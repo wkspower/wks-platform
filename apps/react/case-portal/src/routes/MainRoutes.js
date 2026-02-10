@@ -87,6 +87,18 @@ import SteadyStateConsumption from 'components/aop-phase-two/vgoht/steady-state-
 import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consumption/index'
 import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
 import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
+
+// crude
+import ProductionNormsBasisCrude from 'components/aop-phase-two/crude/production-norms-basis/index'
+import ShutdownActivitiesCrude from 'components/aop-phase-two/crude/shutdown-activities/index'
+import SlowdownActivitiesCrude from 'components/aop-phase-two/crude/slowdown-activities/index'
+import ProductionTargetCrude from 'components/aop-phase-two/crude/production-target/index'
+import NetProductionHoursCrude from 'components/aop-phase-two/crude/net-production-hours/index'
+import MonthwiseProductionPlanCrude from 'components/aop-phase-two/crude/monthwise-production-plan/index'
+import SteadyStateConsumptionCrude from 'components/aop-phase-two/crude/steady-state-consumption/index'
+import ShutdownConsumptionCrude from 'components/aop-phase-two/crude/shutdown-consumption/index'
+import SlowdownConsumptionCrude from 'components/aop-phase-two/crude/slowdown-consumption/index'
+import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-aop-consumption/index'
 import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
@@ -511,6 +523,89 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+
+          //Vertical CRUDE Started
+          {
+            path: 'production-norms-basis-crude',
+            element: (
+              <PrivateRoute routeId='production-norms-basis-crude'>
+                <ProductionNormsBasisCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'shutdown-activities-crude',
+            element: (
+              <PrivateRoute routeId='shutdown-activities-crude'>
+                <ShutdownActivitiesCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'slowdown-activities-crude',
+            element: (
+              <PrivateRoute routeId='slowdown-activities-crude'>
+                <SlowdownActivitiesCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'production-target-crude',
+            element: (
+              <PrivateRoute routeId='production-target-crude'>
+                <ProductionTargetCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'net-production-hrs-crude',
+            element: (
+              <PrivateRoute routeId='net-production-hrs-crude'>
+                <NetProductionHoursCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'monthwise-production-plan-crude',
+            element: (
+              <PrivateRoute routeId='monthwise-production-plan-crude'>
+                <MonthwiseProductionPlanCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'steady-state-consumption-crude',
+            element: (
+              <PrivateRoute routeId='steady-state-consumption-crude'>
+                <SteadyStateConsumptionCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'shutdown-consumption-crude',
+            element: (
+              <PrivateRoute routeId='shutdown-consumption-crude'>
+                <ShutdownConsumptionCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'slowdown-consumption-crude',
+            element: (
+              <PrivateRoute routeId='slowdown-consumption-crude'>
+                <SlowdownConsumptionCrude />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'overall-aop-consumption-crude',
+            element: (
+              <PrivateRoute routeId='overall-aop-consumption-crude'>
+                <OverallAopConsumptionCrude />
+              </PrivateRoute>
+            ),
+          },
+          //Vertical CRUDE Ended
         ],
       },
 
