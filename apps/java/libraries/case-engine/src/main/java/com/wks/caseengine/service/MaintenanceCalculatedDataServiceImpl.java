@@ -823,13 +823,15 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        throw new RuntimeException("Import process failed: " + e.getMessage());
 	    }
 	}
-	
+
 	public List<Map<String, Object>> readMaintenance(InputStream inputStream, UUID plantFKId, String year) {
 	    List<Map<String, Object>> payloadList = new ArrayList<>();
+	    
+	    int baseYearValue = Integer.parseInt(year.split("-")[0]);
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
-	        int totalRows = sheet.getLastRowNum();
+	        int totalRows = sheet.getLastRowNum(); 
 	        
 	        Row headerRow = sheet.getRow(0);
 	        if (headerRow == null) return payloadList;
@@ -840,27 +842,58 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            columnNames.add(headerValue != null ? headerValue.trim() : "Column_" + i);
 	        }
 
-	        for (int i = 1; i <= totalRows-1; i++) {
+	        for (int i = 1; i < totalRows; i++) { 
 	            Row row = sheet.getRow(i);
-	            
 	            if (row == null) continue;
 
-	            Map<String, Object> rowData = new HashMap<>();
+	            Map<String, Object> rowData = new LinkedHashMap<>();
+	            String currentRowMonth = "";
+	            boolean rowError = false;
+	            StringBuilder rowErrorMsg = new StringBuilder("Error at row " + (i + 1) + ": ");
+
 	            try {
 	                for (int j = 0; j < columnNames.size(); j++) {
-	                    String columnName = columnNames.get(j);
-	                    Cell cell = row.getCell(j);
-	                    
-	                    if (columnName.equalsIgnoreCase("AOPYear") || columnName.equalsIgnoreCase("PlantId") || columnName.equalsIgnoreCase("Id") || columnName.equalsIgnoreCase("MonthName") || columnName.equalsIgnoreCase("Remarks")) {
-	                        rowData.put(columnName, getStringCellValue(cell));
-	                    } else if (columnName.equalsIgnoreCase("NumberOfDays")) {
-	                        rowData.put(columnName, getIntegerCellValue(cell));
-	                    } else {
-	                        rowData.put(columnName, getNumericCellValue(cell));
+	                    if (columnNames.get(j).equalsIgnoreCase("MonthName")) {
+	                        currentRowMonth = getStringCellValue(row.getCell(j));
+	                        break;
 	                    }
 	                }
 
-	                rowData.put("saveStatus", "Success");
+	                for (int j = 0; j < columnNames.size(); j++) {
+	                    String columnName = columnNames.get(j);
+	                    Cell cell = row.getCell(j);
+	                    Object value;
+
+	                    if (columnName.equalsIgnoreCase("AOPYear") || columnName.equalsIgnoreCase("PlantId") || 
+	                        columnName.equalsIgnoreCase("Id") || columnName.equalsIgnoreCase("MonthName") || 
+	                        columnName.equalsIgnoreCase("Remarks")) {
+	                        value = getStringCellValue(cell);
+	                    } else if (columnName.equalsIgnoreCase("NumberOfDays")) {
+	                        value = getIntegerCellValue(cell);
+	                    } else {
+	                        value = getNumericCellValue(cell);
+	                    }
+
+	                    if (value instanceof Number && !columnName.equalsIgnoreCase("Id") && !columnName.equalsIgnoreCase("PlantId")) {
+	                        double numericValue = ((Number) value).doubleValue();
+	                        int maxDays = getMaxDaysInMonth(currentRowMonth, baseYearValue);
+	                        
+	                        if (numericValue < 0 || numericValue > maxDays) {
+	                            rowError = true;
+	                            rowErrorMsg.append("[").append(columnName).append("] value ").append(numericValue)
+	                                       .append(" exceeds max allowed (").append(maxDays).append(") for ").append(currentRowMonth != null ? currentRowMonth : "month").append(". ");
+	                        }
+	                    }
+	                    rowData.put(columnName, value);
+	                }
+
+	                if (rowError) {
+	                    rowData.put("saveStatus", "Failed");
+	                    rowData.put("errDescription", rowErrorMsg.toString());
+	                } else {
+	                    rowData.put("saveStatus", "Success");
+	                }
+
 	            } catch (Exception e) {
 	                rowData.put("saveStatus", "Failed");
 	                rowData.put("errDescription", "Error at row " + (i + 1) + ": " + e.getMessage());
@@ -871,6 +904,22 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        e.printStackTrace();
 	    }
 	    return payloadList;
+	}
+	
+	private int getMaxDaysInMonth(String monthName, int baseYear) {
+	    if (monthName == null) return 31;
+	    
+	    String month = monthName.trim().toLowerCase();
+	    
+	    switch (month) {
+	        case "april": case "june": case "september": case "november":
+	            return 30;
+	        case "february":
+	            int febYear = baseYear + 1; 
+	            return java.time.Year.of(febYear).isLeap() ? 29 : 28;
+	        default:
+	            return 31;
+	    }
 	}
 	
 	private static String getStringCellValue(Cell cell) {
