@@ -19,9 +19,9 @@ const getEnhancedColDefs = ({
     colDefs = productionColDefs1
   } else if (lowerVertName === 'elastomer') {
     colDefs = productionColDefsElastomer
-  } else if (lowerVertName === 'pta'){
+  } else if (lowerVertName === 'pta') {
     colDefs = productionColDefsPta
-  }else if (lowerVertName === 'vcm') {
+  } else if (lowerVertName === 'vcm') {
     colDefs = productionColDefsVcm
   }
 
