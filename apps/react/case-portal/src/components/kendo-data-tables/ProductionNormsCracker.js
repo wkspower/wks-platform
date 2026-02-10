@@ -698,16 +698,17 @@ const ProductionNormsCracker = ({ permissions }) => {
           titleName: '',
           saveBtn: true,
           downloadExcelBtnFromUI: true,
-
           ExcelName: `${EXCEL_NAME_OTHER_PRODUCTION}`,
-
-          showCalculateVisibility:
-            calculationObjectOtherProduction &&
-            Object.keys(calculationObjectOtherProduction).length > 0,
         },
         isOldYear,
       ),
-    [permissions, calculationObjectOtherProduction, lowerVertName, isOldYear],
+    [
+      permissions,
+      calculationObjectOtherProduction,
+      lowerVertName,
+      isOldYear,
+      IS_NMD,
+    ],
   )
 
   const handleRemarkCellClick = (dataItem) => {
