@@ -1499,6 +1499,41 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
+			
+			if ("VCM".equalsIgnoreCase(verticalName))  {
+				Date start = plantMaintenanceTransaction.getMaintStartDateTime();
+				Date end = plantMaintenanceTransaction.getMaintEndDateTime();
+
+				if (start != null && end != null) {
+				    LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				    LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+				    List<SlowdownNormsValue> slowdownNormsValues = slowdownNormsRepository
+				            .findByPlantFkIdAndFinancialYear(plantId, plantMaintenanceTransaction.getAuditYear());
+
+				    YearMonth current = YearMonth.from(startDate);
+				    YearMonth last = YearMonth.from(endDate);
+
+				    while (!current.isAfter(last)) {
+				        int currentMonth = current.getMonthValue();
+				  
+				        Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(
+				                plantId, 
+				                currentMonth, 
+				                "Slowdown", 
+				                plantMaintenanceTransaction.getAuditYear()
+				        );
+
+				        if (count == 1) {
+				            for (SlowdownNormsValue slowdownNormsValue : slowdownNormsValues) {
+				                setMonth(currentMonth, slowdownNormsValue);
+				            }
+				        }
+
+				        current = current.plusMonths(1);
+				    }
+				}
+			}
 
 			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction);
 
@@ -1565,8 +1600,41 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
+			if ("VCM".equalsIgnoreCase(verticalName))  {
+				Date start = plantMaintenanceTransaction.getMaintStartDateTime();
+				Date end = plantMaintenanceTransaction.getMaintEndDateTime();
 
-			if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+				if (start != null && end != null) {
+				    LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				    LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+				    List<ShutdownNormsValue> shutdownNormsValues = shutdownNormsRepository
+				            .findByPlantFkIdAndFinancialYear(plantId, plantMaintenanceTransaction.getAuditYear());
+
+				    YearMonth current = YearMonth.from(startDate);
+				    YearMonth last = YearMonth.from(endDate);
+
+				    while (!current.isAfter(last)) {
+				       
+				        Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(
+				                plantId, 
+				                current.getMonthValue(), 
+				                "Shutdown", 
+				                plantMaintenanceTransaction.getAuditYear()
+				        );
+
+				        if (count == 1) {
+				            for (ShutdownNormsValue shutdownNormsValue : shutdownNormsValues) {
+				                setMonthShutdown(current.getMonthValue(), shutdownNormsValue);
+				            }
+				        }
+
+				        current = current.plusMonths(1);
+				    }
+				}	
+			}
+
+			if ("PE".equalsIgnoreCase(verticalName) || "PP".equalsIgnoreCase(verticalName) || "PET".equalsIgnoreCase(verticalName)) {
 				int month = plantMaintenanceTransaction.getMaintForMonth();
 				Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId, month, "Shutdown",
 						year);
