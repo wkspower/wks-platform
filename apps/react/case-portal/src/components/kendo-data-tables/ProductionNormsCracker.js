@@ -553,7 +553,23 @@ const ProductionNormsCracker = ({ permissions }) => {
         dataSet = response
       } else {
         dataSet = response?.data?.configurationDTOList
-        setCalculationObjectOtherProduction(response?.data?.aopCalculation)
+
+        const shouldCalculate =
+          dataSet?.length > 0 && dataSet.every((item) => !item.id)
+
+        let calcObj = response?.data?.aopCalculation || {}
+
+        if (shouldCalculate) {
+          calcObj = {
+            ...calcObj,
+            isDummy: true,
+            dummyValue1: 0,
+            dummyValue2: 'AUTO_ADDED',
+            createdAt: new Date().toISOString(),
+          }
+        }
+
+        setCalculationObjectOtherProduction(calcObj)
       }
 
       var data = dataSet
