@@ -275,18 +275,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                }
 	            }
 
-	            Map<String, Object> totalRow = new LinkedHashMap<>();
-	            for (Map<String, Object> colMeta : metadata) {
-	                String fieldName = (String) colMeta.get("field");
-	                if (fieldName.equalsIgnoreCase("monthName")) {
-	                    totalRow.put(fieldName, "Total");
-	                } else if (numericColumns.contains(fieldName)) {
-	                    totalRow.put(fieldName, totalsMap.get(fieldName));
-	                } else {
-	                    totalRow.put(fieldName, ""); 
-	                }
-	            }
-	            rows.add(totalRow);
+	           
 
 	            List<AopCalculation> aopCalculations = aopCalculationRepository
 	                    .findByPlantIdAndAopYearAndCalculationScreen(plantUUID, year, "maintenance-other-plants");
