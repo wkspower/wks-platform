@@ -55,6 +55,7 @@ public class PCGOutlookService {
 
     public void saveData(List<PCGOutlookDTO> data, String financialYear, UUID siteId) {
 
+        System.out.println("dto to save : " + data.size() +  " " + data);
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
 
@@ -162,6 +163,63 @@ public class PCGOutlookService {
                 }
             }
         }
+
+        if(dto.getAug() != null) {  
+            UUID fymId = financialMonthIds.get(8);
+            if(existingIds.contains(fymId)) {  
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityupdates.add(new Object[]{ dto.getAug(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionupdates.add(new Object[]{ dto.getAug(), siteId, fymId });
+                }
+            }
+            else {
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityInserts.add(new Object[]{ dto.getAug(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionInserts.add(new Object[]{ dto.getAug(), siteId, fymId });
+                }
+            }
+        }
+
+
+        if(dto.getSep() != null) {  
+            UUID fymId = financialMonthIds.get(9);
+            if(existingIds.contains(fymId)) {  
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityupdates.add(new Object[]{ dto.getSep(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionupdates.add(new Object[]{ dto.getSep(), siteId, fymId });
+                }
+            }
+
+            else {
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityInserts.add(new Object[]{ dto.getSep(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionInserts.add(new Object[]{ dto.getSep(), siteId, fymId });
+                }
+            }
+        }
+
+        if(dto.getOct() != null) {  
+            UUID fymId = financialMonthIds.get(10);
+            if(existingIds.contains(fymId)) {  
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityupdates.add(new Object[]{ dto.getOct(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionupdates.add(new Object[]{ dto.getOct(), siteId, fymId });
+                }
+            }
+            else {
+                if ("GasifierAvailability".equals(dto.getProduct())) {
+                    gasifierAvailabilityInserts.add(new Object[]{ dto.getOct(), siteId, fymId });
+                } else if ("SynGasProduction".equals(dto.getProduct())) {
+                    SynGasProductionInserts.add(new Object[]{ dto.getOct(), siteId, fymId });
+                }
+            }
+        }
+
         if(dto.getNov() != null) {  
             UUID fymId = financialMonthIds.get(11);
             if(existingIds.contains(fymId)) {  
@@ -249,11 +307,14 @@ public class PCGOutlookService {
         }
 
         // updates remarks
-
-
    
-        }
+        }   // end of for loop
 
+        System.out.println("gasifierAvailabilityupdates: " + gasifierAvailabilityupdates.size() +  " " + gasifierAvailabilityupdates);
+        System.out.println("SynGasProductionupdates: " + SynGasProductionupdates.size() +  " " + SynGasProductionupdates);
+        System.out.println("gasifierAvailabilityInserts: " + gasifierAvailabilityInserts.size() +  " " + gasifierAvailabilityInserts);
+        System.out.println("SynGasProductionInserts: " + SynGasProductionInserts.size() +  " " + SynGasProductionInserts);
+      
         if(!gasifierAvailabilityupdates.isEmpty()) {  
 
             String sql = "Update TCS_PCGOutlook set GasifierAvailability = ? where Site_FK_Id = ? and FinancialYearMonthId = ?";

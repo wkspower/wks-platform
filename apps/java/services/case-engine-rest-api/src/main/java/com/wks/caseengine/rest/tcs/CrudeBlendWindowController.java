@@ -54,9 +54,7 @@ public class CrudeBlendWindowController {
         @RequestParam String table) {
 
         // Default to CrudeBlendWindow if table is not specified
-        if (table == null || table.isEmpty()) {
-            table = "CrudeBlendWindow";
-        }
+   
        
         if(siteId == null || siteId.isEmpty()) {
             throw new IllegalArgumentException("Site ID is required");

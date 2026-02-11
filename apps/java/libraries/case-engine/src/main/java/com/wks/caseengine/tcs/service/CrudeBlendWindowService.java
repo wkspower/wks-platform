@@ -203,7 +203,7 @@ public class CrudeBlendWindowService {
         masterVGOVRDropDTO.setResults(vgovrDrop);
 
             CrudeBlendScreenDTO vgovrDropScreenDTO = new CrudeBlendScreenDTO();
-            vgovrDropScreenDTO.setTable("VGOVRDROP");
+            vgovrDropScreenDTO.setTable("VGOVRDrop");
             vgovrDropScreenDTO.setData(masterVGOVRDropDTO);
             crudeBlendScreenDTOs.add(vgovrDropScreenDTO);
 
@@ -248,13 +248,13 @@ public class CrudeBlendWindowService {
              
         }
 
-        if(table.equals("CrudeSpecificConstraints")) { 
+       if(table.equals("CrudeSpecificConstraints")) { 
             List<CrudeSpecificConstraintsDTO> crudeSpecificConstraintsDTOs =  convertList(payload.getResults(), CrudeSpecificConstraintsDTO.class);
             System.out.println("dtos to be updated: " + crudeSpecificConstraintsDTOs);
             handleCrudeSpecificConstraintsUpdate(crudeSpecificConstraintsDTOs, plantId, siteId, financialYear);
         }
 
-        if(table.equals("VGOVRDrop")) {
+       if(table.equals("VGOVRDrop")) {
             List<VGOVRDropDTO> vgovrDropDTOs =  convertList(payload.getResults(), VGOVRDropDTO.class);
             System.out.println("dtos to be updated: " + vgovrDropDTOs);
             handleVGOVRDropUpdate(vgovrDropDTOs, plantId, siteId, financialYear);
@@ -600,7 +600,7 @@ private <T> List<T> convertList(List<?> raw, Class<T> clazz) {
         // Extract VGOVRDrop data
         List<VGOVRDropDTO> dtoList = new ArrayList<>();
         for (CrudeBlendScreenDTO screenDTO : screenData) {
-            if ("VGOVRDROP".equals(screenDTO.getTable())) {
+            if ("VGOVRDrop".equals(screenDTO.getTable())) {
                 @SuppressWarnings("unchecked")
                 MasterCrudeBlendDTO<VGOVRDropDTO> masterDTO = (MasterCrudeBlendDTO<VGOVRDropDTO>) screenDTO.getData();
                 dtoList = masterDTO.getResults();
@@ -1577,6 +1577,7 @@ private <T> List<T> convertList(List<?> raw, Class<T> clazz) {
         style.setBorderBottom(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setWrapText(true);
         
         return style;
     }
