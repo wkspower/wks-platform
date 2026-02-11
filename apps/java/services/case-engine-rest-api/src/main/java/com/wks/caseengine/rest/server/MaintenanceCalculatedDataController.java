@@ -55,6 +55,11 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataNMDService.getMaintenanceDataForCracker(plantId,year);		
 	}
 	
+	@GetMapping(value="/maintenance-other-plants")
+	public AOPMessageVM getOtherPlants(@RequestParam String plantId, @RequestParam String year){
+		return maintenanceCalculatedDataService.getOtherPlants(plantId,year);		
+	}
+	
 	@GetMapping(value = "/maintenance-export")
 	public ResponseEntity<byte[]> maintenanceExport(
 	         @RequestParam String year,@RequestParam String plantId) {

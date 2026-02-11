@@ -240,6 +240,74 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    }
 	}
 
+	@Override
+	public AOPMessageVM getOtherPlants(final String plantId, final String year) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    
+	    try {
+	        UUID plantUUID = UUID.fromString(plantId);
+	        Optional<Plants> plantOpt = plantsRepository.findById(plantUUID);
+	        
+	        if (!plantOpt.isPresent()) {
+	            throw new RuntimeException("Plant not found for ID: " + plantId);
+	        }
+
+	        Plants plant = plantOpt.get();
+	        Optional<Verticals> verticalOpt = verticalRepository.findById(plant.getVerticalFKId());
+	        Optional<Sites> siteOpt = siteRepository.findById(plant.getSiteFkId());
+	        
+	        if (verticalOpt.isPresent() && siteOpt.isPresent()) {
+	            String viewName = "vwScrn" + verticalOpt.get().getName() + "" + siteOpt.get().getName() + "MaintForOtherPlants";
+	            
+	            Map<String, Object> databaseResults = fetchOtherPlantsFromView(plantId, year, viewName);
+
+	            List<Map<String, Object>> rows = (List<Map<String, Object>>) databaseResults.get("data");
+	            List<Map<String, Object>> metadata = (List<Map<String, Object>>) databaseResults.get("metadata");
+	            Set<String> numericColumns = (Set<String>) databaseResults.get("numericColumns");
+
+	            Map<String, Double> totalsMap = new HashMap<>();
+	            for (Map<String, Object> row : rows) {
+	                for (String colName : numericColumns) {
+	                    Object val = row.get(colName);
+	                    double currentVal = (val instanceof Number) ? ((Number) val).doubleValue() : 0.0;
+	                    double existingTotal = totalsMap.containsKey(colName) ? totalsMap.get(colName) : 0.0;
+	                    totalsMap.put(colName, existingTotal + currentVal);
+	                }
+	            }
+
+	            Map<String, Object> totalRow = new LinkedHashMap<>();
+	            for (Map<String, Object> colMeta : metadata) {
+	                String fieldName = (String) colMeta.get("field");
+	                if (fieldName.equalsIgnoreCase("monthName")) {
+	                    totalRow.put(fieldName, "Total");
+	                } else if (numericColumns.contains(fieldName)) {
+	                    totalRow.put(fieldName, totalsMap.get(fieldName));
+	                } else {
+	                    totalRow.put(fieldName, ""); 
+	                }
+	            }
+	            rows.add(totalRow);
+
+	            List<AopCalculation> aopCalculations = aopCalculationRepository
+	                    .findByPlantIdAndAopYearAndCalculationScreen(plantUUID, year, "maintenance-other-plants");
+
+	            Map<String, Object> finalData = new HashMap<>();
+	            finalData.put("data", rows);
+	            finalData.put("columns", metadata);
+	            finalData.put("aopCalculation", aopCalculations != null ? aopCalculations : new ArrayList<>());
+
+	            aopMessageVM.setData(finalData);
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("Data fetched successfully");
+	        }
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	    	ex.printStackTrace();
+	        throw new RuntimeException("Error processing dynamic maintenance data", ex);
+	    }
+	}
+
 	private Map<String, String> loadColumnTitles(
 			Connection connection,
 			String viewName,
@@ -405,6 +473,96 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						return resultMap;
 					}
 				});
+	}
+
+	private Map<String, Object> fetchOtherPlantsFromView(
+	        final String plantId,
+	        final String year,
+	        final String viewName) {
+
+
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	            .orElseThrow(() -> new RuntimeException("Plant not found"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	            .orElseThrow(() -> new RuntimeException("Site not found"));
+
+	    return entityManager.unwrap(Session.class)
+	            .doReturningWork(new ReturningWork<Map<String, Object>>() {
+
+	        @Override
+	        public Map<String, Object> execute(Connection connection) throws SQLException {
+
+	            Map<String, Object> resultMap = new HashMap<>();
+	            List<Map<String, Object>> dataList = new ArrayList<>();
+	            List<Map<String, Object>> metadataList = new ArrayList<>();
+	            Set<String> numericFields = new HashSet<>();
+
+	            
+	            Map<String, String> columnTitleMap = loadColumnTitles(connection,
+	                    "vwScrnCrackerKeyValueColumns", site.getName(), "MaintenanceOtherPlants");
+	            
+	            Map<String, String> columnIsVisibleMap = loadIsVisible(connection,
+	                    "vwScrnCrackerKeyValueColumns", site.getName(), "MaintenanceOtherPlants");
+
+	            String sql = "SELECT * FROM " + viewName + " WHERE AuditYear = ? ORDER BY MaintStartDateTime ASC";
+
+	            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	                ps.setString(1, year); 
+
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    ResultSetMetaData rsmd = rs.getMetaData();
+	                    int columnCount = rsmd.getColumnCount();
+
+	                   
+	                    for (int i = 1; i <= columnCount; i++) {
+	                        String columnName = rsmd.getColumnLabel(i);
+	                        int sqlType = rsmd.getColumnType(i);
+
+	                        Map<String, Object> meta = new HashMap<>();
+	                        meta.put("field", columnName);
+	                        meta.put("title", columnTitleMap.getOrDefault(columnName, columnName));
+	                        meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
+	                        meta.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
+	                        
+	                        metadataList.add(meta);
+
+	                        if (isNumericType(sqlType)) {
+	                            numericFields.add(columnName);
+	                        }
+	                    }
+
+	                    
+	                    while (rs.next()) {
+	                        Map<String, Object> row = new LinkedHashMap<>();
+	                        for (int i = 1; i <= columnCount; i++) {
+	                            String colName = rsmd.getColumnLabel(i);
+	                            Object value = rs.getObject(i);
+
+	                            if (value == null) {
+	                                row.put(colName, numericFields.contains(colName) ? 0 : "");
+	                            } else {
+	                                row.put(colName, value);
+	                            }
+	                        }
+	                        dataList.add(row);
+	                    }
+	                }
+	            }
+
+	            resultMap.put("data", dataList);
+	            resultMap.put("metadata", metadataList);
+	            resultMap.put("numericColumns", numericFields);
+
+	            return resultMap;
+	        }
+	    });
+	}
+
+	
+	private boolean isNumericType(int sqlType) {
+	    return sqlType == Types.INTEGER || sqlType == Types.DOUBLE || 
+	           sqlType == Types.DECIMAL || sqlType == Types.FLOAT || 
+	           sqlType == Types.NUMERIC || sqlType == Types.REAL;
 	}
 	
 	private String getFrontendType(String sqlTypeName) {
