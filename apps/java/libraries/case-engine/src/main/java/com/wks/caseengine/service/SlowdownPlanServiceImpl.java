@@ -2371,7 +2371,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            if (shutDownPlanDTO.getDurationInHrs() != null) {
 	                durationMins = (int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
 	                                + (int) Math.round((shutDownPlanDTO.getDurationInHrs()
-	                                        - Math.floor(shutDownPlanDTO.getDurationInHrs())) * 60); // Rounding should be to the minute (60) not 100
+	                                        - Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100); 
 	            }
 	            plantMaintenanceTransaction.setDurationInMins(durationMins);
 	            plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
