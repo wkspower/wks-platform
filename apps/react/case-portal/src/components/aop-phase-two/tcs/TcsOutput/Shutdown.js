@@ -175,6 +175,35 @@ const Shutdown = ({
     }))
   }, [apiMetadata])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportShutdownExcel(
+        keycloak,
+        SITE_ID,
+        VERTICAL_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Shutdown data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.purpose || '')
@@ -239,6 +268,7 @@ const Shutdown = ({
           permissions={permissions}
           readonly={true}
           onApproveClick={() => setOpenApproveDialogeBox(true)}
+          handleExport={handleExport}
         />
       </Stack>
       {/* Approve Dialog */}
