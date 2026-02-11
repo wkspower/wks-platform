@@ -366,8 +366,9 @@ const CrudBlendWindowGrid = ({
         ...formData,
       }
 
-      // Add to rows and modifiedCells
+      // Add to rows, originalRows, and modifiedCells
       setRows((prevRows) => [newRow, ...prevRows])
+      setOriginalRows((prevRows) => [newRow, ...prevRows])
       setModifiedCells((prev) => ({
         ...prev,
         [newRowId]: newRow,
