@@ -387,6 +387,12 @@ const CrackerConfig = () => {
               'sevenFC2C3',
               'sevenFPropane',
               'sevenFEthane',
+              'threeFC2C3',
+              'threeFEthane',
+              'threeFPropane',
+              'fourF2SPropane',
+              'fourF2SEthane',
+              'fourF2SC2C3',
             ]
           } else {
             numericColumns = [
@@ -601,6 +607,14 @@ const CrackerConfig = () => {
           sevenFC2C3: row.sevenFC2C3 || 0,
           sevenFPropane: row.sevenFPropane || 0,
           sevenFEthane: row.sevenFEthane || 0,
+
+          threeFC2C3: row.threeFC2C3 || 0,
+          threeFPropane: row.threeFPropane || 0,
+          threeFEthane: row.threeFEthane || 0,
+
+          fourF2SC2C3: row.fourF2SC2C3 || 0,
+          fourF2SPropane: row.fourF2SPropane || 0,
+          fourF2SEthane: row.fourF2SEthane || 0,
         }))
       }
 

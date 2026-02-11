@@ -80,8 +80,15 @@ const getEnhancedColDefsProposedNorms = ({
         ...newCol,
         type: 'number',
         format: valueFormat || '{0:#.###}',
-        widthT: 100,
+        widthT: 200,
       }
+    }
+
+    newCol = {
+      ...newCol,
+      type: 'number',
+      format: valueFormat || '{0:#.###}',
+      widthT: 200,
     }
 
     return newCol

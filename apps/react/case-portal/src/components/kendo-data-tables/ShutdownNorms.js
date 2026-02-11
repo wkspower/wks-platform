@@ -549,7 +549,7 @@ const ShutdownNorms = () => {
     try {
       let response
 
-      if (lowerVertName === 'vcm') {
+      if (lowerVertName === 'vcm' || lowerVertName === 'pta') {
         // Use shutdownNormsExportNonGrade for VCM
         response =
           await NormalOperationNormsApiService.shutdownNormsExportNonGrade(
@@ -586,7 +586,7 @@ const ShutdownNorms = () => {
     try {
       let response
 
-      if (lowerVertName === 'vcm') {
+      if (lowerVertName === 'vcm' || lowerVertName === 'pta') {
         // Use saveShutdownNormsExcelNonGrade for VCM
         response =
           await NormalOperationNormsApiService.saveShutdownNormsExcelNonGrade(
@@ -727,15 +727,24 @@ const ShutdownNorms = () => {
       dropdownLabel: 'Select Grade',
       allAction: true,
       downloadExcelBtnFromUI:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+        IS_PE_PP_VERTICAL ||
+        IS_PET_VERTICAL ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta'
           ? false
           : true,
       downloadExcelBtn:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+        IS_PE_PP_VERTICAL ||
+        IS_PET_VERTICAL ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta'
           ? true
           : false,
       uploadExcelBtn:
-        IS_PE_NMD_LDPE || lowerVertName === 'pp' || lowerVertName === 'vcm'
+        IS_PE_NMD_LDPE ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta'
           ? true
           : false,
       showTitleNameBusiness: true,

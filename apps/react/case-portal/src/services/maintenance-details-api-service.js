@@ -15,6 +15,7 @@ export const MaintenanceDetailsApiService = {
   deleteSlowdownConfig,
   saveSlowdownConfig,
   getSlowdownConfig,
+  getCrackerDownsteamShutdownDMD,
 }
 
 async function getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
@@ -320,6 +321,21 @@ async function saveSlowdownConfig(PLANT_ID, AOP_YEAR, dataList, keycloak) {
 }
 async function getSlowdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/shutdown-history?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getCrackerDownsteamShutdownDMD(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-other-plants?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

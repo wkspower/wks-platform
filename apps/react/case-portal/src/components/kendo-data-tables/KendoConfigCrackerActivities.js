@@ -28,6 +28,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { getRoleName } from 'services/role-service.js'
 import DecokingConfigNMD from './KendoConfigCrackerActivitiesNMD.js'
+import DownsteamShutdownDMD from './downsteamShutdownDMD.js'
 
 const DecokingConfig = () => {
   const keycloak = useSession()
@@ -64,6 +65,7 @@ const DecokingConfig = () => {
   const lowerVertName = vertName?.toLowerCase()
   const SCREEN_NAME = screenTitle?.title
   const siteName = siteObject?.name?.toLowerCase()
+  const IS_DMD = siteObject?.name?.toLowerCase() == 'dmd'
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -524,16 +526,19 @@ const DecokingConfig = () => {
       }
 
       var rawData1 = getRows('IBR Plan')[2]
-      const result = validateAllDateOverlaps(rawData1)
-      if (result.overlap) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: result.message,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
+
+      //DATES OVERLLAPING IS REVERTED NOW
+
+      // const result = validateAllDateOverlaps(rawData1)
+      // if (result.overlap) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: result.message,
+      //     severity: 'error',
+      //   })
+      //   setLoading(false)
+      //   return
+      // }
 
       postIbr2(rawData)
     } catch (error) {
@@ -1524,6 +1529,24 @@ const DecokingConfig = () => {
         summaryEdited={summaryEdited}
         setSummaryEdited={setSummaryEdited}
       />
+
+      {IS_DMD && (
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography component='span' className='grid-title'>
+              Downsteam Shutdown
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%', margin: 0 }}>
+              <DownsteamShutdownDMD />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      )}
 
       <FurnaceRunLengthGrid
         columns={runLengthColumns}

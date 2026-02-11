@@ -555,7 +555,11 @@ const ProductionNormsCracker = ({ permissions }) => {
         dataSet = response?.data?.configurationDTOList
 
         const shouldCalculate =
-          dataSet?.length > 0 && dataSet.every((item) => !item.id)
+          dataSet?.length > 0 &&
+          dataSet.every(
+            (item) =>
+              !item?.remarks || item?.remarks?.toString()?.trim() === '',
+          )
 
         let calcObj = response?.data?.aopCalculation || {}
 
@@ -715,6 +719,9 @@ const ProductionNormsCracker = ({ permissions }) => {
           saveBtn: true,
           downloadExcelBtnFromUI: true,
           ExcelName: `${EXCEL_NAME_OTHER_PRODUCTION}`,
+          showCalculateVisibility:
+            calculationObjectOtherProduction &&
+            Object.keys(calculationObjectOtherProduction).length > 0,
         },
         isOldYear,
       ),
