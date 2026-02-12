@@ -13,6 +13,7 @@ import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useSelector } from 'react-redux'
 import YearDropdownEditor from './Utilities-Kendo/YearDropdownEditor'
+import SDDaysDropdownEditorWrapper from './Utilities-Kendo/SdDaysDropdownEditor'
 import {
   Box,
   Button,
@@ -169,6 +170,7 @@ const KendoDataTables = ({
   deleteNoteOnDeleteDialogeBox = '',
   shutdownMonths = [],
   slowdownMonths = [],
+  sdDaysValues = [],
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -866,6 +868,18 @@ const KendoDataTables = ({
     return (
       <td {...tdProps} title={dataItem[field]}>
         {dataItem[field]}
+      </td>
+    )
+  }
+  const ElastomerSDDaysDisplayCell = (props) => {
+    const { dataItem, field, tdProps, sdDaysValues = [] } = props
+    const value = dataItem[field]
+    const option = sdDaysValues.find((opt) => opt.value === value)
+    const displayValue = option ? option.name : `${value} Days`
+
+    return (
+      <td {...tdProps} title={displayValue}>
+        {displayValue}
       </td>
     )
   }
@@ -2411,6 +2425,32 @@ const KendoDataTables = ({
                       cells={{
                         edit: { text: YearDropdownEditorWrapper }, // ✅ REQUIRED
                         data: ElastomerYearDisplayCell,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+                if (col.type === 'typesdDropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.width}
+                      hidden={col.hidden}
+                      editable={!!col?.editable}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: {
+                          text: (props) => (
+                            <SDDaysDropdownEditorWrapper
+                              {...props}
+                              sdDaysValues={sdDaysValues}
+                            />
+                          ),
+                        },
+                        data: ElastomerSDDaysDisplayCell,
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}

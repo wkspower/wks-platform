@@ -23,6 +23,7 @@ const ElastomerShutDown = ({ permissions }) => {
   const [modifiedCells1, setModifiedCells1] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
+  const [sdDaysValues, setSdDaysValues] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const {
@@ -146,6 +147,7 @@ const ElastomerShutDown = ({ permissions }) => {
           aopYear: AOP_YEAR,
           remark: row.remarks,
           PlantFKId: PLANT_ID,
+          typeOfSD: row.typeOfSD,
         }
 
         if (row.idFromApi) {
@@ -669,6 +671,7 @@ const ElastomerShutDown = ({ permissions }) => {
         isEditable: true,
         id: idx,
         idFromApi: item.id,
+        typeOfSD: item.typeOfSD,
       }))
       setSlowdownRows(formatted)
     } catch (err) {
@@ -685,6 +688,7 @@ const ElastomerShutDown = ({ permissions }) => {
   useEffect(() => {
     if (tabIndex === 1) {
       slowdownFetchData()
+      fetchSdDaysValues()
     }
   }, [tabIndex, slowdownFetchData])
 
@@ -693,6 +697,20 @@ const ElastomerShutDown = ({ permissions }) => {
       fetchData()
     }
   }, [tabIndex, fetchData])
+
+  const fetchSdDaysValues = async () => {
+    try {
+      const resp = await MaintenanceDetailsApiService.getSdDaysValues(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      setSdDaysValues(resp?.data || [])
+    } catch (err) {
+      console.error('Error fetching Type of SD values:', err)
+      setSdDaysValues([])
+    }
+  }
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -862,7 +880,12 @@ const ElastomerShutDown = ({ permissions }) => {
       editable: true,
       width: 200,
     },
-
+    {
+      field: 'typeOfSD',
+      title: 'Type of SD (Days)',
+      type: 'typesdDropdown',
+      editable: true,
+    },
     {
       field: 'remarks',
       title: 'Remark',
