@@ -24,6 +24,8 @@ import {
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
 const AromaticsProductionGrids = ({ permissions }) => {
+  const [editResetKey, setEditResetKey] = useState(0)
+
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
@@ -1190,6 +1192,8 @@ const AromaticsProductionGrids = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1225,6 +1229,8 @@ const AromaticsProductionGrids = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1260,6 +1266,8 @@ const AromaticsProductionGrids = ({ permissions }) => {
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
+        resetEditSignal={editResetKey}
+        setEditResetKey={setEditResetKey}
       />
 
       {/* PERCENTAGE_SUMMARY */}

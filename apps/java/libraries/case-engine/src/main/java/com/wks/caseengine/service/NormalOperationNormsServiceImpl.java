@@ -326,16 +326,16 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						Double newVal = getMonthlyValue(dto, month);
 
 						Double normalizedNewVal = Optional.ofNullable(newVal).orElse(0.0);
-						if(!dto.getProductName().equalsIgnoreCase("Total Fuel")) {
-							if (newVal != null && !Objects.equals(oldVal, normalizedNewVal)
-									&& Objects.equals(value.getRemarks(), dto.getRemarks())) {
-								dto.setErrDescription("Please add/update remark");
-								dto.setSaveStatus("Failed");
-								failedList.add(dto);
-								break;
-							}
-						}
-						
+						// if (!dto.getProductName().equalsIgnoreCase("Total Fuel")) {
+						// if (newVal != null && !Objects.equals(oldVal, normalizedNewVal)
+						// && Objects.equals(value.getRemarks(), dto.getRemarks())) {
+						// dto.setErrDescription("Please add/update remark");
+						// dto.setSaveStatus("Failed");
+						// failedList.add(dto);
+						// break;
+						// }
+						// }
+
 						if (newVal != null && !Objects.equals(oldVal, newVal)) {
 							NormsTransactions normsTransactions = new NormsTransactions();
 							normsTransactions.setAopMonth(month);
@@ -700,6 +700,12 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				aopCalculation.setPlantId(plantFKId);
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
+			}
+			if (vertical.getName().equalsIgnoreCase("VCM")) {
+				Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+				String procedure = vertical.getName() + "_" + site.getName() + "_CalculateTotalFuel";
+				executeProcedure(procedure, plantFKId.toString(), year);
 			}
 			// TODO Auto-generated method stub
 			return failedList;
@@ -1101,8 +1107,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
 
-					if (dto.getProductName().equalsIgnoreCase("Total Fuel")) {
-						calculateTotalFuel(dto, hydrogen, ambientEthane,naturalGas, vertical, plantFKId, year);
+					// if (dto.getProductName().equalsIgnoreCase("Total Fuel")) {
+					if ("Total Fuel".equalsIgnoreCase(dto.getProductName())) {
+						// calculateTotalFuel(dto, hydrogen, ambientEthane,naturalGas, vertical,
+						// plantFKId, year);
 					} else {
 						dto.setApril(getNumericCellValue(row.getCell(3), dto));
 						dto.setMay(getNumericCellValue(row.getCell(4), dto));
@@ -1130,23 +1138,24 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 						dto.setId(getStringCellValue(row.getCell(16), dto));
 					}
-					if (dto.getProductName().equalsIgnoreCase("AMBIENT ETHANE")) {
-						ambientEthane.add(dto);
-					}
-					if (dto.getProductName().equalsIgnoreCase("Hydrogen")
-							&& dto.getNormParameterTypeDisplayName().equalsIgnoreCase("Utility Consumption")) {
-						hydrogen.add(dto);
-					}
-					if (dto.getProductName().equalsIgnoreCase("NATURAL GAS")) {
-						naturalGas.add(dto);
-					}
+					// if (dto.getProductName().equalsIgnoreCase("AMBIENT ETHANE")) {
+					// ambientEthane.add(dto);
+					// }
+					// if (dto.getProductName().equalsIgnoreCase("Hydrogen")
+					// && dto.getNormParameterTypeDisplayName().equalsIgnoreCase("Utility
+					// Consumption")) {
+					// hydrogen.add(dto);
+					// }
+					// if (dto.getProductName().equalsIgnoreCase("NATURAL GAS")) {
+					// naturalGas.add(dto);
+					// }
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());
 					dto.setSaveStatus("Failed");
 				}
-				
+
 				configList.add(dto);
 			}
 
@@ -1374,26 +1383,26 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 
 		switch (type) {
-		case BOOLEAN:
-			return cell.getBooleanCellValue();
-		case STRING:
-			String text = cell.getStringCellValue().trim().toLowerCase();
-			if ("true".equals(text))
-				return true;
-			if ("false".equals(text))
-				return false;
-			return null;
-		case NUMERIC:
-			double num = cell.getNumericCellValue();
-			if (num == 1.0)
-				return true;
-			if (num == 0.0)
-				return false;
-			return null;
-		case BLANK:
-		case _NONE:
-		default:
-			return null;
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
 		}
 	}
 
@@ -1936,6 +1945,35 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		finalResult.setData(result);
 		finalResult.setMessage("Data fetched successfully");
 		return finalResult;
+	}
+
+	public int executeProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
+				stmt.setString(1, plantId);
+				stmt.setString(2, aopYear);
+				int rowsAffected = stmt.executeUpdate();
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
+
+				return rowsAffected;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+			}
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 
 }

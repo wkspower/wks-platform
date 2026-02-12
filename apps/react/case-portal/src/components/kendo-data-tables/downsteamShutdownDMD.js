@@ -257,7 +257,7 @@ const DownsteamShutdownDMD = ({ viewOnly }) => {
         ...col,
         editable: false,
         hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
-        widthT: 120,
+        widthT: 200,
       }))
 
       setColumns(dynamicColumns)

@@ -1,25 +1,17 @@
 [
   {
-    "field": "normParameterTypeDisplayName",
-    "title": "Type",
-    "editable": false,
-    "isDisabled": true,
-    "width": 180,
-    "hidden": true
-  },
-  {
     "field": "normParameterDisplayName",
     "title": "Particulars",
     "editable": false,
     "isDisabled": true,
-    "width": 160
+    "fixedWidth": 160
   },
   {
     "field": "UOM",
     "title": "UOM",
     "editable": false,
     "isDisabled": true,
-    "width": 70
+    "fixedWidth": 70
   },
   {
     "title": "April",
@@ -27,21 +19,25 @@
       {
         "field": "prevYearBudgetApril",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
-        "isDisabled": true
+        "isDisabled": true,
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetApril",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
-        "isDisabled": true
+        "isDisabled": true,
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedApril",
         "title": "Proposed",
-        "headerName": 3,
+        "isDisabled": true,
+        "type": "numberNonGrey",
+        "fixedWidth": 100,
         "editable": true
       }
     ]
@@ -52,25 +48,25 @@
       {
         "field": "prevYearBudgetMay",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetMay",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedMay",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -80,25 +76,25 @@
       {
         "field": "prevYearBudgetJune",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetJune",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedJune",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -108,25 +104,25 @@
       {
         "field": "prevYearBudgetJuly",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetJuly",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedJuly",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -136,25 +132,25 @@
       {
         "field": "prevYearBudgetAugust",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetAugust",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedAugust",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -164,25 +160,25 @@
       {
         "field": "prevYearBudgetSeptember",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetSeptember",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedSeptember",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -192,25 +188,25 @@
       {
         "field": "prevYearBudgetOctober",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetOctober",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedOctober",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -220,25 +216,25 @@
       {
         "field": "prevYearBudgetNovember",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetNovember",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedNovember",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -248,25 +244,25 @@
       {
         "field": "prevYearBudgetDecember",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetDecember",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedDecember",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -276,24 +272,25 @@
       {
         "field": "prevYearBudgetJanuary",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetJanuary",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
-        "isDisabled": true
+        "isDisabled": true,
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedJanuary",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -303,25 +300,25 @@
       {
         "field": "prevYearBudgetFebruary",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetFebruary",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedFebruary",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
@@ -331,32 +328,32 @@
       {
         "field": "prevYearBudgetMarch",
         "title": "LastFY",
-        "headerName": 1,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearBudgetMarch",
         "title": "SysGen",
-        "headerName": 2,
         "editable": false,
         "isDisabled": true,
-        "width": 100
+        "type": "number",
+        "fixedWidth": 100
       },
       {
         "field": "currYearProposedMarch",
         "title": "Proposed",
-        "headerName": 3,
         "editable": true,
-        "width": 100
+        "type": "numberNonGrey",
+        "fixedWidth": 100
       }
     ]
   },
   {
     "field": "remarks",
     "title": "Remarks",
-    "width": 160
+    "fixedWidth": 160
   },
   {
     "field": "isEditable",
