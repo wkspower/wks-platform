@@ -129,7 +129,7 @@ const ElastomerShutDown = ({ permissions }) => {
         setLoading(false)
         return
       }
-      const requiredFields = ['remarks']
+      const requiredFields = ['remarks', 'typeOfSD', 'year', 'monthly']
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
         setSnackbarOpen(true)

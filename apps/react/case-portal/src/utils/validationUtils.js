@@ -32,6 +32,8 @@ export const validateFields = (data, requiredFields) => {
     targetDate: 'Target Date',
     responsible: 'Responsible',
     reason: 'Reason',
+    year: 'Year',
+    typeOfSD: 'Type of SD (Days)',
   }
 
   const invalidRows = data.filter((row) => {
