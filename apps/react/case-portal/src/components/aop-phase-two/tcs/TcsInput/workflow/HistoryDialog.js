@@ -121,20 +121,6 @@ const HistoryDialog = ({
 }) => {
   // Add Tab column after verifiedDate for plant_manager role
   const displayColumns = React.useMemo(() => {
-    if (role === 'plant_manager') {
-      const newColumns = [...columns]
-      const verifiedDateIndex = newColumns.findIndex(
-        (col) => col.field === 'verifiedDate',
-      )
-      if (verifiedDateIndex !== -1) {
-        newColumns.splice(verifiedDateIndex + 1, 0, {
-          field: 'tab',
-          header: 'Tab',
-          width: '10%',
-        })
-      }
-      return newColumns
-    }
     return columns
   }, [role, columns])
   const getStatusColor = (status) => {
