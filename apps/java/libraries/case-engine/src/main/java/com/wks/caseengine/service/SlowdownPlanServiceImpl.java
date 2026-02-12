@@ -2435,15 +2435,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                Double newRateEo= shutDownPlanDTO.getRateEO()!=null? shutDownPlanDTO.getRateEO():null;
 	                Double newRateEOE= shutDownPlanDTO.getRateEOE()!=null? shutDownPlanDTO.getRateEOE():null;
 	                boolean fieldsChanged = 
-	                    !java.util.Objects.equals(originalDesc, newDesc) ||
-	                    !java.util.Objects.equals(originalStart, newStart) ||
-	                    !java.util.Objects.equals(originalEnd, newEnd) ||
-	                    !java.util.Objects.equals(originalRate, newRate)||
-	                    !java.util.Objects.equals(originalRPFDownTime, newRPFDownTime) ||
-	                    !java.util.Objects.equals(originalNoOfRPF, newNoOfRPF); 
+	                	    !java.util.Objects.equals(originalDesc, newDesc) ||
+	                	    (!monthDropdown && (!java.util.Objects.equals(originalStart, newStart) || 
+	                	                        !java.util.Objects.equals(originalEnd, newEnd))) ||
+	                	    !java.util.Objects.equals(originalRate, newRate) ||
+	                	    !java.util.Objects.equals(originalRPFDownTime, newRPFDownTime) ||
+	                	    !java.util.Objects.equals(originalNoOfRPF, newNoOfRPF);
 	                
-	                
-
 	                if (fieldsChanged && java.util.Objects.equals(originalRemark, newRemark)) {
 	                    shutDownPlanDTO.setSaveStatus("Failed");
 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when changing other fields in an existing record.");
