@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Backdrop,
   Box,
+  Button,
+  ButtonGroup,
   CircularProgress,
   Stack,
 } from '../../../../../node_modules/@mui/material/index'
@@ -24,6 +26,7 @@ import Configuration from './Configuration'
 import Constants from './Constants'
 import ReportManualEntry from './ReportManualEntry'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
+import RevConfirmDialog from './components/RevConfirmDialog'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -51,6 +54,11 @@ const ProductionNormsBasis = () => {
   const [endDate, setEndDate] = useState()
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
+  const [openConfirmDialogRev, setOpenConfirmDialogRev] = useState(false)
+  const [selectedRevNum, setSelectedRevNum] = useState(null)
+  const [revision, setRevision] = useState('1')
+  const [revisionDetails, setRevisionDetails] = useState(null)
+  const [revisionUpdated, setRevisionUpdated] = useState(false)
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -235,23 +243,25 @@ const ProductionNormsBasis = () => {
     return tab ? tab.displayName : null
   }
 
-  // Dynamic tab list from API
-  const tablist = tabs.map((tabId) => {
-    if (!tabId || !availableTabs.length) return ''
-    const tabInfo = availableTabs.find(
-      (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-    )
+  // Dynamic tab list from API (filtered to exclude 'Report Manual Entry')
+  const tablist = tabs
+    .map((tabId) => {
+      if (!tabId || !availableTabs.length) return ''
+      const tabInfo = availableTabs.find(
+        (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+      )
 
-    if (tabInfo) {
-      const originalName = tabInfo.displayName
-      // Add year suffix for Report Manual Entry
-      if (originalName === 'Report Manual Entry') {
-        return `${originalName} (${prevYearFormatted})`
+      if (tabInfo) {
+        const originalName = tabInfo.displayName
+        // Filter out Report Manual Entry
+        if (originalName === 'Report Manual Entry') {
+          return null
+        }
+        return originalName
       }
-      return originalName
-    }
-    return tabId
-  })
+      return tabId
+    })
+    .filter((tab) => tab !== null)
 
   const renderTab = () => {
     if (!tabs.length || !availableTabs.length) {
@@ -265,13 +275,73 @@ const ProductionNormsBasis = () => {
 
     switch (currentTabName) {
       case 'Configuration':
-        return <Configuration />
+        return (
+          <Configuration
+            revisionUpdated={revisionUpdated}
+            setRevisionUpdated={setRevisionUpdated}
+          />
+        )
       case 'Constants':
-        return <Constants />
+        return (
+          <Constants
+            revisionUpdated={revisionUpdated}
+            setRevisionUpdated={setRevisionUpdated}
+          />
+        )
       case 'Report Manual Entry':
         return <ReportManualEntry />
       default:
         return null
+    }
+  }
+
+  const handleOpenDialogRev = (num) => {
+    setSelectedRevNum(num)
+    setOpenConfirmDialogRev(true)
+  }
+
+  const handleCloseDialogRev = () => {
+    setOpenConfirmDialogRev(false)
+    setSelectedRevNum(null)
+  }
+
+  const handleConfirmLoadRev = () => {
+    setOpenConfirmDialogRev(false)
+    handleRevisionChange(selectedRevNum)
+  }
+
+  const handleRevisionChange = async (num) => {
+    setRevision(num)
+    console.log('revisionDetails:', revisionDetails)
+    // if (!revisionDetails || revisionDetails.length === 0) {
+    //   console.log('Returning early - revisionDetails is null or empty')
+    //   return
+    // }
+    const payload = revisionDetails ? { ...revisionDetails } : {}
+    payload.attributeValueVersion = num
+    payload.attributeValue = num
+    await updateRevision([payload])
+  }
+
+  const updateRevision = async (Payload) => {
+    try {
+      // var response = await DataService.updateRevision(
+      //   keycloak,
+      //   Payload,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+      // fetchData()
+      setRevisionUpdated(true)
+      console.log('Payload', Payload)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Revision updated successfully!',
+        severity: 'success',
+        duration: 3000,
+      })
+    } catch (error) {
+      console.error('Error updating data:', error)
     }
   }
 
@@ -302,13 +372,54 @@ const ProductionNormsBasis = () => {
       </Stack>
 
       {tabs.length > 0 && availableTabs.length > 0 && (
-        <Box>
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'
+        >
           <TabSection
             tabIndex={tabIndex}
             setTabIndex={setTabIndex}
             tabs={tablist}
           />
-        </Box>
+
+          <Box>
+            <ButtonGroup aria-label='revision group'>
+              {['1', '2', '3'].map((num) => {
+                const selected = revision === num
+
+                return (
+                  <Button
+                    key={num}
+                    onClick={() => handleOpenDialogRev(num)}
+                    variant={selected ? 'contained' : 'outlined'}
+                    size='small'
+                    sx={{
+                      textTransform: 'none',
+                      fontSize: '0.75rem',
+                      padding: '5px 10px',
+                      minWidth: '36px',
+                      mr: 0.5,
+                      ...(selected && {
+                        bgcolor: '#0100cb',
+                        color: '#fff',
+                        borderColor: '#0100cb',
+                        fontWeight: 'bold',
+                      }),
+                      ...(!selected && {
+                        borderColor: '#000000ff',
+                        color: '#000000ff',
+                        fontWeight: 'bold',
+                      }),
+                    }}
+                  >
+                    {`Rev ${num}`}
+                  </Button>
+                )
+              })}
+            </ButtonGroup>
+          </Box>
+        </Stack>
       )}
 
       {/* Tab Content */}
@@ -325,9 +436,16 @@ const ProductionNormsBasis = () => {
 
       <Notification
         open={snackbarOpen}
-        setOpen={setSnackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
         message={snackbarData.message}
         severity={snackbarData.severity}
+        duration={snackbarData.duration}
+      />
+
+      <RevConfirmDialog
+        openConfirmDialogRev={openConfirmDialogRev}
+        handleCloseDialogRev={handleCloseDialogRev}
+        handleConfirmLoadRev={handleConfirmLoadRev}
       />
     </div>
   )
