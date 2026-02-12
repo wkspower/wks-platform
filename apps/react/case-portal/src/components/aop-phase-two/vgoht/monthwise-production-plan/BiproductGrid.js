@@ -5,10 +5,10 @@ import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
-import { OverallAopConsumptionApiService } from '../../services/vgoht/overallAopConsumptionApiService'
-import { overAllAOpResponse } from '../dummyData'
+import { MonthwiseProductionPlanApiService } from '../../services/vgoht/monthwiseProductionPlanApiService'
+import { monthwiseProductionPlanResponse } from '../dummyData'
 
-const OverallAopConsumption = () => {
+const BiproductGrid = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantObject, year } = dataGridStore
@@ -18,6 +18,12 @@ const OverallAopConsumption = () => {
 
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
+  const [modifiedCells, setModifiedCells] = useState({})
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const [selectedUnit, setSelectedUnit] = useState('MT')
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -27,33 +33,27 @@ const OverallAopConsumption = () => {
   const valueFormat = ValueFormatterPhaseTwo()
   const headerMap = generateHeaderNames(AOP_YEAR)
 
+  // Dropdown configuration for unit selection
+  const dropdownConfig = {
+    options: [
+      { id: 'MT', name: 'MT' },
+      { id: 'KT', name: 'KT' },
+    ],
+    label: 'Select Unit',
+    placeholder: 'Select',
+    valueKey: 'id',
+    labelKey: 'name',
+  }
+
   const columns = [
     {
-      field: 'productName',
-      title: 'Particulars',
+      field: 'displayName',
+      title: 'Product Name',
       widthT: 250,
       minWidth: 200,
       type: 'text',
       editable: false,
       locked: true,
-    },
-    {
-      field: 'normParameterTypeDisplayName',
-      title: 'normParameterTypeDisplayName',
-      widthT: 250,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
-    },
-    {
-      field: 'UOM',
-      title: 'UOM',
-      widthT: 100,
-      minWidth: 80,
-      type: 'text',
-      editable: false,
     },
     {
       field: 'april',
@@ -61,7 +61,7 @@ const OverallAopConsumption = () => {
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
@@ -70,7 +70,7 @@ const OverallAopConsumption = () => {
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
@@ -79,7 +79,7 @@ const OverallAopConsumption = () => {
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
@@ -88,70 +88,70 @@ const OverallAopConsumption = () => {
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'august',
+      field: 'aug',
       title: headerMap[8],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'september',
+      field: 'sep',
       title: headerMap[9],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'october',
+      field: 'oct',
       title: headerMap[10],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'november',
+      field: 'nov',
       title: headerMap[11],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'december',
+      field: 'dec',
       title: headerMap[12],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'january',
+      field: 'jan',
       title: headerMap[1],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
-      field: 'february',
+      field: 'feb',
       title: headerMap[2],
       widthT: 100,
       minWidth: 80,
       type: 'number1',
-      editable: false,
+      editable: true,
       format: valueFormat,
     },
     {
@@ -160,8 +160,25 @@ const OverallAopConsumption = () => {
       widthT: 100,
       minWidth: 80,
       type: 'number1',
+      editable: true,
+      format: valueFormat,
+    },
+    {
+      field: 'averageTPH',
+      title: 'Average TPH',
+      widthT: 120,
+      minWidth: 100,
+      type: 'number1',
       editable: false,
       format: valueFormat,
+    },
+    {
+      field: 'aopRemarks',
+      title: 'Remark',
+      widthT: 150,
+      minWidth: 120,
+      type: 'textarea',
+      editable: true,
     },
   ]
 
@@ -169,63 +186,96 @@ const OverallAopConsumption = () => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR, selectedUnit])
 
   const fetchData = async () => {
     setLoading(true)
     try {
       // const response =
-      //   await OverallAopConsumptionApiService.getOverallAopConsumption(
+      //   await MonthwiseProductionPlanApiService.getMonthwiseProductionPlan(
       //     keycloak,
       //     PLANT_ID,
       //     AOP_YEAR,
       //   )
-
-      const response = overAllAOpResponse.data?.mcuNormsValueDTOList?.map(
-        (item) => {
-          return {
-            ...item,
-            isEditaable: false,
-          }
-        },
+      const response = monthwiseProductionPlanResponse.data.aopDTOList.filter(
+        (item) => item.type === 'biproduct',
       )
+
       setRows(response)
+      setOriginalRows(response)
     } catch (error) {
-      console.error('Error fetching overall AOP consumption data:', error)
+      console.error('Error fetching monthwise production plan data:', error)
+      setRows([])
+      setOriginalRows([])
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Error fetching data',
-        severity: 'error',
+        message: 'Error fetching data, using dummy data',
+        severity: 'warning',
       })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCalculate = async () => {
+  const handleCalculate = useCallback(async () => {
     setLoading(true)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Calculating...',
-      severity: 'info',
-    })
-
     try {
       const calculatedData =
-        await OverallAopConsumptionApiService.calculateOverallAopConsumption(
+        await MonthwiseProductionPlanApiService.calculateMonthwiseProductionPlan(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
       setRows(calculatedData)
+      setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Calculation completed successfully!',
+        message: 'Data calculated successfully!',
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error calculating overall AOP consumption:', error)
+      console.error('Error calculating monthwise production plan:', error)
+      setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Calculation failed. Please try again.',
+        message: 'Error calculating data',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak, PLANT_ID, AOP_YEAR])
+
+  const saveChanges = async () => {
+    setLoading(true)
+
+    const modifiedData = Object.values(modifiedCells)
+    if (modifiedData.length === 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    try {
+      await MonthwiseProductionPlanApiService.saveMonthwiseProductionPlan(
+        keycloak,
+        AOP_YEAR,
+        modifiedData,
+      )
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data saved successfully!',
+        severity: 'success',
+      })
+      setModifiedCells({})
+      setOriginalRows(rows)
+    } catch (error) {
+      console.error('Error saving monthwise production plan data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error saving data!',
         severity: 'error',
       })
     } finally {
@@ -242,7 +292,7 @@ const OverallAopConsumption = () => {
 
     try {
       const blob =
-        await OverallAopConsumptionApiService.exportOverallAopConsumption(
+        await MonthwiseProductionPlanApiService.exportMonthwiseProductionPlan(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
@@ -250,7 +300,7 @@ const OverallAopConsumption = () => {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `Overall_AOP_Consumption_${AOP_YEAR}.xlsx`
+      link.download = `Monthwise_Production_Plan_${AOP_YEAR}.xlsx`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -261,7 +311,7 @@ const OverallAopConsumption = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting overall AOP consumption data:', error)
+      console.error('Error exporting monthwise production plan data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -269,21 +319,28 @@ const OverallAopConsumption = () => {
     }
   }
 
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.aopRemarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   const permissions = {
-    showAction: false,
+    showAction: true,
     addButton: false,
     deleteButton: false,
-    editButton: false,
-    saveBtn: false,
-    allAction: false,
+    editButton: true,
+    saveBtn: true,
+    allAction: true,
     showExport: true,
     showCalculate: true,
-    ExcelName: `Overall_AOP_Consumption_${AOP_YEAR}`,
+    ExcelName: `Monthwise_Production_Plan_${AOP_YEAR}`,
     showImport: false,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Overall AOP Consumption (Norm/Quantity)',
-    showDropdown: false,
+    titleName: `Monthwise Production Plan Biproducts (${selectedUnit})`,
+    showDropdown: true,
+    remarksEditable: true,
   }
 
   return (
@@ -299,16 +356,27 @@ const OverallAopConsumption = () => {
         columns={columns}
         rows={rows}
         setRows={setRows}
+        modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
         title={permissions.showTitle ? permissions.titleName : ''}
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
+        saveChanges={saveChanges}
         handleExport={handleExport}
         handleCalculate={handleCalculate}
+        dropdownConfig={dropdownConfig}
+        selectedDropdownValue={selectedUnit}
+        setSelectedDropdownValue={setSelectedUnit}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customHeight={70}
-        groupBy={['normParameterTypeDisplayName']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,
@@ -320,4 +388,4 @@ const OverallAopConsumption = () => {
   )
 }
 
-export default OverallAopConsumption
+export default BiproductGrid
