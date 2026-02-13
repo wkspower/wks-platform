@@ -1,9 +1,9 @@
-import { Box, Tab, Tabs, IconButton, Tooltip, Button } from '@mui/material'
-import HistoryIcon from '@mui/icons-material/History'
+import { Box, Tab, Tabs } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
+import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcsWorkflowApiService'
 import { useSession } from 'SessionStoreContext'
 import UnitCapacity from './UnitCapacity'
 import NetUnitCapacity from './NetUnitCapacity'
@@ -15,6 +15,8 @@ import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
 import RemarkDialog from '../TcsInput/workflow/RemarkDialog'
 import HistoryDialog from '../TcsInput/workflow/HistoryDialog'
+import ApproveDialog from '../TcsInput/workflow/ApproveDialog'
+import SubmitSection from '../TcsInput/workflow/SubmitSection'
 import { getUserRole, ROLES } from '../utils/roleUtils'
 
 // Handler to render tab component based on displayName
@@ -74,9 +76,18 @@ const TcsOutput = () => {
   // Remark state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false)
+  const [isSubmitEligible, setIsSubmitEligible] = useState(false)
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
+  const [isSubmittingRemark, setIsSubmittingRemark] = useState(false)
+  const [timelineData, setTimelineData] = useState([])
 
   const handleViewHistory = () => {
     setHistoryDialogOpen(true)
+  }
+
+  const handleReviewClick = () => {
+    setApproveDialogOpen(true)
   }
 
   const userRole = useMemo(() => {
@@ -88,10 +99,173 @@ const TcsOutput = () => {
   // Get current tab object (has id, displayName, displaySequence)
   const currentTab = tabObj[tabIndex] || {}
 
+  // Generate dynamic tooltip based on role and eligibility
+  const submitTooltip = useMemo(() => {
+    // Parse approvalStatus from timelineData
+    let approvalStatus = null
+    const approvalStatusVar = timelineData?.find(
+      (v) => v.name === 'approvalStatus',
+    )
+    if (approvalStatusVar && approvalStatusVar.value) {
+      try {
+        approvalStatus = JSON.parse(approvalStatusVar.value)
+      } catch (e) {
+        console.error('Error parsing approvalStatus:', e)
+      }
+    }
+
+    if (!isSubmitEligible) {
+      if (userRole === ROLES.EPS_ENGINEER) {
+        // Check if already submitted
+        if (approvalStatus?.ebs_approved === true) {
+          return 'You have already submitted to CTS Head/EPS Head'
+        }
+        return 'All plants must be approved before submission'
+      } else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
+        // Check if already submitted
+        if (approvalStatus?.cts_approved === true) {
+          return 'You have already submitted to Cluster Head'
+        }
+        // Check if EPS Engineer has submitted
+        if (approvalStatus?.ebs_approved === false) {
+          return 'Waiting for EPS Engineer submission'
+        }
+        return 'Submission is pending from the EPS Engineer, or you have already submitted.'
+      } else if (userRole === ROLES.CLUSTER_HEAD) {
+        // Check if already submitted
+        if (approvalStatus?.cluster_head_approved === true) {
+          return 'You have already finalized the data for PIMS Output'
+        }
+        // Check if CTS/EPS Head has submitted
+        if (approvalStatus?.cts_approved === false) {
+          return 'Waiting for CTS Head/EPS Head submission'
+        }
+        return 'Submission is pending from the CTS/EPS Head, or you have already submitted.'
+      }
+
+      return 'Submission not available'
+    } else {
+      if (userRole === ROLES.EPS_ENGINEER) {
+        return 'Submit all approved plants to CTS Head/EPS Head'
+      } else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
+        return 'Submit to Cluster Head'
+      } else if (userRole === ROLES.CLUSTER_HEAD) {
+        return 'Finalize data for PIMS Output'
+      }
+      return 'Submit data for next approval'
+    }
+  }, [isSubmitEligible, userRole, timelineData])
+
   // Fetch all tabs and visible tab IDs from backend
   useEffect(() => {
     fetchTabsData()
-  }, [PLANT_ID, SITE_ID, VERTICAL_ID])
+    checkSubmitEligibility()
+  }, [AOP_YEAR, PLANT_ID, SITE_ID, VERTICAL_ID])
+
+  // Check if user can submit based on workflow variables
+  const checkSubmitEligibility = async () => {
+    try {
+      if (!keycloak || !SITE_ID || !AOP_YEAR) {
+        return
+      }
+
+      setIsCheckingEligibility(true)
+
+      // Fetch workflow variables to check approval status
+      const variables = await TcsWorkflowApiService.getWorkflowVariables(
+        keycloak,
+        VERTICAL_ID,
+        SITE_ID,
+        AOP_YEAR,
+      )
+
+      console.log('Workflow Variables:', variables)
+      setTimelineData(variables)
+
+      if (variables.length === 0) {
+        setIsSubmitEligible(false)
+        return
+      }
+
+      // Find approvalStatus variable
+      const approvalStatusVar = variables?.find(
+        (v) => v.name === 'approvalStatus',
+      )
+
+      if (approvalStatusVar && approvalStatusVar.value) {
+        try {
+          // Parse the JSON value
+          const approvalStatus = JSON.parse(approvalStatusVar.value)
+          console.log('Approval Status:', approvalStatus)
+
+          // For EPS Engineer: Check if all plants have been approved and EBS not yet submitted
+          if (userRole === ROLES.EPS_ENGINEER) {
+            // Check if EBS approval is already done from approvalStatus
+            const ebsApproved = approvalStatus.ebs_approved === true
+
+            // If EBS already approved, EPS Engineer cannot submit again
+            if (ebsApproved) {
+              setIsSubmitEligible(false)
+            } else {
+              // Check if approved count equals total count
+              const plantCountVar = variables?.find(
+                (v) => v.name === 'plantCount',
+              )
+
+              if (plantCountVar && plantCountVar.value) {
+                try {
+                  const plantCount = JSON.parse(plantCountVar.value)
+                  const approvedCount = plantCount.approved_plants || 0
+                  const totalCount = plantCount.total_plants || 0
+
+                  const allPlantsApproved =
+                    approvedCount === totalCount && totalCount > 0
+
+                  setIsSubmitEligible(allPlantsApproved)
+                } catch (parseError) {
+                  console.error('Error parsing plantCount:', parseError)
+                  setIsSubmitEligible(false)
+                }
+              } else {
+                setIsSubmitEligible(false)
+              }
+            }
+          }
+          // For CTS Head/EPS Head: Check if EBS approved is true AND CTS approved is false
+          else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
+            const ebsApproved = approvalStatus.ebs_approved === true
+            const ctsApproved = approvalStatus.cts_approved === true
+
+            // Enable submit button only if EBS is approved but CTS is not yet approved
+            const canSubmit = ebsApproved && !ctsApproved
+            setIsSubmitEligible(canSubmit)
+          }
+          // For Cluster Head: Check if CTS approved is true AND Cluster Head approved is false
+          else if (userRole === ROLES.CLUSTER_HEAD) {
+            const ctsApproved = approvalStatus.cts_approved === true
+            const clusterHeadApproved =
+              approvalStatus.cluster_head_approved === true
+
+            // Enable submit button only if CTS is approved but Cluster Head is not yet approved
+            const canSubmit = ctsApproved && !clusterHeadApproved
+            setIsSubmitEligible(canSubmit)
+          } else {
+            setIsSubmitEligible(false)
+          }
+        } catch (parseError) {
+          console.error('Error parsing approvalStatus:', parseError)
+          setIsSubmitEligible(false)
+        }
+      } else {
+        setIsSubmitEligible(false)
+      }
+    } catch (err) {
+      console.error('Error checking submit eligibility:', err)
+      setIsSubmitEligible(false)
+    } finally {
+      setIsCheckingEligibility(false)
+    }
+  }
 
   const fetchTabsData = async () => {
     try {
@@ -149,42 +323,214 @@ const TcsOutput = () => {
     }
   }
 
-  // Handle remark submission
-  const handleRemarkSubmit = (remark) => {
-    console.log('Remark submitted:', remark)
-    // TODO: Add API call to save remark
-    setSnackbarData({
-      message: 'Remark submitted successfully!',
-      severity: 'success',
-    })
-    setSnackbarOpen(true)
+  // Handle submission based on user role
+  const handleRemarkSubmit = async (remark) => {
+    try {
+      // Validate required parameters
+      if (
+        !keycloak ||
+        !plantObject?.name ||
+        !SITE_ID ||
+        !userRole ||
+        !AOP_YEAR
+      ) {
+        setSnackbarData({
+          message: 'Missing required parameters. Please refresh and try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return
+      }
+
+      setIsSubmittingRemark(true)
+
+      // Call appropriate API based on user role
+      if (userRole === ROLES.EPS_ENGINEER) {
+        // EPS Engineer submission - uses submittedBy and submissionRemark
+        await TcsWorkflowApiService.epsEngineerSubmission(
+          keycloak,
+          plantObject.name,
+          SITE_ID,
+          VERTICAL_ID,
+          AOP_YEAR,
+          remark,
+          userRole, // submittedBy
+        )
+      }
+
+      setSnackbarData({
+        message: 'Submission completed successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      // Refresh eligibility after submission
+      await checkSubmitEligibility()
+
+      // Close the remark dialog on success
+      setRemarkDialogOpen(false)
+    } catch (err) {
+      console.error('Error submitting:', err)
+
+      setSnackbarData({
+        message: 'Failed to complete submission. Please try again.',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    } finally {
+      setIsSubmittingRemark(false)
+    }
   }
 
-  const data = [
-    {
-      id: 1,
-      status: 'Approved',
-      remarks: 'OK',
-      submittedBy: 'OMS HEAD',
-      submittedDate: '2022-01-10',
-    },
-    {
-      id: 2,
-      status: 'Rejected',
-      remarks:
-        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem mollitia distinctio officia possimus. Modi dolorum, quod doloribus, amet impedit adipisci suscipit ducimus sapiente maxime id laborum voluptatibus, incidunt perspiciatis deserunt.',
-      submittedBy: 'EPS HEAD',
-      submittedDate: '2022-01-05',
-    },
-    {
-      id: 3,
-      status: 'Rejected',
-      remarks:
-        'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Excepturi, a natus. Quasi consequatur amet pariatur eius saepe cum, qui itaque eos nobis aliquam. Provident dolores dicta repellendus! Soluta alias architecto, quos necessitatibus modi provident! Placeat odit eos exercitationem enim error itaque pariatur numquam ipsam at sequi corporis, maiores rerum aut labore reiciendis perferendis! Repellendus soluta, deserunt, quisquam omnis cumque, necessitatibus possimus ratione eos deleniti maxime in odit quae. Iure, quas dolore optio quo numquam illo eos voluptas, vero ab debitis delectus vel laudantium? Voluptatibus dignissimos ut sunt laboriosam, labore nostrum voluptatem nulla distinctio alias tenetur, id aspernatur corrupti expedita fugit sit quis quo consequuntur minus voluptates sint rerum. Harum optio aliquam veniam ut officia magnam quasi ea, similique eos, minus beatae? Saepe ratione ex explicabo magni at id magnam odio in suscipit pariatur provident facilis rem nulla harum praesentium porro molestiae, dolorem quam libero veniam asperiores excepturi vero! Unde exercitationem quidem quam eos soluta modi tempora fugit nemo velit voluptatem nihil, iste odio, aspernatur amet nulla obcaecati quae, accusamus expedita! Dignissimos quas ex molestias ratione sequi. Iusto iure impedit accusamus quibusdam nulla voluptatem magnam alias similique assumenda perferendis laboriosam sint, quam animi laborum possimus nihil, vel aspernatur doloremque quidem maiores?',
-      submittedBy: 'EPS HEAD',
-      submittedDate: '2022-01-01',
-    },
-  ]
+  // Handle approval for CTS_HEAD and EPS_HEAD
+  const handleApprove = async (remark) => {
+    try {
+      // Validate required parameters
+      if (!keycloak || !SITE_ID || !VERTICAL_ID || !userRole || !AOP_YEAR) {
+        setSnackbarData({
+          message: 'Missing required parameters. Please refresh and try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return
+      }
+
+      setIsSubmittingRemark(true)
+
+      // Call appropriate approve APIs based on role
+      if (userRole === ROLES.CLUSTER_HEAD) {
+        // First API: Approve/Reject with true
+        await TcsWorkflowApiService.clusterHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          true, // approvalStatus = true for approve
+          AOP_YEAR,
+          remark,
+          userRole, // verifiedBy
+          VERTICAL_ID,
+        )
+
+        // Second API: Submission
+        await TcsWorkflowApiService.clusterHeadSubmission(
+          keycloak,
+          SITE_ID,
+          AOP_YEAR,
+          remark,
+          userRole, // verifiedBy
+          VERTICAL_ID,
+        )
+      } else {
+        // CTS_HEAD or EPS_HEAD
+        // First API: Approve/Reject with true
+        await TcsWorkflowApiService.ctsHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          true, // approvalStatus = true for approve
+          AOP_YEAR,
+          remark,
+          userRole, // submittedBy
+          VERTICAL_ID,
+        )
+
+        // Second API: Submission
+        await TcsWorkflowApiService.ctsHeadSubmission(
+          keycloak,
+          SITE_ID,
+          AOP_YEAR,
+          remark,
+          userRole, // submittedBy
+          VERTICAL_ID,
+        )
+      }
+
+      setSnackbarData({
+        message: 'Approved successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      // Refresh eligibility after approval
+      await checkSubmitEligibility()
+
+      // Close the remark dialog on success
+      setRemarkDialogOpen(false)
+    } catch (err) {
+      console.error('Error approving:', err)
+
+      setSnackbarData({
+        message: 'Failed to approve. Please try again.',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      throw err
+    } finally {
+      setIsSubmittingRemark(false)
+    }
+  }
+
+  // Handle rejection for CTS_HEAD and EPS_HEAD
+  const handleReject = async (remark) => {
+    try {
+      // Validate required parameters
+      if (!keycloak || !SITE_ID || !VERTICAL_ID || !userRole || !AOP_YEAR) {
+        setSnackbarData({
+          message: 'Missing required parameters. Please refresh and try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return
+      }
+
+      setIsSubmittingRemark(true)
+
+      // Call appropriate reject API based on role
+      if (userRole === ROLES.CLUSTER_HEAD) {
+        await TcsWorkflowApiService.clusterHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          false, // approvalStatus = false for reject
+          AOP_YEAR,
+          remark,
+          userRole, // verifiedBy
+          VERTICAL_ID,
+        )
+      } else {
+        // CTS_HEAD or EPS_HEAD
+        await TcsWorkflowApiService.ctsHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          false, // approvalStatus = false for reject
+          AOP_YEAR,
+          remark,
+          userRole, // verifiedBy
+          VERTICAL_ID,
+        )
+      }
+
+      setSnackbarData({
+        message: 'Rejected successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      // Refresh eligibility after rejection
+      await checkSubmitEligibility()
+
+      // Close the remark dialog on success
+      setRemarkDialogOpen(false)
+    } catch (err) {
+      console.error('Error rejecting:', err)
+
+      setSnackbarData({
+        message: 'Failed to reject. Please try again.',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      throw err
+    } finally {
+      setIsSubmittingRemark(false)
+    }
+  }
 
   return (
     <Box
@@ -246,37 +592,16 @@ const TcsOutput = () => {
         </Box>
 
         {/* Submit button and History icon - Fixed on right */}
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}
-        >
-          <Button
-            className='btn-save'
-            style={{ background: '#28a745', color: '#ffffff' }}
-            onClick={() => setRemarkDialogOpen(true)}
-          >
-            Submit
-          </Button>
-          <Tooltip title='View History'>
-            <Button
-              variant='outlined'
-              size='small'
-              onClick={handleViewHistory}
-              sx={{
-                textTransform: 'none',
-                borderColor: '#1976d2',
-                color: '#1976d2',
-                padding: '6px 16px',
-                maxHeight: '1.8rem',
-                '&:hover': {
-                  borderColor: '#1565c0',
-                  backgroundColor: '#e3f2fd',
-                },
-              }}
-            >
-              <HistoryIcon />
-            </Button>
-          </Tooltip>
-        </Box>
+        <SubmitSection
+          onSubmitClick={() => setRemarkDialogOpen(true)}
+          onViewHistory={handleViewHistory}
+          onReviewClick={handleReviewClick}
+          isEligible={isSubmitEligible}
+          isLoading={isCheckingEligibility || isSubmittingRemark}
+          submitTooltip={submitTooltip}
+          showReviewBtn={userRole === ROLES.EPS_ENGINEER}
+          reviewTooltip='Review and approve/reject plants'
+        />
       </Box>
 
       {/* Tab Content */}
@@ -300,9 +625,11 @@ const TcsOutput = () => {
         handleClose={() => setRemarkDialogOpen(false)}
         placeholder='Enter your remarks here...'
         onSubmit={handleRemarkSubmit}
+        onApprove={handleApprove}
+        onReject={handleReject}
         maxLength={1000}
-        historyData={data}
         role={userRole}
+        keycloak={keycloak}
       />
 
       {/* History Dialog */}
@@ -310,8 +637,21 @@ const TcsOutput = () => {
         open={historyDialogOpen}
         onClose={() => setHistoryDialogOpen(false)}
         title='Audit Trail'
-        data={data}
-        role={userRole}
+        userRole={userRole}
+        timelineData={timelineData}
+      />
+
+      {/* Approve/Reject Dialog */}
+      <ApproveDialog
+        open={approveDialogOpen}
+        onClose={async () => {
+          setApproveDialogOpen(false)
+          await checkSubmitEligibility()
+        }}
+        tab={currentTab.displayName}
+        year={AOP_YEAR}
+        userRole={userRole}
+        timelineData={timelineData}
       />
 
       <Notification

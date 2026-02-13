@@ -747,7 +747,7 @@ const AdvanceKendoTable = ({
   }
 
   const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
+    const { dataItem, field, onRemarkClick, ...restProps } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
@@ -765,7 +765,7 @@ const AdvanceKendoTable = ({
 
     return (
       <td
-        {...tdProps}
+        {...restProps}
         title={displayText}
         style={{
           cursor: isRowEditable ? 'pointer' : 'not-allowed',
