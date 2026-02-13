@@ -35,6 +35,11 @@ public class ShutdownHistoryController {
 		 return  shutdownHistoryService.getTypeOfSD(plantId,year);
 	}
 	
+	@GetMapping(value="/line-details")
+	public AOPMessageVM getLineDetails(@RequestParam(required=false) String plantId,@RequestParam(required=false) String year){
+		 return  shutdownHistoryService.getLineDetails(plantId,year);
+	}
+	
 	@PostMapping(value="/shutdown-history")
 	public AOPMessageVM saveShutdownHistory(@RequestParam String year,@RequestParam String plantFKId, @RequestBody List<ShutdownHistoryConfigDTO> shutdownHistoryConfigDTOs) {
 		return 	shutdownHistoryService.saveShutdownHistory(year,plantFKId,shutdownHistoryConfigDTOs);

@@ -656,9 +656,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        innerHeaders.add("3F-C2C3");
 	        innerHeaders.add("3F-Propane");
 	        innerHeaders.add("3F-Ethane");
-	        innerHeaders.add("4F+2SFD1BFD-C2C3");
-	        innerHeaders.add("4F+2SFD1BFD-Propane");
-	        innerHeaders.add("4F+2SFD1BFD-Ethane");
+	        innerHeaders.add("4F+2SFD 1BFD-C2C3");
+	        innerHeaders.add("4F+2SFD 1BFD-Propane");
+	        innerHeaders.add("4F+2SFD 1BFD-Ethane");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
