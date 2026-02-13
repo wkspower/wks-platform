@@ -40,6 +40,20 @@ public class TCSSlowdownController {
         return tcsSlowdownService.getAll(plantId, year, siteId, verticalId);
     }
 
+    @PostMapping("/tcs-slowdown/carry-forward")
+    public AOPMessageVM carryForwardTCSSlowdown(
+        @RequestParam String plantId,
+        @RequestParam String year) {
+            
+            if(plantId == null || plantId.isEmpty()) {
+                throw new RestInvalidArgumentException("Plant ID cannot be null", null);
+            }
+            if(year == null || year.isEmpty()) {
+                throw new RestInvalidArgumentException("Year cannot be null", null);
+            }
+            return tcsSlowdownService.carryForwardTCSSlowdown(plantId, year);
+    }
+
     @PostMapping("/tcs-slowdown")
     public AOPMessageVM saveOrUpdate(
         @RequestParam String plantId,

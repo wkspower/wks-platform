@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tcs.dto.TCSCPPUnitsSDPlanDTO;
 import com.wks.caseengine.tcs.service.TCSCPPUnitsSDPlanService;
@@ -35,6 +36,16 @@ public class TCSCPPUnitsSDPlanController {
 
         System.out.println("tcsCppUnitsSDPlanDTOs: " + tcsCppUnitsSDPlanDTOs);
         return ResponseEntity.ok(tcsCppUnitsSDPlanDTOs);
+    }
+
+    @PostMapping("/cpp-unit-sd-plan/carry-forward/{financialYear}/{siteId}")
+    public ResponseEntity<AOPMessageVM> carryForwardTCSCPPUnitsSDPlan(@PathVariable String financialYear, @PathVariable String siteId) {
+
+        if(financialYear == null || siteId == null) {
+            throw new RestInvalidArgumentException("Invalid request parameters", null);
+        }
+        AOPMessageVM response = tcsCppUnitsSDPlanService.carryForwardTCSCPPUnitsSDPlan(financialYear, UUID.fromString(siteId)); 
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cpp-unit-sd-plan/{financialYear}/{siteId}")

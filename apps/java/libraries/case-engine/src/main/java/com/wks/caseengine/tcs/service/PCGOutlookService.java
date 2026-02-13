@@ -26,6 +26,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -33,6 +34,10 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.tcs.dto.PCGOutlookDTO;
 import com.wks.caseengine.tcs.repository.PCGOutlookRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
 public class PCGOutlookService {
@@ -46,10 +51,32 @@ public class PCGOutlookService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public List<PCGOutlookDTO> getData(UUID siteId, String financialYear) {
        
         List<PCGOutlookDTO> projections = repository.getPcgOutlookBySiteAndFY(siteId, financialYear).stream().map(p -> new PCGOutlookDTO(p.getProduct(), p.getApr(), p.getMay(), p.getJun(), p.getJul(), p.getAug(), p.getSep(), p.getOct(), p.getNov(), p.getDec(), p.getJan(), p.getFeb(), p.getMar(), p.getRemarks(), null, null)).collect(Collectors.toList());
         return projections;
+    }
+
+    @Transactional
+    public AOPMessageVM carryForwardPCGOutlook(String financialYear, UUID siteId) {
+        try {
+            String procedureName = "TCS_PCGOutlook_CarryForward";
+            String sql = "EXEC " + procedureName + "  @FinancialYear = :financialYear, @Site_FK_Id = :siteId";
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("financialYear", financialYear);
+            query.setParameter("siteId", siteId);
+            query.executeUpdate();
+            AOPMessageVM vm = new AOPMessageVM();
+            vm.setCode(200);
+            vm.setMessage("Data carried forward successfully");
+            return vm;
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to carry forward data", e);
+        }
     }
 
 

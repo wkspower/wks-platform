@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.tcs;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tcs.dto.CrudeBlendScreenDTO;
 import com.wks.caseengine.tcs.dto.CrudeBlendWindowPostRequestDTO;
@@ -37,6 +39,14 @@ public class CrudeBlendWindowController {
 
         List<CrudeBlendScreenDTO> crudeBlendScreenDTO = crudeBlendWindowService.getCrudeBlendWindowData(plantId, siteId, financialYear);
         return ResponseEntity.ok(crudeBlendScreenDTO);
+    }
+
+    @PostMapping("/crude-blend-window/carry-forward/{financialYear}/{siteId}/{plantId}")
+    public AOPMessageVM carryForwardCrudeBlendWindow(@PathVariable String financialYear, @PathVariable String siteId, @PathVariable String plantId) {
+        if(plantId == null || financialYear == null || siteId == null) {
+            throw new RestInvalidArgumentException("Invalid request parameters", null);
+        }
+        return crudeBlendWindowService.carryForwardCrudeBlendWindow(financialYear, UUID.fromString(siteId), UUID.fromString(plantId));
     }
     
     @PostMapping("/crude-blend-window/{plantId}/{siteId}/{financialYear}/{table}")

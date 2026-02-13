@@ -24,6 +24,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,10 @@ import com.wks.caseengine.tcs.dto.CrudeBlendWindowPostRequestDTO;
 import com.wks.caseengine.tcs.dto.CrudeSpecificConstraintsDTO;
 import com.wks.caseengine.tcs.dto.VGOVRDropDTO;
 import com.wks.caseengine.tcs.repository.CrudeBlendWindowRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 
 @Service
@@ -52,6 +57,9 @@ public class CrudeBlendWindowService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
      
  //   public List<MasterCrudeBlendDTO> getCrudeBlendWindowData(String plantId, String siteId) {
@@ -211,6 +219,41 @@ public class CrudeBlendWindowService {
 
         return crudeBlendScreenDTOs;
     }
+
+    @Transactional
+    public AOPMessageVM carryForwardCrudeBlendWindow(String financialYear, UUID siteId, UUID plantId) {
+       
+          try {
+           executeCarryForwardStoredProcedure("CrudeBlendWindow_CarryForward", financialYear, siteId, plantId);
+           executeCarryForwardStoredProcedure("CrudeSpecificConstraints_CarryForward", financialYear, siteId, plantId);
+           executeCarryForwardStoredProcedure("VGOVRDrop_CarryForward", financialYear, siteId, plantId);
+          } catch (Exception e) {
+            throw new RuntimeException("Failed to carry forward crude blend window data", e);
+          }
+          AOPMessageVM aopMessageVM = new AOPMessageVM();
+          aopMessageVM.setCode(200);
+          aopMessageVM.setMessage("Crude blend window data carried forward successfully");
+          return aopMessageVM;
+    }
+
+    public void executeCarryForwardStoredProcedure(String procedureName, String financialYear, UUID siteId, UUID plantId) {
+        try {
+            String sql = "EXEC " + procedureName + " @targetYear = :financialYear, @siteId = :siteId, @plantId = :plantId";
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("financialYear", financialYear);
+            query.setParameter("siteId", siteId);
+            query.setParameter("plantId", plantId);
+            query.executeUpdate();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to execute carry forward stored procedure", e);
+        }
+
+    }
+
+
+
+
 
     public void updateCrudeBlendWindowData(CrudeBlendWindowPostRequestDTO<?> payload, String plantId, String siteId, String financialYear, String table) {
    

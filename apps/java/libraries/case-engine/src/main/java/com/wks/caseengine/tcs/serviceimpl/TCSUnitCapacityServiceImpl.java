@@ -36,6 +36,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;	
 
 import com.wks.caseengine.entity.Plants;
@@ -247,6 +248,39 @@ Verticals vertical = null;
             throw new RuntimeException("Failed to fetch data", e);
         }
     }
+
+    @Override
+    @Transactional
+    public AOPMessageVM carryForwardTCSUnitCapacity(
+        String plantId,
+        String aopYear,
+        String capacityType
+        ) {
+        
+       try {
+        String procedureName = "CRUDE_ALL_CarryForwardTcsUnitCapacity";
+        String sql = "EXEC " + procedureName + " @plantId = :plantId, @targetYear = :aopYear, @capacityType = :capacityType";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("plantId", plantId);
+        query.setParameter("aopYear", aopYear);
+        query.setParameter("capacityType", capacityType);
+
+        query.executeUpdate();
+
+        AOPMessageVM vm = new AOPMessageVM();
+        vm.setCode(200);
+        vm.setMessage("Data carried forward successfully");
+        return vm;
+
+       } catch (Exception e) {
+        throw new RuntimeException("Failed to carry forward data", e);
+
+    }
+
+   
+
+}
 
     private List<String> getHeaders(
         String plantId,

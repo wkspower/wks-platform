@@ -12,6 +12,9 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface TCSShutdownService {
 
     public Map<String, Object> getAll(String plantId, String year, String siteId, String verticalId);
+
+    public AOPMessageVM carryForwardTCSShutdown(String plantId, String year);
+    
     AOPMessageVM saveOrUpdate(String plantId, String year, List<TCSShutdownDTO> dtoList);
 
     public AOPMessageVM delete(UUID id);

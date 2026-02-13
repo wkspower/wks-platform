@@ -12,6 +12,8 @@ public interface TCSCPPUnitsSDPlanService {
 
     List<TCSCPPUnitsSDPlanDTO> getTCSCPPUnitsSDPlan(String financialYear, UUID siteId);
 
+    AOPMessageVM carryForwardTCSCPPUnitsSDPlan(String financialYear, UUID siteId);
+
     void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs, UUID siteId, String financialYear);
 
     void deleteTCSCPPUnitsSDPlan(UUID id);
