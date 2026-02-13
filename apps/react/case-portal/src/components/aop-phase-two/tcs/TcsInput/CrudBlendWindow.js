@@ -24,53 +24,121 @@ const CrudBlendWindow = ({
     { key: 'CrudeSpecificConstraints', title: 'Crude Specific Constraints' },
   ]
 
-  // Fetch all tables data once
-  const fetchAllTablesData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR || !SITE_ID) {
-      console.warn('Missing required params:', { PLANT_ID, AOP_YEAR, SITE_ID })
-      return
-    }
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      console.log('Fetching Crude Blend Window data with:', {
-        PLANT_ID,
-        AOP_YEAR,
-        SITE_ID,
-      })
+      console.log('No data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getCrudBlendWindowData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        SITE_ID,
-      )
+      const carryForwardResponse =
+        await TcsApiService.carryForwardCrudBlendWindow(
+          keycloak,
+          AOP_YEAR,
+          SITE_ID,
+          PLANT_ID,
+        )
 
-      console.log('Crude Blend Window API Response:', response)
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      // Transform response into a map keyed by table name
-      const tablesDataMap = {}
-      if (Array.isArray(response)) {
-        response.forEach((item) => {
-          if (item.table && item.data) {
-            tablesDataMap[item.table] = item.data
-          }
-        })
-      }
-
-      console.log('Transformed tables data:', tablesDataMap)
-      setAllTablesData(tablesDataMap)
-    } catch (err) {
-      console.error('Error fetching Crude Blend Window data:', err)
       setSnackbarData({
-        message: 'Failed to load Crude Blend Window data. Please try again.',
-        severity: 'error',
+        message: 'Data carried forward from previous year successfully!',
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setAllTablesData({})
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward:', carryForwardErr)
+      return false
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
+  }, [keycloak, AOP_YEAR, SITE_ID, PLANT_ID, setSnackbarData, setSnackbarOpen])
+
+  // Fetch all tables data once
+  const fetchAllTablesData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!PLANT_ID || !AOP_YEAR || !SITE_ID) {
+        console.warn('Missing required params:', {
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+        })
+        return
+      }
+      try {
+        setLoading(true)
+        console.log('Fetching Crude Blend Window data with:', {
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+        })
+
+        const response = await TcsApiService.getCrudBlendWindowData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+        )
+
+        console.log('Crude Blend Window API Response:', response)
+
+        // Transform response into a map keyed by table name
+        const tablesDataMap = {}
+        if (Array.isArray(response)) {
+          response.forEach((item) => {
+            if (item.table && item.data) {
+              tablesDataMap[item.table] = item.data
+            }
+          })
+        }
+
+        console.log('Transformed tables data:', tablesDataMap)
+
+        // Check if all three tables have empty results
+        const allTablesEmpty =
+          Array.isArray(response) &&
+          response.length > 0 &&
+          response.every(
+            (item) =>
+              item.data &&
+              item.data.results &&
+              Array.isArray(item.data.results) &&
+              item.data.results.length === 0,
+          )
+
+        console.log('All tables empty check:', allTablesEmpty)
+
+        // If all tables have empty results and carry forward not skipped, attempt carry forward
+        if (allTablesEmpty && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry forward
+            await fetchAllTablesData(true)
+            return
+          }
+        }
+
+        setAllTablesData(tablesDataMap)
+      } catch (err) {
+        console.error('Error fetching Crude Blend Window data:', err)
+        setSnackbarData({
+          message: 'Failed to load Crude Blend Window data. Please try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setAllTablesData({})
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      SITE_ID,
+      setSnackbarData,
+      setSnackbarOpen,
+      handleCarryForward,
+    ],
+  )
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {

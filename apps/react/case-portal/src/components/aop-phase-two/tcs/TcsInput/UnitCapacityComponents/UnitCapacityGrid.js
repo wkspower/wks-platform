@@ -90,75 +90,36 @@ const UnitCapacityGrid = ({
     })
   }, [])
 
-  // Fetch Unit Capacity data for this capacity type
-  const fetchUnitCapacityData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-
-      const response = await TcsApiService.getTcsUnitCapacityData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        capacityType,
-        'KBPSD',
+      console.log(
+        `No data found for ${capacityType}, attempting carry-forward...`,
       )
 
-      let transformedData = []
-      if (response?.results && Array.isArray(response.results)) {
-        transformedData = response.results.map((item, index) => {
-          // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
-          const months = [
-            'apr',
-            'may',
-            'jun',
-            'jul',
-            'aug',
-            'sep',
-            'oct',
-            'nov',
-            'dec',
-            'jan',
-            'feb',
-            'mar',
-          ]
-          const monthData = {}
+      const carryForwardResponse =
+        await TcsApiService.carryForwardTcsUnitCapacity(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          capacityType,
+        )
 
-          months.forEach((month) => {
-            const kbpsdValue = item[month] || 0
-            monthData[month] = {
-              kbpsd: kbpsdValue,
-              ktpd: convertFromKBPSD(kbpsdValue, 'KTPD'),
-            }
-          })
+      console.log('Carry-forward response:', carryForwardResponse)
 
-          return {
-            id: item.id || `row_${index}`,
-            particulates: item.particulates,
-            ...monthData,
-            remark: item.remark,
-            insertedDateTime: item.insertedDateTime,
-            inEdit: false,
-          }
-        })
-      }
-
-      if (response?.headers && response?.keys) {
-        setApiMetadata({ headers: response.headers, keys: response.keys })
-      }
-
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error(`Error fetching Unit Capacity data (${capacityType}):`, err)
       setSnackbarData({
-        message: `Failed to load Unit Capacity data. Please try again.`,
-        severity: 'error',
+        message: `Data carried forward from previous year successfully!`,
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error(
+        `Error during carry-forward for ${capacityType}:`,
+        carryForwardErr,
+      )
+      return false
     }
   }, [
     keycloak,
@@ -168,6 +129,102 @@ const UnitCapacityGrid = ({
     setSnackbarData,
     setSnackbarOpen,
   ])
+
+  // Fetch Unit Capacity data for this capacity type
+  const fetchUnitCapacityData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!PLANT_ID || !AOP_YEAR) return
+      try {
+        setLoading(true)
+
+        const response = await TcsApiService.getTcsUnitCapacityData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          capacityType,
+          'KBPSD',
+        )
+
+        let transformedData = []
+        if (response?.results && Array.isArray(response.results)) {
+          transformedData = response.results.map((item, index) => {
+            // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
+            const months = [
+              'apr',
+              'may',
+              'jun',
+              'jul',
+              'aug',
+              'sep',
+              'oct',
+              'nov',
+              'dec',
+              'jan',
+              'feb',
+              'mar',
+            ]
+            const monthData = {}
+
+            months.forEach((month) => {
+              const kbpsdValue = item[month] || 0
+              monthData[month] = {
+                kbpsd: kbpsdValue,
+                ktpd: convertFromKBPSD(kbpsdValue, 'KTPD'),
+              }
+            })
+
+            return {
+              id: item.id || `row_${index}`,
+              particulates: item.particulates,
+              ...monthData,
+              remark: item.remark,
+              insertedDateTime: item.insertedDateTime,
+              inEdit: false,
+            }
+          })
+        }
+
+        if (response?.headers && response?.keys) {
+          setApiMetadata({ headers: response.headers, keys: response.keys })
+        }
+
+        // If data is empty and carry-forward not skipped, attempt carry-forward and refetch
+        if (transformedData.length === 0 && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry-forward
+            await fetchUnitCapacityData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error(
+          `Error fetching Unit Capacity data (${capacityType}):`,
+          err,
+        )
+        setSnackbarData({
+          message: `Failed to load Unit Capacity data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      capacityType,
+      handleCarryForward,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
 
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {

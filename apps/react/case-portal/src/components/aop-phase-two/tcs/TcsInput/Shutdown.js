@@ -38,54 +38,94 @@ const Shutdown = ({
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
-  // Fetch Shutdown Data
-  const fetchShutdownData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      let transformedData = []
+      console.log('No Shutdown data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getTcsShutdownData(
+      const carryForwardResponse = await TcsApiService.carryForwardTcsShutdown(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-      console.log('TCS Shutdown Response:', response)
 
-      if (response?.results && Array.isArray(response.results)) {
-        transformedData = response.results.map((item, index) => ({
-          id: item.id || `row_${index}`,
-          ...item,
-          inEdit: false,
-        }))
-      }
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      // Store headers and keys from API response
-      if (response?.headers && response?.keys) {
-        setApiMetadata({ headers: response.headers, keys: response.keys })
-      }
-
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching Shutdown data:', err)
       setSnackbarData({
-        message: `Failed to load Shutdown data. Please try again.`,
-        severity: 'error',
+        message: `Shutdown data carried forward from previous year successfully!`,
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward for Shutdown:', carryForwardErr)
+      return false
     }
-  }, [
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    currentTab.id,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+  }, [keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen])
+
+  // Fetch Shutdown Data
+  const fetchShutdownData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!PLANT_ID || !AOP_YEAR) return
+      try {
+        setLoading(true)
+        let transformedData = []
+
+        const response = await TcsApiService.getTcsShutdownData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        console.log('TCS Shutdown Response:', response)
+
+        if (response?.results && Array.isArray(response.results)) {
+          transformedData = response.results.map((item, index) => ({
+            id: item.id || `row_${index}`,
+            ...item,
+            inEdit: false,
+          }))
+        }
+
+        // Store headers and keys from API response
+        if (response?.headers && response?.keys) {
+          setApiMetadata({ headers: response.headers, keys: response.keys })
+        }
+
+        // If data is empty and carry-forward not skipped, attempt carry-forward and refetch
+        if (transformedData.length === 0 && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry-forward
+            await fetchShutdownData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching Shutdown data:', err)
+        setSnackbarData({
+          message: `Failed to load Shutdown data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      currentTab.id,
+      handleCarryForward,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {

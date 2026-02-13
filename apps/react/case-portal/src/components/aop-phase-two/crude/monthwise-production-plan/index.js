@@ -14,6 +14,7 @@ const MonthwiseProductionPlan = () => {
   const { plantObject, year } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME = plantObject?.name
   const AOP_YEAR = year?.selectedYear
 
   const [loading, setLoading] = useState(false)
@@ -51,6 +52,15 @@ const MonthwiseProductionPlan = () => {
       title: 'Product Name',
       widthT: 250,
       minWidth: 200,
+      type: 'text',
+      editable: false,
+      locked: true,
+    },
+    {
+      field: 'UOM',
+      title: 'UOM',
+      widthT: 150,
+      minWidth: 120,
       type: 'text',
       editable: false,
       locked: true,
@@ -182,64 +192,6 @@ const MonthwiseProductionPlan = () => {
     },
   ]
 
-  // Dummy data for aromatics products
-  const dummyRows = [
-    {
-      id: 1,
-      displayName: 'Benzene',
-      april: 125.5,
-      may: 130.2,
-      june: 128.8,
-      july: 132.1,
-      aug: 135.4,
-      sep: 127.9,
-      oct: 131.5,
-      nov: 129.3,
-      dec: 133.7,
-      jan: 126.8,
-      feb: 130.9,
-      march: 128.4,
-      averageTPH: 130.0,
-      aopRemarks: '',
-    },
-    {
-      id: 2,
-      displayName: 'Toluene',
-      april: 85.3,
-      may: 88.7,
-      june: 86.2,
-      july: 89.5,
-      aug: 91.2,
-      sep: 87.4,
-      oct: 90.1,
-      nov: 88.3,
-      dec: 92.0,
-      jan: 86.9,
-      feb: 89.4,
-      march: 87.6,
-      averageTPH: 88.5,
-      aopRemarks: '',
-    },
-    {
-      id: 3,
-      displayName: 'Xylene',
-      april: 95.8,
-      may: 98.2,
-      june: 96.5,
-      july: 99.3,
-      aug: 101.5,
-      sep: 97.1,
-      oct: 100.2,
-      nov: 98.7,
-      dec: 102.3,
-      jan: 96.3,
-      feb: 99.1,
-      march: 97.4,
-      averageTPH: 98.5,
-      aopRemarks: '',
-    },
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
@@ -256,7 +208,7 @@ const MonthwiseProductionPlan = () => {
       //     AOP_YEAR,
       //   )
       const data = monthwiseProductionPlanResponse.data.aopDTOList.filter(
-        (i) => i.plantFkId === PLANT_ID,
+        (i) => i.plantName === PLANT_NAME,
       )
       setRows(data)
       setOriginalRows(data)

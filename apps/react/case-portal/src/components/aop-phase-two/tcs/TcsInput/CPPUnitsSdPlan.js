@@ -53,54 +53,105 @@ const CPPUnitsSdPlan = ({
     ],
   })
 
-  // Fetch data
-  const fetchData = useCallback(async () => {
-    if (!AOP_YEAR || !SITE_ID) {
-      console.warn('Missing required params:', { AOP_YEAR, SITE_ID })
-      return
-    }
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      console.log('Fetching CPP Units SD Plan data with:', {
-        AOP_YEAR,
-        SITE_ID,
-      })
+      console.log('No data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getCPPUnitsSdPlanData(
-        keycloak,
-        AOP_YEAR,
-        SITE_ID,
-      )
+      const carryForwardResponse =
+        await TcsApiService.carryForwardCppUnitsSdPlan(
+          keycloak,
+          AOP_YEAR,
+          SITE_ID,
+        )
 
-      const transformedData = (response || []).map((item, index) => ({
-        id: item.id || `row_${index}`,
-        ...item,
-        majorJobs: item.majorJobs || '',
-        // Convert gtMaintenance from comma-separated string to array for multi-select
-        gtMaintenance: item.gtMaintenance
-          ? item.gtMaintenance
-              .split(',')
-              .map((v) => v.trim())
-              .filter(Boolean)
-          : [],
-        inEdit: false,
-      }))
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      console.log('CPP Units SD Plan API Response:', transformedData)
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching CPP Units SD Plan data:', err)
       setSnackbarData({
-        message: 'Failed to load CPP Units SD Plan data. Please try again.',
-        severity: 'error',
+        message: 'Data carried forward from previous year successfully!',
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward:', carryForwardErr)
+      return false
     }
   }, [keycloak, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
+
+  // Fetch data
+  const fetchData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!AOP_YEAR || !SITE_ID) {
+        console.warn('Missing required params:', { AOP_YEAR, SITE_ID })
+        return
+      }
+      try {
+        setLoading(true)
+        console.log('Fetching CPP Units SD Plan data with:', {
+          AOP_YEAR,
+          SITE_ID,
+        })
+
+        const response = await TcsApiService.getCPPUnitsSdPlanData(
+          keycloak,
+          AOP_YEAR,
+          SITE_ID,
+        )
+
+        const transformedData = (response || []).map((item, index) => ({
+          id: item.id || `row_${index}`,
+          ...item,
+          majorJobs: item.majorJobs || '',
+          // Convert gtMaintenance from comma-separated string to array for multi-select
+          gtMaintenance: item.gtMaintenance
+            ? item.gtMaintenance
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean)
+            : [],
+          inEdit: false,
+        }))
+
+        console.log('CPP Units SD Plan API Response:', transformedData)
+
+        // If no data and carry forward not skipped, attempt carry forward
+        if (
+          (!transformedData || transformedData.length === 0) &&
+          !skipCarryForward
+        ) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry forward
+            await fetchData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching CPP Units SD Plan data:', err)
+        setSnackbarData({
+          message: 'Failed to load CPP Units SD Plan data. Please try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      AOP_YEAR,
+      SITE_ID,
+      setSnackbarData,
+      setSnackbarOpen,
+      handleCarryForward,
+    ],
+  )
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {

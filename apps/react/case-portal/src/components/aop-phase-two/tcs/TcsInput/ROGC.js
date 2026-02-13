@@ -30,100 +30,142 @@ const ROGC = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // Fetch ROGC Data
-  const fetchRogcData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      let transformedData = []
+      console.log('No data found, attempting carry-forward...')
 
-      // TODO: Replace with actual API call once backend is ready
-      // const response = getMockRogcResponse()
-      const response = await TcsApiService.getTcsRogcData(
+      const carryForwardResponse = await TcsApiService.carryForwardRogc(
         keycloak,
+        AOP_YEAR,
         SITE_ID,
         PLANT_ID,
-        AOP_YEAR,
       )
-      console.log('TCS ROGC Response:', response)
 
-      if (
-        response?.furnaceData?.length > 0 &&
-        response?.furnaceData &&
-        Array.isArray(response.furnaceData)
-      ) {
-        // Calculate days dynamically based on financial year
-        const getDaysInMonth = (year, month) => {
-          return new Date(year, month, 0).getDate()
-        }
+      console.log('Carry-forward response:', carryForwardResponse)
 
-        // Extract the start year from AOP_YEAR (e.g., "2025-26" -> 2025)
-        const startYear = parseInt(AOP_YEAR?.split('-')[0])
-        const endYear = startYear + 1
-
-        // Add days row at the beginning
-        const daysRow = {
-          id: 'days_row',
-          furnace: 'Days',
-          apr: getDaysInMonth(startYear, 4),
-          may: getDaysInMonth(startYear, 5),
-          jun: getDaysInMonth(startYear, 6),
-          jul: getDaysInMonth(startYear, 7),
-          aug: getDaysInMonth(startYear, 8),
-          sep: getDaysInMonth(startYear, 9),
-          oct: getDaysInMonth(startYear, 10),
-          nov: getDaysInMonth(startYear, 11),
-          dec: getDaysInMonth(startYear, 12),
-          jan: getDaysInMonth(endYear, 1),
-          feb: getDaysInMonth(endYear, 2),
-          mar: getDaysInMonth(endYear, 3),
-          remarks: '-',
-          isEditable: false,
-          inEdit: false,
-        }
-        transformedData = [daysRow]
-
-        // Add furnace data
-        const furnaceRows = response.furnaceData.map((item, index) => ({
-          id: item.id || `row_${index}`,
-          ...item,
-          inEdit: false,
-        }))
-        transformedData.push(...furnaceRows)
-
-        // Add average row
-        const averageRow = {
-          id: 'average_row',
-          furnace: 'Average of Duty_Furnace_Cracking',
-          ...response.gCalPerHrData,
-          remarks: '-',
-          isEditable: false,
-          inEdit: false,
-        }
-        transformedData.push(averageRow)
-      }
-
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching ROGC data:', err)
       setSnackbarData({
-        message: `Failed to load ROGC data. Please try again.`,
-        severity: 'error',
+        message: 'Data carried forward from previous year successfully!',
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward:', carryForwardErr)
+      return false
     }
-  }, [
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    currentTab.id,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+  }, [keycloak, AOP_YEAR, SITE_ID, PLANT_ID, setSnackbarData, setSnackbarOpen])
+
+  // Fetch ROGC Data
+  const fetchRogcData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!PLANT_ID || !AOP_YEAR) return
+      try {
+        setLoading(true)
+        let transformedData = []
+
+        // TODO: Replace with actual API call once backend is ready
+        // const response = getMockRogcResponse()
+        const response = await TcsApiService.getTcsRogcData(
+          keycloak,
+          SITE_ID,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        console.log('TCS ROGC Response:', response)
+
+        if (
+          response?.furnaceData?.length > 0 &&
+          response?.furnaceData &&
+          Array.isArray(response.furnaceData)
+        ) {
+          // Calculate days dynamically based on financial year
+          const getDaysInMonth = (year, month) => {
+            return new Date(year, month, 0).getDate()
+          }
+
+          // Extract the start year from AOP_YEAR (e.g., "2025-26" -> 2025)
+          const startYear = parseInt(AOP_YEAR?.split('-')[0])
+          const endYear = startYear + 1
+
+          // Add days row at the beginning
+          const daysRow = {
+            id: 'days_row',
+            furnace: 'Days',
+            apr: getDaysInMonth(startYear, 4),
+            may: getDaysInMonth(startYear, 5),
+            jun: getDaysInMonth(startYear, 6),
+            jul: getDaysInMonth(startYear, 7),
+            aug: getDaysInMonth(startYear, 8),
+            sep: getDaysInMonth(startYear, 9),
+            oct: getDaysInMonth(startYear, 10),
+            nov: getDaysInMonth(startYear, 11),
+            dec: getDaysInMonth(startYear, 12),
+            jan: getDaysInMonth(endYear, 1),
+            feb: getDaysInMonth(endYear, 2),
+            mar: getDaysInMonth(endYear, 3),
+            remarks: '-',
+            isEditable: false,
+            inEdit: false,
+          }
+          transformedData = [daysRow]
+
+          // Add furnace data
+          const furnaceRows = response.furnaceData.map((item, index) => ({
+            id: item.id || `row_${index}`,
+            ...item,
+            inEdit: false,
+          }))
+          transformedData.push(...furnaceRows)
+
+          // Add average row
+          const averageRow = {
+            id: 'average_row',
+            furnace: 'Average of Duty_Furnace_Cracking',
+            ...response.gCalPerHrData,
+            remarks: '-',
+            isEditable: false,
+            inEdit: false,
+          }
+          transformedData.push(averageRow)
+        } else {
+          // If no data and carry forward not skipped, attempt carry forward
+          if (!skipCarryForward) {
+            const carryForwardSuccess = await handleCarryForward()
+            if (carryForwardSuccess) {
+              // Refetch data after successful carry forward
+              await fetchRogcData(true)
+              return
+            }
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching ROGC data:', err)
+        setSnackbarData({
+          message: `Failed to load ROGC data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      SITE_ID,
+      AOP_YEAR,
+      currentTab.id,
+      setSnackbarData,
+      setSnackbarOpen,
+      handleCarryForward,
+    ],
+  )
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {

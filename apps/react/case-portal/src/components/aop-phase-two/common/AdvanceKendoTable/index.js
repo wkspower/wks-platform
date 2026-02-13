@@ -49,7 +49,6 @@ import {
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 import { getColumnMenuDateFilter } from '../utilities/ColumnMenuDateFilter'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
-import valueFormatterByUOM from '../commonUtilityFunctions'
 import DateTimePickerEditor from '../utilities/DatePickeronSelectedYr'
 
 // Helper function to get nested value from object
@@ -88,13 +87,6 @@ const applyKendoNumberFormat = (value, format) => {
   return value
 }
 
-export const particulars = [
-  'normParameterId',
-  'normParametersFKId',
-  'NormParameterFKId',
-  'materialFkId',
-  'normParameterFKId',
-]
 export const hiddenFields = [
   'maintenanceId',
   'id',
@@ -201,7 +193,7 @@ const AdvanceKendoTable = ({
   const READ_ONLY = getRoleName(keycloak)
   const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
   const initialGroup = Array.isArray(groupBy)
-    ? groupBy.map((field) => ({ field }))
+    ? groupBy.map((field) => ({ field, dir: undefined }))
     : groupBy
       ? [{ field: groupBy, dir: undefined }]
       : []

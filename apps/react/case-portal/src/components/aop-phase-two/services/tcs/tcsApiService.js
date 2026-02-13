@@ -11,33 +11,40 @@ export const TcsApiService = {
   getTcsUnitCapacityData,
   getTcsNetCapacityData,
   saveUnitCapacityData,
+  carryForwardTcsUnitCapacity,
 
   // TCS Crude Blend Window Data APIs
   getCrudBlendWindowData,
   saveCrudBlendWindowData,
+  carryForwardCrudBlendWindow,
 
   // TCS Shutdown Data APIs
   getTcsShutdownData,
   saveShutdownData,
   deleteShutdownData,
+  carryForwardTcsShutdown,
 
   // TCS Slowdown Data APIs
   getTcsSlowdownData,
   saveSlowdownData,
   deleteSlowdownData,
+  carryForwardTcsSlowdown,
 
   // TCS ROGC Data APIs
   getTcsRogcData,
   saveRogcData,
+  carryForwardRogc,
 
   // TCS CPP Units SD Plan Data APIs
   getCPPUnitsSdPlanData,
   saveCPPUnitsSdPlanData,
   deleteCPPUnitsSdPlanData,
+  carryForwardCppUnitsSdPlan,
 
   // TCS PCG Outlook Data APIs
   getPcgOutlookData,
   savePcgOutlookData,
+  carryForwardPcgOutlook,
 
   // Excel Import/Export APIs (Legacy)
   downloadTcsExcel,
@@ -194,6 +201,33 @@ async function saveUnitCapacityData(
   }
 }
 
+async function carryForwardTcsUnitCapacity(
+  keycloak,
+  plantId,
+  year,
+  capacityType,
+) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity/carry-forward?plantId=${plantId}&year=${year}&capacityType=${capacityType}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 // ===================== || TCS Shutdown Data APIs || ===================== //
 async function getTcsShutdownData(keycloak, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?plantId=${plantId}&year=${year}`
@@ -256,6 +290,28 @@ async function deleteShutdownData(keycloak, id) {
     }
     const result = await json(keycloak, resp)
     return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function carryForwardTcsShutdown(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown/carry-forward?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -329,6 +385,28 @@ async function deleteSlowdownData(keycloak, id) {
   }
 }
 
+async function carryForwardTcsSlowdown(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-slowdown/carry-forward?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 // ===================== || TCS Crude Blend Window Data APIs || ===================== //
 async function getCrudBlendWindowData(keycloak, plantId, year, siteId) {
   const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}/${year}`
@@ -374,6 +452,33 @@ async function saveCrudBlendWindowData(
     }
     const result = await json(keycloak, resp)
     return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function carryForwardCrudBlendWindow(
+  keycloak,
+  financialYear,
+  siteId,
+  plantId,
+) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/carry-forward/${financialYear}/${siteId}/${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -453,6 +558,28 @@ async function deleteCPPUnitsSdPlanData(keycloak, id) {
   }
 }
 
+async function carryForwardCppUnitsSdPlan(keycloak, financialYear, siteId) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan/carry-forward/${financialYear}/${siteId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 // ===================== || TCS ROGC Data APIs || ===================== //
 async function getTcsRogcData(keycloak, siteId, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/furnace/${year}/${siteId}/${plantId}`
@@ -498,6 +625,28 @@ async function saveRogcData(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, payload) {
   }
 }
 
+async function carryForwardRogc(keycloak, financialYear, siteId, plantId) {
+  const url = `${Config.CaseEngineUrl}/task/furnace/carry-forward/${financialYear}/${siteId}/${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 // ===================== || TCS PCG Outlook Data APIs || ===================== //
 async function getPcgOutlookData(keycloak, siteId, financialYear) {
   const url = `${Config.CaseEngineUrl}/task/pcg-outlook/${siteId}/${financialYear}`
@@ -537,6 +686,28 @@ async function savePcgOutlookData(keycloak, siteId, financialYear, payload) {
     }
     const result = await json(keycloak, resp)
     return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function carryForwardPcgOutlook(keycloak, financialYear, siteId) {
+  const url = `${Config.CaseEngineUrl}/task/pcg-outlook/carry-forward?financialYear=${financialYear}&siteId=${siteId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
