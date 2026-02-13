@@ -133,11 +133,12 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 		aopMessageVM.setMessage("Data deleted successfully");
 		return aopMessageVM;
 	}
-
+	
 	@Override
 	public AOPMessageVM getTypeOfSD(String plantId, String year) {
 		try {
-			String view="vwScrnElastomerTypeOfSD";
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String view="vwScrn"+verticalName+"TypeOfSD";
 			List<Object[]> obj=getTypeOfSDData(view);
 			List<Map<String,Object>> maps=new ArrayList<>();
 			for (Object[] row : obj) {
@@ -162,7 +163,37 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 		}
 		
 	}
-	
+
+	@Override
+	public AOPMessageVM getLineDetails(String plantId, String year) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String view="vwScrn"+verticalName+"GetLineDetails";
+			List<Object[]> obj=getLineDetailsData(view,plantId);
+			List<Map<String,Object>> maps=new ArrayList<>();
+			for (Object[] row : obj) {
+				
+				Map<String,Object> map=new HashMap<>();
+				map.put("id", row[0] != null ? row[0].toString() : null);
+				map.put("name", row[1] != null ? row[1].toString() : null);
+				map.put("displayName", row[2] != null ? row[2].toString() : null);
+				map.put("plantId", row[3] != null ? (row[3].toString()) : null);
+				maps.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(maps);
+			aopMessageVM.setMessage("Data fetched successfully");
+			
+			// TODO Auto-generated method stub
+			return aopMessageVM;
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save data", ex);
+		}
+		
+	}
+
 	public List<Object[]> getTypeOfSDData(String viewName) {
 		try {
 			String sql = "SELECT * from "+ viewName;
@@ -176,6 +207,19 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> getLineDetailsData(String viewName,String plantId) {
+		try {
+			String sql = "SELECT * from "+ viewName+" where PlantId= :plantId";
 
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 	
 }
