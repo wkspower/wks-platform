@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tcs.dto.PCGOutlookDTO;
 import com.wks.caseengine.tcs.service.PCGOutlookService;
@@ -29,6 +30,19 @@ public class PCGOutlookController {
     @GetMapping("pcg-outlook/{siteId}/{financialYear}")
     public List<PCGOutlookDTO> getPCGOutlook(@PathVariable String siteId, @PathVariable String financialYear) {
         return service.getData(UUID.fromString(siteId), financialYear);
+    }
+
+    @PostMapping("pcg-outlook/carry-forward")
+    public AOPMessageVM carryForwardPCGOutlook(
+        @RequestParam String financialYear,
+        @RequestParam String siteId) {
+            if(financialYear == null || financialYear.isEmpty()) {
+                throw new RestInvalidArgumentException("Financial year cannot be null", null);
+            }
+            if(siteId == null || siteId.isEmpty()) {
+                throw new RestInvalidArgumentException("Site ID cannot be null", null);
+            }
+            return service.carryForwardPCGOutlook(financialYear, UUID.fromString(siteId));
     }
 
     @PostMapping("pcg-outlook/{siteId}/{financialYear}")

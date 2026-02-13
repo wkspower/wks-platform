@@ -40,6 +40,20 @@ public class TCSShutdownController {
         return tcsShutdownService.getAll(plantId, year, siteId, verticalId);
     }
 
+    @PostMapping("/tcs-shutdown/carry-forward")
+    public AOPMessageVM carryForwardTCSShutdown(
+        @RequestParam String plantId,
+        @RequestParam String year) {
+            if(plantId == null || plantId.isEmpty()) {
+                throw new RestInvalidArgumentException("Plant ID cannot be null", null);
+            }
+            if(year == null || year.isEmpty()) {
+                throw new RestInvalidArgumentException("Year cannot be null", null);
+            }
+      
+        return tcsShutdownService.carryForwardTCSShutdown(plantId, year);
+    }
+
     @PostMapping("/tcs-shutdown")
     public AOPMessageVM saveOrUpdate(
         @RequestParam String plantId,

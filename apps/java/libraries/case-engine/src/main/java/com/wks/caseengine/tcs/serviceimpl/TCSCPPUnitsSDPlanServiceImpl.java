@@ -27,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -35,6 +36,10 @@ import com.wks.caseengine.tcs.dto.TCSCPPUnitsSDPlanDTO;
 import com.wks.caseengine.tcs.dto.TCSCPPUnitsSDPlanProjection;
 import com.wks.caseengine.tcs.repository.TCSCPPUnitsSDPlanRepository;
 import com.wks.caseengine.tcs.service.TCSCPPUnitsSDPlanService;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
 public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
@@ -45,6 +50,9 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public List<TCSCPPUnitsSDPlanDTO> getTCSCPPUnitsSDPlan(String financialYear, UUID siteId) {
@@ -94,6 +102,30 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
            }
            return tcsCppUnitsSDPlanDTOs;
     }
+
+    @Override
+    @Transactional
+    public AOPMessageVM carryForwardTCSCPPUnitsSDPlan(String financialYear, UUID siteId) {
+        try {
+           String procedureName = "TCS_CPPUnitsSD_Plan_CarryForward";
+           String sql = "EXEC " + procedureName + " @targetYear = :financialYear, @siteId = :siteId";
+           Query query = entityManager.createNativeQuery(sql);
+           query.setParameter("financialYear", financialYear);
+           query.setParameter("siteId", siteId);
+           query.executeUpdate();
+           AOPMessageVM aopMessageVM = new AOPMessageVM();
+           aopMessageVM.setCode(200);
+           aopMessageVM.setMessage("TCSCPPUnitsSDPlan data carried forward successfully");
+           return aopMessageVM;
+    }
+    catch (Exception e) {
+        System.out.println("Failed to carry forward TCSCPPUnitsSDPlan data: " + e.getMessage());
+        AOPMessageVM aopMessageVM = new AOPMessageVM();
+        aopMessageVM.setCode(500);
+        aopMessageVM.setMessage("Failed to carry forward TCSCPPUnitsSDPlan data: " + e.getMessage());
+        return aopMessageVM;
+    }
+}
 
 
     @Override

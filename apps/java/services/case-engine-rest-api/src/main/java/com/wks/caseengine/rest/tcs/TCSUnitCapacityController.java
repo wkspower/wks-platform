@@ -50,6 +50,20 @@ if (plantId != null && (siteId != null || verticalId != null)) {
             verticalId);
     }
 
+    @PostMapping("/tcs-unit-capacity/carry-forward")
+    public AOPMessageVM carryForwardTCSUnitCapacity(
+        @RequestParam String plantId,
+        @RequestParam String year,
+        @RequestParam String capacityType
+        ) {
+        
+        return tcsUnitCapacityService.carryForwardTCSUnitCapacity(
+            plantId,
+            year,
+            capacityType
+           );
+    }
+
     @PostMapping("/tcs-unit-capacity")
     public AOPMessageVM saveOrUpdate(
         @RequestParam String plantId,
@@ -118,6 +132,8 @@ if (plantId != null && (siteId != null || verticalId != null)) {
             .headers(headers)
             .body(excelData);
     }
+
+   
 
     @PostMapping("/tcs-unit-capacity/import")
     public AOPMessageVM importTCSUnitCapacity(

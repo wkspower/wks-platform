@@ -25,6 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -35,6 +36,10 @@ import com.wks.caseengine.tcs.dto.GCalPerHrDTO;
 import com.wks.caseengine.tcs.dto.MasterFurnaceDTO;
 import com.wks.caseengine.tcs.repository.FurnaceProjection;
 import com.wks.caseengine.tcs.repository.FurnaceRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
 public class FurnaceService {
@@ -47,6 +52,9 @@ public class FurnaceService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public MasterFurnaceDTO getFurnaceData(
             String financialYear,
@@ -156,6 +164,28 @@ else {
         return masterFurnaceDTO;
 
     }
+@Transactional
+ public AOPMessageVM carryForwardFurnace(String financialYear, UUID siteId, UUID plantId) {
+    try {
+        String procedureName = "Furnace_CarryForward";
+        String sql = "EXEC " + procedureName + "  @FinancialYear = :financialYear, @Site_FK_Id = :siteId, @Plant_FK_Id = :plantId";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("financialYear", financialYear);
+        query.setParameter("siteId", siteId);
+        query.setParameter("plantId", plantId);
+        query.executeUpdate();
+        AOPMessageVM aopMessageVM = new AOPMessageVM();
+        aopMessageVM.setCode(200);
+        aopMessageVM.setMessage("Furnace data carried forward successfully");
+        return aopMessageVM;
+    } catch (Exception e) {
+        AOPMessageVM aopMessageVM = new AOPMessageVM();
+        aopMessageVM.setCode(500);
+        aopMessageVM.setMessage("Failed to carry forward furnace data: " + e.getMessage());
+        System.out.println("Failed to carry forward furnace data: " + e.getMessage());
+        return aopMessageVM;
+    }
+ }
 
     public void updateFurnaceData(List<FurnaceDTO> furnaceDTOs, String financialYear, UUID siteId, UUID plantId) {
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tcs.dto.FurnaceDTO;
 import com.wks.caseengine.tcs.dto.MasterFurnaceDTO;
@@ -38,6 +39,14 @@ public class FurnaceController {
             return furnaceService.getFurnaceData(financialYear, UUID.fromString(siteId), null);
         }
         return furnaceService.getFurnaceData(financialYear, UUID.fromString(siteId), UUID.fromString(plantId));
+    }
+
+    @PostMapping("/furnace/carry-forward/{financialYear}/{siteId}/{plantId}")
+    public AOPMessageVM carryForwardFurnace(@PathVariable String financialYear, @PathVariable String siteId, @PathVariable String plantId) {
+        if(plantId == null || financialYear == null || siteId == null) {
+            throw new RestInvalidArgumentException("Invalid request parameters", null);
+        }
+        return furnaceService.carryForwardFurnace(financialYear, UUID.fromString(siteId), UUID.fromString(plantId));
     }
 
    @PostMapping("/furnace/{financialYear}/{siteId}/{plantId}")

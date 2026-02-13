@@ -18,6 +18,12 @@ public interface TCSUnitCapacityService {
         String siteId,
         String verticalId);
 
+    public AOPMessageVM carryForwardTCSUnitCapacity(
+        String plantId,
+        String aopYear,
+        String capacityType
+        );
+
     public AOPMessageVM saveOrUpdate(
         String plantId,
         String aopYear,

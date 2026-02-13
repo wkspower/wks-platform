@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,18 @@ public class VerticalsServiceImpl implements VerticalsService {
 		// TODO Auto-generated method stub
 		return verticalsDTOList;
 	}
+
+	@Override
+	public VerticalsDTO getVerticalById(String verticalId) {
+		Verticals vertical = verticalsRepository.findById(UUID.fromString(verticalId)).orElseThrow(() -> new RuntimeException("Vertical not found"));
+		VerticalsDTO verticalDTO = new VerticalsDTO();
+		verticalDTO.setId(vertical.getId().toString());
+		verticalDTO.setName(vertical.getName());
+		verticalDTO.setDisplayName(vertical.getDisplayName());
+		return verticalDTO;
+	
+
+}
 
 	@Override
 	public List<VerticalsDTO> getHierarchyData() {

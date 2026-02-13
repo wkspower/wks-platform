@@ -40,7 +40,9 @@ import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.exception.RestResourceNotFoundException;
+import com.wks.caseengine.service.VerticalsService;
 import com.wks.caseengine.tcs.dto.camundadto.PlantSubmissionAuditTrailDTO;
 import com.wks.caseengine.tcs.dto.camundadto.SubmissionStatusDTO;
 import com.wks.caseengine.tcs.service.TCSWorkFlowService;
@@ -58,6 +60,9 @@ public class TCSOutPutWorkFlowController {
 
 	@Autowired
 	private TCSWorkFlowService tcsWorkFlowService;
+
+	@Autowired
+	private VerticalsService verticalsService;
 
     @Value("${camunda.process.id.tcs.output.workflow}")
     private String tcsOutputWorkflowProcessDefinitionKey;
@@ -129,7 +134,12 @@ public class TCSOutPutWorkFlowController {
 		throw new RestResourceNotFoundException("Financial Year is required to check if process exists");
 	   }
 
-	   String businessKey =  siteId + "-" + finacialYear;
+	   VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+	   if(vertical == null) {
+		throw new RestResourceNotFoundException("Vertical not found");
+	   }
+
+	   String businessKey =  vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
 	   if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
 		throw new RestResourceNotFoundException("TCS Output Workflow Process Definition Key is not set");
@@ -163,7 +173,13 @@ public class TCSOutPutWorkFlowController {
 		if(finacialYear == null || finacialYear.isEmpty()) {
 			throw new RestResourceNotFoundException("Financial Year is required to get variables");
 		}
-		String businessKey =   siteId + "-" + finacialYear;
+
+		VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+		if(vertical == null) {
+			throw new RestResourceNotFoundException("Vertical not found");
+		}
+
+		String businessKey =   vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
 		
 		if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
@@ -213,7 +229,11 @@ public class TCSOutPutWorkFlowController {
 		if(finacialYear == null || finacialYear.isEmpty()) {
 			throw new RestResourceNotFoundException("Financial Year is required to find process");
 		}
-		String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+		VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+		if(vertical == null) {
+			throw new RestResourceNotFoundException("Vertical not found");
+		}
+		String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 		
 		return ResponseEntity.ok(processEngineClientFacade.findProcessInstances(Optional.ofNullable(tcsOutputWorkflowProcessDefinitionKey), Optional.ofNullable(businessKey), Optional.empty()));
 	}

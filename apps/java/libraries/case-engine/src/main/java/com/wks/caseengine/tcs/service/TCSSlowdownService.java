@@ -12,6 +12,9 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface TCSSlowdownService {
 
     public Map<String, Object> getAll(String plantId, String year, String siteId, String verticalId);
+
+    public AOPMessageVM carryForwardTCSSlowdown(String plantId, String year);
+
     AOPMessageVM saveOrUpdate(String plantId, String year, List<TCSSlowdownDTO> dtoList);
 
     public AOPMessageVM delete(UUID id);
