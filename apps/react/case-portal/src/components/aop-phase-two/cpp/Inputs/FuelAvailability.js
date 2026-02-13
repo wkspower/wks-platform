@@ -211,7 +211,7 @@ const FuelAvailability = () => {
       const defaultData = [
         {
           id: 1,
-          fuel: '300001591 - Fuel gas',
+          fuel: 'Fuel gas',
           uom: 'MT',
           fuelCategory: 'INTERNAL_LNG',
           apr: null,
@@ -230,7 +230,7 @@ const FuelAvailability = () => {
         },
         {
           id: 2,
-          fuel: 'HSD - High Speed Diesel-HSD',
+          fuel: 'High Speed Diesel-HSD',
           uom: 'K15',
           fuelCategory: 'LNG',
           apr: null,
@@ -249,7 +249,7 @@ const FuelAvailability = () => {
         },
         {
           id: 3,
-          fuel: 'LSHS - Low Sulfur Heavy Stock',
+          fuel: 'Low Sulfur Heavy Stock',
           uom: 'MT',
           fuelCategory: 'LNG',
           apr: null,
@@ -268,7 +268,7 @@ const FuelAvailability = () => {
         },
         {
           id: 4,
-          fuel: 'MIXED OIL - MIXED OIL',
+          fuel: 'MIXED OIL',
           uom: 'MT',
           fuelCategory: 'LNG',
           apr: null,
@@ -287,7 +287,7 @@ const FuelAvailability = () => {
         },
         {
           id: 5,
-          fuel: 'RFOMVG - FURNACE OIL ( MEDIUM VISCOSITY GRADE )',
+          fuel: 'FURNACE OIL ( MEDIUM VISCOSITY GRADE )',
           uom: 'MT',
           fuelCategory: 'FO',
           apr: null,
@@ -306,7 +306,7 @@ const FuelAvailability = () => {
         },
         {
           id: 6,
-          fuel: 'NGASRG01 - NATURAL GAS',
+          fuel: 'NATURAL GAS',
           uom: 'GBT',
           fuelCategory: 'R-GAS',
           apr: null,
@@ -325,7 +325,7 @@ const FuelAvailability = () => {
         },
         {
           id: 7,
-          fuel: 'AMBIENT-ETHANE - AMBIENT ETHANE',
+          fuel: 'AMBIENT ETHANE',
           uom: 'MT',
           fuelCategory: 'ETHANE',
           apr: null,
@@ -344,7 +344,7 @@ const FuelAvailability = () => {
         },
         {
           id: 8,
-          fuel: 'CBMGAS_1 - COAL BED METHANE GAS',
+          fuel: 'COAL BED METHANE GAS',
           uom: 'GBT',
           fuelCategory: 'CBM',
           apr: null,

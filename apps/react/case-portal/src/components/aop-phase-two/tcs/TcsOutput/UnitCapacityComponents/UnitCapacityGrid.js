@@ -1,14 +1,11 @@
 import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
-import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
+import { convertFromKBPSD } from './uomConversionUtils'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
-import ApproveDialog from '../../TcsInput/workflow/ApproveDialog'
-import { ROLES } from '../../utils/roleUtils'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -27,52 +24,17 @@ const UnitCapacityGrid = ({
   const valueFormat = ValueFormatterPhaseTwo()
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  const defaultDropdownConfig = {
-    options: [
-      { id: 'KBPSD', name: 'KBPSD' },
-      { id: 'KTPD', name: 'KTPD' },
-      { id: 'TPD', name: 'TPD' },
-    ],
-    label: 'Select UOM',
-    placeholder: 'Select',
-    valueKey: 'id',
-    labelKey: 'name',
-  }
-
   // State management for this capacity type only
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
+
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loadingUOM, setLoadingUOM] = useState(false)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
-
-  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
-  // Approve Dialog handlers
-  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
-  const handleApprove = (plantId, remark) => {
-    console.log('Approved plantId:', plantId, 'Remark:', remark)
-    // TODO: Call API to approve the plant
-    setSnackbarData({
-      message: `Plant ${plantId} approved successfully`,
-      severity: 'success',
-    })
-    setSnackbarOpen(true)
-    closeApproveDialogeBox()
-  }
-  const handleReject = (plantId, remark) => {
-    console.log('Rejected plantId:', plantId, 'Remark:', remark)
-    // TODO: Call API to reject the plant
-    setSnackbarData({
-      message: `Plant ${plantId} rejected`,
-      severity: 'error',
-    })
-    setSnackbarOpen(true)
-    closeApproveDialogeBox()
-  }
 
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(async () => {
@@ -365,7 +327,7 @@ const UnitCapacityGrid = ({
       showExport: true,
       showTitle: true,
       showDropdown: false,
-      approveBtn: userRole === ROLES.EPS_ENGINEER,
+      approveBtn: false,
     }),
     [userRole],
   )
@@ -401,22 +363,9 @@ const UnitCapacityGrid = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           readonly={true}
-          onApproveClick={() => setOpenApproveDialogeBox(true)}
           handleExport={handleExport}
         />
       </Stack>
-      {/* Approve Dialog */}
-      <ApproveDialog
-        open={openApproveDialogeBox}
-        onClose={closeApproveDialogeBox}
-        onApprove={handleApprove}
-        onReject={handleReject}
-        entries={rows.map((row) => ({
-          id: row.id,
-          plantId: row.plantId,
-          plantName: row.plantName,
-        }))}
-      />
     </Box>
   )
 }
