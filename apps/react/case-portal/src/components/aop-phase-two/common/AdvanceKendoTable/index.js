@@ -27,6 +27,12 @@ import { Tooltip } from '../../../../../node_modules/@progress/kendo-react-toolt
 import { BooleanCellEditor } from '../utilities/BooleanCellEditor'
 import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
 import {
+  RadioCellEditor,
+  RadioDisplayCell,
+  InlineRadioCellEditor,
+  InlineRadioDisplayCell,
+} from '../utilities/RadioCellEditor'
+import {
   Backdrop,
   Box,
   CircularProgress,
@@ -741,7 +747,7 @@ const AdvanceKendoTable = ({
   }
 
   const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
+    const { dataItem, field, onRemarkClick, ...restProps } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
@@ -759,7 +765,7 @@ const AdvanceKendoTable = ({
 
     return (
       <td
-        {...tdProps}
+        {...restProps}
         title={displayText}
         style={{
           cursor: isRowEditable ? 'pointer' : 'not-allowed',
@@ -1521,6 +1527,85 @@ const AdvanceKendoTable = ({
                   customModifiedCells={customModifiedCells}
                   allRedCell={allRedCell}
                   disableRedHighlight={disableRedHighlight}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Number with Inline Radio Type Handler
+      if (col.type === 'numberWithRadio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
+            }
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <InlineRadioCellEditor
+                    {...cellProps}
+                    radioGroupField={
+                      col.radioGroupField || 'selectedHeatRateSource'
+                    }
+                    targetField={col.targetField || 'finalHeatRate'}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <InlineRadioDisplayCell
+                  {...cellProps}
+                  radioGroupField={
+                    col.radioGroupField || 'selectedHeatRateSource'
+                  }
+                  format={col.format}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Radio Type Handler
+      if (col.type === 'radio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <RadioCellEditor
+                    {...cellProps}
+                    sourceFields={col.sourceFields || []}
+                    targetField={col.targetField || ''}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <RadioDisplayCell
+                  {...cellProps}
+                  sourceFields={col.sourceFields || []}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,

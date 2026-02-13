@@ -6,7 +6,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
 import { OverallAopConsumptionApiService } from '../../services/vgoht/overallAopConsumptionApiService'
-import { steadyStateConsumptionResponse } from '../dummyData'
+import { overAllAOpResponse } from '../dummyData'
 
 const OverallAopConsumption = () => {
   const keycloak = useSession()
@@ -181,15 +181,14 @@ const OverallAopConsumption = () => {
       //     AOP_YEAR,
       //   )
 
-      const response =
-        steadyStateConsumptionResponse.data?.mcuNormsValueDTOList?.map(
-          (item) => {
-            return {
-              ...item,
-              isEditaable: false,
-            }
-          },
-        )
+      const response = overAllAOpResponse.data?.mcuNormsValueDTOList?.map(
+        (item) => {
+          return {
+            ...item,
+            isEditaable: false,
+          }
+        },
+      )
       setRows(response)
     } catch (error) {
       console.error('Error fetching overall AOP consumption data:', error)

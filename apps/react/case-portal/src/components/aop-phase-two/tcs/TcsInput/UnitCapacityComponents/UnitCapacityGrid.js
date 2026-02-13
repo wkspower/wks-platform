@@ -12,6 +12,8 @@ const UnitCapacityGrid = ({
   capacityType,
   title,
   PLANT_ID,
+  SITE_ID,
+  VERTICAL_ID,
   AOP_YEAR,
   snackbarData,
   setSnackbarData,
@@ -22,31 +24,14 @@ const UnitCapacityGrid = ({
   const valueFormat = ValueFormatterPhaseTwo()
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  const defaultDropdownConfig = {
-    options: [
-      { id: 'KBPSD', name: 'KBPSD' },
-      { id: 'KTPD', name: 'KTPD' },
-      { id: 'TPD', name: 'TPD' },
-    ],
-    label: 'Select UOM',
-    placeholder: 'Select',
-    valueKey: 'id',
-    labelKey: 'name',
-  }
-
   // State management for this capacity type only
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
-  const [selectedDropdown, setSelectedDropdown] = useState('KBPSD')
-  const [dropdownConfig, setDropdownConfig] = useState({
-    ...defaultDropdownConfig,
-  })
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [loadingUOM, setLoadingUOM] = useState(false)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
   // Custom itemChange handler to auto-convert between KBPSD and KTPD for monthly fields
@@ -106,130 +91,92 @@ const UnitCapacityGrid = ({
   }, [])
 
   // Fetch Unit Capacity data for this capacity type
-  const fetchUnitCapacityData = useCallback(
-    async (selectedUOM) => {
-      if (!PLANT_ID || !AOP_YEAR) return
-      try {
-        setLoading(true)
+  const fetchUnitCapacityData = useCallback(async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+    try {
+      setLoading(true)
 
-        const response = await TcsApiService.getTcsUnitCapacityData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          capacityType,
-          selectedUOM,
-        )
-        // const response = {
-        //   headers: [
-        //     'Id',
-        //     'Particulars',
-        //     'UOM',
-        //     'Summer',
-        //     'Winter',
-        //     'Remark',
-        //     'InsertedDateTime',
-        //   ],
-        //   keys: [
-        //     'id',
-        //     'particulates',
-        //     'uom',
-        //     'summer',
-        //     'winter',
-        //     'remark',
-        //     'insertedDateTime',
-        //   ],
-        //   results: [
-        //     {
-        //       id: '9F1897F2-BEB5-4352-A25D-B473C0219FD4',
-        //       particulates: 'CDU-1',
-        //       uom: 'KBPSD',
-        //       summer: 345.0,
-        //       winter: 345.0,
-        //       remark:
-        //         'Unit capacity considered for min API of 27. L+N: CDU-1: 7.4 KTPD max           CDU-2: 6.4 KTPD (Summer: March-Oct) & 7.4 KTPD max in winters (Nov-Feb). RCO: Max 24.2 KTPD VR: Max 14.5 KTPD, however HOT VR to Coker will be 13.6 KTPD max based on hydraulic limitation',
-        //       insertedDateTime: 'Dec 22, 2025, 12:00:00 AM',
-        //     },
-        //   ],
-        // }
+      const response = await TcsApiService.getTcsUnitCapacityData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        capacityType,
+        'KBPSD',
+      )
 
-        let transformedData = []
-        if (response?.results && Array.isArray(response.results)) {
-          transformedData = response.results.map((item, index) => {
-            // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
-            const months = [
-              'apr',
-              'may',
-              'jun',
-              'jul',
-              'aug',
-              'sep',
-              'oct',
-              'nov',
-              'dec',
-              'jan',
-              'feb',
-              'mar',
-            ]
-            const monthData = {}
+      let transformedData = []
+      if (response?.results && Array.isArray(response.results)) {
+        transformedData = response.results.map((item, index) => {
+          // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
+          const months = [
+            'apr',
+            'may',
+            'jun',
+            'jul',
+            'aug',
+            'sep',
+            'oct',
+            'nov',
+            'dec',
+            'jan',
+            'feb',
+            'mar',
+          ]
+          const monthData = {}
 
-            months.forEach((month) => {
-              const kbpsdValue = item[month] || 0
-              monthData[month] = {
-                kbpsd: kbpsdValue,
-                ktpd: convertFromKBPSD(kbpsdValue, 'KTPD'),
-              }
-            })
-
-            return {
-              id: item.id || `row_${index}`,
-              particulates: item.particulates,
-              ...monthData,
-              remark: item.remark,
-              insertedDateTime: item.insertedDateTime,
-              inEdit: false,
+          months.forEach((month) => {
+            const kbpsdValue = item[month] || 0
+            monthData[month] = {
+              kbpsd: kbpsdValue,
+              ktpd: convertFromKBPSD(kbpsdValue, 'KTPD'),
             }
           })
-        }
 
-        if (response?.headers && response?.keys) {
-          setApiMetadata({ headers: response.headers, keys: response.keys })
-        }
-
-        setRows(transformedData)
-        setOriginalRows(transformedData)
-      } catch (err) {
-        console.error(
-          `Error fetching Unit Capacity data (${capacityType}):`,
-          err,
-        )
-        setSnackbarData({
-          message: `Failed to load Unit Capacity data. Please try again.`,
-          severity: 'error',
+          return {
+            id: item.id || `row_${index}`,
+            particulates: item.particulates,
+            ...monthData,
+            remark: item.remark,
+            insertedDateTime: item.insertedDateTime,
+            inEdit: false,
+          }
         })
-        setSnackbarOpen(true)
-        setRows([])
-      } finally {
-        setLoading(false)
       }
-    },
-    [
-      keycloak,
-      PLANT_ID,
-      AOP_YEAR,
-      capacityType,
-      setSnackbarData,
-      setSnackbarOpen,
-    ],
-  )
+
+      if (response?.headers && response?.keys) {
+        setApiMetadata({ headers: response.headers, keys: response.keys })
+      }
+
+      setRows(transformedData)
+      setOriginalRows(transformedData)
+    } catch (err) {
+      console.error(`Error fetching Unit Capacity data (${capacityType}):`, err)
+      setSnackbarData({
+        message: `Failed to load Unit Capacity data. Please try again.`,
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    capacityType,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
 
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && selectedDropdown) {
+    if (PLANT_ID && AOP_YEAR) {
       // Clear modified cells when UOM changes to reset edit state
       setModifiedCells({})
-      fetchUnitCapacityData(selectedDropdown)
+      fetchUnitCapacityData()
     }
-  }, [PLANT_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
+  }, [PLANT_ID, AOP_YEAR, fetchUnitCapacityData])
 
   // Column configuration for Unit Capacity with monthly nested KBPSD and KTPD
   const columnConfig = useMemo(() => {
@@ -396,15 +343,6 @@ const UnitCapacityGrid = ({
         return
       }
 
-      if (!selectedDropdown) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Please select a UOM before saving!',
-          severity: 'warning',
-        })
-        return
-      }
-
       // Custom validation: If any row data is updated, remarks must be filled and different from original
       const fieldsToCheck = [
         'apr.kbpsd',
@@ -477,7 +415,7 @@ const UnitCapacityGrid = ({
         PLANT_ID,
         AOP_YEAR,
         capacityType,
-        selectedDropdown,
+        'KBPSD',
         dataInKBPSD,
       )
 
@@ -502,7 +440,6 @@ const UnitCapacityGrid = ({
     PLANT_ID,
     AOP_YEAR,
     capacityType,
-    selectedDropdown,
     setSnackbarData,
     setSnackbarOpen,
   ])
@@ -519,9 +456,10 @@ const UnitCapacityGrid = ({
       await TcsApiService.exportUnitCapacityExcel(
         keycloak,
         PLANT_ID,
+        SITE_ID,
+        VERTICAL_ID,
         AOP_YEAR,
         capacityType,
-        selectedDropdown,
       )
 
       setSnackbarData({
@@ -548,7 +486,6 @@ const UnitCapacityGrid = ({
         PLANT_ID,
         AOP_YEAR,
         capacityType,
-        selectedDropdown,
         file,
       )
 
@@ -559,7 +496,7 @@ const UnitCapacityGrid = ({
           severity: 'success',
         })
         // Refresh data after import
-        await fetchUnitCapacityData(selectedDropdown)
+        await fetchUnitCapacityData()
       } else if (response?.code === 400 && response?.data) {
         // Handle error response with Excel file download
         try {
@@ -589,7 +526,7 @@ const UnitCapacityGrid = ({
             severity: 'error',
           })
           // Refresh data after import
-          await fetchUnitCapacityData(selectedDropdown)
+          await fetchUnitCapacityData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -647,7 +584,7 @@ const UnitCapacityGrid = ({
         <AdvanceKendoTable
           rows={rows}
           setRows={setRows}
-          fetchData={() => fetchUnitCapacityData(selectedDropdown)}
+          fetchData={() => fetchUnitCapacityData()}
           title={title}
           handleRemarkCellClick={handleRemarkCellClick}
           columns={columns}
@@ -666,9 +603,6 @@ const UnitCapacityGrid = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           customItemChange={handleCustomItemChange}
-          dropdownConfig={dropdownConfig}
-          selectedDropdownValue={selectedDropdown}
-          setSelectedDropdownValue={setSelectedDropdown}
           handleExcelUpload={handleExcelUpload}
           handleExport={handleExport}
         />

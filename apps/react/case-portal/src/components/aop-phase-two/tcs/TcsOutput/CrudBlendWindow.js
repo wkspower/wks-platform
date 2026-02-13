@@ -20,7 +20,7 @@ const CrudBlendWindow = ({
 
   const gridConfigs = [
     { key: 'CrudeBlendWindow', title: 'Crude Blend Window' },
-    { key: 'VGOVRDROP', title: 'VGO-VR Drop' },
+    { key: 'VGOVRDrop', title: 'VGO-VR Drop' },
     { key: 'CrudeSpecificConstraints', title: 'Crude Specific Constraints' },
   ]
 

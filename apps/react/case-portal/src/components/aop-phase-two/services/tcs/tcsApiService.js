@@ -356,7 +356,7 @@ async function saveCrudBlendWindowData(
   siteId,
   payload,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${payload.tableKey}/${year}`
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}/${year}/${payload.tableKey}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -555,8 +555,8 @@ async function savePcgOutlookData(keycloak, siteId, financialYear, payload) {
 async function saveExcelData(file, keycloak, endpoint, queryParams = {}) {
   const queryString = new URLSearchParams(queryParams).toString()
   const url = queryString
-    ? `${Config.CaseEngineUrl}/task/${endpoint}-import?${queryString}`
-    : `${Config.CaseEngineUrl}/task/${endpoint}-import`
+    ? `${Config.CaseEngineUrl}/task/${endpoint}?${queryString}`
+    : `${Config.CaseEngineUrl}/task/${endpoint}`
 
   const formData = new FormData()
   formData.append('file', file)
@@ -595,8 +595,8 @@ async function saveExcelData(file, keycloak, endpoint, queryParams = {}) {
 async function exportExcelData(keycloak, endpoint, queryParams = {}, fileName) {
   const queryString = new URLSearchParams(queryParams).toString()
   const url = queryString
-    ? `${Config.CaseEngineUrl}/task/${endpoint}-export?${queryString}`
-    : `${Config.CaseEngineUrl}/task/${endpoint}-export`
+    ? `${Config.CaseEngineUrl}/task/${endpoint}?${queryString}`
+    : `${Config.CaseEngineUrl}/task/${endpoint}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -645,7 +645,7 @@ async function exportExcelData(keycloak, endpoint, queryParams = {}, fileName) {
 
 // TCS Shutdown Excel Import
 async function importShutdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
-  return saveExcelData(file, keycloak, 'tcs-shutdown', {
+  return saveExcelData(file, keycloak, 'tcs-shutdown/import', {
     plantId: PLANT_ID,
     year: AOP_YEAR,
   })
@@ -655,7 +655,7 @@ async function importShutdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
 async function exportShutdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
   return exportExcelData(
     keycloak,
-    'tcs-shutdown',
+    'tcs-shutdown/export',
     { plantId: PLANT_ID, year: AOP_YEAR },
     `TCS_Shutdown_${AOP_YEAR}.xlsx`,
   )
@@ -663,7 +663,7 @@ async function exportShutdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
 
 // TCS Slowdown Excel Import
 async function importSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
-  return saveExcelData(file, keycloak, 'tcs-slowdown', {
+  return saveExcelData(file, keycloak, 'tcs-slowdown/import', {
     plantId: PLANT_ID,
     year: AOP_YEAR,
   })
@@ -673,7 +673,7 @@ async function importSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
 async function exportSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
   return exportExcelData(
     keycloak,
-    'tcs-slowdown',
+    'tcs-slowdown/export',
     { plantId: PLANT_ID, year: AOP_YEAR },
     `TCS_Slowdown_${AOP_YEAR}.xlsx`,
   )
@@ -681,8 +681,8 @@ async function exportSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
 
 // TCS ROGC Excel Import
 async function importRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, file) {
-  return saveExcelData(file, keycloak, 'furnace', {
-    year: AOP_YEAR,
+  return saveExcelData(file, keycloak, 'furnace/import', {
+    financialYear: AOP_YEAR,
     siteId: SITE_ID,
     plantId: PLANT_ID,
   })
@@ -692,15 +692,15 @@ async function importRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, file) {
 async function exportRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR) {
   return exportExcelData(
     keycloak,
-    'furnace',
-    { year: AOP_YEAR, siteId: SITE_ID, plantId: PLANT_ID },
+    'furnace/export',
+    { financialYear: AOP_YEAR, siteId: SITE_ID, plantId: PLANT_ID },
     `TCS_ROGC_${AOP_YEAR}.xlsx`,
   )
 }
 
 // TCS PCG Outlook Excel Import
 async function importPcgOutlookExcel(keycloak, SITE_ID, AOP_YEAR, file) {
-  return saveExcelData(file, keycloak, 'pcg-outlook', {
+  return saveExcelData(file, keycloak, 'pcg-outlook/import', {
     siteId: SITE_ID,
     financialYear: AOP_YEAR,
   })
@@ -710,7 +710,7 @@ async function importPcgOutlookExcel(keycloak, SITE_ID, AOP_YEAR, file) {
 async function exportPcgOutlookExcel(keycloak, SITE_ID, AOP_YEAR) {
   return exportExcelData(
     keycloak,
-    'pcg-outlook',
+    'pcg-outlook/export',
     { siteId: SITE_ID, financialYear: AOP_YEAR },
     `TCS_PCG_Outlook_${AOP_YEAR}.xlsx`,
   )
@@ -725,11 +725,11 @@ async function importCrudBlendWindowExcel(
   tableKey,
   file,
 ) {
-  return saveExcelData(file, keycloak, 'crude-blend-window', {
+  return saveExcelData(file, keycloak, 'crude-blend-window/import', {
     plantId: PLANT_ID,
     siteId: SITE_ID,
-    year: AOP_YEAR,
-    tableKey: tableKey,
+    financialYear: AOP_YEAR,
+    table: tableKey,
   })
 }
 
@@ -743,26 +743,33 @@ async function exportCrudBlendWindowExcel(
 ) {
   return exportExcelData(
     keycloak,
-    'crude-blend-window',
-    { plantId: PLANT_ID, siteId: SITE_ID, year: AOP_YEAR, tableKey: tableKey },
+    'crude-blend-window/export',
+    {
+      plantId: PLANT_ID,
+      siteId: SITE_ID,
+      financialYear: AOP_YEAR,
+      table: tableKey,
+    },
     `TCS_Crud_Blend_Window_${tableKey}_${AOP_YEAR}.xlsx`,
   )
 }
 
 // TCS CPP Units SD Plan Excel Import
 async function importCPPUnitsSdPlanExcel(keycloak, SITE_ID, AOP_YEAR, file) {
-  return saveExcelData(file, keycloak, 'cpp-unit-sd-plan', {
-    financialYear: AOP_YEAR,
-    siteId: SITE_ID,
-  })
+  return saveExcelData(
+    file,
+    keycloak,
+    `cpp-unit-sd-plan/import/${AOP_YEAR}/${SITE_ID}`,
+    {},
+  )
 }
 
 // TCS CPP Units SD Plan Excel Export
 async function exportCPPUnitsSdPlanExcel(keycloak, SITE_ID, AOP_YEAR) {
   return exportExcelData(
     keycloak,
-    'cpp-unit-sd-plan',
-    { financialYear: AOP_YEAR, siteId: SITE_ID },
+    `cpp-unit-sd-plan/export/${AOP_YEAR}/${SITE_ID}`,
+    {},
     `TCS_CPP_Units_SD_Plan_${AOP_YEAR}.xlsx`,
   )
 }
@@ -773,14 +780,12 @@ async function importUnitCapacityExcel(
   PLANT_ID,
   AOP_YEAR,
   capacityType,
-  uom,
   file,
 ) {
-  return saveExcelData(file, keycloak, 'tcs-unit-capacity', {
+  return saveExcelData(file, keycloak, 'tcs-unit-capacity/import', {
     plantId: PLANT_ID,
     year: AOP_YEAR,
     capacityType: capacityType,
-    uom: uom,
   })
 }
 
@@ -788,18 +793,20 @@ async function importUnitCapacityExcel(
 async function exportUnitCapacityExcel(
   keycloak,
   PLANT_ID,
+  SITE_ID,
+  VERTICAL_ID,
   AOP_YEAR,
   capacityType,
-  uom,
 ) {
   return exportExcelData(
     keycloak,
-    'tcs-unit-capacity',
+    'tcs-unit-capacity/export',
     {
       plantId: PLANT_ID,
       year: AOP_YEAR,
       capacityType: capacityType,
-      uom: uom,
+      // siteId: SITE_ID,
+      // verticalId: VERTICAL_ID,
     },
     `TCS_Unit_Capacity_${capacityType}_${AOP_YEAR}.xlsx`,
   )
