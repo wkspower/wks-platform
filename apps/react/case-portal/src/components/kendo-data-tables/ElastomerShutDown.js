@@ -1244,6 +1244,7 @@ const ElastomerShutDown = ({ permissions }) => {
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
           permissions={adjustedPermissionsslowdown}
+          sdDaysValues={sdDaysValues}
         />
       )}
     </div>
