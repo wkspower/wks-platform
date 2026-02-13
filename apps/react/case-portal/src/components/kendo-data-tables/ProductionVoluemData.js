@@ -9,7 +9,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
-import { Typography } from '../../../node_modules/@mui/material/index'
+import { Typography, Box } from '../../../node_modules/@mui/material/index'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
@@ -31,7 +31,19 @@ import ProductionTarget from './ProductionTarget'
 import AromaticsProductionGrids from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
+import PEDTAProductionGrids from './PEDTAProductionGrids'
+import AopTabs from 'components/AopTabs'
 const ProductionvolumeData = ({ permissions }) => {
+  // State for tabs
+  const [tabIndex, setTabIndex] = useState(0)
+  const [tabs] = useState([
+    'LINE1',
+    'LINE2',
+    'LINE3',
+    'LINE4',
+    'LINE5',
+    'LINE6',
+  ])
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
 
@@ -1134,6 +1146,9 @@ const ProductionvolumeData = ({ permissions }) => {
     return <AromaticsProductionGrids />
   }
 
+  // Check if it's PP VERTICAL | DTA SITE
+  const isPPVerticalDTASite = VERTICAL_NAME?.toLowerCase() === 'pp' && SITE_NAME === 'dta'
+
   return (
     <div>
       <Backdrop
@@ -1142,6 +1157,17 @@ const ProductionvolumeData = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
+      {isPPVerticalDTASite && (
+        <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tabs}
+          />
+        </Box>
+      )}
 
       {/* DESIGN_CAPACITY */}
       {conditionForFirst && (
