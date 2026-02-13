@@ -30,50 +30,93 @@ const PCGOutlook = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // Fetch PCG Outlook Data
-  const fetchPcgOutlookData = useCallback(async () => {
-    if (!SITE_ID || !AOP_YEAR) return
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      let transformedData = []
+      console.log('No PCG Outlook data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getPcgOutlookData(
+      const carryForwardResponse = await TcsApiService.carryForwardPcgOutlook(
         keycloak,
-        SITE_ID,
         AOP_YEAR,
+        SITE_ID,
       )
-      console.log('PCG Outlook Response:', response)
 
-      if (response?.length > 0 && Array.isArray(response)) {
-        transformedData = response.map((item, index) => ({
-          id: item.id || `row_${index}`,
-          ...item,
-          remarks: item.remarks || '',
-          inEdit: false,
-        }))
-      }
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching PCG Outlook data:', err)
       setSnackbarData({
-        message: `Failed to load PCG Outlook data. Please try again.`,
-        severity: 'error',
+        message: `PCG Outlook data carried forward from previous year successfully!`,
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error(
+        'Error during carry-forward for PCG Outlook:',
+        carryForwardErr,
+      )
+      return false
     }
-  }, [
-    keycloak,
-    AOP_YEAR,
-    SITE_ID,
-    currentTab.id,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+  }, [keycloak, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
+
+  // Fetch PCG Outlook Data
+  const fetchPcgOutlookData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!SITE_ID || !AOP_YEAR) return
+      try {
+        setLoading(true)
+        let transformedData = []
+
+        const response = await TcsApiService.getPcgOutlookData(
+          keycloak,
+          SITE_ID,
+          AOP_YEAR,
+        )
+        console.log('PCG Outlook Response:', response)
+
+        if (response?.length > 0 && Array.isArray(response)) {
+          transformedData = response.map((item, index) => ({
+            id: item.id || `row_${index}`,
+            ...item,
+            remarks: item.remarks || '',
+            inEdit: false,
+          }))
+        }
+
+        // If data is empty and carry-forward not skipped, attempt carry-forward and refetch
+        if (transformedData.length === 0 && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry-forward
+            await fetchPcgOutlookData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching PCG Outlook data:', err)
+        setSnackbarData({
+          message: `Failed to load PCG Outlook data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      AOP_YEAR,
+      SITE_ID,
+      currentTab.id,
+      handleCarryForward,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
