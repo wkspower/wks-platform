@@ -93,7 +93,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const SITE_NAME = siteObject?.name?.toLowerCase()
   const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
-
+  const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -1130,7 +1130,7 @@ const ProductionvolumeData = ({ permissions }) => {
   if (VERTICAL_NAME?.toLowerCase() == 'elastomer' && conditionForFirst) {
     return <ProductionTarget />
   }
-  if (VERTICAL_NAME?.toLowerCase() == 'aromatics' && conditionForFirst) {
+  if (IS_AROMATICS_DTA && conditionForFirst) {
     return <AromaticsProductionGrids />
   }
 

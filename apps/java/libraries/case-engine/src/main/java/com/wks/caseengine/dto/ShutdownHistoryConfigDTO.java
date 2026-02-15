@@ -20,5 +20,6 @@ public class ShutdownHistoryConfigDTO {
     private Date modifiedOn;
     private String modifiedBy;
     private String plantId;
+    private Integer typeOfSD;
 
 }

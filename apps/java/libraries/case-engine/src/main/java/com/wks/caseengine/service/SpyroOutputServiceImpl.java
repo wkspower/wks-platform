@@ -653,6 +653,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        innerHeaders.add("6F+BFD-C2C3");
 	        innerHeaders.add("6F+BFD-Propane");
 	        innerHeaders.add("6F+BFD-Ethane");
+	        innerHeaders.add("3F-C2C3");
+	        innerHeaders.add("3F-Propane");
+	        innerHeaders.add("3F-Ethane");
+	        innerHeaders.add("4F+2SFD 1BFD-C2C3");
+	        innerHeaders.add("4F+2SFD 1BFD-Propane");
+	        innerHeaders.add("4F+2SFD 1BFD-Ethane");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -689,6 +695,13 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	            rowData.add(dto.getSixFBFDC2C3());
 	            rowData.add(dto.getSixFBFDPropane());
 	            rowData.add(dto.getSixFBFDEthane());
+	            rowData.add(dto.getThreeFC2C3());
+	            rowData.add(dto.getThreeFPropane());
+	            rowData.add(dto.getThreeFEthane());
+	    	    rowData.add(dto.getFourF2SC2C3());
+	    	    rowData.add(dto.getFourF2SPropane());
+	    	    rowData.add(dto.getFourF2SEthane());
+	    	    
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -867,6 +880,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	               dto.setSixFBFDC2C3(getNumericCellValue(row.getCell(16), dto));
 	               dto.setSixFBFDPropane(getNumericCellValue(row.getCell(17), dto));
 	               dto.setSixFBFDEthane(getNumericCellValue(row.getCell(18), dto));
+	               dto.setThreeFC2C3(getNumericCellValue(row.getCell(19), dto));
+	               dto.setThreeFPropane(getNumericCellValue(row.getCell(20), dto));
+	               dto.setThreeFEthane(getNumericCellValue(row.getCell(21), dto));
+	               dto.setFourF2SC2C3(getNumericCellValue(row.getCell(22), dto));
+	               dto.setFourF2SPropane(getNumericCellValue(row.getCell(23), dto));
+	               dto.setFourF2SEthane(getNumericCellValue(row.getCell(24), dto));
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                dto.setErrDescription(e.getMessage());
@@ -878,7 +897,6 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-
 	    return yieldList;
 	}
 
