@@ -60,9 +60,11 @@ public class HeatRateService {
 
     }
    // original
-    public List<HeatRateDTO> getHeatRateByAssetId(String assetId) {
-        
-        return heatRateRepository.findHeatRateByAssetId(UUID.fromString(assetId)).stream()
+    public List<HeatRateDTO> getHeatRateByAssetId(String assetId, String financialYear) {
+        // Calculate previous financial year (e.g., "2026-27" -> "2025-26")
+        String previousFinancialYear = calculatePreviousFinancialYear(financialYear);
+
+        return heatRateRepository.findGtHeatRateByAssetId(UUID.fromString(assetId), financialYear, previousFinancialYear).stream()
                 .map(projection -> {
                     HeatRateDTO dto = new HeatRateDTO();
                     dto.setId(projection.getId());
@@ -72,9 +74,29 @@ public class HeatRateService {
                     dto.setHeatRate(projection.getHeatRate());
                     dto.setFreeSteamFactor(projection.getFreeSteamFactor());
                     dto.setRemarks(projection.getRemarks());
+                    dto.setPreviousYearHeatRate(projection.getPreviousYearHeatRate());
                     return dto;
                 })
                 .toList();
+    }
+
+    /**
+     * Calculate previous financial year from current financial year
+     * Example: "2026-27" -> "2025-26"
+     */
+    private String calculatePreviousFinancialYear(String financialYear) {
+        if (financialYear == null || !financialYear.contains("-")) {
+            throw new IllegalArgumentException("Invalid financial year format. Expected format: YYYY-YY");
+        }
+        
+        String[] parts = financialYear.split("-");
+        int startYear = Integer.parseInt(parts[0]);
+        int endYear = Integer.parseInt(parts[1]);
+        
+        int prevStartYear = startYear - 1;
+        int prevEndYear = endYear - 1;
+        
+        return prevStartYear + "-" + String.format("%02d", prevEndYear);
     }
 
     public List<STGExtractionLookupDTO> getSTGExtractionLookup() {
@@ -150,7 +172,7 @@ public class HeatRateService {
             updates.add(new Object[] { heatRateDTO.getGtLoad(), heatRateDTO.getHeatRate(), heatRateDTO.getFreeSteamFactor(), heatRateDTO.getRemarks(), heatRateDTO.getId() });
         }
         if(updates.size() > 0) {
-            String sql = "update HeatRateLookup set  GTLoad = ?, HeatRate = ?, FreeSteamFactor = ?, Remarks = ?  WHERE Id = ?";
+            String sql = "update CPP_GTHeatRate set GTLoad = ?, DisplayedAvgHeatRate = ?, FreeSteamFactor = ?, Remarks = ?, UpdatedDate = GETDATE() WHERE Id = ?";
             jdbcTemplate.batchUpdate(sql, updates);
     }
 }
@@ -328,8 +350,8 @@ public byte[] exportSTGExtractionLookup() throws IOException {
 /**
  * Export Heat Rate data to Excel for a specific asset
  */
-public byte[] exportHeatRate(String assetId) throws IOException {
-    List<HeatRateDTO> data = getHeatRateByAssetId(assetId);
+public byte[] exportHeatRate(String assetId, String financialYear) throws IOException {
+    List<HeatRateDTO> data = getHeatRateByAssetId(assetId, financialYear);
     
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("Heat Rate");
@@ -341,15 +363,15 @@ public byte[] exportHeatRate(String assetId) throws IOException {
     
     // Create header row
     Row headerRow = sheet.createRow(rowNum++);
-    String[] headers = {"Equipment Type", "CPP Utility", "GT Load", "Heat Rate", "Free Steam Factor", "Remarks", "Id"};
+    String[] headers = {"Equipment Type", "CPP Utility", "GT Load", "Heat Rate", "Previous Year Heat Rate", "Free Steam Factor", "Remarks", "Id"};
     for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
         cell.setCellStyle(headerStyle);
     }
     
-    // Hide ID column (index 6)
-    sheet.setColumnHidden(6, true);
+    // Hide ID column (index 7)
+    sheet.setColumnHidden(7, true);
     
     // Create data rows
     for (HeatRateDTO dto : data) {
@@ -367,6 +389,9 @@ public byte[] exportHeatRate(String assetId) throws IOException {
         cell.setCellStyle(dataStyle);
         cell = row.createCell(colNum++);
         cell.setCellValue(dto.getHeatRate() != null ? dto.getHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getPreviousYearHeatRate() != null ? dto.getPreviousYearHeatRate() : 0.0);
         cell.setCellStyle(dataStyle);
         cell = row.createCell(colNum++);
         cell.setCellValue(dto.getFreeSteamFactor() != null ? dto.getFreeSteamFactor() : 0.0);
@@ -500,8 +525,8 @@ public void importHeatRate(MultipartFile file) throws IOException {
             
             HeatRateDTO dto = new HeatRateDTO();
             
-            // Read ID from hidden column (index 6)
-            String idStr = getCellValueAsString(row, 6);
+            // Read ID from hidden column (index 7)
+            String idStr = getCellValueAsString(row, 7);
             if (idStr != null && !idStr.isEmpty()) {
                 dto.setId(UUID.fromString(idStr));
             }
@@ -510,8 +535,9 @@ public void importHeatRate(MultipartFile file) throws IOException {
             dto.setCppUtility(getCellValueAsString(row, 1));
             dto.setGtLoad(getCellValueAsDouble(row, 2));
             dto.setHeatRate(getCellValueAsDouble(row, 3));
-            dto.setFreeSteamFactor(getCellValueAsDouble(row, 4));
-            dto.setRemarks(getCellValueAsString(row, 5));
+            dto.setPreviousYearHeatRate(getCellValueAsDouble(row, 4));
+            dto.setFreeSteamFactor(getCellValueAsDouble(row, 5));
+            dto.setRemarks(getCellValueAsString(row, 6));
             
             dtos.add(dto);
         }

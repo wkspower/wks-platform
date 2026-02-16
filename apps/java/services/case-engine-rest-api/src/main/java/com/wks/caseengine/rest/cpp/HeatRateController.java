@@ -38,9 +38,9 @@ public class HeatRateController {
 
 
 
-    @GetMapping("/heat-rate/{assetId}")
-    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId) {
-        return ResponseEntity.ok(heatRateService.getHeatRateByAssetId(assetId));
+    @GetMapping("/heat-rate/{assetId}/{financialYear}")
+    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId, @PathVariable String financialYear) {
+        return ResponseEntity.ok(heatRateService.getHeatRateByAssetId(assetId, financialYear));
     }
 
          // *****************
@@ -121,10 +121,10 @@ public class HeatRateController {
         }
     }
 
-    @GetMapping("/heat-rate/export/{assetId}")
-    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId) {
+    @GetMapping("/heat-rate/export/{assetId}/{financialYear}")
+    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId, @PathVariable String financialYear) {
         try {
-            byte[] excelData = heatRateService.exportHeatRate(assetId);
+            byte[] excelData = heatRateService.exportHeatRate(assetId, financialYear);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", "Heat_Rate.xlsx");

@@ -15,6 +15,7 @@ public class HeatRateDTO {
     private Double heatRate;
     private Double freeSteamFactor;
     private String remarks;
+    private Double previousYearHeatRate;
 }
 
 
