@@ -549,7 +549,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	            String sheetName = sheet.getSheetName();
 	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
 	            List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown",year,gradeId);
-                List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown",year,gradeId);
+                List<Integer> slowdown = slowdownNormsService.getSlowdownMonthsImport(plantFKId, "Slowdown",year);
                 
                 if (shutdown != null) activeMonths.addAll(shutdown);
                 if (slowdown != null) activeMonths.addAll(slowdown);
