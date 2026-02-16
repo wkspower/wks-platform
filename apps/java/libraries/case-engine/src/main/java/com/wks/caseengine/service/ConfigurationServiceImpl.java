@@ -441,9 +441,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	public List<ConfigurationDTO> getMonthlyProductionData(String year, UUID plantFKId) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			Plants plant = plantsRepository.findById((plantFKId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			
 			List<Object[]> obj = new ArrayList<>();
 			
-				String procedureName = verticalName + "_GetC2R_C3RProduction";
+			
+				String procedureName = verticalName  + "_" + site.getName() + "_GetOtherProduction";
+			
+				
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
 			
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();

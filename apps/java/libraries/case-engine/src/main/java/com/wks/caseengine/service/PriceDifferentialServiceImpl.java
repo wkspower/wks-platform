@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -152,7 +153,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 								: 0.0);
 				priceDifferentialTransactionDTO.setPlantId(row[5] != null ? row[5].toString() : "");
 				priceDifferentialTransactionDTO.setAopYear(row[6] != null ? row[6].toString() : "");
-				priceDifferentialTransactionDTO.setRemark(row[9] != null ? row[9].toString() : "");
+				priceDifferentialTransactionDTO.setRemark(row[10] != null ? row[10].toString() : "");
 				
 				
 				priceDifferentialTransactionDTOs.add(priceDifferentialTransactionDTO);
@@ -271,17 +272,48 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 					failedList.add(priceDifferentialTransactionDTO);
 					continue;
 				}
+				Boolean update=false;
+				Boolean changed=false;
 				PriceDifferentialTransaction priceDifferentialTransaction =null;
 				UUID material=UUID.fromString(priceDifferentialTransactionDTO.getMaterialId());
 				Optional<PriceDifferentialTransaction> priceDifferentialTransactionOpt =priceDifferentialTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(priceDifferentialTransactionOpt.isPresent()) {
 					priceDifferentialTransaction=priceDifferentialTransactionOpt.get();
+					update=true;
 				}else {
+					update=false;
 					priceDifferentialTransaction = new PriceDifferentialTransaction();
 					priceDifferentialTransaction.setMaterialId(UUID.fromString(priceDifferentialTransactionDTO.getMaterialId()));
 					priceDifferentialTransaction.setAopYear(year);
 					priceDifferentialTransaction.setPlantId(plantId);
 				}
+				if (update) {
+				    if (!Objects.equals(priceDifferentialTransaction.getPercentage(), priceDifferentialTransactionDTO.getPercentage())) {
+				        changed = true;
+				    }
+				    
+				    if (changed) {
+				        String existingRemark = priceDifferentialTransaction.getRemark();
+				        String newRemark = priceDifferentialTransactionDTO.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				        	priceDifferentialTransactionDTO.setErrDescription("Please update remark");
+				        	priceDifferentialTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(priceDifferentialTransactionDTO);
+				            continue;
+				        }
+				    }
+				}else {
+					if(priceDifferentialTransactionDTO.getRemark()==null) {
+						priceDifferentialTransactionDTO.setErrDescription("Please add remark");
+						priceDifferentialTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(priceDifferentialTransactionDTO);
+				            continue;
+					}
+				}
+
 				priceDifferentialTransaction.setPercentage(priceDifferentialTransactionDTO.getPercentage());
 				priceDifferentialTransaction.setRemark(priceDifferentialTransactionDTO.getRemark());
 				priceDifferentialTransaction.setUpdatedBy(Utility.getUserName());
@@ -416,6 +448,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("Quality Type");
 	        innerHeaders.add("Value %");
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Material Id");
 	       
 	        if (isAfterSave) {
@@ -437,6 +470,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	            
 	            rowData.add(dto.getDisplayName());
 	            rowData.add(dto.getPercentage());
+	            rowData.add(dto.getRemark());
 	            rowData.add(dto.getMaterialId());
 	            
 	            if (isAfterSave) {
@@ -458,7 +492,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(2, true);
+	        sheet.setColumnHidden(3, true);
 	        
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
@@ -523,8 +557,8 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	                    }
 	                }
 	                dto.setPercentage(getNumericCellValue(row.getCell(1), dto));
-	                dto.setMaterialId(getStringCellValue(row.getCell(2), dto));
-	                dto.setId(getStringCellValue(row.getCell(3), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(3), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
 	                dto.setAopYear(year);
 	                dto.setPlantId(plantFKId.toString());
 	              } 

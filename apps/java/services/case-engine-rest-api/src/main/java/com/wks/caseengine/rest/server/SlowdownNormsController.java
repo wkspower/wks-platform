@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
@@ -57,6 +58,39 @@ public class SlowdownNormsController {
 	    } catch (Exception e) {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
+	}
+	
+	@GetMapping(value = "/export-slowdown-consumption")
+	public ResponseEntity<byte[]> exportSlowdownConsumption(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year, @RequestParam(required = false) String gradeId
+	        ) {
+	    try {
+			
+	        byte[] excelBytes = slowdownNormsService.exportSlowdownConsumption(year,UUID.fromString(plantId),false,null,gradeId); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("Slowdown_Consumption.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	@PostMapping(value = "/import-slowdown-consumption", consumes = "multipart/form-data")
+	public AOPMessageVM importExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+            @RequestParam(required = false) String gradeId,
+			@RequestParam("file") MultipartFile file,@RequestParam(required = false) String mode
+	        ) {
+			return	slowdownNormsService.importSlowdownConsumption(year,UUID.fromString(plantId),gradeId, file); 
 	}
 
 	

@@ -7,8 +7,9 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
+import { configurationAndReportManualEntryResponse } from '../dummyData'
 
-const Configuration = () => {
+const Configuration = ({ revisionUpdated, setRevisionUpdated }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -32,7 +33,7 @@ const Configuration = () => {
 
   const columns = [
     {
-      field: 'particulars',
+      field: 'productName',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -41,7 +42,7 @@ const Configuration = () => {
       hidden: false,
     },
     {
-      field: 'uom',
+      field: 'UOM',
       title: 'UOM',
       widthT: 80,
       minWidth: 60,
@@ -192,17 +193,24 @@ const Configuration = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchConfigurationData()
+      fetchConfigurationData()
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR, revisionUpdated])
 
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
-      const res = await ProductionNormsApiService.getConfigurationData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
+      // Simulate API call with 3 second delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // const res = await ProductionNormsApiService.getConfigurationData(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+
+      const res = configurationAndReportManualEntryResponse.data.filter(
+        (item) => item.normType !== 'Report Manual Entry',
       )
 
       if (res?.length === 0) {
@@ -226,6 +234,7 @@ const Configuration = () => {
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
+      setRevisionUpdated(false)
     }
   }
 
@@ -464,6 +473,7 @@ const Configuration = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        groupBy={['normType']}
         // customHeight={60}
         paginationConfig={{
           threshold: 100,

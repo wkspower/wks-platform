@@ -20,6 +20,10 @@ public class TCSShutdownDTO {
     private Date endDate;
     private String purpose;
     private Date insertedDateTime;
+    
+    // Fields for import/export status
+    private String saveStatus;
+    private String errDescription;
 }
 
 

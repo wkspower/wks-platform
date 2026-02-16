@@ -28,9 +28,11 @@ import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.engine.model.spi.Task;
+import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.exception.RestResourceNotFoundException;
 import com.wks.caseengine.service.PlantService;
+import com.wks.caseengine.service.VerticalsService;
 import com.wks.caseengine.tcs.dto.camundadto.PlantSubmissionAuditTrailDTO;
 import com.wks.caseengine.tcs.dto.camundadto.PlantSubmissionAuditTrailProjection;
 import com.wks.caseengine.tcs.repository.tcsworkflow.TCSAuditTrailRepository;
@@ -68,6 +70,9 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
     private PlantService plantService;
 
     @Autowired
+    private VerticalsService verticalsService;
+
+    @Autowired
     private TCSAuditTrailRepository tcsAuditTrailRepository;
 
     @Autowired
@@ -80,10 +85,15 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
     @Override
     public void startProcess(String verticalId, String siteId, String finacialYear) {
 
-       
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+        
         String key = tcsOutputWorkflowProcessId;
         // business key = siteId-finacialYear
-        String businessKey = siteId + "-" + finacialYear;
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
    //     List<String> plantList = Arrays.asList("CDU-1", "Crude-1", "HPIB");
 
@@ -94,7 +104,8 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
 
         // temporary short the list for cdu-1, crude-1, hpid
 
-   List<String> plantList = plantList1.stream().filter(plantName -> plantName.equals("CDU-1") || plantName.equals("Crude-1") || plantName.equals("HPIB")).toList();
+//    List<String> plantList = plantList1.stream().filter(plantName -> plantName.equals("CDU-1") || plantName.equals("Crude-1") || plantName.equals("HPIB")).toList();
+List<String> plantList = plantList1.stream().filter(plantName -> plantName.equals("CDU-1") || plantName.equals("CDU-2")).toList();
 
         Map<String, Boolean> submissionStatusMap = new HashMap<>();
         Map<String, Boolean> approvalStatusMap = new HashMap<>();
@@ -200,7 +211,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
                 throw new RuntimeException("Vertical id is required");
             }
 
-        String businessKey =  siteId + "-" + finacialYear;
+            VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+
+            if(vertical == null) {
+                throw new RestResourceNotFoundException("Vertical not found");
+            }
+
+        String businessKey =  vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -322,8 +339,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
 
-        String businessKey = siteId + "-" + finacialYear;
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -473,7 +495,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -584,7 +612,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -765,7 +799,12 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -839,7 +878,8 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
   List<Object[]> statusUpdates = new ArrayList<>();
   for(PlantSubmissionAuditTrailProjection plantSubmission : plantWiseLatestSubmissions) {  
 
-statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
+    String status = approvalStatus ? "APPROVED" : "PENDING";
+statusUpdates.add(new Object[] { status, plantSubmission.getId() });
 
 
   }
@@ -876,7 +916,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -963,7 +1008,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1215,7 +1265,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
   
     @Override
     public List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrail(String plantId, String siteId, String verticalId, String type, String finacialYear) { 
-
+  
         if(plantId == null || plantId.isEmpty()) {  
             throw new RuntimeException("Plant id is required");
         }
@@ -1232,7 +1282,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
          List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrail(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
@@ -1269,7 +1324,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getLatestPlantWiseSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
@@ -1305,7 +1365,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrailByVerfiedDate(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId),businessKey, type);
        
@@ -1341,7 +1406,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrailByVerfiedDate(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
@@ -1372,7 +1442,12 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = siteId + "-" + finacialYear;
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         PlantSubmissionAuditTrailProjection auditTrail = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
         return PlantSubmissionAuditTrailDTO.builder()
@@ -1401,7 +1476,13 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = siteId + "-" + finacialYear;
+
+        VerticalsDTO vertical = verticalsService.getVerticalById(verticalId);
+        if(vertical == null) {
+            throw new RestResourceNotFoundException("Vertical not found");
+        }
+
+        String businessKey = vertical.getDisplayName() + "-" + siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()

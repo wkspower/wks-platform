@@ -27,6 +27,12 @@ import { Tooltip } from '../../../../../node_modules/@progress/kendo-react-toolt
 import { BooleanCellEditor } from '../utilities/BooleanCellEditor'
 import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
 import {
+  RadioCellEditor,
+  RadioDisplayCell,
+  InlineRadioCellEditor,
+  InlineRadioDisplayCell,
+} from '../utilities/RadioCellEditor'
+import {
   Backdrop,
   Box,
   CircularProgress,
@@ -43,7 +49,6 @@ import {
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 import { getColumnMenuDateFilter } from '../utilities/ColumnMenuDateFilter'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
-import valueFormatterByUOM from '../commonUtilityFunctions'
 import DateTimePickerEditor from '../utilities/DatePickeronSelectedYr'
 
 // Helper function to get nested value from object
@@ -82,13 +87,6 @@ const applyKendoNumberFormat = (value, format) => {
   return value
 }
 
-export const particulars = [
-  'normParameterId',
-  'normParametersFKId',
-  'NormParameterFKId',
-  'materialFkId',
-  'normParameterFKId',
-]
 export const hiddenFields = [
   'maintenanceId',
   'id',
@@ -195,7 +193,7 @@ const AdvanceKendoTable = ({
   const READ_ONLY = getRoleName(keycloak)
   const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
   const initialGroup = Array.isArray(groupBy)
-    ? groupBy.map((field) => ({ field }))
+    ? groupBy.map((field) => ({ field, dir: undefined }))
     : groupBy
       ? [{ field: groupBy, dir: undefined }]
       : []
@@ -1521,6 +1519,85 @@ const AdvanceKendoTable = ({
                   customModifiedCells={customModifiedCells}
                   allRedCell={allRedCell}
                   disableRedHighlight={disableRedHighlight}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Number with Inline Radio Type Handler
+      if (col.type === 'numberWithRadio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
+            }
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <InlineRadioCellEditor
+                    {...cellProps}
+                    radioGroupField={
+                      col.radioGroupField || 'selectedHeatRateSource'
+                    }
+                    targetField={col.targetField || 'finalHeatRate'}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <InlineRadioDisplayCell
+                  {...cellProps}
+                  radioGroupField={
+                    col.radioGroupField || 'selectedHeatRateSource'
+                  }
+                  format={col.format}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Radio Type Handler
+      if (col.type === 'radio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <RadioCellEditor
+                    {...cellProps}
+                    sourceFields={col.sourceFields || []}
+                    targetField={col.targetField || ''}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <RadioDisplayCell
+                  {...cellProps}
+                  sourceFields={col.sourceFields || []}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,

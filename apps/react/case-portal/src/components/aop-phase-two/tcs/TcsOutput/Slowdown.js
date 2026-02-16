@@ -164,6 +164,35 @@ const Slowdown = ({
     }))
   }, [apiMetadata])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportSlowdownExcel(
+        keycloak,
+        SITE_ID,
+        VERTICAL_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Slowdown data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.purpose || '')
@@ -228,6 +257,7 @@ const Slowdown = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           readonly={true}
+          handleExport={handleExport}
         />
       </Stack>
     </Box>

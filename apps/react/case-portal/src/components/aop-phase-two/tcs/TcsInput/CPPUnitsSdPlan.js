@@ -53,54 +53,105 @@ const CPPUnitsSdPlan = ({
     ],
   })
 
-  // Fetch data
-  const fetchData = useCallback(async () => {
-    if (!AOP_YEAR || !SITE_ID) {
-      console.warn('Missing required params:', { AOP_YEAR, SITE_ID })
-      return
-    }
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      console.log('Fetching CPP Units SD Plan data with:', {
-        AOP_YEAR,
-        SITE_ID,
-      })
+      console.log('No data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getCPPUnitsSdPlanData(
-        keycloak,
-        AOP_YEAR,
-        SITE_ID,
-      )
+      const carryForwardResponse =
+        await TcsApiService.carryForwardCppUnitsSdPlan(
+          keycloak,
+          AOP_YEAR,
+          SITE_ID,
+        )
 
-      const transformedData = (response || []).map((item, index) => ({
-        id: item.id || `row_${index}`,
-        ...item,
-        majorJobs: item.majorJobs || '',
-        // Convert gtMaintenance from comma-separated string to array for multi-select
-        gtMaintenance: item.gtMaintenance
-          ? item.gtMaintenance
-              .split(',')
-              .map((v) => v.trim())
-              .filter(Boolean)
-          : [],
-        inEdit: false,
-      }))
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      console.log('CPP Units SD Plan API Response:', transformedData)
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching CPP Units SD Plan data:', err)
       setSnackbarData({
-        message: 'Failed to load CPP Units SD Plan data. Please try again.',
-        severity: 'error',
+        message: 'Data carried forward from previous year successfully!',
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward:', carryForwardErr)
+      return false
     }
   }, [keycloak, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
+
+  // Fetch data
+  const fetchData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!AOP_YEAR || !SITE_ID) {
+        console.warn('Missing required params:', { AOP_YEAR, SITE_ID })
+        return
+      }
+      try {
+        setLoading(true)
+        console.log('Fetching CPP Units SD Plan data with:', {
+          AOP_YEAR,
+          SITE_ID,
+        })
+
+        const response = await TcsApiService.getCPPUnitsSdPlanData(
+          keycloak,
+          AOP_YEAR,
+          SITE_ID,
+        )
+
+        const transformedData = (response || []).map((item, index) => ({
+          id: item.id || `row_${index}`,
+          ...item,
+          majorJobs: item.majorJobs || '',
+          // Convert gtMaintenance from comma-separated string to array for multi-select
+          gtMaintenance: item.gtMaintenance
+            ? item.gtMaintenance
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean)
+            : [],
+          inEdit: false,
+        }))
+
+        console.log('CPP Units SD Plan API Response:', transformedData)
+
+        // If no data and carry forward not skipped, attempt carry forward
+        if (
+          (!transformedData || transformedData.length === 0) &&
+          !skipCarryForward
+        ) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry forward
+            await fetchData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching CPP Units SD Plan data:', err)
+        setSnackbarData({
+          message: 'Failed to load CPP Units SD Plan data. Please try again.',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      AOP_YEAR,
+      SITE_ID,
+      setSnackbarData,
+      setSnackbarOpen,
+      handleCarryForward,
+    ],
+  )
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {
@@ -343,6 +394,108 @@ const CPPUnitsSdPlan = ({
     [keycloak, PLANT_ID, AOP_YEAR, fetchData, setSnackbarData, setSnackbarOpen],
   )
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsApiService.exportCPPUnitsSdPlanExcel(keycloak, SITE_ID, AOP_YEAR)
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting CPP Units SD Plan data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
+  // Import handler
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await TcsApiService.importCPPUnitsSdPlanExcel(
+        keycloak,
+        SITE_ID,
+        AOP_YEAR,
+        file,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        // Refresh data after import
+        await fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        // Handle error response with Excel file download
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `TCS_CPP_Units_SD_Plan_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          // Refresh data after import
+          await fetchData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to import Excel file.',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const permissions = {
     showAction: true,
     addButton: true,
@@ -352,9 +505,9 @@ const CPPUnitsSdPlan = ({
     allAction: true,
     showTitleNameBusiness: true,
     showTitle: true,
-    // showImport: true,
-    // downloadExcelBtnFromUI: true,
-    // ExcelName: `CPP Units SD Plan - ${AOP_YEAR}`,
+    showExport: true,
+    ExcelName: `CPP_Units_SD_Plan_${AOP_YEAR}`,
+    showImport: true,
   }
 
   return (
@@ -383,6 +536,8 @@ const CPPUnitsSdPlan = ({
           setCurrentRowId={() => {}}
           deleteRowData={deleteRowData}
           saveChanges={saveChanges}
+          handleExcelUpload={handleExcelUpload}
+          handleExport={handleExport}
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
           snackbarOpen={snackbarOpen}

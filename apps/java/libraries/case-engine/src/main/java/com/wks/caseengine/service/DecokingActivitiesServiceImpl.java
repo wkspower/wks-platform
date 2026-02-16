@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.LinkedHashMap;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.sql.PreparedStatement;
@@ -81,8 +85,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	@Autowired
 	private PlantsRepository plantsRepository;
 
-	@Autowired
-	private SiteRepository siteRepository;
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
@@ -104,6 +106,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Autowired
 	private CrackerConfigurationRepository crackerConfigurationRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
 
 	private DataSource dataSource;
 
@@ -433,10 +438,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	                    continue;
 	                }
 	                
-	                if (value == null) {
-	                    continue;
-	                }
-
 	                if (setClause.length() > 0) {
 	                    setClause.append(", ");
 	                }
@@ -1073,6 +1074,173 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        throw new RuntimeException("Failed to fetch data", ex);
 	    }
 	}
+	
+	private Map<String, Object> fetchEverythingFromView(
+			final String plantId,
+			final String year,
+			final String viewName) {
+		
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		
+
+		return entityManager.unwrap(Session.class)
+				.doReturningWork(new ReturningWork<Map<String, Object>>() {
+
+					@Override
+					public Map<String, Object> execute(Connection connection) throws SQLException {
+
+						Map<String, Object> resultMap = new HashMap<>();
+						List<Map<String, Object>> dataList = new ArrayList<>();
+						List<Map<String, Object>> metadataList = new ArrayList<>();
+						Set<String> numericFields = new HashSet<>();
+
+						// ?? Load column title mapping from other view
+						Map<String, String> columnTitleMap = loadColumnTitles(connection,
+								"vwScrnCrackerKeyValueColumns", site.getName(), "DecokeMaintenance");
+						
+						Map<String, String> columnIsVisibleMap = loadIsVisible(connection,
+								"vwScrnCrackerKeyValueColumns", site.getName(), "DecokeMaintenance");
+
+						String sql = "SELECT * FROM " + viewName +
+								" WHERE PlantId = ? AND AOPYear = ? ORDER BY " +
+								"CASE MonthName " +
+								"WHEN 'April' THEN 1 WHEN 'May' THEN 2 WHEN 'June' THEN 3 " +
+								"WHEN 'July' THEN 4 WHEN 'August' THEN 5 WHEN 'September' THEN 6 " +
+								"WHEN 'October' THEN 7 WHEN 'November' THEN 8 WHEN 'December' THEN 9 " +
+								"WHEN 'January' THEN 10 WHEN 'February' THEN 11 WHEN 'March' THEN 12 " +
+								"ELSE 13 END";
+
+						try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+							ps.setString(1, plantId);
+							ps.setString(2, year);
+
+							try (ResultSet rs = ps.executeQuery()) {
+
+								ResultSetMetaData rsmd = rs.getMetaData();
+								int columnCount = rsmd.getColumnCount();
+
+								// -------- Metadata --------
+								for (int i = 1; i <= columnCount; i++) {
+
+									String columnName = rsmd.getColumnLabel(i);
+									int sqlType = rsmd.getColumnType(i);
+
+									Map<String, Object> meta = new HashMap<>();
+									meta.put("field", columnName);
+									meta.put("title",
+											columnTitleMap.getOrDefault(columnName, columnName));
+									meta.put("type",
+											getFrontendType(rsmd.getColumnTypeName(i)));
+									
+									meta.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
+									metadataList.add(meta);
+
+									if (sqlType == Types.INTEGER ||
+											sqlType == Types.DOUBLE ||
+											sqlType == Types.DECIMAL ||
+											sqlType == Types.FLOAT ||
+											sqlType == Types.NUMERIC ||
+											sqlType == Types.REAL) {
+										numericFields.add(columnName);
+									}
+								}
+
+								// -------- Data --------
+								while (rs.next()) {
+
+									Map<String, Object> row = new LinkedHashMap<>();
+
+									for (int i = 1; i <= columnCount; i++) {
+										String colName = rsmd.getColumnLabel(i);
+										Object value = rs.getObject(i);
+
+										if (value == null) {
+											row.put(colName,
+													numericFields.contains(colName) ? 0 : "");
+										} else {
+											row.put(colName, value);
+										}
+									}
+									dataList.add(row);
+								}
+							}
+						}
+
+						resultMap.put("data", dataList);
+						resultMap.put("metadata", metadataList);
+						resultMap.put("numericColumns", numericFields);
+
+						return resultMap;
+					}
+				});
+	}
+
+	private Map<String, String> loadColumnTitles(
+			Connection connection,
+			String viewName,
+			String siteName,
+			String tableName) throws SQLException {
+
+		Map<String, String> titleMap = new HashMap<>();
+
+		String sql = "SELECT [Key], [Value] " +
+				"FROM " + viewName + " " +
+				"WHERE TableName = ? AND SiteName = ?";
+
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, tableName);
+			ps.setString(2, siteName);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					String key = rs.getString("Key");
+					String value = rs.getString("Value");
+
+					if (value != null) {
+						titleMap.put(key, value);
+					}
+				}
+			}
+		}
+
+		return titleMap;
+	}
+
+	private Map<String, String> loadIsVisible(
+			Connection connection,
+			String viewName,
+			String siteName,
+			String tableName) throws SQLException {
+
+		Map<String, String> titleMap = new HashMap<>();
+
+		String sql = "SELECT [Key],[IsVisible] " +
+				"FROM " + viewName + " " +
+				"WHERE TableName = ? AND SiteName = ?";
+
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, tableName);
+			ps.setString(2, siteName);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					String key = rs.getString("Key");
+					String isVisible = rs.getString("IsVisible");
+
+					if (isVisible != null) {
+						titleMap.put(key, isVisible);
+					}
+					
+				}
+			}
+		}
+
+		return titleMap;
+	}
 
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String procedureName) {
 	    try {
@@ -1116,8 +1284,15 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	public List<Map<String, Object>> getDecokingActivityColumnMetadata(String plantId, String year, String storedProcedure) {
 	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
 	        List<Map<String, Object>> columnMetadata = new ArrayList<>();
-	        
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			
+			Map<String, String> columnTitleMap = loadColumnTitles(connection,
+								"vwScrnCrackerKeyValueColumns", "DMD", "Sd-Ta-Activities");
+			Map<String, String> columnIsVisibleMap = loadIsVisible(connection,
+					"vwScrnCrackerKeyValueColumns", site.getName(), "Sd-Ta-Activities");
 	        String sql = "EXEC " + storedProcedure + " @plantId = ?, @aopYear = ?";
+
 	        
 	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 	            ps.setString(1, plantId);
@@ -1131,8 +1306,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	                    String columnType = rsMetaData.getColumnTypeName(i);
 
 	                    columnInfo.put("field", columnName);
-	                    columnInfo.put("title", formatTitle(columnName)); 
+	                    columnInfo.put("title", columnTitleMap.getOrDefault(columnName, (columnName)));
 	                    columnInfo.put("editable", false); 
+	                    columnInfo.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
 	                    columnInfo.put("type", getFrontendType(columnType)); 
 	                    columnMetadata.add(columnInfo);
 	                }
@@ -1141,6 +1317,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        return columnMetadata;
 	    });
 	}
+	
 	
 	private String formatTitle(String columnName) {
 		return columnName.replace("_", " ");

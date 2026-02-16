@@ -353,7 +353,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 					Date startDate = dto.getMaintStartDateTime();
 					Date endDate = dto.getMaintEndDateTime();
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						if (dto.getMaintStartDateTime() != null) {
 			                int monthNumber = dto.getMaintStartDateTime().toInstant()
 			                        .atZone(ZoneId.systemDefault()).toLocalDate().getMonthValue();
@@ -364,7 +364,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		            	list.add(startDate != null ? formatter.format(startDate) : null);
 						list.add(endDate != null ? formatter.format(endDate) : null);
 		            }
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						list.add(dto.getDurationInHrs());
 					}else {
 						list.add(formattedDuration);
@@ -402,7 +402,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 			innerHeaders.add("Shutdown Desc");
 			// innerHeaders.add("Particulars");
-			if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
 				innerHeaders.add("Month");
 			}else {
 				innerHeaders.add("SD-From");
@@ -438,7 +438,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						cell.setCellValue((Date) value);
 						cell.setCellStyle(dateTimeStyle);
 					} else if (value instanceof Number) {
-						if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+						if(vertical.getName().equalsIgnoreCase("PTA")) {
 							if (col == 2) {
 		                        cell.setCellStyle(decimalStyle);
 		                    }
@@ -454,7 +454,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
-			if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
 				sheet.setColumnHidden(4, true);
 			}else {
 				sheet.setColumnHidden(5, true);	
@@ -891,17 +891,18 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 	            
-	    // Fetch and prepare slowdown ranges
 	    List<ShutDownPlanDTO> listOfSite = slowdownPlanService.findSlowdownDetailsByPlantIdAndType(plantFKId, "Slowdown", year);
 	    List<LocalDateTime[]> slowdownTimeRanges = new ArrayList<>();
 	    if (listOfSite != null) {
 	        for (ShutDownPlanDTO slowdown : listOfSite) {
 	            if (slowdown.getMaintStartDateTime() != null && slowdown.getMaintEndDateTime() != null) {
 
-	                LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	                LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	            	LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
+	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	            	        .withSecond(0).withNano(0); // Truncate here
+	            	LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
+	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	            	        .withSecond(0).withNano(0); // Truncate here
 	                slowdownTimeRanges.add(new LocalDateTime[]{slowdownStart, slowdownEnd});
 	            }
 	        }
@@ -952,7 +953,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                if (mantStartStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
 	                        
 	                        if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
 	                            dto.setSaveStatus("Failed");
@@ -978,7 +979,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                if (mantEndStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt).withSecond(0).withNano(0);
 
 	                        Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 	                        dto.setMaintEndDateTime(endDate);
@@ -1011,13 +1012,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                            }
 
 	                            if (overlapsFile) {
-	                                dto.setSaveStatus("Failed");
-	                                dto.setErrDescription(
+	                                    dto.setSaveStatus("Failed");
+	                                    dto.setErrDescription(
 	                                        "The maintenance period overlaps with an already validated period in the file.");
-	                                alreadyFailed = true;
+	                                    alreadyFailed = true;
 	                            }
-	                            
-	                            // Check for overlap with existing slowdowns
 	                            if (!alreadyFailed && !(vertical.getName().equalsIgnoreCase("Elastomer") || vertical.getName().equalsIgnoreCase("PVC"))) {
 	                                boolean overlapsSlowdown = false;
 	                                for (LocalDateTime[] slowdownPeriod : slowdownTimeRanges) {
@@ -1188,7 +1187,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					LocalDateTime[] bounds = parseFinancialYearBounds(year);
 					LocalDateTime fyStart = bounds[0];
 					LocalDateTime fyEnd = bounds[1];
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						dto.setMonth(getCellAsString(row.getCell(1), dto, evaluator));
 						if(dto.getMonth()==null) {
 							dto.setSaveStatus("Failed");
@@ -1315,7 +1314,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						}
 
 					}
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						dto.setRemark(getStringCellValue(row.getCell(3), dto)); // Set DTO field
 					}else {
 						dto.setRemark(getStringCellValue(row.getCell(4), dto)); // Set DTO field
@@ -1327,7 +1326,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						dto.setErrDescription("Please enter remark");
 						alreadyFailed = true;
 					}
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						String idString = getStringCellValue(row.getCell(4), dto);
 						dto.setId(idString);
 					}else {
@@ -1348,7 +1347,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						}
 					}
 
-					if (verticalName.equalsIgnoreCase("PTA") && !site.getName().equalsIgnoreCase("DMD") && !alreadyFailed && ldtStart != null && ldtEnd != null) {
+					if (verticalName.equalsIgnoreCase("PTA") && !alreadyFailed && ldtStart != null && ldtEnd != null) {
 						validTimeRangesWithIndex.add(new TimeRangeWithIndex(ldtStart, ldtEnd, currentRowIndex));
 					}
 
@@ -1849,7 +1848,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
 					plantMaintenanceTransaction.setPlantId(plantId);
-					if(verticalName.equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(verticalName.equalsIgnoreCase("PTA")) {
 		            	if(shutDownPlanDTO.getMonth()!=null) {
 		            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 		            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
@@ -1927,7 +1926,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						if (plantMaintenance.isPresent()) {
 							PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
 							plantMaintenanceTransaction.setPlantId(plantId);
-							if(verticalName.equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+							if(verticalName.equalsIgnoreCase("PTA")) {
 				            	if(shutDownPlanDTO.getMonth()!=null) {
 				            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 				            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
@@ -1975,7 +1974,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 									}
 								}
 							}
-							if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+							if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("PET".equalsIgnoreCase(verticalName))) {
 								int month = plantMaintenanceTransaction.getMaintForMonth();
 								Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId, month,
 										"Shutdown", year);
@@ -2141,12 +2140,52 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Override
+	public AOPMessageVM getShutdownDescription(String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+			String viewName = vertical.getName() + site.getName() + "vwScrnShutdown";
+			List<Object[]> results = getDescriptionDropdownDataBySite(site.getId(), viewName);
+			for (Object[] obj : results) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("DisplayName", obj[2]);
+				map.put("Name", obj[1]);
+				mapList.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(mapList);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 	public List<Object[]> getDescriptionDropdownData(UUID verticalId, String viewName) {
 		try {
 			String sql = "SELECT * from " + viewName + " where Vertical_FK_Id = :verticalId order by DisplayOrder";
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("verticalId", verticalId);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getDescriptionDropdownDataBySite(UUID siteId, String viewName) {
+		try {
+			String sql = "SELECT * from " + viewName + " where Site_FK_Id = :siteId order by DisplayOrder";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("siteId", siteId);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);

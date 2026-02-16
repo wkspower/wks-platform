@@ -16,7 +16,20 @@ export const PostCrDaysEditor = ({ dataItem, field, onChange }) => {
 
   const handleChange = (e) => {
     const val = e.target.value
-    if (val === '' || /^\d*(\.\d*)?$/.test(val)) {
+
+    // allow clearing the field
+    if (val === '') {
+      setLocalValue(val)
+      return
+    }
+
+    // allow only digits
+    if (!/^\d+$/.test(val)) return
+
+    const num = Number(val)
+
+    // allow only 0 to 130
+    if (num >= 0 && num <= 130) {
       setLocalValue(val)
     }
   }

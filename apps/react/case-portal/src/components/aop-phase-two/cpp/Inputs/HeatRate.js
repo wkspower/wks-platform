@@ -61,12 +61,45 @@ const HeatRate = () => {
     },
     {
       field: 'heatRate',
-      title: 'Heat Rate',
-      width: 120,
+      title: 'OEM HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRateSource',
+      targetField: 'finalHeatRate',
+    },
+    {
+      field: 'lastYearHeatRate',
+      title: 'PREVIOUS YEAR HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRateSource',
+      targetField: 'finalHeatRate',
+    },
+    {
+      field: 'derivedHeatRate',
+      title: 'ACTUAL PROPOSED HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRateSource',
+      targetField: 'finalHeatRate',
+    },
+    {
+      field: 'finalHeatRate',
+      title: 'Final Heat Rate',
+      width: 150,
       type: 'number1',
       format: valueFormat,
       editable: true,
-      minWidth: 100,
+      minWidth: 150,
     },
     {
       field: 'freeSteamFactor',
@@ -149,10 +182,36 @@ const HeatRate = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
+        // Compute selectedHeatRateSource based on finalHeatRate match
+        const finalHR = item.finalHeatRate || item.derivedHeatRate || ''
+        let selectedSource = ''
+
+        // Check if finalHeatRate matches any source column
+        const sourceFields = [
+          { field: 'heatRate', value: item.heatRate },
+          { field: 'lastYearHeatRate', value: item.lastYearHeatRate },
+          { field: 'derivedHeatRate', value: item.derivedHeatRate || '200' },
+        ]
+
+        for (const source of sourceFields) {
+          if (
+            source.value !== null &&
+            source.value !== undefined &&
+            parseFloat(finalHR) === parseFloat(source.value)
+          ) {
+            selectedSource = source.field
+            break
+          }
+        }
+
         return {
           ...item,
           id: item.id || index + 1,
           remarks: item.remarks || '',
+          derivedHeatRate: item.derivedHeatRate || '200',
+          lastYearHeatRate: item.lastYearHeatRate || '300',
+          finalHeatRate: finalHR,
+          selectedHeatRateSource: selectedSource, // Computed, not from API
         }
       })
       setRows(tempRes)
@@ -216,7 +275,12 @@ const HeatRate = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['gtLoad', 'heatRate', 'freeSteamFactor']
+    const fieldsToCheck = [
+      'gtLoad',
+      'heatRate',
+      'freeSteamFactor',
+      'finalHeatRate',
+    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
@@ -236,7 +300,7 @@ const HeatRate = () => {
     console.log('modifiedData', modifiedData)
     try {
       const payload = modifiedData.map((item) => {
-        const { inEdit, ...rest } = item
+        const { inEdit, selectedHeatRateSource, ...rest } = item
         return rest
       })
       const tempPayload = JSON.stringify(payload)
@@ -338,6 +402,63 @@ const HeatRate = () => {
     setRemarkDialogOpen(true)
   }
 
+  // Custom itemChange handler for radio selection with bidirectional sync
+  const handleCustomItemChange = (e, setRows) => {
+    const { dataItem, field, value } = e
+
+    // When radio selection changes, update the Final Heat Rate
+    if (field === 'selectedHeatRateSource') {
+      const selectedValue = dataItem[value]
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              selectedHeatRateSource: value,
+              finalHeatRate: selectedValue,
+            }
+          }
+          return r
+        }),
+      )
+    }
+
+    // When Final Heat Rate is manually edited, check if it matches any source column
+    if (field === 'finalHeatRate') {
+      const sourceFields = ['heatRate', 'lastYearHeatRate', 'derivedHeatRate']
+      let matchedField = null
+
+      // Check if the entered value matches any source column value
+      for (const sourceField of sourceFields) {
+        const sourceValue = dataItem[sourceField]
+        // Compare as numbers to handle string/number type differences
+        if (
+          sourceValue !== null &&
+          sourceValue !== undefined &&
+          parseFloat(value) === parseFloat(sourceValue)
+        ) {
+          matchedField = sourceField
+          break
+        }
+      }
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              finalHeatRate: value,
+              // Auto-select radio if value matches a source, otherwise clear selection
+              selectedHeatRateSource: matchedField || '',
+            }
+          }
+          return r
+        }),
+      )
+    }
+  }
+
   return (
     <Box>
       <Backdrop
@@ -372,6 +493,7 @@ const HeatRate = () => {
         dropdownConfig={dropdownConfig}
         selectedDropdownValue={selectedPlant}
         setSelectedDropdownValue={setSelectedPlant}
+        customItemChange={handleCustomItemChange}
         paginationConfig={{
           threshold: 20, // Show pagination if > 50 rows
           buttonCount: 5,

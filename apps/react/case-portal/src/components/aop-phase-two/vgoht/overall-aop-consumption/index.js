@@ -6,6 +6,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
 import { OverallAopConsumptionApiService } from '../../services/vgoht/overallAopConsumptionApiService'
+import { overAllAOpResponse } from '../dummyData'
 
 const OverallAopConsumption = () => {
   const keycloak = useSession()
@@ -28,7 +29,7 @@ const OverallAopConsumption = () => {
 
   const columns = [
     {
-      field: 'particulars',
+      field: 'productName',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -37,7 +38,17 @@ const OverallAopConsumption = () => {
       locked: true,
     },
     {
-      field: 'uom',
+      field: 'normParameterTypeDisplayName',
+      title: 'normParameterTypeDisplayName',
+      widthT: 250,
+      minWidth: 200,
+      type: 'text',
+      editable: false,
+      locked: true,
+      hidden: true,
+    },
+    {
+      field: 'UOM',
       title: 'UOM',
       widthT: 100,
       minWidth: 80,
@@ -45,7 +56,7 @@ const OverallAopConsumption = () => {
       editable: false,
     },
     {
-      field: 'apr',
+      field: 'april',
       title: headerMap[4],
       widthT: 100,
       minWidth: 80,
@@ -63,7 +74,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jun',
+      field: 'june',
       title: headerMap[6],
       widthT: 100,
       minWidth: 80,
@@ -72,7 +83,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jul',
+      field: 'july',
       title: headerMap[7],
       widthT: 100,
       minWidth: 80,
@@ -81,7 +92,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'aug',
+      field: 'august',
       title: headerMap[8],
       widthT: 100,
       minWidth: 80,
@@ -90,7 +101,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'sep',
+      field: 'september',
       title: headerMap[9],
       widthT: 100,
       minWidth: 80,
@@ -99,7 +110,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'oct',
+      field: 'october',
       title: headerMap[10],
       widthT: 100,
       minWidth: 80,
@@ -108,7 +119,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'nov',
+      field: 'november',
       title: headerMap[11],
       widthT: 100,
       minWidth: 80,
@@ -117,7 +128,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'dec',
+      field: 'december',
       title: headerMap[12],
       widthT: 100,
       minWidth: 80,
@@ -126,7 +137,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jan',
+      field: 'january',
       title: headerMap[1],
       widthT: 100,
       minWidth: 80,
@@ -135,7 +146,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'feb',
+      field: 'february',
       title: headerMap[2],
       widthT: 100,
       minWidth: 80,
@@ -144,7 +155,7 @@ const OverallAopConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'mar',
+      field: 'march',
       title: headerMap[3],
       widthT: 100,
       minWidth: 80,
@@ -154,111 +165,31 @@ const OverallAopConsumption = () => {
     },
   ]
 
-  const dummyRows = [
-    {
-      id: 1,
-      particulars: 'Fuel Oil',
-      uom: 'KL',
-      apr: 1250.5,
-      may: 1320.8,
-      jun: 1180.3,
-      jul: 1290.6,
-      aug: 1350.2,
-      sep: 1220.9,
-      oct: 1310.4,
-      nov: 1280.7,
-      dec: 1340.1,
-      jan: 1260.5,
-      feb: 1300.8,
-      mar: 1270.3,
-    },
-    {
-      id: 2,
-      particulars: 'Natural Gas',
-      uom: 'MMBTU',
-      apr: 8500.0,
-      may: 8750.5,
-      jun: 8300.2,
-      jul: 8600.8,
-      aug: 8900.3,
-      sep: 8450.6,
-      oct: 8700.9,
-      nov: 8550.4,
-      dec: 8800.7,
-      jan: 8650.1,
-      feb: 8720.5,
-      mar: 8580.2,
-    },
-    {
-      id: 3,
-      particulars: 'Electricity',
-      uom: 'MWH',
-      apr: 4500.0,
-      may: 4650.5,
-      jun: 4400.2,
-      jul: 4550.8,
-      aug: 4700.3,
-      sep: 4480.6,
-      oct: 4620.9,
-      nov: 4530.4,
-      dec: 4680.7,
-      jan: 4590.1,
-      feb: 4640.5,
-      mar: 4560.2,
-    },
-    {
-      id: 4,
-      particulars: 'Steam',
-      uom: 'MT',
-      apr: 12500.0,
-      may: 12850.5,
-      jun: 12300.2,
-      jul: 12650.8,
-      aug: 13000.3,
-      sep: 12450.6,
-      oct: 12750.9,
-      nov: 12600.4,
-      dec: 12900.7,
-      jan: 12700.1,
-      feb: 12820.5,
-      mar: 12680.2,
-    },
-    {
-      id: 5,
-      particulars: 'Cooling Water',
-      uom: 'M3',
-      apr: 25000.0,
-      may: 26500.5,
-      jun: 24500.2,
-      jul: 25800.8,
-      aug: 27000.3,
-      sep: 24800.6,
-      oct: 26200.9,
-      nov: 25500.4,
-      dec: 26800.7,
-      jan: 25900.1,
-      feb: 26300.5,
-      mar: 25600.2,
-    },
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchData()
+      fetchData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const response =
-        await OverallAopConsumptionApiService.getOverallAopConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      const data = response || dummyRows
-      setRows(data)
+      // const response =
+      //   await OverallAopConsumptionApiService.getOverallAopConsumption(
+      //     keycloak,
+      //     PLANT_ID,
+      //     AOP_YEAR,
+      //   )
+
+      const response = overAllAOpResponse.data?.mcuNormsValueDTOList?.map(
+        (item) => {
+          return {
+            ...item,
+            isEditaable: false,
+          }
+        },
+      )
+      setRows(response)
     } catch (error) {
       console.error('Error fetching overall AOP consumption data:', error)
       setSnackbarOpen(true)
@@ -376,6 +307,8 @@ const OverallAopConsumption = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customHeight={70}
+        groupBy={['normParameterTypeDisplayName']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

@@ -6,6 +6,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
 import { SteadyStateConsumptionApiService } from '../../services/vgoht/steadyStateConsumptionApiService'
+import { steadyStateConsumptionResponse } from '../dummyData'
 
 const SteadyStateConsumption = () => {
   const keycloak = useSession()
@@ -33,7 +34,17 @@ const SteadyStateConsumption = () => {
 
   const columns = [
     {
-      field: 'particulars',
+      field: 'id',
+      title: 'Id',
+      widthT: 250,
+      minWidth: 200,
+      type: 'text',
+      editable: false,
+      locked: true,
+      hidden: true,
+    },
+    {
+      field: 'productName',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -42,7 +53,16 @@ const SteadyStateConsumption = () => {
       locked: true,
     },
     {
-      field: 'uom',
+      field: 'normParameterTypeDisplayName',
+      title: 'Type',
+      widthT: 250,
+      minWidth: 200,
+      type: 'text',
+      editable: false,
+      locked: true,
+    },
+    {
+      field: 'UOM',
       title: 'UOM',
       widthT: 100,
       minWidth: 80,
@@ -50,7 +70,7 @@ const SteadyStateConsumption = () => {
       editable: false,
     },
     {
-      field: 'apr',
+      field: 'april',
       title: headerMap[4],
       widthT: 100,
       minWidth: 80,
@@ -68,7 +88,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jun',
+      field: 'june',
       title: headerMap[6],
       widthT: 100,
       minWidth: 80,
@@ -77,7 +97,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jul',
+      field: 'july',
       title: headerMap[7],
       widthT: 100,
       minWidth: 80,
@@ -86,7 +106,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'aug',
+      field: 'august',
       title: headerMap[8],
       widthT: 100,
       minWidth: 80,
@@ -95,7 +115,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'sep',
+      field: 'september',
       title: headerMap[9],
       widthT: 100,
       minWidth: 80,
@@ -104,7 +124,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'oct',
+      field: 'october',
       title: headerMap[10],
       widthT: 100,
       minWidth: 80,
@@ -113,7 +133,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'nov',
+      field: 'november',
       title: headerMap[11],
       widthT: 100,
       minWidth: 80,
@@ -122,7 +142,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'dec',
+      field: 'december',
       title: headerMap[12],
       widthT: 100,
       minWidth: 80,
@@ -131,7 +151,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'jan',
+      field: 'january',
       title: headerMap[1],
       widthT: 100,
       minWidth: 80,
@@ -140,7 +160,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'feb',
+      field: 'february',
       title: headerMap[2],
       widthT: 100,
       minWidth: 80,
@@ -149,7 +169,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'mar',
+      field: 'march',
       title: headerMap[3],
       widthT: 100,
       minWidth: 80,
@@ -158,7 +178,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'remark',
+      field: 'remarks',
       title: 'Remark',
       widthT: 150,
       minWidth: 120,
@@ -167,26 +187,25 @@ const SteadyStateConsumption = () => {
     },
   ]
 
-  const dummyRows = []
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchData()
+      fetchData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const response =
-        await SteadyStateConsumptionApiService.getSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      const data = response || dummyRows
-      setRows(data)
-      setOriginalRows(data)
+      // const response =
+      //   await SteadyStateConsumptionApiService.getSteadyStateConsumption(
+      //     keycloak,
+      //     PLANT_ID,
+      //     AOP_YEAR,
+      //   )
+
+      const response = steadyStateConsumptionResponse
+      setRows(response.data.mcuNormsValueDTOList)
+      setOriginalRows(response.data.mcuNormsValueDTOList)
     } catch (error) {
       console.error('Error fetching steady state consumption data:', error)
       setSnackbarOpen(true)
@@ -397,6 +416,8 @@ const SteadyStateConsumption = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        groupBy={['normParameterTypeDisplayName']}
+        customHeight={70}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

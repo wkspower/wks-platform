@@ -9,10 +9,27 @@ const WorkflowTimeline = ({ steps, currentStep }) => {
     return 'pending'
   }
 
-  const getTooltipContent = (step, status) => {
+  const getTooltipContent = (step, status, isLastStep) => {
+    // Special message for last step (Cluster Head) when completed
+    const showFinalizedMessage =
+      isLastStep &&
+      status === 'completed' &&
+      step.role?.toLowerCase().includes('cluster head')
+
     return (
       <div style={{ padding: '4px' }}>
         <div style={{ fontWeight: 600, marginBottom: '4px' }}>{step.role}</div>
+        {showFinalizedMessage && (
+          <div
+            style={{
+              fontSize: '0.75rem',
+              color: '#a7f3d0',
+              marginTop: '4px',
+            }}
+          >
+            Finalised data for PIMS Output
+          </div>
+        )}
         {step.completedDate && status === 'completed' && (
           <div style={{ fontSize: '0.75rem' }}>
             <div style={{ color: '#a7f3d0' }}>{step.completedDate}</div>
@@ -39,7 +56,7 @@ const WorkflowTimeline = ({ steps, currentStep }) => {
               <div className={`timeline-step ${status}`}>
                 {/* Step Circle/Icon with Tooltip */}
                 <Tooltip
-                  title={getTooltipContent(step, status)}
+                  title={getTooltipContent(step, status, isLastStep)}
                   arrow
                   placement='top'
                 >

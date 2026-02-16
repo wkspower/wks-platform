@@ -1,6 +1,7 @@
 import { Box, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 
@@ -113,6 +114,35 @@ const CrudBlendWindowGrid = ({
 
   console.log('columns', columns)
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportCrudBlendWindowExcel(
+        keycloak,
+        SITE_ID,
+        AOP_YEAR,
+        tableKey,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Crud Blend Window data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = useCallback(
     (row) => {
@@ -184,6 +214,7 @@ const CrudBlendWindowGrid = ({
           {...(tableKey === 'CrudeBlendWindow' && { groupBy: 'type' })}
           {...(tableKey === 'CrudeBlendWindow' && { labelField: 'property' })}
           readonly={true}
+          handleExport={handleExport}
         />
       </Stack>
     </Box>

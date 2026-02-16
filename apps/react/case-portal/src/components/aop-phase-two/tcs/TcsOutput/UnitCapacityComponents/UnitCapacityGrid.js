@@ -282,6 +282,36 @@ const UnitCapacityGrid = ({
     return result
   }, [apiMetadata, columnConfig, headerMap])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportUnitCapacityExcel(
+        keycloak,
+        SITE_ID,
+        VERTICAL_ID,
+        AOP_YEAR,
+        capacityType,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Unit Capacity data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
@@ -333,6 +363,7 @@ const UnitCapacityGrid = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           readonly={true}
+          handleExport={handleExport}
         />
       </Stack>
     </Box>

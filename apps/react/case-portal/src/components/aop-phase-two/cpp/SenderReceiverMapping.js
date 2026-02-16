@@ -178,7 +178,7 @@ const SenderReceiverMapping = () => {
   // Permissions
   const permissions = {
     showAction: true,
-    addButton: false,
+    addButton: true,
     deleteButton: false,
     editButton: true,
     saveBtn: true,

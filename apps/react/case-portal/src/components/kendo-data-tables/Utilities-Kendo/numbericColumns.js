@@ -15,6 +15,19 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
 
   const handleChange = (e) => {
     const val = e.target.value
+
+    const getAllowedRange = (field) => {
+      if (field === 'Reduction') {
+        return { min: 0, max: 100 }
+      }
+
+      if (['Pre_CR_Days', 'Post_CR_Days', 'ActualRunLength'].includes(field)) {
+        return { min: 0, max: 130 }
+      }
+
+      return null
+    }
+
     if (val === '' || /^\d*(\.\d*)?$/.test(val)) {
       if (dataItem?.productName?.trim().toLowerCase() === 'tst') {
         setSnackbarOpen(true)
@@ -22,6 +35,14 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
           message: 'Please enter a value between 100 and 370 !',
           severity: 'warning',
         })
+      }
+
+      const numVal = Number(val)
+      const range = getAllowedRange(field)
+
+      // Hard block if out of range
+      if (range && (numVal < range.min || numVal > range.max)) {
+        return
       }
       setLocalValue(val)
     }

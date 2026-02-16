@@ -76,6 +76,7 @@ const ShutDown = ({ permissions }) => {
     lowerVertName === 'meg' ||
     lowerVertName === 'pe' ||
     lowerVertName === 'pp'
+  const IS_PTA = lowerVertName === 'pta'
   const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
   const DELETE_NOTE =
     'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
@@ -158,7 +159,7 @@ const ShutDown = ({ permissions }) => {
             : new Date(record.maintEndDateTime)
 
         // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (!IS_PTA_DMD) {
+        if (!IS_PTA) {
           if (
             startLimit &&
             endLimit &&
@@ -190,7 +191,7 @@ const ShutDown = ({ permissions }) => {
         } else {
           requiredFields = ['discription', 'remark']
         }
-      } else if (IS_PTA_DMD) {
+      } else if (IS_PTA) {
         requiredFields = [
           'discriptionDrpdwn',
           'remark',
@@ -273,7 +274,7 @@ const ShutDown = ({ permissions }) => {
       //5 START DATE END DATE MANDATORY
       const allRecords = [...rows]
       const timeErrorRows = new Set() // Add this line
-      if (!IS_PTA_DMD) {
+      if (!IS_PTA) {
         for (const record of data) {
           // Date required validation (before checking time order)
           const dateRequiredRows = new Set()
@@ -327,7 +328,7 @@ const ShutDown = ({ permissions }) => {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
 
-        if (lowerVertName != 'vcm' && !IS_PTA_DMD) {
+        if (lowerVertName != 'vcm' && !IS_PTA) {
           for (const row of allRecords) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)
@@ -358,7 +359,7 @@ const ShutDown = ({ permissions }) => {
         }
 
         //Shutdown timeframe overlapping of same time.
-        if (!IS_PTA_DMD) {
+        if (!IS_PTA) {
           for (let i = 0; i < allRecords.length; i++) {
             const a = allRecords[i]
             const aStart = new Date(a.maintStartDateTime).getTime()
@@ -394,7 +395,8 @@ const ShutDown = ({ permissions }) => {
         if (
           lowerVertName != 'elastomer' &&
           // lowerVertName != 'vcm' &&
-          lowerVertName != 'pvc'
+          lowerVertName != 'pvc' &&
+          !IS_PTA
         ) {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
@@ -444,7 +446,7 @@ const ShutDown = ({ permissions }) => {
     try {
       let shutdownDetails
 
-      if (IS_PTA_DMD) {
+      if (IS_PTA) {
         // PTA DMD: Use month instead of dates
         shutdownDetails = newRow.map((row) => ({
           discription: row.discription || row.discriptionDrpdwn,
@@ -733,7 +735,16 @@ const ShutDown = ({ permissions }) => {
     const getAllDescriptionDrpdwn = async () => {
       try {
         let data = []
-        data = await DataService.dropdownValues(keycloak, PLANT_ID, AOP_YEAR)
+
+        if (IS_PTA) {
+          data = await DataService.dropdownValuesDMD(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        } else {
+          data = await DataService.dropdownValues(keycloak, PLANT_ID, AOP_YEAR)
+        }
 
         // let data = {
         //   code: 200,
@@ -808,7 +819,7 @@ const ShutDown = ({ permissions }) => {
         return ShutDownPpColumns
 
       case verticalEnums.PTA:
-        return IS_PTA_DMD ? ShutDownPTADMDColumns : ShutDownPTAColumns
+        return IS_PTA ? ShutDownPTADMDColumns : ShutDownPTAColumns
 
       default:
         return ShutDownAllColumns

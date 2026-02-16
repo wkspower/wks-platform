@@ -1,7 +1,5 @@
 package com.wks.caseengine.tcs.dto;
 
-import java.util.UUID;
-
 import lombok.Data;
 
 @Data
@@ -25,6 +23,10 @@ public class FurnaceDTO {
 
     private String remarks;
   //  private Double gCalPerHr;
+
+    // For import status tracking
+    private String saveStatus;
+    private String errDescription;
 }
 
 

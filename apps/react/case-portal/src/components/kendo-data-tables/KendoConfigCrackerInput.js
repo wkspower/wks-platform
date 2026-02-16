@@ -224,7 +224,7 @@ const CrackerConfig = () => {
 
   const fetchModes = useCallback(async () => {
     try {
-      var resp = await OptimizerDataApiService.fetchModes(
+      const resp = await OptimizerDataApiService.fetchModes(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -288,6 +288,7 @@ const CrackerConfig = () => {
       constantsRows,
     ],
   )
+
   const setRowsForTab = useCallback((tabId, data) => {
     switch (tabId) {
       case 'Feed':
@@ -335,17 +336,6 @@ const CrackerConfig = () => {
             AOP_YEAR,
           )
 
-          if (
-            !(
-              spyroVM1?.code === 200 &&
-              Array.isArray(spyroVM1?.data) &&
-              spyroVM1.data.length > 0
-            )
-          ) {
-            setConstantsRows([])
-            return
-          }
-
           if (spyroVM1?.data && Array.isArray(spyroVM1.data)) {
             transformedData1 = spyroVM1.data.map((item, index) => ({
               id: item.NormParameterFKID || `row_${index}`,
@@ -372,23 +362,6 @@ const CrackerConfig = () => {
           PLANT_ID,
           AOP_YEAR,
         )
-
-        if (
-          !(
-            spyroVM?.code === 200 &&
-            Array.isArray(spyroVM?.data) &&
-            spyroVM.data.length > 0
-          )
-        ) {
-          setFeedRows([])
-          setCompositionRows([])
-          setHydrogenationRows([])
-          setRecoveryRows([])
-          setOptimizing([])
-          setConstantsRows([])
-          return
-        }
-
         setTimeout(() => {
           if (spyroVM?.data && Array.isArray(spyroVM.data)) {
             transformedData = spyroVM.data.map((item, index) => ({
@@ -398,9 +371,7 @@ const CrackerConfig = () => {
               remarks: item.remarks ?? item.Remarks ?? '',
               originalRemark: item.remarks ?? item.Remarks ?? '',
               ParticularsType: item.normParameterTypeName,
-
               NormParameterFKID: item.NormParameterFKID,
-
               ...item,
             }))
           }
