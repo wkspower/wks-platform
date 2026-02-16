@@ -164,6 +164,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				dto.setRateEOE(result[12] != null ? ((Number) result[12]).doubleValue() : null);
 				dto.setRpfDownTime(result[13] != null ? ((Number) result[13]).doubleValue() : null);
 				dto.setNoOfRPF(result[14] != null ? ((Number) result[14]).doubleValue() : null);
+				dto.setLineId(result[15] != null ? result[15].toString() : null);
 				dtoList.add(dto);
 			}
 			// TODO Auto-generated method stub
@@ -2361,6 +2362,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            Double originalRate=null;
 	            Double originalRPFDownTime=null;
 	            Double originalNoOfRPF=null;
+	            UUID originalLineId=null;
 	            if(plantMaintenanceTransaction.getRate()!=null) {
 	            	 originalRate = plantMaintenanceTransaction.getRate();
 	            }
@@ -2376,7 +2378,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            Double originalRateEO = plantMaintenanceTransaction.getRateEO()!=null? plantMaintenanceTransaction.getRateEO():null;
 	            Double originalRateEOE = plantMaintenanceTransaction.getRateEOE()!=null? plantMaintenanceTransaction.getRateEOE():null;
 	            plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-	            
+	            if(plantMaintenanceTransaction.getLineFKId()!=null) {
+	            	originalLineId = plantMaintenanceTransaction.getLineFKId();
+	            }
 	            int durationMins = 0;
 	            if (shutDownPlanDTO.getDurationInHrs() != null) {
 	                durationMins = (int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
@@ -2398,6 +2402,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
 	            plantMaintenanceTransaction.setRpfDownTime(shutDownPlanDTO.getRpfDownTime());
 	            plantMaintenanceTransaction.setNoOfRPF(shutDownPlanDTO.getNoOfRPF());
+	            plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
 	            plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark()); // Set incoming remark for now
 	            plantMaintenanceTransaction.setVersion("V1");
 	            plantMaintenanceTransaction.setUser(Utility.getUserName());
@@ -2423,24 +2428,29 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                }
 	                Double newRPFDownTime=null;
 		            Double newNoOfRPF=null;
-		           
+		            UUID newLineId=null;
 		            if(plantMaintenanceTransaction.getRpfDownTime()!=null) {
 		            	newRPFDownTime = plantMaintenanceTransaction.getRpfDownTime();
 		            }
 		            if(plantMaintenanceTransaction.getNoOfRPF()!=null) {
 		            	newNoOfRPF = plantMaintenanceTransaction.getNoOfRPF();
 		            }
+		            
 	                Double newDurationInHrs = shutDownPlanDTO.getDurationInHrs();
 	                String newRemark = shutDownPlanDTO.getRemark();
 	                Double newRateEo= shutDownPlanDTO.getRateEO()!=null? shutDownPlanDTO.getRateEO():null;
 	                Double newRateEOE= shutDownPlanDTO.getRateEOE()!=null? shutDownPlanDTO.getRateEOE():null;
+	                if(shutDownPlanDTO.getLineId()!=null) {
+	                	newLineId = UUID.fromString(shutDownPlanDTO.getLineId());
+	                }
 	                boolean fieldsChanged = 
 	                	    !java.util.Objects.equals(originalDesc, newDesc) ||
 	                	    (!monthDropdown && (!java.util.Objects.equals(originalStart, newStart) || 
 	                	                        !java.util.Objects.equals(originalEnd, newEnd))) ||
 	                	    !java.util.Objects.equals(originalRate, newRate) ||
 	                	    !java.util.Objects.equals(originalRPFDownTime, newRPFDownTime) ||
-	                	    !java.util.Objects.equals(originalNoOfRPF, newNoOfRPF);
+	                	    !java.util.Objects.equals(originalNoOfRPF, newNoOfRPF) || 
+	                	    !java.util.Objects.equals(originalLineId, newLineId);
 	                
 	                if (fieldsChanged && java.util.Objects.equals(originalRemark, newRemark)) {
 	                    shutDownPlanDTO.setSaveStatus("Failed");
