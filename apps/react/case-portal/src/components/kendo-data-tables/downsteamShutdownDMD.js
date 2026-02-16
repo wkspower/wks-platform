@@ -12,7 +12,7 @@ import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
 import MaintenanceProcessTableNMD from './processTableNMD'
-const MaintenanceProcessTable = ({ viewOnly }) => {
+const DownsteamShutdownDMD = ({ viewOnly }) => {
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
@@ -49,7 +49,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const dataConfig = useMemo(
     () => ({
       serviceFn: () =>
-        MaintenanceDetailsApiService.getCrackerMaintenanceData(
+        MaintenanceDetailsApiService.getCrackerDownsteamShutdownDMD(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
@@ -252,16 +252,12 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data?.data
       setCalculationObject(resp?.data?.aopCalculation)
-      const hiddenKeys = ['Id', 'AOPYear', 'PlantId']
+      const hiddenKeys = ['Id', 'AOPYear', 'PlantId', 'AuditYear']
       const dynamicColumns = (resp.data?.columns || columns).map((col) => ({
         ...col,
-        editable:
-          col.field === 'NumberOfDays'
-            ? false
-            : col.type === 'number' || col.field === 'Remarks',
+        editable: false,
         hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
-        widthT: 120,
-        crackerValidation: col.type === 'number' ? true : false,
+        widthT: 200,
       }))
 
       setColumns(dynamicColumns)
@@ -449,15 +445,6 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     hidden: true,
   }
 
-  // let basecols
-  // if (siteName === 'dmd') {
-  //   basecols = crackercolumnsDMD
-  // } else if (siteName === 'nmd') {
-  //   basecols = crackercolumns
-  // } else {
-  //   basecols = crackercolumns
-  // }
-
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -486,27 +473,18 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           editButton: false,
           showUnit: false,
           saveWithRemark: false,
-          saveBtn: viewOnly ? false : true,
+          saveBtn: false,
           allAction: true,
-          downloadExcelBtn: true,
-          uploadExcelBtn: viewOnly ? false : true,
+          downloadExcelBtn: false,
+          uploadExcelBtn: false,
           showRefresh: false,
-          showCalculate: viewOnly ? false : true,
-          showCalculateVisibility: true,
-
-          //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
-          // showCalculateVisibility: false,
-
-          showNote: true,
+          showCalculate: false,
+          showNote: false,
         },
         isOldYear,
       ),
     [isOldYear],
   )
-
-  if (siteName == 'nmd') {
-    return <MaintenanceProcessTableNMD />
-  }
 
   return (
     <div>
@@ -548,4 +526,4 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     </div>
   )
 }
-export default MaintenanceProcessTable
+export default DownsteamShutdownDMD

@@ -386,11 +386,27 @@ public class CrudeBlendWindowService {
         }
     }
 
-// private <T> List<T> convertList(List<?> raw, Class<T> clazz) {
-//     return raw.stream()
-//             .map((Object o) -> objectMapper.convertValue(o, clazz))
-//             .toList();
-// }
+    @Transactional
+    public void deleteCrudeBlendWindowData(UUID id, String table) {  
+
+        if(table.equals("CrudeBlendWindow")) {
+            String deleteSql = " delete from CrudeBlendWindow where Id = ?";
+            jdbcTemplate.update(deleteSql, id);
+        }
+
+        if(table.equals("CrudeSpecificConstraints")) {
+            String deleteSql = " delete from CrudeSpecificConstraints where Id = ?";
+            jdbcTemplate.update(deleteSql, id);
+        }
+
+        if(table.equals("VGOVRDrop")) {
+            String deleteSql = " delete from VGOVRDrop where Id = ?";
+            jdbcTemplate.update(deleteSql, id);
+        }
+
+    }
+
+
 
 private <T> List<T> convertList(List<?> raw, Class<T> clazz) {
 

@@ -88,6 +88,8 @@ export const dateFieldsCracker = [
   'ShutDown_SD',
   'ShutDown_ED',
   'date',
+  'HSS_SD',
+  'HSS_ED',
 ]
 export const hiddenFields = []
 export const monthMap = {
@@ -562,7 +564,7 @@ const KendoDataTablesCracker = ({
         }
         if (
           col.type === 'number' &&
-          ['Pre_CR_Days', 'ActualRunLength'].includes(col?.field)
+          ['Pre_CR_Days', 'ActualRunLength', 'Reduction'].includes(col?.field)
         ) {
           return (
             <GridColumn

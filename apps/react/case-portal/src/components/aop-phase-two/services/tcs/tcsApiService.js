@@ -16,6 +16,7 @@ export const TcsApiService = {
   // TCS Crude Blend Window Data APIs
   getCrudBlendWindowData,
   saveCrudBlendWindowData,
+  deleteCrudBlendWindowData,
   carryForwardCrudBlendWindow,
 
   // TCS Shutdown Data APIs
@@ -454,6 +455,62 @@ async function saveCrudBlendWindowData(
     return result || { success: true }
   } catch (e) {
     console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function deleteCrudBlendWindowData(keycloak, id, table) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/delete/${id}/${table}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    console.log('Delete API called:', { url, id, table })
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+
+    console.log('Response status:', resp.status)
+    console.log('Response headers:', {
+      contentType: resp.headers.get('content-type'),
+      contentLength: resp.headers.get('content-length'),
+    })
+
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+
+    // Check if response has content
+    if (resp.status === 204 || resp.headers.get('content-length') === '0') {
+      console.log('Empty response, returning success')
+      return { success: true, message: 'Data deleted successfully' }
+    }
+
+    // Try to parse response - backend may incorrectly set Content-Type
+    const contentType = resp.headers.get('content-type')
+    console.log('Content-Type:', contentType)
+
+    // Clone response to allow multiple reads if needed
+    const responseClone = resp.clone()
+
+    try {
+      // Try parsing as JSON first
+      console.log('Attempting to parse as JSON')
+      const result = await resp.json()
+      console.log('JSON result:', result)
+      return result || { success: true, message: 'Data deleted successfully' }
+    } catch (jsonError) {
+      // If JSON parsing fails, fall back to text
+      console.log('JSON parse failed, falling back to text')
+      const textResult = await responseClone.text()
+      console.log('Text result:', textResult)
+      return { success: true, message: textResult }
+    }
+  } catch (e) {
+    console.error('Delete API error:', e)
     return await Promise.reject(e)
   }
 }

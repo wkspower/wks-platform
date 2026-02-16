@@ -396,6 +396,15 @@ export const NormalOpNormPtaColumns = [
     type: 'number',
   },
   {
+    field: 'wtAverage',
+    title: 'Weighted Avg',
+    align: 'right',
+    format: '{0:#.###}',
+    editable: false,
+    width: 120,
+    type: 'number',
+  },
+  {
     field: 'remarks',
     title: 'Remark',
     width: 125,

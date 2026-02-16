@@ -26,7 +26,7 @@ import Configuration from './Configuration'
 import Constants from './Constants'
 import ReportManualEntry from './ReportManualEntry'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
-import RevConfirmDialog from './components/RevConfirmDialog'
+import PIMSThroughput from './PIMSThroughput'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -54,11 +54,7 @@ const ProductionNormsBasis = () => {
   const [endDate, setEndDate] = useState()
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
-  const [openConfirmDialogRev, setOpenConfirmDialogRev] = useState(false)
-  const [selectedRevNum, setSelectedRevNum] = useState(null)
-  const [revision, setRevision] = useState('1')
-  const [revisionDetails, setRevisionDetails] = useState(null)
-  const [revisionUpdated, setRevisionUpdated] = useState(false)
+
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -206,56 +202,6 @@ const ProductionNormsBasis = () => {
     }
   }
 
-  const handleOpenDialogRev = (num) => {
-    setSelectedRevNum(num)
-    setOpenConfirmDialogRev(true)
-  }
-
-  const handleCloseDialogRev = () => {
-    setOpenConfirmDialogRev(false)
-    setSelectedRevNum(null)
-  }
-
-  const handleConfirmLoadRev = () => {
-    setOpenConfirmDialogRev(false)
-    handleRevisionChange(selectedRevNum)
-  }
-
-  const handleRevisionChange = async (num) => {
-    setRevision(num)
-    console.log('revisionDetails:', revisionDetails)
-    // if (!revisionDetails || revisionDetails.length === 0) {
-    //   console.log('Returning early - revisionDetails is null or empty')
-    //   return
-    // }
-    const payload = revisionDetails ? { ...revisionDetails } : {}
-    payload.attributeValueVersion = num
-    payload.attributeValue = num
-    await updateRevision([payload])
-  }
-
-  const updateRevision = async (Payload) => {
-    try {
-      // var response = await DataService.updateRevision(
-      //   keycloak,
-      //   Payload,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
-      // fetchData()
-      setRevisionUpdated(true)
-      console.log('Payload', Payload)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Revision updated successfully!',
-        severity: 'success',
-        duration: 3000,
-      })
-    } catch (error) {
-      console.error('Error updating data:', error)
-    }
-  }
-
   useEffect(() => {
     if (!PLANT_ID || !AOP_YEAR) return
     setTabIndex(0)
@@ -325,19 +271,12 @@ const ProductionNormsBasis = () => {
 
     switch (currentTabName) {
       case 'Configuration':
-        return (
-          <Configuration
-            revisionUpdated={revisionUpdated}
-            setRevisionUpdated={setRevisionUpdated}
-          />
-        )
+        return <Configuration />
       case 'Constants':
-        return (
-          <Constants
-            revisionUpdated={revisionUpdated}
-            setRevisionUpdated={setRevisionUpdated}
-          />
-        )
+        return <Constants />
+      case 'PIMS Throughput':
+        return <PIMSThroughput />
+
       case 'Report Manual Entry':
         return <ReportManualEntry />
       default:
@@ -382,43 +321,6 @@ const ProductionNormsBasis = () => {
             setTabIndex={setTabIndex}
             tabs={tablist}
           />
-
-          <Box>
-            <ButtonGroup aria-label='revision group'>
-              {['1', '2', '3'].map((num) => {
-                const selected = revision === num
-
-                return (
-                  <Button
-                    key={num}
-                    onClick={() => handleOpenDialogRev(num)}
-                    variant={selected ? 'contained' : 'outlined'}
-                    size='small'
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: '0.75rem',
-                      padding: '5px 10px',
-                      minWidth: '36px',
-                      mr: 0.5,
-                      ...(selected && {
-                        bgcolor: '#0100cb',
-                        color: '#fff',
-                        borderColor: '#0100cb',
-                        fontWeight: 'bold',
-                      }),
-                      ...(!selected && {
-                        borderColor: '#000000ff',
-                        color: '#000000ff',
-                        fontWeight: 'bold',
-                      }),
-                    }}
-                  >
-                    {`Rev ${num}`}
-                  </Button>
-                )
-              })}
-            </ButtonGroup>
-          </Box>
         </Stack>
       )}
 
@@ -440,12 +342,6 @@ const ProductionNormsBasis = () => {
         message={snackbarData.message}
         severity={snackbarData.severity}
         duration={snackbarData.duration}
-      />
-
-      <RevConfirmDialog
-        openConfirmDialogRev={openConfirmDialogRev}
-        handleCloseDialogRev={handleCloseDialogRev}
-        handleConfirmLoadRev={handleConfirmLoadRev}
       />
     </div>
   )

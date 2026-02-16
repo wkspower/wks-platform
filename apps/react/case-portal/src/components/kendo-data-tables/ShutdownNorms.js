@@ -74,6 +74,10 @@ const ShutdownNorms = () => {
     ['pe'].includes(lowerVertName) &&
     ['nmd'].includes(SITE_NAME_LOWERCASE) &&
     ['ldpe'].includes(PLANT_NAME_LOWERCASE)
+  const IS_PE_VMD =
+    lowerVertName === 'pe' && ['vmd'].includes(SITE_NAME_LOWERCASE)
+  const IS_PE_DMD =
+    lowerVertName === 'pe' && ['dmd'].includes(SITE_NAME_LOWERCASE)
   // const IS_PE_PP_VERTICAL_NMD_LLDPE =
   //   ['pe'].includes(lowerVertName) &&
   //   ['nmd'].includes(SITE_NAME_LOWERCASE) &&
@@ -83,6 +87,9 @@ const ShutdownNorms = () => {
     ['pe'].includes(lowerVertName) &&
     ['nmd'].includes(SITE_NAME_LOWERCASE) &&
     ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
+  const IS_PTA_DMD =
+    ['pta'].includes(lowerVertName) && ['dmd'].includes(SITE_NAME_LOWERCASE)
 
   const textNote = IS_PE_PP_VERTICAL
     ? '*Adding shutdown consumption to all grades will replace any existing individual grade consumption entries.'
@@ -178,7 +185,12 @@ const ShutdownNorms = () => {
 
         // Fetch grades for slowdown months
         let slowdownMonthsRes = []
-        if (IS_PE_NMD_LDPE || lowerVertName === 'pp') {
+        if (
+          IS_PE_NMD_LDPE ||
+          lowerVertName === 'pp' ||
+          IS_PE_VMD ||
+          IS_PE_DMD
+        ) {
           const gradesRes =
             await NormalOperationNormsApiService.getGradesForShutdownNorms(
               keycloak,
@@ -211,7 +223,11 @@ const ShutdownNorms = () => {
         }
 
         const finalMonths =
-          IS_PE_PP_VERTICAL || IS_PE_NMD_LDPE || lowerVertName === 'pp'
+          IS_PE_PP_VERTICAL ||
+          IS_PE_NMD_LDPE ||
+          lowerVertName === 'pp' ||
+          IS_PE_VMD ||
+          IS_PE_DMD
             ? [
                 ...new Set([
                   ...(Array.isArray(shutdownMonthsRes)
@@ -549,7 +565,7 @@ const ShutdownNorms = () => {
     try {
       let response
 
-      if (lowerVertName === 'vcm') {
+      if (lowerVertName === 'vcm' || lowerVertName === 'pta') {
         // Use shutdownNormsExportNonGrade for VCM
         response =
           await NormalOperationNormsApiService.shutdownNormsExportNonGrade(
@@ -586,7 +602,7 @@ const ShutdownNorms = () => {
     try {
       let response
 
-      if (lowerVertName === 'vcm') {
+      if (lowerVertName === 'vcm' || lowerVertName === 'pta') {
         // Use saveShutdownNormsExcelNonGrade for VCM
         response =
           await NormalOperationNormsApiService.saveShutdownNormsExcelNonGrade(
@@ -727,15 +743,26 @@ const ShutdownNorms = () => {
       dropdownLabel: 'Select Grade',
       allAction: true,
       downloadExcelBtnFromUI:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+        IS_PE_PP_VERTICAL ||
+        IS_PET_VERTICAL ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta'
           ? false
           : true,
       downloadExcelBtn:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+        IS_PE_PP_VERTICAL ||
+        IS_PET_VERTICAL ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta'
           ? true
           : false,
       uploadExcelBtn:
-        IS_PE_NMD_LDPE || lowerVertName === 'pp' || lowerVertName === 'vcm'
+        IS_PE_NMD_LDPE ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pta' ||
+        IS_PE_VMD ||
+        IS_PE_DMD
           ? true
           : false,
       showTitleNameBusiness: true,

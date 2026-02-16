@@ -92,5 +92,8 @@ public class PackagingConsumablesController {
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
-	
+	@GetMapping(value = "/calculate-other-production")
+	public AOPMessageVM getCalculateOtherProductionNorms(@RequestParam String year, @RequestParam String plantId) {
+		return packagingConsumablesService.getCalculateOtherProductionNorms(year, plantId);
+	}
 }

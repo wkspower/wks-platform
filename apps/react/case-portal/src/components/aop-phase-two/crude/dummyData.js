@@ -1825,6 +1825,13 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         options: ['Yes', 'No'],
         productName: 'VR Motor (P18) Pump Running Status',
+        dependencyConfig: {
+          dependentProductName: 'VR Motor (P18) Pump',
+          valueMapping: {
+            Yes: 40,
+            No: 10,
+          },
+        },
       },
       {
         id: 'VR-MOTOR-P18-PUMP',
@@ -1849,6 +1856,13 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         options: ['Yes', 'No'],
         productName: 'RCO motor (P10) Pump Running Status',
+        dependencyConfig: {
+          dependentProductName: 'RCO motor (P10) Pump',
+          valueMapping: {
+            Yes: 45,
+            No: 10,
+          },
+        },
       },
       {
         id: 'RCO-MOTOR-P10-PUMP',
@@ -1927,6 +1941,13 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         options: ['Yes', 'No'],
         productName: 'Heat Exchanger Cleaning Plan',
+        dependencyConfig: {
+          dependentProductName: 'PHT Drop due to exchanger cleaning',
+          valueMapping: {
+            Yes: 3,
+            No: 6,
+          },
+        },
       },
       {
         id: 'PHT-DROP-EXCHANGER-CLEANING',
@@ -2078,6 +2099,13 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         options: ['Yes', 'No'],
         productName: '38% ejector in line status',
+        dependencyConfig: {
+          dependentProductName: 'MP Steam to 38% ejector',
+          valueMapping: {
+            Yes: 382.08,
+            No: 0,
+          },
+        },
       },
       {
         id: 'MP-STEAM-TO-38-EJECTOR',
