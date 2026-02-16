@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +49,17 @@ public class CrudeBlendWindowController {
         }
         return crudeBlendWindowService.carryForwardCrudeBlendWindow(financialYear, UUID.fromString(siteId), UUID.fromString(plantId));
     }
-    
+
+    @DeleteMapping("/crude-blend-window/delete/{id}/{table}")
+    public ResponseEntity<String> deleteCrudeBlendWindow(@PathVariable String id, @PathVariable String table) {
+        if(id == null || table == null) {
+            throw new RestInvalidArgumentException("Invalid request parameters", null);
+        }
+        crudeBlendWindowService.deleteCrudeBlendWindowData(UUID.fromString(id), table);
+        return ResponseEntity.ok("Data deleted successfully");
+    }
+
+
     @PostMapping("/crude-blend-window/{plantId}/{siteId}/{financialYear}/{table}")
     public void updateCrudeBlendWindow(@RequestBody CrudeBlendWindowPostRequestDTO<?> payload, @PathVariable String plantId, @PathVariable String siteId, @PathVariable String financialYear, @PathVariable String table) {
       
