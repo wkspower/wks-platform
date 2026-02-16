@@ -349,6 +349,24 @@ def distribute_by_priority(
         return {"message": f"FYM {month}-{year} not found."}
     fym_id = row[0]
 
+    # Fetch heat rate data early to avoid connection timeout
+    cur.execute("""
+        SELECT AssetName AS EquipType, UtilityId AS CPPUtility, GTLoad, FinalHeatRate AS HeatRate, FreeSteamFactor
+        FROM CPP_GTHeatRate
+    """)
+    heat_rows = cur.fetchall()
+
+    heat_df = None
+    if heat_rows:
+        heat_cols = ["EquipType", "CPPUtility", "GTLoad", "HeatRate", "FreeSteamFactor"]
+        heat_df = pd.DataFrame.from_records(heat_rows, columns=heat_cols)
+
+        # Ensure numeric and sorted
+        heat_df["GTLoad"] = heat_df["GTLoad"].astype(float)
+        heat_df["HeatRate"] = heat_df["HeatRate"].astype(float)
+        heat_df["FreeSteamFactor"] = heat_df["FreeSteamFactor"].astype(float)
+        heat_df = heat_df.sort_values("GTLoad").reset_index(drop=True)
+
     # NET DEMAND (Plant + Fixed) - Fetch separately for logging
     # Fetch process plant demand from CalculatedProcessDemand
     from services.process_demand_service import get_process_demand_for_month
@@ -673,24 +691,7 @@ def distribute_by_priority(
         print(f"  ---------------------------------------")
         print(f"  NET DEMAND (for assets):  {net_demand_for_dispatch:>12,.2f} MWh")
 
-    # HeatRateLookup (same for all GTs)
-    cur.execute("""
-        SELECT EquipType, CPPUtility, GTLoad, HeatRate, FreeSteamFactor
-        FROM HeatRateLookup
-    """)
-    heat_rows = cur.fetchall()
-
-    heat_df = None
-    if heat_rows:
-        heat_cols = ["EquipType", "CPPUtility", "GTLoad", "HeatRate", "FreeSteamFactor"]
-        heat_df = pd.DataFrame.from_records(heat_rows, columns=heat_cols)
-
-        # Ensure numeric and sorted
-        heat_df["GTLoad"] = heat_df["GTLoad"].astype(float)
-        heat_df["HeatRate"] = heat_df["HeatRate"].astype(float)
-        heat_df["FreeSteamFactor"] = heat_df["FreeSteamFactor"].astype(float)
-        heat_df = heat_df.sort_values("GTLoad").reset_index(drop=True)
-
+    # Heat rate data already fetched earlier (after connection established)
     conn.close()
 
     # ----------- HANDLE ZERO/NEGATIVE DEMAND -----------
