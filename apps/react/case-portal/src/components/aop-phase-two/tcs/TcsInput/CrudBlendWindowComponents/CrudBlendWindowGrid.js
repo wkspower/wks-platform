@@ -73,7 +73,6 @@ const CrudBlendWindowGrid = ({
   const groupTypes = useMemo(() => {
     if (tableKey !== 'CrudeBlendWindow') return []
     const types = [...new Set(rows.map((row) => row.type).filter(Boolean))]
-    console.log('groupTypes calculated:', types)
     return types
   }, [rows, tableKey])
 
@@ -152,8 +151,6 @@ const CrudBlendWindowGrid = ({
 
     return [idCol, typeCol, ...otherCols].filter(Boolean)
   }, [apiMetadata, groupTypes])
-
-  console.log('columns', columns)
 
   // Handle remark cell click
   const handleRemarkCellClick = useCallback(
@@ -312,10 +309,15 @@ const CrudBlendWindowGrid = ({
           })
         } else {
           // Call API to delete from backend
+          const response = await TcsApiService.deleteCrudBlendWindowData(
+            keycloak,
+            deleteId,
+            tableKey,
+          )
           setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
           setSnackbarOpen(true)
           setSnackbarData({
-            message: 'Record deleted successfully!',
+            message: response?.message || 'Record deleted successfully!',
             severity: 'success',
           })
           if (onRefresh) {
@@ -331,7 +333,7 @@ const CrudBlendWindowGrid = ({
         })
       }
     },
-    [onRefresh, setSnackbarData, setSnackbarOpen],
+    [keycloak, tableKey, onRefresh, setSnackbarData, setSnackbarOpen],
   )
 
   // Handle add row dialog submission

@@ -9,7 +9,7 @@ import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/comm
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
 
-const Configuration = ({ revisionUpdated, setRevisionUpdated }) => {
+const Configuration = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -195,7 +195,7 @@ const Configuration = ({ revisionUpdated, setRevisionUpdated }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConfigurationData()
     }
-  }, [PLANT_ID, AOP_YEAR, revisionUpdated])
+  }, [PLANT_ID, AOP_YEAR])
 
   const fetchConfigurationData = async () => {
     setLoading(true)
@@ -234,7 +234,6 @@ const Configuration = ({ revisionUpdated, setRevisionUpdated }) => {
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
-      setRevisionUpdated(false)
     }
   }
 

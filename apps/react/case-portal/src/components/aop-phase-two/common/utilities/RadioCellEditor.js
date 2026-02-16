@@ -9,29 +9,21 @@ export const InlineRadioCellEditor = (props) => {
     onChange,
     radioGroupField = 'selectedHeatRateSource',
     targetField = 'finalHeatRate',
+    radioValue,
   } = props
 
   const currentValue = dataItem[field]
-  const isSelected = dataItem[radioGroupField] === field
+  const isSelected = dataItem[radioGroupField] === radioValue
 
   const handleRadioClick = () => {
-    // Update the radio selection field
+    // Update the radio selection field with the radioValue (e.g., 'OEM', 'PREVIOUS_YEAR', 'PROPOSED')
+    // The customItemChange handler will take care of updating finalHeatRate
     onChange({
       dataItem,
       field: radioGroupField,
-      value: field,
+      value: radioValue,
       syntheticEvent: new Event('change'),
     })
-
-    // Also update the target field with this field's value
-    setTimeout(() => {
-      onChange({
-        dataItem: { ...dataItem, [radioGroupField]: field },
-        field: targetField,
-        value: currentValue,
-        syntheticEvent: new Event('change'),
-      })
-    }, 0)
   }
 
   return (
@@ -69,10 +61,11 @@ export const InlineRadioDisplayCell = (props) => {
     field,
     radioGroupField = 'selectedHeatRateSource',
     format,
+    radioValue,
   } = props
 
   const value = dataItem[field]
-  const isSelected = dataItem[radioGroupField] === field
+  const isSelected = dataItem[radioGroupField] === radioValue
 
   // Apply formatting if provided
   let displayValue = value
