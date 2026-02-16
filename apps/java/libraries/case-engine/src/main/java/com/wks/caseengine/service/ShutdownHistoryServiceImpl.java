@@ -2,7 +2,9 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.dto.ShutdownHistoryConfigDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ShutdownHistoryConfig;
@@ -24,6 +27,7 @@ import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
 public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
@@ -54,6 +58,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				shutdownHistoryConfigDTO.setAopYear(shutdownHistoryConfig.getAopYear());
 				shutdownHistoryConfigDTO.setYear(shutdownHistoryConfig.getYear());
 				shutdownHistoryConfigDTO.setPlantId(shutdownHistoryConfig.getPlantFKId().toString());
+				shutdownHistoryConfigDTO.setTypeOfSD(shutdownHistoryConfig.getTypeOfSD());
 				shutdownHistoryConfigDTOs.add(shutdownHistoryConfigDTO);
 			}
 		} catch (IllegalArgumentException e) {
@@ -98,6 +103,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				shutdownHistoryConfig.setRemark(shutdownHistoryConfigDTO.getRemark());
 				shutdownHistoryConfig.setYear(shutdownHistoryConfigDTO.getYear());
 				shutdownHistoryConfig.setPlantFKId(plantId);
+				shutdownHistoryConfig.setTypeOfSD(shutdownHistoryConfigDTO.getTypeOfSD());
 				list.add(shutdownHistoryConfigRepository.save(shutdownHistoryConfig));
 				
 			}
@@ -126,6 +132,94 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 		aopMessageVM.setData(id);
 		aopMessageVM.setMessage("Data deleted successfully");
 		return aopMessageVM;
+	}
+	
+	@Override
+	public AOPMessageVM getTypeOfSD(String plantId, String year) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String view="vwScrn"+verticalName+"TypeOfSD";
+			List<Object[]> obj=getTypeOfSDData(view);
+			List<Map<String,Object>> maps=new ArrayList<>();
+			for (Object[] row : obj) {
+				
+				Map<String,Object> map=new HashMap<>();
+				map.put("name", row[0] != null ? row[0].toString() : null);
+				map.put("value", row[1] != null ? Integer.parseInt(row[1].toString()) : null);
+				maps.add(map);
+				
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(maps);
+			aopMessageVM.setMessage("Data fetched successfully");
+			
+			// TODO Auto-generated method stub
+			return aopMessageVM;
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			
+			throw new RuntimeException("Failed to save data", ex);
+		}
+		
+	}
+
+	@Override
+	public AOPMessageVM getLineDetails(String plantId, String year) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String view="vwScrn"+verticalName+"GetLineDetails";
+			List<Object[]> obj=getLineDetailsData(view,plantId);
+			List<Map<String,Object>> maps=new ArrayList<>();
+			for (Object[] row : obj) {
+				
+				Map<String,Object> map=new HashMap<>();
+				map.put("id", row[0] != null ? row[0].toString() : null);
+				map.put("name", row[1] != null ? row[1].toString() : null);
+				map.put("displayName", row[2] != null ? row[2].toString() : null);
+				map.put("plantId", row[3] != null ? (row[3].toString()) : null);
+				maps.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(maps);
+			aopMessageVM.setMessage("Data fetched successfully");
+			
+			// TODO Auto-generated method stub
+			return aopMessageVM;
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save data", ex);
+		}
+		
+	}
+
+	public List<Object[]> getTypeOfSDData(String viewName) {
+		try {
+			String sql = "SELECT * from "+ viewName;
+
+			Query query = entityManager.createNativeQuery(sql);
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> getLineDetailsData(String viewName,String plantId) {
+		try {
+			String sql = "SELECT * from "+ viewName+" where PlantId= :plantId";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 	
 }

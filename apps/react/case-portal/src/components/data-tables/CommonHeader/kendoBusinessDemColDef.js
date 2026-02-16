@@ -1,5 +1,6 @@
 import { BusinessDemandElastomerColumns } from 'components/colums/ElastomerColums'
 import { BusinessDemandMegColumns } from 'components/colums/MegColums'
+import { BusinessDemandPetColumns } from 'components/colums/PetColums'
 import { BusinessDemandPeColumns } from 'components/colums/PeColums'
 import { BusinessDemandPpColumns } from 'components/colums/PpColums'
 import { BusinessDemandPtaColumns } from 'components/colums/PtaColums'
@@ -15,6 +16,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: BusinessDemandPtaColumns,
   [verticalEnums.ELASTOMER]: BusinessDemandElastomerColumns,
   [verticalEnums.MEG]: BusinessDemandMegColumns,
+  [verticalEnums.PET]: BusinessDemandPetColumns,
 }
 
 const kendoBusinessDemColDef = ({ headerMap }) => {

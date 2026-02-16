@@ -676,6 +676,21 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		return null;
 	}
 	
+	@Override
+	@Transactional
+	public List getSlowdownMonthsImport(UUID plantId, String maintenanceName,String year) {
+		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
+		
+		try {
+				
+				return	slowdownNormsRepository.getSlowdownMonthsWithGradesImport(plantId,maintenanceName,year);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public byte[] exportSlowdownConsumption(String year, UUID plantFKId, boolean isAfterSave, List<SlowdownNormsValueDTO> dtoList,String gradeId) {
 		try {
 			

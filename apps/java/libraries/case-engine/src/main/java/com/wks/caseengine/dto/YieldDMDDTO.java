@@ -54,7 +54,13 @@ public class YieldDMDDTO {
     private Double sevenFPropane;
     private Double sevenFEthane;
   
-	
+    private Double threeFC2C3;
+    private Double threeFPropane;
+    private Double threeFEthane;
+    
+    private Double fourF2SC2C3;
+    private Double fourF2SPropane;
+    private Double fourF2SEthane;
 	
 
 }

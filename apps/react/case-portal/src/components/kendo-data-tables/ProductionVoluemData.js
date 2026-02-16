@@ -35,6 +35,8 @@ const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
 
+  const [editResetKey, setEditResetKey] = useState(0)
+
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
@@ -91,7 +93,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const SITE_NAME = siteObject?.name?.toLowerCase()
   const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
-
+  const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -1128,7 +1130,7 @@ const ProductionvolumeData = ({ permissions }) => {
   if (VERTICAL_NAME?.toLowerCase() == 'elastomer' && conditionForFirst) {
     return <ProductionTarget />
   }
-  if (VERTICAL_NAME?.toLowerCase() == 'aromatics' && conditionForFirst) {
+  if (IS_AROMATICS_DTA && conditionForFirst) {
     return <AromaticsProductionGrids />
   }
 
@@ -1175,6 +1177,8 @@ const ProductionvolumeData = ({ permissions }) => {
             downloadExcelForConfiguration('design')
           }
           handleExcelUpload={handleExcelUpload}
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1193,6 +1197,8 @@ const ProductionvolumeData = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1229,6 +1235,8 @@ const ProductionvolumeData = ({ permissions }) => {
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
+        resetEditSignal={editResetKey}
+        setEditResetKey={setEditResetKey}
       />
 
       {/* PERCENTAGE_SUMMARY */}
@@ -1242,6 +1250,8 @@ const ProductionvolumeData = ({ permissions }) => {
             fetchData={fetchData}
             permissions={adjustedPermissionsLast}
             supressGridHeight={true}
+            resetEditSignal={editResetKey}
+            setEditResetKey={setEditResetKey}
           />
         </>
       )}

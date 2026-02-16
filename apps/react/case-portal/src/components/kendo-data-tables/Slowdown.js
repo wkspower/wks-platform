@@ -325,7 +325,9 @@ const SlowDown = ({ permissions }) => {
           ? slowDownDetailsElastomer
           : IS_PTA_DMD
             ? slowDownDetailsPTADMD
-            : lowerVertName === 'pe' || lowerVertName === 'pp'
+            : lowerVertName === 'pe' ||
+                lowerVertName === 'pp' ||
+                lowerVertName === 'pet'
               ? slowDownDetailsPEPP
               : slowDownDetailsMEG,
         keycloak,
@@ -703,7 +705,7 @@ const SlowDown = ({ permissions }) => {
         // Month span check
         //check timeframe Multiple month spilt into single
 
-        if (lowerVertName != 'vcm' || !IS_PTA_DMD || lowerVertName !== 'pet') {
+        if (lowerVertName != 'vcm' && !IS_PTA_DMD && lowerVertName !== 'pet') {
           for (const row of rows) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)

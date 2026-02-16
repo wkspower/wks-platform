@@ -48,5 +48,10 @@ public class ShutdownHistoryConfig {
 
     @Column(name = "ModifiedBy", length = 100)
     private String modifiedBy;
+    
+    @Column(name = "TypeOfSD")
+    private Integer typeOfSD;
+    
+    
 }
 

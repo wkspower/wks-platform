@@ -883,8 +883,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
 	    List<String> des = new ArrayList<>();
-	    
-	    // Safety check for plant and vertical information
 	    Plants plant = plantsRepository.findById(plantFKId)
 	            .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 
@@ -892,18 +890,24 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 	            
 	    List<ShutDownPlanDTO> listOfSite = slowdownPlanService.findSlowdownDetailsByPlantIdAndType(plantFKId, "Slowdown", year);
-	    List<LocalDateTime[]> slowdownTimeRanges = new ArrayList<>();
+	    
+	    List<Object[]> slowdownTimeRanges = new ArrayList<>();
 	    if (listOfSite != null) {
 	        for (ShutDownPlanDTO slowdown : listOfSite) {
 	            if (slowdown.getMaintStartDateTime() != null && slowdown.getMaintEndDateTime() != null) {
 
-	            	LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
-	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-	            	        .withSecond(0).withNano(0); // Truncate here
-	            	LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
-	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-	            	        .withSecond(0).withNano(0); // Truncate here
-	                slowdownTimeRanges.add(new LocalDateTime[]{slowdownStart, slowdownEnd});
+	                LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
+	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	                        .withSecond(0).withNano(0);
+	                LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
+	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	                        .withSecond(0).withNano(0);
+	                
+	                // Track if this existing slowdown is a Seasonal Impact
+	                boolean isSeasonal = slowdown.getDiscription() != null && 
+	                                     slowdown.getDiscription().equalsIgnoreCase("Seasonal Impact");
+	                
+	                slowdownTimeRanges.add(new Object[]{slowdownStart, slowdownEnd, isSeasonal});
 	            }
 	        }
 	    }
@@ -999,8 +1003,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                        }
 	                        
 	                        if (ldtStart != null && !alreadyFailed) {
-	                            
-	                            // Check for overlap within the uploaded file
 	                            boolean overlapsFile = false;
 	                            for (LocalDateTime[] prevPeriod : validTimeRanges) {
 	                                LocalDateTime prevLdtStart = prevPeriod[0];
@@ -1017,14 +1019,24 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                                        "The maintenance period overlaps with an already validated period in the file.");
 	                                    alreadyFailed = true;
 	                            }
+	                            
 	                            if (!alreadyFailed && !(vertical.getName().equalsIgnoreCase("Elastomer") || vertical.getName().equalsIgnoreCase("PVC"))) {
 	                                boolean overlapsSlowdown = false;
-	                                for (LocalDateTime[] slowdownPeriod : slowdownTimeRanges) {
-	                                    LocalDateTime slowdownStart = slowdownPeriod[0];
-	                                    LocalDateTime slowdownEnd = slowdownPeriod[1];
+	                                
+	                                boolean isVcmSeasonal = vertical.getName().equalsIgnoreCase("VCM") && 
+	                                                       dto.getDiscription() != null && 
+	                                                       dto.getDiscription().equalsIgnoreCase("Seasonal Impact");
+
+	                                for (Object[] slowdownPeriod : slowdownTimeRanges) {
+	                                    LocalDateTime slowdownStart = (LocalDateTime) slowdownPeriod[0];
+	                                    LocalDateTime slowdownEnd = (LocalDateTime) slowdownPeriod[1];
+	                                    boolean existingIsSeasonal = (Boolean) slowdownPeriod[2];
+
 	                                    if (ldtStart.isBefore(slowdownEnd) && ldtEnd.isAfter(slowdownStart)) {
-	                                        overlapsSlowdown = true;
-	                                        break;
+	                                        if (!isVcmSeasonal && !existingIsSeasonal) {
+	                                            overlapsSlowdown = true;
+	                                            break;
+	                                        }
 	                                    }
 	                                }
 
@@ -1035,7 +1047,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                                }
 	                            }
 	                            
-	                            // If validation passed, add to validTimeRanges
+	                            
 	                            if (!alreadyFailed) {
 	                                validTimeRanges.add(new LocalDateTime[] { ldtStart, ldtEnd });
 	                            }
@@ -1077,7 +1089,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                String remark = getStringCellValue(row.getCell(4), dto);
 	                dto.setRemark(remark); 
 	                
-	                if (!alreadyFailed) { // Only validate the remark if no other failure
+	                if (!alreadyFailed) { 
 	                    if (dto.getRemark() == null || dto.getRemark().trim().isEmpty()) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("Please enter remark");
@@ -1487,6 +1499,41 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
+			
+			if ("VCM".equalsIgnoreCase(verticalName))  {
+				Date start = plantMaintenanceTransaction.getMaintStartDateTime();
+				Date end = plantMaintenanceTransaction.getMaintEndDateTime();
+
+				if (start != null && end != null) {
+				    LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				    LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+				    List<SlowdownNormsValue> slowdownNormsValues = slowdownNormsRepository
+				            .findByPlantFkIdAndFinancialYear(plantId, plantMaintenanceTransaction.getAuditYear());
+
+				    YearMonth current = YearMonth.from(startDate);
+				    YearMonth last = YearMonth.from(endDate);
+
+				    while (!current.isAfter(last)) {
+				        int currentMonth = current.getMonthValue();
+				  
+				        Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(
+				                plantId, 
+				                currentMonth, 
+				                "Slowdown", 
+				                plantMaintenanceTransaction.getAuditYear()
+				        );
+
+				        if (count == 1) {
+				            for (SlowdownNormsValue slowdownNormsValue : slowdownNormsValues) {
+				                setMonth(currentMonth, slowdownNormsValue);
+				            }
+				        }
+
+				        current = current.plusMonths(1);
+				    }
+				}
+			}
 
 			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction);
 
@@ -1553,8 +1600,41 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
+			if ("VCM".equalsIgnoreCase(verticalName))  {
+				Date start = plantMaintenanceTransaction.getMaintStartDateTime();
+				Date end = plantMaintenanceTransaction.getMaintEndDateTime();
 
-			if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+				if (start != null && end != null) {
+				    LocalDate startDate = start.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				    LocalDate endDate = end.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+				    List<ShutdownNormsValue> shutdownNormsValues = shutdownNormsRepository
+				            .findByPlantFkIdAndFinancialYear(plantId, plantMaintenanceTransaction.getAuditYear());
+
+				    YearMonth current = YearMonth.from(startDate);
+				    YearMonth last = YearMonth.from(endDate);
+
+				    while (!current.isAfter(last)) {
+				       
+				        Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(
+				                plantId, 
+				                current.getMonthValue(), 
+				                "Shutdown", 
+				                plantMaintenanceTransaction.getAuditYear()
+				        );
+
+				        if (count == 1) {
+				            for (ShutdownNormsValue shutdownNormsValue : shutdownNormsValues) {
+				                setMonthShutdown(current.getMonthValue(), shutdownNormsValue);
+				            }
+				        }
+
+				        current = current.plusMonths(1);
+				    }
+				}	
+			}
+
+			if ("PE".equalsIgnoreCase(verticalName) || "PP".equalsIgnoreCase(verticalName) || "PET".equalsIgnoreCase(verticalName)) {
 				int month = plantMaintenanceTransaction.getMaintForMonth();
 				Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId, month, "Shutdown",
 						year);
