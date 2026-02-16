@@ -3,6 +3,8 @@ import UnitCapacityGrid from './UnitCapacityComponents/UnitCapacityGrid'
 
 const UnitCapacity = ({
   PLANT_ID,
+  SITE_ID,
+  VERTICAL_ID,
   AOP_YEAR,
   currentTab,
   snackbarData,
@@ -24,6 +26,8 @@ const UnitCapacity = ({
           capacityType={type.key}
           title={type.title}
           PLANT_ID={PLANT_ID}
+          SITE_ID={SITE_ID}
+          VERTICAL_ID={VERTICAL_ID}
           AOP_YEAR={AOP_YEAR}
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}

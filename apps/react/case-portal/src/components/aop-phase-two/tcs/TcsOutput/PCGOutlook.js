@@ -217,6 +217,34 @@ const PCGOutlook = ({
     ]
   }, [headerMap])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportPcgOutlookExcel(
+        keycloak,
+        SITE_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting PCG Outlook data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     // Prevent remark dialog from opening if row is not editable
@@ -280,6 +308,7 @@ const PCGOutlook = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           readonly={true}
+          handleExport={handleExport}
         />
       </Stack>
     </Box>

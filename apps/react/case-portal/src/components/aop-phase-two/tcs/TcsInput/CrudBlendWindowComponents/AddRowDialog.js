@@ -80,7 +80,7 @@ const AddRowDialog = ({
           return ['type', 'property']
         case 'CrudeSpecificConstraints':
           return ['crude']
-        case 'VGOVRDROP':
+        case 'VGOVRDrop':
           return ['kbpsd']
         default:
           return []
@@ -149,7 +149,7 @@ const AddRowDialog = ({
         return ['type', 'property'].includes(field)
       case 'CrudeSpecificConstraints':
         return ['crude'].includes(field)
-      case 'VGOVRDROP':
+      case 'VGOVRDrop':
         return ['kbpsd'].includes(field)
       default:
         return field === 'type'

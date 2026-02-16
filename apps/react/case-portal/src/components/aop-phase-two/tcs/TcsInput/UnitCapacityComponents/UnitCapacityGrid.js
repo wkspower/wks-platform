@@ -12,6 +12,8 @@ const UnitCapacityGrid = ({
   capacityType,
   title,
   PLANT_ID,
+  SITE_ID,
+  VERTICAL_ID,
   AOP_YEAR,
   snackbarData,
   setSnackbarData,
@@ -22,31 +24,14 @@ const UnitCapacityGrid = ({
   const valueFormat = ValueFormatterPhaseTwo()
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  const defaultDropdownConfig = {
-    options: [
-      { id: 'KBPSD', name: 'KBPSD' },
-      { id: 'KTPD', name: 'KTPD' },
-      { id: 'TPD', name: 'TPD' },
-    ],
-    label: 'Select UOM',
-    placeholder: 'Select',
-    valueKey: 'id',
-    labelKey: 'name',
-  }
-
   // State management for this capacity type only
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
-  const [selectedDropdown, setSelectedDropdown] = useState('KBPSD')
-  const [dropdownConfig, setDropdownConfig] = useState({
-    ...defaultDropdownConfig,
-  })
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [loadingUOM, setLoadingUOM] = useState(false)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
   // Custom itemChange handler to auto-convert between KBPSD and KTPD for monthly fields
@@ -105,9 +90,49 @@ const UnitCapacityGrid = ({
     })
   }, [])
 
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
+    try {
+      console.log(
+        `No data found for ${capacityType}, attempting carry-forward...`,
+      )
+
+      const carryForwardResponse =
+        await TcsApiService.carryForwardTcsUnitCapacity(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          capacityType,
+        )
+
+      console.log('Carry-forward response:', carryForwardResponse)
+
+      setSnackbarData({
+        message: `Data carried forward from previous year successfully!`,
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error(
+        `Error during carry-forward for ${capacityType}:`,
+        carryForwardErr,
+      )
+      return false
+    }
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    capacityType,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
+
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(
-    async (selectedUOM) => {
+    async (skipCarryForward = false) => {
       if (!PLANT_ID || !AOP_YEAR) return
       try {
         setLoading(true)
@@ -117,40 +142,8 @@ const UnitCapacityGrid = ({
           PLANT_ID,
           AOP_YEAR,
           capacityType,
-          selectedUOM,
+          'KBPSD',
         )
-        // const response = {
-        //   headers: [
-        //     'Id',
-        //     'Particulars',
-        //     'UOM',
-        //     'Summer',
-        //     'Winter',
-        //     'Remark',
-        //     'InsertedDateTime',
-        //   ],
-        //   keys: [
-        //     'id',
-        //     'particulates',
-        //     'uom',
-        //     'summer',
-        //     'winter',
-        //     'remark',
-        //     'insertedDateTime',
-        //   ],
-        //   results: [
-        //     {
-        //       id: '9F1897F2-BEB5-4352-A25D-B473C0219FD4',
-        //       particulates: 'CDU-1',
-        //       uom: 'KBPSD',
-        //       summer: 345.0,
-        //       winter: 345.0,
-        //       remark:
-        //         'Unit capacity considered for min API of 27. L+N: CDU-1: 7.4 KTPD max           CDU-2: 6.4 KTPD (Summer: March-Oct) & 7.4 KTPD max in winters (Nov-Feb). RCO: Max 24.2 KTPD VR: Max 14.5 KTPD, however HOT VR to Coker will be 13.6 KTPD max based on hydraulic limitation',
-        //       insertedDateTime: 'Dec 22, 2025, 12:00:00 AM',
-        //     },
-        //   ],
-        // }
 
         let transformedData = []
         if (response?.results && Array.isArray(response.results)) {
@@ -195,6 +188,16 @@ const UnitCapacityGrid = ({
           setApiMetadata({ headers: response.headers, keys: response.keys })
         }
 
+        // If data is empty and carry-forward not skipped, attempt carry-forward and refetch
+        if (transformedData.length === 0 && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry-forward
+            await fetchUnitCapacityData(true)
+            return
+          }
+        }
+
         setRows(transformedData)
         setOriginalRows(transformedData)
       } catch (err) {
@@ -217,6 +220,7 @@ const UnitCapacityGrid = ({
       PLANT_ID,
       AOP_YEAR,
       capacityType,
+      handleCarryForward,
       setSnackbarData,
       setSnackbarOpen,
     ],
@@ -224,12 +228,12 @@ const UnitCapacityGrid = ({
 
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && selectedDropdown) {
+    if (PLANT_ID && AOP_YEAR) {
       // Clear modified cells when UOM changes to reset edit state
       setModifiedCells({})
-      fetchUnitCapacityData(selectedDropdown)
+      fetchUnitCapacityData()
     }
-  }, [PLANT_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
+  }, [PLANT_ID, AOP_YEAR, fetchUnitCapacityData])
 
   // Column configuration for Unit Capacity with monthly nested KBPSD and KTPD
   const columnConfig = useMemo(() => {
@@ -396,15 +400,6 @@ const UnitCapacityGrid = ({
         return
       }
 
-      if (!selectedDropdown) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Please select a UOM before saving!',
-          severity: 'warning',
-        })
-        return
-      }
-
       // Custom validation: If any row data is updated, remarks must be filled and different from original
       const fieldsToCheck = [
         'apr.kbpsd',
@@ -477,7 +472,7 @@ const UnitCapacityGrid = ({
         PLANT_ID,
         AOP_YEAR,
         capacityType,
-        selectedDropdown,
+        'KBPSD',
         dataInKBPSD,
       )
 
@@ -502,10 +497,119 @@ const UnitCapacityGrid = ({
     PLANT_ID,
     AOP_YEAR,
     capacityType,
-    selectedDropdown,
     setSnackbarData,
     setSnackbarOpen,
   ])
+
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsApiService.exportUnitCapacityExcel(
+        keycloak,
+        PLANT_ID,
+        SITE_ID,
+        VERTICAL_ID,
+        AOP_YEAR,
+        capacityType,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Unit Capacity data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
+  // Import handler
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await TcsApiService.importUnitCapacityExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        capacityType,
+        file,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        // Refresh data after import
+        await fetchUnitCapacityData()
+      } else if (response?.code === 400 && response?.data) {
+        // Handle error response with Excel file download
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `TCS_Unit_Capacity_${capacityType}_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          // Refresh data after import
+          await fetchUnitCapacityData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to import Excel file.',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
@@ -514,8 +618,9 @@ const UnitCapacityGrid = ({
     addButton: false,
     remarksEditable: true,
     showCalculate: false,
-    showExport: false,
-    showImport: false,
+    showExport: true,
+    ExcelName: `Unit_Capacity_${capacityType}_${AOP_YEAR}`,
+    showImport: true,
     saveBtnForRemark: true,
     saveBtn: true,
     showWorkFlowBtns: false,
@@ -536,7 +641,7 @@ const UnitCapacityGrid = ({
         <AdvanceKendoTable
           rows={rows}
           setRows={setRows}
-          fetchData={() => fetchUnitCapacityData(selectedDropdown)}
+          fetchData={() => fetchUnitCapacityData()}
           title={title}
           handleRemarkCellClick={handleRemarkCellClick}
           columns={columns}
@@ -555,9 +660,8 @@ const UnitCapacityGrid = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           customItemChange={handleCustomItemChange}
-          dropdownConfig={dropdownConfig}
-          selectedDropdownValue={selectedDropdown}
-          setSelectedDropdownValue={setSelectedDropdown}
+          handleExcelUpload={handleExcelUpload}
+          handleExport={handleExport}
         />
       </Stack>
     </Box>

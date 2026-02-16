@@ -39,13 +39,13 @@ const OverallAopConsumption = () => {
     },
     {
       field: 'normParameterTypeDisplayName',
-      title: 'normParameterTypeDisplayName',
+      title: 'Type',
       widthT: 250,
       minWidth: 200,
       type: 'text',
       editable: false,
       locked: true,
-      hidden: true,
+      hidden: false,
     },
     {
       field: 'UOM',

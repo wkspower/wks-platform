@@ -8,6 +8,8 @@ import com.wks.caseengine.dto.VerticalsDTO;
 public interface VerticalsService {
 	
 	public List<VerticalsDTO> getAllVerticals();
+
+	public VerticalsDTO getVerticalById(String verticalId);
 	
 	public List<VerticalsDTO> getHierarchyData();
 

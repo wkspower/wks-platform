@@ -19,6 +19,7 @@ import ApproveDialog from '../../tcs/TcsInput/workflow/ApproveDialog'
 import { TextCellEditorUpdated } from '../utilities/TextCellEditorUpdated'
 import { SelectCellEditor } from '../utilities/SelectCellEditor'
 import { MultiselectCellEditor } from '../utilities/MultiselectCellEditor'
+import { ConditionalCellEditor } from '../utilities/ConditionalCellEditor'
 import { ExcelExport } from '../../../../../node_modules/@progress/kendo-react-excel-export/index'
 import { NumberCellEditor } from '../utilities/NumberCellEditor'
 import { SvgIcon } from '../../../../../node_modules/@progress/kendo-react-common/index'
@@ -26,6 +27,12 @@ import { trashIcon } from '../../../../../node_modules/@progress/kendo-svg-icons
 import { Tooltip } from '../../../../../node_modules/@progress/kendo-react-tooltip/index'
 import { BooleanCellEditor } from '../utilities/BooleanCellEditor'
 import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
+import {
+  RadioCellEditor,
+  RadioDisplayCell,
+  InlineRadioCellEditor,
+  InlineRadioDisplayCell,
+} from '../utilities/RadioCellEditor'
 import {
   Backdrop,
   Box,
@@ -43,7 +50,6 @@ import {
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 import { getColumnMenuDateFilter } from '../utilities/ColumnMenuDateFilter'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
-import valueFormatterByUOM from '../commonUtilityFunctions'
 import DateTimePickerEditor from '../utilities/DatePickeronSelectedYr'
 
 // Helper function to get nested value from object
@@ -82,13 +88,6 @@ const applyKendoNumberFormat = (value, format) => {
   return value
 }
 
-export const particulars = [
-  'normParameterId',
-  'normParametersFKId',
-  'NormParameterFKId',
-  'materialFkId',
-  'normParameterFKId',
-]
 export const hiddenFields = [
   'maintenanceId',
   'id',
@@ -173,6 +172,8 @@ const AdvanceKendoTable = ({
   customHeight = null,
   customAddRow = null,
   customActionCell = null,
+  externalCustomModifiedCells = null,
+  externalSetCustomModifiedCells = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -189,13 +190,24 @@ const AdvanceKendoTable = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [applyMinWidth, setApplyMinWidth] = useState(false)
   const [gridCurrent, setGridCurrent] = useState(0)
-  const [customModifiedCells, setCustomModifiedCells] = useState({})
+  const [internalCustomModifiedCells, setInternalCustomModifiedCells] =
+    useState({})
   const [disableRedHighlight, setDisableRedHighlight] = useState(false)
+
+  // Use external customModifiedCells if provided, otherwise use internal
+  const customModifiedCells =
+    externalCustomModifiedCells !== null
+      ? externalCustomModifiedCells
+      : internalCustomModifiedCells
+  const setCustomModifiedCells =
+    externalSetCustomModifiedCells !== null
+      ? externalSetCustomModifiedCells
+      : setInternalCustomModifiedCells
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
   const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
   const initialGroup = Array.isArray(groupBy)
-    ? groupBy.map((field) => ({ field }))
+    ? groupBy.map((field) => ({ field, dir: undefined }))
     : groupBy
       ? [{ field: groupBy, dir: undefined }]
       : []
@@ -741,7 +753,15 @@ const AdvanceKendoTable = ({
   }
 
   const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
+    const {
+      dataItem,
+      field,
+      onRemarkClick,
+      isSorted,
+      tdProps,
+      selectionChange,
+      ...restProps
+    } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
@@ -759,7 +779,7 @@ const AdvanceKendoTable = ({
 
     return (
       <td
-        {...tdProps}
+        {...restProps}
         title={displayText}
         style={{
           cursor: isRowEditable ? 'pointer' : 'not-allowed',
@@ -1431,6 +1451,54 @@ const AdvanceKendoTable = ({
           />
         )
       }
+
+      // Conditional Type - handles both dropdown and numeric based on row data
+      if (col.type === 'conditional') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
+            }
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <ConditionalCellEditor {...cellProps} format={col.format} />
+                ),
+              },
+              data: (props) =>
+                showThreeColors ? (
+                  <RedHighlightCell2
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    allRedCell2={allRedCell2}
+                    disableRedHighlight={disableRedHighlight}
+                    format={col.format}
+                  />
+                ) : (
+                  <RedHighlightCell
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    disableRedHighlight={disableRedHighlight}
+                    format={col.format}
+                  />
+                ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
       if (col?.type === 'select') {
         // Change this to your multiselect field name
         let allOptions = col.options
@@ -1521,6 +1589,87 @@ const AdvanceKendoTable = ({
                   customModifiedCells={customModifiedCells}
                   allRedCell={allRedCell}
                   disableRedHighlight={disableRedHighlight}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Number with Inline Radio Type Handler
+      if (col.type === 'numberWithRadio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
+            }
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <InlineRadioCellEditor
+                    {...cellProps}
+                    radioGroupField={
+                      col.radioGroupField || 'selectedHeatRateSource'
+                    }
+                    targetField={col.targetField || 'finalHeatRate'}
+                    radioValue={col.radioValue}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <InlineRadioDisplayCell
+                  {...cellProps}
+                  radioGroupField={
+                    col.radioGroupField || 'selectedHeatRateSource'
+                  }
+                  format={col.format}
+                  radioValue={col.radioValue}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
+      // Radio Type Handler
+      if (col.type === 'radio') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <RadioCellEditor
+                    {...cellProps}
+                    sourceFields={col.sourceFields || []}
+                    targetField={col.targetField || ''}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <RadioDisplayCell
+                  {...cellProps}
+                  sourceFields={col.sourceFields || []}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,

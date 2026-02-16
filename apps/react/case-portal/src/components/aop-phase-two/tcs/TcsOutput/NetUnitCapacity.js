@@ -1,16 +1,11 @@
 import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
-import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import {
-  convertFromKBPSD,
-  convertToKBPSD,
-} from './UnitCapacityComponents/uomConversionUtils'
+import { convertFromKBPSD } from './UnitCapacityComponents/uomConversionUtils'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
-import { ROLES } from '../utils/roleUtils'
 
 const NetUnitCapacity = ({
   title,
@@ -21,7 +16,6 @@ const NetUnitCapacity = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
-  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -273,25 +267,22 @@ const NetUnitCapacity = ({
     setRemarkDialogOpen(true)
   }
 
-  const permissions = useMemo(
-    () => ({
-      customHeight: { mainBox: '32vh', otherBox: '100%' },
-      textAlignment: 'center',
-      allAction: true,
-      addButton: false,
-      remarksEditable: false,
-      showCalculate: false,
-      showExport: true,
-      showImport: false,
-      saveBtnForRemark: false,
-      saveBtn: false,
-      showWorkFlowBtns: false,
-      showTitle: true,
-      showDropdown: false,
-      approveBtn: userRole === ROLES.EPS_ENGINEER,
-    }),
-    [userRole],
-  )
+  const permissions = {
+    customHeight: { mainBox: '32vh', otherBox: '100%' },
+    textAlignment: 'center',
+    allAction: true,
+    addButton: false,
+    remarksEditable: false,
+    showCalculate: false,
+    showExport: true,
+    showImport: false,
+    saveBtnForRemark: false,
+    saveBtn: false,
+    showWorkFlowBtns: false,
+    showTitle: true,
+    showDropdown: false,
+    approveBtn: false,
+  }
 
   return (
     <Box>

@@ -5,6 +5,7 @@ import { ProductionNormsApiService } from 'components/aop-phase-two/services/vgo
 import { useSession } from 'SessionStoreContext'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
+import { productionAndNormsBasisConstant } from '../dummyData'
 
 const Constants = () => {
   const keycloak = useSession()
@@ -28,7 +29,7 @@ const Constants = () => {
 
   const columns = [
     {
-      field: 'particulars',
+      field: 'Name',
       title: 'Particulars',
       widthT: 300,
       minWidth: 250,
@@ -37,7 +38,7 @@ const Constants = () => {
       hidden: false,
     },
     {
-      field: 'uom',
+      field: 'UOM',
       title: 'UOM',
       widthT: 120,
       minWidth: 100,
@@ -45,7 +46,7 @@ const Constants = () => {
       editable: false,
     },
     {
-      field: 'value',
+      field: 'ConstantValue',
       title: 'Value',
       editable: true,
       widthT: 150,
@@ -56,7 +57,7 @@ const Constants = () => {
       format: '{0:0.00}',
     },
     {
-      field: 'remarks',
+      field: 'Remarks',
       title: 'Remark',
       widthT: 350,
       type: 'textarea',
@@ -67,18 +68,23 @@ const Constants = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchConstantsData()
+      fetchConstantsData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
   const fetchConstantsData = async () => {
     setLoading(true)
     try {
-      const res = await ProductionNormsApiService.getConstantsData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      // Simulate API call with 1 second delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // const res = await ProductionNormsApiService.getConstantsData(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+
+      const res = productionAndNormsBasisConstant.data
 
       if (res?.length === 0) {
         setRows([])
