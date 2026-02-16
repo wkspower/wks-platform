@@ -13,6 +13,7 @@ const HeatRate = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
+  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -60,37 +61,40 @@ const HeatRate = () => {
       minWidth: 80,
     },
     {
-      field: 'heatRate',
+      field: 'oemHeatRate',
       title: 'OEM HR',
       width: 150,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
       minWidth: 150,
-      radioGroupField: 'selectedHeatRateSource',
+      radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
+      radioValue: 'OEM',
     },
     {
-      field: 'lastYearHeatRate',
+      field: 'previousYearHeatRate',
       title: 'PREVIOUS YEAR HR',
       width: 150,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
       minWidth: 150,
-      radioGroupField: 'selectedHeatRateSource',
+      radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
+      radioValue: 'PREVIOUS_YEAR',
     },
     {
-      field: 'derivedHeatRate',
+      field: 'heatRate',
       title: 'ACTUAL PROPOSED HR',
       width: 150,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
       minWidth: 150,
-      radioGroupField: 'selectedHeatRateSource',
+      radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
+      radioValue: 'PROPOSED',
     },
     {
       field: 'finalHeatRate',
@@ -173,7 +177,11 @@ const HeatRate = () => {
   const fetchHeatRateData = async (assetId) => {
     setLoading(true)
     try {
-      const res = await InputApiService.getHeatRateData(keycloak, assetId)
+      const res = await InputApiService.getHeatRateData(
+        keycloak,
+        assetId,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -182,36 +190,11 @@ const HeatRate = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
-        // Compute selectedHeatRateSource based on finalHeatRate match
-        const finalHR = item.finalHeatRate || item.derivedHeatRate || ''
-        let selectedSource = ''
-
-        // Check if finalHeatRate matches any source column
-        const sourceFields = [
-          { field: 'heatRate', value: item.heatRate },
-          { field: 'lastYearHeatRate', value: item.lastYearHeatRate },
-          { field: 'derivedHeatRate', value: item.derivedHeatRate || '200' },
-        ]
-
-        for (const source of sourceFields) {
-          if (
-            source.value !== null &&
-            source.value !== undefined &&
-            parseFloat(finalHR) === parseFloat(source.value)
-          ) {
-            selectedSource = source.field
-            break
-          }
-        }
-
         return {
           ...item,
           id: item.id || index + 1,
           remarks: item.remarks || '',
-          derivedHeatRate: item.derivedHeatRate || '200',
-          lastYearHeatRate: item.lastYearHeatRate || '300',
-          finalHeatRate: finalHR,
-          selectedHeatRateSource: selectedSource, // Computed, not from API
+          selectedHeatRate: item.selectedHeatRate || 'PROPOSED',
         }
       })
       setRows(tempRes)
@@ -300,7 +283,7 @@ const HeatRate = () => {
     console.log('modifiedData', modifiedData)
     try {
       const payload = modifiedData.map((item) => {
-        const { inEdit, selectedHeatRateSource, ...rest } = item
+        const { inEdit, ...rest } = item
         return rest
       })
       const tempPayload = JSON.stringify(payload)
@@ -405,40 +388,138 @@ const HeatRate = () => {
   // Custom itemChange handler for radio selection with bidirectional sync
   const handleCustomItemChange = (e, setRows) => {
     const { dataItem, field, value } = e
+    const itemId = dataItem.id
 
     // When radio selection changes, update the Final Heat Rate
-    if (field === 'selectedHeatRateSource') {
-      const selectedValue = dataItem[value]
+    if (field === 'selectedHeatRate') {
+      // Map radioValue to field name
+      const fieldMapping = {
+        OEM: 'oemHeatRate',
+        PREVIOUS_YEAR: 'previousYearHeatRate',
+        PROPOSED: 'heatRate',
+      }
+
+      const selectedField = fieldMapping[value]
+      const selectedValue = selectedField ? dataItem[selectedField] : null
 
       setRows((prev) =>
         prev.map((r) => {
           if (r.id === dataItem.id) {
             return {
               ...r,
-              selectedHeatRateSource: value,
+              selectedHeatRate: value,
               finalHeatRate: selectedValue,
             }
           }
           return r
         }),
       )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...dataItem,
+          selectedHeatRate: value,
+          finalHeatRate: selectedValue,
+        },
+      }))
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          selectedHeatRate: value,
+          finalHeatRate: selectedValue,
+        },
+      }))
+
+      return
+    }
+
+    // When a source column is edited, update finalHeatRate ONLY if that source is currently selected
+    const sourceFieldMapping = {
+      oemHeatRate: 'OEM',
+      previousYearHeatRate: 'PREVIOUS_YEAR',
+      heatRate: 'PROPOSED',
+    }
+
+    if (sourceFieldMapping[field]) {
+      const radioValueForThisField = sourceFieldMapping[field]
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            // Only update finalHeatRate if this source is currently selected
+            if (r.selectedHeatRate === radioValueForThisField) {
+              return {
+                ...r,
+                [field]: value,
+                finalHeatRate: value,
+              }
+            }
+            // Otherwise just update the source field
+            return {
+              ...r,
+              [field]: value,
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track changes in modifiedCells
+      const currentRow = rows.find((r) => r.id === itemId)
+      if (currentRow?.selectedHeatRate === radioValueForThisField) {
+        // Update both source field and finalHeatRate
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...dataItem,
+            [field]: value,
+            finalHeatRate: value,
+          },
+        }))
+
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [field]: value,
+            finalHeatRate: value,
+          },
+        }))
+      }
+
+      return
     }
 
     // When Final Heat Rate is manually edited, check if it matches any source column
     if (field === 'finalHeatRate') {
-      const sourceFields = ['heatRate', 'lastYearHeatRate', 'derivedHeatRate']
-      let matchedField = null
+      const sourceFields = [
+        {
+          radioValue: 'OEM',
+          field: 'oemHeatRate',
+          value: dataItem.oemHeatRate,
+        },
+        {
+          radioValue: 'PREVIOUS_YEAR',
+          field: 'previousYearHeatRate',
+          value: dataItem.previousYearHeatRate,
+        },
+        { radioValue: 'PROPOSED', field: 'heatRate', value: dataItem.heatRate },
+      ]
+
+      let matchedRadioValue = null
 
       // Check if the entered value matches any source column value
-      for (const sourceField of sourceFields) {
-        const sourceValue = dataItem[sourceField]
-        // Compare as numbers to handle string/number type differences
+      for (const source of sourceFields) {
         if (
-          sourceValue !== null &&
-          sourceValue !== undefined &&
-          parseFloat(value) === parseFloat(sourceValue)
+          source.value !== null &&
+          source.value !== undefined &&
+          parseFloat(value) === parseFloat(source.value)
         ) {
-          matchedField = sourceField
+          matchedRadioValue = source.radioValue
           break
         }
       }
@@ -449,13 +530,32 @@ const HeatRate = () => {
             return {
               ...r,
               finalHeatRate: value,
-              // Auto-select radio if value matches a source, otherwise clear selection
-              selectedHeatRateSource: matchedField || '',
+              // Auto-select radio if value matches a source, otherwise set to OTHER
+              selectedHeatRate: matchedRadioValue || 'OTHER',
             }
           }
           return r
         }),
       )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...dataItem,
+          finalHeatRate: value,
+          selectedHeatRate: matchedRadioValue || 'OTHER',
+        },
+      }))
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          finalHeatRate: value,
+          selectedHeatRate: matchedRadioValue || 'OTHER',
+        },
+      }))
     }
   }
 
@@ -474,6 +574,8 @@ const HeatRate = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
+        externalCustomModifiedCells={customModifiedCells}
+        externalSetCustomModifiedCells={setCustomModifiedCells}
         title='GT Heat Rate'
         permissions={permissions}
         handleRemarkCellClick={handleRemarkCellClick}

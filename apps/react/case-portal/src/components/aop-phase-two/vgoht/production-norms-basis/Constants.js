@@ -7,7 +7,7 @@ import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/comm
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { productionAndNormsBasisConstant } from '../dummyData'
 
-const Constants = ({ revisionUpdated, setRevisionUpdated }) => {
+const Constants = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -70,7 +70,7 @@ const Constants = ({ revisionUpdated, setRevisionUpdated }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConstantsData()
     }
-  }, [PLANT_ID, AOP_YEAR, revisionUpdated])
+  }, [PLANT_ID, AOP_YEAR])
 
   const fetchConstantsData = async () => {
     setLoading(true)
@@ -107,7 +107,6 @@ const Constants = ({ revisionUpdated, setRevisionUpdated }) => {
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
-      setRevisionUpdated(false)
     }
   }
 
