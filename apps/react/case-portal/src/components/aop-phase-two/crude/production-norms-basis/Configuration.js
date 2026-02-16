@@ -7,9 +7,8 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
-import { ConditionalCellEditor } from 'components/aop-phase-two/common/utilities/ConditionalCellEditor'
 
-const Configuration = ({}) => {
+const Configuration = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
