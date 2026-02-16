@@ -16,6 +16,9 @@ public class HeatRateDTO {
     private Double freeSteamFactor;
     private String remarks;
     private Double previousYearHeatRate;
+    private Double finalHeatRate;
+    private Double oemHeatRate;
+    private String selectedHeatRate;
 }
 
 

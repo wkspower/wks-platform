@@ -22,7 +22,7 @@ public interface HeatRateRepository extends JpaRepository<DummyEntity, Long> {
     @Query(value = "select Id, EquipType, CPPUtility, GTLoad, HeatRate, FreeSteamFactor, Remarks from HeatRateLookup where AssetId = :assetId order by GTLoad asc", nativeQuery = true)
     List<HeatRateProjection> findHeatRateByAssetId(@Param("assetId") UUID assetId);
 
-    @Query(value = "SELECT curr.Id, curr.AssetName as EquipType, curr.UtilityId as CPPUtility, curr.GTLoad, curr.DisplayedAvgHeatRate as HeatRate, curr.FreeSteamFactor, curr.Remarks, prev.DisplayedAvgHeatRate as PreviousYearHeatRate FROM CPP_GTHeatRate curr LEFT JOIN CPP_GTHeatRate prev ON curr.Asset_FK_Id = prev.Asset_FK_Id AND curr.GTLoad = prev.GTLoad AND prev.FinancialYear = :previousFinancialYear WHERE curr.Asset_FK_Id = :assetId AND curr.FinancialYear = :financialYear ORDER BY curr.GTLoad ASC", nativeQuery = true)
+    @Query(value = "SELECT curr.Id, curr.AssetName as EquipType, curr.UtilityId as CPPUtility, curr.GTLoad, curr.DisplayedAvgHeatRate as HeatRate, curr.FreeSteamFactor, curr.Remarks, prev.DisplayedAvgHeatRate as PreviousYearHeatRate, curr.FinalHeatRate, curr.OEMHeatRate, curr.SelectedHeatRate FROM CPP_GTHeatRate curr LEFT JOIN CPP_GTHeatRate prev ON curr.Asset_FK_Id = prev.Asset_FK_Id AND curr.GTLoad = prev.GTLoad AND prev.FinancialYear = :previousFinancialYear WHERE curr.Asset_FK_Id = :assetId AND curr.FinancialYear = :financialYear ORDER BY curr.GTLoad ASC", nativeQuery = true)
     List<HeatRateProjection> findGtHeatRateByAssetId(@Param("assetId") UUID assetId, @Param("financialYear") String financialYear, @Param("previousFinancialYear") String previousFinancialYear);
 }
 
