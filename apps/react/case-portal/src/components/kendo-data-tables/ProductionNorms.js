@@ -14,7 +14,14 @@ import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopH
 import KendoDataTables from './index'
 import ProductionNormsCracker from './ProductionNormsCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import AopTabs from 'components/AopTabs'
+import { Box } from '@mui/material'
+import { DataService } from 'services/DataService'
 const ProductionNorms = ({ permissions }) => {
+  // State for tabs
+  const [tabIndex, setTabIndex] = useState(0)
+  const [tabs, setTabs] = useState([])
+  const [lineDetails, setLineDetails] = useState([])
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
@@ -48,6 +55,9 @@ const ProductionNorms = ({ permissions }) => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const SITE_NAME = siteObject?.name?.toLowerCase()
+  const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
+  const isPPVerticalDTASite = VERTICAL_NAME === 'pp' && SITE_NAME === 'dta'
   const plantName = plantObject?.name?.toLowerCase()
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
@@ -766,6 +776,40 @@ const ProductionNorms = ({ permissions }) => {
     }
   }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
 
+  // Fetch line details when component mounts or plantID/year changes
+  const fetchLineDetails = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+
+    try {
+      const response = await DataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR
+      )
+
+      if (response?.code != 200) {
+        setTabs([])
+        return
+      }
+      if (response && Array.isArray(response?.data)) {
+        setLineDetails(response.data)
+        // Update tabs based on the response
+        const lineTabs = response?.data.map(line => line.displayName)
+        setTabs(lineTabs)
+      }
+    } catch (err) {
+      console.error('Error fetching line details:', err)
+      // Fallback to default tabs if API fails
+      setTabs([])
+    }
+  }
+
+  useEffect(() => {
+    if (isPPVerticalDTASite) {
+      fetchLineDetails()
+    }
+  }, [PLANT_ID, keycloak, yearChanged, isPPVerticalDTASite])
+
   const valueFormat_ = ValueFormatterProduction()
   const valueFormat = IS_VCM ? '{0:0.000}' : valueFormat_
 
@@ -915,6 +959,16 @@ const ProductionNorms = ({ permissions }) => {
 
   return (
     <div>
+      {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
+      {isPPVerticalDTASite && (
+        <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tabs}
+          />
+        </Box>
+      )}
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
