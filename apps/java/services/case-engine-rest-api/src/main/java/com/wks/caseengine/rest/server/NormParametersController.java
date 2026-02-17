@@ -37,6 +37,12 @@ public class NormParametersController {
 	public AOPMessageVM getAllProducts(@RequestParam  String year,@RequestParam String plantId) {
 		return normParametersService.getAllProducts( plantId,year);
 	}
-    
-}
 
+
+     @GetMapping(value = "/lines")
+    public AOPMessageVM getAllLines(@RequestParam String plantId) {
+        return normParametersService.getAllLines(plantId);
+    }
+
+
+}
