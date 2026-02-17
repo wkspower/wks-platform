@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { DtaDataService } from 'services/DtaDataservice'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 
@@ -15,7 +16,10 @@ import {
 import { SlowDownAromaticsColumns } from 'components/colums/AromaticsColumns'
 import { SlowDownMegColumns } from 'components/colums/MegColums'
 import { SlowDownPeColumns } from 'components/colums/PeColums'
-import { SlowDownPpColumns } from 'components/colums/PpColums'
+import {
+  SlowDownPpColumns,
+  SlowDownPpDtaColumns,
+} from 'components/colums/PpColums'
 import {
   SlowDownPtaColumns,
   SlowDownPtadmdColumns,
@@ -84,6 +88,7 @@ const SlowDown = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
+  const [allLines, setAllLines] = useState([])
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -102,7 +107,7 @@ const SlowDown = ({ permissions }) => {
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
   const IS_PET = lowerVertName === 'pet'
   const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
-
+  const IS_PP_DTA = lowerVertName === 'pp' && lowerSiteName === 'dta'
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -288,6 +293,7 @@ const SlowDown = ({ permissions }) => {
         id: row.idFromApi || null,
         rateEO: null,
         rateEOE: null,
+        ...(IS_PP_DTA ? { lineId: row.lineId } : {}),
       }))
       const slowDownDetailsPTADMD = newRow.map((row) => ({
         productId: (() => {
@@ -979,6 +985,7 @@ const SlowDown = ({ permissions }) => {
             (item?.maintStartDateTime
               ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
               : ''),
+          lineId: item?.lineId || null,
         }
       })
 
@@ -1172,6 +1179,24 @@ const SlowDown = ({ permissions }) => {
     lowerSiteName,
     PLANT_NAME_LOWER,
   ])
+  const fetchLineDetails = async () => {
+    try {
+      const response = await DtaDataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      const lines = Array.isArray(response?.data) ? response.data : []
+      setAllLines(lines)
+    } catch (error) {
+      console.error('Error fetching line details:', error)
+    }
+  }
+  useEffect(() => {
+    if (IS_PP_DTA) {
+      fetchLineDetails()
+    }
+  }, [lowerVertName, lowerSiteName, keycloak, PLANT_ID, AOP_YEAR])
 
   const focusFirstField = async () => {
     const newRowId = rows.length
@@ -1193,7 +1218,7 @@ const SlowDown = ({ permissions }) => {
       case verticalEnums.PE:
         return SlowDownPeColumns
       case verticalEnums.PP:
-        return SlowDownPpColumns
+        return IS_PP_DTA ? SlowDownPpDtaColumns : SlowDownPpColumns
       case verticalEnums.PTA:
         return IS_PTA_DMD ? SlowDownPtadmdColumns : SlowDownPtaColumns
       case verticalEnums.ELASTOMER:
@@ -1441,6 +1466,7 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
       highlightProductName1:
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightLine: IS_PP_DTA ? true : false,
     },
     isOldYear,
   )
@@ -1529,6 +1555,7 @@ const SlowDown = ({ permissions }) => {
           screenType='slowdown'
           downloadExcelForConfiguration={downloadExcelForConfiguration}
           allDescriptionDrpdwn={allDescriptionDrpdwn}
+          allLines={allLines}
         />
       )}
 

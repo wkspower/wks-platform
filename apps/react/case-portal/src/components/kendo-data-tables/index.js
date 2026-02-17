@@ -14,6 +14,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useSelector } from 'react-redux'
 import YearDropdownEditor from './Utilities-Kendo/YearDropdownEditor'
 import SDDaysDropdownEditorWrapper from './Utilities-Kendo/SdDaysDropdownEditor'
+import LineDropdownEditor from './Utilities-Kendo/LineDropdownEditor'
 import {
   Box,
   Button,
@@ -171,6 +172,7 @@ const KendoDataTables = ({
   shutdownMonths = [],
   slowdownMonths = [],
   sdDaysValues = [],
+  allLines = [],
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -861,6 +863,35 @@ const KendoDataTables = ({
     return (
       <td {...tdProps} title={dataItem[field]}>
         {dataItem[field]}
+      </td>
+    )
+  }
+  const LineDisplayCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      customModifiedCells,
+      highlightField,
+      highlight,
+    } = props
+    const rowId = dataItem.id
+    const checkField = highlightField || field
+    const isEdited = !!(
+      customModifiedCells?.[rowId] && checkField in customModifiedCells[rowId]
+    )
+    const lineObj = props.allLines?.find((l) => l.id === dataItem[field])
+    const displayLabel = lineObj ? lineObj.displayName : ''
+    return (
+      <td
+        {...tdProps}
+        style={{
+          color: highlight && isEdited ? 'orange' : undefined,
+          fontWeight: highlight && isEdited ? 'bold' : undefined,
+        }}
+        title={displayLabel}
+      >
+        {displayLabel || ''}
       </td>
     )
   }
@@ -2451,6 +2482,42 @@ const KendoDataTables = ({
                           ),
                         },
                         data: ElastomerSDDaysDisplayCell,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+                const LineDropdownEditorWrapper = (props) => (
+                  <LineDropdownEditor
+                    {...props}
+                    allLines={allLines}
+                    customModifiedCells={customModifiedCells}
+                    highlightField={props.field}
+                    highlight={!!permissions?.highlightLine}
+                    rowId={props.dataItem?.id}
+                  />
+                )
+                if (col.type === 'lineDropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title}
+                      width={col.width}
+                      editable={col.editable}
+                      cells={{
+                        edit: { text: LineDropdownEditorWrapper },
+                        data: (props) => (
+                          <LineDisplayCell
+                            {...props}
+                            allLines={allLines}
+                            customModifiedCells={customModifiedCells}
+                            highlightField={col.field}
+                            highlight={!!permissions?.highlightLine}
+                            rowId={props.dataItem?.id}
+                          />
+                        ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}

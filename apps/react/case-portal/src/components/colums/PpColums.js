@@ -204,6 +204,75 @@ export const SlowDownPpColumns = [
     editable: true,
   },
 ]
+export const SlowDownPpDtaColumns = [
+  {
+    field: 'discription',
+    title: 'Slowdown Desc',
+    editable: true,
+    widthT: 130,
+  },
+
+  {
+    field: 'maintenanceId',
+    title: 'maintenanceId',
+    editable: false,
+    hidden: true,
+  },
+
+  {
+    field: 'productName1',
+    title: 'Particulars',
+    editable: true,
+    widthT: 130,
+  },
+  {
+    field: 'lineId',
+    title: 'Line',
+    type: 'lineDropdown',
+    editable: true,
+    width: 130,
+  },
+
+  // {
+  //   field: 'maintStartDateTime',
+  //   title: 'SD- From',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
+
+  // {
+  //   field: 'maintEndDateTime',
+  //   title: 'SD- To',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
+  {
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdownPEPP',
+    editable: true,
+    width: 200,
+  },
+
+  {
+    field: 'durationInHrs',
+    title: 'Duration (hrs)',
+    editable: true,
+  },
+
+  {
+    field: 'rate',
+    title: 'Reduced Rate (TPH)',
+    editable: true,
+    type: 'number',
+  },
+
+  {
+    field: 'remark',
+    title: 'Remarks',
+    editable: true,
+  },
+]
 
 export const NormalOpNormPpColumns = [
   {

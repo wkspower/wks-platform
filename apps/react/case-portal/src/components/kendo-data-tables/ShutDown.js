@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-
+import { DtaDataService } from 'services/DtaDataservice'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
@@ -11,7 +11,10 @@ import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
 import { ShutDownPeColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPeColumnsldpe12 } from 'components/colums/ShutdownColumn'
-import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
+import {
+  ShutDownPpColumns,
+  ShutDownPpDtaColumns,
+} from 'components/colums/ShutdownColumn'
 import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
 import {
   ShutDownPTAColumns,
@@ -78,6 +81,7 @@ const ShutDown = ({ permissions }) => {
     lowerVertName === 'pp'
   const IS_PTA = lowerVertName === 'pta'
   const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
+  const IS_PP_DTA = lowerVertName === 'pp' && lowerSiteName === 'dta'
   const DELETE_NOTE =
     'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
 
@@ -98,13 +102,11 @@ const ShutDown = ({ permissions }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
-
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
   const IS_PET_VERTICAL = lowerVertName === 'pet'
-
+  const [allLines, setAllLines] = useState([])
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remark || '')
@@ -468,6 +470,23 @@ const ShutDown = ({ permissions }) => {
           id: row.idFromApi || null,
           remark: row.remark || 'null',
         }))
+      } else if (IS_PP_DTA) {
+        // For PP DTA, match the GET payload structure
+        shutdownDetails = newRow.map((row) => ({
+          discription: row.discription || row.discriptionDrpdwn,
+          maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+          maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+          durationInHrs: (() => {
+            const v = findDuration('1', row)
+            if (!v) return null
+            const [h = '00', m = '00'] = String(v).split('.')
+            return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+          })(),
+          audityear: AOP_YEAR,
+          id: row.idFromApi || null,
+          remark: row.remark || 'null',
+          lineId: row.lineId,
+        }))
       } else {
         // Default: Use start/end date
         shutdownDetails = newRow.map((row) => ({
@@ -568,6 +587,24 @@ const ShutDown = ({ permissions }) => {
       fetchData()
     }
   }
+  const fetchLineDetails = async () => {
+    try {
+      const response = await DtaDataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      const lines = Array.isArray(response?.data) ? response.data : []
+      setAllLines(lines)
+    } catch (error) {
+      console.error('Error fetching line details:', error)
+    }
+  }
+  useEffect(() => {
+    if (IS_PP_DTA) {
+      fetchLineDetails()
+    }
+  }, [lowerVertName, lowerSiteName, keycloak, PLANT_ID, AOP_YEAR])
 
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
@@ -636,7 +673,6 @@ const ShutDown = ({ permissions }) => {
                 : ''),
           }
         }
-
         return {
           ...item,
           idFromApi: item?.id,
@@ -822,7 +858,7 @@ const ShutDown = ({ permissions }) => {
         return ShutDownPeColumns
 
       case verticalEnums.PP:
-        return ShutDownPpColumns
+        return IS_PP_DTA ? ShutDownPpDtaColumns : ShutDownPpColumns
 
       case verticalEnums.PTA:
         return IS_PTA ? ShutDownPTADMDColumns : ShutDownPTAColumns
@@ -830,7 +866,7 @@ const ShutDown = ({ permissions }) => {
       default:
         return ShutDownAllColumns
     }
-  }, [lowerVertName, plantName])
+  }, [lowerVertName, lowerSiteName, plantName])
 
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
@@ -1037,6 +1073,7 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
       highlightDuration:
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightLine: IS_PP_DTA ? true : false,
     },
     isOldYear,
   )
@@ -1087,6 +1124,7 @@ const ShutDown = ({ permissions }) => {
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
         screenType='shutdown'
+        allLines={allLines}
       />
     </div>
   )

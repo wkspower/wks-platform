@@ -182,6 +182,53 @@ export const ShutDownPpColumns = [
     editable: true,
   },
 ]
+export const ShutDownPpDtaColumns = [
+  {
+    field: 'discription',
+    title: 'Shutdown Desc',
+    editable: true,
+    type: 'descLimit',
+  },
+  {
+    field: 'lineId',
+    title: 'Line',
+    type: 'lineDropdown',
+    editable: true,
+    width: 130,
+  },
+  // {
+  //   field: 'productName1',
+  //   title: 'Particulars',
+  //   editable: true,
+  //   widthT: 130,
+  // },
+  {
+    field: 'maintenanceId',
+    title: 'Maintenance ID',
+    editable: false,
+    hidden: true,
+  },
+  {
+    field: 'maintStartDateTime',
+    title: 'SD - From',
+    editable: true,
+  },
+  {
+    field: 'maintEndDateTime',
+    title: 'SD - To',
+    editable: true,
+  },
+  {
+    field: 'durationInHrs',
+    title: 'Duration (hrs)',
+    editable: true,
+  },
+  {
+    field: 'remark',
+    title: 'Shutdown Basis',
+    editable: true,
+  },
+]
 
 export const ShutDownPTAColumns = [
   {
