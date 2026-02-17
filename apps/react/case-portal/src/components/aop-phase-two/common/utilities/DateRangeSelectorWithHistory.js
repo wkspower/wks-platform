@@ -149,7 +149,6 @@ const DateRangeSelectorWithHistory = ({
       }
     } catch (error) {
       console.error('Error fetching getConfigurationExecutionDetails:', error)
-    } finally {
     }
   }
 
