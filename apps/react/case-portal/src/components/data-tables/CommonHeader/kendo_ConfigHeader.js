@@ -23,7 +23,7 @@ const getConfigByType = (configType) => {
       return productionColumns
     case 'megConstants':
       return productionColumnsConstants
-    case 'pioImpact':
+    case 'PIO Impact':
       return pioImpactColumns
     case 'shutdownData':
       return pioImpactColumns
@@ -155,7 +155,7 @@ const getEnhancedAOPColDefs = ({
       return col
     })
   } else if (
-    configType == 'pioImpact' ||
+    configType == 'PIO Impact' ||
     configType == 'shutdownData' ||
     configType == 'cracker_configuration'
   ) {

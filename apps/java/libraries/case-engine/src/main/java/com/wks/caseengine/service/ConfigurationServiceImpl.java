@@ -59,7 +59,9 @@ import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
+import com.wks.caseengine.dto.NormLineRequestDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormAttributeTransactionLine;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
@@ -70,10 +72,12 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
-import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
+
+import com.wks.caseengine.repository.NormAttributeTransactionLineRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionReceipeRepository;
 
 import java.util.UUID;
 import java.util.List;
@@ -127,6 +131,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	
 	@Autowired
 	private NormParametersService normParametersService;
+
+	@Autowired
+	NormAttributeTransactionLineRepository normAttributeTransactionLineRepository;
 
 	private DataSource dataSource;
 
@@ -3610,6 +3617,76 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Transactional
+	@Override
+	public AOPMessageVM updateLineConfiguration(String year, String plantId,
+			List<NormLineRequestDTO> dtoList) {
+
+		try {
+
+			UUID plantUUID = UUID.fromString(plantId);
+			List<NormAttributeTransactionLine> saveList = new ArrayList<>();
+
+			for (NormLineRequestDTO dto : dtoList) {
+
+				UUID lineUUID = UUID.fromString(dto.getLineId());
+
+				for (Map.Entry<String, String> entry : dto.getGrades().entrySet()) {
+
+					UUID gradeUUID = UUID.fromString(entry.getKey());
+					String value = entry.getValue();
+
+					NormAttributeTransactionLine existing = normAttributeTransactionLineRepository.findExisting(
+							year, plantUUID, gradeUUID, lineUUID);
+
+					if (existing != null) {
+
+						existing.setAttributeValue(value);
+						existing.setModifiedOn(new Date());
+						saveList.add(existing);
+					} else {
+
+						NormAttributeTransactionLine n = new NormAttributeTransactionLine();
+						n.setGradeFkId(gradeUUID);
+						n.setLineFkId(lineUUID);
+						n.setPlantFkId(plantUUID);
+						n.setAopYear(year);
+						n.setAttributeValue(value);
+						n.setCreatedOn(new Date());
+						n.setModifiedOn(new Date());
+						n.setUser(Utility.getUserName());
+
+						saveList.add(n);
+					}
+				}
+			}
+
+			normAttributeTransactionLineRepository.saveAll(saveList);
+
+			return AOPMessageVM.builder()
+					.code(200)
+					.message("Line configuration updated successfully")
+					.data(saveList.size())
+					.build();
+
+		} catch (IllegalArgumentException e) {
+
+			return AOPMessageVM.builder()
+					.code(400)
+					.message("Invalid UUID: " + e.getMessage())
+					.data(null)
+					.build();
+
+		} catch (Exception e) {
+
+			return AOPMessageVM.builder()
+					.code(500)
+					.message("Failed to update line configuration: " + e.getMessage())
+					.data(null)
+					.build();
 		}
 	}
 

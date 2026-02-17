@@ -320,6 +320,7 @@ const DecokingConfig = () => {
               const dynamicColumnDeckoking = (data3?.data?.columns || []).map(
                 (col) => ({
                   ...col,
+                  filter: col.field === 'Month' ? true : false,
                   isDisabled:
                     ['Id', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(
                       col.field,
@@ -389,7 +390,7 @@ const DecokingConfig = () => {
   function validateAllDateOverlaps(rows) {
     const pairs = [
       ['IBR_SD', 'IBR_ED', 'IBR'],
-      ['ShutDown_SD', 'ShutDown_ED', 'ShutDown'],
+      // ['ShutDown_SD', 'ShutDown_ED', 'ShutDown'],
     ]
     rows.forEach((row) => {
       row.isError = false
@@ -586,7 +587,7 @@ const DecokingConfig = () => {
       d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
 
     const pairs = [
-      ['ShutDown_SD', 'ShutDown_ED'],
+      // ['ShutDown_SD', 'ShutDown_ED'],
       ['IBR_SD', 'IBR_ED'],
     ]
 

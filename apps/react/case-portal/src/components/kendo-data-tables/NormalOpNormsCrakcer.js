@@ -1160,7 +1160,7 @@ const NormalOpNormsScreenCracker = () => {
     'Criteria for Best Achieved',
     'Norms Selection',
     'Final monthly norms',
-    'Report Mannual Entry',
+    'Report Manual Entry',
   ]
 
   // UI render

@@ -274,7 +274,7 @@ const LineConfiguration = ({
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Exclusion Date.xlsx')
+        link.setAttribute('download', 'Error File - Line Configuration.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -329,10 +329,6 @@ const LineConfiguration = ({
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? true,
-      addButton: permissions?.addButton ?? true,
-      deleteButton: permissions?.deleteButton ?? true,
-      editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
@@ -340,7 +336,7 @@ const LineConfiguration = ({
       downloadExcelBtn: true,
       showTitleNameBusiness: true,
       titleName: 'Line Configuration',
-      uploadExcelBtn: true,
+      uploadExcelBtn: false,
     },
     IS_OLD_YEAR,
   )
@@ -376,198 +372,60 @@ const LineConfiguration = ({
     }
   }
 
-  const saveAPI = async (newRows) => {
-    // --- 1. Basic Structure Validation ---
-
-    if (!newRows || newRows.length === 0) return
-
-    // Convert limit states to Date objects for comparison
-    const limitStart = new Date(startDate)
-    const limitEnd = new Date(endDate)
-
+  const handleUpdate = async (updatedRows) => {
+    setLoading(true)
     try {
-      const payloadData = []
+      const payloadMap = {}
 
-      for (let i = 0; i < newRows.length; i++) {
-        const row = newRows[i]
+      // Loop grade rows
+      updatedRows.forEach((row) => {
+        const gradeId = row.GradeId
 
-        // --- 0. Validation: Both dates must be present ---
-        if (!row.exclusionStartDate || !row.exclusionEndDate) {
-          setSnackbarData({
-            message: 'Both From date and To date are required.',
-            severity: 'error',
-          })
-          setSnackbarOpen(true)
-          return // Stop execution
-        }
-
-        const rowStart = new Date(row.exclusionStartDate)
-        const rowEnd = new Date(row.exclusionEndDate)
-
-        // --- 2. Validation: Start Date < End Date ---
-        if (rowStart > rowEnd) {
-          setSnackbarData({
-            message: `From date cannot be after To date.`,
-            severity: 'error',
-          })
-          setSnackbarOpen(true)
-          return // Stop execution
-        }
-
-        // --- 3. Validation: Within Global Range (Inclusive) ---
-        const normalizeDate = (date) => {
-          const d = new Date(date)
-          d.setHours(0, 0, 0, 0)
-          return d
-        }
-
-        const rs = normalizeDate(rowStart)
-        const re = normalizeDate(rowEnd)
-        const ls = normalizeDate(limitStart)
-        const le = normalizeDate(limitEnd)
-
-        const formatDDMMYYYY = (date) => {
-          if (!date) return ''
-          const d = new Date(date)
-          const day = String(d.getDate()).padStart(2, '0')
-          const month = String(d.getMonth() + 1).padStart(2, '0')
-          const year = d.getFullYear()
-          return `${day}-${month}-${year}`
-        }
-
-        if (rs < ls || re > le) {
-          setSnackbarData({
-            message: `Dates must be between ${formatDDMMYYYY(startDate)} and ${formatDDMMYYYY(endDate)}.`,
-            severity: 'error',
-          })
-          setSnackbarOpen(true)
-          return
-        }
-
-        const allRows = [...rows, ...newRows]
-
-        const parseDateSafe = (value) => {
-          if (!value) return null
-
-          // Case 1: Already a Date object
-          if (value instanceof Date) {
-            const d = new Date(value)
-            d.setHours(0, 0, 0, 0)
-            return d
-          }
-
-          // Case 2: String in DD-MM-YYYY
-          if (typeof value === 'string' && value.includes('-')) {
-            const parts = value.split('-')
-
-            // DD-MM-YYYY
-            if (parts[0].length === 2) {
-              const [dd, mm, yyyy] = parts
-              const d = new Date(yyyy, mm - 1, dd)
-              d.setHours(0, 0, 0, 0)
-              return d
+        Object.entries(row)
+          .filter(([key]) => /^[0-9A-Fa-f-]{36}$/.test(key)) // Line UUID columns
+          .forEach(([lineId, value]) => {
+            if (!payloadMap[lineId]) {
+              payloadMap[lineId] = {
+                lineId,
+                grades: {},
+              }
             }
 
-            // YYYY-MM-DD
-            if (parts[0].length === 4) {
-              const [yyyy, mm, dd] = parts
-              const d = new Date(yyyy, mm - 1, dd)
-              d.setHours(0, 0, 0, 0)
-              return d
-            }
-          }
+            payloadMap[lineId].grades[gradeId] = String(value)
+          })
+      })
 
-          return null
-        }
+      // Convert map to array
+      const payload = Object.values(payloadMap)
 
-        // --- Validation: No overlapping with existing + new rows ---
-        for (let i = 0; i < allRows.length; i++) {
-          const rowStart = parseDateSafe(allRows[i].exclusionStartDate)
-          const rowEnd = parseDateSafe(allRows[i].exclusionEndDate)
-
-          for (let j = i + 1; j < allRows.length; j++) {
-            // Skip same row (important when editing)
-            if (allRows[i].id === allRows[j].id) continue
-
-            const otherStart = parseDateSafe(allRows[j].exclusionStartDate)
-            const otherEnd = parseDateSafe(allRows[j].exclusionEndDate)
-
-            if (rowStart <= otherEnd && rowEnd >= otherStart) {
-              setSnackbarData({
-                message: 'Overlapping dates not allowed.',
-                severity: 'error',
-              })
-              setSnackbarOpen(true)
-              return
-            }
-          }
-        }
-
-        // --- 5. Validation: reason must be non-empty and different from originalRemark ---
-        const reason = (row?.remark ?? '').trim()
-        const originalRemark = (row?.originalRemark ?? '').trim()
-
-        if (!reason) {
+      if (payload.length > 0) {
+        const response = await LineConfigurationApiDataService.postData(
+          keycloak,
+          payload,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        if (response) {
+          setSnackbarOpen(true)
           setSnackbarData({
-            message: `Please add the Reason`,
+            message: 'Saved Successfully!',
+            severity: 'success',
+          })
+          fetchData()
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data Saved failed!',
             severity: 'error',
           })
-          setSnackbarOpen(true)
-          return
         }
 
-        if (reason === originalRemark) {
-          setSnackbarData({
-            message: `Please update the Reason`,
-            severity: 'error',
-          })
-          setSnackbarOpen(true)
-          return
-        }
-
-        // If valid, push to payload
-        const toLocalDateOnly = (date) => {
-          if (!date) return null
-
-          const d = new Date(date)
-          const year = d.getFullYear()
-          const month = String(d.getMonth() + 1).padStart(2, '0')
-          const day = String(d.getDate()).padStart(2, '0')
-
-          return `${year}-${month}-${day}` // YYYY-MM-DD (LOCAL)
-        }
-
-        // If valid, push to payload
-        payloadData.push({
-          id: row?.idFromApi || null,
-          startDate: toLocalDateOnly(row?.exclusionStartDate),
-          endDate: toLocalDateOnly(row?.exclusionEndDate),
-          remark: row?.remark || row?.remarks,
-        })
+        return response
       }
-
-      // --- 5. Proceed to API Call ---
-      const response = await ExclusionDateApiDataService.postExclusionDate(
-        payloadData,
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-
-      if (summaryEdited) {
-        await saveSummary(summary)
-        setSummaryEdited(false)
-      }
-
-      setSnackbarOpen(true)
-      setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
-      setModifiedCells({})
-      await fetchData()
-      return response
     } catch (error) {
-      console.error('Error in saving data!', error)
-      setSnackbarData({ message: 'Failed to save data.', severity: 'error' })
-      setSnackbarOpen(true)
+      console.error('Error updating data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -575,7 +433,6 @@ const LineConfiguration = ({
     setLoading(true)
 
     try {
-      // CASE 1: only summary edited
       if (Object.keys(modifiedCells).length === 0) {
         if (summaryEdited) {
           await saveSummary(summary)
@@ -586,13 +443,16 @@ const LineConfiguration = ({
       }
 
       const rawData = Object.values(modifiedCells)
+
+      console.log(rawData)
+
       const data = rawData.filter((row) => row.inEdit)
       if (data.length === 0) {
         setLoading(false)
         return
       }
 
-      await saveAPI(data)
+      await handleUpdate(data)
     } catch (error) {
       console.log('Error saving changes:', error)
     } finally {

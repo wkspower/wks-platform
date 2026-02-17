@@ -126,7 +126,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'apr',
-      title: headerMap[4],
+      title: 'Apr',
       editable: true,
       width: 120,
       align: 'right',
@@ -135,7 +135,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'may',
-      title: headerMap[5],
+      title: 'May',
       editable: true,
       width: 120,
       align: 'right',
@@ -144,7 +144,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'jun',
-      title: headerMap[6],
+      title: 'Jun',
       editable: true,
       width: 120,
       align: 'right',
@@ -153,7 +153,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'jul',
-      title: headerMap[7],
+      title: 'Jul',
       editable: true,
       width: 120,
       align: 'right',
@@ -162,7 +162,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'aug',
-      title: headerMap[8],
+      title: 'Aug',
       editable: true,
       width: 120,
       align: 'right',
@@ -171,7 +171,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'sep',
-      title: headerMap[9],
+      title: 'Sep',
       editable: true,
       width: 120,
       align: 'right',
@@ -180,7 +180,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'oct',
-      title: headerMap[10],
+      title: 'Oct',
       editable: true,
       width: 120,
       align: 'right',
@@ -189,7 +189,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'nov',
-      title: headerMap[11],
+      title: 'Nov',
       editable: true,
       width: 120,
       align: 'right',
@@ -198,7 +198,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'dec',
-      title: headerMap[12],
+      title: 'Dec',
       editable: true,
       width: 120,
       align: 'right',
@@ -207,7 +207,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'jan',
-      title: headerMap[1],
+      title: 'Jan',
       editable: true,
       width: 120,
       align: 'right',
@@ -216,7 +216,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'feb',
-      title: headerMap[2],
+      title: 'Feb',
       editable: true,
       width: 120,
       align: 'right',
@@ -225,7 +225,7 @@ const CrackerReportMannualEntry = (props) => {
     },
     {
       field: 'mar',
-      title: headerMap[3],
+      title: 'Mar',
       editable: true,
       width: 120,
       align: 'right',
