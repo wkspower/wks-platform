@@ -2402,7 +2402,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
 	            plantMaintenanceTransaction.setRpfDownTime(shutDownPlanDTO.getRpfDownTime());
 	            plantMaintenanceTransaction.setNoOfRPF(shutDownPlanDTO.getNoOfRPF());
-	            plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
+	            if(shutDownPlanDTO.getLineId()!=null) {
+	            	plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
+	            }
+	            
 	            plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark()); // Set incoming remark for now
 	            plantMaintenanceTransaction.setVersion("V1");
 	            plantMaintenanceTransaction.setUser(Utility.getUserName());
