@@ -5,7 +5,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.tcs.dto.TCSSlowdownDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -36,6 +40,20 @@ public class TCSSlowdownController {
         return tcsSlowdownService.getAll(plantId, year, siteId, verticalId);
     }
 
+    @PostMapping("/tcs-slowdown/carry-forward")
+    public AOPMessageVM carryForwardTCSSlowdown(
+        @RequestParam String plantId,
+        @RequestParam String year) {
+            
+            if(plantId == null || plantId.isEmpty()) {
+                throw new RestInvalidArgumentException("Plant ID cannot be null", null);
+            }
+            if(year == null || year.isEmpty()) {
+                throw new RestInvalidArgumentException("Year cannot be null", null);
+            }
+            return tcsSlowdownService.carryForwardTCSSlowdown(plantId, year);
+    }
+
     @PostMapping("/tcs-slowdown")
     public AOPMessageVM saveOrUpdate(
         @RequestParam String plantId,
@@ -50,6 +68,47 @@ public class TCSSlowdownController {
         @RequestParam String id) {
         
         return tcsSlowdownService.delete(UUID.fromString(id));
+    }
+
+    @GetMapping("/tcs-slowdown/export")
+    public ResponseEntity<byte[]> exportTCSSlowdown(
+        @RequestParam(required = false) String plantId,
+        @RequestParam String year,
+        @RequestParam(required = false) String siteId,
+        @RequestParam(required = false) String verticalId) {
+
+        if (plantId == null && (siteId == null || verticalId == null)) {
+            throw new RestInvalidArgumentException("Plant ID and Site ID or Vertical ID cannot be null", null);
+        }
+        if (plantId != null && (siteId != null || verticalId != null)) {
+            throw new RestInvalidArgumentException("Plant ID and Site ID or Vertical ID cannot be provided together", null);
+        }
+
+        byte[] excelData = tcsSlowdownService.exportTCSSlowdown(
+            plantId,
+            year,
+            siteId,
+            verticalId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "TCSSlowdown_" + year + ".xlsx");
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(excelData);
+    }
+
+    @PostMapping("/tcs-slowdown/import")
+    public AOPMessageVM importTCSSlowdown(
+        @RequestParam String plantId,
+        @RequestParam String year,
+        @RequestParam("file") MultipartFile file) {
+
+        return tcsSlowdownService.importExcel(
+            plantId,
+            year,
+            file);
     }
 
 }

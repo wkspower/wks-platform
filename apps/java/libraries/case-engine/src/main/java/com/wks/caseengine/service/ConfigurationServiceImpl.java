@@ -75,6 +75,23 @@ import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 
+import java.util.UUID;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
+import org.hibernate.Session;
+
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
 
@@ -3393,6 +3410,200 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			aopMessageVM.setData(map);
 			aopMessageVM.setMessage("Data fetched successfully");
 
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public AOPMessageVM getNormAttributeTransactionLine(String year, String plantId) {
+
+		AOPMessageVM response = new AOPMessageVM();
+
+		try {
+
+			// ================= Validate Input =================
+			if (year == null || year.isBlank()) {
+				return AOPMessageVM.builder()
+						.code(400)
+						.message("Year is required")
+						.data(null)
+						.build();
+			}
+
+			UUID plantUUID;
+			try {
+				plantUUID = UUID.fromString(plantId);
+			} catch (Exception e) {
+				return AOPMessageVM.builder()
+						.code(400)
+						.message("Invalid Plant ID UUID format")
+						.data(null)
+						.build();
+			}
+
+			// ================= Fetch Master Data =================
+			Plants plant = plantsRepository.findById(plantUUID)
+					.orElseThrow(() -> new RestInvalidArgumentException("Plant not found", null));
+
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new RestInvalidArgumentException("Site not found", null));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new RestInvalidArgumentException("Vertical not found", null));
+
+			// ================= Build Stored Procedure Name =================
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GradeWiseLineDetail";
+
+			// ================= Execute Stored Procedure =================
+			List<Map<String, Object>> data = callStoredProcedureWithHeadersLine(
+					storedProcedure,
+					year,
+					plant.getId().toString(),
+					site.getId().toString(),
+					vertical.getId().toString());
+
+			// ================= Return Success =================
+			response.setCode(200);
+			response.setMessage("Data fetched successfully");
+			response.setData(data);
+
+			return response;
+
+		} catch (RestInvalidArgumentException e) {
+			return AOPMessageVM.builder()
+					.code(400)
+					.message(e.getMessage())
+					.data(null)
+					.build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return AOPMessageVM.builder()
+					.code(500)
+					.message("Failed to fetch Line Configuration data")
+					.data(null)
+					.build();
+		}
+	}
+
+	private List<Map<String, Object>> callStoredProcedureWithHeadersLine(
+			String spName, String year, String plantId, String siteId, String verticalId) {
+
+		List<Map<String, Object>> result = new ArrayList<>();
+
+		Session session = entityManager.unwrap(Session.class);
+
+		session.doWork(connection -> {
+
+			String sql = "{call " + spName + "(?, ?, ?, ?)}";
+
+			try (CallableStatement stmt = connection.prepareCall(sql)) {
+
+				stmt.setString(1, year);
+				stmt.setString(2, plantId);
+				stmt.setString(3, siteId);
+				stmt.setString(4, verticalId);
+
+				boolean hasResult = stmt.execute();
+				if (!hasResult)
+					return;
+
+				ResultSet rs = stmt.getResultSet();
+				ResultSetMetaData meta = rs.getMetaData();
+				int colCount = meta.getColumnCount();
+
+				while (rs.next()) {
+					Map<String, Object> row = new LinkedHashMap<>();
+					for (int i = 1; i <= colCount; i++) {
+						String col = meta.getColumnLabel(i);
+						Object val = rs.getObject(i);
+						row.put(col, val);
+					}
+					result.add(row);
+				}
+
+			} catch (SQLException e) {
+				throw new RuntimeException("SP execution failed: " + spName, e);
+			}
+		});
+
+		return result;
+	}
+
+	public AOPMessageVM getConfigurationDataReportMannualEntry(String year, UUID plantFKId, String version) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			List<Object[]> obj = new ArrayList<>();
+			String procedureName = verticalName + "_GetReportManualEntry";
+			obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
+
+			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
+			int i = 0;
+			for (Object[] row : obj) {
+				ConfigurationDTO configurationDTO = new ConfigurationDTO();
+				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+
+				configurationDTO.setJan(
+						(row[1] != null && !row[1].toString().trim().isEmpty())
+								? Double.parseDouble(row[1].toString().trim())
+								: 0.0);
+				configurationDTO.setFeb(
+						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
+								: 0.0);
+				configurationDTO.setMar(
+						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
+								: 0.0);
+				configurationDTO.setApr(
+						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
+								: 0.0);
+				configurationDTO.setMay(
+						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Double.parseDouble(row[5].toString())
+								: 0.0);
+				configurationDTO.setJun(
+						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
+								: 0.0);
+				configurationDTO.setJul(
+						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
+								: 0.0);
+				configurationDTO.setAug(
+						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
+								: 0.0);
+				configurationDTO.setSep(
+						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
+								: 0.0);
+				configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
+						? Double.parseDouble(row[10].toString())
+						: 0.0);
+				configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
+						? Double.parseDouble(row[11].toString())
+						: 0.0);
+				configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
+						? Double.parseDouble(row[12].toString())
+						: 0.0);
+				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
+
+				configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
+				configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
+				configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
+				configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
+				configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
+
+				configurationDTOList.add(configurationDTO);
+				if (row[14] == null) {
+					i++;
+				}
+
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(configurationDTOList);
+			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);

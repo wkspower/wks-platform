@@ -11,6 +11,10 @@ public class VGOVRDropDTO {
     private String kbpsd;
     private Double value_345;
     private String remarks;
+    
+    // For Excel import error handling
+    private String saveStatus;
+    private String errDescription;
 }
 
 

@@ -44,6 +44,11 @@ public class AOPMCCalculatedDataController {
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId, year);
 	}
 	
+	@GetMapping(value = "/production-target-line")
+	public AOPMessageVM getProductionTarget(@RequestParam String plantId, @RequestParam String year,@RequestParam(required=false) String lineId) {
+		return aOPMCCalculatedDataService.getProductionTarget(plantId, year,lineId);
+	}
+	
 	@GetMapping(value = "/max-achieved-capacity")
 	public AOPMessageVM getMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getMaxAchievedCapacity(plantId, year);
@@ -139,4 +144,3 @@ public class AOPMCCalculatedDataController {
 	}
 
 }
-

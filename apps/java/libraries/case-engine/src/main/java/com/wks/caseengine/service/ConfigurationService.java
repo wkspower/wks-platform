@@ -50,4 +50,7 @@ public interface ConfigurationService {
             List<ConfigurationDTO> configurationDTOList, Boolean calculation);
 
     public AOPMessageVM getOtherProductionNormsData(String year, String plantId, String gradeId);
+    public AOPMessageVM getNormAttributeTransactionLine(String year, String plantId);
+
+    public AOPMessageVM getConfigurationDataReportMannualEntry(String year, UUID plantFKId, String version);
 }

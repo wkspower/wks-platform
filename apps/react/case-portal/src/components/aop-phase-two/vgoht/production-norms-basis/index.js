@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Backdrop,
   Box,
+  Button,
+  ButtonGroup,
   CircularProgress,
   Stack,
 } from '../../../../../node_modules/@mui/material/index'
@@ -24,6 +26,7 @@ import Configuration from './Configuration'
 import Constants from './Constants'
 import ReportManualEntry from './ReportManualEntry'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
+import PIMSThroughput from './PIMSThroughput'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -51,6 +54,7 @@ const ProductionNormsBasis = () => {
   const [endDate, setEndDate] = useState()
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
+
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -235,23 +239,25 @@ const ProductionNormsBasis = () => {
     return tab ? tab.displayName : null
   }
 
-  // Dynamic tab list from API
-  const tablist = tabs.map((tabId) => {
-    if (!tabId || !availableTabs.length) return ''
-    const tabInfo = availableTabs.find(
-      (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-    )
+  // Dynamic tab list from API (filtered to exclude 'Report Manual Entry')
+  const tablist = tabs
+    .map((tabId) => {
+      if (!tabId || !availableTabs.length) return ''
+      const tabInfo = availableTabs.find(
+        (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+      )
 
-    if (tabInfo) {
-      const originalName = tabInfo.displayName
-      // Add year suffix for Report Manual Entry
-      if (originalName === 'Report Manual Entry') {
-        return `${originalName} (${prevYearFormatted})`
+      if (tabInfo) {
+        const originalName = tabInfo.displayName
+        // Filter out Report Manual Entry
+        if (originalName === 'Report Manual Entry') {
+          return null
+        }
+        return originalName
       }
-      return originalName
-    }
-    return tabId
-  })
+      return tabId
+    })
+    .filter((tab) => tab !== null)
 
   const renderTab = () => {
     if (!tabs.length || !availableTabs.length) {
@@ -268,6 +274,9 @@ const ProductionNormsBasis = () => {
         return <Configuration />
       case 'Constants':
         return <Constants />
+      case 'PIMS Throughput':
+        return <PIMSThroughput />
+
       case 'Report Manual Entry':
         return <ReportManualEntry />
       default:
@@ -302,13 +311,17 @@ const ProductionNormsBasis = () => {
       </Stack>
 
       {tabs.length > 0 && availableTabs.length > 0 && (
-        <Box>
+        <Stack
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'
+        >
           <TabSection
             tabIndex={tabIndex}
             setTabIndex={setTabIndex}
             tabs={tablist}
           />
-        </Box>
+        </Stack>
       )}
 
       {/* Tab Content */}
@@ -325,9 +338,10 @@ const ProductionNormsBasis = () => {
 
       <Notification
         open={snackbarOpen}
-        setOpen={setSnackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
         message={snackbarData.message}
         severity={snackbarData.severity}
+        duration={snackbarData.duration}
       />
     </div>
   )

@@ -13,6 +13,7 @@ const HeatRate = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
+  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -60,13 +61,49 @@ const HeatRate = () => {
       minWidth: 80,
     },
     {
+      field: 'oemHeatRate',
+      title: 'OEM HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'OEM',
+    },
+    {
+      field: 'previousYearHeatRate',
+      title: 'PREVIOUS YEAR HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'PREVIOUS_YEAR',
+    },
+    {
       field: 'heatRate',
-      title: 'Heat Rate',
-      width: 120,
+      title: 'ACTUAL PROPOSED HR',
+      width: 150,
+      type: 'numberWithRadio',
+      format: valueFormat,
+      editable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'PROPOSED',
+    },
+    {
+      field: 'finalHeatRate',
+      title: 'Final Heat Rate',
+      width: 150,
       type: 'number1',
       format: valueFormat,
       editable: true,
-      minWidth: 100,
+      minWidth: 150,
     },
     {
       field: 'freeSteamFactor',
@@ -140,7 +177,11 @@ const HeatRate = () => {
   const fetchHeatRateData = async (assetId) => {
     setLoading(true)
     try {
-      const res = await InputApiService.getHeatRateData(keycloak, assetId)
+      const res = await InputApiService.getHeatRateData(
+        keycloak,
+        assetId,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -153,6 +194,7 @@ const HeatRate = () => {
           ...item,
           id: item.id || index + 1,
           remarks: item.remarks || '',
+          selectedHeatRate: item.selectedHeatRate || 'PROPOSED',
         }
       })
       setRows(tempRes)
@@ -216,7 +258,12 @@ const HeatRate = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['gtLoad', 'heatRate', 'freeSteamFactor']
+    const fieldsToCheck = [
+      'gtLoad',
+      'heatRate',
+      'freeSteamFactor',
+      'finalHeatRate',
+    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
@@ -338,6 +385,180 @@ const HeatRate = () => {
     setRemarkDialogOpen(true)
   }
 
+  // Custom itemChange handler for radio selection with bidirectional sync
+  const handleCustomItemChange = (e, setRows) => {
+    const { dataItem, field, value } = e
+    const itemId = dataItem.id
+
+    // When radio selection changes, update the Final Heat Rate
+    if (field === 'selectedHeatRate') {
+      // Map radioValue to field name
+      const fieldMapping = {
+        OEM: 'oemHeatRate',
+        PREVIOUS_YEAR: 'previousYearHeatRate',
+        PROPOSED: 'heatRate',
+      }
+
+      const selectedField = fieldMapping[value]
+      const selectedValue = selectedField ? dataItem[selectedField] : null
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              selectedHeatRate: value,
+              finalHeatRate: selectedValue,
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...dataItem,
+          selectedHeatRate: value,
+          finalHeatRate: selectedValue,
+        },
+      }))
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          selectedHeatRate: value,
+          finalHeatRate: selectedValue,
+        },
+      }))
+
+      return
+    }
+
+    // When a source column is edited, update finalHeatRate ONLY if that source is currently selected
+    const sourceFieldMapping = {
+      oemHeatRate: 'OEM',
+      previousYearHeatRate: 'PREVIOUS_YEAR',
+      heatRate: 'PROPOSED',
+    }
+
+    if (sourceFieldMapping[field]) {
+      const radioValueForThisField = sourceFieldMapping[field]
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            // Only update finalHeatRate if this source is currently selected
+            if (r.selectedHeatRate === radioValueForThisField) {
+              return {
+                ...r,
+                [field]: value,
+                finalHeatRate: value,
+              }
+            }
+            // Otherwise just update the source field
+            return {
+              ...r,
+              [field]: value,
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track changes in modifiedCells
+      const currentRow = rows.find((r) => r.id === itemId)
+      if (currentRow?.selectedHeatRate === radioValueForThisField) {
+        // Update both source field and finalHeatRate
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...dataItem,
+            [field]: value,
+            finalHeatRate: value,
+          },
+        }))
+
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [field]: value,
+            finalHeatRate: value,
+          },
+        }))
+      }
+
+      return
+    }
+
+    // When Final Heat Rate is manually edited, check if it matches any source column
+    if (field === 'finalHeatRate') {
+      const sourceFields = [
+        {
+          radioValue: 'OEM',
+          field: 'oemHeatRate',
+          value: dataItem.oemHeatRate,
+        },
+        {
+          radioValue: 'PREVIOUS_YEAR',
+          field: 'previousYearHeatRate',
+          value: dataItem.previousYearHeatRate,
+        },
+        { radioValue: 'PROPOSED', field: 'heatRate', value: dataItem.heatRate },
+      ]
+
+      let matchedRadioValue = null
+
+      // Check if the entered value matches any source column value
+      for (const source of sourceFields) {
+        if (
+          source.value !== null &&
+          source.value !== undefined &&
+          parseFloat(value) === parseFloat(source.value)
+        ) {
+          matchedRadioValue = source.radioValue
+          break
+        }
+      }
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              finalHeatRate: value,
+              // Auto-select radio if value matches a source, otherwise set to OTHER
+              selectedHeatRate: matchedRadioValue || 'OTHER',
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...dataItem,
+          finalHeatRate: value,
+          selectedHeatRate: matchedRadioValue || 'OTHER',
+        },
+      }))
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          finalHeatRate: value,
+          selectedHeatRate: matchedRadioValue || 'OTHER',
+        },
+      }))
+    }
+  }
+
   return (
     <Box>
       <Backdrop
@@ -353,6 +574,8 @@ const HeatRate = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
+        externalCustomModifiedCells={customModifiedCells}
+        externalSetCustomModifiedCells={setCustomModifiedCells}
         title='GT Heat Rate'
         permissions={permissions}
         handleRemarkCellClick={handleRemarkCellClick}
@@ -372,6 +595,7 @@ const HeatRate = () => {
         dropdownConfig={dropdownConfig}
         selectedDropdownValue={selectedPlant}
         setSelectedDropdownValue={setSelectedPlant}
+        customItemChange={handleCustomItemChange}
         paginationConfig={{
           threshold: 20, // Show pagination if > 50 rows
           buttonCount: 5,

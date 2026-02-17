@@ -509,7 +509,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	                        Map<String, Object> meta = new HashMap<>();
 	                        meta.put("field", columnName);
-	                        meta.put("title", columnTitleMap.getOrDefault(columnName, columnName));
+									meta.put("title", columnName);
 	                        meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
 	                        meta.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
 	                        

@@ -29,6 +29,7 @@ import CrakcerConstantsBestAchieved from './CrakcerConstantsBestAchieved'
 import CrakcerConstants from './CrakcerConstants'
 import { validateFields } from 'utils/validationUtils'
 import CrackerConfiguration from './CrackerConfiguration'
+import CrackerReportMannualEntry from './CrackerReportMannualEntry'
 // Constants
 const MONTHS = [
   'april',
@@ -1159,6 +1160,7 @@ const NormalOpNormsScreenCracker = () => {
     'Criteria for Best Achieved',
     'Norms Selection',
     'Final monthly norms',
+    'Report Mannual Entry',
   ]
 
   // UI render
@@ -1187,31 +1189,8 @@ const NormalOpNormsScreenCracker = () => {
           ))}
         </Tabs>
       </Box>
-      {/* {selectedTab === 0 && (
-        <SelectivityData
-          rows={productionRows}
-          loading={loading}
-          fetchData={fetchData}
-          setRows={setProductionRows}
-          configType='cracker_configuration'
-          groupBy='Particulars'
-          tabIndex='0'
-          setGradeId={handleGradeChange}
-          reportTypes={reportTypes}
-        />
-      )} */}
+
       {selectedTab === 0 && <CrackerConfiguration tabIndex={0} />}
-      {/* {selectedTab === 1 && (
-        <SelectivityData
-          rows={productionRowsConstants}
-          loading={loading}
-          fetchData={fetchConstantsData}
-          setRows={setProductionRowsConstants}
-          configType='cracker_constants'
-          groupBy='Particulars'
-          tabIndex='1'
-        />
-      )} */}
 
       {/* Constant Tab */}
       {selectedTab === 1 && <CrakcerConstants />}
@@ -1464,6 +1443,9 @@ const NormalOpNormsScreenCracker = () => {
           />
         </>
       )}
+
+      {/* Report Mannual Entry Tab */}
+      {selectedTab === 5 && <CrackerReportMannualEntry tabIndex={5} />}
     </div>
   )
 }

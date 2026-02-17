@@ -34,6 +34,7 @@ import { getRoleName } from 'services/role-service'
 import { ButtonGroup } from '../../../node_modules/@progress/kendo-react-buttons/index'
 import QualityParameters from './QualityParameters'
 import ExclusionDate from './ExclusionDate'
+import LineConfiguration from './LineConfiguration'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -1527,6 +1528,15 @@ const ConfigurationTable = () => {
                   <ExclusionDate
                     revision={revision}
                     loadBtnClicked={loadBtnClicked}
+                    summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
+                    setSummaryEdited={setSummaryEdited}
+                  />
+                )
+
+              case getTheId('LineConfiguration'):
+                return (
+                  <LineConfiguration
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     setSummaryEdited={setSummaryEdited}

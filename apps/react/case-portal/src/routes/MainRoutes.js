@@ -87,10 +87,8 @@ import SteadyStateConsumption from 'components/aop-phase-two/vgoht/steady-state-
 import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consumption/index'
 import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
 import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
-import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
-import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
-//MISSING ROUTES PHSE-II
+// crude
 import ProductionNormsBasisCrude from 'components/aop-phase-two/crude/production-norms-basis/index'
 import ShutdownActivitiesCrude from 'components/aop-phase-two/crude/shutdown-activities/index'
 import SlowdownActivitiesCrude from 'components/aop-phase-two/crude/slowdown-activities/index'
@@ -101,6 +99,8 @@ import SteadyStateConsumptionCrude from 'components/aop-phase-two/crude/steady-s
 import ShutdownConsumptionCrude from 'components/aop-phase-two/crude/shutdown-consumption/index'
 import SlowdownConsumptionCrude from 'components/aop-phase-two/crude/slowdown-consumption/index'
 import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-aop-consumption/index'
+import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
+import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))

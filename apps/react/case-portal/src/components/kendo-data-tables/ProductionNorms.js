@@ -61,7 +61,8 @@ const ProductionNorms = ({ permissions }) => {
   const plantName = plantObject?.name?.toLowerCase()
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
-
+  const IS_AROMATIC_SEZ =
+    lowerVertName === 'aromatics' && SITE_NAME_LOWERCASE === 'sez'
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -646,7 +647,8 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
           lowerVertName !== 'vcm' &&
-          lowerVertName !== 'pta'
+          lowerVertName !== 'pta' &&
+          !IS_AROMATIC_SEZ
         ) {
           finalData = [...formattedData, totalsRow]
         } else {

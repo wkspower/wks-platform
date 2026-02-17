@@ -704,7 +704,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			if (vertical.getName().equalsIgnoreCase("VCM")) {
 				Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
-				String procedure = vertical.getName() + "_" + site.getName() + "_CalculateTotalFuel";
+				String procedure = vertical.getName() + "_" + site.getName() + "_CalculateTotalFuelNorms";
 				executeProcedure(procedure, plantFKId.toString(), year);
 			}
 			// TODO Auto-generated method stub

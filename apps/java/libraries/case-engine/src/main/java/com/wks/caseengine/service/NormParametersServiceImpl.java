@@ -23,6 +23,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
+
+
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+import org.hibernate.query.NativeQuery;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TupleElement;
+
+
  @Service
  public class NormParametersServiceImpl implements NormParametersService {
 	
@@ -122,5 +132,55 @@ import jakarta.persistence.Query;
 		return aopMessageVM;
 		
 	}
+
+public AOPMessageVM getAllLines(String plantId) {
+
+    try {
+        UUID plantUUID = UUID.fromString(plantId);
+        String verticalName = plantsRepository.findVerticalNameByPlantId(plantUUID);
+        String viewName = "vwScrn" + verticalName + "GetLineDetails";
+
+        List<Map<String, Object>> data = getDynamicViewData(plantId, viewName);
+
+        return AOPMessageVM.builder()
+                .code(200)
+                .message("Lines fetched successfully")
+                .data(data)
+                .build();
+
+    } catch (Exception e) {
+        return AOPMessageVM.builder()
+                .code(500)
+                .message("Error: " + e.getMessage())
+                .data(null)
+                .build();
+    }
+}
+
+
+
+
+public List<Map<String, Object>> getDynamicViewData(String plantFkId, String viewName) {
+
+    String sql = "SELECT * FROM " + viewName + " WHERE PlantId = :plantFkId";
+
+    Query query = entityManager.createNativeQuery(sql, Tuple.class);
+    query.setParameter("plantFkId", plantFkId);
+
+    List<Tuple> rows = query.getResultList();
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Tuple row : rows) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (TupleElement<?> col : row.getElements()) {
+            map.put(col.getAlias(), row.get(col.getAlias()));
+        }
+        result.add(map);
+    }
+
+    return result;
+}
+
+
 
  }

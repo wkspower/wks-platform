@@ -4,9 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import ApproveDialog from '../TcsInput/workflow/ApproveDialog'
 import { Stack } from '../../../../../node_modules/@mui/material/index'
-import { ROLES } from '../utils/roleUtils'
 
 const Slowdown = ({
   SITE_ID,
@@ -33,28 +31,6 @@ const Slowdown = ({
 
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
-
-  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
-  // Approve Dialog handlers
-  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
-  const handleApprove = (plantId, remark) => {
-    console.log('Approved plantId:', plantId, 'Remark:', remark)
-    // TODO: Call API to approve the plant
-    setSnackbarData({
-      message: `Plant ${plantId} approved successfully`,
-      severity: 'success',
-    })
-    setSnackbarOpen(true)
-  }
-  const handleReject = (plantId, remark) => {
-    console.log('Rejected plantId:', plantId, 'Remark:', remark)
-    // TODO: Call API to reject the plant
-    setSnackbarData({
-      message: `Plant ${plantId} rejected`,
-      severity: 'error',
-    })
-    setSnackbarOpen(true)
-  }
 
   // Fetch Shutdown Data
   const fetchSlowdownData = useCallback(async () => {
@@ -188,6 +164,35 @@ const Slowdown = ({
     }))
   }, [apiMetadata])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsOutputApiService.exportSlowdownExcel(
+        keycloak,
+        SITE_ID,
+        VERTICAL_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Slowdown data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.purpose || '')
@@ -215,9 +220,9 @@ const Slowdown = ({
       showExport: true,
       showTitle: true,
       filterable: false,
-      approveBtn: userRole === ROLES.EPS_ENGINEER,
+      approveBtn: false,
     }),
-    [userRole],
+    [],
   )
 
   return (
@@ -252,22 +257,9 @@ const Slowdown = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           readonly={true}
-          onApproveClick={() => setOpenApproveDialogeBox(true)}
+          handleExport={handleExport}
         />
       </Stack>
-
-      {/* Approve Dialog */}
-      <ApproveDialog
-        open={openApproveDialogeBox}
-        onClose={closeApproveDialogeBox}
-        onApprove={handleApprove}
-        onReject={handleReject}
-        entries={rows.map((row) => ({
-          id: row.id,
-          plantId: row.plantId,
-          plantName: row.plantName,
-        }))}
-      />
     </Box>
   )
 }

@@ -77,6 +77,7 @@ const getEnhancedAOPColDefs = ({
   headerMap,
   configType,
   FORMATE_VALUE,
+  allGradesRecipes,
 }) => {
   var config = []
 
@@ -99,6 +100,31 @@ const getEnhancedAOPColDefs = ({
       config.push({
         field: field?.id?.toUpperCase(),
         title: field?.displayName,
+        editable: true,
+        width1: 200,
+        type: 'number',
+        format: FORMATE_VALUE,
+      })
+    })
+  } else if (configType == 'lines') {
+    config = [
+      {
+        field: 'GradeName',
+        title: 'Grade',
+        editable: false,
+        width1: 200,
+      },
+      {
+        field: 'UOM',
+        title: 'UOM',
+        editable: false,
+        width1: 85,
+      },
+    ]
+    allGradesRecipes?.forEach((line) => {
+      config.push({
+        field: line?.Id?.toUpperCase(), // use Id from API
+        title: line?.DisplayName, // use DisplayName
         editable: true,
         width1: 200,
         type: 'number',

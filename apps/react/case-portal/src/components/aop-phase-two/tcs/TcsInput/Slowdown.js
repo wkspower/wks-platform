@@ -38,54 +38,94 @@ const Slowdown = ({
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
   const [originalRows, setOriginalRows] = useState([])
 
-  // Fetch Shutdown Data
-  const fetchSlowdownData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+  // Carry forward data from previous year
+  const handleCarryForward = useCallback(async () => {
     try {
-      setLoading(true)
-      let transformedData = []
+      console.log('No Slowdown data found, attempting carry-forward...')
 
-      const response = await TcsApiService.getTcsSlowdownData(
+      const carryForwardResponse = await TcsApiService.carryForwardTcsSlowdown(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-      console.log('TCS Slowdown Response:', response)
 
-      if (response?.results && Array.isArray(response.results)) {
-        transformedData = response.results.map((item, index) => ({
-          id: item.id || `row_${index}`,
-          ...item,
-          inEdit: false,
-        }))
-      }
+      console.log('Carry-forward response:', carryForwardResponse)
 
-      // Store headers and keys from API response
-      if (response?.headers && response?.keys) {
-        setApiMetadata({ headers: response.headers, keys: response.keys })
-      }
-
-      setRows(transformedData)
-      setOriginalRows(transformedData)
-    } catch (err) {
-      console.error('Error fetching Slowdown data:', err)
       setSnackbarData({
-        message: `Failed to load Slowdown data. Please try again.`,
-        severity: 'error',
+        message: `Slowdown data carried forward from previous year successfully!`,
+        severity: 'success',
       })
       setSnackbarOpen(true)
-      setRows([])
-    } finally {
-      setLoading(false)
+
+      return true
+    } catch (carryForwardErr) {
+      console.error('Error during carry-forward for Slowdown:', carryForwardErr)
+      return false
     }
-  }, [
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    currentTab.id,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+  }, [keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen])
+
+  // Fetch Slowdown Data
+  const fetchSlowdownData = useCallback(
+    async (skipCarryForward = false) => {
+      if (!PLANT_ID || !AOP_YEAR) return
+      try {
+        setLoading(true)
+        let transformedData = []
+
+        const response = await TcsApiService.getTcsSlowdownData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        console.log('TCS Slowdown Response:', response)
+
+        if (response?.results && Array.isArray(response.results)) {
+          transformedData = response.results.map((item, index) => ({
+            id: item.id || `row_${index}`,
+            ...item,
+            inEdit: false,
+          }))
+        }
+
+        // Store headers and keys from API response
+        if (response?.headers && response?.keys) {
+          setApiMetadata({ headers: response.headers, keys: response.keys })
+        }
+
+        // If data is empty and carry-forward not skipped, attempt carry-forward and refetch
+        if (transformedData.length === 0 && !skipCarryForward) {
+          const carryForwardSuccess = await handleCarryForward()
+          if (carryForwardSuccess) {
+            // Refetch data after successful carry-forward
+            await fetchSlowdownData(true)
+            return
+          }
+        }
+
+        setRows(transformedData)
+        setOriginalRows(transformedData)
+      } catch (err) {
+        console.error('Error fetching Slowdown data:', err)
+        setSnackbarData({
+          message: `Failed to load Slowdown data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRows([])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      currentTab.id,
+      handleCarryForward,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
@@ -458,6 +498,108 @@ const Slowdown = ({
     ],
   )
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsApiService.exportSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR)
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Slowdown data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
+  // Import handler
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await TcsApiService.importSlowdownExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        file,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        // Refresh data after import
+        await fetchSlowdownData()
+      } else if (response?.code === 400 && response?.data) {
+        // Handle error response with Excel file download
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `TCS_Slowdown_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          // Refresh data after import
+          await fetchSlowdownData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to import Excel file.',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
@@ -467,8 +609,9 @@ const Slowdown = ({
     showAction: true,
     remarksEditable: true,
     showCalculate: false,
-    showExport: false,
-    showImport: false,
+    showExport: true,
+    ExcelName: `Slowdown_${AOP_YEAR}`,
+    showImport: true,
     saveBtnForRemark: true,
     saveBtn: true,
     showWorkFlowBtns: false,
@@ -501,6 +644,8 @@ const Slowdown = ({
           setCurrentRowId={() => {}}
           saveChanges={validateData}
           deleteRowData={deleteRowData}
+          handleExcelUpload={handleExcelUpload}
+          handleExport={handleExport}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}

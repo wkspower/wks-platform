@@ -75,27 +75,30 @@ const Constants = () => {
   const fetchConstantsData = async () => {
     setLoading(true)
     try {
+      // Simulate API call with 1 second delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       // const res = await ProductionNormsApiService.getConstantsData(
       //   keycloak,
       //   PLANT_ID,
       //   AOP_YEAR,
       // )
 
-      // if (res?.length === 0) {
-      //   setRows([])
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({ message: 'No data found', severity: 'info' })
-      //   return
-      // }
+      const res = productionAndNormsBasisConstant.data
 
-      // console.log('Constants data:', res)
-      const formattedData = productionAndNormsBasisConstant.data?.map(
-        (item, index) => ({
-          ...item,
-          remarks: item.remarks || '',
-          id: item?.id || index + 1,
-        }),
-      )
+      if (res?.length === 0) {
+        setRows([])
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No data found', severity: 'info' })
+        return
+      }
+
+      console.log('Constants data:', res)
+      const formattedData = res?.map((item, index) => ({
+        ...item,
+        remarks: item.remarks || '',
+        id: item?.id || index + 1,
+      }))
       setRows(formattedData)
       setOriginalRows(formattedData)
     } catch (error) {

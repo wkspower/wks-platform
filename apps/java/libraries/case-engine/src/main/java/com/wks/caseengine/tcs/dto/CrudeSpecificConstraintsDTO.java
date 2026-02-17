@@ -12,6 +12,10 @@ public class CrudeSpecificConstraintsDTO {
     private String crude;
     private Double maxBlendLimit;
     private String reasons;
+    
+    // For Excel import error handling
+    private String saveStatus;
+    private String errDescription;
 }
 
 

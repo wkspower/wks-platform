@@ -1537,7 +1537,7 @@ const DecokingConfig = () => {
             id='meg-grid-header'
           >
             <Typography component='span' className='grid-title'>
-              Downsteam Shutdown
+              Downstream Shutdown
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>

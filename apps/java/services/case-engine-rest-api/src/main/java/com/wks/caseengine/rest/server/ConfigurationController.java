@@ -297,4 +297,18 @@ public class ConfigurationController {
 		return configurationService.getOtherProductionNormsData(year, plantId, gradeId);
 	}
 
+	@GetMapping(value = "/line-configuration")
+	public AOPMessageVM getNormAttributeTransactionLine(
+			@RequestParam String year,
+			@RequestParam String plantId) {
+
+		return configurationService.getNormAttributeTransactionLine(year, plantId);
+	}
+
+	@GetMapping(value = "/report-mannual-entry")
+	public AOPMessageVM getConfigurationDataReportMannualEntry(@RequestParam String year, @RequestParam UUID plantFKId,
+			@RequestParam(required = false) String version) {
+		return configurationService.getConfigurationDataReportMannualEntry(year, plantFKId, version);
+	}
+
 }
