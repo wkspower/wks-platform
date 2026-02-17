@@ -365,7 +365,11 @@ const HeatRate = () => {
     })
 
     try {
-      await InputApiService.exportHeatRateExcel(keycloak, selectedPlant)
+      await InputApiService.exportHeatRateExcel(
+        keycloak,
+        selectedPlant,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',

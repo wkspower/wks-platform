@@ -2,6 +2,8 @@ package com.wks.caseengine.rest.cpp;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,8 @@ import java.util.List;
 @RequestMapping("task")
 public class HeatRateController {
   
+    private static final Logger logger = LoggerFactory.getLogger(HeatRateController.class);
+    
     @Autowired
     private HeatRateService heatRateService;
     
@@ -38,9 +42,44 @@ public class HeatRateController {
 
 
 
-    @GetMapping("/heat-rate/{assetId}")
-    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId) {
-        return ResponseEntity.ok(heatRateService.getHeatRateByAssetId(assetId));
+    @GetMapping({"/heat-rate/{assetId}/{financialYear}", "/heat-rate/{assetId}/{financialYear}/{startDate}/{endDate}"})
+    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(
+            @PathVariable String assetId, 
+            @PathVariable String financialYear,
+            @PathVariable(required = false) String startDate,
+            @PathVariable(required = false) String endDate) {
+        
+        logger.info("========== GET HEAT RATE REQUEST ==========");
+        logger.info("Request Parameters - assetId: {}, financialYear: {}", assetId, financialYear);
+        logger.info("Optional Parameters - startDate: {}, endDate: {}", startDate, endDate);
+        
+        List<HeatRateDTO> result;
+        
+        // If date range is provided, calculate proposed heat rates
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            logger.info("Date range provided - calling getHeatRateByAssetIdWithProposed");
+            result = heatRateService.getHeatRateByAssetIdWithProposed(assetId, financialYear, startDate, endDate);
+        } else {
+            logger.info("No date range provided - calling standard getHeatRateByAssetId");
+            result = heatRateService.getHeatRateByAssetId(assetId, financialYear);
+        }
+        
+        logger.info("Service returned {} records", result != null ? result.size() : 0);
+        if (result != null && !result.isEmpty()) {
+            HeatRateDTO firstRecord = result.get(0);
+            logger.info("First record details:");
+            logger.info("  - id: {}", firstRecord.getId());
+            logger.info("  - equipType: {}", firstRecord.getEquipType());
+            logger.info("  - gtLoad: {}", firstRecord.getGtLoad());
+            logger.info("  - heatRate: {}", firstRecord.getHeatRate());
+            logger.info("  - previousYearHeatRate: {}", firstRecord.getPreviousYearHeatRate());
+            logger.info("  - finalHeatRate: {}", firstRecord.getFinalHeatRate());
+            logger.info("  - proposedHeatRate: {}", firstRecord.getProposedHeatRate());
+            logger.info("  - freeSteamFactor: {}", firstRecord.getFreeSteamFactor());
+        }
+        logger.info("========== RESPONSE BEING SENT ==========");
+        
+        return ResponseEntity.ok(result);
     }
 
          // *****************
@@ -74,7 +113,24 @@ public class HeatRateController {
 
     @PostMapping("/heat-rate/{financialYear}")
     public ResponseEntity<Void> updateHeatRate(@RequestBody List<HeatRateDTO> heatRateDTOs, @PathVariable String financialYear) {
+        logger.info("========== UPDATE HEAT RATE REQUEST ==========");
+        logger.info("Request Parameters - financialYear: {}", financialYear);
+        logger.info("Received {} heat rate records to update", heatRateDTOs != null ? heatRateDTOs.size() : 0);
+        
+        if (heatRateDTOs != null && !heatRateDTOs.isEmpty()) {
+            HeatRateDTO firstRecord = heatRateDTOs.get(0);
+            logger.info("First record to update:");
+            logger.info("  - id: {}", firstRecord.getId());
+            logger.info("  - gtLoad: {}", firstRecord.getGtLoad());
+            logger.info("  - heatRate: {}", firstRecord.getHeatRate());
+            logger.info("  - finalHeatRate: {}", firstRecord.getFinalHeatRate());
+            logger.info("  - freeSteamFactor: {}", firstRecord.getFreeSteamFactor());
+        }
+        
         heatRateService.updateHeatRate(heatRateDTOs);
+        logger.info("Heat rate update completed successfully");
+        logger.info("==========================================");
+        
         return ResponseEntity.ok().build();
     }
 
@@ -121,10 +177,10 @@ public class HeatRateController {
         }
     }
 
-    @GetMapping("/heat-rate/export/{assetId}")
-    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId) {
+    @GetMapping("/heat-rate/export/{assetId}/{financialYear}")
+    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId, @PathVariable String financialYear) {
         try {
-            byte[] excelData = heatRateService.exportHeatRate(assetId);
+            byte[] excelData = heatRateService.exportHeatRate(assetId, financialYear);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", "Heat_Rate.xlsx");

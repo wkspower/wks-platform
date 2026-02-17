@@ -11,6 +11,10 @@ public interface HeatRateProjection {
     Double getHeatRate();
     Double getFreeSteamFactor();
     String getRemarks();
+    Double getPreviousYearHeatRate();
+    Double getFinalHeatRate();
+    Double getOemHeatRate();
+    String getSelectedHeatRate();
 }
 
 
