@@ -1968,7 +1968,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 
 					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-					plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
+					if(shutDownPlanDTO.getLineId()!=null) {
+						plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
+					}
 
 					// Save new record
 					plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
@@ -2087,8 +2089,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 							if(plantMaintenanceTransaction.getLineFKId()!=null && shutDownPlanDTO.getLineId()!=null && !plantMaintenanceTransaction.getLineFKId().toString().equalsIgnoreCase(shutDownPlanDTO.getLineId())) {
 								changed = true;
+								plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
 							}
-							plantMaintenanceTransaction.setLineFKId(UUID.fromString(shutDownPlanDTO.getLineId()));
 							if (changed && (plantMaintenanceTransaction.getRemarks()
 									.equalsIgnoreCase(shutDownPlanDTO.getRemark()))) {
 								shutDownPlanDTO.setSaveStatus("Failed");
