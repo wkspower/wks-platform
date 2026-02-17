@@ -19,6 +19,7 @@ public class HeatRateDTO {
     private Double finalHeatRate;
     private Double oemHeatRate;
     private String selectedHeatRate;
+    private Double proposedHeatRate; // Calculated from date range using SP
 }
 
 

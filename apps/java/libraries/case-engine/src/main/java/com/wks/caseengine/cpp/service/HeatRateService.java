@@ -117,6 +117,51 @@ public class HeatRateService {
     }
 
     /**
+     * Get heat rate data with proposed heat rate calculated from date range
+     * 
+     * @param assetId Asset UUID
+     * @param financialYear Financial year (e.g., "2026-27")
+     * @param startDate Start date for proposed calculation (format: YYYY-MM-DD)
+     * @param endDate End date for proposed calculation (format: YYYY-MM-DD)
+     * @return List of HeatRateDTO with proposedHeatRate populated
+     */
+    public List<HeatRateDTO> getHeatRateByAssetIdWithProposed(String assetId, String financialYear, String startDate, String endDate) {
+        logger.info("========== SERVICE: getHeatRateByAssetIdWithProposed ==========");
+        logger.info("Input Parameters:");
+        logger.info("  - assetId: {}", assetId);
+        logger.info("  - financialYear: {}", financialYear);
+        logger.info("  - startDate: {}", startDate);
+        logger.info("  - endDate: {}", endDate);
+        
+        // Get base heat rate data from table
+        List<HeatRateDTO> heatRateDTOs = getHeatRateByAssetId(assetId, financialYear);
+        
+        // Calculate proposed heat rates from date range if dates are provided
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            UUID assetUUID = UUID.fromString(assetId);
+            java.util.Map<Double, Double> proposedHeatRateMap = calculateProposedHeatRates(assetUUID, startDate, endDate);
+            
+            // Merge proposed heat rates with existing data
+            for (HeatRateDTO dto : heatRateDTOs) {
+                Double proposedHeatRate = proposedHeatRateMap.get(dto.getGtLoad());
+                if (proposedHeatRate != null) {
+                    dto.setProposedHeatRate(proposedHeatRate);
+                    logger.debug("Set proposedHeatRate for GTLoad {}: {}", dto.getGtLoad(), proposedHeatRate);
+                }
+            }
+            
+            logger.info("Merged proposed heat rates for {} load points", proposedHeatRateMap.size());
+        } else {
+            logger.info("No date range provided, skipping proposed heat rate calculation");
+        }
+        
+        logger.info("Returning {} heat rate records with proposed data", heatRateDTOs.size());
+        logger.info("=================================================================");
+        
+        return heatRateDTOs;
+    }
+
+    /**
      * Calculate previous financial year from current financial year
      * Example: "2026-27" -> "2025-26"
      */
@@ -133,6 +178,54 @@ public class HeatRateService {
         int prevEndYear = endYear - 1;
         
         return prevStartYear + "-" + String.format("%02d", prevEndYear);
+    }
+
+    /**
+     * Call stored procedure to calculate proposed heat rates based on date range
+     * 
+     * @param assetId Asset UUID
+     * @param startDate Start date for calculation
+     * @param endDate End date for calculation
+     * @return Map of GTLoad to ProposedHeatRate
+     */
+    private java.util.Map<Double, Double> calculateProposedHeatRates(UUID assetId, String startDate, String endDate) {
+        logger.info("Calculating proposed heat rates for assetId: {}, dateRange: {} to {}", assetId, startDate, endDate);
+        
+        // Get asset name from PowerGenerationAssets using displayName column
+        String assetName = jdbcTemplate.queryForObject(
+            "SELECT displayName FROM PowerGenerationAssets WHERE AssetId = ?",
+            String.class,
+            assetId
+        );
+        
+        if (assetName == null) {
+            logger.warn("Asset not found for assetId: {}", assetId);
+            return new java.util.HashMap<>();
+        }
+        
+        logger.info("Asset name (displayName): {}", assetName);
+        
+        // Call the stored procedure
+        String sql = "EXEC CPP_CalculateGTHeatRate_ByDateRange @StartDate = ?, @EndDate = ?, @AssetName = ?";
+        
+        java.util.Map<Double, Double> proposedHeatRateMap = new java.util.HashMap<>();
+        
+        try {
+            jdbcTemplate.query(sql, 
+                (rs) -> {
+                    Double gtLoad = rs.getDouble("GTLoad");
+                    Double displayedAvgHeatRate = rs.getDouble("DisplayedAvgHeatRate");
+                    proposedHeatRateMap.put(gtLoad, displayedAvgHeatRate);
+                },
+                startDate, endDate, assetName
+            );
+            
+            logger.info("Proposed heat rates calculated for {} load points", proposedHeatRateMap.size());
+        } catch (Exception e) {
+            logger.error("Error calculating proposed heat rates: {}", e.getMessage(), e);
+        }
+        
+        return proposedHeatRateMap;
     }
 
     public List<STGExtractionLookupDTO> getSTGExtractionLookup() {

@@ -43,11 +43,26 @@ public class HeatRateController {
 
 
     @GetMapping("/heat-rate/{assetId}/{financialYear}")
-    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId, @PathVariable String financialYear) {
+    public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(
+            @PathVariable String assetId, 
+            @PathVariable String financialYear,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
         logger.info("========== GET HEAT RATE REQUEST ==========");
         logger.info("Request Parameters - assetId: {}, financialYear: {}", assetId, financialYear);
+        logger.info("Optional Parameters - startDate: {}, endDate: {}", startDate, endDate);
         
-        List<HeatRateDTO> result = heatRateService.getHeatRateByAssetId(assetId, financialYear);
+        List<HeatRateDTO> result;
+        
+        // If date range is provided, calculate proposed heat rates
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            logger.info("Date range provided - calling getHeatRateByAssetIdWithProposed");
+            result = heatRateService.getHeatRateByAssetIdWithProposed(assetId, financialYear, startDate, endDate);
+        } else {
+            logger.info("No date range provided - calling standard getHeatRateByAssetId");
+            result = heatRateService.getHeatRateByAssetId(assetId, financialYear);
+        }
         
         logger.info("Service returned {} records", result != null ? result.size() : 0);
         if (result != null && !result.isEmpty()) {
@@ -59,6 +74,7 @@ public class HeatRateController {
             logger.info("  - heatRate: {}", firstRecord.getHeatRate());
             logger.info("  - previousYearHeatRate: {}", firstRecord.getPreviousYearHeatRate());
             logger.info("  - finalHeatRate: {}", firstRecord.getFinalHeatRate());
+            logger.info("  - proposedHeatRate: {}", firstRecord.getProposedHeatRate());
             logger.info("  - freeSteamFactor: {}", firstRecord.getFreeSteamFactor());
         }
         logger.info("========== RESPONSE BEING SENT ==========");
