@@ -178,7 +178,11 @@ const HeatRate = () => {
   const fetchHeatRateData = async (assetId) => {
     setLoading(true)
     try {
-      const res = await InputApiService.getHeatRateData(keycloak, assetId, AOP_YEAR)
+      const res = await InputApiService.getHeatRateData(
+        keycloak,
+        assetId,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -361,7 +365,11 @@ const HeatRate = () => {
     })
 
     try {
-      await InputApiService.exportHeatRateExcel(keycloak, selectedPlant, AOP_YEAR)
+      await InputApiService.exportHeatRateExcel(
+        keycloak,
+        selectedPlant,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -591,7 +599,7 @@ const HeatRate = () => {
         currentRemark={currentRemark}
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
-        setCurrentRowId={() => { }}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
         handleExport={handleExport}
