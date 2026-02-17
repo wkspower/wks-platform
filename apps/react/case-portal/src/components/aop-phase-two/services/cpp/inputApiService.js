@@ -39,6 +39,8 @@ export const InputApiService = {
   saveHeatRateData,
   saveHeatRateExcel,
   exportHeatRateExcel,
+  getConfigurationExecutionDetails,
+  executeConfiguration,
 
   getSTGHeatRateData,
   saveSTGHeatRateData,
@@ -1059,4 +1061,45 @@ async function exportFuelAvailabilityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     fileName: `Fuel_Availability_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
+}
+
+//========= Heat Rate Date From to
+async function getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function executeConfiguration(executionDetailDtoList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(executionDetailDtoList),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error saving configuration execution:', e)
+    return Promise.reject(e)
+  }
 }

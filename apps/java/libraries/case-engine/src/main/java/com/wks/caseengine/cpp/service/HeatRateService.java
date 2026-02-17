@@ -214,8 +214,8 @@ public class HeatRateService {
             jdbcTemplate.query(sql, 
                 (rs) -> {
                     Double gtLoad = rs.getDouble("GTLoad");
-                    Double displayedAvgHeatRate = rs.getDouble("DisplayedAvgHeatRate");
-                    proposedHeatRateMap.put(gtLoad, displayedAvgHeatRate);
+                    Double heatRate = rs.getDouble("HeatRate");
+                    proposedHeatRateMap.put(gtLoad, heatRate);
                 },
                 startDate, endDate, assetName
             );
@@ -320,7 +320,6 @@ public class HeatRateService {
                 heatRateDTO.getFinalHeatRate(), heatRateDTO.getOemHeatRate(), selectedHeatRate);
             updates.add(new Object[] { 
                 heatRateDTO.getGtLoad(), 
-                heatRateDTO.getHeatRate(), 
                 heatRateDTO.getFreeSteamFactor(), 
                 heatRateDTO.getFinalHeatRate(), 
                 heatRateDTO.getOemHeatRate(),
@@ -331,7 +330,7 @@ public class HeatRateService {
         }
         
         if(updates.size() > 0) {
-            String sql = "update CPP_GTHeatRate set GTLoad = ?, DisplayedAvgHeatRate = ?, FreeSteamFactor = ?, FinalHeatRate = ?, OEMHeatRate = ?, SelectedHeatRate = ?, Remarks = ?, UpdatedDate = GETDATE() WHERE Id = ?";
+            String sql = "update CPP_GTHeatRate set GTLoad = ?, FreeSteamFactor = ?, FinalHeatRate = ?, OEMHeatRate = ?, SelectedHeatRate = ?, Remarks = ?, UpdatedDate = GETDATE() WHERE Id = ?";
             logger.info("Executing batch update SQL: {}", sql);
             logger.info("Updating {} records in database", updates.size());
             

@@ -42,12 +42,12 @@ public class HeatRateController {
 
 
 
-    @GetMapping("/heat-rate/{assetId}/{financialYear}")
+    @GetMapping({"/heat-rate/{assetId}/{financialYear}", "/heat-rate/{assetId}/{financialYear}/{startDate}/{endDate}"})
     public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(
             @PathVariable String assetId, 
             @PathVariable String financialYear,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
+            @PathVariable(required = false) String startDate,
+            @PathVariable(required = false) String endDate) {
         
         logger.info("========== GET HEAT RATE REQUEST ==========");
         logger.info("Request Parameters - assetId: {}, financialYear: {}", assetId, financialYear);
