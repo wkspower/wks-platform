@@ -50,4 +50,5 @@ public class AOPDTO {
     private String saveStatus;
 	private String errDescription;
 	private Double total;
+	private String lineId;
 }

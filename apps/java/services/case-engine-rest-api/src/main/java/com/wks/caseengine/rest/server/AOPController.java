@@ -32,6 +32,11 @@ public class AOPController {
 		 return  aopService.getAOPData(plantId,year,type);
 	}
 	
+	@GetMapping(value="/monthly-production-line")
+	public AOPMessageVM getMonthlyProduction(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String type,@RequestParam(required=false) String lineId){
+		 return  aopService.getMonthlyProduction(plantId,year,type,lineId);
+	}
+	
 	@GetMapping(value = "/monthly-production-export")
 	public ResponseEntity<byte[]> exportAOPData(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String type) {
 	    try {
@@ -77,4 +82,3 @@ public class AOPController {
 
   
 }
-
