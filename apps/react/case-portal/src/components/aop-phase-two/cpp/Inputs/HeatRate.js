@@ -8,6 +8,7 @@ import STGHeatRate from './STGHeatRate'
 import HRSGHeatRate from './HRSGHeatRate'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
 
 const HeatRate = () => {
   const keycloak = useSession()
@@ -568,6 +569,16 @@ const HeatRate = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      <Stack sx={{ mt: 2, mb: 2 }}>
+        <DateRangeSelectorWithHistory
+          onDateChange={({ startDate, endDate }) => {
+            console.log('Dates changed:', startDate, endDate)
+          }}
+          disabled={false}
+          timeRequired={false}
+          showLastRefreshed={true}
+        />
+      </Stack>
       <AdvanceKendoTable
         columns={columns}
         rows={rows}
