@@ -102,18 +102,6 @@ import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-a
 import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
-//MISSING ROUTES PHSE-II
-import ProductionNormsBasisCrude from 'components/aop-phase-two/crude/production-norms-basis/index'
-import ShutdownActivitiesCrude from 'components/aop-phase-two/crude/shutdown-activities/index'
-import SlowdownActivitiesCrude from 'components/aop-phase-two/crude/slowdown-activities/index'
-import ProductionTargetCrude from 'components/aop-phase-two/crude/production-target/index'
-import NetProductionHoursCrude from 'components/aop-phase-two/crude/net-production-hours/index'
-import MonthwiseProductionPlanCrude from 'components/aop-phase-two/crude/monthwise-production-plan/index'
-import SteadyStateConsumptionCrude from 'components/aop-phase-two/crude/steady-state-consumption/index'
-import ShutdownConsumptionCrude from 'components/aop-phase-two/crude/shutdown-consumption/index'
-import SlowdownConsumptionCrude from 'components/aop-phase-two/crude/slowdown-consumption/index'
-import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-aop-consumption/index'
-
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
