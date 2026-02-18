@@ -32,8 +32,7 @@ import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
-import ElastomerSlowDown from './SlowdownElastomer'
-const SlowDown = ({ permissions }) => {
+const ElastomerSlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -1471,9 +1470,6 @@ const SlowDown = ({ permissions }) => {
     },
     isOldYear,
   )
-  if(lowerVertName === 'elastomer'){
-    return <ElastomerSlowDown  />
-  }
 
   return (
     <div>
@@ -1484,7 +1480,6 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {lowerVertName === 'meg' && (
         <Box style={{ margin: 0, padding: 0 }}>
           <Tabs
             value={selectedTab}
@@ -1508,7 +1503,7 @@ const SlowDown = ({ permissions }) => {
             />
 
             <Tab
-              label='Configuration'
+              label='Slowdown History Configure'
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
@@ -1519,7 +1514,7 @@ const SlowDown = ({ permissions }) => {
             />
           </Tabs>
         </Box>
-      )}
+     
 
       {selectedTab === 0 && (
         <KendoDataTables
@@ -1568,7 +1563,7 @@ const SlowDown = ({ permissions }) => {
           modifiedCells={modifiedCells2}
           setModifiedCells={setModifiedCells2}
           setRows={setRows2}
-          columns={colDefs2}
+          columns={colDefs}
           rows={rows2}
           paginationOptions={[100, 200, 300]}
           updateSlowdownData={updateSlowdownData2}
@@ -1587,15 +1582,12 @@ const SlowDown = ({ permissions }) => {
           unsavedChangesRef={unsavedChangesRef}
           permissions={{
             saveBtn: true,
-            addButton: false,
-            deleteButton: false,
-            editButton: true,
             allAction: true,
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
             ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown Activities(Configuration)`,
             showTitleNameBusiness: true,
-            titleName: 'Configuration',
+            titleName: 'Slowdown ElastomerConfigure',
           }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'
@@ -1606,4 +1598,4 @@ const SlowDown = ({ permissions }) => {
   )
 }
 
-export default SlowDown
+export default ElastomerSlowDown
