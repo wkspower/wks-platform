@@ -125,12 +125,24 @@ const SiteAOPReport = ({ permissions }) => {
     // 'Technical Availability',
     // 'MCU Capacity Utilization (%)',
   ]
+  function getAopShortYears(aopYear) {
+  if (!aopYear) return { prev: '', next: '' }
+  const match = aopYear.match(/(\d{4})-(\d{2})/)
+  if (match) {
+    const prev = match[1].slice(-2)
+    const next = match[2]
+    return { prev, next }
+  }
+  const year = String(aopYear).slice(-2)
+  return { prev: year, next: String(Number(year) + 1).padStart(2, '0') }
+}
+const { prev, next } = getAopShortYears(AOP_YEAR)
   const valueFormat = ValueFormatterConsumption()
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const headerMap = generateHeaderNames(AOP_YEAR)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
-  const columns = getSiteAOPReportColumns({ AOP_YEAR, valueFormat })
+  const columns = getSiteAOPReportColumns({ AOP_YEAR, valueFormat, prev, next  })
   const handleRemarkCellClick1 = (row) => {
     setCurrentRemark1(row.remarks || '')
     setCurrentRowId1(row.id)

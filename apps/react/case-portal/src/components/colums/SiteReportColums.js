@@ -1,5 +1,5 @@
 
-const getSiteAOPReportColumns = ({ AOP_YEAR, valueFormat }) => ({
+const getSiteAOPReportColumns = ({ AOP_YEAR, valueFormat, prev, next }) => ({
   siteTeam: [
     { field: 'id', title: 'ID', editable: false, hidden: true },
     { field: 'sno', title: 'S.No.', editable: false, align: 'right', format: '{0:0}', widthT: 60 },
@@ -72,9 +72,9 @@ const getSiteAOPReportColumns = ({ AOP_YEAR, valueFormat }) => ({
     { field: 'id', title: 'ID', editable: false, hidden: true },
     { field: 'plant', title: 'Plant', editable: false },
     { field: 'uom', title: 'UOM', editable: false },
-    { field: 'aopValue', title: 'FY26 AOP', editable: true, type: 'number' },
-    { field: 'actualValue', title: 'FY26 Actual', editable: true, type: 'number' },
-    { field: 'planValue', title: 'FY27 AOP', editable: true, type: 'number' },
+    { field: 'aopValue', title: `FY${prev} AOP`, editable: true, type: 'number' },
+    { field: 'actualValue', title: `FY${prev} Actual`, editable: true, type: 'number' },
+    { field: 'planValue', title: `FY${next} AOP`, editable: true, type: 'number' },
     { field: 'remark', title: 'Remark', editable: true },
   ],
   contribution: [
