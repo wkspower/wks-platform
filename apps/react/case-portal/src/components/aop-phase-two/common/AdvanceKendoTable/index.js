@@ -1102,8 +1102,6 @@ const AdvanceKendoTable = ({
                 style={{
                   fontSize: '0.75rem',
                   fontWeight: 'normal',
-                  // color: '#666',
-                  fontWeight: 'normal',
                   fontStyle: 'italic',
                 }}
               >
@@ -1117,9 +1115,13 @@ const AdvanceKendoTable = ({
   }
 
   // Helper to create header cell with subtitle
-  const createHeaderWithSubtitle = (subtitle) => (props) => (
-    <SimpleHeaderWithTooltip {...props} subtitle={subtitle} />
-  )
+  const createHeaderWithSubtitle = (subtitle) => {
+    const HeaderWithSubtitle = (props) => (
+      <SimpleHeaderWithTooltip {...props} subtitle={subtitle} />
+    )
+    HeaderWithSubtitle.displayName = `HeaderWithSubtitle(${subtitle})`
+    return HeaderWithSubtitle
+  }
 
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
