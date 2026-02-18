@@ -300,6 +300,14 @@ const workspace = {
         // },
 
         {
+          id: 'site-aop-report',
+          title: i18n.t('menu.siteAOPReport'),
+          type: 'item',
+          url: '/functional-reports/site-aop-report',
+          icon: icons.IconFileText,
+          breadcrumbs: true,
+        },
+        {
           id: 'plant-budget-summary',
           title: i18n.t('menu.plantBudgetSummary'),
           type: 'item',

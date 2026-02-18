@@ -94,6 +94,7 @@ const defs = {
     productionTargetBasis: 'Production Target Basis',
     maintenanceSummary: 'Plant Maintenance Summary',
     siteMaintenanceSummary: 'Site Maintenance Summary',
+    siteAOPReport: 'Site AOP Report',
     plantBudgetSummary: 'Plant Budget Summary',
     siteBudgetSummary: 'Site Budget Summary',
 
@@ -297,6 +298,7 @@ const defs = {
 
         maintenanceSummary: 'Plant Maintenance Summary',
         siteMaintenanceSummary: 'Site Maintenance Summary',
+        siteAOPReport: 'Site AOP Report',
         plantBudgetSummary: 'Plant Budget Summary',
         siteBudgetSummary: 'Site Budget Summary',
 

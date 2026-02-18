@@ -55,6 +55,7 @@ import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchi
 import RunLengthDataSet from 'components/data-tables/Reports/RunLengthDataSet'
 import MaintenanceSummary from 'components/kendo-data-tables/MaintenanceSummary'
 import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
+import SiteAOPReport from 'components/kendo-data-tables/SiteAOPReport'
 import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
 
@@ -867,6 +868,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='plant-budget-summary'>
                 <PlantBudgetSummary />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'site-aop-report',
+            element: (
+              <PrivateRoute routeId='site-aop-report'>
+                <SiteAOPReport />
               </PrivateRoute>
             ),
           },
