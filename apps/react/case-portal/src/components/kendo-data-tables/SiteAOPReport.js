@@ -15,6 +15,7 @@ import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
+import { TextArea } from '@progress/kendo-react-inputs'
 const SiteAOPReport = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -103,6 +104,9 @@ const SiteAOPReport = ({ permissions }) => {
   const keycloak = useSession()
   const [rows, setRows] = useState()
   const [energyPerformance, setEnergyPerformance] = useState()
+  const [performanceSummary, setPerformanceSummary] = useState('')
+  const [performanceHighlightsEdited, setPerformanceHighlightsEdited] =
+    useState(false)
   const [tabIndex, setTabIndex] = useState(0)
   const defaultTabs = [
     'Site Team',
@@ -126,23 +130,23 @@ const SiteAOPReport = ({ permissions }) => {
     // 'MCU Capacity Utilization (%)',
   ]
   function getAopShortYears(aopYear) {
-  if (!aopYear) return { prev: '', next: '' }
-  const match = aopYear.match(/(\d{4})-(\d{2})/)
-  if (match) {
-    const prev = match[1].slice(-2)
-    const next = match[2]
-    return { prev, next }
+    if (!aopYear) return { prev: '', next: '' }
+    const match = aopYear.match(/(\d{4})-(\d{2})/)
+    if (match) {
+      const prev = match[1].slice(-2)
+      const next = match[2]
+      return { prev, next }
+    }
+    const year = String(aopYear).slice(-2)
+    return { prev: year, next: String(Number(year) + 1).padStart(2, '0') }
   }
-  const year = String(aopYear).slice(-2)
-  return { prev: year, next: String(Number(year) + 1).padStart(2, '0') }
-}
-const { prev, next } = getAopShortYears(AOP_YEAR)
+  const { prev, next } = getAopShortYears(AOP_YEAR)
   const valueFormat = ValueFormatterConsumption()
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const headerMap = generateHeaderNames(AOP_YEAR)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
-  const columns = getSiteAOPReportColumns({ AOP_YEAR, valueFormat, prev, next  })
+  const columns = getSiteAOPReportColumns({ AOP_YEAR, valueFormat, prev, next })
   const handleRemarkCellClick1 = (row) => {
     setCurrentRemark1(row.remarks || '')
     setCurrentRowId1(row.id)
@@ -455,7 +459,7 @@ const { prev, next } = getAopShortYears(AOP_YEAR)
           severity: 'success',
         })
         setModifiedCellsEnergyPerformance({})
-        fetchData()
+        fetchDataEnergyPerformance()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -479,6 +483,59 @@ const { prev, next } = getAopShortYears(AOP_YEAR)
     AOP_YEAR,
     fetchDataEnergyPerformance,
   ])
+
+  const getPerformanceHighlights = async () => {
+    if (!PLANT_ID || !SITE_ID || !AOP_YEAR) return
+    try {
+      setPerformanceSummary('')
+      const res = await SiteReportDataService.getPerformanceHighlightsSummary(
+        keycloak,
+        SITE_ID,
+        AOP_YEAR,
+      )
+      if (res?.code === 200) {
+        setPerformanceSummary(res?.data?.summary || '')
+      } else {
+        setPerformanceSummary('')
+      }
+    } catch (error) {
+      setPerformanceSummary('')
+      console.error('Error fetching summary:', error)
+    }
+  }
+
+  // Save summary (POST/PUT)
+  const savePerformanceHighlightsSummary = async () => {
+    try {
+      const res = await SiteReportDataService.savePerformanceHighlightsSummary(
+        PLANT_ID,
+        SITE_ID,
+        AOP_YEAR,
+        performanceSummary,
+        keycloak,
+      )
+      if (res?.code === 200) {
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setPerformanceHighlightsEdited(false)
+        setSnackbarOpen(true)
+      } else {
+        setSnackbarData({
+          message: 'Save Failed!',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+      }
+    } catch (error) {
+      setSnackbarData({
+        message: 'Error saving summary!',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    }
+  }
   //----------
   const contributionColumns = [
     {
@@ -1303,6 +1360,7 @@ const { prev, next } = getAopShortYears(AOP_YEAR)
       fetchData()
     } else if (tabIndex === 1) {
       fetchDataEnergyPerformance()
+      getPerformanceHighlights()
     }
   }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak, tabIndex])
 
@@ -1450,33 +1508,72 @@ const { prev, next } = getAopShortYears(AOP_YEAR)
           screenType='shutdown'
         />
       )}
-       {tabIndex === 1 && (
-        <KendoDataTables
-          modifiedCells={modifiedCellsEnergyPerformance}
-          setModifiedCells={setModifiedCellsEnergyPerformance}
-          columns={columns.energyPerformance}
-          rows={energyPerformance}
-          setRows={setEnergyPerformance}
-          saveChanges={saveChangesEnergyPerformance}
-          fetchData={fetchDataEnergyPerformance}
-          title='B3.4. Energy Performance'
-          permissions={adjustedPermissions}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          snackbarData={snackbarData}
-          setSnackbarData={setSnackbarData}
-          setDeleteId={setDeleteId}
-          setOpen1={setOpen1}
-          handleRemarkCellClick={handleRemarkCellClickEnergyPerformance}
-          remarkDialogOpen={remarkDialogOpenEnergyPerformance}
-          setRemarkDialogOpen={setRemarkDialogOpenEnergyPerformance}
-          currentRemark={currentRemarkEnergyPerformance}
-          setCurrentRemark={setCurrentRemarkEnergyPerformance}
-          currentRowId={currentRowIdEnergyPerformance}
-          setCurrentRowId={setCurrentRowIdEnergyPerformance}
-        />
+      {tabIndex === 1 && (
+        <>
+          <KendoDataTables
+            modifiedCells={modifiedCellsEnergyPerformance}
+            setModifiedCells={setModifiedCellsEnergyPerformance}
+            columns={columns.energyPerformance}
+            rows={energyPerformance}
+            setRows={setEnergyPerformance}
+            saveChanges={saveChangesEnergyPerformance}
+            fetchData={fetchDataEnergyPerformance}
+            title='B3.4. Energy Performance'
+            permissions={adjustedPermissions}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            snackbarData={snackbarData}
+            setSnackbarData={setSnackbarData}
+            setDeleteId={setDeleteId}
+            setOpen1={setOpen1}
+            handleRemarkCellClick={handleRemarkCellClickEnergyPerformance}
+            remarkDialogOpen={remarkDialogOpenEnergyPerformance}
+            setRemarkDialogOpen={setRemarkDialogOpenEnergyPerformance}
+            currentRemark={currentRemarkEnergyPerformance}
+            setCurrentRemark={setCurrentRemarkEnergyPerformance}
+            currentRowId={currentRowIdEnergyPerformance}
+            setCurrentRowId={setCurrentRowIdEnergyPerformance}
+          />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column', // ?? stack vertically
+              alignItems: 'flex-start',
+              gap: 0,
+              mt: 1,
+            }}
+          >
+            <Typography className='button-title' sx={{ whiteSpace: 'nowrap' }}>
+              Performance Highlights
+            </Typography>
+
+            <Button
+              variant='contained'
+              // onClick={onLoad}
+              onClick={savePerformanceHighlightsSummary}
+              className='btn-save'
+              disabled={READ_ONLY || !performanceHighlightsEdited}
+              sx={{ alignSelf: 'flex-end' }}
+            >
+              Save
+            </Button>
+            <TextArea
+              value={performanceSummary}
+              rows={6}
+              style={{
+                width: '100%',
+              }}
+              onChange={(e) => {
+                setPerformanceSummary(e.target.value)
+                setPerformanceHighlightsEdited(true)
+              }}
+              placeholder='Enter summary here...'
+              disabled={READ_ONLY}
+            />
+          </Box>
+        </>
       )}
-      
+
       {tabIndex === 2 && (
         <KendoDataTables
           columns={columns.majorIncidents}
