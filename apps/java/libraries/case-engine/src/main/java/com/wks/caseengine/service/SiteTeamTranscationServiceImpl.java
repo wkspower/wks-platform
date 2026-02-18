@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -156,6 +157,8 @@ public class SiteTeamTranscationServiceImpl implements SiteTeamTranscationServic
 				siteTeam.setName(siteTeamTranscationDTO.getName());			
 				siteTeam.setRemark(siteTeamTranscationDTO.getRemark());
 				siteTeam.setTeamSize(siteTeamTranscationDTO.getTeamSize());
+				siteTeam.setUpdatedBy(Utility.getUserName());
+				siteTeam.setUpdatedDate(new Date());
 				siteTeamRepository.save(siteTeam);
 			}
 			
