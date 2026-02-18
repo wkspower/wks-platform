@@ -913,15 +913,21 @@ async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // Heat Rate Excel Export
-async function exportHeatRateExcel(keycloak, assetId, financialYear, startDate = null, endDate = null) {
+async function exportHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
   // Construct endpoint with optional date range
   let endpoint = `heat-rate/export/${assetId}/${financialYear}`
-  
+
   // If both dates are provided, add them as path variables
   if (startDate && endDate) {
     endpoint = `heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
   }
-  
+
   return exportExcelData(keycloak, {
     endpoint: endpoint,
     queryParams: {},

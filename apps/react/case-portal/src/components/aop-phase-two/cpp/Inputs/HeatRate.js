@@ -399,7 +399,7 @@ const HeatRate = () => {
     try {
       const formattedStartDate = formatDate(startDate)
       const formattedEndDate = formatDate(endDate)
-      
+
       await InputApiService.exportHeatRateExcel(
         keycloak,
         selectedPlant,

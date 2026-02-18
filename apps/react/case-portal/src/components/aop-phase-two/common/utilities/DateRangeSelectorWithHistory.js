@@ -307,7 +307,7 @@ const DateRangeSelectorWithHistory = ({
         })
         getConfigurationExecutionDetails()
         setLoading(false)
-        
+
         // Notify parent component of date change
         if (onDateChange) {
           onDateChange({ startDate, endDate })
@@ -428,7 +428,11 @@ const DateRangeSelectorWithHistory = ({
           sx={loadButtonSx}
           disabled={disabled || loading}
         >
-          {loading ? <CircularProgress size={20} color="inherit" /> : loadButtonText}
+          {loading ? (
+            <CircularProgress size={20} color='inherit' />
+          ) : (
+            loadButtonText
+          )}
         </Button>
       )}
 
