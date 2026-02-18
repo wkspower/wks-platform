@@ -394,11 +394,15 @@ const ProductionNorms = ({ permissions }) => {
     try {
       setRows([])
       setLoading(true)
+      const selectedLine = lineDetails[tabIndex]
+      const lineId = selectedLine?.id
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'Production',
         PLANT_ID,
         AOP_YEAR,
+        lineId,
+        isPPVerticalDTASite,
       )
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
@@ -771,12 +775,25 @@ const ProductionNorms = ({ permissions }) => {
     return total === '0.00' ? null : total
   }
 
+  const initialRender = React.useRef(true);
+
   useEffect(() => {
-    fetchData()
-    if (lowerVertName === 'meg') {
-      fetchDataByProducts()
+    const fetchDataWrapper = async () => {
+      // Only fetch data if this is not the initial render or if dependencies have changed
+      if (!initialRender.current || PLANT_ID) {
+        await fetchData();
+        if (lowerVertName === 'meg') {
+          await fetchDataByProducts();
+        }
+      } else {
+        initialRender.current = false;
+      }
+    };
+    if (isPPVerticalDTASite && lineDetails?.length === 0) {
+      return;
     }
-  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
+    fetchDataWrapper();
+  }, [PLANT_ID, yearChanged, keycloak, selectedUnit, tabIndex, lineDetails]);
 
   // Fetch line details when component mounts or plantID/year changes
   const fetchLineDetails = async () => {
@@ -809,8 +826,10 @@ const ProductionNorms = ({ permissions }) => {
   useEffect(() => {
     if (isPPVerticalDTASite) {
       fetchLineDetails()
+    } else {
+      setLineDetails([]);
     }
-  }, [PLANT_ID, keycloak, yearChanged, isPPVerticalDTASite])
+  }, [PLANT_ID, keycloak, yearChanged])
 
   const valueFormat_ = ValueFormatterProduction()
   const valueFormat = IS_VCM ? '{0:0.000}' : valueFormat_

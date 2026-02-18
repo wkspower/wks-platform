@@ -445,6 +445,7 @@ const ProductionvolumeData = ({ permissions }) => {
           PLANT_ID,
           AOP_YEAR,
           lineId,
+          isPPVerticalDTASite,
         )
       if (response?.code != 200) {
         setRows([])

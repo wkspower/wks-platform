@@ -83,8 +83,13 @@ async function handleCalculate(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 
-async function getAOPData(keycloak, type, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/monthly-production?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}`
+async function getAOPData(keycloak, type, PLANT_ID, AOP_YEAR, LINE_ID, isPPVerticalDTASite) {
+  const endpoint = isPPVerticalDTASite 
+    ? 'monthly-production-line' 
+    : 'monthly-production'
+    
+  const lineIdParams = LINE_ID ? `&lineId=${LINE_ID}` : ''
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}${lineIdParams}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
