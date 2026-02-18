@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { Box, Typography, Button, CircularProgress } from '@mui/material'
+import { Box, Typography, Button } from '@mui/material'
 import { DatePicker, DateTimePicker } from '@progress/kendo-react-dateinputs'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
@@ -307,11 +307,6 @@ const DateRangeSelectorWithHistory = ({
         })
         getConfigurationExecutionDetails()
         setLoading(false)
-
-        // Notify parent component of date change
-        if (onDateChange) {
-          onDateChange({ startDate, endDate })
-        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -428,11 +423,7 @@ const DateRangeSelectorWithHistory = ({
           sx={loadButtonSx}
           disabled={disabled || loading}
         >
-          {loading ? (
-            <CircularProgress size={20} color='inherit' />
-          ) : (
-            loadButtonText
-          )}
+          {loading ? 'Loading...' : loadButtonText}
         </Button>
       )}
 
