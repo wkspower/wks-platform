@@ -38,24 +38,24 @@ const HeatRate = () => {
     {
       field: 'equipType',
       title: 'Equipment Type',
-      width: 150,
+      widthT: 150,
       type: 'text',
       editable: false,
       locked: true,
-      minWidth: 100,
+      minWidth: 150,
     },
     {
       field: 'cppUtility',
       title: 'CPP Utility',
-      width: 120,
+      widthT: 120,
       type: 'text',
       editable: false,
-      minWidth: 100,
+      minWidth: 120,
     },
     {
       field: 'gtLoad',
       title: 'GT Load',
-      width: 100,
+      widthT: 100,
       type: 'number1',
       format: valueFormat,
       editable: true,
@@ -64,10 +64,11 @@ const HeatRate = () => {
     {
       field: 'oemHeatRate',
       title: 'OEM HR',
-      width: 150,
+      widthT: 150,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
+      numericEditable: true,
       minWidth: 150,
       radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
@@ -75,32 +76,35 @@ const HeatRate = () => {
     },
     {
       field: 'previousYearHeatRate',
-      title: 'PREVIOUS YEAR HR',
-      width: 150,
+      title: 'PREVIOUS YEAR BUDGET HR',
+      widthT: 200,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
-      minWidth: 150,
+      numericEditable: false,
+      minWidth: 200,
       radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
       radioValue: 'PREVIOUS_YEAR',
     },
     {
       field: 'heatRate',
-      title: 'ACTUAL PROPOSED HR',
-      width: 150,
+      title: 'PROPOSED HR',
+      subtitle: '(Based On Actual Data)',
+      widthT: 200,
       type: 'numberWithRadio',
       format: valueFormat,
       editable: true,
-      minWidth: 150,
+      numericEditable: false,
+      minWidth: 200,
       radioGroupField: 'selectedHeatRate',
       targetField: 'finalHeatRate',
       radioValue: 'PROPOSED',
     },
     {
       field: 'finalHeatRate',
-      title: 'Final Heat Rate',
-      width: 150,
+      title: 'Final HR',
+      widthT: 150,
       type: 'number1',
       format: valueFormat,
       editable: true,
@@ -109,11 +113,11 @@ const HeatRate = () => {
     {
       field: 'freeSteamFactor',
       title: 'Free Steam Factor',
-      width: 130,
+      widthT: 130,
       type: 'number1',
       format: valueFormat,
       editable: true,
-      minWidth: 100,
+      minWidth: 130,
     },
     {
       field: 'remarks',
@@ -133,11 +137,25 @@ const HeatRate = () => {
   const [originalRows, setOriginalRows] = useState([])
   const [selectedPlant, setSelectedPlant] = useState('')
   const [dropdownOptions, setDropdownOptions] = useState([])
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
+  const [dateLoading, setDateLoading] = useState(false)
+
+  const formatDate = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   useEffect(() => {
-    if (selectedPlant) {
-      fetchHeatRateData(selectedPlant)
+    if (selectedPlant && startDate && endDate) {
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      fetchHeatRateData(selectedPlant, formattedStartDate, formattedEndDate)
     }
-  }, [PLANT_ID, AOP_YEAR, selectedPlant])
+  }, [PLANT_ID, AOP_YEAR, selectedPlant, startDate, endDate])
 
   useEffect(() => {
     getPlantList()
@@ -175,13 +193,15 @@ const HeatRate = () => {
     }
   }
 
-  const fetchHeatRateData = async (assetId) => {
+  const fetchHeatRateData = async (assetId, startDate, endDate) => {
     setLoading(true)
     try {
       const res = await InputApiService.getHeatRateData(
         keycloak,
         assetId,
         AOP_YEAR,
+        startDate,
+        endDate,
       )
 
       if (res?.length === 0) {
@@ -191,11 +211,32 @@ const HeatRate = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
+        const selectedHeatRate = item.selectedHeatRate || 'PROPOSED'
+
+        // Validate if selectedHeatRate matches the actual finalHeatRate value
+        const fieldMapping = {
+          OEM: 'oemHeatRate',
+          PREVIOUS_YEAR: 'previousYearHeatRate',
+          PROPOSED: 'heatRate',
+        }
+
+        const selectedField = fieldMapping[selectedHeatRate]
+        const selectedValue = selectedField ? item[selectedField] : null
+        const finalValue = item.finalHeatRate
+
+        // Check if selected column value matches final heat rate
+        const isMatch =
+          selectedValue !== null &&
+          selectedValue !== undefined &&
+          finalValue !== null &&
+          finalValue !== undefined &&
+          parseFloat(selectedValue) === parseFloat(finalValue)
+
         return {
           ...item,
           id: item.id || index + 1,
           remarks: item.remarks || '',
-          selectedHeatRate: item.selectedHeatRate || 'PROPOSED',
+          selectedHeatRate: isMatch ? selectedHeatRate : 'OTHER',
         }
       })
       setRows(tempRes)
@@ -246,8 +287,7 @@ const HeatRate = () => {
       return
     }
 
-    var rawData = Object.values(modifiedCells)
-    const data = rawData.filter((row) => row.inEdit)
+    const data = modifiedData.filter((row) => row.inEdit)
     if (data.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -261,7 +301,7 @@ const HeatRate = () => {
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = [
       'gtLoad',
-      'heatRate',
+      'oemHeatRate',
       'freeSteamFactor',
       'finalHeatRate',
     ]
@@ -281,14 +321,12 @@ const HeatRate = () => {
       setLoading(false)
       return
     }
-    console.log('modifiedData', modifiedData)
+
     try {
       const payload = modifiedData.map((item) => {
         const { inEdit, ...rest } = item
         return rest
       })
-      const tempPayload = JSON.stringify(payload)
-      console.log('Payload being sent:', tempPayload)
 
       const res = await InputApiService.saveHeatRateData(
         keycloak,
@@ -296,8 +334,6 @@ const HeatRate = () => {
         AOP_YEAR,
         payload,
       )
-
-      console.log('Save response:', res)
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
@@ -306,9 +342,6 @@ const HeatRate = () => {
       })
     } catch (error) {
       console.error('Error saving heat rate data:', error)
-      console.error('Error message:', error?.message)
-      console.error('Error status:', error?.status)
-      console.error('Error response:', error?.response)
       setSnackbarOpen(true)
       setSnackbarData({
         message: `Failed to save changes. Error: ${error?.message || 'Unknown error'}`,
@@ -421,14 +454,18 @@ const HeatRate = () => {
       )
 
       // Track both fields in modifiedCells
-      setModifiedCells((prev) => ({
-        ...prev,
-        [itemId]: {
-          ...dataItem,
-          selectedHeatRate: value,
-          finalHeatRate: selectedValue,
-        },
-      }))
+      setModifiedCells((prev) => {
+        const currentRow = rows.find((r) => r.id === itemId)
+        return {
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            selectedHeatRate: value,
+            finalHeatRate: selectedValue,
+            inEdit: true,
+          },
+        }
+      })
 
       setCustomModifiedCells((prev) => ({
         ...prev,
@@ -473,16 +510,17 @@ const HeatRate = () => {
         }),
       )
 
-      // Track changes in modifiedCells
+      // Track changes in modifiedCells and customModifiedCells
       const currentRow = rows.find((r) => r.id === itemId)
       if (currentRow?.selectedHeatRate === radioValueForThisField) {
         // Update both source field and finalHeatRate
         setModifiedCells((prev) => ({
           ...prev,
           [itemId]: {
-            ...dataItem,
+            ...(prev[itemId] || currentRow),
             [field]: value,
             finalHeatRate: value,
+            inEdit: true,
           },
         }))
 
@@ -492,6 +530,24 @@ const HeatRate = () => {
             ...(prev[itemId] || {}),
             [field]: value,
             finalHeatRate: value,
+          },
+        }))
+      } else {
+        // Still track the source field change even if not selected (for orange highlighting)
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            [field]: value,
+            inEdit: true,
+          },
+        }))
+
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [field]: value,
           },
         }))
       }
@@ -544,14 +600,18 @@ const HeatRate = () => {
       )
 
       // Track both fields in modifiedCells
-      setModifiedCells((prev) => ({
-        ...prev,
-        [itemId]: {
-          ...dataItem,
-          finalHeatRate: value,
-          selectedHeatRate: matchedRadioValue || 'OTHER',
-        },
-      }))
+      setModifiedCells((prev) => {
+        const currentRow = rows.find((r) => r.id === itemId)
+        return {
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            finalHeatRate: value,
+            selectedHeatRate: matchedRadioValue || 'OTHER',
+            inEdit: true,
+          },
+        }
+      })
 
       setCustomModifiedCells((prev) => ({
         ...prev,
@@ -568,7 +628,7 @@ const HeatRate = () => {
     <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        open={!!loading || !!dateLoading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
@@ -577,10 +637,14 @@ const HeatRate = () => {
         <DateRangeSelectorWithHistory
           onDateChange={({ startDate, endDate }) => {
             console.log('Dates changed:', startDate, endDate)
+            setStartDate(startDate)
+            setEndDate(endDate)
           }}
           disabled={false}
           timeRequired={false}
           showLastRefreshed={true}
+          dateLoading={dateLoading}
+          setDateLoading={setDateLoading}
         />
       </Stack>
       <AdvanceKendoTable
