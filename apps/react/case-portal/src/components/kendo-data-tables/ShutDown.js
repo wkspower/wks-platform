@@ -912,7 +912,14 @@ const ShutDown = ({ permissions }) => {
 
     try {
       let response
-      if (IS_NON_PRODUCT_VERTICAL) {
+      if (IS_PP_DTA) {
+        response = await DtaDataService.exportShutdownLineWise(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+        )
+      } else if (IS_NON_PRODUCT_VERTICAL) {
         response = await DataService.exportShutdownNonProduct(
           keycloak,
           PLANT_ID,
@@ -943,8 +950,14 @@ const ShutDown = ({ permissions }) => {
 
     try {
       let response
-
-      if (IS_NON_PRODUCT_VERTICAL) {
+      if (IS_PP_DTA) {
+        response = await DtaDataService.ImportShutdownLineWise(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (IS_NON_PRODUCT_VERTICAL) {
         response = await DataService.ImportShutdownNonProduct(
           rawFile,
           keycloak,
