@@ -177,10 +177,14 @@ public class HeatRateController {
         }
     }
 
-    @GetMapping("/heat-rate/export/{assetId}/{financialYear}")
-    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId, @PathVariable String financialYear) {
+    @GetMapping({"/heat-rate/export/{assetId}/{financialYear}", "/heat-rate/export/{assetId}/{financialYear}/{startDate}/{endDate}"})
+    public ResponseEntity<byte[]> exportHeatRate(
+            @PathVariable String assetId, 
+            @PathVariable String financialYear,
+            @PathVariable(required = false) String startDate,
+            @PathVariable(required = false) String endDate) {
         try {
-            byte[] excelData = heatRateService.exportHeatRate(assetId, financialYear);
+            byte[] excelData = heatRateService.exportHeatRate(assetId, financialYear, startDate, endDate);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", "Heat_Rate.xlsx");

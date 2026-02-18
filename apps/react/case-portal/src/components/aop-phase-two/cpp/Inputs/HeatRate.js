@@ -148,7 +148,6 @@ const HeatRate = () => {
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
   }
-
   useEffect(() => {
     if (selectedPlant && startDate && endDate) {
       const formattedStartDate = formatDate(startDate)
@@ -398,10 +397,15 @@ const HeatRate = () => {
     })
 
     try {
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+
       await InputApiService.exportHeatRateExcel(
         keycloak,
         selectedPlant,
         AOP_YEAR,
+        formattedStartDate,
+        formattedEndDate,
       )
       setSnackbarData({
         message: 'Excel download completed successfully!',

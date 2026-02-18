@@ -1,7 +1,6 @@
 import Config from 'consts'
 import { json } from '../../../../services/request'
 
-// Export service object following the same pattern as TabAccessApiService
 export const HistoricPeriodBasisApiService = {
   // Configuration Execution APIs
   getConfigurationExecutionDetails,
@@ -24,7 +23,7 @@ export const HistoricPeriodBasisApiService = {
  * @param {string} aopYear - AOP Year
  * @returns {Promise} Response with configuration execution details
  */
-const getConfigurationExecutionDetails = async (keycloak, plantId, aopYear) => {
+async function getConfigurationExecutionDetails(keycloak, plantId, aopYear) {
   const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${plantId}&year=${aopYear}`
   const headers = {
     Accept: 'application/json',
@@ -47,7 +46,7 @@ const getConfigurationExecutionDetails = async (keycloak, plantId, aopYear) => {
  * @param {Object} keycloak - Keycloak session
  * @returns {Promise} Response from configuration execution
  */
-const executeConfiguration = async (payload, keycloak) => {
+async function executeConfiguration(payload, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/configuration-execution`
   const headers = {
     Accept: 'application/json',
@@ -80,7 +79,7 @@ const executeConfiguration = async (payload, keycloak) => {
  * @param {string} aopYear - AOP Year
  * @returns {Promise} Response with AOP summary
  */
-const getAopSummary = async (keycloak, plantId, aopYear) => {
+async function getAopSummary(keycloak, plantId, aopYear) {
   const url = `${Config.CaseEngineUrl}/task/aop-summary?plantId=${plantId}&aopYear=${aopYear}`
   const headers = {
     Accept: 'application/json',
@@ -105,7 +104,7 @@ const getAopSummary = async (keycloak, plantId, aopYear) => {
  * @param {Object} keycloak - Keycloak session
  * @returns {Promise} Response from save operation
  */
-const saveAOPSummary = async (plantId, aopYear, summary, keycloak) => {
+async function saveAOPSummary(plantId, aopYear, summary, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/aop-summary?plantId=${plantId}&aopYear=${aopYear}`
   const headers = {
     Accept: 'application/json',
