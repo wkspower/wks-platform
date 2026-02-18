@@ -397,8 +397,8 @@ const HeatRate = () => {
     })
 
     try {
-      const formattedStartDate = formatDate(dateRange.startDate)
-      const formattedEndDate = formatDate(dateRange.endDate)
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
       
       await InputApiService.exportHeatRateExcel(
         keycloak,
