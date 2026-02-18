@@ -494,9 +494,8 @@ async function getPlantList(keycloak, plantId, year) {
 }
 
 // ========================|| Heat Rate APIs ||=====================================//
-
-async function getHeatRateData(keycloak, assetId, financialYear) {
-  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${financialYear}`
+async function getHeatRateData(keycloak, assetId, year, startDate, endDate) {
+  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}/${startDate}/${endDate}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
