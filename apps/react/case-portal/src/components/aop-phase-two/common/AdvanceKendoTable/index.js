@@ -1075,6 +1075,7 @@ const AdvanceKendoTable = ({
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
+    const subtitle = props.subtitle
 
     return (
       <th
@@ -1084,7 +1085,7 @@ const AdvanceKendoTable = ({
         style={{
           padding: '0px',
           borderRight: '1px solid #878787',
-          textAlign: 'center',
+          textAlign: 'start',
           width: { ...restThProps['width'] },
         }}
       >
@@ -1094,11 +1095,31 @@ const AdvanceKendoTable = ({
           parentTitle={true}
           className='test'
         >
-          {props.children}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div>{props.children}</div>
+            {subtitle && (
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 'normal',
+                  // color: '#666',
+                  fontWeight: 'normal',
+                  fontStyle: 'italic',
+                }}
+              >
+                {subtitle}
+              </div>
+            )}
+          </div>
         </Tooltip>
       </th>
     )
   }
+
+  // Helper to create header cell with subtitle
+  const createHeaderWithSubtitle = (subtitle) => (props) => (
+    <SimpleHeaderWithTooltip {...props} subtitle={subtitle} />
+  )
 
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
@@ -1190,7 +1211,9 @@ const AdvanceKendoTable = ({
             cells={{
               edit: { date: DateOnlyPicker },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             format='{0:dd-MM-yyyy}'
             editor='date'
@@ -1223,7 +1246,9 @@ const AdvanceKendoTable = ({
                   format={col.format}
                 />
               ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             format={
               col.type == 'dateTime'
@@ -1270,7 +1295,9 @@ const AdvanceKendoTable = ({
             cells={{
               edit: { text: NoSpinnerNumericEditor },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1311,7 +1338,9 @@ const AdvanceKendoTable = ({
                     format={col.format}
                   />
                 ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1371,7 +1400,9 @@ const AdvanceKendoTable = ({
                     format={col.format}
                   />
                 ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1418,7 +1449,9 @@ const AdvanceKendoTable = ({
                     format={col.format}
                   />
                 ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1442,7 +1475,9 @@ const AdvanceKendoTable = ({
             cells={{
               edit: { text: TextCellEditorUpdated },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             // filter='numeric'
@@ -1490,7 +1525,9 @@ const AdvanceKendoTable = ({
                     format={col.format}
                   />
                 ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1522,7 +1559,9 @@ const AdvanceKendoTable = ({
                 ),
               },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
@@ -1553,7 +1592,9 @@ const AdvanceKendoTable = ({
                 ),
               },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
@@ -1591,7 +1632,9 @@ const AdvanceKendoTable = ({
                   disableRedHighlight={disableRedHighlight}
                 />
               ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
@@ -1622,6 +1665,7 @@ const AdvanceKendoTable = ({
                     }
                     targetField={col.targetField || 'finalHeatRate'}
                     radioValue={col.radioValue}
+                    isNumberEditable={col.numericEditable || false}
                   />
                 ),
               },
@@ -1633,9 +1677,13 @@ const AdvanceKendoTable = ({
                   }
                   format={col.format}
                   radioValue={col.radioValue}
+                  customModifiedCells={customModifiedCells}
+                  isNumberEditable={col.numericEditable || false}
                 />
               ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
@@ -1672,7 +1720,9 @@ const AdvanceKendoTable = ({
                   sourceFields={col.sourceFields || []}
                 />
               ),
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
@@ -1710,7 +1760,9 @@ const AdvanceKendoTable = ({
                 ),
               },
               data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
+              headerCell: col.subtitle
+                ? createHeaderWithSubtitle(col.subtitle)
+                : SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
@@ -1728,7 +1780,9 @@ const AdvanceKendoTable = ({
           cells={{
             edit: { text: NoSpinnerNumericEditor },
             data: toolTipRenderer,
-            headerCell: SimpleHeaderWithTooltip,
+            headerCell: col.subtitle
+              ? createHeaderWithSubtitle(col.subtitle)
+              : SimpleHeaderWithTooltip,
           }}
           className={`${!isEditable ? 'non-editable-cell' : ''}`}
           columnMenu={ColumnMenuCheckboxFilter}

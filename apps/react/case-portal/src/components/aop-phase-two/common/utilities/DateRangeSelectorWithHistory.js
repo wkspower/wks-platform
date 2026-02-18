@@ -29,6 +29,8 @@ const DateRangeSelectorWithHistory = ({
   loadButtonSx = {},
   loadButtonClassName = 'btn-save',
   loadButtonVariant = 'contained',
+  dateLoading = false,
+  setDateLoading = () => {},
 }) => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
@@ -42,9 +44,6 @@ const DateRangeSelectorWithHistory = ({
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
   const [loading, setLoading] = useState(false)
-  const [loadBtnClicked, setLoadBtnClicked] = useState(false)
-
-  const [loading1, setLoading1] = useState(false)
 
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
 
@@ -79,6 +78,7 @@ const DateRangeSelectorWithHistory = ({
         )
       setStartDate(getDateValue('StartDate'))
       setEndDate(getDateValue('EndDate'))
+      onDateChange({ startDate, endDate })
     } else {
       const today = new Date()
       const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
@@ -173,6 +173,7 @@ const DateRangeSelectorWithHistory = ({
     ]
     try {
       setLoading(true)
+      setDateLoading(true)
       const response = await InputApiService.executeConfiguration(
         payload,
         keycloak,
@@ -191,21 +192,16 @@ const DateRangeSelectorWithHistory = ({
       console.error('Execution Failed!', error)
     } finally {
       setLoading(false)
+      setDateLoading(false)
     }
   }
 
   const handleStartDateChange = (value) => {
     setStartDate(value)
-    if (onDateChange) {
-      onDateChange({ startDate: value, endDate })
-    }
   }
 
   const handleEndDateChange = (value) => {
     setEndDate(value)
-    if (onDateChange) {
-      onDateChange({ startDate, endDate: value })
-    }
   }
 
   const handleOpenDialog = () => {
@@ -262,6 +258,7 @@ const DateRangeSelectorWithHistory = ({
       return
     }
     setLoading(true)
+    setDateLoading(true)
     try {
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
@@ -317,13 +314,13 @@ const DateRangeSelectorWithHistory = ({
           severity: 'error',
         })
       }
-      setLoadBtnClicked(true)
       return response
     } catch (error) {
       console.error('Execution Falied!', error)
       setLoading(false)
     } finally {
       setLoading(false)
+      setDateLoading(false)
     }
   }
 
