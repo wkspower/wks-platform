@@ -514,9 +514,22 @@ public byte[] exportSTGExtractionLookup() throws IOException {
 
 /**
  * Export Heat Rate data to Excel for a specific asset
+ * @param assetId Asset ID
+ * @param financialYear Financial year
+ * @param startDate Optional start date for proposed heat rate calculation
+ * @param endDate Optional end date for proposed heat rate calculation
  */
-public byte[] exportHeatRate(String assetId, String financialYear) throws IOException {
-    List<HeatRateDTO> data = getHeatRateByAssetId(assetId, financialYear);
+public byte[] exportHeatRate(String assetId, String financialYear, String startDate, String endDate) throws IOException {
+    List<HeatRateDTO> data;
+    
+    // If date range is provided, get data with proposed heat rates
+    if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+        logger.info("Exporting with proposed heat rates for date range: {} to {}", startDate, endDate);
+        data = getHeatRateByAssetIdWithProposed(assetId, financialYear, startDate, endDate);
+    } else {
+        logger.info("Exporting without proposed heat rates");
+        data = getHeatRateByAssetId(assetId, financialYear);
+    }
     
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("Heat Rate");
@@ -528,15 +541,15 @@ public byte[] exportHeatRate(String assetId, String financialYear) throws IOExce
     
     // Create header row
     Row headerRow = sheet.createRow(rowNum++);
-    String[] headers = {"Equipment Type", "CPP Utility", "GT Load", "Heat Rate", "Previous Year Heat Rate", "Final Heat Rate", "OEM Heat Rate", "Selected Heat Rate", "Free Steam Factor", "Remarks", "Id"};
+    String[] headers = {"Equipment Type", "CPP Utility", "GT Load", "Heat Rate", "Previous Year Heat Rate", "Proposed Heat Rate (Calculated - Read Only)", "Final Heat Rate", "OEM Heat Rate", "Selected Heat Rate", "Free Steam Factor", "Remarks", "Id"};
     for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
         cell.setCellStyle(headerStyle);
     }
     
-    // Hide ID column (index 10)
-    sheet.setColumnHidden(10, true);
+    // Hide ID column (index 11)
+    sheet.setColumnHidden(11, true);
     
     // Create data rows
     for (HeatRateDTO dto : data) {
@@ -557,6 +570,9 @@ public byte[] exportHeatRate(String assetId, String financialYear) throws IOExce
         cell.setCellStyle(dataStyle);
         cell = row.createCell(colNum++);
         cell.setCellValue(dto.getPreviousYearHeatRate() != null ? dto.getPreviousYearHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getProposedHeatRate() != null ? dto.getProposedHeatRate() : 0.0);
         cell.setCellStyle(dataStyle);
         cell = row.createCell(colNum++);
         cell.setCellValue(dto.getFinalHeatRate() != null ? dto.getFinalHeatRate() : 0.0);
@@ -580,7 +596,7 @@ public byte[] exportHeatRate(String assetId, String financialYear) throws IOExce
     
     // Auto-size columns (header + content aware)
     for (int i = 0; i < headers.length; i++) {
-        if (i == 9) { // Remarks column
+        if (i == 10) { // Remarks column
             sheet.setColumnWidth(i, 8000);
             continue;
         }
@@ -699,8 +715,8 @@ public void importHeatRate(MultipartFile file) throws IOException {
             
             HeatRateDTO dto = new HeatRateDTO();
             
-            // Read ID from hidden column (index 10)
-            String idStr = getCellValueAsString(row, 10);
+            // Read ID from hidden column (index 11)
+            String idStr = getCellValueAsString(row, 11);
             if (idStr != null && !idStr.isEmpty()) {
                 dto.setId(UUID.fromString(idStr));
             }
@@ -710,11 +726,12 @@ public void importHeatRate(MultipartFile file) throws IOException {
             dto.setGtLoad(getCellValueAsDouble(row, 2));
             dto.setHeatRate(getCellValueAsDouble(row, 3));
             dto.setPreviousYearHeatRate(getCellValueAsDouble(row, 4));
-            dto.setFinalHeatRate(getCellValueAsDouble(row, 5));
-            dto.setOemHeatRate(getCellValueAsDouble(row, 6));
-            dto.setSelectedHeatRate(getCellValueAsString(row, 7));
-            dto.setFreeSteamFactor(getCellValueAsDouble(row, 8));
-            dto.setRemarks(getCellValueAsString(row, 9));
+            // Skip index 5 - proposedHeatRate (calculated, not imported)
+            dto.setFinalHeatRate(getCellValueAsDouble(row, 6));
+            dto.setOemHeatRate(getCellValueAsDouble(row, 7));
+            dto.setSelectedHeatRate(getCellValueAsString(row, 8));
+            dto.setFreeSteamFactor(getCellValueAsDouble(row, 9));
+            dto.setRemarks(getCellValueAsString(row, 10));
             
             dtos.add(dto);
         }

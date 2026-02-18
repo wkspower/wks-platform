@@ -494,8 +494,10 @@ async function getPlantList(keycloak, plantId, year) {
 }
 
 // ========================|| Heat Rate APIs ||=====================================//
+
 async function getHeatRateData(keycloak, assetId, year, startDate, endDate) {
   const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}/${startDate}/${endDate}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -911,9 +913,17 @@ async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // Heat Rate Excel Export
-async function exportHeatRateExcel(keycloak, assetId, financialYear) {
+async function exportHeatRateExcel(keycloak, assetId, financialYear, startDate = null, endDate = null) {
+  // Construct endpoint with optional date range
+  let endpoint = `heat-rate/export/${assetId}/${financialYear}`
+  
+  // If both dates are provided, add them as path variables
+  if (startDate && endDate) {
+    endpoint = `heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
+  }
+  
   return exportExcelData(keycloak, {
-    endpoint: `heat-rate/export/${assetId}/${financialYear}`,
+    endpoint: endpoint,
     queryParams: {},
     fileName: `Heat_Rate_${financialYear}.xlsx`,
     method: 'GET',
