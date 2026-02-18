@@ -133,6 +133,34 @@ export default function HeaderContent({ keycloak }) {
 
     setVerticals(avail)
 
+    // --- Startt snippet ---
+    /* first available vertical so dropdown won't be empty */
+    if (
+      selectedVertical &&
+      avail.length &&
+      !avail.some((v) => v.id === selectedVertical)
+    ) {
+      const defV = avail[0]
+      setSelectedVertical(defV.id)
+
+      localStorage.setItem('verticalId', defV.id)
+      localStorage.setItem(
+        'selectedVertical',
+        JSON.stringify({ id: defV.id, name: defV.name }),
+      )
+
+      dispatch(
+        setVerticalChange({
+          selectedVertical: defV.name,
+          selectedSite: '',
+          selectedPlant: '',
+        }),
+      )
+
+      dispatch(setVerticalObject({ id: defV.id, name: defV.name }))
+    }
+    // --- end snippet ---
+
     if (!selectedVertical && avail.length) {
       const defV = avail[0]
       setSelectedVertical(defV.id)

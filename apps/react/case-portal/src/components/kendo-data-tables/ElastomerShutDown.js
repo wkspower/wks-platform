@@ -157,7 +157,7 @@ const ElastomerShutDown = ({ permissions }) => {
         return obj
       })
 
-      const res = await MaintenanceDetailsApiService.saveSlowdownConfig(
+      const res = await MaintenanceDetailsApiService.saveShutdownConfig(
         PLANT_ID,
         AOP_YEAR,
         dataList,
@@ -656,7 +656,7 @@ const ElastomerShutDown = ({ permissions }) => {
     setLoading(true)
     try {
       //
-      const resp = await MaintenanceDetailsApiService.getSlowdownConfig(
+      const resp = await MaintenanceDetailsApiService.getShutdownConfig(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -1050,7 +1050,7 @@ const ElastomerShutDown = ({ permissions }) => {
     }
     setLoading(true)
     try {
-      const response = await MaintenanceDetailsApiService.deleteSlowdownConfig(
+      const response = await MaintenanceDetailsApiService.deleteShutdownConfig(
         row.idFromApi,
         keycloak,
         PLANT_ID,

@@ -64,6 +64,45 @@ export const ShutDownAllColumns = [
   },
 ]
 
+export const SlowdownConfigColumns = [
+  {
+    field: 'description',
+    title: 'Slowdown Desc',
+    editable: true,
+  },
+  {
+    field: 'id',
+    title: 'id',
+    hidden: true,
+  },
+  {
+    field: 'maintStartDateTime',
+    title: 'SD - From',
+    editable: true,
+  },
+  {
+    field: 'maintEndDateTime',
+    title: 'SD - To',
+    editable: true,
+  },
+  {
+    field: 'durationInMins',
+    title: 'Duration (hrs)',
+    editable: true,
+  },
+
+  {
+    field: 'rate',
+    title: 'Rate',
+    editable: true,
+  },
+  {
+    field: 'remarks',
+    title: 'Remarks',
+    editable: true,
+  },
+]
+
 // PE Shutdown Columns (adds productName)
 export const ShutDownPeColumns = [
   {
