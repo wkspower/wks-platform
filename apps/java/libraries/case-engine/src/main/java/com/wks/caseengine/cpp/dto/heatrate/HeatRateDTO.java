@@ -15,6 +15,11 @@ public class HeatRateDTO {
     private Double heatRate;
     private Double freeSteamFactor;
     private String remarks;
+    private Double previousYearHeatRate;
+    private Double finalHeatRate;
+    private Double oemHeatRate;
+    private String selectedHeatRate;
+    private Double proposedHeatRate; // Calculated from date range using SP
 }
 
 

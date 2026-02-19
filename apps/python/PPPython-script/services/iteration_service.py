@@ -1122,7 +1122,7 @@ def usd_iterate(
         print(f"  |   STG SHP = {stg_gross_mwh * 1000:,.2f} KWh x {NORM_STG_SHP_PER_KWH} MT/KWh = {stg_shp_required:,.2f} MT")
         print(f"  " + "-"*90)
         print(f"  | Free Steam Calculation (per GT):")
-        print(f"  |   Formula: Free Steam = GT_Gross_MWh x FreeSteamFactor (from HeatRateLookup)")
+        print(f"  |   Formula: Free Steam = GT_Gross_MWh x FreeSteamFactor (from CPP_GTHeatRate)")
         print(f"  |   Total Free Steam = {total_free_steam:,.2f} MT")
         print(f"  " + "-"*90)
         print(f"  | Supplementary Firing Calculation (per HRSG):")
