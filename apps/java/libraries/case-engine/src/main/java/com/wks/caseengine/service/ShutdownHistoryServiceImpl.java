@@ -244,15 +244,17 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 
 			for (SlowdownHistoryConfigDTO dto : dtos) {
 
-				SlowdownHistoryConfig entity;
+				SlowdownHistoryConfig entity=null;
 
-				// UPDATE
-				Optional<SlowdownHistoryConfig> opt = slowdownHistoryConfigRepository.findById(dto.getId());
-				if (opt.isPresent()) {
-					entity = opt.get();
-				} else {
+				if(dto.getId()!=null) {
+					Optional<SlowdownHistoryConfig> opt = slowdownHistoryConfigRepository.findById(dto.getId());
+					if (opt.isPresent()) {
+						entity = opt.get();
+					}
+				}
+				 else {
 					entity = new SlowdownHistoryConfig();
-					entity.setId(UUID.randomUUID());
+					
 				}
 
 				entity.setDescription(dto.getDescription());
