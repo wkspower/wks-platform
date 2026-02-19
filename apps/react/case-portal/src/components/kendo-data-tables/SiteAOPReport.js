@@ -484,40 +484,69 @@ const SiteAOPReport = ({ permissions }) => {
     fetchDataEnergyPerformance,
   ])
 
+  const [performanceId, setPerformanceId] = useState(null)
+
   const getPerformanceHighlights = async () => {
     if (!PLANT_ID || !SITE_ID || !AOP_YEAR) return
+
     try {
+      // Clear states before fetching
       setPerformanceSummary('')
+      setPerformanceId(null)
+
       const res = await SiteReportDataService.getPerformanceHighlightsSummary(
         keycloak,
         SITE_ID,
         AOP_YEAR,
       )
-      if (res?.code === 200) {
-        setPerformanceSummary(res?.data?.summary || '')
+
+      if (res?.code === 200 && res?.data?.Data?.length > 0) {
+        // Get the first record from the array
+        const record = res.data.Data[0]
+
+        // Set both the text and the ID
+        setPerformanceSummary(record.summary || '')
+        setPerformanceId(record.id || null)
       } else {
         setPerformanceSummary('')
+        setPerformanceId(null)
       }
     } catch (error) {
       setPerformanceSummary('')
+      setPerformanceId(null)
       console.error('Error fetching summary:', error)
     }
   }
 
   // Save summary (POST/PUT)
+  // Assuming you store the ID from the GET response in a state variable
+
   const savePerformanceHighlightsSummary = async () => {
     try {
+      // Construct the DTO list expected by the @RequestBody List<PerformanceHighlightDTO>
+      const payload = [
+        {
+          id: performanceId, // The UUID from the GET response
+          summary: performanceSummary,
+          saveStatus: null,
+        },
+      ]
+
       const res = await SiteReportDataService.savePerformanceHighlightsSummary(
-        PLANT_ID,
-        SITE_ID,
-        AOP_YEAR,
-        performanceSummary,
         keycloak,
+
+        SITE_ID, // mapped to @RequestParam String siteId
+        AOP_YEAR, // mapped to @RequestParam String year
+        payload, // mapped to @RequestBody List<PerformanceHighlightDTO>
       )
-      if (res?.code === 200) {
+
+      if (res?.code === 200 || res?.code === 207) {
         setSnackbarData({
-          message: 'Saved Successfully!',
-          severity: 'success',
+          message:
+            res?.code === 200
+              ? 'Saved Successfully!'
+              : 'Saved with minor issues',
+          severity: res?.code === 200 ? 'success' : 'warning',
         })
         setPerformanceHighlightsEdited(false)
         setSnackbarOpen(true)

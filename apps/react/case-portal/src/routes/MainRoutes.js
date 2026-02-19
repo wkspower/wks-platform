@@ -88,6 +88,10 @@ import SteadyStateConsumption from 'components/aop-phase-two/vgoht/steady-state-
 import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consumption/index'
 import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
 import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
+import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
+import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
+import EthyleneBalance from 'components/kendo-data-tables/EthyleneBalance'
+import PropyleneBalance from 'components/kendo-data-tables/PropyleneBalance'
 
 // crude
 import ProductionNormsBasisCrude from 'components/aop-phase-two/crude/production-norms-basis/index'
@@ -100,8 +104,6 @@ import SteadyStateConsumptionCrude from 'components/aop-phase-two/crude/steady-s
 import ShutdownConsumptionCrude from 'components/aop-phase-two/crude/shutdown-consumption/index'
 import SlowdownConsumptionCrude from 'components/aop-phase-two/crude/slowdown-consumption/index'
 import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-aop-consumption/index'
-import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
-import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -894,6 +896,24 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='norm-comparison-report'>
                 <NormComparisonReport />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'ethylene-balance',
+            element: (
+              <PrivateRoute routeId='ethylene-balance'>
+                <EthyleneBalance />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'propylene-balance',
+            element: (
+              <PrivateRoute routeId='propylene-balance'>
+                <PropyleneBalance />
               </PrivateRoute>
             ),
           },

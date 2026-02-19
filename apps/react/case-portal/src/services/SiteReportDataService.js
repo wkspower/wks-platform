@@ -82,7 +82,7 @@ export async function getPerformanceHighlightsSummary(
   SITE_ID,
   AOP_YEAR,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/performance-highlights-summary?siteId=${SITE_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/performance-highlights?siteId=${SITE_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export async function savePerformanceHighlightsSummary(
   AOP_YEAR,
   data,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/performance-highlights-summary?siteId=${SITE_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/performance-highlights?siteId=${SITE_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

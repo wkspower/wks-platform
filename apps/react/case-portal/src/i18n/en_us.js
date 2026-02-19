@@ -97,6 +97,8 @@ const defs = {
     siteAOPReport: 'Site AOP Report',
     plantBudgetSummary: 'Plant Budget Summary',
     siteBudgetSummary: 'Site Budget Summary',
+    ethyleneBalance: 'Ethylene Balance',
+    propyleneBalance: 'Propylene Balance',
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
@@ -313,6 +315,8 @@ const defs = {
         dashboard: 'AOP Dashboard',
         proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
         qualitypackaging: 'Quality & Packaging Norms',
+        ethyleneBalance: 'Ethylene Balance',
+        propyleneBalance: 'Propylene Balance',
       },
     },
   },
