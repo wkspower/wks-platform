@@ -106,11 +106,11 @@ public class PCGOutlookService {
 
             // updates remarks
             if ("GasifierAvailability".equals(dto.getProduct())) {
-              for (UUID fymId : existingIds) {
+              for (UUID fymId : financialMonthIds.values()) {
                 updatesGasifierAvailabilityRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
               }
             } else if ("SynGasProduction".equals(dto.getProduct())) {
-                for (UUID fymId : existingIds) {
+                for (UUID fymId : financialMonthIds.values()) {
                     updatesSynGasProductionRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
                 }
             }
@@ -340,7 +340,10 @@ public class PCGOutlookService {
         System.out.println("gasifierAvailabilityupdates: " + gasifierAvailabilityupdates.size() +  " " + gasifierAvailabilityupdates);
         System.out.println("SynGasProductionupdates: " + SynGasProductionupdates.size() +  " " + SynGasProductionupdates);
         System.out.println("gasifierAvailabilityInserts: " + gasifierAvailabilityInserts.size() +  " " + gasifierAvailabilityInserts);
-        System.out.println("SynGasProductionInserts: " + SynGasProductionInserts.size() +  " " + SynGasProductionInserts);
+        System.out.println("SynGasProductionInserts: " + SynGasProductionInserts.size() +  " " + List.of(SynGasProductionInserts));
+
+        System.out.println("updatesGasifierAvailabilityRemarks: " + updatesGasifierAvailabilityRemarks.size() +  " " + updatesGasifierAvailabilityRemarks);
+        System.out.println("updatesSynGasProductionRemarks: " + updatesSynGasProductionRemarks.size() +  " " + updatesSynGasProductionRemarks);
       
         if(!gasifierAvailabilityupdates.isEmpty()) {  
 
