@@ -106,11 +106,11 @@ public class PCGOutlookService {
 
             // updates remarks
             if ("GasifierAvailability".equals(dto.getProduct())) {
-              for (UUID fymId : existingIds) {
+              for (UUID fymId : financialMonthIds.values()) {
                 updatesGasifierAvailabilityRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
               }
             } else if ("SynGasProduction".equals(dto.getProduct())) {
-                for (UUID fymId : existingIds) {
+                for (UUID fymId : financialMonthIds.values()) {
                     updatesSynGasProductionRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
                 }
             }
@@ -337,11 +337,7 @@ public class PCGOutlookService {
    
         }   // end of for loop
 
-        System.out.println("gasifierAvailabilityupdates: " + gasifierAvailabilityupdates.size() +  " " + gasifierAvailabilityupdates);
-        System.out.println("SynGasProductionupdates: " + SynGasProductionupdates.size() +  " " + SynGasProductionupdates);
-        System.out.println("gasifierAvailabilityInserts: " + gasifierAvailabilityInserts.size() +  " " + gasifierAvailabilityInserts);
-        System.out.println("SynGasProductionInserts: " + SynGasProductionInserts.size() +  " " + SynGasProductionInserts);
-      
+       
         if(!gasifierAvailabilityupdates.isEmpty()) {  
 
             String sql = "Update TCS_PCGOutlook set GasifierAvailability = ? where Site_FK_Id = ? and FinancialYearMonthId = ?";
@@ -499,9 +495,7 @@ public class PCGOutlookService {
                 }
             }
 
-            System.out.println("Failed records: " + failedRecords.size());
-            System.out.println("Valid records: " + validRecords.size());
-            System.out.println("All records: " + data);
+           
 
             // Try to save valid records
             if (!validRecords.isEmpty()) {
