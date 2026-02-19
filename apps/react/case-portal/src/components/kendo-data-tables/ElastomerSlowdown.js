@@ -56,6 +56,7 @@ const ElastomerSlowdown = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState([])
+  const [rowsShutdown, setRowsShutdown] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -103,6 +104,15 @@ const ElastomerSlowdown = ({ permissions }) => {
 
       const tableData = formattedDataShutDown || []
       setRows(tableData)
+
+      // Fetch Shutdown data for cross-overlap check
+      const maintenanceResponse =
+        await MaintenanceDetailsApiService.getMaintenanceData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      setRowsShutdown(maintenanceResponse?.data || [])
     } catch (error) {
       const status = error.response?.status
       const serverMessage = error.response?.data?.message
@@ -234,16 +244,137 @@ const ElastomerSlowdown = ({ permissions }) => {
         })
         return
       }
-      const requiredFields = ['remarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
+
+      const yearStr = AOP_YEAR
+      let startLimit, endLimit
+      if (yearStr) {
+        const [startYear, endYear] = yearStr
+          .split('-')
+          .map((y) => parseInt(y.trim(), 10))
+        if (!isNaN(startYear) && !isNaN(endYear)) {
+          startLimit = new Date(`${startYear}-04-01T00:00:00`)
+          endLimit = new Date(`20${endYear}-03-31T23:59:59`)
+        }
+      }
+
+      for (const row of data) {
+        if (
+          !row.description ||
+          !row.remarks ||
+          row.rate === undefined ||
+          row.rate === null ||
+          row.durationInMins === undefined ||
+          row.durationInMins === null ||
+          !row.maintStartDateTime ||
+          !row.maintEndDateTime
+        ) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Description, Rate, Duration, Remarks, and Dates are required!',
+            severity: 'error',
+          })
+          return
+        }
+
+        const start = new Date(row.maintStartDateTime)
+        const end = new Date(row.maintEndDateTime)
+
+        // Date Format validation (DD/MM/YYYY style check if user type it, though grid uses picker)
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Invalid date format! Please use DD/MM/YYYY.',
+            severity: 'error',
+          })
+          return
+        }
+
+        if (start >= end) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Start date must be before end date!',
+            severity: 'error',
+          })
+          return
+        }
+
+        if (
+          startLimit &&
+          endLimit &&
+          (start < startLimit ||
+            start > endLimit ||
+            end < startLimit ||
+            end > endLimit)
+        ) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Dates must be between ${startLimit.toLocaleDateString()} and ${endLimit.toLocaleDateString()} for selected year.`,
+            severity: 'error',
+          })
+          return
+        }
+
+        // Month span check (similar to Tab 0)
+        const isSameMonth =
+          start.getMonth() === end.getMonth() &&
+          start.getFullYear() === end.getFullYear()
+
+        if (!isSameMonth) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `The slowdown timeframe for '${row.description}' spans multiple months. Please split into separate entries.`,
+            severity: 'error',
+          })
+          return
+        }
+      }
+
+      // Intra-Slowdown Overlap check (similar to Tab 0)
+      for (let i = 0; i < rows.length; i++) {
+        const a = rows[i]
+        const aStart = new Date(a.maintStartDateTime).getTime()
+        const aEnd = new Date(a.maintEndDateTime).getTime()
+        if (isNaN(aStart) || isNaN(aEnd)) continue
+
+        for (let j = i + 1; j < rows.length; j++) {
+          const b = rows[j]
+          const bStart = new Date(b.maintStartDateTime).getTime()
+          const bEnd = new Date(b.maintEndDateTime).getTime()
+          if (isNaN(bStart) || isNaN(bEnd)) continue
+
+          if (aStart < bEnd && bStart < aEnd) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `The slowdown timeframe for "${a.description || b.description || 'this record'}" overlaps with "${b.description}". Please ensure no overlapping of timeframes.`,
+              severity: 'error',
+            })
+            return
+          }
+        }
+      }
+
+      // Cross overlap with Shutdown check 
+      for (let i = 0; i < rows.length; i++) {
+        const a = rows[i]
+        const aStart = new Date(a.maintStartDateTime).getTime()
+        const aEnd = new Date(a.maintEndDateTime).getTime()
+        if (isNaN(aStart) || isNaN(aEnd)) continue
+
+        for (let j = 0; j < rowsShutdown.length; j++) {
+          const b = rowsShutdown[j]
+          const bStart = new Date(b.maintStartDateTime).getTime()
+          const bEnd = new Date(b.maintEndDateTime).getTime()
+          if (isNaN(bStart) || isNaN(bEnd)) continue
+
+          if (aStart < bEnd && bStart < aEnd) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `The timeframe for "${a.description} (Slowdown)" overlaps with "${b.discription} (Shutdown)". Please ensure no overlapping of timeframes.`,
+              severity: 'error',
+            })
+            return
+          }
+        }
       }
 
       const payload = data.map((row) => ({
@@ -264,7 +395,7 @@ const ElastomerSlowdown = ({ permissions }) => {
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells])
+  }, [modifiedCells, rows, rowsShutdown, AOP_YEAR])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
