@@ -7,11 +7,10 @@ import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import Configuration from './Configuration'
 import Constants from './Constants'
-import ReportManualEntry from './ReportManualEntry'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
 import PIMSThroughput from './PIMSThroughput'
 
-const ProductionNormsBasis = () => {
+const ProductionNormsBasisFCC = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { oldYear, plantObject, siteObject, verticalObject, year } =
@@ -88,13 +87,6 @@ const ProductionNormsBasis = () => {
   const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
   const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
 
-  // Hardcoded tabs (commented - now using API)
-  // const tablist = [
-  //   'Configuration',
-  //   'Constants',
-  //   `Report Manual Entry (${prevYearFormatted})`,
-  // ]
-
   // Helper function to get tab display name by matching the UUID from tabs array
   const getTabName = (tabId) => {
     if (!tabId || !availableTabs.length) return null
@@ -114,10 +106,6 @@ const ProductionNormsBasis = () => {
 
       if (tabInfo) {
         const originalName = tabInfo.displayName
-        // Filter out Report Manual Entry
-        if (originalName === 'Report Manual Entry') {
-          return null
-        }
         return originalName
       }
       return tabId
@@ -141,9 +129,6 @@ const ProductionNormsBasis = () => {
         return <Constants />
       case 'PIMS Throughput':
         return <PIMSThroughput />
-
-      case 'Report Manual Entry':
-        return <ReportManualEntry />
       default:
         return null
     }
@@ -181,4 +166,4 @@ const ProductionNormsBasis = () => {
   )
 }
 
-export default ProductionNormsBasis
+export default ProductionNormsBasisFCC

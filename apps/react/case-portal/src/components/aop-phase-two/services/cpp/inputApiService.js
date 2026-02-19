@@ -39,6 +39,8 @@ export const InputApiService = {
   saveHeatRateData,
   saveHeatRateExcel,
   exportHeatRateExcel,
+  getConfigurationExecutionDetails,
+  executeConfiguration,
 
   getSTGHeatRateData,
   saveSTGHeatRateData,
@@ -492,8 +494,10 @@ async function getPlantList(keycloak, plantId, year) {
 }
 
 // ========================|| Heat Rate APIs ||=====================================//
-async function getHeatRateData(keycloak, assetId, year) {
-  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}`
+
+async function getHeatRateData(keycloak, assetId, year, startDate, endDate) {
+  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}/${startDate}/${endDate}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -909,11 +913,25 @@ async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // Heat Rate Excel Export
-async function exportHeatRateExcel(keycloak, assetId) {
+async function exportHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
+  // Construct endpoint with optional date range
+  let endpoint = `heat-rate/export/${assetId}/${financialYear}`
+
+  // If both dates are provided, add them as path variables
+  if (startDate && endDate) {
+    endpoint = `heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
+  }
+
   return exportExcelData(keycloak, {
-    endpoint: `heat-rate/export/${assetId}`,
+    endpoint: endpoint,
     queryParams: {},
-    fileName: `Heat_Rate.xlsx`,
+    fileName: `Heat_Rate_${financialYear}.xlsx`,
     method: 'GET',
   })
 }
@@ -1058,4 +1076,45 @@ async function exportFuelAvailabilityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     fileName: `Fuel_Availability_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
+}
+
+//========= Heat Rate Date From to
+async function getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function executeConfiguration(executionDetailDtoList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(executionDetailDtoList),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error saving configuration execution:', e)
+    return Promise.reject(e)
+  }
 }
