@@ -102,6 +102,13 @@ import OverallAopConsumptionCrude from 'components/aop-phase-two/crude/overall-a
 import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
+//fcc
+import ProductionNormsBasisFCC from 'components/aop-phase-two/fcc/production-norms-basis/index'
+import OverallAopConsumptionFCC from 'components/aop-phase-two/fcc/overall-aop-consumption/index'
+import SteadyStateConsumptionFCC from 'components/aop-phase-two/fcc/steady-state-consumption/index'
+import MonthwiseProductionPlanFCC from 'components/aop-phase-two/fcc/monthwise-production-plan/index'
+import NetProductionHoursFCC from 'components/aop-phase-two/fcc/net-production-hours/index'
+
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -606,6 +613,50 @@ export const MainRoutes = (
             ),
           },
           //Vertical CRUDE Ended
+
+          //Vertical FCC Start******************************************************************
+          {
+            path: 'production-norms-basis-fcc',
+            element: (
+              <PrivateRoute routeId='production-norms-basis-fcc'>
+                <ProductionNormsBasisFCC />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'net-production-hrs-fcc',
+            element: (
+              <PrivateRoute routeId='net-production-hrs-fcc'>
+                <NetProductionHoursFCC />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'monthwise-production-plan-fcc',
+            element: (
+              <PrivateRoute routeId='monthwise-production-plan-fcc'>
+                <MonthwiseProductionPlanFCC />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'steady-state-consumption-fcc',
+            element: (
+              <PrivateRoute routeId='steady-state-consumption-fcc'>
+                <SteadyStateConsumptionFCC />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'overall-aop-consumption-fcc',
+            element: (
+              <PrivateRoute routeId='overall-aop-consumption-fcc'>
+                <OverallAopConsumptionFCC />
+              </PrivateRoute>
+            ),
+          },
+          //Vertical FCC Ended ****************************
         ],
       },
 
