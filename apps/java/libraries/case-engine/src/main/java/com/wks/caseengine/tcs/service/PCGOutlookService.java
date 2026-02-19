@@ -337,14 +337,7 @@ public class PCGOutlookService {
    
         }   // end of for loop
 
-        System.out.println("gasifierAvailabilityupdates: " + gasifierAvailabilityupdates.size() +  " " + gasifierAvailabilityupdates);
-        System.out.println("SynGasProductionupdates: " + SynGasProductionupdates.size() +  " " + SynGasProductionupdates);
-        System.out.println("gasifierAvailabilityInserts: " + gasifierAvailabilityInserts.size() +  " " + gasifierAvailabilityInserts);
-        System.out.println("SynGasProductionInserts: " + SynGasProductionInserts.size() +  " " + List.of(SynGasProductionInserts));
-
-        System.out.println("updatesGasifierAvailabilityRemarks: " + updatesGasifierAvailabilityRemarks.size() +  " " + updatesGasifierAvailabilityRemarks);
-        System.out.println("updatesSynGasProductionRemarks: " + updatesSynGasProductionRemarks.size() +  " " + updatesSynGasProductionRemarks);
-      
+       
         if(!gasifierAvailabilityupdates.isEmpty()) {  
 
             String sql = "Update TCS_PCGOutlook set GasifierAvailability = ? where Site_FK_Id = ? and FinancialYearMonthId = ?";
@@ -502,9 +495,7 @@ public class PCGOutlookService {
                 }
             }
 
-            System.out.println("Failed records: " + failedRecords.size());
-            System.out.println("Valid records: " + validRecords.size());
-            System.out.println("All records: " + data);
+           
 
             // Try to save valid records
             if (!validRecords.isEmpty()) {
