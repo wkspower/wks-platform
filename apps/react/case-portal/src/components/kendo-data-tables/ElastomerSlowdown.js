@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-
+import { validateFields } from 'utils/validationUtils'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
@@ -234,12 +234,23 @@ const ElastomerSlowdown = ({ permissions }) => {
         })
         return
       }
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
 
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
         rate: row.rate || 0,
         description: row.description || '',
-        remarks: row.remark || '',
+        remarks: row.remarks || '',
         maintStartDateTime: row.maintStartDateTime
           ? new Date(row.maintStartDateTime).toLocaleDateString('en-CA')
           : null,
@@ -258,7 +269,7 @@ const ElastomerSlowdown = ({ permissions }) => {
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
     if (READ_ONLY) return
-    setCurrentRemark(dataItem.remark || '')
+    setCurrentRemark(dataItem.remarks || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)
   }
@@ -325,6 +336,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         setRemarkDialogOpen={setRemarkDialogOpen}
         unsavedChangesRef={unsavedChangesRef}
         currentRemark={currentRemark}
+        currentRowId={currentRowId}
         setCurrentRemark={setCurrentRemark}
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={handleDeleteSlowdownConfig}
