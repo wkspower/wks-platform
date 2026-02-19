@@ -162,6 +162,7 @@ export const DataService = {
   ImportPeopleInitiativeExcel,
   dropdownValuesDMD,
   dropdownValueSlowdown,
+  getLineDetails,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -3806,5 +3807,28 @@ export async function ImportPeopleInitiativeExcel(
   } catch (e) {
     console.error('Error importing People Initiative Excel:', e)
     return Promise.reject(e)
+  }
+}
+
+async function getLineDetails(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/line-details?plantId=${plantId || ''}&year=${year || ''}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

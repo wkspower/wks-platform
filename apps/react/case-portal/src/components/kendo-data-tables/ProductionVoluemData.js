@@ -9,7 +9,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
-import { Typography } from '../../../node_modules/@mui/material/index'
+import { Typography, Box } from '../../../node_modules/@mui/material/index'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
@@ -31,7 +31,13 @@ import ProductionTarget from './ProductionTarget'
 import AromaticsProductionGrids from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
+import AopTabs from 'components/AopTabs'
+
 const ProductionvolumeData = ({ permissions }) => {
+  // State for tabs and line details
+  const [tabIndex, setTabIndex] = useState(0)
+  const [tabs, setTabs] = useState([])
+  const [lineDetails, setLineDetails] = useState([])
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
 
@@ -62,6 +68,7 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject,
     year,
   } = dataGridStore
+
 
   const IS_OLD_YEAR = oldYear?.oldYear
   const isOldYear = false
@@ -94,6 +101,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
   const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
+  // Check if it's PP VERTICAL | DTA SITE
+  const isPPVerticalDTASite = VERTICAL_NAME?.toLowerCase() === 'pp' && SITE_NAME === 'dta'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -425,7 +434,9 @@ const ProductionvolumeData = ({ permissions }) => {
     setEnableSaveAddBtnDesignCapacity({})
     setModifiedCells({})
     // setEdit({})
-
+    // Get the selected line ID based on the current tab
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
       setLoading(true)
       const response =
@@ -433,6 +444,8 @@ const ProductionvolumeData = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          lineId,
+          isPPVerticalDTASite,
         )
       if (response?.code != 200) {
         setRows([])
@@ -613,7 +626,48 @@ const ProductionvolumeData = ({ permissions }) => {
     fetchData()
 
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID, tabIndex])
+
+  // Fetch line details when component mounts or plantID/year changes
+  const fetchLineDetails = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+    
+    try {
+      const response = await DataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR
+      )
+      
+      if (response?.code != 200) {
+        setTabs([])
+        return
+      }
+      if (response && Array.isArray(response?.data)) {
+        setLineDetails(response.data)
+        // Update tabs based on the response
+        const lineTabs = response?.data.map(line => line.displayName)
+        setTabs(lineTabs)
+      }
+    } catch (err) {
+      console.error('Error fetching line details:', err)
+      // Fallback to default tabs if API fails
+      setTabs([])
+    }
+  }
+  
+  useEffect(() => {
+    if (isPPVerticalDTASite) {
+      fetchLineDetails()
+    }
+  }, [PLANT_ID, keycloak, yearChanged, isPPVerticalDTASite])
+
+  // Call fetchData when lineDetails is updated and has at least one item
+  useEffect(() => {
+    if (lineDetails && lineDetails.length > 0) {
+      fetchData()
+    }
+  }, [lineDetails])
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
@@ -773,10 +827,6 @@ const ProductionvolumeData = ({ permissions }) => {
     fetchMaxCapacityData(unitMaxCapacity)
   }, [unitMaxCapacity, PLANT_ID, yearChanged, keycloak])
 
-  useEffect(() => {
-    fetchData()
-    fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const handleCalculateMeg = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
@@ -1142,6 +1192,17 @@ const ProductionvolumeData = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
+      {isPPVerticalDTASite && (
+        <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tabs}
+          />
+        </Box>
+      )}
 
       {/* DESIGN_CAPACITY */}
       {conditionForFirst && (
