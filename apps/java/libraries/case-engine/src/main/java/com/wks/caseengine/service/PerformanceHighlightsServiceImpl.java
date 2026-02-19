@@ -121,30 +121,47 @@ public class PerformanceHighlightsServiceImpl implements PerformanceHighlightsSe
 
 	            PerformanceHighlight entity=null;
 
-	            try {
-	                if (dto.getId() != null) {
-	                   
-	                    Optional<PerformanceHighlight> existing = performanceHighlightsRepository.findById(UUID.fromString(dto.getId()));
-	                    if (existing.isPresent()) {
-	                        entity = existing.get();
-	                    } else {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Record not found for ID: " + dto.getId());
-	                        failedList.add(dto);
-	                        continue;
-	                    }
-	                } 
+				try {
+					// If id provided -> update path
+					if (dto.getId() != null) {
+						Optional<PerformanceHighlight> existing = performanceHighlightsRepository
+								.findById(UUID.fromString(dto.getId()));
+						if (existing.isPresent()) {
+							entity = existing.get();
+						} else {
+							dto.setSaveStatus("Failed");
+							dto.setErrDescription("Record not found for ID: " + dto.getId());
+							failedList.add(dto);
+							continue;
+						}
+					}
+					// If id is null -> create new entity (insert)
+					else {
+						entity = new PerformanceHighlight();
+						// ensure entity has an id (DB default may not exist)
+						entity.setId(UUID.randomUUID());
 
-	               
-	                entity.setSummary(dto.getSummary());
-	                
-	                
-	                entity.setUpdatedBy(currentUser);
-	                entity.setUpdatedDate(currentDate);
+						// set SiteId and AOPYear from method params (if provided)
+						if (siteId != null && !siteId.trim().isEmpty()) {
+							try {
+								entity.setSiteId(UUID.fromString(siteId));
+							} catch (IllegalArgumentException iae) {
+								// if siteId isn't a UUID string, skip setting SiteId to avoid crash;
+								// this preserves "do not change anything else" request.
+							}
+						}
+						entity.setAopYear(year);
 
-	                performanceHighlightsRepository.save(entity);
+					}
 
-	            } catch (Exception e) {
+					// common update/insert fields
+					entity.setSummary(dto.getSummary());
+					entity.setUpdatedBy(currentUser);
+					entity.setUpdatedDate(currentDate);
+
+					performanceHighlightsRepository.save(entity);
+
+				} catch (Exception e) {
 	                dto.setSaveStatus("Failed");
 	                dto.setErrDescription("Error processing record: " + e.getMessage());
 	                failedList.add(dto);
