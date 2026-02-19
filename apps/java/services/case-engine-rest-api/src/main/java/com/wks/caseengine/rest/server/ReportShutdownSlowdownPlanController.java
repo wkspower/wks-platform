@@ -28,7 +28,7 @@ public class ReportShutdownSlowdownPlanController {
 		 return  reportShutdownSlowdownPlanService.getShutdownSlowdownPlan(siteId,year);
 	}
 	
-	@PostMapping(value="/report-capex-pioplan")
+	@PostMapping(value="/shutdown-slowdown-plan")
 	public AOPMessageVM saveShutdownSlowdownPlan(@RequestParam String year,@RequestParam String siteId, @RequestBody List<ShutdownSlowdownPlanDTO> shutdownSlowdownPlanDTOs) {
 		return 	reportShutdownSlowdownPlanService.saveShutdownSlowdownPlan(year,siteId,shutdownSlowdownPlanDTOs);
 	}
