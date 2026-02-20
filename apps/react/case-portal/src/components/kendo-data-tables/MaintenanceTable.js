@@ -165,7 +165,7 @@ const MaintenanceTable = () => {
   }
 
   useEffect(() => {
-    if(isPPVerticalDTASite){
+    if (isPPVerticalDTASite) {
       fetchLineDetails()
     }
   }, [PLANT_ID, keycloak, yearChanged])
