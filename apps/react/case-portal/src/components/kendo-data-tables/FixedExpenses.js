@@ -93,6 +93,7 @@ export default function FixedExpenses() {
       editable: false,
       align: 'right',
       format: '{0:0}',
+      type: 'numberNonGrey',
     },
     {
       field: 'particular',
@@ -106,16 +107,15 @@ export default function FixedExpenses() {
         {
           field: 'fyPrevAOP',
           title: `FY${prev} AOP`,
-          widthT: 100,
           editable: true,
-          type: 'number',
+
+          type: 'numberNonGrey',
         },
         {
           field: 'fyPrevActual',
           title: `FY${prev} Actual`,
-          widthT: 100,
           editable: true,
-          type: 'number',
+          type: 'numberNonGrey',
         },
       ],
     },
@@ -125,23 +125,21 @@ export default function FixedExpenses() {
         {
           field: 'fyCurrAOP',
           title: `FY${next} AOP`,
-          widthT: 100,
+
           editable: true,
-          type: 'number',
+          type: 'numberNonGrey',
         },
         {
           field: 'percentageChange',
           title: '% Change',
-          widthT: 80,
           editable: true,
-          type: 'number',
+          type: 'numberNonGrey',
         },
         {
           field: 'variance',
           title: 'Variance',
-          widthT: 80,
           editable: true,
-          type: 'number',
+          type: 'numberNonGrey',
         },
       ],
     },

@@ -70,11 +70,7 @@ export const SlowdownConfigColumns = [
     title: 'Slowdown Desc',
     editable: true,
   },
-  {
-    field: 'id',
-    title: 'id',
-    hidden: true,
-  },
+
   {
     field: 'maintStartDateTime',
     title: 'SD - From',
@@ -86,9 +82,10 @@ export const SlowdownConfigColumns = [
     editable: true,
   },
   {
-    field: 'durationInHrs',
-    title: 'Duration (hrs)',
+    field: 'durationInMins',
+    title: 'Duration (Mins)',
     editable: true,
+    type: 'number',
   },
 
   {

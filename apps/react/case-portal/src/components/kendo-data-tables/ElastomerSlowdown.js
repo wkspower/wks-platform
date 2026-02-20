@@ -103,7 +103,6 @@ const ElastomerSlowdown = ({ permissions }) => {
 
       const tableData = formattedDataShutDown || []
       setRows(tableData)
-
     } catch (error) {
       const status = error.response?.status
       const serverMessage = error.response?.data?.message
@@ -297,7 +296,12 @@ const ElastomerSlowdown = ({ permissions }) => {
       }
 
       // Select required fields based on vertical
-      const requiredFields = ['description','durationInHrs', 'remarks', 'rate']
+      const requiredFields = [
+        'description',
+        'durationInMins',
+        'remarks',
+        'rate',
+      ]
 
       // Missing required fields
       for (const record of data) {
@@ -478,7 +482,6 @@ const ElastomerSlowdown = ({ permissions }) => {
           deleteButton: true,
           saveBtn: true,
           allAction: true,
-
           downloadExcelBtnFromUI: true,
           ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown History Config`,
           showTitleNameBusiness: true,
