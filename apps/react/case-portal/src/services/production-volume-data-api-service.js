@@ -65,12 +65,18 @@ async function editDesignCapacityData(
   }
 }
 
-async function getAOPMCCalculatedData(keycloak, PLANT_ID, AOP_YEAR, LINE_ID, isPPVerticalDTASite) {
+async function getAOPMCCalculatedData(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  LINE_ID,
+  isPPVerticalDTASite,
+) {
   // Use production-target-line endpoint for PP vertical and DTA site
-  const endpoint = isPPVerticalDTASite 
-    ? 'production-target-line' 
+  const endpoint = isPPVerticalDTASite
+    ? 'production-target-line'
     : 'production-target'
-    
+
   const lineIdParams = LINE_ID ? `&lineId=${LINE_ID}` : ''
   const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}${lineIdParams}`
   const headers = {
