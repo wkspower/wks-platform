@@ -46,7 +46,7 @@ public class ReportFixedExpensesServiceImpl implements ReportFixedExpensesServic
 			
 			
 			Sites site = siteRepository.findById(UUID.fromString(siteId)).orElseThrow();
-				String procedureName = "RPT_"+site.getName()+"_GetFixedExpenses";
+				String procedureName = "RPT_GetFixedExpenses";
 				obj = findByYearAndSiteId(year, site.getId(), procedureName);
 			
 			List<ReportFixedExpensesDTO> reportFixedExpensesDTOs = new ArrayList<>();

@@ -49,7 +49,7 @@ public class ReportTechnicalAvailabilityServiceImpl implements ReportTechnicalAv
 	        List<Object[]> obj = new ArrayList<>();
 
 	        Sites site = siteRepository.findById(UUID.fromString(siteId)).orElseThrow();
-	        String procedureName = "RPT_" + site.getName() + "_GetTechnicalAvailability";
+	        String procedureName = "RPT_GetTechnicalAvailability";
 	        obj = findByYearAndSiteId(year, site.getId(), procedureName);
 
 	        List<TechnicalAvailabilityDTO> technicalAvailabilityDTOs = new ArrayList<>();
