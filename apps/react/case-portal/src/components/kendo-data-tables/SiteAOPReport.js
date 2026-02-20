@@ -16,6 +16,10 @@ import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
 import { TextArea } from '@progress/kendo-react-inputs'
+import FixedExpenses from './FixedExpenses'
+import Capex from './Capex'
+import ShutdownSlowdownPlan from './SlowdownPlan'
+import TechnicalAvailability from './TechnicalAvailability'
 const SiteAOPReport = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -111,22 +115,20 @@ const SiteAOPReport = ({ permissions }) => {
   const defaultTabs = [
     'Site Team',
     'Energy Performance',
-    // 'Major Incidents FY26',
-    // 'Major Safety Improvement Initiative',
-    // 'Production',
-    // //'Production: Annual (KTA) basis',
-    // 'Conversion & Variable Cost',
+    'Fixed Expenses',
+    'Capex/PIO Plan',
+    'Shutdown / Slowdown plan',
+    'Technical Availability',
     // 'Safety Performance & Targets',
     // 'Contribution (Rs/ MT & Rs Crs.)',
     // 'Major Process Incidents',
     // 'Major Process Incidents FY26',
-    // 'Fixed Expenses',
+    // 'Major Incidents FY26',
     // // Major Process Incidents FY26 columns and dummy data (tabIndex 9)
-
-    // 'Capex/PIO Plan (Max 10)',
+    // 'Major Safety Improvement Initiative',
     // 'Production (TPH) basis',
-    // 'Shutdown / Slowdown plan',
-    // 'Technical Availability',
+    // 'Production',
+    // 'Conversion & Variable Cost',
     // 'MCU Capacity Utilization (%)',
   ]
   function getAopShortYears(aopYear) {
@@ -686,216 +688,6 @@ const SiteAOPReport = ({ permissions }) => {
   ]
   const [contribution, setContribution] = useState(contributionRows)
 
-  const fixedExpensesColumns = [
-    {
-      field: 'id',
-      title: 'ID',
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'srNo',
-      title: 'Sr. No.',
-      widthT: 60,
-      editable: false,
-      align: 'right',
-      format: '{0:0}',
-    },
-    {
-      field: 'particulars',
-      title: 'Particulars',
-      widthT: 180,
-      editable: false,
-    },
-    {
-      title: `FY ${AOP_YEAR}`,
-      children: [
-        {
-          field: 'fy26Aop',
-          title: `FY${AOP_YEAR} AOP`,
-          widthT: 100,
-          editable: true,
-          type: 'number',
-        },
-        {
-          field: 'fy26Actual',
-          title: `FY${AOP_YEAR} Actual`,
-          widthT: 100,
-          editable: true,
-          type: 'number',
-        },
-      ],
-    },
-    {
-      title: `AOP ${AOP_YEAR + 1}`,
-      children: [
-        {
-          field: 'fy27Aop',
-          title: `FY${AOP_YEAR + 1} AOP`,
-          widthT: 100,
-          editable: true,
-          type: 'number',
-        },
-        {
-          field: 'percentChange',
-          title: '% Change',
-          widthT: 80,
-          editable: true,
-          type: 'number',
-        },
-        {
-          field: 'variance',
-          title: 'Variance',
-          widthT: 80,
-          editable: true,
-          type: 'number',
-        },
-      ],
-    },
-    { field: 'remarks', title: 'Remarks', widthT: 200, editable: true },
-  ]
-
-  const fixedExpensesRows = [
-    {
-      id: 1,
-      srNo: 1,
-      particulars: 'People Related Cost',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      percentChange: '',
-      variance: '',
-      remarks: '',
-    },
-    {
-      id: 2,
-      srNo: 2,
-      particulars: 'Non-People Related Cost',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      percentChange: '',
-      variance: '',
-      remarks: '',
-    },
-    {
-      id: 3,
-      srNo: 3,
-      particulars: 'Repairs',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      percentChange: '',
-      variance: '',
-      remarks: '',
-    },
-    {
-      id: 4,
-      srNo: 4,
-      particulars: 'Group Company Salary',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      percentChange: '',
-      variance: '',
-      remarks: '',
-    },
-    {
-      id: 5,
-      srNo: 5,
-      particulars: 'Grand Total (1 - 4)',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      percentChange: '',
-      variance: '',
-      remarks: '',
-    },
-  ]
-
-  const [fixedExpensesState, setFixedExpensesState] =
-    useState(fixedExpensesRows)
-
-  // Capex/PIO Plan grid columns (tabIndex 10)
-  const capexPlanColumns = [
-    {
-      field: 'id',
-      title: 'ID',
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'sno',
-      title: 'S.No',
-      widthT: 60,
-      editable: false,
-      align: 'right',
-      format: '{0:0}',
-    },
-    { field: 'proposal', title: 'Proposal', widthT: 180, editable: true },
-    { field: 'category', title: 'Category', widthT: 120, editable: true },
-    {
-      field: 'justification',
-      title: 'Justification',
-      widthT: 150,
-      editable: true,
-    },
-    {
-      field: 'cost',
-      title: 'Cost (Rs Cr)',
-      widthT: 100,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'benefit',
-      title: 'Benefit (Rs Cr)',
-      widthT: 100,
-      editable: true,
-      type: 'number',
-    },
-    { field: 'target', title: 'Target', widthT: 100, editable: true },
-    { field: 'status', title: 'Status', widthT: 100, editable: true },
-  ]
-
-  const capexPlanRows = [
-    {
-      id: 1,
-      sno: 1,
-      proposal: '',
-      category: '',
-      justification: '',
-      cost: '',
-      benefit: '',
-      target: '',
-      status: '',
-    },
-    {
-      id: 2,
-      sno: 2,
-      proposal: '',
-      category: '',
-      justification: '',
-      cost: '',
-      benefit: '',
-      target: '',
-      status: '',
-    },
-    {
-      id: 3,
-      sno: 3,
-      proposal: '',
-      category: '',
-      justification: '',
-      cost: '',
-      benefit: '',
-      target: '',
-      status: '',
-    },
-  ]
-
-  const [capexPlanState, setCapexPlanState] = useState(capexPlanRows)
-
   // Production (TPH) basis grid columns (tabIndex 11)
   const productionTphColumns = [
     {
@@ -979,161 +771,6 @@ const SiteAOPReport = ({ permissions }) => {
   const [productionTphState, setProductionTphState] =
     useState(productionTphRows)
   // Shutdown/Slow Down Plan grid columns
-  const shutdownSlowdownColumns = [
-    {
-      field: 'id',
-      title: 'ID',
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'sno',
-      title: 'S.No',
-      widthT: 60,
-      editable: false,
-      align: 'right',
-      format: '{0:0}',
-    },
-    { field: 'plant', title: 'Plant', widthT: 120, editable: true },
-    {
-      field: 'sdDays',
-      title: 'No of S/D days',
-      widthT: 120,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'slowdownDays',
-      title: 'No of slowdown days',
-      widthT: 150,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'monthly',
-      title: 'Month',
-      type: 'monthDropdownPEPP',
-      widthT: 100,
-      editable: true,
-    },
-    { field: 'sdPlan', title: 'S/D Plan', widthT: 200, editable: true },
-  ]
-
-  // Dummy data for Shutdown/Slow Down Plan grid
-  const shutdownSlowdownRows = [
-    {
-      id: 1,
-      sno: 1,
-      plant: '',
-      sdDays: '',
-      slowdownDays: '',
-      monthly: 'March',
-      sdPlan: '',
-    },
-    {
-      id: 2,
-      sno: 2,
-      plant: '',
-      sdDays: '',
-      slowdownDays: '',
-      month: '',
-      sdPlan: '',
-    },
-    {
-      id: 3,
-      sno: 3,
-      plant: '',
-      sdDays: '',
-      slowdownDays: '',
-      month: '',
-      sdPlan: '',
-    },
-  ]
-
-  const [shutdownSlowdownData, setShutdownSlowdownData] =
-    useState(shutdownSlowdownRows)
-
-  // Tab 10: setShutdownSlowdownData grid columns and dummy data
-
-  // Technical Availability grid columns (for tab 10)
-  const technicalAvailabilityColumns = [
-    {
-      field: 'id',
-      title: 'ID',
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'sno',
-      title: 'S.No',
-      widthT: 60,
-      editable: false,
-      align: 'right',
-      format: '{0:0}',
-    },
-    { field: 'plant', title: 'Plant', widthT: 120, editable: true },
-    {
-      field: 'fy26Aop',
-      title: 'FY26 AOP',
-      widthT: 120,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'fy26Actual',
-      title: 'FY26 Actual',
-      widthT: 120,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'fy27Aop',
-      title: 'FY27 AOP',
-      widthT: 120,
-      editable: true,
-      type: 'number',
-    },
-    {
-      field: 'rationalReasons',
-      title: 'Rationale/ Reasons',
-      widthT: 200,
-      editable: true,
-    },
-  ]
-
-  const technicalAvailabilityRows = [
-    {
-      id: 1,
-      sno: 1,
-      plant: '',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      rationalReasons: '',
-    },
-    {
-      id: 2,
-      sno: 2,
-      plant: '',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      rationalReasons: '',
-    },
-    {
-      id: 3,
-      sno: 3,
-      plant: '',
-      fy26Aop: '',
-      fy26Actual: '',
-      fy27Aop: '',
-      rationalReasons: '',
-    },
-  ]
-
-  const [technicalAvailabilityState, setTechnicalAvailabilityState] = useState(
-    technicalAvailabilityRows,
-  )
 
   const mcuCapacityUtilizationColumns = [
     {
@@ -1602,69 +1239,13 @@ const SiteAOPReport = ({ permissions }) => {
           </Box>
         </>
       )}
+      {tabIndex === 2 && <FixedExpenses />}
 
-      {tabIndex === 2 && (
-        <KendoDataTables
-          columns={columns.majorIncidents}
-          rows={majorIncidents}
-          setRows={setMajorIncidents}
-          modifiedCells={modifiedCells2} // <-- add this
-          setModifiedCells={setModifiedCells2}
-          title='B2.1. Major Incidents FY26: (Fatality, PSI Tier 1 & 2, LWC, High Severity, Process Fires)'
-          permissions={adjustedPermission1}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          snackbarData={snackbarData}
-          setSnackbarData={setSnackbarData}
-          handleRemarkCellClick={handleRemarkCellClickMajorInc}
-          remarkDialogOpen={remarkDialogOpen2}
-          setRemarkDialogOpen={setRemarkDialogOpen2}
-          currentRemark={currentRemark2}
-          setCurrentRemark={setCurrentRemark2}
-          currentRowId={currentRowId2}
-        />
-      )}
-      {tabIndex === 3 && (
-        <KendoDataTables
-          columns={columns.majorSafetyInitiative}
-          rows={majorSafetyInitiative}
-          setRows={setMajorSafetyInitiative}
-          title='B2.2. Major Safety Improvement Initiative FY27 (Max 5)'
-          permissions={adjustedPermission1}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          snackbarData={snackbarData}
-          setSnackbarData={setSnackbarData}
-        />
-      )}
-      {tabIndex === 4 && (
-        <KendoDataTablesReports
-          columns={columns.production}
-          rows={production}
-          setRows={setProduction}
-          title='B3.1. AOP FY27 Basis'
-          permissions={adjustedPermission1}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          snackbarData={snackbarData}
-          setSnackbarData={setSnackbarData}
-        />
-      )}
+      {tabIndex === 3 && <Capex />}
+      {tabIndex === 4 && <ShutdownSlowdownPlan />}
+
+      {tabIndex === 5 && <TechnicalAvailability />}
       {tabIndex === 6 && (
-        <KendoDataTables
-          columns={columns.conversionVariableCost}
-          rows={conversionVariableCost}
-          setRows={setConversionVariableCost}
-          title='B3.3. Conversion & Variable Cost'
-          permissions={adjustedPermission1}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          snackbarData={snackbarData}
-          setSnackbarData={setSnackbarData}
-          groupBy={'plant'}
-        />
-      )}
-      {tabIndex === 7 && (
         <KendoDataTablesReports
           columns={columns.safetyPerformance}
           rows={Rowssafety}
@@ -1688,7 +1269,7 @@ const SiteAOPReport = ({ permissions }) => {
           permissions={adjustedPermissionsslowdown}
         />
       )}
-      {tabIndex === 8 && (
+      {tabIndex === 7 && (
         <KendoDataTables
           columns={contributionColumns}
           rows={contribution}
@@ -1702,7 +1283,7 @@ const SiteAOPReport = ({ permissions }) => {
         />
       )}
 
-      {tabIndex === 9 && (
+      {tabIndex === 8 && (
         <KendoDataTables
           columns={majorProcessIncidentsFy26Columns}
           rows={majorProcessIncidentsFy26State}
@@ -1717,25 +1298,32 @@ const SiteAOPReport = ({ permissions }) => {
       )}
 
       {tabIndex === 10 && (
-        <KendoDataTablesReports
-          columns={fixedExpensesColumns}
-          rows={fixedExpensesState}
-          setRows={setFixedExpensesState}
-          title='Fixed Expenses'
-          permissions={adjustedPermissionsslowdown}
+        <KendoDataTables
+          columns={columns.majorIncidents}
+          rows={majorIncidents}
+          setRows={setMajorIncidents}
+          modifiedCells={modifiedCells2} // <-- add this
+          setModifiedCells={setModifiedCells2}
+          title='B2.1. Major Incidents FY26: (Fatality, PSI Tier 1 & 2, LWC, High Severity, Process Fires)'
+          permissions={adjustedPermission1}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
+          handleRemarkCellClick={handleRemarkCellClickMajorInc}
+          remarkDialogOpen={remarkDialogOpen2}
+          setRemarkDialogOpen={setRemarkDialogOpen2}
+          currentRemark={currentRemark2}
+          setCurrentRemark={setCurrentRemark2}
+          currentRowId={currentRowId2}
         />
       )}
-
       {tabIndex === 11 && (
         <KendoDataTables
-          columns={capexPlanColumns}
-          rows={capexPlanState}
-          setRows={setCapexPlanState}
-          title='Capex/PIO Plan (Max 10)'
+          columns={columns.majorSafetyInitiative}
+          rows={majorSafetyInitiative}
+          setRows={setMajorSafetyInitiative}
+          title='B2.2. Major Safety Improvement Initiative FY27 (Max 5)'
           permissions={adjustedPermission1}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
@@ -1759,13 +1347,11 @@ const SiteAOPReport = ({ permissions }) => {
       )}
 
       {tabIndex === 13 && (
-        <KendoDataTables
-          modifiedCells={modifiedCellsShutdownSlowdown}
-          setModifiedCells={setModifiedCellsShutdownSlowdown}
-          columns={shutdownSlowdownColumns}
-          rows={shutdownSlowdownData}
-          setRows={setShutdownSlowdownData}
-          title='Shutdown / Slowdown plan'
+        <KendoDataTablesReports
+          columns={columns.production}
+          rows={production}
+          setRows={setProduction}
+          title='B3.1. AOP FY27 Basis'
           permissions={adjustedPermission1}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
@@ -1776,15 +1362,16 @@ const SiteAOPReport = ({ permissions }) => {
 
       {tabIndex === 15 && (
         <KendoDataTables
-          columns={technicalAvailabilityColumns}
-          rows={technicalAvailabilityState}
-          setRows={setTechnicalAvailabilityState}
-          title='Technical Availability'
+          columns={columns.conversionVariableCost}
+          rows={conversionVariableCost}
+          setRows={setConversionVariableCost}
+          title='B3.3. Conversion & Variable Cost'
           permissions={adjustedPermission1}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
+          groupBy={'plant'}
         />
       )}
 
