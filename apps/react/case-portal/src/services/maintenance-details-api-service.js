@@ -15,11 +15,14 @@ export const MaintenanceDetailsApiService = {
   deleteShutdownConfig,
   saveShutdownConfig,
   getShutdownConfig,
+  getFinishingShutdownConfig,
   getCrackerDownsteamShutdownDMD,
   getSdDaysValues,
   getSlowdownConfig,
   deleteSlowdownConfig,
   saveSlowdownConfig,
+  saveFinishingShutdown,
+  deleteFinishingShutdownConfig,
 }
 
 async function getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
@@ -424,5 +427,61 @@ async function getSlowdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+async function getFinishingShutdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveFinishingShutdown(SITE_ID, AOP_YEAR, dataList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?siteId=${encodeURIComponent(SITE_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error in saveAnnualProduction:', e)
+    return await Promise.reject(e)
+  }
+}
+async function deleteFinishingShutdownConfig(id, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?id=${encodeURIComponent(id)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.json()
+  } catch (e) {
+    console.error('Error deleting finishing shutdown config data:', e)
+    return Promise.reject(e)
   }
 }

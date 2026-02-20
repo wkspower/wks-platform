@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux'
 import YearDropdownEditor from './Utilities-Kendo/YearDropdownEditor'
 import SDDaysDropdownEditorWrapper from './Utilities-Kendo/SdDaysDropdownEditor'
 import LineDropdownEditor from './Utilities-Kendo/LineDropdownEditor'
+import CategoryDropdownEditor from './Utilities-Kendo/CategoryDropdown'
 import {
   Box,
   Button,
@@ -75,6 +76,7 @@ export const dateFields = [
   'periodFrom',
   'toDateReport',
   'fromDateReport',
+  'shutdownDate',
 ]
 export const dateFields2 = ['fromDate', 'toDate']
 export const dateFields1 = [
@@ -2439,7 +2441,38 @@ const KendoDataTables = ({
                     />
                   )
                 }
-
+                if (col.type === 'Categorydropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.width}
+                      editable={!!col?.editable}
+                      cells={{
+                        edit: { text: CategoryDropdownEditor },
+                        data: (props) => {
+                          // Show the value as text in display mode
+                          const options = [
+                            { id: 1, value: '1' },
+                            { id: 2, value: '2' },
+                            { id: 3, value: '3' },
+                          ]
+                          const valueObj = options.find(
+                            (opt) => opt.id === props.dataItem[props.field],
+                          )
+                          return (
+                            <td {...props.tdProps}>
+                              {valueObj ? valueObj.value : ''}
+                            </td>
+                          )
+                        },
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
                 const YearDropdownEditorWrapper = (props) => (
                   <YearDropdownEditor {...props} AOP_YEAR={AOP_YEAR} />
                 )
