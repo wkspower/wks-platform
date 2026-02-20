@@ -276,6 +276,7 @@ export default function Capex() {
       titleName: 'Capex Plan',
       adjustedPermissions: true,
       ExcelName: `${lowerVertName}_Capex_Plan_${AOP_YEAR}`,
+      saveBtn: true,
     },
     isOldYear,
   )
