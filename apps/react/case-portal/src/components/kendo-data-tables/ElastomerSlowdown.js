@@ -386,7 +386,7 @@ const ElastomerSlowdown = ({ permissions }) => {
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
         rate: row.rate || 0,
-        duration: row.duration || '',
+        description: item.description || '',
         remarks: row.remarks || '',
         maintStartDateTime: row.maintStartDateTime
           ? new Date(row.maintStartDateTime).toLocaleDateString('en-CA')
