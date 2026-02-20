@@ -95,7 +95,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         id: index,
         remark: item.remarks,
         originalRemark: item.remarks,
-        duration: item.duration,
+        description: item.description,
         rate: item.rate,
         maintStartDateTime: new Date(item?.maintStartDateTime),
         maintEndDateTime: new Date(item?.maintEndDateTime),
