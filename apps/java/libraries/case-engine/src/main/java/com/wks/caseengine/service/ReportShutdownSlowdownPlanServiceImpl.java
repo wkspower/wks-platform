@@ -46,7 +46,7 @@ public class ReportShutdownSlowdownPlanServiceImpl implements ReportShutdownSlow
 	        List<Object[]> obj = new ArrayList<>();
 
 	        Sites site = siteRepository.findById(UUID.fromString(siteId)).orElseThrow();
-	        String procedureName = "RPT_" + site.getName() + "_GetShutdownSlowdownPlan";
+	        String procedureName = "RPT_GetShutdownSlowdownPlan";
 	        obj = findByYearAndSiteId(year, site.getId(), procedureName);
 
 	        

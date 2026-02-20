@@ -46,7 +46,7 @@ public class ReportCapexPIOPlanServiceImpl implements ReportCapexPIOPlanService 
 			
 			
 			Sites site = siteRepository.findById(UUID.fromString(siteId)).orElseThrow();
-				String procedureName = "RPT_"+site.getName()+"_GetCapexPIOPlan";
+				String procedureName ="RPT_GetCapexPIOPlan";
 				obj = findByYearAndSiteId(year, site.getId(), procedureName);
 			
 			List<ReportCapexPIOPlanDTO> reportCapexPIOPlanDTOs = new ArrayList<>();

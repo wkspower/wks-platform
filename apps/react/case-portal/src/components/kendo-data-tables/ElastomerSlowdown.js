@@ -239,17 +239,15 @@ const ElastomerSlowdown = ({ permissions }) => {
       const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
-        const [startYearStr, endYearStr] = yearStr.split('-')
-        let startYear = parseInt(startYearStr?.trim(), 10)
-        let endYear = parseInt(endYearStr?.trim(), 10)
-
-
+        const [startYearStr, endYearStr] = yearStr
+          .split('-')
+          .map((y) => y.trim())
+        const startYear = parseInt(startYearStr, 10)
+        const endYear =
+          startYearStr.length === 4 && endYearStr.length === 2
+            ? parseInt(startYearStr.slice(0, 2) + endYearStr, 10)
+            : parseInt(endYearStr, 10)
         if (!isNaN(startYear) && !isNaN(endYear)) {
-          // Handle 2 digit vs 4 digit years
-          if (startYear < 100) startYear += 2000
-          if (endYear < 100) endYear += 2000
-
-          // Use yyyy-mm-dd format for reliable parsing
           startLimit = new Date(`${startYear}-04-01T00:00:00`)
           endLimit = new Date(`${endYear}-03-31T23:59:59`)
         }
@@ -265,21 +263,6 @@ const ElastomerSlowdown = ({ permissions }) => {
       }
 
       for (const record of data) {
-        // First check if dates are null or missing
-        if (
-          startLimit &&
-          endLimit &&
-          (!record.maintStartDateTime || !record.maintEndDateTime)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
-        }
-
         const startDate =
           record.maintStartDateTime instanceof Date
             ? record.maintStartDateTime
@@ -310,9 +293,8 @@ const ElastomerSlowdown = ({ permissions }) => {
         }
       }
 
-
       // Select required fields based on vertical
-      const requiredFields = ['description', 'durationInMins', 'rate', 'remarks']
+      const requiredFields = ['description', 'durationInHrs', 'remarks', 'rate']
 
       // Missing required fields
       for (const record of data) {
@@ -363,8 +345,6 @@ const ElastomerSlowdown = ({ permissions }) => {
         return
       }
 
-
-
       // Date required + Start < End check
 
       for (const record of data) {
@@ -376,11 +356,7 @@ const ElastomerSlowdown = ({ permissions }) => {
           record.maintEndDateTime instanceof Date
             ? record.maintEndDateTime
             : new Date(record.maintEndDateTime)
-        if (
-          startDate &&
-          endDate &&
-          startDate.getTime() >= endDate.getTime()
-        ) {
+        if (startDate && endDate && startDate.getTime() >= endDate.getTime()) {
           record.isError = true
           setSnackbarOpen(true)
           setSnackbarData({
@@ -390,7 +366,6 @@ const ElastomerSlowdown = ({ permissions }) => {
           return
         }
       }
-
 
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
@@ -495,7 +470,7 @@ const ElastomerSlowdown = ({ permissions }) => {
           downloadExcelBtnFromUI: true,
           ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown History Config`,
           showTitleNameBusiness: true,
-          titleName: 'Configuration1',
+          titleName: 'Slowdown History Config',
         }}
       />
     </div>
