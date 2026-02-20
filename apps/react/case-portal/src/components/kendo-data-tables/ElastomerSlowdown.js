@@ -239,13 +239,17 @@ const ElastomerSlowdown = ({ permissions }) => {
       const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
-        const [startYear, endYear] = yearStr
+        const [startYearStr, endYearStr] = yearStr
           .split('-')
-          .map((y) => parseInt(y.trim(), 10))
+          .map((y) => y.trim())
+        const startYear = parseInt(startYearStr, 10)
+        const endYear =
+          startYearStr.length === 4 && endYearStr.length === 2
+            ? parseInt(startYearStr.slice(0, 2) + endYearStr, 10)
+            : parseInt(endYearStr, 10)
         if (!isNaN(startYear) && !isNaN(endYear)) {
-          // Use yyyy-mm-dd format for reliable parsing
-          startLimit = new Date(`20${startYear}-04-01T00:00:00`)
-          endLimit = new Date(`20${endYear}-03-31T23:59:59`)
+          startLimit = new Date(`${startYear}-04-01T00:00:00`)
+          endLimit = new Date(`${endYear}-03-31T23:59:59`)
         }
       }
 
@@ -292,9 +296,8 @@ const ElastomerSlowdown = ({ permissions }) => {
         }
       }
 
-
       // Select required fields based on vertical
-      const requiredFields = ['durationInMins', 'remarks', 'rate']
+      const requiredFields = ['description','durationInHrs', 'remarks', 'rate']
 
       // Missing required fields
       for (const record of data) {
@@ -319,7 +322,7 @@ const ElastomerSlowdown = ({ permissions }) => {
             )
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `Required field "${displayField}" is missing for "${record.durationInMins || 'this record'}".`,
+              message: `Required field "${displayField}" is missing for "${record.description || 'this record'}".`,
               severity: 'error',
             })
             return
@@ -343,8 +346,6 @@ const ElastomerSlowdown = ({ permissions }) => {
         return
       }
 
-
-
       // Date required + Start < End check
 
       for (const record of data) {
@@ -367,21 +368,16 @@ const ElastomerSlowdown = ({ permissions }) => {
           record.maintEndDateTime instanceof Date
             ? record.maintEndDateTime
             : new Date(record.maintEndDateTime)
-        if (
-          startDate &&
-          endDate &&
-          startDate.getTime() >= endDate.getTime()
-        ) {
+        if (startDate && endDate && startDate.getTime() >= endDate.getTime()) {
           record.isError = true
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Start time must be before end time for "${record.duration || 'this record'}".`,
+            message: `Start time must be before end time for "${record.description || 'this record'}".`,
             severity: 'error',
           })
           return
         }
       }
-
 
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
