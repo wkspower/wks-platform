@@ -776,25 +776,25 @@ const ProductionNorms = ({ permissions }) => {
     return total === '0.00' ? null : total
   }
 
-  const initialRender = React.useRef(true);
+  const initialRender = React.useRef(true)
 
   useEffect(() => {
     const fetchDataWrapper = async () => {
       // Only fetch data if this is not the initial render or if dependencies have changed
       if (!initialRender.current || PLANT_ID) {
-        await fetchData();
+        await fetchData()
         if (lowerVertName === 'meg') {
-          await fetchDataByProducts();
+          await fetchDataByProducts()
         }
       } else {
-        initialRender.current = false;
+        initialRender.current = false
       }
-    };
-    if (isPPVerticalDTASite && lineDetails?.length === 0) {
-      return;
     }
-    fetchDataWrapper();
-  }, [PLANT_ID, yearChanged, keycloak, selectedUnit, tabIndex, lineDetails]);
+    if (isPPVerticalDTASite && lineDetails?.length === 0) {
+      return
+    }
+    fetchDataWrapper()
+  }, [PLANT_ID, yearChanged, keycloak, selectedUnit, tabIndex, lineDetails])
 
   // Fetch line details when component mounts or plantID/year changes
   const fetchLineDetails = async () => {
@@ -804,7 +804,7 @@ const ProductionNorms = ({ permissions }) => {
       const response = await DataService.getLineDetails(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
 
       if (response?.code != 200) {
@@ -814,7 +814,7 @@ const ProductionNorms = ({ permissions }) => {
       if (response && Array.isArray(response?.data)) {
         setLineDetails(response.data)
         // Update tabs based on the response
-        const lineTabs = response?.data.map(line => line.displayName)
+        const lineTabs = response?.data.map((line) => line.displayName)
         setTabs(lineTabs)
       }
     } catch (err) {
@@ -828,7 +828,7 @@ const ProductionNorms = ({ permissions }) => {
     if (isPPVerticalDTASite) {
       fetchLineDetails()
     } else {
-      setLineDetails([]);
+      setLineDetails([])
     }
   }, [PLANT_ID, keycloak, yearChanged])
 
@@ -909,7 +909,7 @@ const ProductionNorms = ({ permissions }) => {
             lowerVertName === 'pta' ||
             lowerVertName === 'cracker'
               ? true
-              : permissions?.showUnit ?? true,
+              : (permissions?.showUnit ?? true),
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,
           allAction: permissions?.allAction ?? true,
@@ -922,7 +922,7 @@ const ProductionNorms = ({ permissions }) => {
 
           showCalculateVisibility:
             calculationObject && Object.keys(calculationObject).length > 0
-              ? permissions?.showCalculate ?? true
+              ? (permissions?.showCalculate ?? true)
               : false,
           saveBtn: permissions?.saveBtn ?? false,
           units:
@@ -962,7 +962,7 @@ const ProductionNorms = ({ permissions }) => {
       allAction: permissions?.allAction ?? true,
       showCalculateVisibility:
         calculationObject && Object.keys(calculationObject).length > 0
-          ? permissions?.showCalculate ?? true
+          ? (permissions?.showCalculate ?? true)
           : false,
       saveBtn: permissions?.saveBtn ?? false,
       units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
@@ -984,11 +984,7 @@ const ProductionNorms = ({ permissions }) => {
       {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
       {isPPVerticalDTASite && (
         <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
-          <AopTabs
-            tabIndex={tabIndex}
-            setTabIndex={setTabIndex}
-            tabs={tabs}
-          />
+          <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
         </Box>
       )}
       <Backdrop

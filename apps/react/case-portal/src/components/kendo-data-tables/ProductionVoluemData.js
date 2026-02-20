@@ -69,7 +69,6 @@ const ProductionvolumeData = ({ permissions }) => {
     year,
   } = dataGridStore
 
-
   const IS_OLD_YEAR = oldYear?.oldYear
   const isOldYear = false
 
@@ -102,7 +101,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
   const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
   // Check if it's PP VERTICAL | DTA SITE
-  const isPPVerticalDTASite = VERTICAL_NAME?.toLowerCase() === 'pp' && SITE_NAME === 'dta'
+  const isPPVerticalDTASite =
+    VERTICAL_NAME?.toLowerCase() === 'pp' && SITE_NAME === 'dta'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -631,14 +631,14 @@ const ProductionvolumeData = ({ permissions }) => {
   // Fetch line details when component mounts or plantID/year changes
   const fetchLineDetails = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
-    
+
     try {
       const response = await DataService.getLineDetails(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
-      
+
       if (response?.code != 200) {
         setTabs([])
         return
@@ -646,7 +646,7 @@ const ProductionvolumeData = ({ permissions }) => {
       if (response && Array.isArray(response?.data)) {
         setLineDetails(response.data)
         // Update tabs based on the response
-        const lineTabs = response?.data.map(line => line.displayName)
+        const lineTabs = response?.data.map((line) => line.displayName)
         setTabs(lineTabs)
       }
     } catch (err) {
@@ -655,7 +655,7 @@ const ProductionvolumeData = ({ permissions }) => {
       setTabs([])
     }
   }
-  
+
   useEffect(() => {
     if (isPPVerticalDTASite) {
       fetchLineDetails()
@@ -826,7 +826,6 @@ const ProductionvolumeData = ({ permissions }) => {
   useEffect(() => {
     fetchMaxCapacityData(unitMaxCapacity)
   }, [unitMaxCapacity, PLANT_ID, yearChanged, keycloak])
-
 
   const handleCalculateMeg = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
@@ -1196,11 +1195,7 @@ const ProductionvolumeData = ({ permissions }) => {
       {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
       {isPPVerticalDTASite && (
         <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
-          <AopTabs
-            tabIndex={tabIndex}
-            setTabIndex={setTabIndex}
-            tabs={tabs}
-          />
+          <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
         </Box>
       )}
 

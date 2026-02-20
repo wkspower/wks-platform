@@ -48,7 +48,9 @@ const MaintenanceTable = () => {
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
   const lowerVertName = vertName?.toLowerCase()
-  const isPPVerticalDTASite = verticalObject?.name?.toLowerCase() === 'pp' && siteObject?.name?.toLowerCase() === 'dta'
+  const isPPVerticalDTASite =
+    verticalObject?.name?.toLowerCase() === 'pp' &&
+    siteObject?.name?.toLowerCase() === 'dta'
   const dataConfig = useMemo(
     () => ({
       serviceFn: (keycloak, PLANT_ID, AOP_YEAR) =>
@@ -144,7 +146,7 @@ const MaintenanceTable = () => {
       const response = await DataService.getLineDetails(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
 
       if (response?.code != 200) {
@@ -154,7 +156,7 @@ const MaintenanceTable = () => {
       if (response && Array.isArray(response?.data)) {
         setLineDetails(response.data)
         // Update tabs based on the response
-        const lineTabs = response?.data.map(line => line.displayName)
+        const lineTabs = response?.data.map((line) => line.displayName)
         setTabs(lineTabs)
       }
     } catch (err) {
@@ -165,7 +167,7 @@ const MaintenanceTable = () => {
   }
 
   useEffect(() => {
-    if(isPPVerticalDTASite){
+    if (isPPVerticalDTASite) {
       fetchLineDetails()
     }
   }, [PLANT_ID, keycloak, yearChanged])
@@ -353,11 +355,7 @@ const MaintenanceTable = () => {
       {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
       {isPPVerticalDTASite && (
         <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
-          <AopTabs
-            tabIndex={tabIndex}
-            setTabIndex={setTabIndex}
-            tabs={tabs}
-          />
+          <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
         </Box>
       )}
       <div>

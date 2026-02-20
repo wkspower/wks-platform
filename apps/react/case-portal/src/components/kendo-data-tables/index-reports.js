@@ -146,17 +146,23 @@ const KendoDataTablesReports = ({
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const TextCellEditor = (props) => (
-  <td>
-    <input
-      type="text"
-      className="k-textbox"
-      value={props.dataItem[props.field] || ''}
-      onChange={e => props.onChange({ dataItem: props.dataItem, field: props.field, value: e.target.value })}
-      style={{ width: '100%' }}
-      autoFocus
-    />
-  </td>
-)
+    <td>
+      <input
+        type='text'
+        className='k-textbox'
+        value={props.dataItem[props.field] || ''}
+        onChange={(e) =>
+          props.onChange({
+            dataItem: props.dataItem,
+            field: props.field,
+            value: e.target.value,
+          })
+        }
+        style={{ width: '100%' }}
+        autoFocus
+      />
+    </td>
+  )
   const initialGroup = groupBy
     ? [
         {
