@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
-import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/coker/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
-import { configurationAndReportManualEntryResponse } from '../dummyData'
+import { productionAndNormsBasisConstant } from '../dummyData'
 
-const Configuration = () => {
+const Constants = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
-  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -23,36 +21,18 @@ const Configuration = () => {
   const { plantObject, year } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
-  const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterPhaseTwo()
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [dependencyRules, setDependencyRules] = useState({})
-
-  // Build dependency rules from row data
-  // Expects rows to have dependencyConfig property on controller fields
-  const buildDependencyRules = (rowsData) => {
-    const rules = {}
-    rowsData.forEach((row) => {
-      if (row.dependencyConfig && row.productName) {
-        rules[row.productName] = {
-          dependentProductName: row.dependencyConfig.dependentProductName,
-          values: row.dependencyConfig.valueMapping || {},
-        }
-      }
-    })
-    return rules
-  }
 
   const columns = [
     {
-      field: 'productName',
+      field: 'Name',
       title: 'Particulars',
-      widthT: 250,
-      minWidth: 200,
+      widthT: 300,
+      minWidth: 250,
       type: 'text',
       editable: false,
       hidden: false,
@@ -60,53 +40,51 @@ const Configuration = () => {
     {
       field: 'UOM',
       title: 'UOM',
-      widthT: 80,
-      minWidth: 60,
+      widthT: 120,
+      minWidth: 100,
       type: 'text',
       editable: false,
     },
     {
-      field: 'value',
+      field: 'ConstantValue',
       title: 'Value',
       editable: true,
-      widthT: 100,
-      minWidth: 80,
+      widthT: 150,
+      minWidth: 120,
       align: 'left',
       headerAlign: 'left',
-      type: 'conditional',
-      format: valueFormat,
+      type: 'number1',
+      format: '{0:0.00}',
     },
     {
-      field: 'remarks',
-      title: 'Remarks',
-      widthT: 250,
+      field: 'Remarks',
+      title: 'Remark',
+      widthT: 350,
       type: 'textarea',
       editable: true,
-      minWidth: 250,
+      minWidth: 300,
     },
   ]
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchConfigurationData()
+      fetchConstantsData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  const fetchConfigurationData = async () => {
+  const fetchConstantsData = async () => {
     setLoading(true)
     try {
       // Simulate API call with 1 second delay
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      // const res = await ProductionNormsApiService.getConfigurationData(
+      // const res = await ProductionNormsApiService.getConstantsData(
       //   keycloak,
       //   PLANT_ID,
       //   AOP_YEAR,
       // )
 
-      const res = configurationAndReportManualEntryResponse.data.filter(
-        (item) => item.normType !== 'PIMS Throughput',
-      )
+      const res = productionAndNormsBasisConstant.data
 
       if (res?.length === 0) {
         setRows([])
@@ -115,27 +93,16 @@ const Configuration = () => {
         return
       }
 
-      const formattedData = res?.map((item, index) => {
-        const mappingKeys = item.dependencyConfig?.valueMapping
-          ? Object.keys(item.dependencyConfig.valueMapping)
-          : []
-        return {
-          ...item,
-          inputType:
-            item.inputType || (mappingKeys.length ? 'dropdown' : undefined),
-          options: item.options?.length ? item.options : mappingKeys,
-          remarks: item.remarks || '',
-          id: item?.id || index + 1,
-        }
-      })
+      console.log('Constants data:', res)
+      const formattedData = res?.map((item, index) => ({
+        ...item,
+        remarks: item.remarks || '',
+        id: item?.id || index + 1,
+      }))
       setRows(formattedData)
       setOriginalRows(formattedData)
-
-      // Build dependency rules from the data
-      const rules = buildDependencyRules(formattedData)
-      setDependencyRules(rules)
     } catch (error) {
-      console.error('Error fetching configuration data:', error)
+      console.error('Error fetching constants data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -151,11 +118,11 @@ const Configuration = () => {
     saveBtn: true,
     allAction: true,
     showExport: true,
-    ExcelName: `Production_Norms_Configuration_${AOP_YEAR}`,
+    ExcelName: `Production_Norms_Constants_${AOP_YEAR}`,
     showImport: true,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Configuration',
+    titleName: 'Constants',
   }
 
   const saveChanges = async () => {
@@ -183,20 +150,7 @@ const Configuration = () => {
       return
     }
 
-    const fieldsToCheck = [
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
-    ]
+    const fieldsToCheck = ['value']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
@@ -216,13 +170,13 @@ const Configuration = () => {
 
     const payload = modifiedData
     try {
-      console.log('Saving configuration data:', payload)
+      console.log('Saving constants data:', payload)
 
-      // const response = await ProductionNormsApiService.saveConfigurationData(
-      //   keycloak,
-      //   AOP_YEAR,
-      //   payload,
-      // )
+      const response = await ProductionNormsApiService.saveConstantsData(
+        keycloak,
+        AOP_YEAR,
+        payload,
+      )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -231,7 +185,7 @@ const Configuration = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving configuration data:', error)
+      console.error('Error saving constants data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -247,12 +201,12 @@ const Configuration = () => {
 
     setLoading(true)
     try {
-      // const response = await ProductionNormsApiService.importConfigurationExcel(
-      //   file,
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      const response = await ProductionNormsApiService.importConstantsExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -260,7 +214,7 @@ const Configuration = () => {
           message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        await fetchConfigurationData()
+        await fetchConstantsData()
       } else if (response?.code === 400 && response?.data) {
         try {
           const base64Data = response.data
@@ -275,7 +229,7 @@ const Configuration = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Configuration_Errors_${new Date().getTime()}.xlsx`
+          link.download = `Constants_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -288,7 +242,7 @@ const Configuration = () => {
               'Import failed with errors. Please check the downloaded file.',
             severity: 'error',
           })
-          await fetchConfigurationData()
+          await fetchConstantsData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -324,17 +278,17 @@ const Configuration = () => {
     })
 
     try {
-      // await ProductionNormsApiService.exportConfigurationExcel(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      await ProductionNormsApiService.exportConstantsExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Configuration data:', error)
+      console.error('Error exporting Constants data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -346,65 +300,6 @@ const Configuration = () => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
-  }
-
-  const handleCustomItemChange = (e, setRowsCallback) => {
-    const { dataItem, field, value } = e
-
-    if (field !== 'value') return
-
-    const currentProductName = dataItem.productName
-    const dependencyRule = dependencyRules[currentProductName]
-
-    if (!dependencyRule) return
-
-    const dependentValue = dependencyRule.values[value]
-    if (dependentValue === undefined) return
-
-    setRowsCallback((prevRows) => {
-      return prevRows.map((row) => {
-        if (row.productName === dependencyRule.dependentProductName) {
-          return {
-            ...row,
-            value: dependentValue,
-            inEdit: true,
-          }
-        }
-        return row
-      })
-    })
-
-    setModifiedCells((prev) => {
-      const dependentRow = rows.find(
-        (r) => r.productName === dependencyRule.dependentProductName,
-      )
-      if (!dependentRow) return prev
-
-      return {
-        ...prev,
-        [dependentRow.id]: {
-          ...dependentRow,
-          value: dependentValue,
-          inEdit: true,
-        },
-      }
-    })
-
-    // Update customModifiedCells for orange highlighting
-    setCustomModifiedCells((prev) => {
-      const dependentRow = rows.find(
-        (r) => r.productName === dependencyRule.dependentProductName,
-      )
-      if (!dependentRow) return prev
-
-      return {
-        ...prev,
-        [dependentRow.id]: {
-          ...(prev[dependentRow.id] || {}),
-          value: dependentValue,
-        },
-      }
-    })
   }
 
   return (
@@ -437,10 +332,6 @@ const Configuration = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customItemChange={handleCustomItemChange}
-        externalCustomModifiedCells={customModifiedCells}
-        externalSetCustomModifiedCells={setCustomModifiedCells}
-        groupBy={['normType']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,
@@ -452,4 +343,4 @@ const Configuration = () => {
   )
 }
 
-export default Configuration
+export default Constants
