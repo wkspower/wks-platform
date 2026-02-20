@@ -56,7 +56,6 @@ const ElastomerSlowdown = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [rows, setRows] = useState([])
-  const [rowsShutdown, setRowsShutdown] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -96,7 +95,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         id: index,
         remark: item.remarks,
         originalRemark: item.remarks,
-        description: item.description,
+        duration: item.duration,
         rate: item.rate,
         maintStartDateTime: new Date(item?.maintStartDateTime),
         maintEndDateTime: new Date(item?.maintEndDateTime),
@@ -105,14 +104,6 @@ const ElastomerSlowdown = ({ permissions }) => {
       const tableData = formattedDataShutDown || []
       setRows(tableData)
 
-      // Fetch Shutdown data for cross-overlap check
-      const maintenanceResponse =
-        await MaintenanceDetailsApiService.getMaintenanceData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      setRowsShutdown(maintenanceResponse?.data || [])
     } catch (error) {
       const status = error.response?.status
       const serverMessage = error.response?.data?.message
@@ -252,100 +243,83 @@ const ElastomerSlowdown = ({ permissions }) => {
           .split('-')
           .map((y) => parseInt(y.trim(), 10))
         if (!isNaN(startYear) && !isNaN(endYear)) {
-          startLimit = new Date(`${startYear}-04-01T00:00:00`)
+          // Use yyyy-mm-dd format for reliable parsing
+          startLimit = new Date(`20${startYear}-04-01T00:00:00`)
           endLimit = new Date(`20${endYear}-03-31T23:59:59`)
         }
       }
 
-      for (const row of data) {
-        if (
-          !row.description ||
-          !row.remarks ||
-          row.rate === undefined ||
-          row.rate === null ||
-          row.durationInMins === undefined ||
-          row.durationInMins === null ||
-          !row.maintStartDateTime ||
-          !row.maintEndDateTime
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Description, Rate, Duration, Remarks, and Dates are required!',
-            severity: 'error',
-          })
-          return
-        }
+      // Helper to format date as dd/mm/yyyy
+      // eslint-disable-next-line
+      function formatDateDDMMYYYY(date) {
+        if (!(date instanceof Date) || isNaN(date)) return ''
+        const d = date.getDate().toString().padStart(2, '0')
+        const m = (date.getMonth() + 1).toString().padStart(2, '0')
+        const y = date.getFullYear()
+        return `${d}/${m}/${y}`
+      }
 
-        const start = new Date(row.maintStartDateTime)
-        const end = new Date(row.maintEndDateTime)
+      for (const record of data) {
+        const startDate =
+          record.maintStartDateTime instanceof Date
+            ? record.maintStartDateTime
+            : new Date(record.maintStartDateTime)
+        const endDate =
+          record.maintEndDateTime instanceof Date
+            ? record.maintEndDateTime
+            : new Date(record.maintEndDateTime)
 
-        // Date Format validation (DD/MM/YYYY style check if user type it, though grid uses picker)
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Invalid date format! Please use DD/MM/YYYY.',
-            severity: 'error',
-          })
-          return
-        }
-
-        if (start >= end) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start date must be before end date!',
-            severity: 'error',
-          })
-          return
-        }
-
+        // Validate date format: dd/mm/yyyy (by parsing and checking)
         if (
           startLimit &&
           endLimit &&
-          (start < startLimit ||
-            start > endLimit ||
-            end < startLimit ||
-            end > endLimit)
+          (!startDate ||
+            !endDate ||
+            isNaN(startDate) ||
+            isNaN(endDate) ||
+            startDate < startLimit ||
+            startDate > endLimit ||
+            endDate < startLimit ||
+            endDate > endLimit)
         ) {
+          record.isError = true
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Dates must be between ${startLimit.toLocaleDateString()} and ${endLimit.toLocaleDateString()} for selected year.`,
-            severity: 'error',
-          })
-          return
-        }
-
-        // Month span check (similar to Tab 0)
-        const isSameMonth =
-          start.getMonth() === end.getMonth() &&
-          start.getFullYear() === end.getFullYear()
-
-        if (!isSameMonth) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `The slowdown timeframe for '${row.description}' spans multiple months. Please split into separate entries.`,
+            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
             severity: 'error',
           })
           return
         }
       }
 
-      // Intra-Slowdown Overlap check (similar to Tab 0)
-      for (let i = 0; i < rows.length; i++) {
-        const a = rows[i]
-        const aStart = new Date(a.maintStartDateTime).getTime()
-        const aEnd = new Date(a.maintEndDateTime).getTime()
-        if (isNaN(aStart) || isNaN(aEnd)) continue
 
-        for (let j = i + 1; j < rows.length; j++) {
-          const b = rows[j]
-          const bStart = new Date(b.maintStartDateTime).getTime()
-          const bEnd = new Date(b.maintEndDateTime).getTime()
-          if (isNaN(bStart) || isNaN(bEnd)) continue
+      // Select required fields based on vertical
+      const requiredFields = ['durationInMins', 'remarks', 'rate']
 
-          if (aStart < bEnd && bStart < aEnd) {
+      // Missing required fields
+      for (const record of data) {
+        for (const field of requiredFields) {
+          const value = record[field]
+          if (
+            value === null ||
+            value === undefined ||
+            (typeof value === 'string' && value.trim() === '')
+          ) {
+            let displayField = field
+            if (field === 'productName1') displayField = 'Particulars'
+            else if (field === 'monthly') displayField = 'Month'
+            record.isError = true
+            setRows((prevRows) =>
+              prevRows.map((row) => {
+                if (row.id === record.id) {
+                  return { ...row, isError: true }
+                }
+                return row
+              }),
+            )
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `The slowdown timeframe for "${a.description || b.description || 'this record'}" overlaps with "${b.description}". Please ensure no overlapping of timeframes.`,
+              message: `Required field "${displayField}" is missing for "${record.durationInMins || 'this record'}".`,
               severity: 'error',
             })
             return
@@ -353,34 +327,66 @@ const ElastomerSlowdown = ({ permissions }) => {
         }
       }
 
-      // Cross overlap with Shutdown check 
-      for (let i = 0; i < rows.length; i++) {
-        const a = rows[i]
-        const aStart = new Date(a.maintStartDateTime).getTime()
-        const aEnd = new Date(a.maintEndDateTime).getTime()
-        if (isNaN(aStart) || isNaN(aEnd)) continue
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        data.forEach((r) => (r.isError = true))
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            data.some((d) => d.id === row.id) ? { ...row, isError: true } : row,
+          ),
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
 
-        for (let j = 0; j < rowsShutdown.length; j++) {
-          const b = rowsShutdown[j]
-          const bStart = new Date(b.maintStartDateTime).getTime()
-          const bEnd = new Date(b.maintEndDateTime).getTime()
-          if (isNaN(bStart) || isNaN(bEnd)) continue
 
-          if (aStart < bEnd && bStart < aEnd) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `The timeframe for "${a.description} (Slowdown)" overlaps with "${b.discription} (Shutdown)". Please ensure no overlapping of timeframes.`,
-              severity: 'error',
-            })
-            return
-          }
+
+      // Date required + Start < End check
+
+      for (const record of data) {
+        const startMissing = !record.maintStartDateTime
+        const endMissing = !record.maintEndDateTime
+        if (startMissing || endMissing) {
+          record.isError = true
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Start Date and End Date are required for all records.',
+            severity: 'error',
+          })
+          return
+        }
+        const startDate =
+          record.maintStartDateTime instanceof Date
+            ? record.maintStartDateTime
+            : new Date(record.maintStartDateTime)
+        const endDate =
+          record.maintEndDateTime instanceof Date
+            ? record.maintEndDateTime
+            : new Date(record.maintEndDateTime)
+        if (
+          startDate &&
+          endDate &&
+          startDate.getTime() >= endDate.getTime()
+        ) {
+          record.isError = true
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Start time must be before end time for "${record.duration || 'this record'}".`,
+            severity: 'error',
+          })
+          return
         }
       }
+
 
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
         rate: row.rate || 0,
-        description: row.description || '',
+        duration: row.duration || '',
         remarks: row.remarks || '',
         maintStartDateTime: row.maintStartDateTime
           ? new Date(row.maintStartDateTime).toLocaleDateString('en-CA')
@@ -395,7 +401,7 @@ const ElastomerSlowdown = ({ permissions }) => {
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells, rows, rowsShutdown, AOP_YEAR])
+  }, [modifiedCells, rows, AOP_YEAR])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
