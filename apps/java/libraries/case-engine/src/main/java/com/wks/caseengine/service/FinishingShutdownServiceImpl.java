@@ -18,6 +18,7 @@ import com.wks.caseengine.dto.ReportCapexPIOPlanDTO;
 import com.wks.caseengine.dto.ShutdownSlowdownPlanDTO;
 import com.wks.caseengine.dto.TechnicalAvailabilityDTO;
 import com.wks.caseengine.entity.FinishingShutdownConfig;
+import com.wks.caseengine.entity.PlantTeam;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ReportCapexPIOPlan;
 import com.wks.caseengine.entity.ReportShutdownSlowdownPlan;
@@ -174,5 +175,19 @@ public class FinishingShutdownServiceImpl implements FinishingShutdownService {
 	       
 	        throw new RuntimeException("Failed to save shutdown data", ex);
 	    }
+	}
+	
+	@Override
+	public AOPMessageVM deleteFinishingShutdown(String id) {
+		Optional<FinishingShutdownConfig> finishingShutdownConfig =finishingShutdownConfigRepository.findById(UUID.fromString(id));
+		if(finishingShutdownConfig.isPresent()) {
+			finishingShutdownConfigRepository.delete(finishingShutdownConfig.get()); 
+		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(aopMessageVM);
+		aopMessageVM.setMessage("Record deleted successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
 	}
 }

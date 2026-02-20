@@ -11,5 +11,5 @@ public interface FinishingShutdownService {
 	
 	public AOPMessageVM getFinishingShutdown(String plantId,String year);
 	public AOPMessageVM saveFinishingShutdown( String year, String plantFKId, List<FinishingShutdownConfigDTO> finishingShutdownConfigDTOs);
-	
+	public AOPMessageVM deleteFinishingShutdown(String id);
 }
