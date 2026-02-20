@@ -1506,7 +1506,7 @@ const SlowDown = ({ permissions }) => {
             />
 
             <Tab
-              label='Configuration'
+              label='Slowdown History Config'
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',

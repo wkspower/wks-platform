@@ -486,7 +486,7 @@ const ElastomerSlowdown = ({ permissions }) => {
           downloadExcelBtnFromUI: true,
           ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown History Config`,
           showTitleNameBusiness: true,
-          titleName: 'Configuration1',
+          titleName: 'Slowdown History Config',
         }}
       />
     </div>
