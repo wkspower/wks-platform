@@ -25,6 +25,7 @@ const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
+  const [editResetKey, setEditResetKey] = useState(0)
 
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -1027,6 +1028,8 @@ const ProductionNorms = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         selectedUOM={'UOM'}
+        resetEditSignal={editResetKey}
+        setEditResetKey={setEditResetKey}
         // downloadExcelForConfiguration={downloadExcelForConfiguration}
         note={
           !permissions?.hideNoteText &&
@@ -1051,6 +1054,8 @@ const ProductionNorms = ({ permissions }) => {
           title={'By Products'}
           fetchData={fetchDataByProducts}
           permissions={adjustedPermissionsByProducts}
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
     </div>
