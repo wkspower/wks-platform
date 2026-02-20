@@ -239,16 +239,21 @@ const ElastomerSlowdown = ({ permissions }) => {
       const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
-        const [startYear, endYear] = yearStr
-          .split('-')
-          .map((y) => parseInt(y.trim(), 10))
+        const [startYearStr, endYearStr] = yearStr.split('-')
+        let startYear = parseInt(startYearStr?.trim(), 10)
+        let endYear = parseInt(endYearStr?.trim(), 10)
+
+
         if (!isNaN(startYear) && !isNaN(endYear)) {
+          // Handle 2 digit vs 4 digit years
+          if (startYear < 100) startYear += 2000
+          if (endYear < 100) endYear += 2000
+
           // Use yyyy-mm-dd format for reliable parsing
-          startLimit = new Date(`20${startYear}-04-01T00:00:00`)
-          endLimit = new Date(`20${endYear}-03-31T23:59:59`)
+          startLimit = new Date(`${startYear}-04-01T00:00:00`)
+          endLimit = new Date(`${endYear}-03-31T23:59:59`)
         }
       }
-
       // Helper to format date as dd/mm/yyyy
       // eslint-disable-next-line
       function formatDateDDMMYYYY(date) {
@@ -260,6 +265,21 @@ const ElastomerSlowdown = ({ permissions }) => {
       }
 
       for (const record of data) {
+        // First check if dates are null or missing
+        if (
+          startLimit &&
+          endLimit &&
+          (!record.maintStartDateTime || !record.maintEndDateTime)
+        ) {
+          record.isError = true
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+            severity: 'error',
+          })
+          return
+        }
+
         const startDate =
           record.maintStartDateTime instanceof Date
             ? record.maintStartDateTime
@@ -269,13 +289,11 @@ const ElastomerSlowdown = ({ permissions }) => {
             ? record.maintEndDateTime
             : new Date(record.maintEndDateTime)
 
-        // Validate date format: dd/mm/yyyy (by parsing and checking)
+        // Validate date format and range
         if (
           startLimit &&
           endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
+          (isNaN(startDate) ||
             isNaN(endDate) ||
             startDate < startLimit ||
             startDate > endLimit ||
@@ -294,7 +312,7 @@ const ElastomerSlowdown = ({ permissions }) => {
 
 
       // Select required fields based on vertical
-      const requiredFields = ['durationInMins', 'remarks', 'rate']
+      const requiredFields = ['description', 'durationInMins', 'rate', 'remarks']
 
       // Missing required fields
       for (const record of data) {
@@ -306,8 +324,10 @@ const ElastomerSlowdown = ({ permissions }) => {
             (typeof value === 'string' && value.trim() === '')
           ) {
             let displayField = field
-            if (field === 'productName1') displayField = 'Particulars'
-            else if (field === 'monthly') displayField = 'Month'
+            if (field === 'durationInMins') displayField = 'Duration'
+            else if (field === 'description') displayField = 'Description'
+            else if (field === 'rate') displayField = 'Rate'
+            else if (field === 'remarks') displayField = 'Remarks'
             record.isError = true
             setRows((prevRows) =>
               prevRows.map((row) => {
@@ -319,7 +339,7 @@ const ElastomerSlowdown = ({ permissions }) => {
             )
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `Required field "${displayField}" is missing for "${record.durationInMins || 'this record'}".`,
+              message: `Required field "${displayField}" is missing for "${record.description || 'this record'}".`,
               severity: 'error',
             })
             return
@@ -348,17 +368,6 @@ const ElastomerSlowdown = ({ permissions }) => {
       // Date required + Start < End check
 
       for (const record of data) {
-        const startMissing = !record.maintStartDateTime
-        const endMissing = !record.maintEndDateTime
-        if (startMissing || endMissing) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start Date and End Date are required for all records.',
-            severity: 'error',
-          })
-          return
-        }
         const startDate =
           record.maintStartDateTime instanceof Date
             ? record.maintStartDateTime
@@ -375,7 +384,7 @@ const ElastomerSlowdown = ({ permissions }) => {
           record.isError = true
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Start time must be before end time for "${record.duration || 'this record'}".`,
+            message: `Start time must be before end time for "${record.description || 'this record'}".`,
             severity: 'error',
           })
           return
