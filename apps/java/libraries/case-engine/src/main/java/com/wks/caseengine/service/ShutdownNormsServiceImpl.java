@@ -25,6 +25,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.Connection;
 import jakarta.persistence.Query;
+
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -1513,6 +1515,163 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return null;
 
 	}
+	
+	public byte[] exportDMDShutdownConsumption(String year, UUID plantFKId, boolean isAfterSave, List<ShutdownNormsValueDTO> dtoList, String gradeId) {
+	    try {
+	        AOPMessageVM aopMessageVM = getShutdownNormsData(year, plantFKId.toString(), gradeId);
+	        List<Boolean> isEditable = new ArrayList<>();
+
+	        if (!isAfterSave) {
+	            Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+	            dtoList = (List<ShutdownNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+	        }
+
+	       
+	        List<Integer> activeMonths = plantService.getShutdownMonths(plantFKId, "Shutdown", year, null);
+	        if (activeMonths == null) activeMonths = new ArrayList<>();
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        
+	       
+	        CellStyle unlockedStyle = workbook.createCellStyle();
+	        unlockedStyle.setLocked(false); 
+	        unlockedStyle.setBorderBottom(BorderStyle.THIN);
+	        unlockedStyle.setBorderTop(BorderStyle.THIN);
+	        unlockedStyle.setBorderLeft(BorderStyle.THIN);
+	        unlockedStyle.setBorderRight(BorderStyle.THIN);
+
+	        
+	        CellStyle lockedGrayStyle = workbook.createCellStyle();
+	        lockedGrayStyle.setLocked(true);
+	        lockedGrayStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        lockedGrayStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	        lockedGrayStyle.setBorderBottom(BorderStyle.THIN);
+	        lockedGrayStyle.setBorderTop(BorderStyle.THIN);
+	        lockedGrayStyle.setBorderLeft(BorderStyle.THIN);
+	        lockedGrayStyle.setBorderRight(BorderStyle.THIN);
+
+	       
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Type");         
+	        innerHeaders.add("Particulars");  
+	        innerHeaders.add("UOM");          
+	        
+	        
+	        List<String> monthsList = getAcademicYearMonths(year);
+	        innerHeaders.addAll(monthsList);
+	        
+	        innerHeaders.add("Remarks");      
+	        innerHeaders.add("Id");           
+	        innerHeaders.add("Material Id");  
+
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+
+	        int currentRow = 0;
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+	        }
+
+	        for (ShutdownNormsValueDTO dto : dtoList) {
+	            Row row = sheet.createRow(currentRow++);
+	            
+	            List<Object> rowData = new ArrayList<>();
+	            rowData.add(dto.getNormParameterTypeDisplayName()); 
+	            rowData.add(dto.getProductName());                  
+	            rowData.add(dto.getUOM());                          
+	            rowData.add(dto.getApril());                        
+	            rowData.add(dto.getMay());                         
+	            rowData.add(dto.getJune());                         
+	            rowData.add(dto.getJuly());                        
+	            rowData.add(dto.getAugust());                      
+	            rowData.add(dto.getSeptember());                   
+	            rowData.add(dto.getOctober());                      
+	            rowData.add(dto.getNovember());                     
+	            rowData.add(dto.getDecember());                     
+	            rowData.add(dto.getJanuary());                      
+	            rowData.add(dto.getFebruary());                    
+	            rowData.add(dto.getMarch());                        
+	            rowData.add(dto.getRemarks());                       
+	            rowData.add(dto.getId());                            
+	            rowData.add(dto.getMaterialFkId());                  
+	            
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
+
+	            boolean isRowEditable = dto.getIsEditable() != null ? dto.getIsEditable() : true;
+
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+
+	                
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+
+	            
+	                if (!isRowEditable) {
+	                    
+	                    cell.setCellStyle(lockedGrayStyle);
+	                } else if (col >= 3 && col <= 14) {
+	                    
+	                    int monthNumber = getMonthNumberFromColumnIndex(col);
+	                    
+	                    if (activeMonths.contains(monthNumber)) {
+	                        cell.setCellStyle(unlockedStyle); 
+	                    } else {
+	                        cell.setCellStyle(lockedGrayStyle); 
+	                    }
+	                } else if (col == 15) {
+	                    
+	                    cell.setCellStyle(unlockedStyle);
+	                } else {
+	                    
+	                    cell.setCellStyle(lockedGrayStyle);
+	                }
+	            }
+	        }
+
+	        
+	        sheet.setColumnHidden(16, true);
+	        sheet.setColumnHidden(17, true);
+	        
+	        
+	        sheet.protectSheet("password"); 
+
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
+	
+	private int getMonthNumberFromColumnIndex(int col) {
+	    switch (col) {
+	        case 3: return 4;  case 4: return 5;  case 5: return 6;
+	        case 6: return 7;  case 7: return 8;  case 8: return 9;
+	        case 9: return 10; case 10: return 11; case 11: return 12;
+	        case 12: return 1; case 13: return 2; case 14: return 3;
+	        default: return -1;
+	    }
+	}
 
 	public static List<String> getAcademicYearMonths(String year) {
 		List<String> months = new ArrayList<>();
@@ -1541,7 +1700,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	
 	@Override
 	public AOPMessageVM importShutdownConsumption(String year, UUID plantFKId, String gradeId, MultipartFile file) {
-		// TODO Auto-generated method stub
+		
 		try {
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			List<ShutdownNormsValueDTO> data=null;
@@ -1552,15 +1711,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			}else {
 				data = readShutdownConsumptions(file.getInputStream(), plantFKId, year);
 			}
-				
 				Map<String,Object> map = saveShutdownNormsData(data);
 				List<ShutdownNormsValueDTO> retrievedList = (List<ShutdownNormsValueDTO>) map.get("data");
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (retrievedList != null && retrievedList.size() > 0) {
 				byte[] fileByteArray =null;
-				
+				if(vertical.getName().equalsIgnoreCase("VCM") && site.getName().equalsIgnoreCase("DMD")) {
+					 fileByteArray = exportDMDShutdownConsumption(year, plantFKId, true, retrievedList,gradeId);
+				}else {
 					 fileByteArray = exportShutdownConsumption(year, plantFKId, true, retrievedList,gradeId);
+				}
 				
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
