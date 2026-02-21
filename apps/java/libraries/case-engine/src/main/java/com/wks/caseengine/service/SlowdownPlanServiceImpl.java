@@ -1672,8 +1672,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    List<Object[]> validTimeRanges = new ArrayList<>(); 
 	    Plants plant = plantsRepository.findById(plantFKId).get();
 	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-	    
-	    final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60; // 11520 minutes or 192 hours
+	    Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	    final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60;
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -1696,7 +1696,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc); 
-	                if (dto.getDiscription() != null && des.contains(dto.getDiscription()) && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+
+	               
+	                boolean isDuplicate = dto.getDiscription() != null && des.contains(dto.getDiscription());
+	                boolean isExcludedVertical = vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA");
+	                boolean isExcludedSite = site.getName().equalsIgnoreCase("HMD");
+	                
+	                if (!alreadyFailed && isDuplicate && !isExcludedVertical && !isExcludedSite) {
 	                    dto.setSaveStatus("Failed");
 	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
 	                    alreadyFailed = true;
@@ -1716,7 +1722,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
-	                        
 	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
 	                        dto.setMaintStartDateTime(startDate);
 	                        
@@ -1730,7 +1735,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    } catch (Exception ex) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("Invalid date/time format in cell 2 (Start Date).");
-	                        ex.printStackTrace();
 	                        alreadyFailed = true;
 	                    }
 	                } else { 
@@ -1770,7 +1774,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                        } catch (Exception ex) {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("Invalid date/time format in cell 3 (End Date).");
-	                            ex.printStackTrace();
 	                            alreadyFailed = true;
 	                        }
 	                    } else if (!alreadyFailed) {
@@ -1797,22 +1800,23 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                        }   
 	                    } else if (ldtStart != null) {
 	                        boolean overlaps = false;
-	                        
-	                        // Seasonal Impact Logic Flag
 	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
 	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
 
-	                        for (Object[] prevPeriod : validTimeRanges) {
-	                            LocalDateTime prevLdtStart = (LocalDateTime) prevPeriod[0];
-	                            LocalDateTime prevLdtEnd = (LocalDateTime) prevPeriod[1];
-	                            boolean prevIsSeasonal = (Boolean) prevPeriod[2];
+	                        
+	                        boolean skipOverlapCheck = vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("HMD");
 
-	                            // Check for overlap
-	                            if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-	                                // If neither the current row nor the previous row is Seasonal Impact, trigger failure
-	                                if (!isVcmSeasonalImpact && !prevIsSeasonal) {
-	                                    overlaps = true;
-	                                    break;
+	                        if (!skipOverlapCheck) {
+	                            for (Object[] prevPeriod : validTimeRanges) {
+	                                LocalDateTime prevLdtStart = (LocalDateTime) prevPeriod[0];
+	                                LocalDateTime prevLdtEnd = (LocalDateTime) prevPeriod[1];
+	                                boolean prevIsSeasonal = (Boolean) prevPeriod[2];
+
+	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+	                                    if (!isVcmSeasonalImpact && !prevIsSeasonal) {
+	                                        overlaps = true;
+	                                        break;
+	                                    }
 	                                }
 	                            }
 	                        }
@@ -1825,54 +1829,41 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    }
 	                }
 	                
-	                // Duration Calculation and Furnace Decoking Check
 	                if (ldtStart != null && ldtEnd != null) {
 	                    try {
 	                        Duration duration = Duration.between(ldtStart, ldtEnd);
 	                        long totalMinutes = duration.toMinutes();
-
-	                        if (totalMinutes < 0) {
-	                            throw new IllegalStateException("Calculated negative duration.");
-	                        }
-
 	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
 	                        
 	                        if (dto.getDiscription() != null && dto.getDiscription().equalsIgnoreCase("Furnace Decoking")) {
-	                            if (totalMinutes != EIGHT_DAYS_IN_MINUTES) {
-	                                if (!alreadyFailed) {
-	                                    dto.setSaveStatus("Failed");
-	                                    dto.setErrDescription("Duration for 'Furnace Decoking' must be exactly 8 days (11520 minutes). Actual duration: " + totalMinutes + " minutes.");
-	                                    alreadyFailed = true;
-	                                }
+	                            if (totalMinutes != EIGHT_DAYS_IN_MINUTES && !alreadyFailed) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("Duration for 'Furnace Decoking' must be exactly 8 days.");
+	                                alreadyFailed = true;
 	                            }
 	                        }
 
-	                        // Seasonal flag for storage
 	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
 	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
 
 	                        if (!alreadyFailed) {
 	                            dto.setDurationInHrs(durationInDecimalHours); 
-	                            // Store as Object array to include the seasonal flag
 	                            validTimeRanges.add(new Object[]{ldtStart, ldtEnd, isVcmSeasonalImpact});
 	                        } else if (dto.getSaveStatus() == null) {
 	                            dto.setDurationInHrs(durationInDecimalHours);
 	                        }
-
 	                    } catch (Exception e) {
 	                        if (!alreadyFailed) {
 	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                            dto.setErrDescription("Error calculating duration.");
 	                            alreadyFailed = true;
 	                        }
-	                        e.printStackTrace();
 	                    }
 	                }
 	                
 	                if (vertical.getName().equalsIgnoreCase("ELASTOMER")) {
 	                    Double elastomerDuration = getNumericCellValue(row.getCell(3), dto);
 	                    dto.setDurationInHrs(elastomerDuration); 
-	                    
 	                    if (elastomerDuration == null && !alreadyFailed) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("Duration in cell 4 is missing for ELASTOMER.");
@@ -1900,11 +1891,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                String idString = getStringCellValue(row.getCell(6), dto);
 	                dto.setId(idString); 
 	                
-	                if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+	               
+	                boolean skipDbCheck = vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("HMD");
+	                if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed && !skipDbCheck) {
 	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown", plantFKId.toString(), year, dto.getDiscription());
 	                    if (obj.size() > 0) {
 	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("The Description '" + dto.getDiscription() + "' already exists in the database. Please enter a unique description to avoid duplication.");
+	                        dto.setErrDescription("The Description '" + dto.getDiscription() + "' already exists in the database.");
 	                        alreadyFailed = true;
 	                    }
 	                }
@@ -1914,9 +1907,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                }
 
 	            } catch (Exception e) {
-	                e.printStackTrace();
 	                if (dto.getSaveStatus() == null) {
-	                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
+	                    dto.setErrDescription("An unexpected error occurred.");
 	                    dto.setSaveStatus("Failed");
 	                }
 	            }
