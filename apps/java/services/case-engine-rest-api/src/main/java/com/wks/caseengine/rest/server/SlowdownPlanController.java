@@ -89,7 +89,33 @@ public class SlowdownPlanController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-	
+
+	@GetMapping(value = "/slowdown-export-line")
+	public ResponseEntity<byte[]> slowdownExportLine(
+	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
+	    try {
+	    	byte[] excelBytes=null;
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			
+				 excelBytes = slowdownPlanService.slowdownExportLine(year, plantId,maintenanceTypeName, false, null);
+			
+	       
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("slowdown.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	@GetMapping(value = "/slowdown-rate-export")
 	public ResponseEntity<byte[]> slowdownRateExport(
 	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
@@ -162,6 +188,15 @@ public class SlowdownPlanController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	slowdownPlanService.importSlowdownExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
+	}
+	
+	@PostMapping(value = "/slowdown-import-line", consumes = "multipart/form-data")
+	public AOPMessageVM importSlowdownLineExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	slowdownPlanService.importSlowdownLineExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
 	
 	@PostMapping(value = "/slowdown-rate-import", consumes = "multipart/form-data")
