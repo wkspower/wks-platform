@@ -305,7 +305,7 @@ const ElastomerSlowdown = ({ permissions }) => {
       // Select required fields based on vertical
       const requiredFields = [
         'description',
-        // 'durationInMins',
+        'durationInHrs',
         'remarks',
         'rate',
       ]
