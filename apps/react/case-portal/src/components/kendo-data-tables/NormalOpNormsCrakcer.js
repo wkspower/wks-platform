@@ -564,11 +564,12 @@ const NormalOpNormsScreenCracker = () => {
   const fetchModeData = useCallback(
     async (gradeIdParam) => {
       if (!lowerVertName) return
-      setLoading(true)
 
-      getNormTransactions()
+      setLoading1(true)
 
       try {
+        await getNormTransactions()
+
         if (lowerVertName === 'cracker') {
           const [bestResp, exprResp, yearlyResp, colorResp] = await Promise.all(
             [
@@ -625,9 +626,9 @@ const NormalOpNormsScreenCracker = () => {
           )
         }
       } catch (err) {
-        console.error('fetchModeData', err)
+        console.error('fetchModeData error:', err)
       } finally {
-        setLoading(false)
+        setLoading1(false)
       }
     },
     [AOP_YEAR, PLANT_ID, keycloak, lowerVertName],
@@ -1171,7 +1172,7 @@ const NormalOpNormsScreenCracker = () => {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+open={!!loading1}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
