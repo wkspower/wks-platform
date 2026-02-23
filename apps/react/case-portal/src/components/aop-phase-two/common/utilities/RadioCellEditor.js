@@ -16,18 +16,19 @@ export const InlineRadioCellEditor = (props) => {
 
   const currentValue = dataItem[field] ?? ''
   const isSelected = dataItem[radioGroupField] === radioValue
+  const initialValue = currentValue
   const [localValue, setLocalValue] = useState(currentValue)
-  const isFirstRender = useRef(true)
-  const onChangeRef = useRef(onChange)
-  const dataItemRef = useRef(dataItem)
-  const fieldRef = useRef(field)
+  const inputRef = useRef(null)
 
-  // Update refs when props change
+  // Auto-focus on mount
   useEffect(() => {
-    onChangeRef.current = onChange
-    dataItemRef.current = dataItem
-    fieldRef.current = field
-  })
+    if (inputRef.current && isNumberEditable) {
+      const el = inputRef.current.element || inputRef.current
+      if (el && typeof el.focus === 'function') {
+        el.focus()
+      }
+    }
+  }, [])
 
   const handleRadioClick = () => {
     // Update the radio selection field with the radioValue (e.g., 'OEM', 'PREVIOUS_YEAR', 'PROPOSED')
@@ -48,25 +49,19 @@ export const InlineRadioCellEditor = (props) => {
     }
   }
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
+  const handleBlur = () => {
+    if (localValue !== initialValue) {
+      onChange({ dataItem, field, value: localValue })
     }
+  }
 
-    const handler = setTimeout(() => {
-      const initialValue = dataItemRef.current[fieldRef.current] ?? ''
-      if (localValue !== initialValue.toString()) {
-        onChangeRef.current({
-          dataItem: dataItemRef.current,
-          field: fieldRef.current,
-          value: localValue,
-        })
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (localValue !== initialValue) {
+        onChange({ dataItem, field, value: localValue })
       }
-    }, 300)
-
-    return () => clearTimeout(handler)
-  }, [localValue])
+    }
+  }
 
   return (
     <td>
@@ -90,8 +85,11 @@ export const InlineRadioCellEditor = (props) => {
         <Box sx={{ flexGrow: 1 }}>
           {isNumberEditable ? (
             <Input
+              ref={inputRef}
               value={localValue}
               onChange={handleValueChange}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
               style={{
                 fontSize: '0.8rem',
                 padding: '2px 2px',

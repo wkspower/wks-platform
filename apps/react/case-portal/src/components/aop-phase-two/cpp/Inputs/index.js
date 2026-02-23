@@ -14,10 +14,10 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import ImportPower from './ImportPower'
 import AssetAvailability from './AssetAvailability'
 import AssetCapacity from './AssetCapacity'
-import ShutdownAndOperational from './ShutdownAndOperational'
+import ShutdownAndOperational from './ShutdownAndOperational/index'
 import { generateMockData, getColumnsForTab } from './InputUtility'
 import ExportAvailability from './ExportAvailability'
-import HeatRate from './HeatRate'
+import HeatRate from './HeatRate/index'
 import FixedNorms from './FixedNorms'
 import FuelAvailability from './FuelAvailability'
 
