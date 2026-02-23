@@ -61,6 +61,10 @@ const ElastomerShutDown = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase()
   const lowerSiteName = SITE_NAME?.toLowerCase()
   const lowerPlantName = PLANT_NAME?.toLowerCase()
+  const IS_ELASTOMER_HMD_PBR3 =
+    lowerVertName === 'elastomer' &&
+    lowerSiteName === 'hmd' &&
+    lowerPlantName === 'pbr3'
   const plantName = plantObject?.name
   const siteName = siteObject?.name
   const isOldYear = false
@@ -107,7 +111,7 @@ const ElastomerShutDown = ({ permissions }) => {
   const defaultTabs = [
     'Shutdown/TA Activities',
     'Shutdown History Config',
-    'Finishing Shutdown Config',
+    ...(IS_ELASTOMER_HMD_PBR3 ? ['Finishing Shutdown Config'] : []),
   ]
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -1475,7 +1479,7 @@ const ElastomerShutDown = ({ permissions }) => {
           sdDaysValues={sdDaysValues}
         />
       )}
-      {tabIndex === 2 && (
+      {IS_ELASTOMER_HMD_PBR3 && tabIndex === 2 && (
         <KendoDataTables
           columns={finishingShutdownColumns}
           rows={finishingShutdownRows}
