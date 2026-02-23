@@ -194,14 +194,9 @@ const ShutDown = ({ permissions }) => {
           requiredFields = ['discription', 'remark']
         }
       } else if (IS_PTA) {
-        requiredFields = [
-          'discriptionDrpdwn',
-          'remark',
-          'monthly',
-          'durationInHrs',
-        ]
+        requiredFields = ['discription', 'remark', 'monthly', 'durationInHrs']
       } else if (lowerVertName === 'pta') {
-        requiredFields = ['discriptionDrpdwn', 'remark']
+        requiredFields = ['discription', 'remark']
       } else if (lowerVertName === 'pp') {
         requiredFields = ['discription', 'remark']
       } else {
@@ -213,10 +208,11 @@ const ShutDown = ({ permissions }) => {
       // Check each record for missing required fields
       for (const record of data) {
         for (const field of requiredFields) {
-          if (
-            (!record[field] && record[field] !== 0) ||
-            (typeof record[field] === 'string' && record[field].trim() === '')
-          ) {
+          // if (
+          //   (!record[field] && record[field] !== 0) ||
+          //   (typeof record[field] === 'string' && record[field].trim() === '')
+          // ) {
+          if (!record[field] || record[field].trim() === '') {
             record.isError = true
             rowsWithErrors.add(record.id)
             setRows((prevRows) =>
@@ -667,7 +663,7 @@ const ShutDown = ({ permissions }) => {
             inEdit: false,
             maintStartDateTime: new Date(item?.maintStartDateTime),
             maintEndDateTime: new Date(item?.maintEndDateTime),
-            discriptionDrpdwn: descriptionObj ? descriptionObj.displayName : '',
+            discription: descriptionObj ? descriptionObj.displayName : '',
             monthly:
               item?.monthly ||
               item?.month ||
