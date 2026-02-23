@@ -120,6 +120,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+	    boolean pvc= verticalName.equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 		Boolean withGrade = false;
 		if (plant.getName().equalsIgnoreCase("SBR") && site.getName().equalsIgnoreCase("HMD")
 				&& vertical.getName().equalsIgnoreCase("ELASTOMER")) {
@@ -144,7 +146,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 
 				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-						|| vertical.getName().equalsIgnoreCase("PET") || withGrade) {
+						|| vertical.getName().equalsIgnoreCase("PET") || withGrade || pvc) {
 					mCUNormsValueDTO.setGradeId(row[4].toString());
 					mCUNormsValueDTO.setMaterialFkId(row[5].toString());
 					mCUNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -250,6 +252,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<MCUNormsValueDTO> failedList = new ArrayList<>();
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			boolean pvc = vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 			for (MCUNormsValueDTO dto : mCUNormsValueDTOList) {
 				System.out.println(dto.getProductName());
 				Boolean changed = false;
@@ -374,7 +378,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
 					if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-							|| vertical.getName().equalsIgnoreCase("PET")) {
+							|| vertical.getName().equalsIgnoreCase("PET") || pvc) {
 
 						Optional<MCUNormsValueGrade> optionalNormsValue = mcuNormsValueGradeRepository
 								.findById(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -875,6 +879,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					&& vertical.getName().equalsIgnoreCase("ELASTOMER")) {
 				withGrade = true;
 			}
+			boolean pvc = vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 			String viewName = "vwScrn" + vertical.getName() + "NormalOperationNorms";
 			if (withGrade) {
 				viewName = "vwScrn" + vertical.getName() + "NormalOperationNormsGrade";
@@ -883,7 +888,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			// prevent SQL injection
 			String sql = null;
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-					|| vertical.getName().equalsIgnoreCase("PET") || withGrade) {
+					|| vertical.getName().equalsIgnoreCase("PET") || withGrade || pvc) {
 				sql = "SELECT * FROM " + viewName
 						+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId";
 			} else if (vertical.getName().equalsIgnoreCase("Cracker")) {
@@ -897,7 +902,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			query.setParameter("financialYear", financialYear);
 			query.setParameter("plantId", plantId);
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-					|| vertical.getName().equalsIgnoreCase("PET") || withGrade) {
+					|| vertical.getName().equalsIgnoreCase("PET") || withGrade || pvc) {
 				query.setParameter("gradeId", UUID.fromString(gradeId));
 			}
 			if (vertical.getName().equalsIgnoreCase("Cracker")) {
@@ -972,8 +977,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			List<MCUNormsValueDTO> data = null;
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			boolean pvc = vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-					|| vertical.getName().equalsIgnoreCase("PET")) {
+					|| vertical.getName().equalsIgnoreCase("PET") || pvc) {
 				data = readSteadyState(file.getInputStream(), plantFKId, year);
 			} else {
 				data = readConfigurations(file.getInputStream(), plantFKId, year);
@@ -985,7 +992,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			if (failedRecords != null && failedRecords.size() > 0) {
 				byte[] fileByteArray = null;
 				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-						|| vertical.getName().equalsIgnoreCase("PET")) {
+						|| vertical.getName().equalsIgnoreCase("PET") || pvc) {
 					fileByteArray = exportSteadyStateNorms(year, plantFKId, true, failedRecords, mode);
 				} else {
 					fileByteArray = createExcel(year, plantFKId, true, failedRecords, mode, gradeId);

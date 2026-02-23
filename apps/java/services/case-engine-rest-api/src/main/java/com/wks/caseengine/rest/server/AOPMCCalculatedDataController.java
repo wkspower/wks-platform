@@ -20,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
@@ -38,6 +40,9 @@ public class AOPMCCalculatedDataController {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
 
 	@GetMapping(value = "/production-target")
 	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
@@ -134,7 +139,9 @@ public class AOPMCCalculatedDataController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
         Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-        if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+        Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+        boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+        if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
         	return aOPMCCalculatedDataService.importExcelPE(year, plantId, file);
         }else {
         	return aOPMCCalculatedDataService.importExcel(year, plantId, file);

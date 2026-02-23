@@ -27,9 +27,11 @@ import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
@@ -51,6 +53,9 @@ public class SlowdownPlanController {
 	@Autowired
 	private VerticalsRepository verticalRepository;
 	
+	@Autowired
+	private SiteRepository siteRepository;
+	
 	@GetMapping(value = "/slowdown")
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		List<ShutDownPlanDTO> listOfSite=null;
@@ -69,7 +74,9 @@ public class SlowdownPlanController {
 	    	byte[] excelBytes=null;
 	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	        boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
 				 excelBytes = slowdownPlanService.slowdownExportPE(year, plantId,maintenanceTypeName, false, null);
 			}else {
 				  excelBytes = slowdownPlanService.slowdownExport(year, plantId,maintenanceTypeName, false, null);

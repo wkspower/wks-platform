@@ -655,9 +655,11 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	@Transactional
 	public List getSlowdownMonths(UUID plantId, String maintenanceName,String year,String gradeId) {
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
-		
+		Plants plant = plantsRepository.findById(plantId).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		boolean pvc = verticalName.equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 		try {
-			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || pvc) {
 				UUID grade=null;
 				if(gradeId!=null) {
 					 grade=UUID.fromString(gradeId);

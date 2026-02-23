@@ -490,7 +490,9 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			List<ShutdownNormsValueDTO> data=null;
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			boolean pvc = vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
 				 data= readShutdownConsumption(file.getInputStream(), plantFKId, year);
 			}
 			else {
@@ -506,7 +508,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			if (failedRecords != null && failedRecords.size() > 0) {
 				byte[] fileByteArray = null;
 				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
-						|| vertical.getName().equalsIgnoreCase("PET")) {
+						|| vertical.getName().equalsIgnoreCase("PET") || pvc) {
 					fileByteArray = exportShutdownNorms(
 							year,
 							plantFKId,
@@ -718,9 +720,10 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		
 		Map<String,Object> map=null;
-		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PET")) {
+		boolean pvc = vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
 			 map=	savePPShutdownNormsData(shutdownNormsValueDTOList);
 		}else {
 			 map= saveShutdownNormsData(shutdownNormsValueDTOList);

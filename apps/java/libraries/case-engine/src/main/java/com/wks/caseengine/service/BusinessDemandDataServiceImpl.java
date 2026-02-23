@@ -103,9 +103,14 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	public List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		    boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 			String viewName = "vwScrn" + verticalName + "BusinessDemand";
 			List<Object[]> obj=null;
-			if(verticalName.equalsIgnoreCase("CRACKER") || verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || verticalName.equalsIgnoreCase("Elastomer")) {
+			if(verticalName.equalsIgnoreCase("CRACKER") || verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || verticalName.equalsIgnoreCase("Elastomer") || pvc) {
 				String procedureName=verticalName+"_GetBusinessDemand";
 				obj=findByYearAndPlantId(year,UUID.fromString(plantId),procedureName);
 				return getBusinessDemand(obj);
@@ -484,7 +489,11 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	public List<BusinessDemandDataDTO> readBusinessDemand(InputStream inputStream, UUID plantFKId, String year) {
 	    List<BusinessDemandDataDTO> configList = new ArrayList<>();
 	    String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
-
+	    Plants plant = plantsRepository.findById((plantFKId))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	    boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
@@ -516,7 +525,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	                dto.setNormParameterId(normParameterId); 
 	                boolean isProduction = false;
 	                if (verticalName != null
-	                        && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) 
+	                        && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || pvc) 
 	                        && normParameterId != null) {
 	                    
 	                    isProduction = isProductionType(normParameterId, normParametersRepository, normParameterTypeRepository);
@@ -549,13 +558,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	                 continue;
 	             }
 
-	                
-	                Plants plant = plantsRepository.findById(plantFKId)
-	                        .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-
-	                Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-	                        .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-	                Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	             
 	                dto.setVerticalFKId(vertical.getId().toString());
 	                dto.setSiteFKId(site.getId().toString());
 	                dto.setYear(year);
@@ -568,7 +571,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	            configList.add(dto);
 	        }
 	        
-	        if (!productionDtos.isEmpty() && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP"))) {
+	        if (!productionDtos.isEmpty() && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || pvc)) {
 	            
 	            Map<String, Double> monthlyProductionSums = new HashMap<>();
 	            String[] months = {"April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "March"};
