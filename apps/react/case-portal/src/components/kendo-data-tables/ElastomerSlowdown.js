@@ -75,6 +75,12 @@ const ElastomerSlowdown = ({ permissions }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  function formatHHMMFromMinutes(minutes) {
+    if (!minutes) return '00:00'
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}:${mins.toString().padStart(2, '0')}`
+  }
 
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
@@ -88,12 +94,6 @@ const ElastomerSlowdown = ({ permissions }) => {
         PLANT_ID,
         AOP_YEAR,
       )
-      function formatHHMMFromMinutes(minutes) {
-        if (!minutes) return '00:00'
-        const hours = Math.floor(minutes / 60)
-        const mins = minutes % 60
-        return `${hours}:${mins.toString().padStart(2, '0')}`
-      }
 
       const formattedDataShutDown = response?.data?.map((item, index) => ({
         ...item,
@@ -228,7 +228,13 @@ const ElastomerSlowdown = ({ permissions }) => {
       // setLoading(false)
     }
   }
-
+  function parseHHMMtoMinutes(hhmm) {
+    if (!hhmm) return 0
+    const [h, m = '0'] = String(hhmm).split('.')
+    const hours = parseInt(h, 10) || 0
+    const mins = parseInt(m.padEnd(2, '0'), 10) || 0
+    return hours * 60 + mins
+  }
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -303,12 +309,7 @@ const ElastomerSlowdown = ({ permissions }) => {
       // }
 
       // Select required fields based on vertical
-      const requiredFields = [
-        'description',
-        'durationInHrs',
-        'remarks',
-        'rate',
-      ]
+      const requiredFields = ['description', 'durationInHrs', 'remarks', 'rate']
 
       // Missing required fields
       for (const record of data) {
@@ -388,13 +389,6 @@ const ElastomerSlowdown = ({ permissions }) => {
           })
           return
         }
-      }
-      function parseHHMMtoMinutes(hhmm) {
-        if (!hhmm) return 0
-        const [h, m = '0'] = String(hhmm).split('.')
-        const hours = parseInt(h, 10) || 0
-        const mins = parseInt(m.padEnd(2, '0'), 10) || 0
-        return hours * 60 + mins
       }
 
       const payload = data.map((row) => ({
