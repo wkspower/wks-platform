@@ -4,13 +4,11 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
-import STGHeatRate from './STGHeatRate'
-import HRSGHeatRate from './HRSGHeatRate'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
-
-const HeatRate = () => {
+import { customValueFormatterPhaseTwo as customValueFormat } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+const GTHeatRate = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -57,7 +55,7 @@ const HeatRate = () => {
       title: 'GT Load',
       widthT: 100,
       type: 'number1',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
       minWidth: 80,
     },
@@ -66,7 +64,7 @@ const HeatRate = () => {
       title: 'OEM HR',
       widthT: 150,
       type: 'numberWithRadio',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
       numericEditable: true,
       minWidth: 150,
@@ -79,7 +77,7 @@ const HeatRate = () => {
       title: 'PREVIOUS YEAR BUDGET HR',
       widthT: 200,
       type: 'numberWithRadio',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
       numericEditable: false,
       minWidth: 200,
@@ -93,7 +91,7 @@ const HeatRate = () => {
       subtitle: '(Based On Actual Data)',
       widthT: 200,
       type: 'numberWithRadio',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
       numericEditable: false,
       minWidth: 200,
@@ -106,7 +104,7 @@ const HeatRate = () => {
       title: 'Final HR',
       widthT: 150,
       type: 'number1',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
       minWidth: 150,
     },
@@ -115,7 +113,7 @@ const HeatRate = () => {
       title: 'Free Steam Factor',
       widthT: 130,
       type: 'number1',
-      format: valueFormat,
+      format: customValueFormat(2),
       editable: true,
       minWidth: 130,
     },
@@ -686,15 +684,8 @@ const HeatRate = () => {
           defaultPageSize: 20,
         }}
       />
-
-      <Stack sx={{ mt: 2 }}>
-        <STGHeatRate />
-      </Stack>
-      <Stack sx={{ mt: 2 }}>
-        <HRSGHeatRate />
-      </Stack>
     </Box>
   )
 }
 
-export default HeatRate
+export default GTHeatRate
