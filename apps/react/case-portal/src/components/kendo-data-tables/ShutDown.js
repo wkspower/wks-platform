@@ -213,7 +213,7 @@ const ShutDown = ({ permissions }) => {
       // Check each record for missing required fields
       for (const record of data) {
         for (const field of requiredFields) {
-          if (!record[field] || record[field].trim() === '') {
+          if (!record[field] && record[field] !== 0 || (typeof record[field] === 'string' && record[field].trim() === '')) {
             record.isError = true
             rowsWithErrors.add(record.id)
             setRows((prevRows) =>

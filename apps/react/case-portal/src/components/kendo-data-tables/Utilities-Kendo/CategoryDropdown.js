@@ -2,9 +2,9 @@ import React from 'react'
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 
 const options = [
+  { id: 0, value: '0' },
   { id: 1, value: '1' },
   { id: 2, value: '2' },
-  { id: 3, value: '3' },
 ]
 
 const CategoryDropdownEditor = (props) => {

@@ -88,6 +88,12 @@ const ElastomerSlowdown = ({ permissions }) => {
         PLANT_ID,
         AOP_YEAR,
       )
+      function formatHHMMFromMinutes(minutes) {
+        if (!minutes) return '00:00'
+        const hours = Math.floor(minutes / 60)
+        const mins = minutes % 60
+        return `${hours}:${mins.toString().padStart(2, '0')}`
+      }
 
       const formattedDataShutDown = response?.data?.map((item, index) => ({
         ...item,
@@ -99,6 +105,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         rate: item.rate,
         maintStartDateTime: new Date(item?.maintStartDateTime),
         maintEndDateTime: new Date(item?.maintEndDateTime),
+        durationInHrs: formatHHMMFromMinutes(item.durationInMins),
       }))
 
       const tableData = formattedDataShutDown || []
@@ -254,51 +261,51 @@ const ElastomerSlowdown = ({ permissions }) => {
 
       // Helper to format date as dd/mm/yyyy
       // eslint-disable-next-line
-      function formatDateDDMMYYYY(date) {
-        if (!(date instanceof Date) || isNaN(date)) return ''
-        const d = date.getDate().toString().padStart(2, '0')
-        const m = (date.getMonth() + 1).toString().padStart(2, '0')
-        const y = date.getFullYear()
-        return `${d}/${m}/${y}`
-      }
+      // function formatDateDDMMYYYY(date) {
+      //   if (!(date instanceof Date) || isNaN(date)) return ''
+      //   const d = date.getDate().toString().padStart(2, '0')
+      //   const m = (date.getMonth() + 1).toString().padStart(2, '0')
+      //   const y = date.getFullYear()
+      //   return `${d}/${m}/${y}`
+      // }
 
-      for (const record of data) {
-        const startDate =
-          record.maintStartDateTime instanceof Date
-            ? record.maintStartDateTime
-            : new Date(record.maintStartDateTime)
-        const endDate =
-          record.maintEndDateTime instanceof Date
-            ? record.maintEndDateTime
-            : new Date(record.maintEndDateTime)
+      // for (const record of data) {
+      //   const startDate =
+      //     record.maintStartDateTime instanceof Date
+      //       ? record.maintStartDateTime
+      //       : new Date(record.maintStartDateTime)
+      //   const endDate =
+      //     record.maintEndDateTime instanceof Date
+      //       ? record.maintEndDateTime
+      //       : new Date(record.maintEndDateTime)
 
-        // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (
-          startLimit &&
-          endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
-            isNaN(endDate) ||
-            startDate < startLimit ||
-            startDate > endLimit ||
-            endDate < startLimit ||
-            endDate > endLimit)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
-        }
-      }
+      //   // Validate date format: dd/mm/yyyy (by parsing and checking)
+      //   if (
+      //     startLimit &&
+      //     endLimit &&
+      //     (!startDate ||
+      //       !endDate ||
+      //       isNaN(startDate) ||
+      //       isNaN(endDate) ||
+      //       startDate < startLimit ||
+      //       startDate > endLimit ||
+      //       endDate < startLimit ||
+      //       endDate > endLimit)
+      //   ) {
+      //     record.isError = true
+      //     setSnackbarOpen(true)
+      //     setSnackbarData({
+      //       message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+      //       severity: 'error',
+      //     })
+      //     return
+      //   }
+      // }
 
       // Select required fields based on vertical
       const requiredFields = [
         'description',
-        'durationInMins',
+        // 'durationInMins',
         'remarks',
         'rate',
       ]
@@ -382,6 +389,13 @@ const ElastomerSlowdown = ({ permissions }) => {
           return
         }
       }
+      function parseHHMMtoMinutes(hhmm) {
+        if (!hhmm) return 0
+        const [h, m = '0'] = String(hhmm).split('.')
+        const hours = parseInt(h, 10) || 0
+        const mins = parseInt(m.padEnd(2, '0'), 10) || 0
+        return hours * 60 + mins
+      }
 
       const payload = data.map((row) => ({
         id: row.idFromApi || null,
@@ -394,7 +408,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         maintEndDateTime: row.maintEndDateTime
           ? new Date(row.maintEndDateTime).toLocaleDateString('en-CA')
           : null,
-        durationInMins: row.durationInMins || 0,
+        durationInMins: parseHHMMtoMinutes(row.durationInHrs),
       }))
 
       saveSlowDownConfigurationData(payload)

@@ -1222,7 +1222,7 @@ export default function QualityPackagingNorms() {
       ExcelName: `${lowerVertName}_Packagings_Consumables`,
       addButton: false,
       deleteButton: false,
-      showCalculate: true,
+      showCalculate: lowerVertName === 'elastomer' ? false : true,
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
     },
