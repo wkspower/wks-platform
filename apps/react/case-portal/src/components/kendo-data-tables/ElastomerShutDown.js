@@ -166,7 +166,7 @@ const ElastomerShutDown = ({ permissions }) => {
       }))
 
       const res = await MaintenanceDetailsApiService.saveFinishingShutdown(
-        SITE_ID,
+        PLANT_ID,
         AOP_YEAR,
         dataList,
         keycloak,

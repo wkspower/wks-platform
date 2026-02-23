@@ -444,8 +444,8 @@ async function getFinishingShutdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function saveFinishingShutdown(SITE_ID, AOP_YEAR, dataList, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?siteId=${encodeURIComponent(SITE_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
+async function saveFinishingShutdown(PLANT_ID, AOP_YEAR, dataList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?siteId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
