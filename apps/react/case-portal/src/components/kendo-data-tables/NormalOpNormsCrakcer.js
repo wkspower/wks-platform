@@ -830,19 +830,19 @@ const NormalOpNormsScreenCracker = () => {
         const payload = mapGridRowToPayload(rowsToSave, savingAllMonthValues)
         const response = isFinal
           ? await NormalOperationNormsApiService.updateFinalNormsData(
-              keycloak,
-              gradeId,
-              payload,
-              PLANT_ID,
-              AOP_YEAR,
-            )
+            keycloak,
+            gradeId,
+            payload,
+            PLANT_ID,
+            AOP_YEAR,
+          )
           : await NormalOperationNormsApiService.updateModeWiseNormsData(
-              keycloak,
-              gradeId,
-              payload,
-              PLANT_ID,
-              AOP_YEAR,
-            )
+            keycloak,
+            gradeId,
+            payload,
+            PLANT_ID,
+            AOP_YEAR,
+          )
 
         if (response?.code === 200) {
           dispatch(setIsBlocked(false))
@@ -1033,23 +1033,23 @@ const NormalOpNormsScreenCracker = () => {
 
       // 2) Collect unchecked rows from those new arrays (except the one we just checked)
       const uncheckedRows = []
-      ;[
-        { arr: newMainRows, gridName: 'main' },
-        { arr: newExpressionRows, gridName: 'expression' },
-        { arr: newBestRows, gridName: 'best' },
-      ].forEach(({ arr, gridName: gName }) => {
-        arr.forEach((r) => {
-          // If this row belongs to the same material and is unchecked, and it's NOT the row we clicked,
-          // then it's one of the rows that was implicitly unchecked
-          if (
-            r.materialName === materialName &&
-            !(gName === gridName && r.id === id) &&
-            !r[field]
-          ) {
-            uncheckedRows.push({ ...r, gridName: gName })
-          }
+        ;[
+          { arr: newMainRows, gridName: 'main' },
+          { arr: newExpressionRows, gridName: 'expression' },
+          { arr: newBestRows, gridName: 'best' },
+        ].forEach(({ arr, gridName: gName }) => {
+          arr.forEach((r) => {
+            // If this row belongs to the same material and is unchecked, and it's NOT the row we clicked,
+            // then it's one of the rows that was implicitly unchecked
+            if (
+              r.materialName === materialName &&
+              !(gName === gridName && r.id === id) &&
+              !r[field]
+            ) {
+              uncheckedRows.push({ ...r, gridName: gName })
+            }
+          })
         })
-      })
 
       // 3) Apply the new arrays to state (this updates UI)
       setRows(newMainRows)
@@ -1163,7 +1163,7 @@ const NormalOpNormsScreenCracker = () => {
     'Criteria for Best Achieved',
     'Norms Selection',
     'Final monthly norms',
-    'Report Manual Entry',
+    // 'Report Manual Entry',
   ]
 
   // UI render
@@ -1448,7 +1448,7 @@ const NormalOpNormsScreenCracker = () => {
       )}
 
       {/* Report Mannual Entry Tab */}
-      {selectedTab === 5 && <CrackerReportMannualEntry tabIndex={5} />}
+      {/* {selectedTab === 5 && <CrackerReportMannualEntry tabIndex={5} />} */}
     </div>
   )
 }

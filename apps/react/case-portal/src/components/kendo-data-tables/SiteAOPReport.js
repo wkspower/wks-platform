@@ -20,6 +20,7 @@ import FixedExpenses from './FixedExpenses'
 import Capex from './Capex'
 import ShutdownSlowdownPlan from './SlowdownPlan'
 import TechnicalAvailability from './TechnicalAvailability'
+import CrackerReportMannualEntry from './CrackerReportMannualEntry'
 const SiteAOPReport = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -119,6 +120,7 @@ const SiteAOPReport = ({ permissions }) => {
     'Capex/PIO Plan',
     'Shutdown / Slowdown plan',
     'Technical Availability',
+    'Report Manual Entry',
     // 'Safety Performance & Targets',
     // 'Contribution (Rs/ MT & Rs Crs.)',
     // 'Major Process Incidents',
@@ -1245,7 +1247,10 @@ const SiteAOPReport = ({ permissions }) => {
       {tabIndex === 4 && <ShutdownSlowdownPlan />}
 
       {tabIndex === 5 && <TechnicalAvailability />}
-      {tabIndex === 6 && (
+
+      {tabIndex === 6 && <CrackerReportMannualEntry tabIndex={6} />}
+
+      {tabIndex === 7 && (
         <KendoDataTablesReports
           columns={columns.safetyPerformance}
           rows={Rowssafety}
@@ -1269,7 +1274,7 @@ const SiteAOPReport = ({ permissions }) => {
           permissions={adjustedPermissionsslowdown}
         />
       )}
-      {tabIndex === 7 && (
+      {tabIndex === 8 && (
         <KendoDataTables
           columns={contributionColumns}
           rows={contribution}
@@ -1283,7 +1288,7 @@ const SiteAOPReport = ({ permissions }) => {
         />
       )}
 
-      {tabIndex === 8 && (
+      {tabIndex === 9 && (
         <KendoDataTables
           columns={majorProcessIncidentsFy26Columns}
           rows={majorProcessIncidentsFy26State}
