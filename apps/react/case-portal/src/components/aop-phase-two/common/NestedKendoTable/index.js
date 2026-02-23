@@ -5,6 +5,7 @@ import {
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
+import { process } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import { SvgIcon } from '@progress/kendo-react-common'
@@ -34,6 +35,25 @@ import valueFormatterByUOM, {
 } from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 import { handleTabKeyNavigation } from '../AdvanceKendoTable/utility'
+
+// Helper function to extract flat row sequence from grouped data
+const extractFlatRowsFromGrouped = (data) => {
+  const flatRows = []
+  const traverse = (items) => {
+    if (!items || !Array.isArray(items)) return
+    items.forEach((item) => {
+      if (item.items && Array.isArray(item.items)) {
+        // This is a group header, traverse its children
+        traverse(item.items)
+      } else {
+        // This is an actual data row
+        flatRows.push(item)
+      }
+    })
+  }
+  traverse(data)
+  return flatRows
+}
 
 // Helper function to apply Kendo number format
 const applyKendoNumberFormat = (value, format) => {
@@ -131,6 +151,21 @@ const NestedKendoTable = ({
     : groupBy
       ? [{ field: groupBy }]
       : []
+
+  // Process grouped data to get flat row sequence for tab navigation
+  const processedFlatRows = useMemo(() => {
+    if (!groupBy || initialGroup.length === 0) {
+      return rows
+    }
+
+    const processedData = process(rows, {
+      group: initialGroup,
+      sort: sort,
+      filter: filter,
+    })
+
+    return extractFlatRowsFromGrouped(processedData.data)
+  }, [rows, groupBy, initialGroup, sort, filter])
 
   // Extract all leaf columns (columns with field property)
   const extractAllColumns = useCallback((cols) => {
@@ -269,7 +304,7 @@ const NestedKendoTable = ({
       activeCellRef,
       columns,
       hiddenFields,
-      rows,
+      rows: processedFlatRows, // Use processed flat rows for correct grouped sequence
       setRows,
       setEdit,
       extractAllColumns,

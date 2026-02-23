@@ -5,6 +5,7 @@ import {
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
+import { process } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import GenericDropdown from 'components/aop-phase-two/common/utilities/GenericDropdown'
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
@@ -62,6 +63,25 @@ const getNestedValue = (obj, path) => {
     value = value?.[part]
   }
   return value
+}
+
+// Helper function to extract flat row sequence from grouped data
+const extractFlatRowsFromGrouped = (data) => {
+  const flatRows = []
+  const traverse = (items) => {
+    if (!items || !Array.isArray(items)) return
+    items.forEach((item) => {
+      if (item.items && Array.isArray(item.items)) {
+        // This is a group header, traverse its children
+        traverse(item.items)
+      } else {
+        // This is an actual data row
+        flatRows.push(item)
+      }
+    })
+  }
+  traverse(data)
+  return flatRows
 }
 
 // Helper function to apply Kendo number format
@@ -214,6 +234,21 @@ const AdvanceKendoTable = ({
     : groupBy
       ? [{ field: groupBy, dir: undefined }]
       : []
+
+  // Process grouped data to get flat row sequence for tab navigation
+  const processedFlatRows = useMemo(() => {
+    if (!groupBy || initialGroup.length === 0) {
+      return rows
+    }
+
+    const processedData = process(rows, {
+      group: initialGroup,
+      sort: sort,
+      filter: filter,
+    })
+
+    return extractFlatRowsFromGrouped(processedData.data)
+  }, [rows, groupBy, initialGroup, sort, filter])
 
   // Build pagination configuration with defaults
   const getPaginationConfig = useCallback(() => {
@@ -600,7 +635,7 @@ const AdvanceKendoTable = ({
       activeCellRef,
       columns,
       hiddenFields,
-      rows,
+      rows: processedFlatRows, // Use processed flat rows for correct grouped sequence
       setRows,
       setEdit,
       extractAllColumns,
