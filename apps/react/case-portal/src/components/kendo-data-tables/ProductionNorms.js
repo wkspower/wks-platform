@@ -909,7 +909,7 @@ const ProductionNorms = ({ permissions }) => {
             lowerVertName === 'pta' ||
             lowerVertName === 'cracker'
               ? true
-              : (permissions?.showUnit ?? true),
+              : permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,
           allAction: permissions?.allAction ?? true,
@@ -922,7 +922,7 @@ const ProductionNorms = ({ permissions }) => {
 
           showCalculateVisibility:
             calculationObject && Object.keys(calculationObject).length > 0
-              ? (permissions?.showCalculate ?? true)
+              ? permissions?.showCalculate ?? true
               : false,
           saveBtn: permissions?.saveBtn ?? false,
           units:
@@ -962,7 +962,7 @@ const ProductionNorms = ({ permissions }) => {
       allAction: permissions?.allAction ?? true,
       showCalculateVisibility:
         calculationObject && Object.keys(calculationObject).length > 0
-          ? (permissions?.showCalculate ?? true)
+          ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
       units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],

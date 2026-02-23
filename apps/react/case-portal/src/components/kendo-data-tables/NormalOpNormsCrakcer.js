@@ -1172,7 +1172,7 @@ const NormalOpNormsScreenCracker = () => {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-open={!!loading1}
+        open={!!loading1}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
