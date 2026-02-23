@@ -33,6 +33,7 @@ import valueFormatterByUOM, {
   recalcEndDate,
 } from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
+import { handleTabKeyNavigation } from '../AdvanceKendoTable/utility'
 
 // Helper function to apply Kendo number format
 const applyKendoNumberFormat = (value, format) => {
@@ -111,6 +112,7 @@ const NestedKendoTable = ({
   const minGridWidth = useRef(0)
   const gridRef = useRef(null)
   const _export = useRef(null)
+  const activeCellRef = useRef({ rowId: null, field: null })
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -252,7 +254,27 @@ const NestedKendoTable = ({
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
+    if (e.edit && typeof e.edit === 'object') {
+      const rowId = Object.keys(e.edit)[0]
+      const field = e.edit[rowId]?.[0]
+      if (rowId && field) {
+        activeCellRef.current = { rowId, field }
+      }
+    }
   }, [])
+
+  const onTabKeyPressed = (e) => {
+    handleTabKeyNavigation({
+      e,
+      activeCellRef,
+      columns,
+      hiddenFields,
+      rows,
+      setRows,
+      setEdit,
+      extractAllColumns,
+    })
+  }
 
   const excelExport = () => {
     if (_export.current !== null) {
@@ -286,6 +308,22 @@ const NestedKendoTable = ({
         inEdit: r.id === e.dataItem.id,
       })),
     )
+  }
+
+  // Required for nested fields (e.g. 'april.shutdownHrs') — tells Kendo which specific field to edit
+  const handleCellClick = (e) => {
+    // Guard against group header rows (they have an 'items' array, not a data id)
+    if (e.dataItem?.items !== undefined) return
+
+    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) return
+
+    const allColumns = extractAllColumns(columns)
+    const clickedColumn = allColumns.find((col) => col.field === e.field)
+    if (clickedColumn?.editable) {
+      const rowId = e.dataItem?.id
+      setEdit({ [rowId]: [e.field] })
+      activeCellRef.current = { rowId: String(rowId), field: e.field }
+    }
   }
 
   // Utility: Get nested property value by path (supports any depth)
@@ -1230,6 +1268,8 @@ const NestedKendoTable = ({
                   : false
               }
               onRowClick={handleRowClick}
+              onCellClick={handleCellClick}
+              onKeyDown={onTabKeyPressed}
             >
               {renderColumns(
                 columns.filter((col) => !hiddenFields.includes(col.field)),

@@ -12,6 +12,7 @@ import '../../../../../src/kendo-data-grid.css'
 import '../../css/advance-kendo-table.css'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
+import { handleTabKeyNavigation } from './utility'
 import RemarkDialog from './components/RemarkDialog'
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
@@ -178,6 +179,8 @@ const AdvanceKendoTable = ({
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
   const gridRef = useRef(null)
+  const gridContainerRef = useRef(null)
+  const activeCellRef = useRef({ rowId: null, field: null })
   const _export = useRef(null)
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -356,7 +359,14 @@ const AdvanceKendoTable = ({
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
-    // }
+    // e.edit = { rowId: [field] } — extract active cell
+    if (e.edit && typeof e.edit === 'object') {
+      const rowId = Object.keys(e.edit)[0]
+      const field = e.edit[rowId]?.[0]
+      if (rowId && field) {
+        activeCellRef.current = { rowId, field }
+      }
+    }
   }, [])
 
   // Helper function to add IST timezone offset (+5:30) to dates before sending to backend
@@ -583,7 +593,38 @@ const AdvanceKendoTable = ({
     [setRows, setModifiedCells, setCustomModifiedCells, customItemChange],
   )
 
+  // Handle Tab key navigation between editable cells in the grid
+  const onTabKeyPressed = (e) => {
+    handleTabKeyNavigation({
+      e,
+      activeCellRef,
+      columns,
+      hiddenFields,
+      rows,
+      setRows,
+      setEdit,
+      extractAllColumns,
+    })
+  }
+
   const prevModifiedCellsRef = useRef(modifiedCells)
+
+  // Close inline edit mode when user clicks outside the grid container
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (
+        gridContainerRef.current &&
+        !gridContainerRef.current.contains(e.target)
+      ) {
+        setRows((prev) =>
+          prev.map((r) => (r.inEdit ? { ...r, inEdit: false } : r)),
+        )
+        setEdit({})
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [setRows])
 
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
@@ -2023,7 +2064,7 @@ const AdvanceKendoTable = ({
           },
         }}
       > */}
-      <div className='kendo-data-grid'>
+      <div className='kendo-data-grid' ref={gridContainerRef}>
         <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <ExcelExport
             data={rows}
@@ -2055,6 +2096,7 @@ const AdvanceKendoTable = ({
               filter={filter}
               onFilterChange={(e) => setFilter(e.filter)}
               onItemChange={itemChange}
+              onKeyDown={(e) => onTabKeyPressed(e)}
               resizable={true}
               defaultSkip={0}
               defaultGroup={initialGroup}
