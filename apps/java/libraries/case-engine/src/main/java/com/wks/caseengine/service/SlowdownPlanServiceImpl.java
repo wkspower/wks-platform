@@ -3163,15 +3163,21 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                Double newRateEOE= shutDownPlanDTO.getRateEOE()!=null? shutDownPlanDTO.getRateEOE():null;
 	                String newLine = shutDownPlanDTO.getLineId()!=null?shutDownPlanDTO.getLineId():null;
 	                String newMonth = shutDownPlanDTO.getMonth();
-	                boolean fieldsChanged = 
-	                    !java.util.Objects.equals(originalDesc, newDesc) ||
-	                    !java.util.Objects.equals(originalMonth, newMonth) ||
-	                    !java.util.Objects.equals(originalRate, newRate) ||
-	                    !java.util.Objects.equals(originalLine, newLine); 
+	                boolean descChanged = !java.util.Objects.equals(originalDesc, newDesc);
+	                boolean monthChanged = !java.util.Objects.equals(originalMonth, newMonth);
+	                boolean rateChanged = !java.util.Objects.equals(originalRate, newRate);
+	                boolean lineChanged = !(originalLine == null && newLine == null)
+	                        && (originalLine == null || newLine == null || !originalLine.equalsIgnoreCase(newLine));
+	                boolean fieldsChanged = descChanged || monthChanged || rateChanged || lineChanged;
 
 	                if (fieldsChanged && java.util.Objects.equals(originalRemark, newRemark)) {
+	                    java.util.List<String> changedFields = new java.util.ArrayList<>();
+	                    if (descChanged) changedFields.add("Description");
+	                    if (monthChanged) changedFields.add("Month");
+	                    if (rateChanged) changedFields.add("Rate");
+	                    if (lineChanged) changedFields.add("Line");
 	                    shutDownPlanDTO.setSaveStatus("Failed");
-	                    shutDownPlanDTO.setErrDescription("Remark must be updated when changing other fields in an existing record.");
+	                    shutDownPlanDTO.setErrDescription("Remark must be updated when changing other fields in an existing record. Changed field(s): " + String.join(", ", changedFields) + ".");
 	                    failedList.add(shutDownPlanDTO);
 	                    continue; 
 	                }
