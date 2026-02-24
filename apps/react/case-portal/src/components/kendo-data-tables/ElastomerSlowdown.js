@@ -262,6 +262,13 @@ const ElastomerSlowdown = ({ permissions }) => {
     const mins = parseInt(m.padEnd(2, '0'), 10) || 0
     return hours * 60 + mins
   }
+  function formatDateDDMMYYYY(date) {
+    if (!(date instanceof Date) || isNaN(date)) return ''
+    const d = date.getDate().toString().padStart(2, '0')
+    const m = (date.getMonth() + 1).toString().padStart(2, '0')
+    const y = date.getFullYear()
+    return `${d}/${m}/${y}`
+  }
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -290,15 +297,6 @@ const ElastomerSlowdown = ({ permissions }) => {
           startLimit = new Date(`${startYear}-04-01T00:00:00`)
           endLimit = new Date(`${endYear}-03-31T23:59:59`)
         }
-      }
-
-      //Helper to format date as dd/mm/yyyy
-      function formatDateDDMMYYYY(date) {
-        if (!(date instanceof Date) || isNaN(date)) return ''
-        const d = date.getDate().toString().padStart(2, '0')
-        const m = (date.getMonth() + 1).toString().padStart(2, '0')
-        const y = date.getFullYear()
-        return `${d}/${m}/${y}`
       }
 
       let hasDateError = false
