@@ -1,50 +1,61 @@
 import { DateTimePicker } from '@progress/kendo-react-dateinputs'
+import { useState, useEffect } from 'react'
 
-const DatePickerNoLimit = ({ dataItem, field, onChange }) => {
-  const currentRaw = dataItem[field]
-  const currentDate = currentRaw ? new Date(currentRaw) : null
+const isValidDate = (d) => d instanceof Date && !isNaN(d)
 
-  // Determine if editing start or end
+const DatePickerNoLimit = ({ dataItem, field, onChange, min, max }) => {
+  const initialValue = dataItem[field] ? new Date(dataItem[field]) : null
+  const [localValue, setLocalValue] = useState(initialValue)
+
+  useEffect(() => {
+    setLocalValue(initialValue)
+  }, [dataItem.id]) 
+
   const isStart = field === 'maintStartDateTime'
   const isEnd = field === 'maintEndDateTime'
+
   const partnerField = isStart
     ? 'maintEndDateTime'
     : isEnd
       ? 'maintStartDateTime'
       : null
 
-  const partnerRaw = partnerField ? dataItem[partnerField] : null
-  const partnerDate = partnerRaw ? new Date(partnerRaw) : null
+  const partnerDate =
+    partnerField && dataItem[partnerField]
+      ? new Date(dataItem[partnerField])
+      : null
 
-  const pickerProps = {
-    value: currentDate,
-    format: 'dd-MM-yyyy hh:mm a',
-    onChange: (event) => {
-      onChange({
-        dataItem,
-        field,
-        value: event.value,
-        syntheticEvent: event.syntheticEvent,
-      })
-    },
-    width: '100%',
-    size: 'small',
-    autoFill: true,
-    enableMouseWheel: false,
-    steps: { hour: 1, minute: 1, second: 0 },
+  let pickerMin = isValidDate(min) ? min : undefined
+  let pickerMax = isValidDate(max) ? max : undefined
+
+  if (isStart && isValidDate(partnerDate)) {
+    pickerMax = partnerDate
   }
 
-  // Only set min/max if partnerDate is valid
-  if (isStart && partnerDate && !isNaN(partnerDate)) {
-    pickerProps.max = partnerDate
-  }
-  if (isEnd && partnerDate && !isNaN(partnerDate)) {
-    pickerProps.min = partnerDate
+  if (isEnd && isValidDate(partnerDate)) {
+    pickerMin = partnerDate
   }
 
   return (
     <td>
-      <DateTimePicker {...pickerProps} />
+      <DateTimePicker
+        value={localValue}
+        format='dd-MM-yyyy hh:mm a'
+        width='100%'
+        size='small'
+        min={pickerMin}
+        max={pickerMax}
+        onChange={(event) => {
+          setLocalValue(event.value)
+        }}
+        onBlur={() => {
+          onChange({
+            dataItem,
+            field,
+            value: localValue,
+          })
+        }}
+      />
     </td>
   )
 }

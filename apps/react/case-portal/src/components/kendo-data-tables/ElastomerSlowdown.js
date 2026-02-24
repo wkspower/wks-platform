@@ -11,6 +11,7 @@ import {
   SlowdownConfigColumns,
 } from 'components/colums/ShutdownColumn'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
+import { DataService } from 'services/DataService'
 import { getRoleName } from 'services/role-service'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import KendoDataTables from './index'
@@ -64,6 +65,8 @@ const ElastomerSlowdown = ({ permissions }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
 
   const SHOW_EXCEL_UPLOAD_BUTTON = true
 
@@ -228,6 +231,30 @@ const ElastomerSlowdown = ({ permissions }) => {
       // setLoading(false)
     }
   }
+  const isValidDate = (d) => d instanceof Date && !isNaN(d)
+  useEffect(() => {
+    const fetchConfigDates = async () => {
+      try {
+        const data = await DataService.getConfigurationExecutionDetails(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        const data1 = data?.data
+        const startObj = data1?.find((item) => item.Name === 'StartDate')
+        const endObj = data1?.find((item) => item.Name === 'EndDate')
+        const start = startObj ? new Date(startObj.AttributeValue) : null
+        const end = endObj ? new Date(endObj.AttributeValue) : null
+        setStartDate(isValidDate(start) ? start : null)
+        setEndDate(isValidDate(end) ? end : null)
+      } catch (e) {
+        setStartDate(null)
+        setEndDate(null)
+      }
+    }
+    if (PLANT_ID && AOP_YEAR) fetchConfigDates()
+  }, [PLANT_ID, AOP_YEAR, keycloak])
+
   function parseHHMMtoMinutes(hhmm) {
     if (!hhmm) return 0
     const [h, m = '0'] = String(hhmm).split('.')
@@ -265,48 +292,59 @@ const ElastomerSlowdown = ({ permissions }) => {
         }
       }
 
-      // Helper to format date as dd/mm/yyyy
-      // eslint-disable-next-line
-      // function formatDateDDMMYYYY(date) {
-      //   if (!(date instanceof Date) || isNaN(date)) return ''
-      //   const d = date.getDate().toString().padStart(2, '0')
-      //   const m = (date.getMonth() + 1).toString().padStart(2, '0')
-      //   const y = date.getFullYear()
-      //   return `${d}/${m}/${y}`
-      // }
+      //Helper to format date as dd/mm/yyyy
+      function formatDateDDMMYYYY(date) {
+        if (!(date instanceof Date) || isNaN(date)) return ''
+        const d = date.getDate().toString().padStart(2, '0')
+        const m = (date.getMonth() + 1).toString().padStart(2, '0')
+        const y = date.getFullYear()
+        return `${d}/${m}/${y}`
+      }
 
-      // for (const record of data) {
-      //   const startDate =
-      //     record.maintStartDateTime instanceof Date
-      //       ? record.maintStartDateTime
-      //       : new Date(record.maintStartDateTime)
-      //   const endDate =
-      //     record.maintEndDateTime instanceof Date
-      //       ? record.maintEndDateTime
-      //       : new Date(record.maintEndDateTime)
+      let hasDateError = false
 
-      //   // Validate date format: dd/mm/yyyy (by parsing and checking)
-      //   if (
-      //     startLimit &&
-      //     endLimit &&
-      //     (!startDate ||
-      //       !endDate ||
-      //       isNaN(startDate) ||
-      //       isNaN(endDate) ||
-      //       startDate < startLimit ||
-      //       startDate > endLimit ||
-      //       endDate < startLimit ||
-      //       endDate > endLimit)
-      //   ) {
-      //     record.isError = true
-      //     setSnackbarOpen(true)
-      //     setSnackbarData({
-      //       message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-      //       severity: 'error',
-      //     })
-      //     return
-      //   }
-      // }
+      for (const record of data) {
+        const sDate =
+          record.maintStartDateTime instanceof Date
+            ? record.maintStartDateTime
+            : new Date(record.maintStartDateTime)
+        const eDate =
+          record.maintEndDateTime instanceof Date
+            ? record.maintEndDateTime
+            : new Date(record.maintEndDateTime)
+
+        if (
+          startDate &&
+          endDate &&
+          (!sDate ||
+            !eDate ||
+            isNaN(sDate) ||
+            isNaN(eDate) ||
+            sDate < startDate ||
+            sDate > endDate ||
+            eDate < startDate ||
+            eDate > endDate)
+        ) {
+          console.log('Date validation failed:', {
+            record,
+            sDate,
+            eDate,
+            startDate,
+            endDate,
+          })
+          record.isError = true
+          hasDateError = true
+        }
+      }
+
+      if (hasDateError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Dates must be between ${formatDateDDMMYYYY(startDate)} and ${formatDateDDMMYYYY(endDate)} for selected year.`,
+          severity: 'error',
+        })
+        return
+      }
 
       // Select required fields based on vertical
       const requiredFields = ['description', 'durationInHrs', 'remarks', 'rate']
@@ -486,6 +524,8 @@ const ElastomerSlowdown = ({ permissions }) => {
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={handleDeleteSlowdownConfig}
         screenType='ElastomerSlowdown'
+        startDate={startDate}
+        endDate={endDate}
         permissions={{
           addButton: true,
           deleteButton: true,
@@ -495,7 +535,6 @@ const ElastomerSlowdown = ({ permissions }) => {
           ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown History Config`,
           showTitleNameBusiness: true,
           titleName: 'Slowdown History Config',
-          
         }}
       />
     </div>

@@ -176,6 +176,8 @@ const KendoDataTables = ({
   slowdownMonths = [],
   sdDaysValues = [],
   allLines = [],
+  startDate,
+  endDate,
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -2003,7 +2005,15 @@ const KendoDataTables = ({
                         field={col.field}
                         title={col.title || col.headerName}
                         cells={{
-                          edit: { date: DatePickerNoLimit },
+                          edit: {
+                            date: (props) => (
+                              <DatePickerNoLimit
+                                {...props}
+                                min={startDate}
+                                max={endDate}
+                              />
+                            ),
+                          },
                           data: (props) => (
                             <SimpleHighlightCell
                               {...props}
