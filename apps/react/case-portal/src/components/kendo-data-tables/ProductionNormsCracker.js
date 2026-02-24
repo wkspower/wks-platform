@@ -65,13 +65,14 @@ const ProductionNormsCracker = ({ permissions }) => {
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const lowerSiteName = SITE_NAME?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-
+  const CRACKER_DMD = lowerVertName === 'cracker' && lowerSiteName === 'dmd'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('')
@@ -753,38 +754,40 @@ const ProductionNormsCracker = ({ permissions }) => {
       </Backdrop>
 
       {/* SHOW THIS GRID TO ALL SITES */}
-      <KendoDataTables
-        modifiedCells={modifiedCellsC2C3R}
-        setModifiedCells={setModifiedCellsC2C3R}
-        columns={productionColumnsC2C3R}
-        rows={rowsC2C3R}
-        setRows={setRowsC2C3R}
-        title={'Production AOP'}
-        isCellEditable={isCellEditable}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        saveChanges={saveChangesC2C3R}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        apiRef={apiRefC2C3R}
-        fetchData={fetchDataC2C3R}
-        remarkDialogOpen={remarkDialogOpenC2C3R}
-        setRemarkDialogOpen={setRemarkDialogOpenC2C3R}
-        currentRemark={currentRemarkC2C3R}
-        setCurrentRemark={setCurrentRemarkC2C3R}
-        currentRowId={currentRowIdC2C3R}
-        permissions={adjustedPermissionsForC2C3R}
-        selectedUOM={'UOM'}
-        note={''}
-        handleRemarkCellClick={handleRemarkCellClick}
-        handleCalculate={handleCalculateOtherProduction}
-        resetEditSignal={editResetKey}
-        setEditResetKey={setEditResetKey}
-      />
+      {!CRACKER_DMD && (
+        <KendoDataTables
+          modifiedCells={modifiedCellsC2C3R}
+          setModifiedCells={setModifiedCellsC2C3R}
+          columns={productionColumnsC2C3R}
+          rows={rowsC2C3R}
+          setRows={setRowsC2C3R}
+          title={'Production AOP'}
+          isCellEditable={isCellEditable}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={saveChangesC2C3R}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          apiRef={apiRefC2C3R}
+          fetchData={fetchDataC2C3R}
+          remarkDialogOpen={remarkDialogOpenC2C3R}
+          setRemarkDialogOpen={setRemarkDialogOpenC2C3R}
+          currentRemark={currentRemarkC2C3R}
+          setCurrentRemark={setCurrentRemarkC2C3R}
+          currentRowId={currentRowIdC2C3R}
+          permissions={adjustedPermissionsForC2C3R}
+          selectedUOM={'UOM'}
+          note={''}
+          handleRemarkCellClick={handleRemarkCellClick}
+          handleCalculate={handleCalculateOtherProduction}
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
+        />
+      )}
 
       <KendoDataTables
         modifiedCells={modifiedCells}
