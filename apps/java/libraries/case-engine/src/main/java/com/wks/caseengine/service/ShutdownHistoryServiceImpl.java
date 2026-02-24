@@ -1,12 +1,18 @@
 package com.wks.caseengine.service;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.hibernate.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -342,6 +348,17 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				.setParameter("aopyear", year)
 				.getResultList();
 	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Object[]> getDataPTA(String plantId, String year, String procedureName) {
+
+		String sql = "EXEC " + procedureName + " @PlantId = :plantId, @AOPYear = :aopyear";
+
+		return (List<Object[]>) entityManager.createNativeQuery(sql)
+				.setParameter("plantId", plantId)
+				.setParameter("aopyear", year)
+				.getResultList();
+	}
 
 	
 	@Override
@@ -356,6 +373,123 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 		aopMessageVM.setData(id);
 		aopMessageVM.setMessage("Data deleted successfully");
 		return aopMessageVM;
+	}
+
+	@Override
+	public AOPMessageVM getShutdownHistoryPTA(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results = getDataPTA(plantId, year, getShutdownHistoryPTAProcedureName(plantId));
+			List<String> columnNames = getShutdownHistoryPTADataColumns(plantId, year);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size() && i < row.length; i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getShutdownHistoryPTAColumnMetadata(plantId, year));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	private String getShutdownHistoryPTAProcedureName(String plantId) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+		Sites site = siteRepository.findById(plant.getSiteFkId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+		return vertical.getName() + "_" + site.getName() + "_GetShutdownConfiguration";
+	}
+
+	public List<String> getShutdownHistoryPTADataColumns(String plantId, String year) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			String procedureName = getShutdownHistoryPTAProcedureName(plantId);
+			String sql = "EXEC " + procedureName + " @PlantId = ?, @AOPYear = ?";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, year);
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+
+	public List<Map<String, Object>> getShutdownHistoryPTAColumnMetadata(String plantId, String year) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			String procedureName = getShutdownHistoryPTAProcedureName(plantId);
+			String sql = "EXEC " + procedureName + " @PlantId = ?, @AOPYear = ?";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, year);
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+
+	private String formatTitle(String columnName) {
+		return columnName == null ? "" : columnName.replace("_", " ");
+	}
+
+	private String getFrontendType(String sqlTypeName) {
+		if (sqlTypeName == null) return "string";
+		switch (sqlTypeName.toUpperCase()) {
+			case "VARCHAR":
+			case "NVARCHAR":
+			case "CHAR":
+				return "string";
+			case "INT":
+			case "TINYINT":
+			case "BIGINT":
+			case "SMALLINT":
+			case "DECIMAL":
+			case "FLOAT":
+			case "DOUBLE":
+			case "NUMERIC":
+				return "number";
+			case "DATE":
+			case "DATETIME":
+			case "DATETIME2":
+				return "date";
+			default:
+				return "string";
+		}
 	}
 
 }

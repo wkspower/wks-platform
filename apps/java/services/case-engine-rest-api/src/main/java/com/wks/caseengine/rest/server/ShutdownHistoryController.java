@@ -31,6 +31,11 @@ public class ShutdownHistoryController {
 		 return  shutdownHistoryService.getShutdownHistory(plantId,year);
 	}
 	
+	@GetMapping(value="/shutdown-history-pta")
+	public AOPMessageVM getShutdownHistoryPTA(@RequestParam String plantId,@RequestParam String year){
+		 return  shutdownHistoryService.getShutdownHistoryPTA(plantId,year);
+	}
+	
 	@GetMapping(value="/type-of-sd")
 	public AOPMessageVM getTypeOfSD(@RequestParam(required=false) String plantId,@RequestParam(required=false) String year){
 		 return  shutdownHistoryService.getTypeOfSD(plantId,year);
