@@ -9,7 +9,7 @@ const DatePickerNoLimit = ({ dataItem, field, onChange, min, max }) => {
 
   useEffect(() => {
     setLocalValue(initialValue)
-  }, [dataItem.id]) 
+  }, [dataItem.id])
 
   const isStart = field === 'maintStartDateTime'
   const isEnd = field === 'maintEndDateTime'
