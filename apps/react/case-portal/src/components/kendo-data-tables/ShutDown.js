@@ -194,7 +194,7 @@ const ShutDown = ({ permissions }) => {
           requiredFields = ['discription', 'remark']
         }
       } else if (IS_PTA) {
-        requiredFields = ['discription', 'remark', 'monthly', 'durationInHrs']
+        requiredFields = ['discription', 'monthly', 'remark']
       } else if (lowerVertName === 'pta') {
         requiredFields = ['discription', 'remark']
       } else if (lowerVertName === 'pp') {
