@@ -30,8 +30,8 @@ public class FinishingShutdownController {
 	}
 	
 	@PostMapping(value="/finishing-shutdown")
-	public AOPMessageVM saveFinishingShutdown(@RequestParam String year,@RequestParam String siteId, @RequestBody List<FinishingShutdownConfigDTO> finishingShutdownConfigDTOs) {
-		return 	finishingShutdownService.saveFinishingShutdown(year,siteId,finishingShutdownConfigDTOs);
+	public AOPMessageVM saveFinishingShutdown(@RequestParam String year,@RequestParam String plantId, @RequestBody List<FinishingShutdownConfigDTO> finishingShutdownConfigDTOs) {
+		return 	finishingShutdownService.saveFinishingShutdown(year,plantId,finishingShutdownConfigDTOs);
 	}
 	@DeleteMapping(value="/finishing-shutdown")
 	public AOPMessageVM deleteFinishingShutdown(@RequestParam String id){

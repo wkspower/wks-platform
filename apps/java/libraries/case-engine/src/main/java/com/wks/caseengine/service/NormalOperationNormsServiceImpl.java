@@ -706,8 +706,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				aopCalculationRepository.save(aopCalculation);
 			}
 			if (vertical.getName().equalsIgnoreCase("VCM")) {
-				Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-
 				String procedure = vertical.getName() + "_" + site.getName() + "_CalculateTotalFuelNorms";
 				executeProcedure(procedure, plantFKId.toString(), year);
 			}
