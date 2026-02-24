@@ -1489,6 +1489,28 @@ const AdvanceKendoTable = ({
         )
       }
 
+      // Row-Based Type - uses custom cells from RowBasedKendoTable wrapper
+      if (col.type === 'row-based' && col.cells) {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
+            }
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={col.cells}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
       // Conditional Type - handles both dropdown and numeric based on row data
       if (col.type === 'conditional') {
         return (

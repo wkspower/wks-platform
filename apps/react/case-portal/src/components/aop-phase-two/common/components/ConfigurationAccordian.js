@@ -26,6 +26,7 @@ const ConfigurationAccordian = ({
   READ_ONLY,
   isOldYear,
   isSummaryRequired = false,
+  yearGap = 1,
 }) => {
   const keycloak = useSession()
   const hasExecutedRef = useRef(false)
@@ -105,11 +106,15 @@ const ConfigurationAccordian = ({
     }
   }
 
-  // Initial load with 5-year period
+  // Initial load with configurable year period
   const onLoadTest = async (startDateObj, endDateObj) => {
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-    const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
+    const startDate = new Date(
+      today.getFullYear() - yearGap,
+      today.getMonth(),
+      1,
+    )
 
     const createPayloadItem = (obj, date) => ({
       apr: date,
@@ -187,7 +192,7 @@ const ConfigurationAccordian = ({
       const today = new Date()
       const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
       const fallbackStartDate = new Date(
-        today.getFullYear() - 5,
+        today.getFullYear() - yearGap,
         today.getMonth(),
         1,
       )
