@@ -485,6 +485,7 @@ const ElastomerSlowdown = ({ permissions }) => {
         setCurrentRemark={setCurrentRemark}
         handleRemarkCellClick={handleRemarkCellClick}
         deleteRowData={handleDeleteSlowdownConfig}
+        screenType='ElastomerSlowdown'
         permissions={{
           addButton: true,
           deleteButton: true,
@@ -494,6 +495,7 @@ const ElastomerSlowdown = ({ permissions }) => {
           ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown History Config`,
           showTitleNameBusiness: true,
           titleName: 'Slowdown History Config',
+          
         }}
       />
     </div>

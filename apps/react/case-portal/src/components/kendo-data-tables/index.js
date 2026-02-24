@@ -46,6 +46,7 @@ import '../../kendo-data-grid.css'
 import BudgetConstrainsCellEditor from './Utilities-Kendo/BudgetConstrainsCellEditor'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
+import DatePickerNoLimit from './Utilities-Kendo/DatePickerNoLimit'
 
 import { descLimit } from './Utilities-Kendo/descLimit'
 import {
@@ -1992,6 +1993,52 @@ const KendoDataTables = ({
                 }
 
                 if (dateFields.includes(col.field)) {
+                  if (
+                    screenType === 'ElastomerSlowdown' &&
+                    lowerVertName === 'elastomer'
+                  ) {
+                    return (
+                      <GridColumn
+                        key={col.field}
+                        field={col.field}
+                        title={col.title || col.headerName}
+                        cells={{
+                          edit: { date: DatePickerNoLimit },
+                          data: (props) => (
+                            <SimpleHighlightCell
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              highlight={permissions?.highlightDate || false} // Add this permission
+                            />
+                          ),
+                          headerCell: SimpleHeaderWithTooltip,
+                        }}
+                        format={
+                          [
+                            'fromDate',
+                            'toDate',
+                            'periodFrom',
+                            'periodTo',
+                            'toDateReport',
+                            'fromDateReport',
+                          ].includes(col.field)
+                            ? '{0:dd-MM-yyyy}'
+                            : '{0:dd-MM-yyyy hh:mm a}'
+                        }
+                        editor='date'
+                        hidden={col.hidden}
+                        // columnMenu={DateColumnMenu}
+                        filter='date'
+                        columnMenu={ColumnMenuCheckboxFilterDate}
+                        width={col?.widthT}
+                        headerClassName={
+                          isDateFilterActive.includes(col.field)
+                            ? 'active-column'
+                            : ''
+                        }
+                      />
+                    )
+                  }
                   return (
                     <GridColumn
                       key={col.field}
