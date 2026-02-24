@@ -2,25 +2,17 @@ import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/coker/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
-import {
-  ValueFormatterPhaseTwo,
-  customValueFormatterPhaseTwo,
-} from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import RowBasedKendoTable from '../../common/RowBasedKendoTable/index'
+import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
-import {
-  handleDateDifferenceCalculation,
-  handleValueMappingDependency,
-  handleLegacyDependencyRule,
-} from './utils/dependencyUtils'
 
 const Configuration = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
-  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -32,28 +24,12 @@ const Configuration = () => {
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = customValueFormatterPhaseTwo(3)
+  const valueFormat = ValueFormatterPhaseTwo()
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [dependencyRules, setDependencyRules] = useState({})
-
-  // Build dependency rules from row data
-  // Expects rows to have dependencyConfig property on controller fields
-  const buildDependencyRules = (rowsData) => {
-    const rules = {}
-    rowsData.forEach((row) => {
-      if (row.dependencyConfig && row.productName) {
-        rules[row.productName] = {
-          dependentProductName: row.dependencyConfig.dependentProductName,
-          values: row.dependencyConfig.valueMapping || {},
-        }
-      }
-    })
-    return rules
-  }
 
   const columns = [
     {
@@ -74,14 +50,135 @@ const Configuration = () => {
       editable: false,
     },
     {
-      field: 'value',
-      title: 'Value',
+      field: 'apr',
+      title: headerMap[4],
       editable: true,
       widthT: 100,
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      type: 'row-based',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'may',
+      title: headerMap[5],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jun',
+      title: headerMap[6],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jul',
+      title: headerMap[7],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'aug',
+      title: headerMap[8],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'sep',
+      title: headerMap[9],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'oct',
+      title: headerMap[10],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'nov',
+      title: headerMap[11],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'dec',
+      title: headerMap[12],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jan',
+      title: headerMap[1],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'feb',
+      title: headerMap[2],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'mar',
+      title: headerMap[3],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -103,7 +200,7 @@ const Configuration = () => {
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
-      // Simulate API call with 1 second delay
+      // Simulate API call with 3 second delay
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // const res = await ProductionNormsApiService.getConfigurationData(
@@ -112,20 +209,9 @@ const Configuration = () => {
       //   AOP_YEAR,
       // )
 
-      let res
-      if (plantObject.name == 'CDU-1') {
-        res = configurationAndReportManualEntryResponse.data.filter(
-          (item) =>
-            item.normType !== 'PIMS Throughput' &&
-            (!item.plant || item.plant === 'CDU-1'),
-        )
-      } else {
-        res = configurationAndReportManualEntryResponse.data.filter(
-          (item) =>
-            item.normType !== 'PIMS Throughput' &&
-            (!item.plant || item.plant === 'CDU-2'),
-        )
-      }
+      const res = configurationAndReportManualEntryResponse.data.filter(
+        (item) => item.normType !== 'Report Manual Entry',
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -134,35 +220,14 @@ const Configuration = () => {
         return
       }
 
-      const formattedData = res?.map((item, index) => {
-        const mappingKeys = item.dependencyConfig?.valueMapping
-          ? Object.keys(item.dependencyConfig.valueMapping)
-          : []
-
-        // Preserve existing inputType (date, dropdown, etc.) or infer from dependencies
-        // Default to 'number' if no inputType is specified
-        const inputType =
-          item.inputType || (mappingKeys.length ? 'dropdown' : undefined)
-
-        return {
-          ...item,
-          inputType,
-          options: item.options?.length ? item.options : mappingKeys,
-          remarks: item.remarks || '',
-          id: item?.id || index + 1,
-          // Convert date strings to Date objects for date/datetime inputs
-          value:
-            (inputType === 'date' || inputType === 'datetime') && item.value
-              ? new Date(item.value)
-              : item.value,
-        }
-      })
+      console.log('Configuration data:', res)
+      const formattedData = res?.map((item, index) => ({
+        ...item,
+        remarks: item.remarks || '',
+        id: item?.id || index + 1,
+      }))
       setRows(formattedData)
       setOriginalRows(formattedData)
-
-      // Build dependency rules from the data
-      const rules = buildDependencyRules(formattedData)
-      setDependencyRules(rules)
     } catch (error) {
       console.error('Error fetching configuration data:', error)
       setSnackbarOpen(true)
@@ -179,8 +244,7 @@ const Configuration = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
-    // showExport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `Production_Norms_Configuration_${AOP_YEAR}`,
     showImport: true,
     showTitleNameBusiness: true,
@@ -213,12 +277,25 @@ const Configuration = () => {
       return
     }
 
-    const fieldsToCheck = ['value']
+    const fieldsToCheck = [
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'productName',
+      'particulars',
     )
 
     if (validationError) {
@@ -235,11 +312,11 @@ const Configuration = () => {
     try {
       console.log('Saving configuration data:', payload)
 
-      // const response = await ProductionNormsApiService.saveConfigurationData(
-      //   keycloak,
-      //   AOP_YEAR,
-      //   payload,
-      // )
+      const response = await ProductionNormsApiService.saveConfigurationData(
+        keycloak,
+        AOP_YEAR,
+        payload,
+      )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -264,12 +341,12 @@ const Configuration = () => {
 
     setLoading(true)
     try {
-      // const response = await ProductionNormsApiService.importConfigurationExcel(
-      //   file,
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      const response = await ProductionNormsApiService.importConfigurationExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -341,11 +418,11 @@ const Configuration = () => {
     })
 
     try {
-      // await ProductionNormsApiService.exportConfigurationExcel(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      await ProductionNormsApiService.exportConfigurationExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -365,58 +442,6 @@ const Configuration = () => {
     setRemarkDialogOpen(true)
   }
 
-  const handleCustomItemChange = (e, setRowsCallback) => {
-    const { dataItem, field, value } = e
-
-    if (field !== 'value') return
-
-    const currentProductName = dataItem.productName
-
-    // Check if this field has a dependency configuration
-    if (dataItem.dependencyConfig) {
-      const { calculationType, valueMapping } = dataItem.dependencyConfig
-
-      // Handle date difference calculation
-      if (calculationType === 'dateDifference') {
-        handleDateDifferenceCalculation({
-          value,
-          dependencyConfig: dataItem.dependencyConfig,
-          rows,
-          setRowsCallback,
-          setModifiedCells,
-          setCustomModifiedCells,
-        })
-        return
-      }
-
-      // Handle value mapping (dropdown dependencies)
-      if (valueMapping) {
-        handleValueMappingDependency({
-          value,
-          dependencyConfig: dataItem.dependencyConfig,
-          rows,
-          setRowsCallback,
-          setModifiedCells,
-          setCustomModifiedCells,
-        })
-        return
-      }
-    }
-
-    // Legacy support: Check old dependencyRules format
-    const dependencyRule = dependencyRules[currentProductName]
-    if (dependencyRule) {
-      handleLegacyDependencyRule({
-        value,
-        dependencyRule,
-        rows,
-        setRowsCallback,
-        setModifiedCells,
-        setCustomModifiedCells,
-      })
-    }
-  }
-
   return (
     <Box>
       <Backdrop
@@ -425,7 +450,7 @@ const Configuration = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <RowBasedKendoTable
+      <AdvanceKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}
@@ -447,10 +472,8 @@ const Configuration = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customItemChange={handleCustomItemChange}
-        externalCustomModifiedCells={customModifiedCells}
-        externalSetCustomModifiedCells={setCustomModifiedCells}
         groupBy={['normType']}
+        // customHeight={60}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

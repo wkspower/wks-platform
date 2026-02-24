@@ -33,6 +33,10 @@ import valueFormatterByUOM, {
   recalcEndDate,
 } from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
+import {
+  NumberWithCheckboxCellEditor,
+  NumberWithCheckboxDisplayCell,
+} from '../utilities/NumberWithCheckboxCellEditor'
 
 // Helper function to apply Kendo number format
 const applyKendoNumberFormat = (value, format) => {
@@ -915,6 +919,42 @@ const NestedKendoTable = ({
             filter='numeric'
             format={col.format}
             width={setWidth(col?.minWidth || col?.width)}
+          />
+        )
+      }
+
+      if (col.type === 'numberWithCheckbox') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={true} // Always editable, ignore row-level isEditable
+            className='k-number-right'
+            headerClassName={isActive ? 'active-column' : ''}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <NumberWithCheckboxCellEditor
+                    {...cellProps}
+                    isNumberEditable={col.isNumberEditable}
+                  />
+                ),
+              },
+              data: (props) => (
+                <NumberWithCheckboxDisplayCell
+                  {...props}
+                  customModifiedCells={customModifiedCells}
+                  format={col.format}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
           />
         )
       }

@@ -25,8 +25,10 @@ public interface HeatRateRepository extends JpaRepository<DummyEntity, Long> {
     @Query(value = "SELECT curr.Id, curr.AssetName as EquipType, curr.UtilityId as CPPUtility, curr.GTLoad, curr.FinalHeatRate as HeatRate, curr.FreeSteamFactor, curr.Remarks, prev.FinalHeatRate as PreviousYearHeatRate, curr.FinalHeatRate, curr.OEMHeatRate, curr.SelectedHeatRate FROM CPP_GTHeatRate curr LEFT JOIN CPP_GTHeatRate prev ON curr.Asset_FK_Id = prev.Asset_FK_Id AND curr.GTLoad = prev.GTLoad AND prev.FinancialYear = :previousFinancialYear WHERE curr.Asset_FK_Id = :assetId AND curr.FinancialYear = :financialYear ORDER BY curr.GTLoad ASC", nativeQuery = true)
     List<HeatRateProjection> findGtHeatRateByAssetId(@Param("assetId") UUID assetId, @Param("financialYear") String financialYear, @Param("previousFinancialYear") String previousFinancialYear);
 
-    // HRSG dropdown query
-    @Query(value = "select AssetId, AssetName from SteamGenerationAssets where CPPPLANT_FK_Id = :cppId and AssetType = :assetType", nativeQuery = true)
+    // HRSG dropdown query - uses LinkedPowerAssetId to join with PowerGenerationAssets
+    @Query(value = "SELECT s.AssetId, s.AssetName FROM SteamGenerationAssets s " +
+                   "INNER JOIN PowerGenerationAssets p ON s.LinkedPowerAssetId = p.AssetId " +
+                   "WHERE p.CPPPLANT_FK_Id = :cppId AND s.AssetType = :assetType", nativeQuery = true)
     List<HeatRateDropDownProjection> findHRSGAssetNamesByCppIdAndAssetType(@Param("cppId") UUID cppId, @Param("assetType") String assetType);
 
     // HRSG heat rate query
