@@ -273,6 +273,33 @@ public class HeatRateController {
         }
     }
 
+    @GetMapping({"/hrsg-heat-rate/export/{assetId}/{financialYear}", "/hrsg-heat-rate/export/{assetId}/{financialYear}/{startDate}/{endDate}"})
+    public ResponseEntity<byte[]> exportHRSGHeatRate(
+            @PathVariable String assetId, 
+            @PathVariable String financialYear,
+            @PathVariable(required = false) String startDate,
+            @PathVariable(required = false) String endDate) {
+        
+        logger.info("========== EXPORT HRSG HEAT RATE REQUEST ==========");
+        logger.info("Request Parameters - assetId: {}, financialYear: {}", assetId, financialYear);
+        logger.info("Optional Parameters - startDate: {}, endDate: {}", startDate, endDate);
+        
+        try {
+            byte[] excelData = heatRateService.exportHRSGHeatRate(assetId, financialYear, startDate, endDate);
+            logger.info("Excel file generated successfully, size: {} bytes", excelData.length);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "HRSG_Heat_Rate.xlsx");
+            
+            logger.info("========== EXPORT RESPONSE SENT ==========");
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            logger.error("Error exporting HRSG heat rate: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     // ============================================================
     // IMPORT ENDPOINTS
     // ============================================================
@@ -303,6 +330,22 @@ public class HeatRateController {
             heatRateService.importHeatRate(file);
             return ResponseEntity.ok().build();
         } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/hrsg-heat-rate/import")
+    public ResponseEntity<Void> importHRSGHeatRate(@RequestParam("file") MultipartFile file) {
+        logger.info("========== IMPORT HRSG HEAT RATE REQUEST ==========");
+        logger.info("File name: {}, size: {} bytes", file.getOriginalFilename(), file.getSize());
+        
+        try {
+            heatRateService.importHRSGHeatRate(file);
+            logger.info("HRSG heat rate import completed successfully");
+            logger.info("========== IMPORT RESPONSE SENT ==========");
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            logger.error("Error importing HRSG heat rate: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
