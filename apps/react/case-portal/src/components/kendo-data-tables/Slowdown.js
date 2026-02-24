@@ -1283,7 +1283,14 @@ const SlowDown = ({ permissions }) => {
 
     try {
       let response
-      if (IS_PTA_DMD) {
+      if (IS_PP_DTA) {
+        response = await DtaDataService.exportSlowdownLineWise(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+        )
+      } else if (IS_PTA_DMD) {
         response = await DataService.ExportSlowdownDetailsPTADMD(
           keycloak,
           PLANT_ID,
@@ -1334,7 +1341,14 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (IS_PTA_DMD) {
+      if (IS_PP_DTA) {
+        response = await DtaDataService.ImportSlowdownLineWise(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (IS_PTA_DMD) {
         response = await DataService.ImportSlowdownPTADMDDetails(
           rawFile,
           keycloak,
