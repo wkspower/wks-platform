@@ -40,6 +40,61 @@ public class HeatRateController {
         return   ResponseEntity.ok(heatRateService.getAssetNamesByCppIdAndAssetType(cppId));
     }
 
+    @GetMapping("/hrsg-heat-rate/drop-down/{cppId}")
+    public ResponseEntity<List<Object[]>> getHRSGAssetDropdown(@PathVariable String cppId) {
+        logger.info("========== GET HRSG ASSET DROPDOWN REQUEST ==========");
+        logger.info("Request Parameters - cppId: {}", cppId);
+        
+        List<Object[]> result = heatRateService.getHRSGAssetNamesByCppId(cppId);
+        
+        logger.info("Service returned {} HRSG assets", result != null ? result.size() : 0);
+        if (result != null && !result.isEmpty()) {
+            logger.info("First HRSG asset: AssetId={}, AssetName={}", result.get(0)[0], result.get(0)[1]);
+        }
+        logger.info("========== RESPONSE BEING SENT ==========");
+        
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping({"/hrsg-heat-rate/{assetId}/{financialYear}", "/hrsg-heat-rate/{assetId}/{financialYear}/{startDate}/{endDate}"})
+    public ResponseEntity<List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO>> getHRSGHeatRateByAssetId(
+            @PathVariable String assetId, 
+            @PathVariable String financialYear,
+            @PathVariable(required = false) String startDate,
+            @PathVariable(required = false) String endDate) {
+        
+        logger.info("========== GET HRSG HEAT RATE REQUEST ==========");
+        logger.info("Request Parameters - assetId: {}, financialYear: {}", assetId, financialYear);
+        logger.info("Optional Parameters - startDate: {}, endDate: {}", startDate, endDate);
+        
+        List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> result;
+        
+        // If date range is provided, calculate proposed heat rates
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            logger.info("Date range provided - calling getHRSGHeatRateByAssetIdWithProposed");
+            result = heatRateService.getHRSGHeatRateByAssetIdWithProposed(assetId, financialYear, startDate, endDate);
+        } else {
+            logger.info("No date range provided - calling standard getHRSGHeatRateByAssetId");
+            result = heatRateService.getHRSGHeatRateByAssetId(assetId, financialYear);
+        }
+        
+        logger.info("Service returned {} HRSG heat rate records", result != null ? result.size() : 0);
+        if (result != null && !result.isEmpty()) {
+            com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO firstRecord = result.get(0);
+            logger.info("First record details:");
+            logger.info("  - id: {}", firstRecord.getId());
+            logger.info("  - equipType: {}", firstRecord.getEquipType());
+            logger.info("  - hrsgLoad: {}", firstRecord.getHrsgLoad());
+            logger.info("  - heatRate: {}", firstRecord.getHeatRate());
+            logger.info("  - previousYearHeatRate: {}", firstRecord.getPreviousYearHeatRate());
+            logger.info("  - finalHeatRate: {}", firstRecord.getFinalHeatRate());
+            logger.info("  - proposedHeatRate: {}", firstRecord.getProposedHeatRate());
+        }
+        logger.info("========== RESPONSE BEING SENT ==========");
+        
+        return ResponseEntity.ok(result);
+    }
+
 
 
     @GetMapping({"/heat-rate/{assetId}/{financialYear}", "/heat-rate/{assetId}/{financialYear}/{startDate}/{endDate}"})
@@ -111,6 +166,30 @@ public class HeatRateController {
 
     // ============== Update Methods ====================
 
+    @PostMapping("/hrsg-heat-rate/{financialYear}")
+    public ResponseEntity<Void> updateHRSGHeatRate(@RequestBody List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> hrsgHeatRateDTOs, @PathVariable String financialYear) {
+        logger.info("========== UPDATE HRSG HEAT RATE REQUEST ==========");
+        logger.info("Request Parameters - financialYear: {}", financialYear);
+        logger.info("Received {} HRSG heat rate records to update", hrsgHeatRateDTOs != null ? hrsgHeatRateDTOs.size() : 0);
+        
+        if (hrsgHeatRateDTOs != null && !hrsgHeatRateDTOs.isEmpty()) {
+            com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO firstRecord = hrsgHeatRateDTOs.get(0);
+            logger.info("First record to update:");
+            logger.info("  - id: {}", firstRecord.getId());
+            logger.info("  - hrsgLoad: {}", firstRecord.getHrsgLoad());
+            logger.info("  - heatRate: {}", firstRecord.getHeatRate());
+            logger.info("  - finalHeatRate: {}", firstRecord.getFinalHeatRate());
+            logger.info("  - oemHeatRate: {}", firstRecord.getOemHeatRate());
+            logger.info("  - selectedHeatRate: {}", firstRecord.getSelectedHeatRate());
+        }
+        
+        heatRateService.updateHRSGHeatRate(hrsgHeatRateDTOs);
+        logger.info("HRSG heat rate update completed successfully");
+        logger.info("==========================================");
+        
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/heat-rate/{financialYear}")
     public ResponseEntity<Void> updateHeatRate(@RequestBody List<HeatRateDTO> heatRateDTOs, @PathVariable String financialYear) {
         logger.info("========== UPDATE HEAT RATE REQUEST ==========");
@@ -142,8 +221,8 @@ public class HeatRateController {
     }
 
     @PostMapping("/hrsg-heat-rate-lookup/{financialYear}")
-    public ResponseEntity<Void> updateHRSGHeatRate(@RequestBody List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs, @PathVariable String financialYear) {
-        heatRateService.updateHRSGHeatRate(hrsgHeatRateLookupDTOs);
+    public ResponseEntity<Void> updateHRSGHeatRateLookup(@RequestBody List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs, @PathVariable String financialYear) {
+        heatRateService.updateHRSGHeatRateLookup(hrsgHeatRateLookupDTOs);
         return ResponseEntity.ok().build();
     }
 
