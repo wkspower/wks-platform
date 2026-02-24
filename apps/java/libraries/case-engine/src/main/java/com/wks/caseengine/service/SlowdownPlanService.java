@@ -32,6 +32,7 @@ public interface SlowdownPlanService {
 	public AOPMessageVM importNonProductSlowdown(String year,UUID plantId, String maintenanceTypeName,MultipartFile file);
 	public List<ShutDownPlanDTO> saveShutdownData( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> saveShutdownDataPE( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
+	public List<ShutDownPlanDTO> saveShutdownDataLine( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList); 
 	public AOPMessageVM saveSlowdownConfigurationData( String plantId, String year,  List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList);
 	public AOPMessageVM getSlowdownConfigurationData(String plantId,String year);
