@@ -128,6 +128,16 @@ const FixedNorms = () => {
       editable: false,
       minWidth: 120,
     },
+    {
+      field: 'actualNorm',
+      title: 'Actual Norm',
+      widthT: 120,
+      type: 'numberWithCheckbox',
+      editable: true,
+      isNumberEditable: false,
+      format: valueFormat,
+      minWidth: 120,
+    },
     // Apr
     {
       field: 'aprNorms',
@@ -276,6 +286,9 @@ const FixedNorms = () => {
         ...item,
         id: item.id || index + 1,
         remarks: item.remarks || '',
+        actualNorm: item.actualNorm || 1.343,
+        applyActualNormToAll: item.applyActualNormToAll || false,
+        isEditable: !(item.applyActualNormToAll || false), // Row editable when checkbox unchecked
       }))
 
       setRows(tempRes)
@@ -507,6 +520,108 @@ const FixedNorms = () => {
     setRemarkDialogOpen(true)
   }
 
+  // Custom item change handler for actualNorm checkbox logic
+  const handleCustomItemChange = (e, setRows) => {
+    const { dataItem, field, value } = e
+    const itemId = dataItem.id
+
+    // When checkbox is toggled
+    if (field === 'applyActualNormToAll') {
+      const actualNormValue = dataItem.actualNorm
+
+      if (value && actualNormValue !== null && actualNormValue !== undefined) {
+        // Checkbox is checked - copy actualNorm to all 12 months and disable row
+        const updatedRow = {
+          ...dataItem,
+          applyActualNormToAll: value,
+          isEditable: false, // Disable row when checkbox is checked
+          aprNorms: actualNormValue,
+          mayNorms: actualNormValue,
+          junNorms: actualNormValue,
+          julNorms: actualNormValue,
+          augNorms: actualNormValue,
+          sepNorms: actualNormValue,
+          octNorms: actualNormValue,
+          novNorms: actualNormValue,
+          decNorms: actualNormValue,
+          janNorms: actualNormValue,
+          febNorms: actualNormValue,
+          marNorms: actualNormValue,
+        }
+
+        setRows((prev) => prev.map((r) => (r.id === itemId ? updatedRow : r)))
+
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || dataItem),
+            ...updatedRow,
+            inEdit: true,
+          },
+        }))
+        return false
+      } else {
+        // Checkbox is unchecked - restore entire original row
+        const originalRow = originalRows.find((r) => r.id === itemId)
+
+        const updatedRow = {
+          ...originalRow,
+          applyActualNormToAll: value,
+          isEditable: true, // Enable row when checkbox is unchecked
+        }
+
+        setRows((prev) => prev.map((r) => (r.id === itemId ? updatedRow : r)))
+
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || dataItem),
+            ...updatedRow,
+            inEdit: true,
+          },
+        }))
+        return false
+      }
+    }
+
+    // When actualNorm value changes and checkbox is checked
+    if (field === 'actualNorm') {
+      const isChecked = dataItem.applyActualNormToAll
+
+      if (isChecked) {
+        // Update actualNorm and all 12 months
+        const updatedRow = {
+          ...dataItem,
+          actualNorm: value,
+          aprNorms: value,
+          mayNorms: value,
+          junNorms: value,
+          julNorms: value,
+          augNorms: value,
+          sepNorms: value,
+          octNorms: value,
+          novNorms: value,
+          decNorms: value,
+          janNorms: value,
+          febNorms: value,
+          marNorms: value,
+        }
+
+        setRows((prev) => prev.map((r) => (r.id === itemId ? updatedRow : r)))
+
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || dataItem),
+            ...updatedRow,
+            inEdit: true,
+          },
+        }))
+        return false
+      }
+    }
+  }
+
   return (
     <Box>
       <Backdrop
@@ -537,6 +652,7 @@ const FixedNorms = () => {
         setSnackbarData={setSnackbarData}
         customHeight={70}
         groupBy={['generatingPlantName', 'accountName']}
+        customItemChange={handleCustomItemChange}
       />
     </Box>
   )
