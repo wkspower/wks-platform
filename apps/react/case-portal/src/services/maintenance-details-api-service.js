@@ -445,7 +445,7 @@ async function getFinishingShutdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function saveFinishingShutdown(PLANT_ID, AOP_YEAR, dataList, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?siteId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
+  const url = `${Config.CaseEngineUrl}/task/finishing-shutdown?plantId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -459,7 +459,7 @@ async function saveFinishingShutdown(PLANT_ID, AOP_YEAR, dataList, keycloak) {
     })
     return json(keycloak, resp)
   } catch (e) {
-    console.error('Error in saveAnnualProduction:', e)
+    console.error('Error in saveFinishingShutdown:', e)
     return await Promise.reject(e)
   }
 }
