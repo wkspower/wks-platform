@@ -836,15 +836,16 @@ const NestedKendoTable = ({
   }
 
   const RemarkCell = (props) => {
-    const { dataItem, field, onRemarkClick, ...tdProps } = props
+    const { dataItem, field, onRemarkClick, alwaysEditable, ...tdProps } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
 
-    // Check if row is editable
-    const isRowEditable = !(
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    )
+    // Check if row is editable (standard check) OR if column has alwaysEditable flag
+    const isRowEditable =
+      alwaysEditable ||
+      (!(!dataItem.isEditable && dataItem?.isEditable !== undefined) &&
+        typeof onRemarkClick === 'function')
 
     // Check if this remark field was edited
     const isEdited = Object.prototype.hasOwnProperty.call(
@@ -855,6 +856,7 @@ const NestedKendoTable = ({
     return (
       <td
         {...tdProps}
+        {...(alwaysEditable ? { 'data-always-editable': 'true' } : {})}
         title={displayText}
         style={{
           cursor: isRowEditable ? 'pointer' : 'not-allowed',
@@ -1012,6 +1014,7 @@ const NestedKendoTable = ({
                   <NumberWithCheckboxCellEditor
                     {...cellProps}
                     isNumberEditable={col.isNumberEditable}
+                    alwaysEditable={col.alwaysEditable}
                   />
                 ),
               },
@@ -1020,6 +1023,7 @@ const NestedKendoTable = ({
                   {...props}
                   customModifiedCells={customModifiedCells}
                   format={col.format}
+                  alwaysEditable={col.alwaysEditable}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,
@@ -1115,11 +1119,20 @@ const NestedKendoTable = ({
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
+                  onRemarkClick={
+                    col.alwaysEditable || isEditable
+                      ? handleRemarkCellClick
+                      : () => {}
+                  }
+                  alwaysEditable={col.alwaysEditable}
                 />
               ),
             }}
-            className={!isEditable ? 'non-editable-cell' : undefined}
+            className={
+              !isEditable && !col.alwaysEditable
+                ? 'non-editable-cell'
+                : undefined
+            }
             columnMenu={ColumnMenuCheckboxFilter}
             headerClassName={isActive ? 'active-column' : ''}
           />

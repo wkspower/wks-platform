@@ -14,6 +14,11 @@
   border-right: 1px solid #ccc !important;
 }
 
+/* Keep specific cells white even in disabled rows (for alwaysEditable columns) */
+.custom-disabled-row td[data-always-editable='true'] {
+  background-color: #ffffff !important;
+}
+
 /* ==================== Button Styles ==================== */
 
 /* Green Submit Button */

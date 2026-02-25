@@ -23,10 +23,14 @@ export const SelectCellEditor = ({
   const dropdownRef = useRef(null)
 
   useEffect(() => {
-    if (dropdownRef.current) {
-      const el = dropdownRef.current.element || dropdownRef.current
-      if (el && typeof el.focus === 'function') el.focus()
-    }
+    // Delay focus slightly to prevent interference with onChange
+    const timer = setTimeout(() => {
+      if (dropdownRef.current) {
+        const el = dropdownRef.current.element || dropdownRef.current
+        if (el && typeof el.focus === 'function') el.focus()
+      }
+    }, 50)
+    return () => clearTimeout(timer)
   }, [])
 
   const handleChange = (e) => {

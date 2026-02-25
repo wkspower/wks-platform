@@ -137,6 +137,7 @@ const FixedNorms = () => {
       isNumberEditable: false,
       format: valueFormat,
       minWidth: 120,
+      alwaysEditable: true,
     },
     // Apr
     {
@@ -253,6 +254,7 @@ const FixedNorms = () => {
       type: 'textarea',
       editable: true,
       minWidth: 250,
+      alwaysEditable: true,
     },
   ]
 
