@@ -6,17 +6,21 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import { customValueFormatterPhaseTwo as customValueFormat } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 
 const HRSGHeatRate = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
+  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [selectedPlant, setSelectedPlant] = useState('')
+  const [dropdownOptions, setDropdownOptions] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     plantID,
@@ -46,39 +50,79 @@ const HRSGHeatRate = () => {
       hidden: true,
     },
     {
-      field: 'equipmentName',
+      field: 'equipType',
       title: 'Equipment Type',
       width: 150,
       type: 'text',
       editable: false,
       locked: true,
-      minWidth: 100,
+      minWidth: 150,
     },
     {
       field: 'cppUtility',
       title: 'CPP Utility',
-      width: 120,
+      width: 150,
       type: 'text',
       editable: false,
-      minWidth: 100,
+      minWidth: 150,
     },
     {
       field: 'hrsgLoad',
       title: 'HRSG Load',
-      width: 100,
+      width: 120,
       type: 'number1',
-      format: valueFormat,
+      format: customValueFormat(1),
       editable: true,
-      minWidth: 80,
+      minWidth: 120,
+    },
+    {
+      field: 'oemHeatRate',
+      title: 'OEM HR',
+      widthT: 150,
+      type: 'numberWithRadio',
+      format: customValueFormat(1),
+      editable: true,
+      numericEditable: true,
+      minWidth: 150,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'OEM',
+    },
+    {
+      field: 'previousYearHeatRate',
+      title: 'PREVIOUS YEAR BUDGET HR',
+      widthT: 200,
+      type: 'numberWithRadio',
+      format: customValueFormat(1),
+      editable: true,
+      numericEditable: false,
+      minWidth: 200,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'PREVIOUS_YEAR',
     },
     {
       field: 'heatRate',
-      title: 'Heat Rate',
-      width: 120,
-      type: 'number1',
-      format: valueFormat,
+      title: 'PROPOSED HR',
+      subtitle: '(Based On Actual Data)',
+      widthT: 200,
+      type: 'numberWithRadio',
+      format: customValueFormat(1),
       editable: true,
-      minWidth: 100,
+      numericEditable: false,
+      minWidth: 200,
+      radioGroupField: 'selectedHeatRate',
+      targetField: 'finalHeatRate',
+      radioValue: 'PROPOSED',
+    },
+    {
+      field: 'finalHeatRate',
+      title: 'Final HR',
+      widthT: 150,
+      type: 'number1',
+      format: customValueFormat(1),
+      editable: true,
+      minWidth: 150,
     },
     {
       field: 'remarks',
@@ -93,30 +137,91 @@ const HRSGHeatRate = () => {
   const [originalRows, setOriginalRows] = useState([])
 
   useEffect(() => {
-    if (PLANT_ID) {
-      fetchHeatRateData()
+    if (selectedPlant) {
+      fetchHeatRateData(selectedPlant)
     }
-  }, [PLANT_ID])
+  }, [PLANT_ID, AOP_YEAR, selectedPlant])
 
-  const fetchHeatRateData = async () => {
+  useEffect(() => {
+    getPlantList()
+  }, [PLANT_ID, AOP_YEAR])
+
+  const getPlantList = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API call once backend is ready
-      const res = await InputApiService.getHRSGHeatRateData(keycloak, PLANT_ID)
+      const res = await InputApiService.getHRSGHeatRateDropdown(
+        keycloak,
+        PLANT_ID,
+      )
+
+      // Convert to required format
+      const convertedData = res?.map((item) => ({
+        id: item[0],
+        name: item[1],
+      }))
+
+      if (convertedData?.length === 0) {
+        setDropdownOptions([])
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No data found', severity: 'info' })
+        setLoading(false)
+        return
+      }
+      setSelectedPlant(convertedData[0]?.id)
+      setDropdownOptions(convertedData)
+    } catch (error) {
+      console.error('Error fetching HRSG dropdown options:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Error fetching data', severity: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchHeatRateData = async (assetId) => {
+    setLoading(true)
+    try {
+      const res = await InputApiService.getHRSGHeatRateData(
+        keycloak,
+        assetId,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
+        setLoading(false)
         return
       }
       let tempRes = res.map((item, index) => {
-        const transformed = {
-          id: item?.id || index + 1,
-          remarks: item?.remarks || '',
-          ...item,
+        const selectedHeatRate = item.selectedHeatRate || 'PROPOSED'
+
+        // Validate if selectedHeatRate matches the actual finalHeatRate value
+        const fieldMapping = {
+          OEM: 'oemHeatRate',
+          PREVIOUS_YEAR: 'previousYearHeatRate',
+          PROPOSED: 'heatRate',
         }
-        return transformed
+
+        const selectedField = fieldMapping[selectedHeatRate]
+        const selectedValue = selectedField ? item[selectedField] : null
+        const finalValue = item.finalHeatRate
+
+        // Check if selected column value matches final heat rate
+        const isMatch =
+          selectedValue !== null &&
+          selectedValue !== undefined &&
+          finalValue !== null &&
+          finalValue !== undefined &&
+          parseFloat(selectedValue) === parseFloat(finalValue)
+
+        return {
+          ...item,
+          id: item.id || index + 1,
+          remarks: item.remarks || '',
+          selectedHeatRate: isMatch ? selectedHeatRate : 'OTHER',
+        }
       })
       console.log('res', res)
       setRows(tempRes)
@@ -143,7 +248,15 @@ const HRSGHeatRate = () => {
     showExport: true,
     ExcelName: `HRSG Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
-    showDropdown: false,
+    showDropdown: true,
+  }
+
+  const dropdownConfig = {
+    options: dropdownOptions,
+    label: 'Select Plant',
+    placeholder: 'Select Plant',
+    valueKey: 'id',
+    labelKey: 'name',
   }
 
   const saveChanges = async () => {
@@ -172,7 +285,7 @@ const HRSGHeatRate = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['hrsgLoad', 'heatRate']
+    const fieldsToCheck = ['hrsgLoad', 'oemHeatRate', 'finalHeatRate']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
@@ -240,7 +353,7 @@ const HRSGHeatRate = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        await fetchHeatRateData()
+        await fetchHeatRateData(selectedPlant)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -268,7 +381,11 @@ const HRSGHeatRate = () => {
     })
 
     try {
-      await InputApiService.exportHRSGHeatRateExcel(keycloak)
+      await InputApiService.exportHRSGHeatRateExcel(
+        keycloak,
+        selectedPlant,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -289,6 +406,207 @@ const HRSGHeatRate = () => {
     setRemarkDialogOpen(true)
   }
 
+  // Custom itemChange handler for radio selection with bidirectional sync
+  const handleCustomItemChange = (e, setRows) => {
+    const { dataItem, field, value } = e
+    const itemId = dataItem.id
+
+    // When radio selection changes, update the Final Heat Rate
+    if (field === 'selectedHeatRate') {
+      // Map radioValue to field name
+      const fieldMapping = {
+        OEM: 'oemHeatRate',
+        PREVIOUS_YEAR: 'previousYearHeatRate',
+        PROPOSED: 'heatRate',
+      }
+
+      const selectedField = fieldMapping[value]
+      const selectedValue = selectedField ? dataItem[selectedField] : null
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              selectedHeatRate: value,
+              finalHeatRate: selectedValue,
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => {
+        const currentRow = rows.find((r) => r.id === itemId)
+        return {
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            selectedHeatRate: value,
+            finalHeatRate: selectedValue,
+            inEdit: true,
+          },
+        }
+      })
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          selectedHeatRate: value,
+          finalHeatRate: selectedValue,
+        },
+      }))
+
+      return
+    }
+
+    // When a source column is edited, update finalHeatRate ONLY if that source is currently selected
+    const sourceFieldMapping = {
+      oemHeatRate: 'OEM',
+      previousYearHeatRate: 'PREVIOUS_YEAR',
+      heatRate: 'PROPOSED',
+    }
+
+    if (sourceFieldMapping[field]) {
+      const radioValueForThisField = sourceFieldMapping[field]
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            // Only update finalHeatRate if this source is currently selected
+            if (r.selectedHeatRate === radioValueForThisField) {
+              return {
+                ...r,
+                [field]: value,
+                finalHeatRate: value,
+              }
+            }
+            // Otherwise just update the source field
+            return {
+              ...r,
+              [field]: value,
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track changes in modifiedCells and customModifiedCells
+      const currentRow = rows.find((r) => r.id === itemId)
+      if (currentRow?.selectedHeatRate === radioValueForThisField) {
+        // Update both source field and finalHeatRate
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            [field]: value,
+            finalHeatRate: value,
+            inEdit: true,
+          },
+        }))
+
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [field]: value,
+            finalHeatRate: value,
+          },
+        }))
+      } else {
+        // Still track the source field change even if not selected (for orange highlighting)
+        setModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            [field]: value,
+            inEdit: true,
+          },
+        }))
+
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || {}),
+            [field]: value,
+          },
+        }))
+      }
+
+      return
+    }
+
+    // When Final Heat Rate is manually edited, check if it matches any source column
+    if (field === 'finalHeatRate') {
+      const sourceFields = [
+        {
+          radioValue: 'OEM',
+          field: 'oemHeatRate',
+          value: dataItem.oemHeatRate,
+        },
+        {
+          radioValue: 'PREVIOUS_YEAR',
+          field: 'previousYearHeatRate',
+          value: dataItem.previousYearHeatRate,
+        },
+        { radioValue: 'PROPOSED', field: 'heatRate', value: dataItem.heatRate },
+      ]
+
+      let matchedRadioValue = null
+
+      // Check if the entered value matches any source column value
+      for (const source of sourceFields) {
+        if (
+          source.value !== null &&
+          source.value !== undefined &&
+          parseFloat(value) === parseFloat(source.value)
+        ) {
+          matchedRadioValue = source.radioValue
+          break
+        }
+      }
+
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id === dataItem.id) {
+            return {
+              ...r,
+              finalHeatRate: value,
+              // Auto-select radio if value matches a source, otherwise set to OTHER
+              selectedHeatRate: matchedRadioValue || 'OTHER',
+            }
+          }
+          return r
+        }),
+      )
+
+      // Track both fields in modifiedCells
+      setModifiedCells((prev) => {
+        const currentRow = rows.find((r) => r.id === itemId)
+        return {
+          ...prev,
+          [itemId]: {
+            ...(prev[itemId] || currentRow),
+            finalHeatRate: value,
+            selectedHeatRate: matchedRadioValue || 'OTHER',
+            inEdit: true,
+          },
+        }
+      })
+
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          finalHeatRate: value,
+          selectedHeatRate: matchedRadioValue || 'OTHER',
+        },
+      }))
+    }
+  }
+
   return (
     <Box>
       <Backdrop
@@ -304,6 +622,8 @@ const HRSGHeatRate = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
+        externalCustomModifiedCells={customModifiedCells}
+        externalSetCustomModifiedCells={setCustomModifiedCells}
         title='HRSG Heat Rate'
         permissions={permissions}
         handleRemarkCellClick={handleRemarkCellClick}
@@ -320,6 +640,16 @@ const HRSGHeatRate = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customItemChange={handleCustomItemChange}
+        dropdownConfig={dropdownConfig}
+        selectedDropdownValue={selectedPlant}
+        setSelectedDropdownValue={setSelectedPlant}
+        paginationConfig={{
+          threshold: 20,
+          buttonCount: 5,
+          pageSizes: [10, 20, 50, 100],
+          defaultPageSize: 20,
+        }}
       />
     </Box>
   )

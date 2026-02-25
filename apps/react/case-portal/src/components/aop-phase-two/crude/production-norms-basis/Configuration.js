@@ -3,10 +3,18 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import {
+  ValueFormatterPhaseTwo,
+  customValueFormatterPhaseTwo,
+} from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
+import RowBasedKendoTable from '../../common/RowBasedKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
+import {
+  handleDateDifferenceCalculation,
+  handleValueMappingDependency,
+  handleLegacyDependencyRule,
+} from './utils/dependencyUtils'
 
 const Configuration = () => {
   const keycloak = useSession()
@@ -24,7 +32,7 @@ const Configuration = () => {
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterPhaseTwo()
+  const valueFormat = customValueFormatterPhaseTwo(3)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -73,7 +81,7 @@ const Configuration = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      type: 'conditional',
+      type: 'row-based',
       format: valueFormat,
     },
     {
@@ -104,9 +112,20 @@ const Configuration = () => {
       //   AOP_YEAR,
       // )
 
-      const res = configurationAndReportManualEntryResponse.data.filter(
-        (item) => item.normType !== 'PIMS Throughput',
-      )
+      let res
+      if (plantObject.name == 'CDU-1') {
+        res = configurationAndReportManualEntryResponse.data.filter(
+          (item) =>
+            item.normType !== 'PIMS Throughput' &&
+            (!item.plant || item.plant === 'CDU-1'),
+        )
+      } else {
+        res = configurationAndReportManualEntryResponse.data.filter(
+          (item) =>
+            item.normType !== 'PIMS Throughput' &&
+            (!item.plant || item.plant === 'CDU-2'),
+        )
+      }
 
       if (res?.length === 0) {
         setRows([])
@@ -119,13 +138,23 @@ const Configuration = () => {
         const mappingKeys = item.dependencyConfig?.valueMapping
           ? Object.keys(item.dependencyConfig.valueMapping)
           : []
+
+        // Preserve existing inputType (date, dropdown, etc.) or infer from dependencies
+        // Default to 'number' if no inputType is specified
+        const inputType =
+          item.inputType || (mappingKeys.length ? 'dropdown' : undefined)
+
         return {
           ...item,
-          inputType:
-            item.inputType || (mappingKeys.length ? 'dropdown' : undefined),
+          inputType,
           options: item.options?.length ? item.options : mappingKeys,
           remarks: item.remarks || '',
           id: item?.id || index + 1,
+          // Convert date strings to Date objects for date/datetime inputs
+          value:
+            (inputType === 'date' || inputType === 'datetime') && item.value
+              ? new Date(item.value)
+              : item.value,
         }
       })
       setRows(formattedData)
@@ -150,7 +179,8 @@ const Configuration = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
-    showExport: true,
+    // showExport: true,
+    downloadExcelBtnFromUI: true,
     ExcelName: `Production_Norms_Configuration_${AOP_YEAR}`,
     showImport: true,
     showTitleNameBusiness: true,
@@ -183,25 +213,12 @@ const Configuration = () => {
       return
     }
 
-    const fieldsToCheck = [
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
-    ]
+    const fieldsToCheck = ['value']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'particulars',
+      'productName',
     )
 
     if (validationError) {
@@ -354,57 +371,50 @@ const Configuration = () => {
     if (field !== 'value') return
 
     const currentProductName = dataItem.productName
+
+    // Check if this field has a dependency configuration
+    if (dataItem.dependencyConfig) {
+      const { calculationType, valueMapping } = dataItem.dependencyConfig
+
+      // Handle date difference calculation
+      if (calculationType === 'dateDifference') {
+        handleDateDifferenceCalculation({
+          value,
+          dependencyConfig: dataItem.dependencyConfig,
+          rows,
+          setRowsCallback,
+          setModifiedCells,
+          setCustomModifiedCells,
+        })
+        return
+      }
+
+      // Handle value mapping (dropdown dependencies)
+      if (valueMapping) {
+        handleValueMappingDependency({
+          value,
+          dependencyConfig: dataItem.dependencyConfig,
+          rows,
+          setRowsCallback,
+          setModifiedCells,
+          setCustomModifiedCells,
+        })
+        return
+      }
+    }
+
+    // Legacy support: Check old dependencyRules format
     const dependencyRule = dependencyRules[currentProductName]
-
-    if (!dependencyRule) return
-
-    const dependentValue = dependencyRule.values[value]
-    if (dependentValue === undefined) return
-
-    setRowsCallback((prevRows) => {
-      return prevRows.map((row) => {
-        if (row.productName === dependencyRule.dependentProductName) {
-          return {
-            ...row,
-            value: dependentValue,
-            inEdit: true,
-          }
-        }
-        return row
+    if (dependencyRule) {
+      handleLegacyDependencyRule({
+        value,
+        dependencyRule,
+        rows,
+        setRowsCallback,
+        setModifiedCells,
+        setCustomModifiedCells,
       })
-    })
-
-    setModifiedCells((prev) => {
-      const dependentRow = rows.find(
-        (r) => r.productName === dependencyRule.dependentProductName,
-      )
-      if (!dependentRow) return prev
-
-      return {
-        ...prev,
-        [dependentRow.id]: {
-          ...dependentRow,
-          value: dependentValue,
-          inEdit: true,
-        },
-      }
-    })
-
-    // Update customModifiedCells for orange highlighting
-    setCustomModifiedCells((prev) => {
-      const dependentRow = rows.find(
-        (r) => r.productName === dependencyRule.dependentProductName,
-      )
-      if (!dependentRow) return prev
-
-      return {
-        ...prev,
-        [dependentRow.id]: {
-          ...(prev[dependentRow.id] || {}),
-          value: dependentValue,
-        },
-      }
-    })
+    }
   }
 
   return (
@@ -415,7 +425,7 @@ const Configuration = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <AdvanceKendoTable
+      <RowBasedKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}

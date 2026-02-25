@@ -51,6 +51,7 @@ export const InputApiService = {
   saveHRSGHeatRateData,
   saveHRSGHeatRateExcel,
   exportHRSGHeatRateExcel,
+  getHRSGHeatRateDropdown,
 
   getNormBasedUtilityBudget,
   saveNormsData,
@@ -586,8 +587,19 @@ async function saveSTGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
 }
 
 // ========================|| HRSG Heat Rate APIs ||=====================================//
-async function getHRSGHeatRateData(keycloak, plantId) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup`
+async function getHRSGHeatRateData(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate,
+  endDate,
+) {
+  let url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/${assetId}/${financialYear}`
+
+  if (startDate && endDate) {
+    url += `/${startDate}/${endDate}`
+  }
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -624,6 +636,25 @@ async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
     }
     const result = await json(keycloak, resp)
     return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getHRSGHeatRateDropdown(keycloak, cppId) {
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/drop-down/${cppId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)

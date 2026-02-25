@@ -65,6 +65,278 @@ public class HeatRateService {
                 .toList();
 
     }
+
+    // HRSG dropdown
+    public List<Object[]> getHRSGAssetNamesByCppId(String cppId) {
+        logger.info("========== SERVICE: getHRSGAssetNamesByCppId ==========");
+        logger.info("Input Parameters - cppId: {}", cppId);
+        
+        String assetType = "HRSG";
+        UUID cppUUID = UUID.fromString(cppId);
+        logger.info("Converted cppId to UUID: {}", cppUUID);
+        logger.info("Querying SteamGenerationAssets for AssetType: {}", assetType);
+        
+        List<Object[]> result = heatRateRepository.findHRSGAssetNamesByCppIdAndAssetType(cppUUID, assetType).stream()
+                .map(projection -> {
+                    logger.debug("Mapping HRSG asset - AssetId: {}, AssetName: {}", 
+                        projection.getAssetId(), projection.getAssetName());
+                    return new Object[] { projection.getAssetId(), projection.getAssetName() };
+                })
+                .toList();
+        
+        logger.info("Repository returned {} HRSG assets", result.size());
+        if (!result.isEmpty()) {
+            logger.info("HRSG Assets found:");
+            for (Object[] asset : result) {
+                logger.info("  - AssetId: {}, AssetName: {}", asset[0], asset[1]);
+            }
+        } else {
+            logger.warn("No HRSG assets found for cppId: {} with AssetType: {}", cppId, assetType);
+        }
+        logger.info("========== SERVICE: getHRSGAssetNamesByCppId COMPLETED ==========");
+        
+        return result;
+    }
+
+    // ============================================================
+    // HRSG HEAT RATE METHODS
+    // ============================================================
+
+    /**
+     * Get HRSG heat rate data by asset ID and financial year
+     */
+    public List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> getHRSGHeatRateByAssetId(String assetId, String financialYear) {
+        logger.info("========== SERVICE: getHRSGHeatRateByAssetId ==========");
+        logger.info("Input Parameters:");
+        logger.info("  - assetId: {}", assetId);
+        logger.info("  - financialYear: {}", financialYear);
+        
+        // Calculate previous financial year
+        String previousFinancialYear = calculatePreviousFinancialYear(financialYear);
+        logger.info("  - previousFinancialYear (calculated): {}", previousFinancialYear);
+        
+        UUID assetUUID = UUID.fromString(assetId);
+        logger.info("Calling repository.findHrsgHeatRateByAssetId with UUID: {}", assetUUID);
+
+        List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateProjection> projections = 
+            heatRateRepository.findHrsgHeatRateByAssetId(assetUUID, financialYear, previousFinancialYear);
+        logger.info("Repository returned {} projection records", projections != null ? projections.size() : 0);
+        
+        if (projections != null && !projections.isEmpty()) {
+            com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateProjection firstProj = projections.get(0);
+            logger.info("First projection from DB:");
+            logger.info("  - getId(): {}", firstProj.getId());
+            logger.info("  - getEquipType(): {}", firstProj.getEquipType());
+            logger.info("  - getHRSGLoad(): {}", firstProj.getHRSGLoad());
+            logger.info("  - getHeatRate(): {}", firstProj.getHeatRate());
+            logger.info("  - getPreviousYearHeatRate(): {}", firstProj.getPreviousYearHeatRate());
+            logger.info("  - getFinalHeatRate(): {}", firstProj.getFinalHeatRate());
+        }
+        
+        List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> result = projections.stream()
+                .map(projection -> {
+                    com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO dto = new com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO();
+                    dto.setId(projection.getId());
+                    dto.setEquipType(projection.getEquipType());
+                    dto.setCppUtility(projection.getCPPUtility());
+                    dto.setHrsgLoad(projection.getHRSGLoad());
+                    dto.setHeatRate(projection.getHeatRate());
+                    dto.setRemarks(projection.getRemarks());
+                    dto.setPreviousYearHeatRate(projection.getPreviousYearHeatRate());
+                    dto.setFinalHeatRate(projection.getFinalHeatRate());
+                    dto.setOemHeatRate(projection.getOEMHeatRate());
+                    dto.setSelectedHeatRate(projection.getSelectedHeatRate());
+                    
+                    logger.debug("Mapped DTO - hrsgLoad: {}, finalHeatRate: {}, oemHeatRate: {}, selectedHeatRate: {}", 
+                        dto.getHrsgLoad(), dto.getFinalHeatRate(), dto.getOemHeatRate(), dto.getSelectedHeatRate());
+                    return dto;
+                })
+                .toList();
+        
+        logger.info("Returning {} HRSG heat rate records", result.size());
+        logger.info("========== SERVICE: getHRSGHeatRateByAssetId COMPLETED ==========");
+        
+        return result;
+    }
+
+    /**
+     * Get HRSG heat rate data with proposed heat rate calculated from date range
+     */
+    public List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> getHRSGHeatRateByAssetIdWithProposed(
+            String assetId, String financialYear, String startDate, String endDate) {
+        logger.info("========== SERVICE: getHRSGHeatRateByAssetIdWithProposed ==========");
+        logger.info("Input Parameters:");
+        logger.info("  - assetId: {}", assetId);
+        logger.info("  - financialYear: {}", financialYear);
+        logger.info("  - startDate: {}", startDate);
+        logger.info("  - endDate: {}", endDate);
+        
+        // Get base HRSG heat rate data from table
+        List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> hrsgHeatRateDTOs = getHRSGHeatRateByAssetId(assetId, financialYear);
+        
+        // Calculate proposed heat rates from date range if dates are provided
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            UUID assetUUID = UUID.fromString(assetId);
+            java.util.Map<Double, Double> proposedHeatRateMap = calculateProposedHRSGHeatRates(assetUUID, startDate, endDate);
+            
+            // Merge proposed heat rates with existing data
+            for (com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO dto : hrsgHeatRateDTOs) {
+                Double proposedHeatRate = proposedHeatRateMap.get(dto.getHrsgLoad());
+                if (proposedHeatRate != null) {
+                    dto.setProposedHeatRate(proposedHeatRate);
+                    logger.debug("Set proposedHeatRate for HRSGLoad {}: {}", dto.getHrsgLoad(), proposedHeatRate);
+                }
+            }
+            
+            logger.info("Merged proposed heat rates for {} load points", proposedHeatRateMap.size());
+        } else {
+            logger.info("No date range provided, skipping proposed heat rate calculation");
+        }
+        
+        logger.info("Returning {} HRSG heat rate records with proposed data", hrsgHeatRateDTOs.size());
+        logger.info("========== SERVICE: getHRSGHeatRateByAssetIdWithProposed COMPLETED ==========");
+        
+        return hrsgHeatRateDTOs;
+    }
+
+    /**
+     * Calculate proposed HRSG heat rates using stored procedure
+     */
+    private java.util.Map<Double, Double> calculateProposedHRSGHeatRates(UUID assetId, String startDate, String endDate) {
+        logger.info("========== calculateProposedHRSGHeatRates START ==========");
+        logger.info("Calculating proposed HRSG heat rates for assetId: {}, dateRange: {} to {}", assetId, startDate, endDate);
+        
+        // Get asset name - try multiple sources
+        String assetName = null;
+        
+        // First try: Get from CPP_HRSGHeatRate table (most reliable as it's already populated)
+        try {
+            assetName = jdbcTemplate.queryForObject(
+                "SELECT TOP 1 AssetName FROM CPP_HRSGHeatRate WHERE Asset_FK_Id = ?",
+                String.class,
+                assetId
+            );
+            logger.info("HRSG Asset name retrieved from CPP_HRSGHeatRate table: '{}'", assetName);
+        } catch (Exception e) {
+            logger.warn("Could not retrieve asset name from CPP_HRSGHeatRate, trying SteamGenerationAssets. Error: {}", e.getMessage());
+            
+            // Second try: SteamGenerationAssets with AssetName column
+            try {
+                assetName = jdbcTemplate.queryForObject(
+                    "SELECT AssetName FROM SteamGenerationAssets WHERE AssetId = ?",
+                    String.class,
+                    assetId
+                );
+                logger.info("HRSG Asset name retrieved from SteamGenerationAssets.AssetName: '{}'", assetName);
+            } catch (Exception e2) {
+                logger.warn("AssetName column not found, trying displayName column. Error: {}", e2.getMessage());
+                
+                // Third try: SteamGenerationAssets with displayName column
+                try {
+                    assetName = jdbcTemplate.queryForObject(
+                        "SELECT displayName FROM SteamGenerationAssets WHERE AssetId = ?",
+                        String.class,
+                        assetId
+                    );
+                    logger.info("HRSG Asset name retrieved from SteamGenerationAssets.displayName: '{}'", assetName);
+                } catch (Exception e3) {
+                    logger.error("Error retrieving HRSG asset name for assetId {} from all sources: {}", assetId, e3.getMessage());
+                }
+            }
+        }
+        
+        if (assetName == null || assetName.trim().isEmpty()) {
+            logger.warn("HRSG Asset not found or empty for assetId: {}", assetId);
+            return new java.util.HashMap<>();
+        }
+        
+        // Convert HRSG1, HRSG2, HRSG3 to HRSG-1, HRSG-2, HRSG-3 for SP
+        String spAssetName = assetName.replace("HRSG", "HRSG-");
+        logger.info("Converted asset name for SP: '{}' -> '{}'", assetName, spAssetName);
+        
+        // Call the HRSG stored procedure
+        String sql = "EXEC CPP_CalculateHRSGHeatRate_ByDateRange @StartDate = ?, @EndDate = ?, @AssetName = ?";
+        logger.info("Calling HRSG SP with parameters: StartDate='{}', EndDate='{}', AssetName='{}'", startDate, endDate, spAssetName);
+        
+        java.util.Map<Double, Double> proposedHeatRateMap = new java.util.HashMap<>();
+        
+        try {
+            jdbcTemplate.query(sql, 
+                (rs) -> {
+                    Double hrsgLoad = rs.getDouble("HRSGLoad");
+                    Double heatRate = rs.getDouble("HeatRate");
+                    proposedHeatRateMap.put(hrsgLoad, heatRate);
+                    logger.debug("HRSG SP returned: HRSGLoad={}, HeatRate={}", hrsgLoad, heatRate);
+                },
+                startDate, endDate, spAssetName
+            );
+            
+            logger.info("Proposed HRSG heat rates calculated for {} load points", proposedHeatRateMap.size());
+            if (proposedHeatRateMap.isEmpty()) {
+                logger.warn("WARNING: HRSG Stored procedure returned NO data! Check if CPP_NMD_FCNA_FuelBill has data for asset '{}' in date range {} to {}", 
+                    spAssetName, startDate, endDate);
+            }
+        } catch (Exception e) {
+            logger.error("Error calling HRSG stored procedure: {}", e.getMessage(), e);
+        }
+        
+        logger.info("========== calculateProposedHRSGHeatRates END ==========");
+        return proposedHeatRateMap;
+    }
+
+    /**
+     * Update HRSG heat rate records
+     */
+    public void updateHRSGHeatRate(List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> hrsgHeatRateDTOs) {
+        logger.info("========== SERVICE: updateHRSGHeatRate ==========");
+        logger.info("Received {} HRSG heat rate records to update", hrsgHeatRateDTOs != null ? hrsgHeatRateDTOs.size() : 0);
+        
+        List<Object[]> updates = new ArrayList<>();
+        for(com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO dto : hrsgHeatRateDTOs) {
+            // Validate selectedHeatRate field
+            String selectedHeatRate = dto.getSelectedHeatRate();
+            if (selectedHeatRate != null && !selectedHeatRate.trim().isEmpty()) {
+                if (!SelectedHeatRateType.isValid(selectedHeatRate)) {
+                    logger.error("Invalid selectedHeatRate value: '{}' for ID: {}. Must be one of: OEM, PREVIOUS_YEAR, PROPOSED, OTHER", 
+                        selectedHeatRate, dto.getId());
+                    throw new IllegalArgumentException(
+                        String.format("Invalid selectedHeatRate value: '%s'. Must be one of: OEM, PREVIOUS_YEAR, PROPOSED, OTHER", 
+                        selectedHeatRate));
+                }
+            } else {
+                // Set default value to PROPOSED if null or empty
+                selectedHeatRate = SelectedHeatRateType.PROPOSED.getValue();
+                dto.setSelectedHeatRate(selectedHeatRate);
+                logger.debug("SelectedHeatRate was null/empty for ID: {}, setting default value: PROPOSED", dto.getId());
+            }
+            
+            logger.debug("Preparing update for HRSG ID: {}, HRSGLoad: {}, HeatRate: {}, FinalHeatRate: {}, OEMHeatRate: {}, SelectedHeatRate: {}", 
+                dto.getId(), dto.getHrsgLoad(), dto.getHeatRate(), 
+                dto.getFinalHeatRate(), dto.getOemHeatRate(), selectedHeatRate);
+            
+            updates.add(new Object[] { 
+                dto.getHrsgLoad(), 
+                dto.getFinalHeatRate(), 
+                dto.getOemHeatRate(),
+                selectedHeatRate,
+                dto.getRemarks(), 
+                dto.getId() 
+            });
+        }
+        
+        if(updates.size() > 0) {
+            String sql = "UPDATE CPP_HRSGHeatRate SET HRSGLoad = ?, FinalHeatRate = ?, OEMHeatRate = ?, SelectedHeatRate = ?, Remarks = ?, UpdatedDate = GETDATE() WHERE Id = ?";
+            logger.info("Executing batch update SQL: {}", sql);
+            logger.info("Updating {} HRSG heat rate records in database", updates.size());
+            
+            int[] updateCounts = jdbcTemplate.batchUpdate(sql, updates);
+            logger.info("Batch update completed. {} HRSG heat rate records updated", updateCounts.length);
+        } else {
+            logger.warn("No HRSG heat rate records to update");
+        }
+        logger.info("========== SERVICE: updateHRSGHeatRate COMPLETED ==========");
+    }
+
    // original
     public List<HeatRateDTO> getHeatRateByAssetId(String assetId, String financialYear) {
         logger.info("========== SERVICE: getHeatRateByAssetId ==========");
@@ -353,7 +625,7 @@ public class HeatRateService {
         logger.info("=============================================");
     }
 
-    public void updateHRSGHeatRate(List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs) {
+    public void updateHRSGHeatRateLookup(List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs) {
     List<Object[]> updates = new ArrayList<>();
     for(HRSGHeatRateLookupDTO hrsgHeatRateLookupDTO : hrsgHeatRateLookupDTOs) {
         updates.add(new Object[] { hrsgHeatRateLookupDTO.getHrsgLoad(), hrsgHeatRateLookupDTO.getHeatRate(), hrsgHeatRateLookupDTO.getRemarks(), hrsgHeatRateLookupDTO.getId() });
@@ -662,7 +934,7 @@ public void importHRSGHeatRateLookup(MultipartFile file) throws IOException {
     }
     
     if (!dtos.isEmpty()) {
-        updateHRSGHeatRate(dtos);
+        updateHRSGHeatRateLookup(dtos);
     }
 }
 
