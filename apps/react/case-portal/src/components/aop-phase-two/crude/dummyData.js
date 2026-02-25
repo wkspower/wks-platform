@@ -1830,7 +1830,6 @@ export const configurationAndReportManualEntryResponse =
         normType: 'Common',
         isEditable: true,
         inputType: 'dropdown',
-        // options: ['Yes', 'No'],
         productName: 'VR Motor (P18) Pump Running Status',
         productDisplayName: 'VR Motor (P18) Pump Running Status',
         dependencyConfig: {
@@ -1863,7 +1862,6 @@ export const configurationAndReportManualEntryResponse =
         normType: 'Common',
         isEditable: true,
         inputType: 'dropdown',
-        // options: ['Yes', 'No'],
         productName: 'RCO motor (P10) Pump Running Status',
         productDisplayName: 'RCO motor (P10) Pump Running Status',
         dependencyConfig: {
@@ -1962,7 +1960,6 @@ export const configurationAndReportManualEntryResponse =
         normType: 'Fuel',
         isEditable: true,
         inputType: 'dropdown',
-        // options: ['Yes', 'No'],
         productName: 'Heat Exchanger Cleaning Plan',
         productDisplayName: 'Heat Exchanger Cleaning Plan',
         dependencyConfig: {
@@ -2114,7 +2111,6 @@ export const configurationAndReportManualEntryResponse =
         normType: 'MP Steam',
         isEditable: true,
         inputType: 'dropdown',
-        // options: ['Yes', 'No'],
         productName: '38% Ejector Input',
         productDisplayName: '38% Ejector Input',
         dependencyConfig: {
@@ -2351,7 +2347,7 @@ export const configurationAndReportManualEntryResponse =
         productDisplayName: 'Additional LP steam generation from S03, B1',
       },
       {
-        id: 'ADDITIONAL-LP-STEAM-GENERATION-EXTERNAL',
+        id: 'ADDITIONAL-LP-STEAM-CONSUMPTION-EXTERNAL',
         value: '0',
         remarks: '',
         auditYear: '2025-26',

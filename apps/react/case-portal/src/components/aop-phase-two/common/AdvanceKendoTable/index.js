@@ -647,9 +647,15 @@ const AdvanceKendoTable = ({
   // Close inline edit mode when user clicks outside the grid container
   useEffect(() => {
     const handleOutsideClick = (e) => {
+      // Check if click is on Kendo popup/portal elements (dropdown, date picker, etc.)
+      const isKendoPopup = e.target.closest(
+        '.k-animation-container, .k-popup, .k-list-container, .k-calendar-container',
+      )
+
       if (
         gridContainerRef.current &&
-        !gridContainerRef.current.contains(e.target)
+        !gridContainerRef.current.contains(e.target) &&
+        !isKendoPopup // Don't close if clicking on Kendo popup elements
       ) {
         setRows((prev) =>
           prev.map((r) => (r.inEdit ? { ...r, inEdit: false } : r)),

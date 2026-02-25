@@ -3,7 +3,13 @@ import { Checkbox, Box } from '@mui/material'
 import { Input } from '@progress/kendo-react-inputs'
 
 export const NumberWithCheckboxCellEditor = (props) => {
-  const { dataItem, field, onChange, isNumberEditable = true } = props
+  const {
+    dataItem,
+    field,
+    onChange,
+    isNumberEditable = true,
+    alwaysEditable,
+  } = props
   const currentValue = dataItem[field] ?? ''
   const isChecked = dataItem.applyActualNormToAll || false
   const initialValue = currentValue
@@ -53,7 +59,7 @@ export const NumberWithCheckboxCellEditor = (props) => {
   }
 
   return (
-    <td>
+    <td {...(alwaysEditable ? { 'data-always-editable': 'true' } : {})}>
       <Box
         sx={{
           display: 'flex',
@@ -109,7 +115,7 @@ export const NumberWithCheckboxCellEditor = (props) => {
 }
 
 export const NumberWithCheckboxDisplayCell = (props) => {
-  const { dataItem, field, format, customModifiedCells } = props
+  const { dataItem, field, format, customModifiedCells, alwaysEditable } = props
   const value = dataItem[field]
   const isChecked = dataItem.applyActualNormToAll || false
   const rowId = dataItem.id
@@ -132,6 +138,7 @@ export const NumberWithCheckboxDisplayCell = (props) => {
   return (
     <td
       {...props.tdProps}
+      {...(alwaysEditable ? { 'data-always-editable': 'true' } : {})}
       style={{
         ...props.tdProps?.style,
       }}
