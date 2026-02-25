@@ -15,21 +15,30 @@ import java.util.UUID;
 import org.hibernate.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutdownHistoryConfigDTO;
 import com.wks.caseengine.dto.SlowdownHistoryConfigDTO;
+import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownHistoryConfig;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.SlowdownConsumption;
 import com.wks.caseengine.entity.SlowdownHistoryConfig;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutdownHistoryConfigRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.SlowdownHistoryConfigRepository;
@@ -52,6 +61,11 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 	@Autowired
 	private SiteRepository siteRepository;
 	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 	
 	@Autowired
 	private ShutdownHistoryConfigRepository shutdownHistoryConfigRepository;
@@ -61,6 +75,9 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 
 	@Autowired
 	private SlowdownHistoryConfigRepository slowdownHistoryConfigRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	@Override
 	public AOPMessageVM getShutdownHistory(String plantId, String year) {
@@ -489,6 +506,85 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				return "date";
 			default:
 				return "string";
+		}
+	}
+	
+	@Override
+	public AOPMessageVM saveHistoryPTA(String plantId, String year,
+			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<NormAttributeTransactions>();
+		try {
+			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
+				String rawDesc = normAttributeTransactionsDTO.getDescription();
+				String attributeValue = normAttributeTransactionsDTO.getAttributeValue();
+				Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+				Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+				Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+				
+				String viewName = vertical.getName() + site.getName() + "vwScrnShutdown";
+				List<Object[]> results = getDescriptionIdBySite(site.getId(),rawDesc, viewName);
+				UUID uuid = Optional.ofNullable(results)
+					    .filter(res -> !res.isEmpty() && res.get(0).length > 0)
+					    .map(res -> res.get(0)[0])
+					    .map(val -> (val instanceof UUID) ? (UUID) val : UUID.fromString(val.toString()))
+					    .orElse(null);				
+				List<NormAttributeTransactions> normAttributeTransactions =normAttributeTransactionsRepository.findByAuditYearAndIds(year,normAttributeTransactionsDTO.getNormParameterFKId(),uuid);
+				if(normAttributeTransactions!=null && normAttributeTransactions.size()>0) {
+					for(NormAttributeTransactions normAttributeTransaction:normAttributeTransactions) {
+						normAttributeTransaction.setAttributeValue(attributeValue);
+						normAttributeTransaction.setModifiedOn(new Date());
+						normAttributeTransaction.setUserName(Utility.getUserName());
+						normAttributeTransactionsList.add(normAttributeTransaction);
+					}
+				}else {
+					for(int i=1;i<13;i++) {
+						NormAttributeTransactions normAttributeTransaction = new NormAttributeTransactions();
+						normAttributeTransaction.setAopMonth(i);
+						normAttributeTransaction.setAttributeValue(attributeValue);
+						normAttributeTransaction.setAuditYear(year);
+						normAttributeTransaction.setCreatedOn(new Date());
+						normAttributeTransaction.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
+						normAttributeTransaction.setUserName(Utility.getUserName());
+						normAttributeTransaction.setShutdownTypeId(uuid);
+						normAttributeTransactionsList.add(normAttributeTransaction);
+					}
+				}
+
+				List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("slowdown-norms");
+				for (ScreenMapping screenMapping : screenMappingList) {
+					AopCalculation aopCalculation = new AopCalculation();
+					aopCalculation.setAopYear(year);
+					aopCalculation.setIsChanged(true);
+					aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+					aopCalculation.setPlantId(UUID.fromString(plantId));
+					aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+					aopCalculationRepository.save(aopCalculation);
+				}
+
+			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save/update data", ex);
+		}
+		normAttributeTransactionsRepository.saveAll(normAttributeTransactionsList);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(normAttributeTransactionsList);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
+	}
+	public List<Object[]> getDescriptionIdBySite(UUID siteId,String name, String viewName) {
+		try {
+			String sql = "SELECT * from " + viewName + " where Site_FK_Id = :siteId and DisplayName = :name order by DisplayOrder";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("siteId", siteId);
+			query.setParameter("name", name);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
 

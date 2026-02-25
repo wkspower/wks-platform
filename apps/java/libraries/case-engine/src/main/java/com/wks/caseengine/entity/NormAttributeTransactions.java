@@ -58,6 +58,8 @@ public class NormAttributeTransactions {
     
     @Column(name="PlantMaintenanceTransaction_FK_Id")
     private UUID maintenanceId;
-
+    
+    @Column(name="ShutdownType_FK_Id")
+    private UUID shutdownTypeId;
 
 }
