@@ -3658,13 +3658,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 					UUID gradeUUID = UUID.fromString(entry.getKey());
 					String value = entry.getValue();
+					Double attributeValue = parseAttributeValue(value);
 
 					NormAttributeTransactionLine existing = normAttributeTransactionLineRepository.findExisting(
 							year, plantUUID, gradeUUID, lineUUID);
 
 					if (existing != null) {
 
-						existing.setAttributeValue(value);
+						existing.setAttributeValue(attributeValue);
 						existing.setModifiedOn(new Date());
 						saveList.add(existing);
 					} else {
@@ -3674,10 +3675,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						n.setLineFkId(lineUUID);
 						n.setPlantFkId(plantUUID);
 						n.setAopYear(year);
-						n.setAttributeValue(value);
+						n.setAttributeValue(attributeValue);
 						n.setCreatedOn(new Date());
 						n.setModifiedOn(new Date());
-						n.setUser(Utility.getUserName());
+						n.setUserName(Utility.getUserName());
 
 						saveList.add(n);
 					}
@@ -3707,6 +3708,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					.message("Failed to update line configuration: " + e.getMessage())
 					.data(null)
 					.build();
+		}
+	}
+
+	
+	private Double parseAttributeValue(String value) {
+		if (value == null || value.isBlank() || "null".equalsIgnoreCase(value.trim())) {
+			return null;
+		}
+		try {
+			return Double.parseDouble(value.trim());
+		} catch (NumberFormatException e) {
+			return null;
 		}
 	}
 

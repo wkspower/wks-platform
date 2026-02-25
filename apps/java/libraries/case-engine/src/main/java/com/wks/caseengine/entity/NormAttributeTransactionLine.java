@@ -6,14 +6,18 @@ import lombok.Setter;
 import java.util.Date;
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "NormAttributeTransactionLine")
 public class NormAttributeTransactionLine {
 
-    @Id
-    @GeneratedValue
+	@Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "Grade_FK_ID")
@@ -25,12 +29,19 @@ public class NormAttributeTransactionLine {
     @Column(name = "Plant_FK_ID")
     private UUID plantFkId;
 
-    private String attributeValue;
+    @Column(name = "AttributeValue")
+    private Double attributeValue;
 
     @Column(name = "USER_NAME")
-    private String user;
+    private String userName;
 
+    @Column(name = "AOPYear")
     private String aopYear;
+
+    
+    @Column(name = "CreatedOn")
     private Date createdOn;
-    private Date modifiedOn;
-}
+
+    
+    @Column(name = "ModifiedOn")
+    private Date modifiedOn;}
