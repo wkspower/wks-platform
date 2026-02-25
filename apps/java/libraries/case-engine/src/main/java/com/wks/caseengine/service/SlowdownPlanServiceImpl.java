@@ -3110,10 +3110,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            String originalRemark = plantMaintenanceTransaction.getRemarks();
 	            Double originalRateEO = plantMaintenanceTransaction.getRateEO()!=null? plantMaintenanceTransaction.getRateEO():null;
 	            Double originalRateEOE = plantMaintenanceTransaction.getRateEOE()!=null? plantMaintenanceTransaction.getRateEOE():null;
-	            int monthNum = plantMaintenanceTransaction.getMaintForMonth();
+	            String originalMonth =null;
+	            if(plantMaintenanceTransaction.getMaintForMonth()!=null) {
+	            	int monthNum = plantMaintenanceTransaction.getMaintForMonth();
 
-	            String originalMonth = Month.of(monthNum)
-	                                        .getDisplayName(TextStyle.FULL, Locale.getDefault());
+		             originalMonth = Month.of(monthNum)
+		                                        .getDisplayName(TextStyle.FULL, Locale.getDefault());
+		            
+	            }
 	            plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 	            
 	            String originalLine = plantMaintenanceTransaction.getLineFKId()!=null ? plantMaintenanceTransaction.getLineFKId().toString() : null;
