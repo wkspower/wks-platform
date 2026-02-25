@@ -25,6 +25,7 @@ import { getRoleName } from 'services/role-service'
 import ElastomerShutDown from './ElastomerShutDown'
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
 import { set } from 'lodash'
+import { useCallback } from 'react'
 const PtaShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells1, setModifiedCells1] = useState({})
@@ -633,13 +634,12 @@ const PtaShutDown = ({ permissions }) => {
           title: col.title,
           widthT: col.field.toLowerCase() === 'uom' ? 90 : 150,
           editable:
-            col.field === 'particulars' ||
-            col.field.toLowerCase() === 'uom'
+            col.field === 'Particulars' || col.field.toLowerCase() === 'uom'
               ? false
               : true,
           type: col.type,
           hidden: hiddenFields.includes(col.field),
-          ...(col.field !== 'particulars' &&
+          ...(col.field !== 'Particulars' &&
             col.field.toLowerCase() !== 'uom' && {
               format: '{0:n2}',
               type: 'negativeNumber',
@@ -664,6 +664,7 @@ const PtaShutDown = ({ permissions }) => {
       setLoading(false)
     }
   }
+
   useEffect(() => {
     if (tabIndex === 1) {
       fetchTabIndex1Data()
@@ -1098,6 +1099,47 @@ const PtaShutDown = ({ permissions }) => {
     importShutdown(rawFile)
   }
 
+  const saveSlowdownConfiguration = useCallback(
+    async (payload) => {
+      setLoading(true)
+      try {
+        const response =
+          await MaintenanceDetailsApiService.updateSlowdownNormsForPTA(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            payload,
+          )
+
+        if (response?.code === 200) {
+          setModifiedCells1({})
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data Saved!',
+            severity: 'success',
+          })
+          await fetchTabIndex1Data()
+        } else {
+          // showNotification('Data Save Failed!', 'error')
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data Save Failed!',
+            severity: 'error',
+          })
+        }
+
+        return response
+      } catch (error) {
+        console.error('Error saving data:', error)
+
+        throw error
+      } finally {
+        setLoading(false)
+      }
+    },
+    [keycloak, PLANT_ID, AOP_YEAR],
+  )
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -1171,6 +1213,45 @@ const PtaShutDown = ({ permissions }) => {
   if (lowerVertName == 'elastomer') {
     return <ElastomerShutDown permissions={permissions} />
   }
+
+  const handleSaveChanges = useCallback(async () => {
+    try {
+      const modifiedData = Object.values(modifiedCells1)
+
+      if (modifiedData.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
+
+      const sanitizedData = modifiedData.map((item) => ({
+        ...item,
+        normParameterFKId: item.NormParameter_FK_Id,
+        NormParameter_FK_Id: undefined,
+        inEdit: undefined,
+        particulars: undefined,
+        id: undefined,
+        aopYear: undefined,
+        normParameterDisplayName: undefined,
+        plantId: undefined,
+        DisplayName: undefined,
+        NormTypeName: undefined,
+        srNo: undefined,
+        isEditable: undefined,
+        IsEditable: undefined,
+        Particulars: undefined,
+        uom: undefined,
+        UOM: undefined,
+      }))
+
+      await saveSlowdownConfiguration(sanitizedData)
+    } catch (error) {
+      console.error('Error in handleSaveChanges:', error)
+    }
+  }, [modifiedCells1, saveSlowdownConfiguration])
 
   return (
     <div>
@@ -1257,7 +1338,7 @@ const PtaShutDown = ({ permissions }) => {
           rows={rows1}
           paginationOptions={[100, 200, 300]}
           updateShutdownData={updateShutdownData}
-          //saveChanges={saveChanges1}
+          saveChanges={handleSaveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           apiRef={apiRef}

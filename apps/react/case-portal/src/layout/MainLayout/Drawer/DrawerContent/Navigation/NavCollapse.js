@@ -17,10 +17,13 @@ const NavCollapse = ({ menu, level }) => {
   const theme = useTheme()
   const [open, setOpen] = useState(true)
   const [selected, setSelected] = useState(menu.id)
-  const { plantID, verticalChange } = useSelector(
+  const { plantID, verticalChange, siteObject } = useSelector(
     (state) => state.dataGridStore,
   )
   const plantName = plantID?.plantName
+
+  const SITE_NAME = siteObject?.name?.toLowerCase()
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const handleClick = () => {
@@ -49,7 +52,9 @@ const NavCollapse = ({ menu, level }) => {
     }
 
     const shouldFilterSlowdown =
-      lowerVertName === verticalEnums.PE && plantName === 'LDPE'
+      (lowerVertName === verticalEnums.PE && plantName === 'LDPE') ||
+      (verticalEnums.PE && SITE_NAME === 'dmd')
+
     const menuItems = shouldFilterSlowdown
       ? menu.children.filter((item) => item.id !== 'slowdown-norms')
       : menu.children
