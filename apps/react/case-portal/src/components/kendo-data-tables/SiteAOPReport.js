@@ -1248,7 +1248,7 @@ const SiteAOPReport = ({ permissions }) => {
 
       {tabIndex === 5 && <TechnicalAvailability />}
 
-      {tabIndex === 6 && <CrackerReportMannualEntry tabIndex={6} />}
+      {tabIndex === 6 && <CrackerReportMannualEntry tabIndex={5} />}
 
       {tabIndex === 7 && (
         <KendoDataTablesReports
