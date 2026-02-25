@@ -20,6 +20,14 @@ export const SelectCellEditor = ({
 
   const [localValue, setLocalValue] = useState(getInitialSelection())
   const isFirstRender = useRef(true)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    if (dropdownRef.current) {
+      const el = dropdownRef.current.element || dropdownRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
 
   const handleChange = (e) => {
     const selectedItem = e.target.value
@@ -56,6 +64,7 @@ export const SelectCellEditor = ({
   return (
     <td style={{ textAlign: 'start' }}>
       <DropDownList
+        ref={dropdownRef}
         value={localValue}
         onChange={handleChange}
         data={options}

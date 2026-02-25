@@ -23,6 +23,14 @@ export const ConditionalCellEditor = ({
     inputType === 'dropdown' ? getInitialSelection() : storedValue,
   )
   const isFirstRender = useRef(true)
+  const focusRef = useRef(null)
+
+  useEffect(() => {
+    if (focusRef.current) {
+      const el = focusRef.current.element || focusRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
 
   const handleDropdownChange = (e) => {
     const selectedItem = e.target.value
@@ -77,6 +85,7 @@ export const ConditionalCellEditor = ({
     return (
       <td style={{ textAlign: 'start' }}>
         <DropDownList
+          ref={focusRef}
           value={localValue}
           onChange={handleDropdownChange}
           data={dropdownOptions}
@@ -99,6 +108,7 @@ export const ConditionalCellEditor = ({
   return (
     <td>
       <Input
+        ref={focusRef}
         value={localValue}
         onChange={handleNumericChange}
         onBlur={handleNumericBlur}

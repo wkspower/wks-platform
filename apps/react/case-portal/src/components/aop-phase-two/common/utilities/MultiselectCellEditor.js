@@ -37,6 +37,14 @@ export const MultiselectCellEditor = ({
 
   const [localValue, setLocalValue] = useState(getInitialSelection())
   const isFirstRender = useRef(true)
+  const multiSelectRef = useRef(null)
+
+  useEffect(() => {
+    if (multiSelectRef.current) {
+      const el = multiSelectRef.current.element || multiSelectRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
 
   const handleChange = (e) => {
     const selectedItems = e.target.value || []
@@ -80,6 +88,7 @@ export const MultiselectCellEditor = ({
   return (
     <td style={{ textAlign: 'start' }}>
       <MultiSelect
+        ref={multiSelectRef}
         value={localValue}
         onChange={handleChange}
         data={options}
