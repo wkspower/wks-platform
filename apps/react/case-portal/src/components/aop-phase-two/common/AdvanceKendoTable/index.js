@@ -5,6 +5,7 @@ import {
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
+import { process } from '@progress/kendo-data-query'
 import '@progress/kendo-theme-default/dist/all.css'
 import GenericDropdown from 'components/aop-phase-two/common/utilities/GenericDropdown'
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
@@ -12,6 +13,7 @@ import '../../../../../src/kendo-data-grid.css'
 import '../../css/advance-kendo-table.css'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
+import { handleTabKeyNavigation } from './utility'
 import RemarkDialog from './components/RemarkDialog'
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
@@ -61,6 +63,25 @@ const getNestedValue = (obj, path) => {
     value = value?.[part]
   }
   return value
+}
+
+// Helper function to extract flat row sequence from grouped data
+const extractFlatRowsFromGrouped = (data) => {
+  const flatRows = []
+  const traverse = (items) => {
+    if (!items || !Array.isArray(items)) return
+    items.forEach((item) => {
+      if (item.items && Array.isArray(item.items)) {
+        // This is a group header, traverse its children
+        traverse(item.items)
+      } else {
+        // This is an actual data row
+        flatRows.push(item)
+      }
+    })
+  }
+  traverse(data)
+  return flatRows
 }
 
 // Helper function to apply Kendo number format
@@ -178,6 +199,8 @@ const AdvanceKendoTable = ({
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
   const gridRef = useRef(null)
+  const gridContainerRef = useRef(null)
+  const activeCellRef = useRef({ rowId: null, field: null })
   const _export = useRef(null)
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -211,6 +234,21 @@ const AdvanceKendoTable = ({
     : groupBy
       ? [{ field: groupBy, dir: undefined }]
       : []
+
+  // Process grouped data to get flat row sequence for tab navigation
+  const processedFlatRows = useMemo(() => {
+    if (!groupBy || initialGroup.length === 0) {
+      return rows
+    }
+
+    const processedData = process(rows, {
+      group: initialGroup,
+      sort: sort,
+      filter: filter,
+    })
+
+    return extractFlatRowsFromGrouped(processedData.data)
+  }, [rows, groupBy, initialGroup, sort, filter])
 
   // Build pagination configuration with defaults
   const getPaginationConfig = useCallback(() => {
@@ -356,7 +394,14 @@ const AdvanceKendoTable = ({
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
-    // }
+    // e.edit = { rowId: [field] } — extract active cell
+    if (e.edit && typeof e.edit === 'object') {
+      const rowId = Object.keys(e.edit)[0]
+      const field = e.edit[rowId]?.[0]
+      if (rowId && field) {
+        activeCellRef.current = { rowId, field }
+      }
+    }
   }, [])
 
   // Helper function to add IST timezone offset (+5:30) to dates before sending to backend
@@ -583,7 +628,38 @@ const AdvanceKendoTable = ({
     [setRows, setModifiedCells, setCustomModifiedCells, customItemChange],
   )
 
+  // Handle Tab key navigation between editable cells in the grid
+  const onTabKeyPressed = (e) => {
+    handleTabKeyNavigation({
+      e,
+      activeCellRef,
+      columns,
+      hiddenFields,
+      rows: processedFlatRows, // Use processed flat rows for correct grouped sequence
+      setRows,
+      setEdit,
+      extractAllColumns,
+    })
+  }
+
   const prevModifiedCellsRef = useRef(modifiedCells)
+
+  // Close inline edit mode when user clicks outside the grid container
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (
+        gridContainerRef.current &&
+        !gridContainerRef.current.contains(e.target)
+      ) {
+        setRows((prev) =>
+          prev.map((r) => (r.inEdit ? { ...r, inEdit: false } : r)),
+        )
+        setEdit({})
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [setRows])
 
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
@@ -2045,7 +2121,7 @@ const AdvanceKendoTable = ({
           },
         }}
       > */}
-      <div className='kendo-data-grid'>
+      <div className='kendo-data-grid' ref={gridContainerRef}>
         <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <ExcelExport
             data={rows}
@@ -2077,6 +2153,7 @@ const AdvanceKendoTable = ({
               filter={filter}
               onFilterChange={(e) => setFilter(e.filter)}
               onItemChange={itemChange}
+              onKeyDown={(e) => onTabKeyPressed(e)}
               resizable={true}
               defaultSkip={0}
               defaultGroup={initialGroup}

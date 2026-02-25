@@ -1,6 +1,15 @@
 import { DatePicker } from '@progress/kendo-react-dateinputs'
+import { useRef, useEffect } from 'react'
 
 const DateOnlyPicker = ({ dataItem, field, onChange }) => {
+  const pickerRef = useRef(null)
+
+  useEffect(() => {
+    if (pickerRef.current) {
+      const el = pickerRef.current.element || pickerRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
   const currentRaw = dataItem[field]
   const currentDate = currentRaw ? new Date(currentRaw) : null
 
@@ -16,6 +25,7 @@ const DateOnlyPicker = ({ dataItem, field, onChange }) => {
   return (
     <td>
       <DatePicker
+        ref={pickerRef}
         value={currentDate}
         format='dd-MM-yyyy'
         onChange={handleChange}

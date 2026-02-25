@@ -1,6 +1,6 @@
 import { Input } from '@progress/kendo-react-inputs'
 import NotificationTST from 'components/Utilities/NotificationTST'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // Utility: Get nested property value by path (supports any depth)
 // Handles both nested fields (e.g., "april.shutdownHrs") and flat fields (e.g., "apr")
@@ -20,6 +20,7 @@ export const NumberCellEditor = ({
   // Handle nested fields (e.g., "april.shutdownHrs")
   const initialValue = getNestedValue(dataItem, field) ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
+  const inputRef = useRef(null)
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -53,18 +54,35 @@ export const NumberCellEditor = ({
     }
   }
 
+  useEffect(() => {
+    if (inputRef.current) {
+      const el = inputRef.current.element || inputRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
+
   const handleBlur = () => {
     if (localValue !== initialValue) {
       onChange({ dataItem, field, value: localValue })
     }
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (localValue !== initialValue) {
+        onChange({ dataItem, field, value: localValue })
+      }
+    }
+  }
+
   return (
-    <>
+    <td>
       <Input
+        ref={inputRef}
         value={localValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         style={{
           fontSize: '0.8rem',
           padding: '2px 2px',
@@ -78,6 +96,6 @@ export const NumberCellEditor = ({
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
-    </>
+    </td>
   )
 }

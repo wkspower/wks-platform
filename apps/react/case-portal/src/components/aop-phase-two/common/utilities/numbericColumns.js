@@ -13,6 +13,7 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
   const initialValue = getNestedValue(dataItem, field) ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)
+  const inputRef = useRef(null)
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -34,6 +35,12 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
     }
   }
 
+  const handleBlur = () => {
+    if (localValue !== initialValue) {
+      onChange({ dataItem, field, value: localValue })
+    }
+  }
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
@@ -49,11 +56,20 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
     return () => clearTimeout(handler)
   }, [localValue, dataItem, field, onChange, initialValue])
 
+  useEffect(() => {
+    if (inputRef.current) {
+      const el = inputRef.current.element || inputRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
+
   return (
     <td>
       <Input
+        ref={inputRef}
         value={localValue}
         onChange={handleChange}
+        onBlur={handleBlur}
         style={{
           fontSize: '0.8rem',
           padding: '2px 2px',
