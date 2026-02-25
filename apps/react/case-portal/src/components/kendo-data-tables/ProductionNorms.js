@@ -58,7 +58,8 @@ const ProductionNorms = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase()
   const SITE_NAME = siteObject?.name?.toLowerCase()
   const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
-  const isPPVerticalDTASite = VERTICAL_NAME === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_DTA = lowerVertName === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_SEZ = lowerVertName === 'pp' && SITE_NAME === 'sez'
   const plantName = plantObject?.name?.toLowerCase()
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
@@ -397,14 +398,23 @@ const ProductionNorms = ({ permissions }) => {
       setLoading(true)
       const selectedLine = lineDetails[tabIndex]
       const lineId = selectedLine?.id
-      const response = await ProductionNormsApiService.getAOPData(
-        keycloak,
-        'Production',
-        PLANT_ID,
-        AOP_YEAR,
-        lineId,
-        isPPVerticalDTASite,
-      )
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response = await ProductionNormsApiService.getAOPDataLineWise(
+          keycloak,
+          'Production',
+          PLANT_ID,
+          AOP_YEAR,
+          lineId,
+        )
+      } else {
+        response = await ProductionNormsApiService.getAOPData(
+          keycloak,
+          'Production',
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
         setRows([])
@@ -790,7 +800,7 @@ const ProductionNorms = ({ permissions }) => {
         initialRender.current = false
       }
     }
-    if (isPPVerticalDTASite && lineDetails?.length === 0) {
+    if ((IS_PP_DTA || IS_PP_SEZ) && lineDetails?.length === 0) {
       return
     }
     fetchDataWrapper()
@@ -825,7 +835,7 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   useEffect(() => {
-    if (isPPVerticalDTASite) {
+    if (IS_PP_DTA || IS_PP_SEZ) {
       fetchLineDetails()
     } else {
       setLineDetails([])
@@ -982,7 +992,7 @@ const ProductionNorms = ({ permissions }) => {
   return (
     <div>
       {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
-      {isPPVerticalDTASite && (
+      {(IS_PP_DTA || IS_PP_SEZ) && (
         <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
           <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
         </Box>

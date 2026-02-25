@@ -13,6 +13,9 @@ export const ProductionVolumeDataApiService = {
   getProductionVolExcel,
   getProductionVolExcelCommon,
   editMaxAchievedCapacityData,
+  getAOPMCCalculatedDataLineWise,
+  getDesignCapacityDataLineWise,
+  getMaxAchievedCapacityDataLineWise,
 }
 
 async function editAOPMCCalculatedData(
@@ -65,20 +68,8 @@ async function editDesignCapacityData(
   }
 }
 
-async function getAOPMCCalculatedData(
-  keycloak,
-  PLANT_ID,
-  AOP_YEAR,
-  LINE_ID,
-  isPPVerticalDTASite,
-) {
-  // Use production-target-line endpoint for PP vertical and DTA site
-  const endpoint = isPPVerticalDTASite
-    ? 'production-target-line'
-    : 'production-target'
-
-  const lineIdParams = LINE_ID ? `&lineId=${LINE_ID}` : ''
-  const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}${lineIdParams}`
+async function getAOPMCCalculatedData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -322,6 +313,66 @@ async function editMaxAchievedCapacityData(
       headers,
       body: JSON.stringify(payload),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getAOPMCCalculatedDataLineWise(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  LINE_ID,
+) {
+  const url = `${Config.CaseEngineUrl}/task/production-target-line?plantId=${PLANT_ID}&year=${AOP_YEAR}&lineId=${LINE_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getDesignCapacityDataLineWise(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  LINE_ID,
+) {
+  const url = `${Config.CaseEngineUrl}/task/design-capacity-line?plantId=${PLANT_ID}&year=${AOP_YEAR}&lineId=${LINE_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getMaxAchievedCapacityDataLineWise(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  LINE_ID,
+) {
+  const url = `${Config.CaseEngineUrl}/task/max-achieved-capacity-line?plantId=${PLANT_ID}&year=${AOP_YEAR}&lineId=${LINE_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

@@ -101,8 +101,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
   const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
   // Check if it's PP VERTICAL | DTA SITE
-  const isPPVerticalDTASite =
-    VERTICAL_NAME?.toLowerCase() === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_DTA = VERTICAL_NAME === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_SEZ = VERTICAL_NAME === 'pp' && SITE_NAME === 'sez'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -439,14 +439,22 @@ const ProductionvolumeData = ({ permissions }) => {
     const lineId = selectedLine?.id
     try {
       setLoading(true)
-      const response =
-        await ProductionVolumeDataApiService.getAOPMCCalculatedData(
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getAOPMCCalculatedDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response = await ProductionVolumeDataApiService.getAOPMCCalculatedData(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
-          lineId,
-          isPPVerticalDTASite,
         )
+      }
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
@@ -657,17 +665,23 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   useEffect(() => {
-    if (isPPVerticalDTASite) {
+    if (IS_PP_DTA || IS_PP_SEZ) {
       fetchLineDetails()
     }
-  }, [PLANT_ID, keycloak, yearChanged, isPPVerticalDTASite])
+  }, [PLANT_ID, keycloak, yearChanged, IS_PP_DTA, IS_PP_SEZ])
 
   // Call fetchData when lineDetails is updated and has at least one item
   useEffect(() => {
-    if (lineDetails && lineDetails.length > 0) {
+    if (
+      (IS_PP_DTA || IS_PP_SEZ) &&
+      lineDetails.length > 0 &&
+      lineDetails[tabIndex]
+    ) {
       fetchData()
+      fetchDesignCapacityData()
+      fetchMaxCapacityData()
     }
-  }, [lineDetails])
+  }, [lineDetails, tabIndex, IS_PP_DTA, IS_PP_SEZ])
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
@@ -700,13 +714,25 @@ const ProductionvolumeData = ({ permissions }) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
-      const response =
-        await ProductionVolumeDataApiService.getDesignCapacityData(
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getDesignCapacityDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response = await ProductionVolumeDataApiService.getDesignCapacityData(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
+      }
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -774,13 +800,26 @@ const ProductionvolumeData = ({ permissions }) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
-      const response =
-        await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response =
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+      }
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -1193,7 +1232,7 @@ const ProductionvolumeData = ({ permissions }) => {
       </Backdrop>
 
       {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
-      {isPPVerticalDTASite && (
+      {(IS_PP_DTA || IS_PP_SEZ) && (
         <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
           <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
         </Box>
