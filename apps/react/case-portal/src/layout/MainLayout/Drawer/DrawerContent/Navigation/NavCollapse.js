@@ -50,10 +50,11 @@ const NavCollapse = ({ menu, level }) => {
           )
       }
     }
-
     const shouldFilterSlowdown =
+      // Condition 1: PE vertical AND LDPE plant
       (lowerVertName === verticalEnums.PE && plantName === 'LDPE') ||
-      (verticalEnums.PE && SITE_NAME === 'dmd')
+      // Condition 2: PE vertical AND DMD site
+      (lowerVertName === verticalEnums.PE && SITE_NAME === 'dmd')
 
     const menuItems = shouldFilterSlowdown
       ? menu.children.filter((item) => item.id !== 'slowdown-norms')

@@ -626,8 +626,17 @@ const PtaShutDown = ({ permissions }) => {
           PLANT_ID,
           AOP_YEAR,
         )
+
       const hiddenFields = ['NormType', 'NormParameter_FK_Id', 'IsEditable']
-      // Use columns from response
+      const nonNumericFields = [
+        'Particulars',
+        'uom',
+        'NormType',
+        'NormParameter_FK_Id',
+        'IsEditable',
+      ]
+
+      // 1. Define Columns
       const dynamicColumns =
         response?.data?.columns?.map((col) => ({
           field: col.field,
@@ -641,18 +650,39 @@ const PtaShutDown = ({ permissions }) => {
           hidden: hiddenFields.includes(col.field),
           ...(col.field !== 'Particulars' &&
             col.field.toLowerCase() !== 'uom' && {
-              format: '{0:n2}',
-              type: 'negativeNumber',
+              format: '{0:0.000}',
+              type: 'negativeNumber', // Changed from 'negativeNumber' to 'numeric' for better compatibility
             }),
         })) || []
 
-      // Use data from response
+      // 2. Format Rows (Converting strings to numbers)
       const formattedRows =
-        response?.data?.data?.map((item, idx) => ({
-          ...item,
-          id: idx,
-          normtype: item.NormType || 'Type',
-        })) || []
+        response?.data?.data?.map((item, idx) => {
+          const row = { ...item }
+
+          // Convert values to numbers for columns that aren't text-based
+          Object.keys(row).forEach((key) => {
+            const isStringField = nonNumericFields.some(
+              (f) => f.toLowerCase() === key.toLowerCase(),
+            )
+
+            if (
+              !isStringField &&
+              row[key] !== null &&
+              row[key] !== undefined &&
+              row[key] !== ''
+            ) {
+              const parsedValue = parseFloat(row[key])
+              row[key] = isNaN(parsedValue) ? row[key] : parsedValue
+            }
+          })
+
+          return {
+            ...row,
+            id: idx,
+            normtype: item.NormType || 'Type',
+          }
+        }) || []
 
       setRows1(formattedRows)
       setColDefs1(dynamicColumns)
