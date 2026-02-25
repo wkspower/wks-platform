@@ -23,6 +23,7 @@ export const MaintenanceDetailsApiService = {
   saveSlowdownConfig,
   saveFinishingShutdown,
   deleteFinishingShutdownConfig,
+  getShutdownHistoryConfig,
 }
 
 async function getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
@@ -483,5 +484,20 @@ async function deleteFinishingShutdownConfig(id, keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.error('Error deleting finishing shutdown config data:', e)
     return Promise.reject(e)
+  }
+}
+async function getShutdownHistoryConfig(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-history-pta?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
