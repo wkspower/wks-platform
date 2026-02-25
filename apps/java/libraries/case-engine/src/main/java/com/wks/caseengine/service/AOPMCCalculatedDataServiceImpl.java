@@ -554,6 +554,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("year", year);
         query.setParameter("plantId", plantId);
+        query.setParameter("lineId", lineId);
 
         return query.getResultList();
     }

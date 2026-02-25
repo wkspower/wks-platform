@@ -60,8 +60,8 @@ public class AOPMCCalculatedDataController {
 	}
 	
 	@GetMapping(value = "/max-achieved-capacity-line")
-	public AOPMessageVM getLineWiseMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String LineId) {
-		return aOPMCCalculatedDataService.getLineWiseMaxAchievedCapacity(plantId, year,LineId);
+	public AOPMessageVM getLineWiseMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String lineId) {
+		return aOPMCCalculatedDataService.getLineWiseMaxAchievedCapacity(plantId, year,lineId);
 	}
 	
 	@PostMapping(value = "/max-achieved-capacity")
