@@ -618,7 +618,7 @@ async function getHRSGHeatRateData(
 }
 
 async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -1008,7 +1008,7 @@ async function exportSTGHeatRateExcel(keycloak) {
 
 // HRSG Heat Rate Excel Import
 async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/import`
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/import`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -1024,7 +1024,7 @@ async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 
     if (!resp.ok) {
       throw new Error(
-        `Failed to import data: ${resp.status} ${resp.statusText}`,
+        `Failed to import HRSG heat rate data: ${resp.status} ${resp.statusText}`,
       )
     }
 
@@ -1036,11 +1036,25 @@ async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // HRSG Heat Rate Excel Export
-async function exportHRSGHeatRateExcel(keycloak) {
+async function exportHRSGHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
+  // Construct endpoint with optional date range
+  let endpoint = `hrsg-heat-rate/export/${assetId}/${financialYear}`
+
+  // If both dates are provided, add them as path variables
+  if (startDate && endDate) {
+    endpoint = `hrsg-heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
+  }
+
   return exportExcelData(keycloak, {
-    endpoint: `hrsg-heat-rate-lookup/export`,
+    endpoint: endpoint,
     queryParams: {},
-    fileName: `HRSG_Heat_Rate_Lookup.xlsx`,
+    fileName: `HRSG_Heat_Rate_${financialYear}.xlsx`,
     method: 'GET',
   })
 }

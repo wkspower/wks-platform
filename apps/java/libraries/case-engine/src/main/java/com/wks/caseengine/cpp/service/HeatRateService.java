@@ -1025,6 +1025,168 @@ public void importHeatRate(MultipartFile file) throws IOException {
     }
 }
 
+/**
+ * Export HRSG Heat Rate data to Excel for a specific asset
+ * @param assetId Asset ID
+ * @param financialYear Financial year
+ * @param startDate Optional start date for proposed heat rate calculation
+ * @param endDate Optional end date for proposed heat rate calculation
+ */
+public byte[] exportHRSGHeatRate(String assetId, String financialYear, String startDate, String endDate) throws IOException {
+    logger.info("========== EXPORT HRSG HEAT RATE ==========");
+    logger.info("Parameters - assetId: {}, financialYear: {}, startDate: {}, endDate: {}", assetId, financialYear, startDate, endDate);
+    
+    List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> data;
+    
+    // If date range is provided, get data with proposed heat rates
+    if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+        logger.info("Exporting with proposed heat rates for date range: {} to {}", startDate, endDate);
+        data = getHRSGHeatRateByAssetIdWithProposed(assetId, financialYear, startDate, endDate);
+    } else {
+        logger.info("Exporting without proposed heat rates");
+        data = getHRSGHeatRateByAssetId(assetId, financialYear);
+    }
+    
+    logger.info("Retrieved {} HRSG heat rate records for export", data.size());
+    
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("HRSG Heat Rate");
+    CellStyle headerStyle = createHeaderStyle(workbook);
+    CellStyle dataStyle = createDataStyle(workbook);
+    CellStyle remarksStyle = createRemarksStyle(workbook);
+    
+    int rowNum = 0;
+    
+    // Create header row - matching UI column order and naming
+    Row headerRow = sheet.createRow(rowNum++);
+    String[] headers = {"Equipment Type", "CPP Utility", "HRSG Load", "OEM HR", "PREVIOUS YEAR BUDGET HR", "PROPOSED HR (Based On Actual Data)", "Final HR", "Remark", "Selected Heat Rate", "Id"};
+    for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerStyle);
+    }
+    
+    // Hide Selected Heat Rate column (index 8) and ID column (index 9)
+    sheet.setColumnHidden(8, true);
+    sheet.setColumnHidden(9, true);
+    
+    logger.info("Creating {} data rows in Excel", data.size());
+    
+    // Create data rows
+    for (com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO dto : data) {
+        Row row = sheet.createRow(rowNum++);
+        int colNum = 0;
+        
+        // Column order matching UI: Equipment Type, CPP Utility, HRSG Load, OEM HR, Previous Year Budget HR, Proposed HR, Final HR, Remark, Selected Heat Rate (hidden), Id (hidden)
+        Cell cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getEquipType() != null ? dto.getEquipType() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getHrsgLoad() != null ? dto.getHrsgLoad() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getOemHeatRate() != null ? dto.getOemHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getPreviousYearHeatRate() != null ? dto.getPreviousYearHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getProposedHeatRate() != null ? dto.getProposedHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getFinalHeatRate() != null ? dto.getFinalHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        cell.setCellStyle(remarksStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getSelectedHeatRate() != null ? dto.getSelectedHeatRate() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        cell.setCellStyle(dataStyle);
+    }
+    
+    // Auto-size columns (header + content aware)
+    for (int i = 0; i < headers.length; i++) {
+        if (i == 7) { // Remark column (now at index 7)
+            sheet.setColumnWidth(i, 8000);
+            continue;
+        }
+        sheet.autoSizeColumn(i);
+        applyHeaderMinWidth(sheet, i, headers[i]);
+    }
+    
+    logger.info("Excel file created successfully with {} rows", rowNum);
+    
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    workbook.write(outputStream);
+    workbook.close();
+    
+    logger.info("========== EXPORT COMPLETE ==========");
+    
+    return outputStream.toByteArray();
+}
+
+/**
+ * Import HRSG Heat Rate data from Excel
+ */
+public void importHRSGHeatRate(MultipartFile file) throws IOException {
+    logger.info("========== IMPORT HRSG HEAT RATE ==========");
+    logger.info("File name: {}, size: {} bytes", file.getOriginalFilename(), file.getSize());
+    
+    List<com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO> dtos = new ArrayList<>();
+    
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        logger.info("Processing {} rows from Excel", totalRows);
+        
+        // Start from row 1 (skip header row 0)
+        for (int i = 1; i <= totalRows; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) continue;
+            
+            com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO dto = new com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateDTO();
+            
+            // Column order: Equipment Type, CPP Utility, HRSG Load, OEM HR, PREVIOUS YEAR BUDGET HR, PROPOSED HR, Final HR, Remark, Selected Heat Rate (hidden), Id (hidden)
+            
+            // Read ID from hidden column (index 9)
+            String idStr = getCellValueAsString(row, 9);
+            if (idStr != null && !idStr.isEmpty()) {
+                dto.setId(UUID.fromString(idStr));
+            }
+            
+            dto.setEquipType(getCellValueAsString(row, 0));           // Equipment Type
+            dto.setCppUtility(getCellValueAsString(row, 1));          // CPP Utility
+            dto.setHrsgLoad(getCellValueAsDouble(row, 2));            // HRSG Load
+            dto.setOemHeatRate(getCellValueAsDouble(row, 3));         // OEM HR
+            dto.setPreviousYearHeatRate(getCellValueAsDouble(row, 4)); // PREVIOUS YEAR BUDGET HR
+            // Skip index 5 - proposedHeatRate (PROPOSED HR - calculated, not imported)
+            dto.setFinalHeatRate(getCellValueAsDouble(row, 6));       // Final HR
+            dto.setRemarks(getCellValueAsString(row, 7));             // Remark
+            dto.setSelectedHeatRate(getCellValueAsString(row, 8));    // Selected Heat Rate (hidden)
+            
+            dtos.add(dto);
+        }
+    }
+    
+    logger.info("Parsed {} HRSG heat rate records from Excel", dtos.size());
+    
+    if (!dtos.isEmpty()) {
+        logger.info("Updating HRSG heat rate records in database");
+        updateHRSGHeatRate(dtos);
+        logger.info("HRSG heat rate import completed successfully");
+    } else {
+        logger.warn("No records found in Excel file to import");
+    }
+    
+    logger.info("========== IMPORT COMPLETE ==========");
+}
+
 // ============================================================
 // HELPER METHODS
 // ============================================================

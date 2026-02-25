@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Box, Backdrop, CircularProgress } from '@mui/material'
+import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
 import { customValueFormatterPhaseTwo as customValueFormat } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 
 const HRSGHeatRate = () => {
@@ -21,6 +22,9 @@ const HRSGHeatRate = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedPlant, setSelectedPlant] = useState('')
   const [dropdownOptions, setDropdownOptions] = useState([])
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
+  const [dateLoading, setDateLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     plantID,
@@ -102,7 +106,7 @@ const HRSGHeatRate = () => {
       radioValue: 'PREVIOUS_YEAR',
     },
     {
-      field: 'heatRate',
+      field: 'proposedHeatRate',
       title: 'PROPOSED HR',
       subtitle: '(Based On Actual Data)',
       widthT: 200,
@@ -136,11 +140,20 @@ const HRSGHeatRate = () => {
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
 
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   useEffect(() => {
-    if (selectedPlant) {
-      fetchHeatRateData(selectedPlant)
+    if (selectedPlant && startDate && endDate) {
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      fetchHeatRateData(selectedPlant, formattedStartDate, formattedEndDate)
     }
-  }, [PLANT_ID, AOP_YEAR, selectedPlant])
+  }, [PLANT_ID, AOP_YEAR, selectedPlant, startDate, endDate])
 
   useEffect(() => {
     getPlantList()
@@ -178,13 +191,15 @@ const HRSGHeatRate = () => {
     }
   }
 
-  const fetchHeatRateData = async (assetId) => {
+  const fetchHeatRateData = async (assetId, startDate, endDate) => {
     setLoading(true)
     try {
       const res = await InputApiService.getHRSGHeatRateData(
         keycloak,
         assetId,
         AOP_YEAR,
+        startDate,
+        endDate,
       )
 
       if (res?.length === 0) {
@@ -201,7 +216,7 @@ const HRSGHeatRate = () => {
         const fieldMapping = {
           OEM: 'oemHeatRate',
           PREVIOUS_YEAR: 'previousYearHeatRate',
-          PROPOSED: 'heatRate',
+          PROPOSED: 'proposedHeatRate',
         }
 
         const selectedField = fieldMapping[selectedHeatRate]
@@ -290,7 +305,7 @@ const HRSGHeatRate = () => {
       data,
       originalRows,
       fieldsToCheck,
-      'equipmentName',
+      'hrsgLoad',
     )
 
     if (validationError) {
@@ -323,6 +338,13 @@ const HRSGHeatRate = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      await fetchHeatRateData(
+        selectedPlant,
+        formattedStartDate,
+        formattedEndDate,
+      )
     } catch (error) {
       console.error('Error saving heat rate data:', error)
       setSnackbarOpen(true)
@@ -353,7 +375,15 @@ const HRSGHeatRate = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        await fetchHeatRateData(selectedPlant)
+        if (startDate && endDate) {
+          const formattedStartDate = formatDate(startDate)
+          const formattedEndDate = formatDate(endDate)
+          await fetchHeatRateData(
+            selectedPlant,
+            formattedStartDate,
+            formattedEndDate,
+          )
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -381,10 +411,15 @@ const HRSGHeatRate = () => {
     })
 
     try {
+      const formattedStartDate = startDate ? formatDate(startDate) : null
+      const formattedEndDate = endDate ? formatDate(endDate) : null
+
       await InputApiService.exportHRSGHeatRateExcel(
         keycloak,
         selectedPlant,
         AOP_YEAR,
+        formattedStartDate,
+        formattedEndDate,
       )
       setSnackbarData({
         message: 'Excel download completed successfully!',
@@ -417,7 +452,7 @@ const HRSGHeatRate = () => {
       const fieldMapping = {
         OEM: 'oemHeatRate',
         PREVIOUS_YEAR: 'previousYearHeatRate',
-        PROPOSED: 'heatRate',
+        PROPOSED: 'proposedHeatRate',
       }
 
       const selectedField = fieldMapping[value]
@@ -466,7 +501,7 @@ const HRSGHeatRate = () => {
     const sourceFieldMapping = {
       oemHeatRate: 'OEM',
       previousYearHeatRate: 'PREVIOUS_YEAR',
-      heatRate: 'PROPOSED',
+      proposedHeatRate: 'PROPOSED',
     }
 
     if (sourceFieldMapping[field]) {
@@ -551,7 +586,11 @@ const HRSGHeatRate = () => {
           field: 'previousYearHeatRate',
           value: dataItem.previousYearHeatRate,
         },
-        { radioValue: 'PROPOSED', field: 'heatRate', value: dataItem.heatRate },
+        {
+          radioValue: 'PROPOSED',
+          field: 'proposedHeatRate',
+          value: dataItem.proposedHeatRate,
+        },
       ]
 
       let matchedRadioValue = null
@@ -615,6 +654,18 @@ const HRSGHeatRate = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      <Stack sx={{ mt: 2, mb: 2 }}>
+        <DateRangeSelectorWithHistory
+          onDateChange={({ startDate, endDate }) => {
+            console.log('Dates changed:', startDate, endDate)
+            setStartDate(startDate)
+            setEndDate(endDate)
+          }}
+          disabled={false}
+          timeRequired={false}
+        />
+      </Stack>
 
       <AdvanceKendoTable
         columns={columns}
