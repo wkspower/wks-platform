@@ -59,6 +59,11 @@ public class AOPMCCalculatedDataController {
 		return aOPMCCalculatedDataService.getMaxAchievedCapacity(plantId, year);
 	}
 	
+	@GetMapping(value = "/max-achieved-capacity-line")
+	public AOPMessageVM getLineWiseMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String LineId) {
+		return aOPMCCalculatedDataService.getLineWiseMaxAchievedCapacity(plantId, year,LineId);
+	}
+	
 	@PostMapping(value = "/max-achieved-capacity")
 	public AOPMessageVM updateMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year,@RequestBody List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOs) {
 		return aOPMCCalculatedDataService.updateMaxAchievedCapacity(plantId, year,aopMCCalculatedDataDTOs);
@@ -67,6 +72,11 @@ public class AOPMCCalculatedDataController {
 	@GetMapping(value = "/design-capacity")
 	public AOPMessageVM getDesignCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getDesignCapacity(plantId, year);
+	}
+	
+	@GetMapping(value = "/design-capacity-line")
+	public AOPMessageVM getLineWiseDesignCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String lineId) {
+		return aOPMCCalculatedDataService.getLineWiseDesignCapacity(plantId, year, lineId);
 	}
 	
 	@GetMapping(value = "/production-target-export-excel")
