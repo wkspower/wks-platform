@@ -2340,8 +2340,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	public List<ShutDownPlanDTO> readNonProductSlowdownElastomer(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    
-	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>(); 
-	    
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
@@ -2430,32 +2428,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                                dto.setErrDescription("End date/time cannot be before start date/time.");
 	                                alreadyFailed = true;
 	                            }
-	                            
-	                            // Overlap Checks (only proceed if dates are valid)
-	                            if (ldtStart != null && !alreadyFailed) {
-	                                if (!alreadyFailed) {
-	                                    boolean overlapsFile = false;
-	                                    for (LocalDateTime[] prevPeriod : validTimeRanges) {
-	                                        LocalDateTime prevLdtStart = prevPeriod[0];
-	                                        LocalDateTime prevLdtEnd = prevPeriod[1];
-	                                        if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-	                                            overlapsFile = true;
-	                                            break;
-	                                        }
-	                                    }
-
-	                                    if (overlapsFile) {
-	                                        dto.setSaveStatus("Failed");
-	                                        dto.setErrDescription(
-	                                                "The maintenance period overlaps with an already validated period in the file.");
-	                                        alreadyFailed = true;
-	                                    }
-	                                }
-	                                if (!alreadyFailed) {
-	                                    validTimeRanges.add(new LocalDateTime[] { ldtStart, ldtEnd });
-	                                }
-	                            }
-
 	                        } catch (Exception ex) {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("Invalid date/time format in cell 3 (End Date).");
