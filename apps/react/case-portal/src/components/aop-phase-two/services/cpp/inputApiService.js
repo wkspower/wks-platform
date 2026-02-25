@@ -1036,7 +1036,13 @@ async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // HRSG Heat Rate Excel Export
-async function exportHRSGHeatRateExcel(keycloak, assetId, financialYear, startDate = null, endDate = null) {
+async function exportHRSGHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
   // Construct endpoint with optional date range
   let endpoint = `hrsg-heat-rate/export/${assetId}/${financialYear}`
 

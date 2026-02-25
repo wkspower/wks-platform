@@ -338,9 +338,13 @@ const HRSGHeatRate = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
-        const formattedStartDate = formatDate(startDate)
-        const formattedEndDate = formatDate(endDate)
-        await fetchHeatRateData(selectedPlant, formattedStartDate, formattedEndDate)
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      await fetchHeatRateData(
+        selectedPlant,
+        formattedStartDate,
+        formattedEndDate,
+      )
     } catch (error) {
       console.error('Error saving heat rate data:', error)
       setSnackbarOpen(true)
@@ -374,7 +378,11 @@ const HRSGHeatRate = () => {
         if (startDate && endDate) {
           const formattedStartDate = formatDate(startDate)
           const formattedEndDate = formatDate(endDate)
-          await fetchHeatRateData(selectedPlant, formattedStartDate, formattedEndDate)
+          await fetchHeatRateData(
+            selectedPlant,
+            formattedStartDate,
+            formattedEndDate,
+          )
         }
       } else {
         setSnackbarOpen(true)
@@ -578,7 +586,11 @@ const HRSGHeatRate = () => {
           field: 'previousYearHeatRate',
           value: dataItem.previousYearHeatRate,
         },
-        { radioValue: 'PROPOSED', field: 'proposedHeatRate', value: dataItem.proposedHeatRate },
+        {
+          radioValue: 'PROPOSED',
+          field: 'proposedHeatRate',
+          value: dataItem.proposedHeatRate,
+        },
       ]
 
       let matchedRadioValue = null
