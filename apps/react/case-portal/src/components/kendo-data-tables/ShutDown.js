@@ -471,7 +471,7 @@ const ShutDown = ({ permissions }) => {
           id: row.idFromApi || null,
           remark: row.remark || 'null',
         }))
-      } else if (IS_PP_DTA ||IS_PP_SEZ) {
+      } else if (IS_PP_DTA || IS_PP_SEZ) {
         // For PP DTA, match the GET payload structure
         shutdownDetails = newRow.map((row) => ({
           discription: row.discription || row.discriptionDrpdwn,
@@ -1094,7 +1094,7 @@ const ShutDown = ({ permissions }) => {
   if (lowerVertName == 'elastomer') {
     return <ElastomerShutDown permissions={permissions} />
   }
-  if(lowerVertName == 'pta' && lowerSiteName == 'dmd'){
+  if (lowerVertName == 'pta' && lowerSiteName == 'dmd') {
     return <PtaShutDown permissions={permissions} />
   }
 
