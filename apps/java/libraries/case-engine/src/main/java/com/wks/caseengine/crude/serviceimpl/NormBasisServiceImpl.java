@@ -1,5 +1,7 @@
 package com.wks.caseengine.crude.serviceimpl;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,10 +29,50 @@ public class NormBasisServiceImpl implements NormBasisService {
     public List<NormBasisDTO> getAllNormBasis(UUID plantId, String aopYear) {
         
         List<NormBasisProjection> normBasisProjections = normBasisRepository.getAllNormBasis(plantId, aopYear);
-        return normBasisProjections.stream()
+        List<NormBasisDTO> normBasisDTOs = normBasisProjections.stream()
             .map(this::fromProjection)
             .collect(Collectors.toList());
-      
+
+             String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
+                String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
+                
+            String normsPreparationTime = null;
+
+
+                for(NormBasisDTO normBasisDTO : normBasisDTOs) {  
+
+                     if( !normBasisDTO.getType().equals("date"))  continue;
+
+                    if(normBasisDTO.getName().equals("Norms Preparation Time")) {  
+
+                        normsPreparationTime = normBasisDTO.getAttributeValue();
+                    }
+                }
+
+            for(NormBasisDTO normBasisDTO : normBasisDTOs) {  
+
+                if( !normBasisDTO.getType().equals("date"))  continue;
+
+                if (normBasisDTO.getName().equals("Norms Cycle Start")) {
+   
+                // set the attribute value to 1st april of end year
+                normBasisDTO.setAttributeValue(normCycleStarts);  
+            
+            } 
+
+            if(normBasisDTO.getName().equals("Days remaining time from norms preparation time to AOP next cycle start")) {   
+   
+                 // calculate the days betweeen normsPreparationTime and normCycleStarts
+                 LocalDate normsPreparationTimeDate = LocalDate.parse(normsPreparationTime);
+                 LocalDate normCycleStartsDate = LocalDate.parse(normCycleStarts);
+                 long daysBetween = ChronoUnit.DAYS.between(normsPreparationTimeDate, normCycleStartsDate);
+                 normBasisDTO.setAttributeValue(String.valueOf(daysBetween));
+
+            }
+            
+            }
+
+            return normBasisDTOs;
     }
 
     private NormBasisDTO fromProjection(NormBasisProjection projection) {
@@ -44,6 +86,7 @@ public class NormBasisServiceImpl implements NormBasisService {
             .type(projection.getType())
             .normParameterType(projection.getNormParameterType())
             .displayOrder(projection.getDisplayOrder())
+            .config(projection.getConfig())
             .build();
     }
 

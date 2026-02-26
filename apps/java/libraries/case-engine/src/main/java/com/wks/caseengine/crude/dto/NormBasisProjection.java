@@ -8,6 +8,7 @@ public interface NormBasisProjection {
     String getDisplayName();
     String getUOM();
     String getAttributeValue();
+    String getConfig();
     String getRemarks();
     String getType();
     String getNormParameterType();
