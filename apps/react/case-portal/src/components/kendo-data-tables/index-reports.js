@@ -145,6 +145,24 @@ const KendoDataTablesReports = ({
   const plantID = plantObject?.id
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
+  const TextCellEditor = (props) => (
+    <td>
+      <input
+        type='text'
+        className='k-textbox'
+        value={props.dataItem[props.field] || ''}
+        onChange={(e) =>
+          props.onChange({
+            dataItem: props.dataItem,
+            field: props.field,
+            value: e.target.value,
+          })
+        }
+        style={{ width: '100%' }}
+        autoFocus
+      />
+    </td>
+  )
   const initialGroup = groupBy
     ? [
         {
@@ -469,6 +487,25 @@ const KendoDataTablesReports = ({
             }}
             columnMenu={ColumnMenuCheckboxFilter}
             headerClassName={isActive ? 'active-column' : ''}
+          />
+        )
+      }
+      if (col.field === 'particular') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            editable={col.editable || false}
+            cells={{
+              edit: { text: TextCellEditor }, // <-- Use text editor for particulars
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            className={!isEditable ? 'non-editable-cell' : ''}
+            columnMenu={ColumnMenuCheckboxFilter}
+            headerClassName={isActive ? 'active-column' : ''}
+            width={col?.widthT || col?.fixedWidth}
           />
         )
       }

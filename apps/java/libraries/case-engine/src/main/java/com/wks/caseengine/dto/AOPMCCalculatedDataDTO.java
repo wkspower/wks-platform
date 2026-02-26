@@ -44,4 +44,5 @@ public class AOPMCCalculatedDataDTO {
     private String errDescription;
     private String materialDisplayName;
     private String tableId;
+    private String lineId;
 }

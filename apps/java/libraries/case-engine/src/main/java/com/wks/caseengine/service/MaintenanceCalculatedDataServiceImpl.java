@@ -62,6 +62,7 @@ import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BudgetMaintenance;
 
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -464,90 +465,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				});
 	}
 
-	private Map<String, Object> fetchOtherPlantsFromView(
-	        final String plantId,
-	        final String year,
-	        final String viewName) {
-
-
-	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-	            .orElseThrow(() -> new RuntimeException("Plant not found"));
-	    Sites site = siteRepository.findById(plant.getSiteFkId())
-	            .orElseThrow(() -> new RuntimeException("Site not found"));
-
-	    return entityManager.unwrap(Session.class)
-	            .doReturningWork(new ReturningWork<Map<String, Object>>() {
-
-	        @Override
-	        public Map<String, Object> execute(Connection connection) throws SQLException {
-
-	            Map<String, Object> resultMap = new HashMap<>();
-	            List<Map<String, Object>> dataList = new ArrayList<>();
-	            List<Map<String, Object>> metadataList = new ArrayList<>();
-	            Set<String> numericFields = new HashSet<>();
-
-	            
-	            Map<String, String> columnTitleMap = loadColumnTitles(connection,
-	                    "vwScrnCrackerKeyValueColumns", site.getName(), "MaintenanceOtherPlants");
-	            
-	            Map<String, String> columnIsVisibleMap = loadIsVisible(connection,
-	                    "vwScrnCrackerKeyValueColumns", site.getName(), "MaintenanceOtherPlants");
-
-	            String sql = "SELECT * FROM " + viewName + " WHERE AuditYear = ? ORDER BY MaintStartDateTime ASC";
-
-	            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-	                ps.setString(1, year); 
-
-	                try (ResultSet rs = ps.executeQuery()) {
-	                    ResultSetMetaData rsmd = rs.getMetaData();
-	                    int columnCount = rsmd.getColumnCount();
-
-	                   
-	                    for (int i = 1; i <= columnCount; i++) {
-	                        String columnName = rsmd.getColumnLabel(i);
-	                        int sqlType = rsmd.getColumnType(i);
-
-	                        Map<String, Object> meta = new HashMap<>();
-	                        meta.put("field", columnName);
-	                        meta.put("title", columnTitleMap.getOrDefault(columnName, columnName));
-	                        meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
-	                        meta.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
-	                        
-	                        metadataList.add(meta);
-
-	                        if (isNumericType(sqlType)) {
-	                            numericFields.add(columnName);
-	                        }
-	                    }
-
-	                    
-	                    while (rs.next()) {
-	                        Map<String, Object> row = new LinkedHashMap<>();
-	                        for (int i = 1; i <= columnCount; i++) {
-	                            String colName = rsmd.getColumnLabel(i);
-	                            Object value = rs.getObject(i);
-
-	                            if (value == null) {
-	                                row.put(colName, numericFields.contains(colName) ? 0 : "");
-	                            } else {
-	                                row.put(colName, value);
-	                            }
-	                        }
-	                        dataList.add(row);
-	                    }
-	                }
-	            }
-
-	            resultMap.put("data", dataList);
-	            resultMap.put("metadata", metadataList);
-	            resultMap.put("numericColumns", numericFields);
-
-	            return resultMap;
-	        }
-	    });
-	}
-
-	
 	private boolean isNumericType(int sqlType) {
 	    return sqlType == Types.INTEGER || sqlType == Types.DOUBLE || 
 	           sqlType == Types.DECIMAL || sqlType == Types.FLOAT || 
@@ -929,7 +846,16 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	            totalUpdatedRows += query.executeUpdate();
 	        }
-
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("maintenance-details");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 	        aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("Updated rows: " + totalUpdatedRows);
 	        return aopMessageVM;
@@ -1982,8 +1908,72 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 	}
 
-	
-	
-	
+	private Map<String, Object> fetchOtherPlantsFromView(
+			final String plantId,
+			final String year,
+			final String viewName) {
+
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+				.orElseThrow(() -> new RuntimeException("Plant not found"));
+		Sites site = siteRepository.findById(plant.getSiteFkId())
+				.orElseThrow(() -> new RuntimeException("Site not found"));
+
+		return entityManager.unwrap(Session.class)
+				.doReturningWork(new ReturningWork<Map<String, Object>>() {
+
+					@Override
+					public Map<String, Object> execute(Connection connection) throws SQLException {
+
+						Map<String, Object> resultMap = new HashMap<>();
+						List<Map<String, Object>> dataList = new ArrayList<>();
+						List<Map<String, Object>> metadataList = new ArrayList<>();
+						Set<String> numericFields = new HashSet<>();
+
+						String sql = "SELECT * FROM " + viewName
+								+ " WHERE AuditYear = ? ";
+
+						try (PreparedStatement ps = connection.prepareStatement(sql)) {
+							ps.setString(1, year);
+
+							try (ResultSet rs = ps.executeQuery()) {
+								ResultSetMetaData rsmd = rs.getMetaData();
+								int columnCount = rsmd.getColumnCount();
+
+								for (int i = 1; i <= columnCount; i++) {
+									String columnName = rsmd.getColumnLabel(i);
+									int sqlType = rsmd.getColumnType(i);
+
+									Map<String, Object> meta = new HashMap<>();
+									meta.put("field", columnName);
+									meta.put("title", columnName);
+									meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
+									metadataList.add(meta);
+									if (isNumericType(sqlType)) {
+										numericFields.add(columnName);
+									}
+								}
+								while (rs.next()) {
+									Map<String, Object> row = new LinkedHashMap<>();
+									for (int i = 1; i <= columnCount; i++) {
+										String colName = rsmd.getColumnLabel(i);
+										Object value = rs.getObject(i);
+
+										if (value == null) {
+											row.put(colName, numericFields.contains(colName) ? 0 : "");
+										} else {
+											row.put(colName, value);
+										}
+									}
+									dataList.add(row);
+								}
+							}
+						}
+						resultMap.put("data", dataList);
+						resultMap.put("metadata", metadataList);
+						resultMap.put("numericColumns", numericFields);
+						return resultMap;
+					}
+				});
+	}
 
 }

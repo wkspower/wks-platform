@@ -5,13 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
+import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
-import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
-import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
-import { getRoleName } from 'services/role-service'
-import MaintenanceProcessTableNMD from './processTableNMD'
 const DownsteamShutdownDMD = ({ viewOnly }) => {
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
@@ -266,11 +263,7 @@ const DownsteamShutdownDMD = ({ viewOnly }) => {
         ...item,
         idFromApi: item.Id,
         id: idx,
-        isEditable: viewOnly
-          ? false
-          : idx === arr.length - 1
-            ? false
-            : item?.isEditable,
+        isEditable: false,
         originalRemark: item?.Remarks?.trim(),
       }))
 

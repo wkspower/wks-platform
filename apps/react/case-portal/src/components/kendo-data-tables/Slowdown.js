@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { DtaDataService } from 'services/DtaDataservice'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 
@@ -15,7 +16,10 @@ import {
 import { SlowDownAromaticsColumns } from 'components/colums/AromaticsColumns'
 import { SlowDownMegColumns } from 'components/colums/MegColums'
 import { SlowDownPeColumns } from 'components/colums/PeColums'
-import { SlowDownPpColumns } from 'components/colums/PpColums'
+import {
+  SlowDownPpColumns,
+  SlowDownPpDtaColumns,
+} from 'components/colums/PpColums'
 import {
   SlowDownPtaColumns,
   SlowDownPtadmdColumns,
@@ -28,6 +32,8 @@ import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
+
+import ElastomerSlowdown from './ElastomerSlowdown'
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -84,6 +90,7 @@ const SlowDown = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
+  const [allLines, setAllLines] = useState([])
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -102,7 +109,8 @@ const SlowDown = ({ permissions }) => {
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
   const IS_PET = lowerVertName === 'pet'
   const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
-
+  const IS_PP_DTA = lowerVertName === 'pp' && lowerSiteName === 'dta'
+  const IS_PP_SEZ = lowerVertName === 'pp' && lowerSiteName === 'sez'
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -288,6 +296,7 @@ const SlowDown = ({ permissions }) => {
         id: row.idFromApi || null,
         rateEO: null,
         rateEOE: null,
+        ...(IS_PP_DTA || IS_PP_SEZ ? { lineId: row.lineId } : {}),
       }))
       const slowDownDetailsPTADMD = newRow.map((row) => ({
         productId: (() => {
@@ -979,6 +988,7 @@ const SlowDown = ({ permissions }) => {
             (item?.maintStartDateTime
               ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
               : ''),
+          lineId: item?.lineId || null,
         }
       })
 
@@ -1172,6 +1182,24 @@ const SlowDown = ({ permissions }) => {
     lowerSiteName,
     PLANT_NAME_LOWER,
   ])
+  const fetchLineDetails = async () => {
+    try {
+      const response = await DtaDataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      const lines = Array.isArray(response?.data) ? response.data : []
+      setAllLines(lines)
+    } catch (error) {
+      console.error('Error fetching line details:', error)
+    }
+  }
+  useEffect(() => {
+    if (IS_PP_DTA || IS_PP_SEZ) {
+      fetchLineDetails()
+    }
+  }, [lowerVertName, lowerSiteName, keycloak, PLANT_ID, AOP_YEAR])
 
   const focusFirstField = async () => {
     const newRowId = rows.length
@@ -1193,7 +1221,7 @@ const SlowDown = ({ permissions }) => {
       case verticalEnums.PE:
         return SlowDownPeColumns
       case verticalEnums.PP:
-        return SlowDownPpColumns
+        return IS_PP_DTA || IS_PP_SEZ ? SlowDownPpDtaColumns : SlowDownPpColumns
       case verticalEnums.PTA:
         return IS_PTA_DMD ? SlowDownPtadmdColumns : SlowDownPtaColumns
       case verticalEnums.ELASTOMER:
@@ -1256,7 +1284,14 @@ const SlowDown = ({ permissions }) => {
 
     try {
       let response
-      if (IS_PTA_DMD) {
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response = await DtaDataService.exportSlowdownLineWise(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+        )
+      } else if (IS_PTA_DMD) {
         response = await DataService.ExportSlowdownDetailsPTADMD(
           keycloak,
           PLANT_ID,
@@ -1307,7 +1342,14 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (IS_PTA_DMD) {
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response = await DtaDataService.ImportSlowdownLineWise(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (IS_PTA_DMD) {
         response = await DataService.ImportSlowdownPTADMDDetails(
           rawFile,
           keycloak,
@@ -1441,6 +1483,7 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
       highlightProductName1:
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightLine: IS_PP_DTA || IS_PP_SEZ ? true : false,
     },
     isOldYear,
   )
@@ -1454,7 +1497,7 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {lowerVertName === 'meg' && (
+      {(lowerVertName === 'meg' || lowerVertName === 'elastomer') && (
         <Box style={{ margin: 0, padding: 0 }}>
           <Tabs
             value={selectedTab}
@@ -1478,7 +1521,7 @@ const SlowDown = ({ permissions }) => {
             />
 
             <Tab
-              label='Configuration'
+              label='Slowdown History Config'
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
@@ -1491,6 +1534,7 @@ const SlowDown = ({ permissions }) => {
         </Box>
       )}
 
+      {/* TAB 1 - SAME FOR MEG + ELASTOMER */}
       {selectedTab === 0 && (
         <KendoDataTables
           modifiedCells={modifiedCells}
@@ -1529,10 +1573,12 @@ const SlowDown = ({ permissions }) => {
           screenType='slowdown'
           downloadExcelForConfiguration={downloadExcelForConfiguration}
           allDescriptionDrpdwn={allDescriptionDrpdwn}
+          allLines={allLines}
         />
       )}
 
-      {selectedTab === 1 && (
+      {/* TAB 2 FOR MEG (EXISTING CONFIG GRID) */}
+      {selectedTab === 1 && lowerVertName === 'meg' && (
         <KendoDataTables
           modifiedCells={modifiedCells2}
           setModifiedCells={setModifiedCells2}
@@ -1556,6 +1602,9 @@ const SlowDown = ({ permissions }) => {
           unsavedChangesRef={unsavedChangesRef}
           permissions={{
             saveBtn: true,
+            addButton: false,
+            deleteButton: false,
+            editButton: true,
             allAction: true,
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
@@ -1567,6 +1616,11 @@ const SlowDown = ({ permissions }) => {
           groupBy='Particulars'
           allRedCell={allRedCell}
         />
+      )}
+
+      {/* TAB 2 FOR ELASTOMER */}
+      {selectedTab === 1 && lowerVertName === 'elastomer' && (
+        <ElastomerSlowdown />
       )}
     </div>
   )

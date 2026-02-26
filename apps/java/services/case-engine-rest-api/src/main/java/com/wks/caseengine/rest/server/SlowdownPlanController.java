@@ -27,9 +27,11 @@ import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
@@ -51,6 +53,9 @@ public class SlowdownPlanController {
 	@Autowired
 	private VerticalsRepository verticalRepository;
 	
+	@Autowired
+	private SiteRepository siteRepository;
+	
 	@GetMapping(value = "/slowdown")
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		List<ShutDownPlanDTO> listOfSite=null;
@@ -69,7 +74,9 @@ public class SlowdownPlanController {
 	    	byte[] excelBytes=null;
 	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	        boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
 				 excelBytes = slowdownPlanService.slowdownExportPE(year, plantId,maintenanceTypeName, false, null);
 			}else {
 				  excelBytes = slowdownPlanService.slowdownExport(year, plantId,maintenanceTypeName, false, null);
@@ -89,7 +96,33 @@ public class SlowdownPlanController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-	
+
+	@GetMapping(value = "/slowdown-export-line")
+	public ResponseEntity<byte[]> slowdownExportLine(
+	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
+	    try {
+	    	byte[] excelBytes=null;
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			
+				 excelBytes = slowdownPlanService.slowdownExportLine(year, plantId,maintenanceTypeName, false, null);
+			
+	       
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("slowdown.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	@GetMapping(value = "/slowdown-rate-export")
 	public ResponseEntity<byte[]> slowdownRateExport(
 	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
@@ -162,6 +195,15 @@ public class SlowdownPlanController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	slowdownPlanService.importSlowdownExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
+	}
+	
+	@PostMapping(value = "/slowdown-import-line", consumes = "multipart/form-data")
+	public AOPMessageVM importSlowdownLineExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	slowdownPlanService.importSlowdownLineExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
 	
 	@PostMapping(value = "/slowdown-rate-import", consumes = "multipart/form-data")

@@ -24,7 +24,6 @@ public class GsonBuilderFactory {
 
 		// Configure to serialize null values so fields like finalHeatRate appear in JSON even when null
 		// builder.serializeNulls();
-
 		return builder;
 	}
 

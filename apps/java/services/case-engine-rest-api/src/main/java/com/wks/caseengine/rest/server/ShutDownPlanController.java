@@ -92,7 +92,28 @@ public class ShutDownPlanController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-		
+
+	@GetMapping(value = "/shutdown-export-line")
+	public ResponseEntity<byte[]> shutdownNonProductLineExport(
+	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
+	    try {
+			
+	        byte[] excelBytes = shutDownPlanService.shutdownNonProductLineExport(year, plantId,maintenanceTypeName, false, null);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("shutdown.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	@PostMapping(value = "/shutdown-import", consumes = "multipart/form-data")
 	public AOPMessageVM importShutdownExcel(
 	         @RequestParam("plantId") String plantId,
@@ -109,6 +130,15 @@ public class ShutDownPlanController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	shutDownPlanService.importNonProductShutdown(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
+	}
+
+	@PostMapping(value = "/shutdown-import-line", consumes = "multipart/form-data")
+	public AOPMessageVM importLineShutdown(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	shutDownPlanService.importLineShutdown(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
 
 	

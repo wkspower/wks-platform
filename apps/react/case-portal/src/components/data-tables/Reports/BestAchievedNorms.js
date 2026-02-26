@@ -212,7 +212,7 @@ export default function BestAchievedNorms() {
   const [allRedCellList, setAllRedCellList] = useState([])
   const redLookupRef = useRef(new Map())
 
-  // accordion expanded state — start with a Set so we can expand multiple independently
+  // accordion expanded state ï¿½ start with a Set so we can expand multiple independently
   const [expanded, setExpanded] = useState(() => new Set())
 
   // export control (dynamic ExcelExport mount)
@@ -248,7 +248,7 @@ export default function BestAchievedNorms() {
           filterable: true,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
           align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:0.00}' } : {}),
+          ...(isNumberCol ? { format: '{0:0.0000}' } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
           // hide Material FK field (both common casings)

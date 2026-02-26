@@ -14,6 +14,7 @@ export const ProductionNormsApiService = {
   saveOtherProductionNorms,
   monthlyOtherProduction,
   handleCalculateOtherProduction,
+  getAOPDataLineWise,
 }
 async function updateProductNormData(turnAroundDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/monthly-production` // Corrected endpoint
@@ -83,7 +84,13 @@ async function handleCalculate(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 
-async function getAOPData(keycloak, type, PLANT_ID, AOP_YEAR) {
+async function getAOPData(
+  keycloak,
+  type,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+
   const url = `${Config.CaseEngineUrl}/task/monthly-production?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}`
   const headers = {
     Accept: 'application/json',
@@ -250,6 +257,27 @@ async function saveOtherProductionNorms(
       headers,
       body: JSON.stringify(turnAroundDetails),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getAOPDataLineWise(
+  keycloak,
+  type,
+  PLANT_ID,
+  AOP_YEAR,
+  LINE_ID,
+) {
+  const url = `${Config.CaseEngineUrl}/task/monthly-production-line?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}&lineId=${LINE_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

@@ -320,6 +320,7 @@ const DecokingConfig = () => {
               const dynamicColumnDeckoking = (data3?.data?.columns || []).map(
                 (col) => ({
                   ...col,
+                  filter: col.field === 'Month' ? true : false,
                   isDisabled:
                     ['Id', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(
                       col.field,
@@ -389,7 +390,7 @@ const DecokingConfig = () => {
   function validateAllDateOverlaps(rows) {
     const pairs = [
       ['IBR_SD', 'IBR_ED', 'IBR'],
-      ['ShutDown_SD', 'ShutDown_ED', 'ShutDown'],
+      // ['ShutDown_SD', 'ShutDown_ED', 'ShutDown'],
     ]
     rows.forEach((row) => {
       row.isError = false
@@ -586,7 +587,7 @@ const DecokingConfig = () => {
       d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
 
     const pairs = [
-      ['ShutDown_SD', 'ShutDown_ED'],
+      // ['ShutDown_SD', 'ShutDown_ED'],
       ['IBR_SD', 'IBR_ED'],
     ]
 
@@ -652,6 +653,62 @@ const DecokingConfig = () => {
         setDateError(true)
         setLoading(false)
         return
+      }
+
+      const shutdownDateFields = ibrPlanColumns
+        .filter(
+          (col) =>
+            col.type === 'date' && col.field.toLowerCase().includes('shutdown'),
+        )
+        .map((col) => col.field)
+
+      for (const record of ibrScreen2Rows) {
+        for (const field of shutdownDateFields) {
+          const dateValue = record[field]
+          if (dateValue) {
+            const dateObj = new Date(dateValue)
+            if (dateObj < startLimit || dateObj > endLimit) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `Shutdown dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year.`,
+                severity: 'error',
+              })
+              setLoading(false)
+              return
+            }
+          }
+        }
+      }
+      const shutdownPairs = shutdownDateFields
+        .filter((field) => field.toLowerCase().endsWith('_sd'))
+        .map((startField) => {
+          const base = startField.slice(0, -3) // Remove '_SD'
+          const endField = shutdownDateFields.find(
+            (f) => f.toLowerCase() === `${base.toLowerCase()}_ed`,
+          )
+          return endField ? [startField, endField] : null
+        })
+        .filter(Boolean)
+
+      // Now validate each pair for each record
+      for (const record of ibrScreen2Rows) {
+        for (const [startField, endField] of shutdownPairs) {
+          const sd = record[startField]
+          const ed = record[endField]
+          if (sd && ed) {
+            const sdDate = new Date(sd)
+            const edDate = new Date(ed)
+            if (edDate < sdDate) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `${startField} must be before or equal to ${endField} for ${record.DisplayName || 'row'}.`,
+                severity: 'error',
+              })
+              setLoading(false)
+              return
+            }
+          }
+        }
       }
       if (globalTaStartDate > globalTaEndDate) {
         setSnackbarOpen(true)

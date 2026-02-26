@@ -18,7 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
@@ -27,6 +33,13 @@ public class ShutdownNormsController {
 	
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
+	@Autowired
+	private SiteRepository siteRepository;
+	@Autowired
+	private VerticalsRepository verticalRepository;
 	
 	@GetMapping(value = "/shutdown-consumption")
 	public AOPMessageVM getShutdownNormsData(@RequestParam String year, @RequestParam String plantId,
@@ -40,8 +53,17 @@ public class ShutdownNormsController {
             @RequestParam("year") String year, @RequestParam(required = false) String gradeId
 	        ) {
 	    try {
-			
-	        byte[] excelBytes = shutdownNormsService.exportShutdownConsumption(year,UUID.fromString(plantId),false,null,gradeId); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			List<ShutdownNormsValueDTO> data=null;
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			byte[] excelBytes=null;
+			if(vertical.getName().equalsIgnoreCase("VCM") && site.getName().equalsIgnoreCase("DMD")) {
+				  excelBytes = shutdownNormsService.exportDMDShutdownConsumption(year,UUID.fromString(plantId),false,null,gradeId); 
+			}else {
+				  excelBytes = shutdownNormsService.exportShutdownConsumption(year,UUID.fromString(plantId),false,null,gradeId); 
+			}
+	       
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(

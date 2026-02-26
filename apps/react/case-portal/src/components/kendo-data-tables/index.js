@@ -14,6 +14,8 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { useSelector } from 'react-redux'
 import YearDropdownEditor from './Utilities-Kendo/YearDropdownEditor'
 import SDDaysDropdownEditorWrapper from './Utilities-Kendo/SdDaysDropdownEditor'
+import LineDropdownEditor from './Utilities-Kendo/LineDropdownEditor'
+import CategoryDropdownEditor from './Utilities-Kendo/CategoryDropdown'
 import {
   Box,
   Button,
@@ -44,6 +46,7 @@ import '../../kendo-data-grid.css'
 import BudgetConstrainsCellEditor from './Utilities-Kendo/BudgetConstrainsCellEditor'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
+import DatePickerNoLimit from './Utilities-Kendo/DatePickerNoLimit'
 
 import { descLimit } from './Utilities-Kendo/descLimit'
 import {
@@ -86,6 +89,7 @@ export const dateFields1 = [
   'targetDate',
   'exclusionEndDate',
   'exclusionStartDate',
+  'shutdownDate',
 ]
 
 export const monthMap = {
@@ -171,6 +175,9 @@ const KendoDataTables = ({
   shutdownMonths = [],
   slowdownMonths = [],
   sdDaysValues = [],
+  allLines = [],
+  startDate,
+  endDate,
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -861,6 +868,35 @@ const KendoDataTables = ({
     return (
       <td {...tdProps} title={dataItem[field]}>
         {dataItem[field]}
+      </td>
+    )
+  }
+  const LineDisplayCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      customModifiedCells,
+      highlightField,
+      highlight,
+    } = props
+    const rowId = dataItem.id
+    const checkField = highlightField || field
+    const isEdited = !!(
+      customModifiedCells?.[rowId] && checkField in customModifiedCells[rowId]
+    )
+    const lineObj = props.allLines?.find((l) => l.id === dataItem[field])
+    const displayLabel = lineObj ? lineObj.displayName : ''
+    return (
+      <td
+        {...tdProps}
+        style={{
+          color: highlight && isEdited ? 'orange' : undefined,
+          fontWeight: highlight && isEdited ? 'bold' : undefined,
+        }}
+        title={displayLabel}
+      >
+        {displayLabel || ''}
       </td>
     )
   }
@@ -1959,6 +1995,60 @@ const KendoDataTables = ({
                 }
 
                 if (dateFields.includes(col.field)) {
+                  if (
+                    screenType === 'ElastomerSlowdown' &&
+                    lowerVertName === 'elastomer'
+                  ) {
+                    return (
+                      <GridColumn
+                        key={col.field}
+                        field={col.field}
+                        title={col.title || col.headerName}
+                        cells={{
+                          edit: {
+                            date: (props) => (
+                              <DatePickerNoLimit
+                                {...props}
+                                min={startDate}
+                                max={endDate}
+                              />
+                            ),
+                          },
+                          data: (props) => (
+                            <SimpleHighlightCell
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              highlight={permissions?.highlightDate || false} // Add this permission
+                            />
+                          ),
+                          headerCell: SimpleHeaderWithTooltip,
+                        }}
+                        format={
+                          [
+                            'fromDate',
+                            'toDate',
+                            'periodFrom',
+                            'periodTo',
+                            'toDateReport',
+                            'fromDateReport',
+                          ].includes(col.field)
+                            ? '{0:dd-MM-yyyy}'
+                            : '{0:dd-MM-yyyy hh:mm a}'
+                        }
+                        editor='date'
+                        hidden={col.hidden}
+                        // columnMenu={DateColumnMenu}
+                        filter='date'
+                        columnMenu={ColumnMenuCheckboxFilterDate}
+                        width={col?.widthT}
+                        headerClassName={
+                          isDateFilterActive.includes(col.field)
+                            ? 'active-column'
+                            : ''
+                        }
+                      />
+                    )
+                  }
                   return (
                     <GridColumn
                       key={col.field}
@@ -2408,7 +2498,38 @@ const KendoDataTables = ({
                     />
                   )
                 }
-
+                if (col.type === 'Categorydropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.width}
+                      editable={!!col?.editable}
+                      cells={{
+                        edit: { text: CategoryDropdownEditor },
+                        data: (props) => {
+                          // Show the value as text in display mode
+                          const options = [
+                            { id: 0, value: '0' },
+                            { id: 1, value: '1' },
+                            { id: 2, value: '2' },
+                          ]
+                          const valueObj = options.find(
+                            (opt) => opt.id === props.dataItem[props.field],
+                          )
+                          return (
+                            <td {...props.tdProps}>
+                              {valueObj ? valueObj.value : ''}
+                            </td>
+                          )
+                        },
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
                 const YearDropdownEditorWrapper = (props) => (
                   <YearDropdownEditor {...props} AOP_YEAR={AOP_YEAR} />
                 )
@@ -2451,6 +2572,42 @@ const KendoDataTables = ({
                           ),
                         },
                         data: ElastomerSDDaysDisplayCell,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+                const LineDropdownEditorWrapper = (props) => (
+                  <LineDropdownEditor
+                    {...props}
+                    allLines={allLines}
+                    customModifiedCells={customModifiedCells}
+                    highlightField={props.field}
+                    highlight={!!permissions?.highlightLine}
+                    rowId={props.dataItem?.id}
+                  />
+                )
+                if (col.type === 'lineDropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title}
+                      width={col.width}
+                      editable={col.editable}
+                      cells={{
+                        edit: { text: LineDropdownEditorWrapper },
+                        data: (props) => (
+                          <LineDisplayCell
+                            {...props}
+                            allLines={allLines}
+                            customModifiedCells={customModifiedCells}
+                            highlightField={col.field}
+                            highlight={!!permissions?.highlightLine}
+                            rowId={props.dataItem?.id}
+                          />
+                        ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}

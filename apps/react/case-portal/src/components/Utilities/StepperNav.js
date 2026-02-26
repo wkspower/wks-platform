@@ -81,8 +81,12 @@ export default function StepperNav() {
     const newSteps = buildSteps(menuItems)
 
     const isPE = lowerVertName === 'pe'
-    const shouldFilterSlowdown = lowerVertName === verticalEnums.PP || isPE
 
+    const shouldFilterSlowdown =
+      // Condition 1: PE vertical AND LDPE plant
+      (lowerVertName === verticalEnums.PE && plantName === 'LDPE') ||
+      // Condition 2: PE vertical AND DMD site
+      (lowerVertName === verticalEnums.PE && SITE_NAME === 'dmd')
     if (shouldFilterSlowdown) {
       const filteredSteps = newSteps.filter(
         (step) => step.key !== 'slowdown-norms',

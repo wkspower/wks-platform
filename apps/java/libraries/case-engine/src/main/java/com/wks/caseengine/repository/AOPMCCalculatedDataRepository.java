@@ -47,7 +47,11 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
 	@Query(value = "SELECT TOP (1000) [Id], [Material_FK_Id], [MaterialDisplayName], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [UpdatedBy],[PlantId] FROM [dbo].[vwAOPMCValuesDesignCapacity] WHERE PlantId = :plantId AND FinancialYear = :year",
     nativeQuery = true)
 	List<Object[]> getDesignCapacityData(@Param("year") String year, @Param("plantId") String plantId);
-	
+
+	@Query(value = "SELECT TOP (1000) [Id], [Material_FK_Id], [MaterialDisplayName], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [UpdatedBy],[PlantId], [Line_FK_Id] FROM [dbo].[vwAOPMCValuesDesignCapacity] WHERE PlantId = :plantId AND FinancialYear = :year AND Line_FK_Id = :lineId",
+		    nativeQuery = true)
+			List<Object[]> getLineWiseDesignCapacityData(@Param("year") String year, @Param("plantId") String plantId,@Param("lineId") String lineId);
+
 	@Query(value = "SELECT * FROM MCUValue WHERE Plant_FK_ID = :plantId " +
             "AND FinancialYear = :year " +
             "AND Material_FK_ID = :materialId", nativeQuery = true)

@@ -769,9 +769,7 @@ const ShutdownNorms = () => {
 
       titleName: IS_PET_VERTICAL
         ? `Shutdown Consumption (Norms)`
-        : lowerVertName === 'elastomer' ||
-            lowerVertName === 'pta' ||
-            lowerVertName === 'vcm'
+        : lowerVertName === 'elastomer' || lowerVertName === 'pta'
           ? `Shutdown Consumption (Norms/Quantity)`
           : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}-${SCREEN_NAME}`,

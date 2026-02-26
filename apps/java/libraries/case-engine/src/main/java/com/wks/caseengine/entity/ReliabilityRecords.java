@@ -2,8 +2,7 @@ package com.wks.caseengine.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 import java.util.Date;
 import java.util.UUID;
 

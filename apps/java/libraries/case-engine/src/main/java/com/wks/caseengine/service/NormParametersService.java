@@ -15,4 +15,8 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
     
     public AOPMessageVM getAllProducts(String plantId,String year);
 
+    
+    public AOPMessageVM getAllLines(String plantId);
+
+
  }

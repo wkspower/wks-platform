@@ -26,5 +26,6 @@ public interface ShutdownNormsService {
 	public AOPMessageVM getUniqueGrades(String year, String plantId);
 	public AOPMessageVM getShutConsumptionData( String year, String plantId,String gradeId);
 	public byte[] exportShutdownConsumption(String year, UUID plantFKId,boolean isAfterSave,List<ShutdownNormsValueDTO> dtoList,String gradeId);
+	public byte[] exportDMDShutdownConsumption(String year, UUID plantFKId,boolean isAfterSave,List<ShutdownNormsValueDTO> dtoList,String gradeId);
 	 public AOPMessageVM importShutdownConsumption(String year, UUID fromString,String gradeId, MultipartFile file);
 }

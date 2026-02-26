@@ -82,7 +82,7 @@ const BestAchievedIndividualNorms = () => {
             filterable: true,
             filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
             align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-            ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
+            ...(isNumberCol ? { format: '{0:0.0000}' } : {}),
             editable: false,
             isRightAlligned: isNumberCol ? 'numeric' : undefined,
             ...(fixedWidth ? { widthT: fixedWidth } : {}),

@@ -11,6 +11,7 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
+import com.wks.caseengine.dto.NormLineRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
@@ -50,4 +51,12 @@ public interface ConfigurationService {
             List<ConfigurationDTO> configurationDTOList, Boolean calculation);
 
     public AOPMessageVM getOtherProductionNormsData(String year, String plantId, String gradeId);
+    public AOPMessageVM getNormAttributeTransactionLine(String year, String plantId);
+
+    public AOPMessageVM getConfigurationDataReportMannualEntry(String year, UUID plantFKId, String version);
+        public AOPMessageVM updateLineConfiguration(
+                        String year,
+                        String plantId,
+                        List<NormLineRequestDTO> normLineRequestDTOList);
+
 }

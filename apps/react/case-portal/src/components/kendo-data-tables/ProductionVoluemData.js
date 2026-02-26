@@ -9,7 +9,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
-import { Typography } from '../../../node_modules/@mui/material/index'
+import { Typography, Box } from '../../../node_modules/@mui/material/index'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
@@ -31,7 +31,13 @@ import ProductionTarget from './ProductionTarget'
 import AromaticsProductionGrids from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
+import AopTabs from 'components/AopTabs'
+
 const ProductionvolumeData = ({ permissions }) => {
+  // State for tabs and line details
+  const [tabIndex, setTabIndex] = useState(0)
+  const [tabs, setTabs] = useState([])
+  const [lineDetails, setLineDetails] = useState([])
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
 
@@ -94,6 +100,9 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
   const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
   const IS_AROMATICS_DTA = VERTICAL_NAME === 'aromatics' && SITE_NAME === 'dta'
+  // Check if it's PP VERTICAL | DTA SITE
+  const IS_PP_DTA = VERTICAL_NAME === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_SEZ = VERTICAL_NAME === 'pp' && SITE_NAME === 'sez'
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -425,15 +434,27 @@ const ProductionvolumeData = ({ permissions }) => {
     setEnableSaveAddBtnDesignCapacity({})
     setModifiedCells({})
     // setEdit({})
-
+    // Get the selected line ID based on the current tab
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
       setLoading(true)
-      const response =
-        await ProductionVolumeDataApiService.getAOPMCCalculatedData(
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getAOPMCCalculatedDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response = await ProductionVolumeDataApiService.getAOPMCCalculatedData(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
+      }
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
@@ -613,7 +634,54 @@ const ProductionvolumeData = ({ permissions }) => {
     fetchData()
 
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID, tabIndex])
+
+  // Fetch line details when component mounts or plantID/year changes
+  const fetchLineDetails = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+
+    try {
+      const response = await DataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response?.code != 200) {
+        setTabs([])
+        return
+      }
+      if (response && Array.isArray(response?.data)) {
+        setLineDetails(response.data)
+        // Update tabs based on the response
+        const lineTabs = response?.data.map((line) => line.displayName)
+        setTabs(lineTabs)
+      }
+    } catch (err) {
+      console.error('Error fetching line details:', err)
+      // Fallback to default tabs if API fails
+      setTabs([])
+    }
+  }
+
+  useEffect(() => {
+    if (IS_PP_DTA || IS_PP_SEZ) {
+      fetchLineDetails()
+    }
+  }, [PLANT_ID, keycloak, yearChanged, IS_PP_DTA, IS_PP_SEZ])
+
+  // Call fetchData when lineDetails is updated and has at least one item
+  useEffect(() => {
+    if (
+      (IS_PP_DTA || IS_PP_SEZ) &&
+      lineDetails.length > 0 &&
+      lineDetails[tabIndex]
+    ) {
+      fetchData()
+      fetchDesignCapacityData()
+      fetchMaxCapacityData()
+    }
+  }, [lineDetails, tabIndex, IS_PP_DTA, IS_PP_SEZ])
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
@@ -646,13 +714,25 @@ const ProductionvolumeData = ({ permissions }) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
-      const response =
-        await ProductionVolumeDataApiService.getDesignCapacityData(
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getDesignCapacityDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response = await ProductionVolumeDataApiService.getDesignCapacityData(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
+      }
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -720,13 +800,26 @@ const ProductionvolumeData = ({ permissions }) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
+    const selectedLine = lineDetails[tabIndex]
+    const lineId = selectedLine?.id
     try {
-      const response =
-        await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response =
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityDataLineWise(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            lineId,
+          )
+      } else {
+        response =
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+      }
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -772,11 +865,6 @@ const ProductionvolumeData = ({ permissions }) => {
   useEffect(() => {
     fetchMaxCapacityData(unitMaxCapacity)
   }, [unitMaxCapacity, PLANT_ID, yearChanged, keycloak])
-
-  useEffect(() => {
-    fetchData()
-    fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const handleCalculateMeg = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
@@ -1142,6 +1230,13 @@ const ProductionvolumeData = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
+      {(IS_PP_DTA || IS_PP_SEZ) && (
+        <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
+          <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
+        </Box>
+      )}
 
       {/* DESIGN_CAPACITY */}
       {conditionForFirst && (

@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDMDDTO;
 import com.wks.caseengine.dto.YieldDTO;
+import com.wks.caseengine.dto.YieldVMDDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface SpyroOutputService {
@@ -23,13 +24,19 @@ public interface SpyroOutputService {
 	
 	public AOPMessageVM getSpyroOutputYieldDMD( String year, String plantId);
 	
+	public AOPMessageVM getSpyroOutputYieldVMD( String year, String plantId);
+	
 	public byte[] exportYieldReport(String year, String plantFKId,boolean isAfterSave,List<YieldDTO> dtoList);
 	
 	public byte[] exportYieldDMD(String year, String plantFKId,boolean isAfterSave,List<YieldDMDDTO> dtoList);
 	
+	public byte[] exportYieldVMD(String year, String plantFKId,boolean isAfterSave,List<YieldVMDDTO> dtoList);
+	
 	public AOPMessageVM updateSpyroOutputYieldData( String plantId, String year,  List<YieldDTO> yieldDTOs);
 	
 	public AOPMessageVM updateSpyroOutputYieldDMD( String plantId, String year,  List<YieldDMDDTO> yieldDTOs);
+	
+	public AOPMessageVM updateSpyroOutputYieldVMD( String plantId, String year,  List<YieldVMDDTO> yieldDTOs);
 	
 	byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
 			Map<String, List<SpyroOutputDTO>> mapForExcel);
@@ -37,6 +44,8 @@ public interface SpyroOutputService {
 	public AOPMessageVM importYieldExcel(String year,UUID plantId,MultipartFile file);
 	
 	public AOPMessageVM importYieldDMD(String year,UUID plantId,MultipartFile file);
+	
+	public AOPMessageVM importYieldVMD(String year,UUID plantId,MultipartFile file);
 	          
 	AOPMessageVM importExcel(String year, String plantFKId, String mode, MultipartFile file);
 	

@@ -20,6 +20,7 @@ import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
 const ElastomerShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [finishingModifiedCells, setFinishingModifiedCells] = React.useState({})
   const [modifiedCells1, setModifiedCells1] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
@@ -60,11 +61,16 @@ const ElastomerShutDown = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase()
   const lowerSiteName = SITE_NAME?.toLowerCase()
   const lowerPlantName = PLANT_NAME?.toLowerCase()
+  const IS_ELASTOMER_HMD_PBR3 =
+    lowerVertName === 'elastomer' &&
+    lowerSiteName === 'hmd' &&
+    lowerPlantName === 'pbr3'
   const plantName = plantObject?.name
   const siteName = siteObject?.name
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
   const [slowdownRows, setSlowdownRows] = useState([])
+  const [finishingShutdownRows, setFinishingShutdownRows] = useState([])
   const IS_NON_PRODUCT_VERTICAL =
     lowerVertName === 'elastomer' ||
     lowerVertName === 'pvc' ||
@@ -82,6 +88,7 @@ const ElastomerShutDown = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [deleteId1, setDeleteId1] = useState(null)
+  const [deleteId3, setDeleteId3] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [rowsSlowdown, setRowsSlowdown] = useState()
@@ -101,7 +108,11 @@ const ElastomerShutDown = ({ permissions }) => {
   const [remarkDialogOpen1, setRemarkDialogOpen1] = useState(false)
   const keycloak = useSession()
   const [tabIndex, setTabIndex] = useState(0)
-  const defaultTabs = ['Shutdown/TA Activities', 'Shutdown History Config']
+  const defaultTabs = [
+    'Shutdown/TA Activities',
+    'Shutdown History Config',
+    ...(IS_ELASTOMER_HMD_PBR3 ? ['Finishing Shutdown Config'] : []),
+  ]
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -116,6 +127,73 @@ const ElastomerShutDown = ({ permissions }) => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+  const saveFinishingShutdown = async () => {
+    try {
+      const data = Object.values(finishingModifiedCells)
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      // Validate required fields
+      const requiredFields = ['remarks', 'year']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      // Prepare data for backend
+      const dataList = data.map((row) => ({
+        id: row.id,
+        year: row.year,
+        month: row.monthly,
+        shutdownHours: row.durationInHrs,
+        shutdownDate: row.shutdownDate,
+        category: row.category,
+        remarks: row.remarks,
+        auditYear: AOP_YEAR,
+        plantFkId: PLANT_ID,
+      }))
+
+      const res = await MaintenanceDetailsApiService.saveFinishingShutdown(
+        PLANT_ID,
+        AOP_YEAR,
+        dataList,
+        keycloak,
+      )
+
+      if (res?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setFinishingModifiedCells({})
+        finishingShutdownFetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
   }
   const saveChangesHHistory = async () => {
     try {
@@ -157,7 +235,7 @@ const ElastomerShutDown = ({ permissions }) => {
         return obj
       })
 
-      const res = await MaintenanceDetailsApiService.saveSlowdownConfig(
+      const res = await MaintenanceDetailsApiService.saveShutdownConfig(
         PLANT_ID,
         AOP_YEAR,
         dataList,
@@ -583,6 +661,48 @@ const ElastomerShutDown = ({ permissions }) => {
       fetchData()
     }
   }
+  const finishingShutdownFetchData = useCallback(async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+    setFinishingShutdownRows([])
+    setLoading(true)
+    try {
+      const resp =
+        await MaintenanceDetailsApiService.getFinishingShutdownConfig(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      // Map backend fields directly
+      const formatted = (resp.data?.Data || []).map((item, idx) => ({
+        id: item.id,
+        idFromApi: item.id,
+        year: item.year,
+        monthly: item.month,
+        durationInHrs: item.shutdownHours,
+        shutdownDate: new Date(item?.shutdownDate),
+        category: item.category,
+        remarks: item.remarks,
+        originalRemark: item.remarks,
+        auditYear: item.auditYear,
+        updatedOn: item.updatedOn,
+        updatedBy: item.updatedBy,
+        plantFkId: item.plantFkId,
+        isEditable: true,
+      }))
+      setFinishingShutdownRows(formatted)
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setFinishingShutdownRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [PLANT_ID, AOP_YEAR, keycloak])
+
+  useEffect(() => {
+    if (tabIndex === 2) {
+      finishingShutdownFetchData()
+    }
+  }, [tabIndex, finishingShutdownFetchData])
 
   const fetchData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
@@ -656,7 +776,7 @@ const ElastomerShutDown = ({ permissions }) => {
     setLoading(true)
     try {
       //
-      const resp = await MaintenanceDetailsApiService.getSlowdownConfig(
+      const resp = await MaintenanceDetailsApiService.getShutdownConfig(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -893,6 +1013,51 @@ const ElastomerShutDown = ({ permissions }) => {
       width: 200,
     },
   ]
+  const finishingShutdownColumns = [
+    {
+      field: 'id',
+      title: 'Id',
+      hidden: true,
+    },
+    {
+      field: 'year',
+      title: 'Year',
+      type: 'yeardropdown',
+      editable: true,
+      width: 200,
+    },
+    {
+      field: 'monthly',
+      title: 'Month',
+      type: 'monthDropdown',
+      editable: true,
+      width: 200,
+    },
+    {
+      field: 'durationInHrs',
+      title: 'Shutdown Hours',
+      editable: true,
+    },
+    {
+      field: 'shutdownDate',
+      title: 'Shutdown Date',
+      type: 'date',
+      editable: true,
+    },
+    {
+      field: 'category',
+      title: 'Category',
+      type: 'Categorydropdown',
+      editable: true,
+      width: 200,
+    },
+    {
+      field: 'remarks',
+      title: 'Remark',
+      editable: true,
+      width: 200,
+    },
+  ]
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
 
@@ -1050,7 +1215,7 @@ const ElastomerShutDown = ({ permissions }) => {
     }
     setLoading(true)
     try {
-      const response = await MaintenanceDetailsApiService.deleteSlowdownConfig(
+      const response = await MaintenanceDetailsApiService.deleteShutdownConfig(
         row.idFromApi,
         keycloak,
         PLANT_ID,
@@ -1071,6 +1236,51 @@ const ElastomerShutDown = ({ permissions }) => {
       console.error('Delete error:', error)
       setSnackbarData({ message: 'Error deleting record!', severity: 'error' })
       setSnackbarOpen(true)
+    }
+  }
+
+  const handleFinishingDeleteConfig = async (paramsForDelete) => {
+    setLoading(true)
+
+    try {
+      const { idFromApi, id } = paramsForDelete
+      // console.log('Finishing Delete:', paramsForDelete)
+      const deleteId3 = id
+
+      if (!idFromApi) {
+        setFinishingShutdownRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteId3),
+        )
+      }
+
+      if (idFromApi) {
+        await MaintenanceDetailsApiService.deleteFinishingShutdownConfig(
+          idFromApi,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        setFinishingShutdownRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteId3),
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Record Deleted successfully!',
+          severity: 'success',
+        })
+        finishingShutdownFetchData()
+
+        const maintenanceResponse =
+          await MaintenanceDetailsApiService.getMaintenanceData(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+      } else {
+        setLoading(false)
+      }
+    } catch (error) {
+      console.error('Error deleting Record', error)
     }
   }
 
@@ -1138,6 +1348,28 @@ const ElastomerShutDown = ({ permissions }) => {
           showRefresh: false,
           showTitleNameBusiness: true,
           titleName: 'Shutdown History Config',
+        },
+        isOldYear,
+      ),
+    [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
+  )
+  const adjustedPermissionsFinishing = useMemo(
+    () =>
+      getAdjustedPermissions(
+        {
+          showAction: false,
+          addButton: true,
+          deleteButton: true,
+          editButton: false,
+          showUnit: false,
+          saveWithRemark: false,
+          saveBtn: true,
+          allAction: true,
+          downloadExcelBtnFromUI: true,
+          ExcelName: 'Finishing Shutdown Config',
+          showRefresh: false,
+          showTitleNameBusiness: true,
+          titleName: 'Finishing Shutdown Config',
         },
         isOldYear,
       ),
@@ -1244,6 +1476,34 @@ const ElastomerShutDown = ({ permissions }) => {
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
           permissions={adjustedPermissionsslowdown}
+          sdDaysValues={sdDaysValues}
+        />
+      )}
+      {IS_ELASTOMER_HMD_PBR3 && tabIndex === 2 && (
+        <KendoDataTables
+          columns={finishingShutdownColumns}
+          rows={finishingShutdownRows}
+          setRows={setFinishingShutdownRows}
+          fetchData={finishingShutdownFetchData}
+          deleteRowData={handleFinishingDeleteConfig}
+          saveChanges={saveFinishingShutdown}
+          deleteId={deleteId3}
+          setDeleteId={setDeleteId3}
+          modifiedCells={finishingModifiedCells}
+          setModifiedCells={setFinishingModifiedCells}
+          open1={open1}
+          setOpen1={setOpen1}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          remarkDialogOpen={remarkDialogOpen1}
+          setRemarkDialogOpen={setRemarkDialogOpen1}
+          currentRemark={currentRemark1}
+          setCurrentRemark={setCurrentRemark1}
+          currentRowId={currentRowId1}
+          handleRemarkCellClick={handleRemarkCellClick1}
+          snackbarData={snackbarData}
+          setSnackbarData={setSnackbarData}
+          permissions={adjustedPermissionsFinishing}
           sdDaysValues={sdDaysValues}
         />
       )}

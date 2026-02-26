@@ -4,6 +4,7 @@ import cracker_composition from '../../../assets/kendo_config_cracker_compositio
 import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
 import cracker_yield from '../../../assets/kendo_config_cracker_yield_coldefs.json'
 import cracker_yield_dmd from '../../../assets/kendo_config_cracker_yield_dmd_coldefs.json'
+import cracker_yield_vmd from '../../../assets/kendo_config_cracker_yield_vmd_coldefs.json'
 import disContineGradeChange from '../../../assets/kendo_config_disContineGradeChange.json'
 import productionColumnsConstants from '../../../assets/kendo_config_meg constants.json'
 import productionColumns from '../../../assets/kendo_config_meg.json'
@@ -23,7 +24,7 @@ const getConfigByType = (configType) => {
       return productionColumns
     case 'megConstants':
       return productionColumnsConstants
-    case 'pioImpact':
+    case 'PIO Impact':
       return pioImpactColumns
     case 'shutdownData':
       return pioImpactColumns
@@ -59,6 +60,8 @@ const getConfigByType = (configType) => {
       return cracker_yield
     case 'cracker_yield_dmd':
       return cracker_yield_dmd
+    case 'cracker_yield_vmd':
+      return cracker_yield_vmd
     case 'ContineGradeChange':
       return contineGradeChange
     case 'DisContineGradeChange':
@@ -77,6 +80,7 @@ const getEnhancedAOPColDefs = ({
   headerMap,
   configType,
   FORMATE_VALUE,
+  allGradesRecipes,
 }) => {
   var config = []
 
@@ -99,6 +103,31 @@ const getEnhancedAOPColDefs = ({
       config.push({
         field: field?.id?.toUpperCase(),
         title: field?.displayName,
+        editable: true,
+        width1: 200,
+        type: 'number',
+        format: FORMATE_VALUE,
+      })
+    })
+  } else if (configType == 'lines') {
+    config = [
+      {
+        field: 'GradeName',
+        title: 'Grade',
+        editable: false,
+        width1: 200,
+      },
+      {
+        field: 'UOM',
+        title: 'UOM',
+        editable: false,
+        width1: 85,
+      },
+    ]
+    allGradesRecipes?.forEach((line) => {
+      config.push({
+        field: line?.Id?.toUpperCase(), // use Id from API
+        title: line?.DisplayName, // use DisplayName
         editable: true,
         width1: 200,
         type: 'number',
@@ -129,7 +158,7 @@ const getEnhancedAOPColDefs = ({
       return col
     })
   } else if (
-    configType == 'pioImpact' ||
+    configType == 'PIO Impact' ||
     configType == 'shutdownData' ||
     configType == 'cracker_configuration'
   ) {
@@ -146,7 +175,10 @@ const getEnhancedAOPColDefs = ({
 
       return col
     })
-  } else if (configType == 'cracker_yield_dmd') {
+  } else if (
+    configType == 'cracker_yield_dmd' ||
+    configType == 'cracker_yield_vmd'
+  ) {
     enhancedColDefs = config.map((col) => {
       if (headerMap && headerMap[col.title]) {
         return {

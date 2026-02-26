@@ -14,10 +14,18 @@ import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopH
 import KendoDataTables from './index'
 import ProductionNormsCracker from './ProductionNormsCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import AopTabs from 'components/AopTabs'
+import { Box } from '@mui/material'
+import { DataService } from 'services/DataService'
 const ProductionNorms = ({ permissions }) => {
+  // State for tabs
+  const [tabIndex, setTabIndex] = useState(0)
+  const [tabs, setTabs] = useState([])
+  const [lineDetails, setLineDetails] = useState([])
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
+  const [editResetKey, setEditResetKey] = useState(0)
 
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -48,6 +56,10 @@ const ProductionNorms = ({ permissions }) => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const SITE_NAME = siteObject?.name?.toLowerCase()
+  const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
+  const IS_PP_DTA = lowerVertName === 'pp' && SITE_NAME === 'dta'
+  const IS_PP_SEZ = lowerVertName === 'pp' && SITE_NAME === 'sez'
   const plantName = plantObject?.name?.toLowerCase()
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
@@ -384,12 +396,25 @@ const ProductionNorms = ({ permissions }) => {
     try {
       setRows([])
       setLoading(true)
-      const response = await ProductionNormsApiService.getAOPData(
-        keycloak,
-        'Production',
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      const selectedLine = lineDetails[tabIndex]
+      const lineId = selectedLine?.id
+      let response = ''
+      if (IS_PP_DTA || IS_PP_SEZ) {
+        response = await ProductionNormsApiService.getAOPDataLineWise(
+          keycloak,
+          'Production',
+          PLANT_ID,
+          AOP_YEAR,
+          lineId,
+        )
+      } else {
+        response = await ProductionNormsApiService.getAOPData(
+          keycloak,
+          'Production',
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
         setRows([])
@@ -761,12 +786,61 @@ const ProductionNorms = ({ permissions }) => {
     return total === '0.00' ? null : total
   }
 
+  const initialRender = React.useRef(true)
+
   useEffect(() => {
-    fetchData()
-    if (lowerVertName === 'meg') {
-      fetchDataByProducts()
+    const fetchDataWrapper = async () => {
+      // Only fetch data if this is not the initial render or if dependencies have changed
+      if (!initialRender.current || PLANT_ID) {
+        await fetchData()
+        if (lowerVertName === 'meg') {
+          await fetchDataByProducts()
+        }
+      } else {
+        initialRender.current = false
+      }
     }
-  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
+    if ((IS_PP_DTA || IS_PP_SEZ) && lineDetails?.length === 0) {
+      return
+    }
+    fetchDataWrapper()
+  }, [PLANT_ID, yearChanged, keycloak, selectedUnit, tabIndex, lineDetails])
+
+  // Fetch line details when component mounts or plantID/year changes
+  const fetchLineDetails = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
+
+    try {
+      const response = await DataService.getLineDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response?.code != 200) {
+        setTabs([])
+        return
+      }
+      if (response && Array.isArray(response?.data)) {
+        setLineDetails(response.data)
+        // Update tabs based on the response
+        const lineTabs = response?.data.map((line) => line.displayName)
+        setTabs(lineTabs)
+      }
+    } catch (err) {
+      console.error('Error fetching line details:', err)
+      // Fallback to default tabs if API fails
+      setTabs([])
+    }
+  }
+
+  useEffect(() => {
+    if (IS_PP_DTA || IS_PP_SEZ) {
+      fetchLineDetails()
+    } else {
+      setLineDetails([])
+    }
+  }, [PLANT_ID, keycloak, yearChanged])
 
   const valueFormat_ = ValueFormatterProduction()
   const valueFormat = IS_VCM ? '{0:0.000}' : valueFormat_
@@ -917,6 +991,12 @@ const ProductionNorms = ({ permissions }) => {
 
   return (
     <div>
+      {/* LINE1-LINE6 Tabs - Only for PP VERTICAL | DTA SITE */}
+      {(IS_PP_DTA || IS_PP_SEZ) && (
+        <Box display='flex' alignItems='center' sx={{ mb: 1, mt: 1 }}>
+          <AopTabs tabIndex={tabIndex} setTabIndex={setTabIndex} tabs={tabs} />
+        </Box>
+      )}
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
@@ -954,6 +1034,8 @@ const ProductionNorms = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         selectedUOM={'UOM'}
+        resetEditSignal={editResetKey}
+        setEditResetKey={setEditResetKey}
         // downloadExcelForConfiguration={downloadExcelForConfiguration}
         note={
           !permissions?.hideNoteText &&
@@ -978,6 +1060,8 @@ const ProductionNorms = ({ permissions }) => {
           title={'By Products'}
           fetchData={fetchDataByProducts}
           permissions={adjustedPermissionsByProducts}
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
     </div>

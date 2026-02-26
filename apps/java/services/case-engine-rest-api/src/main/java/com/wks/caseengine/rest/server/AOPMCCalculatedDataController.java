@@ -20,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
@@ -38,15 +40,28 @@ public class AOPMCCalculatedDataController {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
 
 	@GetMapping(value = "/production-target")
 	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId, year);
 	}
 	
+	@GetMapping(value = "/production-target-line")
+	public AOPMessageVM getProductionTarget(@RequestParam String plantId, @RequestParam String year,@RequestParam(required=false) String lineId) {
+		return aOPMCCalculatedDataService.getProductionTarget(plantId, year,lineId);
+	}
+	
 	@GetMapping(value = "/max-achieved-capacity")
 	public AOPMessageVM getMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getMaxAchievedCapacity(plantId, year);
+	}
+	
+	@GetMapping(value = "/max-achieved-capacity-line")
+	public AOPMessageVM getLineWiseMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String lineId) {
+		return aOPMCCalculatedDataService.getLineWiseMaxAchievedCapacity(plantId, year,lineId);
 	}
 	
 	@PostMapping(value = "/max-achieved-capacity")
@@ -57,6 +72,11 @@ public class AOPMCCalculatedDataController {
 	@GetMapping(value = "/design-capacity")
 	public AOPMessageVM getDesignCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getDesignCapacity(plantId, year);
+	}
+	
+	@GetMapping(value = "/design-capacity-line")
+	public AOPMessageVM getLineWiseDesignCapacity(@RequestParam String plantId, @RequestParam String year, @RequestParam String lineId) {
+		return aOPMCCalculatedDataService.getLineWiseDesignCapacity(plantId, year, lineId);
 	}
 	
 	@GetMapping(value = "/production-target-export-excel")
@@ -129,7 +149,9 @@ public class AOPMCCalculatedDataController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
         Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-        if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+        Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+        boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && site.getName().equalsIgnoreCase("VMD");
+        if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || pvc) {
         	return aOPMCCalculatedDataService.importExcelPE(year, plantId, file);
         }else {
         	return aOPMCCalculatedDataService.importExcel(year, plantId, file);
@@ -139,4 +161,3 @@ public class AOPMCCalculatedDataController {
 	}
 
 }
-
