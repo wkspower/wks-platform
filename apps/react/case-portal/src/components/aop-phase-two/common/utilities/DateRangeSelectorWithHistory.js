@@ -49,6 +49,7 @@ const DateRangeSelectorWithHistory = ({
 
   const [startDateObj, setStartDateObj] = useState(null)
   const [endDateObj, setEndDateObj] = useState(null)
+  const [lastModifiedBy, setLastModifiedBy] = useState('')
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -147,6 +148,10 @@ const DateRangeSelectorWithHistory = ({
         await onLoadTest(startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
+        // Capture who last modified the data
+        if (details[0]?.User) {
+          setLastModifiedBy(details[0].User)
+        }
       }
     } catch (error) {
       console.error('Error fetching getConfigurationExecutionDetails:', error)
@@ -226,15 +231,35 @@ const DateRangeSelectorWithHistory = ({
     if (startDate && endDate) {
       const s = new Date(startDate)
       const e = new Date(endDate)
+      const today = new Date()
 
       s.setHours(0, 0, 0, 0)
       e.setHours(0, 0, 0, 0)
+      today.setHours(0, 0, 0, 0)
 
       if (s > e) {
         setSnackbarOpen(true)
         setSnackbarData({
           message:
             'Please choose valid dates (start date must be before end date).',
+          severity: 'warning',
+        })
+        return
+      }
+
+      if (e > today) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'End date cannot be greater than current date.',
+          severity: 'warning',
+        })
+        return
+      }
+
+      if (s > today) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Start date cannot be greater than current date.',
           severity: 'warning',
         })
         return
@@ -388,6 +413,7 @@ const DateRangeSelectorWithHistory = ({
           style={{ height: datePickerHeight }}
           size={datePickerSize}
           disabled={disabled || loading}
+          max={new Date()}
           {...(timeRequired && {
             autoFill: true,
             enableMouseWheel: true,
@@ -409,6 +435,7 @@ const DateRangeSelectorWithHistory = ({
           style={{ height: datePickerHeight }}
           size={datePickerSize}
           disabled={disabled || loading}
+          max={new Date()}
           {...(timeRequired && {
             autoFill: true,
             enableMouseWheel: true,
@@ -439,7 +466,7 @@ const DateRangeSelectorWithHistory = ({
             alignItems: 'center',
           }}
         >
-          {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
+          {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)}${lastModifiedBy ? ` by ${lastModifiedBy}` : ''} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
         </Typography>
       )}
 
