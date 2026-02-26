@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDMDDTO;
 import com.wks.caseengine.dto.YieldDTO;
+import com.wks.caseengine.dto.YieldVMDDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface SpyroOutputService {
@@ -32,6 +33,8 @@ public interface SpyroOutputService {
 	public AOPMessageVM updateSpyroOutputYieldData( String plantId, String year,  List<YieldDTO> yieldDTOs);
 	
 	public AOPMessageVM updateSpyroOutputYieldDMD( String plantId, String year,  List<YieldDMDDTO> yieldDTOs);
+	
+	public AOPMessageVM updateSpyroOutputYieldVMD( String plantId, String year,  List<YieldVMDDTO> yieldDTOs);
 	
 	byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
 			Map<String, List<SpyroOutputDTO>> mapForExcel);

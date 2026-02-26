@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDMDDTO;
 import com.wks.caseengine.dto.YieldDTO;
+import com.wks.caseengine.dto.YieldVMDDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @RestController
@@ -122,6 +123,16 @@ public class SpyroOutputController {
 	) {
 	    
 	    return spyroOutputService.updateSpyroOutputYieldDMD(plantId, year, payload);
+	}
+	
+	@PostMapping(value="/spyro-output/yield-vmd")
+	public AOPMessageVM updateSpyroOutputYieldVMD(
+	    @RequestParam String plantId,
+	    @RequestParam String year,
+	    @RequestBody List<YieldVMDDTO> payload
+	) {
+	    
+	    return spyroOutputService.updateSpyroOutputYieldVMD(plantId, year, payload);
 	}
 	
 	@GetMapping(value = "/spyro-output-export-excel")

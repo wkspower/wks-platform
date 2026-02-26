@@ -1230,6 +1230,73 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		}
 	}
 	
+	@Override
+	public AOPMessageVM updateSpyroOutputYieldVMD(String plantId, String year,
+			List<YieldVMDDTO> yieldDTOs) {
+		
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
+		List<YieldVMDDTO> failedList = new ArrayList<YieldVMDDTO>();
+		List<YieldParticularDTO> yieldParticularDTOs = makeNormParameterNameVMD(yieldDTOs);
+		for(YieldVMDDTO yieldDTO:yieldDTOs) {
+			if (yieldDTO.getSaveStatus() != null
+					&& yieldDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+				failedList.add(yieldDTO);
+				continue;
+			}
+		}
+		
+		try {
+			for(YieldParticularDTO yieldParticularDTO:yieldParticularDTOs) {
+				
+				String normParameterName=yieldParticularDTO.getNormParameterName();
+				Optional<NormParameters> normParameterOpt=normParametersRepository.findFirstOneByNameAndPlantFkId(normParameterName, UUID.fromString(plantId));
+				if(normParameterOpt.isPresent()) {
+					NormParameters normParameters = normParameterOpt.get();
+					NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(normParameters.getId(),year);
+					if(normAttributeTransactions==null) {
+						normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAopMonth(4);
+						normAttributeTransactions.setNormParameterFKId(normParameters.getId());
+						if(yieldParticularDTO.getValue()!=null) {
+							normAttributeTransactions.setAttributeValue(yieldParticularDTO.getValue().toString());
+						}
+						
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setUserName(Utility.getUserName());
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}else {
+						if(yieldParticularDTO.getValue()!=null) {
+							normAttributeTransactions.setAttributeValue(yieldParticularDTO.getValue().toString());
+						}
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}
+				}
+			
+			}
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-output");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data updated successfully");
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("Success", normAttributeTransactionsList);
+			map.put("Failed", failedList);
+			aopMessageVM.setData(map);
+			return aopMessageVM;
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}
+	}
+	
 	private List<YieldParticularDTO> makeNormParameterName(List<YieldDTO> yieldDTOs) {
 		List<YieldParticularDTO> yieldParticularDTOs = new ArrayList<YieldParticularDTO>();
 		for(YieldDTO dto:yieldDTOs) {
@@ -1343,6 +1410,24 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    
 	    return yieldParticularDTOs;
 	}
+	
+	private List<YieldParticularDTO> makeNormParameterNameVMD(List<YieldVMDDTO> yieldDTOs) {
+	    List<YieldParticularDTO> yieldParticularDTOs = new ArrayList<>();
+	    
+	    for (YieldVMDDTO dto : yieldDTOs) {
+	        String part = dto.getParticulars();
+	        if (part == null) continue; 
+
+	        addToList(yieldParticularDTOs, "5NE_" + part, dto.getFiveNE());
+	        addToList(yieldParticularDTOs, "5NS_" + part , dto.getFiveNS());
+	        addToList(yieldParticularDTOs, "4NE_" + part , dto.getFourNE());
+	        addToList(yieldParticularDTOs, "4NS_" + part , dto.getFourNS());
+	        addToList(yieldParticularDTOs, "3NE_" + part , dto.getThreeNE());
+	        	    }
+	    
+	    return yieldParticularDTOs;
+	}
+
 	
 	private void addToList(List<YieldParticularDTO> list, String name, Double value) {
 	    if (value != null) {
