@@ -72,6 +72,9 @@ public class CPPNorms {
     @Column(name = "Remarks")
     private String remarks;
 
+    @Column(name = "ApplyActualNormToAll")
+    private Boolean applyActualNormToAll;
+
     @Column(name = "CreatedBy")
     private String createdBy;
 

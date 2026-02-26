@@ -301,14 +301,51 @@ const FixedNorms = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      let tempRes = res?.data?.map((item, index) => ({
-        ...item,
-        id: item.id || index + 1,
-        remarks: item.remarks || '',
-        actualNorm: item.actualNorm || 1.343,
-        applyActualNormToAll: item.applyActualNormToAll || false,
-        isEditable: !(item.applyActualNormToAll || false), // Row editable when checkbox unchecked
-      }))
+      let tempRes = res?.data?.map((item, index) => {
+        const actualNormValue =
+          item.actualNorm !== null && item.actualNorm !== undefined
+            ? item.actualNorm
+            : 0
+        const applyToAll = item.applyActualNormToAll || false
+
+        // If applyActualNormToAll is true, populate all 12 months with actualNorm value
+        if (
+          applyToAll &&
+          actualNormValue !== null &&
+          actualNormValue !== undefined
+        ) {
+          return {
+            ...item,
+            id: item.id || index + 1,
+            remarks: item.remarks || '',
+            actualNorm: actualNormValue,
+            applyActualNormToAll: applyToAll,
+            isEditable: false, // Row not editable when checkbox is checked
+            aprNorms: actualNormValue,
+            mayNorms: actualNormValue,
+            junNorms: actualNormValue,
+            julNorms: actualNormValue,
+            augNorms: actualNormValue,
+            sepNorms: actualNormValue,
+            octNorms: actualNormValue,
+            novNorms: actualNormValue,
+            decNorms: actualNormValue,
+            janNorms: actualNormValue,
+            febNorms: actualNormValue,
+            marNorms: actualNormValue,
+          }
+        }
+
+        // Otherwise, keep the original month values
+        return {
+          ...item,
+          id: item.id || index + 1,
+          remarks: item.remarks || '',
+          actualNorm: actualNormValue,
+          applyActualNormToAll: applyToAll,
+          isEditable: true, // Row editable when checkbox unchecked
+        }
+      })
 
       setRows(tempRes)
       setOriginalRows(tempRes)
