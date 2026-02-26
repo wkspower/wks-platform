@@ -86,6 +86,7 @@ const ProductionNormsCracker = ({ permissions }) => {
   const [currentRowIdC2C3R, setCurrentRowIdC2C3R] = useState(null)
 
   const IS_NMD = SITE_NAME?.toLowerCase() == 'nmd'
+  const IS_VMD = SITE_NAME?.toLowerCase() == 'vmd'
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -714,7 +715,7 @@ const ProductionNormsCracker = ({ permissions }) => {
           editButton: false,
           showUnit: false,
           saveWithRemark: true,
-          showCalculate: IS_NMD ? false : true,
+          showCalculate: IS_NMD || IS_VMD ? false : true,
           allAction: true,
           showNote: true,
           showTitleNameBusiness: false,
