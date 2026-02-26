@@ -18,6 +18,7 @@ public class NormBasisDTO {
     private String displayName;
     private String uom;
     private String attributeValue;
+    private String config;
     private String remarks;
     private String type;
     private String normParameterType;
