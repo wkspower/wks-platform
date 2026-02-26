@@ -39,6 +39,8 @@ export const InputApiService = {
   saveHeatRateData,
   saveHeatRateExcel,
   exportHeatRateExcel,
+  getConfigurationExecutionDetails,
+  executeConfiguration,
 
   getSTGHeatRateData,
   saveSTGHeatRateData,
@@ -49,6 +51,7 @@ export const InputApiService = {
   saveHRSGHeatRateData,
   saveHRSGHeatRateExcel,
   exportHRSGHeatRateExcel,
+  getHRSGHeatRateDropdown,
 
   getNormBasedUtilityBudget,
   saveNormsData,
@@ -492,8 +495,10 @@ async function getPlantList(keycloak, plantId, year) {
 }
 
 // ========================|| Heat Rate APIs ||=====================================//
-async function getHeatRateData(keycloak, assetId, year) {
-  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}`
+
+async function getHeatRateData(keycloak, assetId, year, startDate, endDate) {
+  const url = `${Config.CaseEngineUrl}/task/heat-rate/${assetId}/${year}/${startDate}/${endDate}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -582,8 +587,19 @@ async function saveSTGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
 }
 
 // ========================|| HRSG Heat Rate APIs ||=====================================//
-async function getHRSGHeatRateData(keycloak, plantId) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup`
+async function getHRSGHeatRateData(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate,
+  endDate,
+) {
+  let url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/${assetId}/${financialYear}`
+
+  if (startDate && endDate) {
+    url += `/${startDate}/${endDate}`
+  }
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -602,7 +618,7 @@ async function getHRSGHeatRateData(keycloak, plantId) {
 }
 
 async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -620,6 +636,25 @@ async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
     }
     const result = await json(keycloak, resp)
     return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getHRSGHeatRateDropdown(keycloak, cppId) {
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/drop-down/${cppId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -909,11 +944,25 @@ async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // Heat Rate Excel Export
-async function exportHeatRateExcel(keycloak, assetId) {
+async function exportHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
+  // Construct endpoint with optional date range
+  let endpoint = `heat-rate/export/${assetId}/${financialYear}`
+
+  // If both dates are provided, add them as path variables
+  if (startDate && endDate) {
+    endpoint = `heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
+  }
+
   return exportExcelData(keycloak, {
-    endpoint: `heat-rate/export/${assetId}`,
+    endpoint: endpoint,
     queryParams: {},
-    fileName: `Heat_Rate.xlsx`,
+    fileName: `Heat_Rate_${financialYear}.xlsx`,
     method: 'GET',
   })
 }
@@ -959,7 +1008,7 @@ async function exportSTGHeatRateExcel(keycloak) {
 
 // HRSG Heat Rate Excel Import
 async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/import`
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate/import`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -975,7 +1024,7 @@ async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 
     if (!resp.ok) {
       throw new Error(
-        `Failed to import data: ${resp.status} ${resp.statusText}`,
+        `Failed to import HRSG heat rate data: ${resp.status} ${resp.statusText}`,
       )
     }
 
@@ -987,11 +1036,25 @@ async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 // HRSG Heat Rate Excel Export
-async function exportHRSGHeatRateExcel(keycloak) {
+async function exportHRSGHeatRateExcel(
+  keycloak,
+  assetId,
+  financialYear,
+  startDate = null,
+  endDate = null,
+) {
+  // Construct endpoint with optional date range
+  let endpoint = `hrsg-heat-rate/export/${assetId}/${financialYear}`
+
+  // If both dates are provided, add them as path variables
+  if (startDate && endDate) {
+    endpoint = `hrsg-heat-rate/export/${assetId}/${financialYear}/${startDate}/${endDate}`
+  }
+
   return exportExcelData(keycloak, {
-    endpoint: `hrsg-heat-rate-lookup/export`,
+    endpoint: endpoint,
     queryParams: {},
-    fileName: `HRSG_Heat_Rate_Lookup.xlsx`,
+    fileName: `HRSG_Heat_Rate_${financialYear}.xlsx`,
     method: 'GET',
   })
 }
@@ -1058,4 +1121,45 @@ async function exportFuelAvailabilityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     fileName: `Fuel_Availability_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
+}
+
+//========= Heat Rate Date From to
+async function getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function executeConfiguration(executionDetailDtoList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(executionDetailDtoList),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error saving configuration execution:', e)
+    return Promise.reject(e)
+  }
 }

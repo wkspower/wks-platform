@@ -22,6 +22,7 @@ import {
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const ProductionTarget = ({ permissions }) => {
+  const [editResetKey, setEditResetKey] = useState(0)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
@@ -1109,6 +1110,8 @@ const ProductionTarget = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
+          setEditResetKey={setEditResetKey}
+          resetEditSignal={editResetKey}
         />
       )}
 
@@ -1126,6 +1129,8 @@ const ProductionTarget = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
+          setEditResetKey={setEditResetKey}
+          resetEditSignal={editResetKey}
         />
       )}
 
@@ -1161,6 +1166,8 @@ const ProductionTarget = ({ permissions }) => {
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
+        setEditResetKey={setEditResetKey}
+        resetEditSignal={editResetKey}
       />
 
       {/* PERCENTAGE_SUMMARY */}

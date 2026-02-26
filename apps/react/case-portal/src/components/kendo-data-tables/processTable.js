@@ -261,7 +261,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
             : col.type === 'number' || col.field === 'Remarks',
         hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
         widthT: 120,
-        crackerValidation: 'true',
+        crackerValidation: col.type === 'number' ? true : false,
       }))
 
       setColumns(dynamicColumns)

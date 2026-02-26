@@ -280,6 +280,21 @@ public class ConfigurationController {
 		return configurationService.updateConfigurationVersion(configurationVersionDTOs);
 	}
 
+	@PostMapping(value = "/other-production-norms")
+	public List<ConfigurationDTO> saveOtherConfigurationData(@RequestParam String year, @RequestParam String plantFKId,
+			@RequestParam(required = false) String version, @RequestBody List<ConfigurationDTO> configurationDTOList,
+			@RequestParam(required = false) Boolean calculation) {
+		configurationService.saveOtherConfigurationData(year, plantFKId, version, configurationDTOList, calculation);
+		return configurationDTOList;
+	}
+
+	@GetMapping(value = "/other-production-norms")
+	public AOPMessageVM getOtherProductionNormsData(
+			@RequestParam String year,
+			@RequestParam String plantId,
+			@RequestParam(required = false) String gradeId) {
+
+		return configurationService.getOtherProductionNormsData(year, plantId, gradeId);
+	}
 
 }
-

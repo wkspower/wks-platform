@@ -677,7 +677,7 @@ def calculate_free_steam_from_dispatch(power_dispatch: list) -> dict:
     
     Calculation Steps:
     1. GT Load (MW) = GrossMWh / Hours
-    2. FreeSteamFactor = Lookup from HeatRateLookup table based on GT Load
+    2. FreeSteamFactor = Lookup from CPP_GTHeatRate table based on GT Load
        (This is already done in power_service and passed in dispatch)
     3. Free Steam (MT) = GrossMWh × FreeSteamFactor
     
@@ -695,7 +695,7 @@ def calculate_free_steam_from_dispatch(power_dispatch: list) -> dict:
         gross_mwh = asset.get("GrossMWh", 0)
         hours = asset.get("Hours", 0)
         load_mw = asset.get("LoadMW", 0)
-        free_steam_factor = asset.get("FreeSteam")  # FreeSteamFactor from HeatRateLookup
+        free_steam_factor = asset.get("FreeSteam")  # FreeSteamFactor from CPP_GTHeatRate
         
         # Only GTs generate free steam (not STG)
         is_gt = any(gt in asset_name.upper() for gt in ["GT1", "GT2", "GT3", "PLANT 1", "PLANT 2", "PLANT 3"])

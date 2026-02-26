@@ -451,23 +451,21 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    try {
 	        List<Object[]> results = getYieldData(plantId, year, procedureName);
 	        
-	        double[] totals = new double[18];
+	        double[] totals = new double[24];
 
 	        for (Object[] row : results) {
 	        	YieldDMDDTO yieldDTO = new YieldDMDDTO();
 	            yieldDTO.setParticulars(row[0] != null ? row[0].toString() : " ");
-	            double[] vals = new double[18];
-	            for (int i = 0; i < 18; i++) {
+	            double[] vals = new double[24];
+	            for (int i = 0; i < 24; i++) {
 	                vals[i] = parseDoubleSafe(row[i + 1]);
 	                totals[i] += vals[i]; 
 	            }
 
-	            // Map values to DTO
 	            mapValuesToDTO(yieldDTO, vals);
 	            spyroOutputYieldDataList.add(yieldDTO);
 	        }
 
-	        // Add the Total row
 	        YieldDMDDTO totalRow = new YieldDMDDTO();
 	        totalRow.setParticulars("Total");
 	        mapValuesToDTO(totalRow, totals);
@@ -519,6 +517,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    dto.setSevenFC2C3(v[15]);
 	    dto.setSevenFPropane(v[16]);
 	    dto.setSevenFEthane(v[17]);
+	    dto.setThreeFC2C3(v[18]);
+	    dto.setThreeFPropane(v[19]);
+	    dto.setThreeFEthane(v[20]);
+	    dto.setFourF2SC2C3(v[21]);
+	    dto.setFourF2SPropane(v[22]);
+	    dto.setFourF2SEthane(v[23]);
 	}	
 	public byte[] exportYieldReport(String year, String plantId, boolean isAfterSave, List<YieldDTO> dtoList) {
 	    try {
@@ -649,6 +653,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        innerHeaders.add("6F+BFD-C2C3");
 	        innerHeaders.add("6F+BFD-Propane");
 	        innerHeaders.add("6F+BFD-Ethane");
+	        innerHeaders.add("3F-C2C3");
+	        innerHeaders.add("3F-Propane");
+	        innerHeaders.add("3F-Ethane");
+	        innerHeaders.add("4F+2SFD 1BFD-C2C3");
+	        innerHeaders.add("4F+2SFD 1BFD-Propane");
+	        innerHeaders.add("4F+2SFD 1BFD-Ethane");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -685,6 +695,13 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	            rowData.add(dto.getSixFBFDC2C3());
 	            rowData.add(dto.getSixFBFDPropane());
 	            rowData.add(dto.getSixFBFDEthane());
+	            rowData.add(dto.getThreeFC2C3());
+	            rowData.add(dto.getThreeFPropane());
+	            rowData.add(dto.getThreeFEthane());
+	    	    rowData.add(dto.getFourF2SC2C3());
+	    	    rowData.add(dto.getFourF2SPropane());
+	    	    rowData.add(dto.getFourF2SEthane());
+	    	    
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -863,6 +880,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	               dto.setSixFBFDC2C3(getNumericCellValue(row.getCell(16), dto));
 	               dto.setSixFBFDPropane(getNumericCellValue(row.getCell(17), dto));
 	               dto.setSixFBFDEthane(getNumericCellValue(row.getCell(18), dto));
+	               dto.setThreeFC2C3(getNumericCellValue(row.getCell(19), dto));
+	               dto.setThreeFPropane(getNumericCellValue(row.getCell(20), dto));
+	               dto.setThreeFEthane(getNumericCellValue(row.getCell(21), dto));
+	               dto.setFourF2SC2C3(getNumericCellValue(row.getCell(22), dto));
+	               dto.setFourF2SPropane(getNumericCellValue(row.getCell(23), dto));
+	               dto.setFourF2SEthane(getNumericCellValue(row.getCell(24), dto));
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                dto.setErrDescription(e.getMessage());
@@ -874,7 +897,6 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-
 	    return yieldList;
 	}
 
@@ -1251,11 +1273,18 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        addToList(yieldParticularDTOs, "7F_" + part + "_C2C3", dto.getSevenFC2C3());
 	        addToList(yieldParticularDTOs, "7F_" + part + "_Propane", dto.getSevenFPropane());
 	        addToList(yieldParticularDTOs, "7F_" + part + "_Ethane", dto.getSevenFEthane());
+
+	      	addToList(yieldParticularDTOs, "3F_" + part + "_C2C3", dto.getThreeFC2C3());
+	        addToList(yieldParticularDTOs, "3F_" + part + "_Propane", dto.getThreeFPropane());
+	        addToList(yieldParticularDTOs, "3F_" + part + "_Ethane", dto.getThreeFEthane());
+
+	        addToList(yieldParticularDTOs, "4F+2SFD1BFD_" + part + "_C2C3", dto.getFourF2SC2C3());
+	        addToList(yieldParticularDTOs, "4F+2SFD1BFD_" + part + "_Propane", dto.getFourF2SPropane());
+	        addToList(yieldParticularDTOs, "4F+2SFD1BFD_" + part + "_Ethane", dto.getFourF2SEthane());
 	    }
 	    
 	    return yieldParticularDTOs;
 	}
-
 	
 	private void addToList(List<YieldParticularDTO> list, String name, Double value) {
 	    if (value != null) {

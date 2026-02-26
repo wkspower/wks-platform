@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/coker/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
+import { productionAndNormsBasisConstant } from '../dummyData'
 
-const HRSGHeatRate = () => {
+const Constants = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -18,91 +18,73 @@ const HRSGHeatRate = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const {
-    plantID,
-    plantObject,
-    siteObject,
-    verticalObject,
-    year,
-    screenTitle,
-  } = dataGridStore
+  const { plantObject, year } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
-  const valueFormat = ValueFormatterPhaseTwo()
-
+  const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
   const columns = [
     {
-      field: 'id',
-      title: 'Id',
-      width: 150,
+      field: 'Name',
+      title: 'Particulars',
+      widthT: 300,
+      minWidth: 250,
       type: 'text',
       editable: false,
-      locked: true,
-      minWidth: 100,
-      hidden: true,
+      hidden: false,
     },
     {
-      field: 'equipmentName',
-      title: 'Equipment Type',
-      width: 150,
+      field: 'UOM',
+      title: 'UOM',
+      widthT: 120,
+      minWidth: 100,
       type: 'text',
       editable: false,
-      locked: true,
-      minWidth: 100,
     },
     {
-      field: 'cppUtility',
-      title: 'CPP Utility',
-      width: 120,
-      type: 'text',
-      editable: false,
-      minWidth: 100,
-    },
-    {
-      field: 'hrsgLoad',
-      title: 'HRSG Load',
-      width: 100,
-      type: 'number1',
-      format: valueFormat,
+      field: 'ConstantValue',
+      title: 'Value',
       editable: true,
-      minWidth: 80,
-    },
-    {
-      field: 'heatRate',
-      title: 'Heat Rate',
-      width: 120,
+      widthT: 150,
+      minWidth: 120,
+      align: 'left',
+      headerAlign: 'left',
       type: 'number1',
-      format: valueFormat,
-      editable: true,
-      minWidth: 100,
+      format: '{0:0.00}',
     },
     {
-      field: 'remarks',
+      field: 'Remarks',
       title: 'Remark',
-      width: 250,
+      widthT: 350,
       type: 'textarea',
       editable: true,
-      minWidth: 250,
+      minWidth: 300,
     },
   ]
-  const [rows, setRows] = useState([])
-  const [originalRows, setOriginalRows] = useState([])
 
   useEffect(() => {
-    if (PLANT_ID) {
-      fetchHeatRateData()
+    if (PLANT_ID && AOP_YEAR) {
+      fetchConstantsData()
     }
-  }, [PLANT_ID])
+  }, [PLANT_ID, AOP_YEAR])
 
-  const fetchHeatRateData = async () => {
+  const fetchConstantsData = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API call once backend is ready
-      const res = await InputApiService.getHRSGHeatRateData(keycloak, PLANT_ID)
+      // Simulate API call with 1 second delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // const res = await ProductionNormsApiService.getConstantsData(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+
+      const res = productionAndNormsBasisConstant.data
 
       if (res?.length === 0) {
         setRows([])
@@ -110,19 +92,17 @@ const HRSGHeatRate = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      let tempRes = res.map((item, index) => {
-        const transformed = {
-          id: item?.id || index + 1,
-          remarks: item?.remarks || '',
-          ...item,
-        }
-        return transformed
-      })
-      console.log('res', res)
-      setRows(tempRes)
-      setOriginalRows(tempRes)
+
+      console.log('Constants data:', res)
+      const formattedData = res?.map((item, index) => ({
+        ...item,
+        remarks: item.remarks || '',
+        id: item?.id || index + 1,
+      }))
+      setRows(formattedData)
+      setOriginalRows(formattedData)
     } catch (error) {
-      console.error('Error fetching HRSG heat rate data:', error)
+      console.error('Error fetching constants data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -137,19 +117,19 @@ const HRSGHeatRate = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
-    showTitleNameBusiness: true,
-    titleName: screenTitle?.title,
-    showImport: true,
     showExport: true,
-    ExcelName: `HRSG Heat Rate - ${AOP_YEAR}`,
+    ExcelName: `Production_Norms_Constants_${AOP_YEAR}`,
+    showImport: true,
+    showTitleNameBusiness: true,
     showTitle: true,
-    showDropdown: false,
+    titleName: 'Constants',
   }
 
   const saveChanges = async () => {
     setLoading(true)
+
     const modifiedData = Object.values(modifiedCells)
-    if (modifiedData.length == 0) {
+    if (modifiedData.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
@@ -159,9 +139,8 @@ const HRSGHeatRate = () => {
       return
     }
 
-    var rawData = Object.values(modifiedCells)
-    const data = rawData.filter((row) => row.inEdit)
-    if (data.length == 0) {
+    const data = modifiedData.filter((row) => row.inEdit)
+    if (data.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
@@ -171,13 +150,12 @@ const HRSGHeatRate = () => {
       return
     }
 
-    // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['hrsgLoad', 'heatRate']
+    const fieldsToCheck = ['value']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'equipmentName',
+      'particulars',
     )
 
     if (validationError) {
@@ -190,16 +168,12 @@ const HRSGHeatRate = () => {
       return
     }
 
+    const payload = modifiedData
     try {
-      const payload = modifiedData.map((item) => {
-        const { inEdit, ...rest } = item
-        return rest
-      })
-      const tempPayload = JSON.stringify(payload)
+      console.log('Saving constants data:', payload)
 
-      const res = await InputApiService.saveHRSGHeatRateData(
+      const response = await ProductionNormsApiService.saveConstantsData(
         keycloak,
-        PLANT_ID,
         AOP_YEAR,
         payload,
       )
@@ -211,7 +185,7 @@ const HRSGHeatRate = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving heat rate data:', error)
+      console.error('Error saving constants data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -221,30 +195,66 @@ const HRSGHeatRate = () => {
       setLoading(false)
     }
   }
+
   const handleExcelUpload = async (file) => {
     if (!file) return
 
     setLoading(true)
     try {
-      const response = await InputApiService.saveHRSGHeatRateExcel(
+      const response = await ProductionNormsApiService.importConstantsExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      if (response?.success) {
+      if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Excel file imported successfully!',
+          message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        setModifiedCells({})
-        await fetchHeatRateData()
+        await fetchConstantsData()
+      } else if (response?.code === 400 && response?.data) {
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `Constants_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          await fetchConstantsData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Upload Failed!',
+          message: response?.message || 'Failed to import Excel file.',
           severity: 'error',
         })
       }
@@ -268,13 +278,17 @@ const HRSGHeatRate = () => {
     })
 
     try {
-      await InputApiService.exportHRSGHeatRateExcel(keycloak)
+      await ProductionNormsApiService.exportConstantsExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting HRSG Heat Rate data:', error)
+      console.error('Error exporting Constants data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -282,7 +296,6 @@ const HRSGHeatRate = () => {
     }
   }
 
-  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -297,14 +310,13 @@ const HRSGHeatRate = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
       <AdvanceKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        title='HRSG Heat Rate'
+        title={permissions.showTitle ? permissions.titleName : ''}
         permissions={permissions}
         handleRemarkCellClick={handleRemarkCellClick}
         remarkDialogOpen={remarkDialogOpen}
@@ -320,9 +332,15 @@ const HRSGHeatRate = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        paginationConfig={{
+          threshold: 100,
+          buttonCount: 5,
+          pageSizes: [10, 20, 50, 100],
+          defaultPageSize: 100,
+        }}
       />
     </Box>
   )
 }
 
-export default HRSGHeatRate
+export default Constants

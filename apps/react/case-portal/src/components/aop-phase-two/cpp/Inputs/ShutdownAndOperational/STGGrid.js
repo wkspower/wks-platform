@@ -1,65 +1,32 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
-import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import { Stack } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
-import STGShutdownAndOperationalHr from './STGShutdownAndOperationalHr'
 import { validateNestedRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
-import { Stack } from '../../../../../node_modules/@mui/material/index'
 import NestedKendoTable from 'components/aop-phase-two/common/NestedKendoTable/index'
 
-const generateMonthHours = (aopYear) => {
-  if (!aopYear) return {}
-
-  const [startYear, endYear] = aopYear.split('-').map((y) => parseInt(y))
-  const fullStartYear = startYear < 100 ? 2000 + startYear : startYear
-  const fullEndYear = endYear < 100 ? 2000 + endYear : endYear
-
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month, 0).getDate()
-  }
-
-  const hourRows = {
-    apr: getDaysInMonth(4, fullStartYear) * 24,
-    may: getDaysInMonth(5, fullStartYear) * 24,
-    jun: getDaysInMonth(6, fullStartYear) * 24,
-    jul: getDaysInMonth(7, fullStartYear) * 24,
-    aug: getDaysInMonth(8, fullStartYear) * 24,
-    sep: getDaysInMonth(9, fullStartYear) * 24,
-    oct: getDaysInMonth(10, fullStartYear) * 24,
-    nov: getDaysInMonth(11, fullStartYear) * 24,
-    dec: getDaysInMonth(12, fullStartYear) * 24,
-    jan: getDaysInMonth(1, fullEndYear) * 24,
-    feb: getDaysInMonth(2, fullEndYear) * 24,
-    mar: getDaysInMonth(3, fullEndYear) * 24,
-  }
-
-  return hourRows
-}
-
-const ShutdownAndOperational = () => {
+const STGGrid = ({ hoursRows = [] }) => {
   const keycloak = useSession()
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { plantObject, year } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const AOP_YEAR = year?.selectedYear
+  const headerMap = generateHeaderNames(AOP_YEAR)
+  const valueFormat = ValueFormatterProduction()
+
+  const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
-  const [modifiedCellsHours, setModifiedCellsHours] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantObject, siteObject, verticalObject, year, screenTitle } =
-    dataGridStore
-  const PLANT_ID = plantObject?.id
-  const AOP_YEAR = year?.selectedYear
-  const headerMap = generateHeaderNames(AOP_YEAR)
-  const [rows, setRows] = useState([])
-  const [originalRows, setOriginalRows] = useState([])
-  const valueFormat = ValueFormatterProduction()
-
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -68,26 +35,16 @@ const ShutdownAndOperational = () => {
     {
       field: 'assetName',
       title: 'Asset Name',
-      widthT: 150,
+      width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
       locked: true,
-    },
-    {
-      field: 'assetType',
-      title: 'Asset Type',
-      widthT: 150,
-      minWidth: 150,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
     },
     {
       field: 'utilityDistributed.name',
       title: 'Utility Distributed',
-      widthT: 150,
+      width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -96,7 +53,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityDistributed.sapCode',
       title: 'Distributed SAP Code',
-      widthT: 150,
+      width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -105,7 +62,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityGenerated.name',
       title: 'Utility Generated',
-      widthT: 150,
+      width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -114,11 +71,21 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityGenerated.sapCode',
       title: 'Generated SAP Code',
-      widthT: 150,
+      width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
       locked: true,
+    },
+    {
+      field: 'assetType',
+      title: 'Asset Type',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
+      hidden: true,
     },
     {
       title: headerMap[4],
@@ -399,140 +366,21 @@ const ShutdownAndOperational = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      widthT: 250,
+      width: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,
     },
   ]
 
-  const [hoursRows, setHoursRows] = useState([])
-  const hoursColumns = [
-    {
-      field: 'apr',
-      title: headerMap[4] || 'Apr',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'may',
-      title: headerMap[5] || 'May',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jun',
-      title: headerMap[6] || 'Jun',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jul',
-      title: headerMap[7] || 'Jul',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'aug',
-      title: headerMap[8] || 'Aug',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'sep',
-      title: headerMap[9] || 'Sep',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'oct',
-      title: headerMap[10] || 'Oct',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'nov',
-      title: headerMap[11] || 'Nov',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'dec',
-      title: headerMap[12] || 'Dec',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jan',
-      title: headerMap[1] || 'Jan',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'feb',
-      title: headerMap[2] || 'Feb',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'mar',
-      title: headerMap[3] || 'Mar',
-      widthT: 60,
-      minWidth: 60,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchShutdownAndOperationalData()
+      fetchData()
       setModifiedCells({})
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  useEffect(() => {
-    if (AOP_YEAR) {
-      const hoursData = generateMonthHours(AOP_YEAR)
-      setHoursRows([hoursData])
-    }
-  }, [AOP_YEAR])
-
-  const fetchShutdownAndOperationalData = async () => {
+  const fetchData = async () => {
     setLoading(true)
     try {
       const res = await InputApiService.getOperationHoursData(
@@ -541,24 +389,15 @@ const ShutdownAndOperational = () => {
         AOP_YEAR,
       )
 
-      if (!res || res?.powerResponse?.length === 0) {
-        setRows([])
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No data found', severity: 'info' })
-        return
-      }
-
-      const rowsWithIds = res?.powerResponse
-        ?.filter((row) => row.assetType !== 'Power_Dis')
-        ?.map((row, index) => ({
-          ...row,
-          id: row.id || index + 1,
-        }))
+      const rowsWithIds = res?.steamResponse?.map((row, index) => ({
+        ...row,
+        id: row.id || index + 1,
+      }))
 
       setRows(rowsWithIds)
       setOriginalRows(rowsWithIds)
     } catch (error) {
-      console.error('Error fetching shutdown and operational data:', error)
+      console.error('Error fetching STG grid data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -575,51 +414,29 @@ const ShutdownAndOperational = () => {
     allAction: true,
     showImport: true,
     showExport: true,
-    ExcelName: `Shutdown and Operational - ${AOP_YEAR}`,
+    ExcelName: `STG Shutdown and Operational - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
-    showTitle: true,
-    titleName: screenTitle?.title,
-  }
-
-  const hoursPermissions = {
-    showAction: false,
-    addButton: false,
-    deleteButton: false,
-    editButton: false,
-    saveBtn: false,
-    allAction: true,
-    showTitleNameBusiness: false,
-    showTitle: true,
-    titleName: 'Total available hours',
+    showTitle: false,
   }
 
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
-    if (modifiedData.length == 0) {
+    if (modifiedData.length === 0) {
       setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'No Records to Save!',
-        severity: 'info',
-      })
+      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
       setLoading(false)
       return
     }
 
-    var rawData = Object.values(modifiedCells)
-    const data = rawData.filter((row) => row.inEdit)
-    if (data.length == 0) {
+    const data = modifiedData.filter((row) => row.inEdit)
+    if (data.length === 0) {
       setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'No Records to Save!',
-        severity: 'info',
-      })
+      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
       setLoading(false)
       return
     }
 
-    // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = [
       'april.shutdownHrs',
       'may.shutdownHrs',
@@ -638,42 +455,27 @@ const ShutdownAndOperational = () => {
       data,
       originalRows,
       fieldsToCheck,
-      'assetName',
     )
-
     if (validationError) {
       setSnackbarOpen(true)
-      setSnackbarData({
-        message: validationError,
-        severity: 'error',
-      })
+      setSnackbarData({ message: validationError, severity: 'error' })
       setLoading(false)
       return
     }
 
     const payload = modifiedData.map(({ id, inEdit, ...rest }) => rest)
-    const tempPayload = {
-      powerResponse: payload,
-    }
     try {
-      console.log('payload', payload)
-
-      const response = await InputApiService.saveOperationHours(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        tempPayload,
-      )
-
+      await InputApiService.saveOperationHours(keycloak, PLANT_ID, AOP_YEAR, {
+        steamResponse: payload,
+      })
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
-      fetchShutdownAndOperationalData()
     } catch (error) {
-      console.error('Error saving operational hours data:', error)
+      console.error('Error saving STG grid data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -686,16 +488,14 @@ const ShutdownAndOperational = () => {
 
   const handleExcelUpload = async (file) => {
     if (!file) return
-
     setLoading(true)
     try {
-      const response = await InputApiService.savePowerResponseExcel(
+      const response = await InputApiService.saveSteamResponseExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -703,42 +503,35 @@ const ShutdownAndOperational = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        await fetchShutdownAndOperationalData()
+        await fetchData()
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
-        const byteNumbers = Array.from(byteCharacters, (char) =>
-          char.charCodeAt(0),
+        const byteArray = new Uint8Array(
+          Array.from(byteCharacters, (c) => c.charCodeAt(0)),
         )
-        const byteArray = new Uint8Array(byteNumbers)
-
         const blob = new Blob([byteArray], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         })
-
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
         link.setAttribute(
           'download',
-          `Error File - Shutdown and Operational.xlsx`,
+          'Error File - STG Shutdown and Operational.xlsx',
         )
         document.body.appendChild(link)
         link.click()
         link.remove()
         window.URL.revokeObjectURL(url)
-
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Partial data saved. Error file downloaded.',
           severity: 'warning',
         })
-        await fetchShutdownAndOperationalData()
+        await fetchData()
       } else {
         setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Upload Failed!',
-          severity: 'error',
-        })
+        setSnackbarData({ message: 'Upload Failed!', severity: 'error' })
       }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
@@ -754,13 +547,9 @@ const ShutdownAndOperational = () => {
 
   const handleExport = async () => {
     setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Excel download started!',
-      severity: 'info',
-    })
-
+    setSnackbarData({ message: 'Excel download started!', severity: 'info' })
     try {
-      await InputApiService.exportPowerResponseExcel(
+      await InputApiService.exportSteamResponseExcel(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -770,7 +559,7 @@ const ShutdownAndOperational = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Power Response data:', error)
+      console.error('Error exporting STG response data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -778,7 +567,6 @@ const ShutdownAndOperational = () => {
     }
   }
 
-  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -793,17 +581,6 @@ const ShutdownAndOperational = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <Stack sx={{ mb: 2 }}>
-        <AdvanceKendoTable
-          columns={hoursColumns}
-          rows={hoursRows}
-          setRows={setHoursRows}
-          title={hoursPermissions?.titleName}
-          permissions={hoursPermissions}
-          modifiedCells={modifiedCellsHours}
-          setModifiedCells={setModifiedCellsHours}
-        />
-      </Stack>
       <Stack>
         <NestedKendoTable
           columns={nestedColumns}
@@ -811,7 +588,6 @@ const ShutdownAndOperational = () => {
           setRows={setRows}
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
-          title='Shutdown and Operational Input (Hours)'
           permissions={permissions}
           handleRemarkCellClick={handleRemarkCellClick}
           remarkDialogOpen={remarkDialogOpen}
@@ -827,16 +603,12 @@ const ShutdownAndOperational = () => {
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
           setSnackbarData={setSnackbarData}
-          hoursRows={hoursRows}
           groupBy={['assetType']}
+          hoursRows={hoursRows}
         />
-      </Stack>
-
-      <Stack sx={{ mt: 2 }}>
-        <STGShutdownAndOperationalHr hoursRows={hoursRows} />
       </Stack>
     </Box>
   )
 }
 
-export default ShutdownAndOperational
+export default STGGrid

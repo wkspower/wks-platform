@@ -76,5 +76,8 @@ public class PlantMaintenanceTransaction {
     
     @Column(name = "Plant_FK_Id")
     private UUID plantId;
+    
+    @Column(name = "Line_FK_Id")
+    private UUID lineFKId;
 
 }

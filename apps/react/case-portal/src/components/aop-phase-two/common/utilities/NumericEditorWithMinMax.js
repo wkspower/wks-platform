@@ -1,5 +1,5 @@
 import { Input } from '@progress/kendo-react-inputs'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export const NumericEditorWithMinMax = ({
   dataItem,
@@ -21,6 +21,7 @@ export const NumericEditorWithMinMax = ({
   const initialValue = getNestedValue(dataItem, field)
   const [localValue, setLocalValue] = useState(initialValue)
   const [error, setError] = useState('')
+  const inputRef = useRef(null)
 
   const handleChange = (e) => {
     let val = e.target.value
@@ -48,9 +49,24 @@ export const NumericEditorWithMinMax = ({
     }
   }
 
+  useEffect(() => {
+    if (inputRef.current) {
+      const el = inputRef.current.element || inputRef.current
+      if (el && typeof el.focus === 'function') el.focus()
+    }
+  }, [])
+
   const handleBlur = () => {
     if (localValue !== initialValue && !error) {
       onChange({ dataItem, field, value: localValue })
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (localValue !== initialValue && !error) {
+        onChange({ dataItem, field, value: localValue })
+      }
     }
   }
 
@@ -59,9 +75,11 @@ export const NumericEditorWithMinMax = ({
       style={{ position: 'relative', display: 'inline-block', width: '100%' }}
     >
       <Input
+        ref={inputRef}
         value={localValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         style={{
           fontSize: '0.8rem',
           padding: '2px 2px',

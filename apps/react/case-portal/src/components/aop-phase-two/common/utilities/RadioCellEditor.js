@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Radio, Box } from '@mui/material'
+import { Input } from '@progress/kendo-react-inputs'
 
 // Inline radio component - displays value with radio button in same cell
 export const InlineRadioCellEditor = (props) => {
@@ -10,10 +11,24 @@ export const InlineRadioCellEditor = (props) => {
     radioGroupField = 'selectedHeatRateSource',
     targetField = 'finalHeatRate',
     radioValue,
+    isNumberEditable,
   } = props
 
-  const currentValue = dataItem[field]
+  const currentValue = dataItem[field] ?? ''
   const isSelected = dataItem[radioGroupField] === radioValue
+  const initialValue = currentValue
+  const [localValue, setLocalValue] = useState(currentValue)
+  const inputRef = useRef(null)
+
+  // Auto-focus on mount
+  useEffect(() => {
+    if (inputRef.current && isNumberEditable) {
+      const el = inputRef.current.element || inputRef.current
+      if (el && typeof el.focus === 'function') {
+        el.focus()
+      }
+    }
+  }, [])
 
   const handleRadioClick = () => {
     // Update the radio selection field with the radioValue (e.g., 'OEM', 'PREVIOUS_YEAR', 'PROPOSED')
@@ -24,6 +39,28 @@ export const InlineRadioCellEditor = (props) => {
       value: radioValue,
       syntheticEvent: new Event('change'),
     })
+  }
+
+  const handleValueChange = (e) => {
+    const val = e.target.value
+    // Allow empty string or valid numeric input (including decimals)
+    if (val === '' || /^\d*(\.\d*)?$/.test(val)) {
+      setLocalValue(val)
+    }
+  }
+
+  const handleBlur = () => {
+    if (localValue !== initialValue) {
+      onChange({ dataItem, field, value: localValue })
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (localValue !== initialValue) {
+        onChange({ dataItem, field, value: localValue })
+      }
+    }
   }
 
   return (
@@ -45,10 +82,39 @@ export const InlineRadioCellEditor = (props) => {
             padding: '2px',
           }}
         />
-        <Box sx={{ flexGrow: 1, textAlign: 'right', paddingRight: '8px' }}>
-          {currentValue !== null && currentValue !== undefined
-            ? currentValue
-            : ''}
+        <Box sx={{ flexGrow: 1 }}>
+          {isNumberEditable ? (
+            <Input
+              ref={inputRef}
+              value={localValue}
+              onChange={handleValueChange}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              style={{
+                fontSize: '0.8rem',
+                padding: '2px 2px',
+                height: '22px',
+                lineHeight: '1rem',
+                textAlign: 'right',
+                width: '100%',
+              }}
+            />
+          ) : (
+            <Box
+              sx={{
+                fontSize: '0.8rem',
+                padding: '2px 8px 2px 2px',
+                height: '22px',
+                lineHeight: '1.4rem',
+                textAlign: 'right',
+                width: '100%',
+              }}
+            >
+              {currentValue !== null && currentValue !== undefined
+                ? currentValue
+                : ''}
+            </Box>
+          )}
         </Box>
       </Box>
     </td>
@@ -62,10 +128,18 @@ export const InlineRadioDisplayCell = (props) => {
     radioGroupField = 'selectedHeatRateSource',
     format,
     radioValue,
+    customModifiedCells,
   } = props
 
   const value = dataItem[field]
   const isSelected = dataItem[radioGroupField] === radioValue
+  const rowId = dataItem.id
+
+  // Check if this cell was edited
+  const isEdited = Object.prototype.hasOwnProperty.call(
+    customModifiedCells?.[rowId] || {},
+    field,
+  )
 
   // Apply formatting if provided
   let displayValue = value
@@ -107,7 +181,15 @@ export const InlineRadioDisplayCell = (props) => {
             padding: '2px',
           }}
         />
-        <Box sx={{ flexGrow: 1, textAlign: 'right', paddingRight: '8px' }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            textAlign: 'right',
+            paddingRight: '8px',
+            color: isEdited ? 'orange' : 'inherit',
+            fontWeight: isEdited ? 'bold' : 'normal',
+          }}
+        >
           {displayValue !== null && displayValue !== undefined
             ? displayValue
             : ''}

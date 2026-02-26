@@ -13,6 +13,7 @@ import getEnhancedColDefsProposedNorms from 'components/data-tables/CommonHeader
 import { ConsumptionNormsApiService } from 'services/consumption-norms-api-service'
 import { getRoleName } from 'services/role-service'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import KendoDataTables from './index'
 
 const ProposedConsumptionNorms = () => {
@@ -445,6 +446,8 @@ const ProposedConsumptionNorms = () => {
       ExcelName: `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}`,
       isHeight: rows?.length > 10,
       showTitleNameBusiness: true,
+      showTitle: true,
+      title: `${SCREEN_NAME}`,
       titleName: `${SCREEN_NAME}`,
     },
     isOldYear,
@@ -476,7 +479,7 @@ const ProposedConsumptionNorms = () => {
               borderBottom: 'none',
             }}
           >
-            <KendoDataTables
+            <KendoDataTablesReports
               modifiedCells={modifiedCells}
               setModifiedCells={setModifiedCells}
               columns={productionColumns}
@@ -508,6 +511,7 @@ const ProposedConsumptionNorms = () => {
               calculatebtnClicked={calculatebtnClicked}
               downloadExcelForConfiguration={downloadExcelForConfiguration}
               plantID={PLANT_ID}
+              title={SCREEN_NAME}
             />
           </Box>
         }

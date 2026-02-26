@@ -49,4 +49,5 @@ public class ShutDownPlanDTO {
 	private String month;
     private Double rpfDownTime;
     private Double noOfRPF;
+    private String lineId;
 }
