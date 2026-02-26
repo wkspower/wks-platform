@@ -971,6 +971,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	        Sites site = siteRepository.findById(plant.getSiteFkId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			Sheet sheet = workbook.createSheet("Sheet1");
@@ -982,6 +984,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				if(vertical.getName().equalsIgnoreCase("CRACKER")) {
 					String procedureName=vertical.getName()+"_GetAOPMCValues";
 		        	obj= findByYearAndPlantId(year, UUID.fromString(plantFKId) ,  procedureName);
+		        } if (vertical.getName().equalsIgnoreCase("PTA")) {
+		            String view = "vw" + vertical.getName() + "_" + site.getName() + "_AOPMCValues";
+		            obj = getDataMCUValuesAllData(year, plantFKId, view);
 		        }else {
 		        	obj = aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantFKId.toString());
 		        }
