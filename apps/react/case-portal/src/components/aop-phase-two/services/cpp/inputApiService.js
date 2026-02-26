@@ -88,10 +88,16 @@ async function getOperationHoursData(keycloak, plantId, year) {
   }
 }
 
-async function exportCPPNormsExcel(keycloak, PLANT_ID, financialYear) {
+async function exportCPPNormsExcel(
+  keycloak,
+  PLANT_ID,
+  financialYear,
+  startDate,
+  endDate,
+) {
   return exportExcelData(keycloak, {
     endpoint: `cpp-norms/export`,
-    queryParams: { cppPlantId: PLANT_ID, financialYear },
+    queryParams: { cppPlantId: PLANT_ID, financialYear, startDate, endDate },
     fileName: `CPPNorms_${financialYear}.xlsx`,
     method: 'GET',
   })
@@ -662,8 +668,17 @@ async function getHRSGHeatRateDropdown(keycloak, cppId) {
 }
 
 //====================|| NORM BASED UTILITY BUDGET APIs ||====================//
-async function getNormBasedUtilityBudget(keycloak, PLANT_ID, financialYear) {
-  const url = `${Config.CaseEngineUrl}/task/cpp-norms?cppPlantId=${PLANT_ID}&financialYear=${financialYear}`
+async function getNormBasedUtilityBudget(
+  keycloak,
+  PLANT_ID,
+  financialYear,
+  startDate,
+  endDate,
+) {
+  let url = `${Config.CaseEngineUrl}/task/cpp-norms?cppPlantId=${PLANT_ID}&financialYear=${financialYear}`
+  if (startDate && endDate) {
+    url += `&startDate=${startDate}&endDate=${endDate}`
+  }
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

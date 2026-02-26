@@ -125,6 +125,7 @@ const DateRangeSelectorWithHistory = ({
   }
 
   const getConfigurationExecutionDetails = async () => {
+    setDateLoading(true)
     try {
       const response = await InputApiService.getConfigurationExecutionDetails(
         keycloak,
@@ -149,6 +150,8 @@ const DateRangeSelectorWithHistory = ({
       }
     } catch (error) {
       console.error('Error fetching getConfigurationExecutionDetails:', error)
+    } finally {
+      setDateLoading(false)
     }
   }
 

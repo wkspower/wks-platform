@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, Backdrop, CircularProgress } from '@mui/material'
+import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
@@ -7,6 +7,7 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { validateNestedRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import NestedKendoTable from 'components/aop-phase-two/common/NestedKendoTable/index'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
+import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
 
 const FixedNorms = () => {
   const keycloak = useSession()
@@ -14,6 +15,9 @@ const FixedNorms = () => {
 
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
+  const [dateLoading, setDateLoading] = useState(false)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -262,20 +266,33 @@ const FixedNorms = () => {
   const [originalRows, setOriginalRows] = useState([])
   const [calculationLoading, setCaculationLoading] = useState(false)
 
+  const formatDate = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
-      fetchNormsData()
+    if (PLANT_ID && AOP_YEAR && startDate && endDate) {
+      setDateLoading(true)
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      fetchNormsData(formattedStartDate, formattedEndDate)
       setModifiedCells({})
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR, startDate, endDate])
 
-  const fetchNormsData = async () => {
+  const fetchNormsData = async (startDate, endDate) => {
     setLoading(true)
     try {
       const res = await InputApiService.getNormBasedUtilityBudget(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        startDate,
+        endDate,
       )
 
       if (res?.data?.length === 0) {
@@ -301,6 +318,7 @@ const FixedNorms = () => {
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
+      setDateLoading(false)
     }
   }
 
@@ -435,7 +453,9 @@ const FixedNorms = () => {
           severity: 'success',
         })
         // Refresh data after import
-        await fetchNormsData()
+        const formattedStartDate = formatDate(startDate)
+        const formattedEndDate = formatDate(endDate)
+        await fetchNormsData(formattedStartDate, formattedEndDate)
       } else if (response?.code === 400 && response?.data) {
         // Handle error response with Excel file download
         try {
@@ -465,7 +485,9 @@ const FixedNorms = () => {
             severity: 'error',
           })
           // Refresh data after import
-          await fetchNormsData()
+          const formattedStartDate = formatDate(startDate)
+          const formattedEndDate = formatDate(endDate)
+          await fetchNormsData(formattedStartDate, formattedEndDate)
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -501,7 +523,16 @@ const FixedNorms = () => {
     })
 
     try {
-      await InputApiService.exportCPPNormsExcel(keycloak, PLANT_ID, AOP_YEAR)
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+
+      await InputApiService.exportCPPNormsExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        formattedStartDate,
+        formattedEndDate,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -628,8 +659,25 @@ const FixedNorms = () => {
     <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading || calculationLoading}
-      ></Backdrop>
+        open={!!loading || !!dateLoading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+
+      <Stack sx={{ mt: 2, mb: 2 }}>
+        <DateRangeSelectorWithHistory
+          onDateChange={({ startDate, endDate }) => {
+            console.log('Dates changed:', startDate, endDate)
+            setStartDate(startDate)
+            setEndDate(endDate)
+          }}
+          disabled={false}
+          timeRequired={false}
+          showLastRefreshed={true}
+          dateLoading={dateLoading}
+          setDateLoading={setDateLoading}
+        />
+      </Stack>
       <NestedKendoTable
         columns={nestedColumns}
         rows={rows}
