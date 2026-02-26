@@ -53,6 +53,11 @@ public class SpyroOutputController {
 		return	spyroOutputService.getSpyroOutputYieldDMD(year, plantId);
 	}
 	
+	@GetMapping(value="/spyro-output/yield-vmd")
+	public AOPMessageVM getSpyroOutputYieldVMD(@RequestParam String year,@RequestParam String plantId){
+		return	spyroOutputService.getSpyroOutputYieldVMD(year, plantId);
+	}
+	
 	@GetMapping(value = "/yield-export")
 	public ResponseEntity<byte[]> exportYieldReport(
 	         @RequestParam("plantId") String plantId,

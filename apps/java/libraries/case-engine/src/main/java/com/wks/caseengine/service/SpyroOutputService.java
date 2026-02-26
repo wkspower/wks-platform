@@ -23,6 +23,8 @@ public interface SpyroOutputService {
 	
 	public AOPMessageVM getSpyroOutputYieldDMD( String year, String plantId);
 	
+	public AOPMessageVM getSpyroOutputYieldVMD( String year, String plantId);
+	
 	public byte[] exportYieldReport(String year, String plantFKId,boolean isAfterSave,List<YieldDTO> dtoList);
 	
 	public byte[] exportYieldDMD(String year, String plantFKId,boolean isAfterSave,List<YieldDMDDTO> dtoList);

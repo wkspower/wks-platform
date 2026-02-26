@@ -35,6 +35,7 @@ import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDMDDTO;
 import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.dto.YieldParticularDTO;
+import com.wks.caseengine.dto.YieldVMDDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
@@ -483,6 +484,56 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    }
 	}
 
+	@Override
+	public AOPMessageVM getSpyroOutputYieldVMD(String year, String plantId) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<YieldVMDDTO> spyroOutputYieldDataList = new ArrayList<YieldVMDDTO>();
+	    
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+
+	    String procedureName = vertical.getName() + "_" + site.getName() + "_GetYield";
+
+	    try {
+	        List<Object[]> results = getYieldData(plantId, year, procedureName);
+	        
+	        double[] totals = new double[8];
+
+	        for (Object[] row : results) {
+	        	YieldVMDDTO yieldDTO = new YieldVMDDTO();
+	            yieldDTO.setParticulars(row[0] != null ? row[0].toString() : " ");
+	            double[] vals = new double[8];
+	            for (int i = 0; i < 5; i++) {
+	                vals[i] = parseDoubleSafe(row[i + 1]);
+	                totals[i] += vals[i]; 
+	            }
+
+	            mapValuesToDTO(yieldDTO, vals);
+	            spyroOutputYieldDataList.add(yieldDTO);
+	        }
+
+	        YieldVMDDTO totalRow = new YieldVMDDTO();
+	        totalRow.setParticulars("Total");
+	        mapValuesToDTO(totalRow, totals);
+	        spyroOutputYieldDataList.add(totalRow);
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(spyroOutputYieldDataList);
+	        return aopMessageVM;
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	    	ex.printStackTrace();
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
 	/**
 	 * Helper to safely parse objects to double
 	 */
@@ -523,7 +574,14 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    dto.setFourF2SC2C3(v[21]);
 	    dto.setFourF2SPropane(v[22]);
 	    dto.setFourF2SEthane(v[23]);
-	}	
+	}
+	private void mapValuesToDTO(YieldVMDDTO dto, double[] v) {
+	    dto.setFiveNE(v[0]);
+	    dto.setFiveNS(v[1]);
+	    dto.setFourNE(v[2]);
+	    dto.setFourNS(v[3]);
+	    dto.setThreeNE(v[4]);
+	}
 	public byte[] exportYieldReport(String year, String plantId, boolean isAfterSave, List<YieldDTO> dtoList) {
 	    try {
 	        AOPMessageVM aopMessageVM = getSpyroOutputYieldData(year,plantId);
