@@ -1394,6 +1394,26 @@ export const monthwiseProductionPlanResponse =
           isEditable: true,
         },
         {
+          id: 'CDU1-HVGO',
+          displayName: 'HVGO',
+          plantName: 'CDU-1',
+          plantFkId: 'D3F15808-5E4F-454B-9C3A-B921731EDFBD',
+          april: 17.07,
+          may: 17.07,
+          june: 17.07,
+          july: 17.07,
+          aug: 17.07,
+          sep: 17.07,
+          oct: 17.07,
+          nov: 17.07,
+          dec: 17.07,
+          jan: 17.07,
+          feb: 17.07,
+          march: 17.07,
+          UOM: 'wt%',
+          isEditable: true,
+        },
+        {
           id: 'CDU1-SLOP-WAX',
           displayName: 'Slop Wax',
           plantName: 'CDU-1',
@@ -1832,7 +1852,7 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         productName: 'VR Motor (P18) Pump Running Status',
         productDisplayName: 'VR Motor (P18) Pump Running Status',
-        dependencyConfig: {
+        attributeValue: {
           dependentProductName: 'VR Motor (P18) Pump',
           valueMapping: {
             Yes: 40,
@@ -1864,7 +1884,7 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         productName: 'RCO motor (P10) Pump Running Status',
         productDisplayName: 'RCO motor (P10) Pump Running Status',
-        dependencyConfig: {
+        attributeValue: {
           dependentProductName: 'RCO motor (P10) Pump',
           valueMapping: {
             Yes: 45,
@@ -1896,7 +1916,7 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'date',
         productName: 'Norms Preparation Time',
         productDisplayName: 'Norms Preparation Time',
-        dependencyConfig: {
+        attributeValue: {
           dependentProductName:
             'Days remaining time from norms preparation time to AOP next cycle start',
           calculationType: 'dateDifference',
@@ -1962,7 +1982,7 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         productName: 'Heat Exchanger Cleaning Plan',
         productDisplayName: 'Heat Exchanger Cleaning Plan',
-        dependencyConfig: {
+        attributeValue: {
           dependentProductName: 'PHT Drop due to exchanger cleaning',
           valueMapping: {
             Yes: 3,
@@ -2113,7 +2133,7 @@ export const configurationAndReportManualEntryResponse =
         inputType: 'dropdown',
         productName: '38% Ejector Input',
         productDisplayName: '38% Ejector Input',
-        dependencyConfig: {
+        attributeValue: {
           dependentProductName: 'MP Steam Consumption in 38% ejector',
           valueMapping: {
             Yes: 382.08,

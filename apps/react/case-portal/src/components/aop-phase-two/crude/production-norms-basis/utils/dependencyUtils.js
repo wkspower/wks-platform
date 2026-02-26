@@ -36,15 +36,15 @@ export const handleDateDifferenceCalculation = ({
   const { dependentProductName, targetDateField } = dependencyConfig
 
   // Find the target date field
-  const targetDateRow = rows.find((r) => r.productName === targetDateField)
+  const targetDateRow = rows.find((r) => r.name === targetDateField)
 
-  if (!targetDateRow || !targetDateRow.value || !value) {
+  if (!targetDateRow || !targetDateRow.attributeValue || !value) {
     return
   }
 
   // Validate dates
   const startDate = new Date(value)
-  const endDate = new Date(targetDateRow.value)
+  const endDate = new Date(targetDateRow.attributeValue)
 
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     console.error(
@@ -54,11 +54,17 @@ export const handleDateDifferenceCalculation = ({
   }
 
   // Calculate days difference
-  const diffDays = calculateDateDifference(value, targetDateRow.value)
+  const diffDays = calculateDateDifference(value, targetDateRow.attributeValue)
 
-  // Format dates for remark
-  const startDateFormatted = startDate.toLocaleDateString('en-GB')
-  const endDateFormatted = endDate.toLocaleDateString('en-GB')
+  // Format dates for remark (yyyy-mm-dd format)
+  const formatDateString = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  const startDateFormatted = formatDateString(startDate)
+  const endDateFormatted = formatDateString(endDate)
 
   // Generate remark with warning for negative days
   let autoRemark = `Auto-calculated: ${diffDays} days between ${startDateFormatted} and ${endDateFormatted}`
@@ -67,7 +73,7 @@ export const handleDateDifferenceCalculation = ({
   }
 
   // Find dependent row once (performance optimization)
-  const dependentRow = rows.find((r) => r.productName === dependentProductName)
+  const dependentRow = rows.find((r) => r.name === dependentProductName)
   if (!dependentRow) {
     console.warn(`Dependent row not found: ${dependentProductName}`)
     return
@@ -84,10 +90,10 @@ export const handleDateDifferenceCalculation = ({
   // Update rows
   setRowsCallback((prevRows) => {
     return prevRows.map((row) => {
-      if (row.productName === dependentProductName) {
+      if (row.name === dependentProductName) {
         return {
           ...row,
-          value: diffDays,
+          attributeValue: diffDays,
           remarks: finalRemark,
           inEdit: true,
         }
@@ -102,7 +108,7 @@ export const handleDateDifferenceCalculation = ({
       ...prev,
       [dependentRow.id]: {
         ...dependentRow,
-        value: diffDays,
+        attributeValue: diffDays,
         remarks: finalRemark,
         inEdit: true,
       },
@@ -115,7 +121,7 @@ export const handleDateDifferenceCalculation = ({
       ...prev,
       [dependentRow.id]: {
         ...(prev[dependentRow.id] || {}),
-        value: diffDays,
+        attributeValue: diffDays,
         remarks: finalRemark,
       },
     }
@@ -126,7 +132,7 @@ export const handleDateDifferenceCalculation = ({
  * Handle value mapping dependency (e.g., dropdown changes)
  * @param {Object} params - Parameters object
  * @param {string} params.value - The new value for the field
- * @param {Object} params.dependencyConfig - The dependency configuration
+ * @param {Object} params.attributeValue - The dependency configuration
  * @param {Array} params.rows - Current rows data
  * @param {Function} params.setRowsCallback - Callback to update rows
  * @param {Function} params.setModifiedCells - Callback to update modified cells
@@ -148,10 +154,10 @@ export const handleValueMappingDependency = ({
   // Update rows
   setRowsCallback((prevRows) => {
     return prevRows.map((row) => {
-      if (row.productName === dependentProductName) {
+      if (row.name === dependentProductName) {
         return {
           ...row,
-          value: dependentValue,
+          attributeValue: dependentValue,
           inEdit: true,
         }
       }
@@ -161,16 +167,14 @@ export const handleValueMappingDependency = ({
 
   // Update modifiedCells
   setModifiedCells((prev) => {
-    const dependentRow = rows.find(
-      (r) => r.productName === dependentProductName,
-    )
+    const dependentRow = rows.find((r) => r.name === dependentProductName)
     if (!dependentRow) return prev
 
     return {
       ...prev,
       [dependentRow.id]: {
         ...dependentRow,
-        value: dependentValue,
+        attributeValue: dependentValue,
         inEdit: true,
       },
     }
@@ -178,16 +182,14 @@ export const handleValueMappingDependency = ({
 
   // Update customModifiedCells
   setCustomModifiedCells((prev) => {
-    const dependentRow = rows.find(
-      (r) => r.productName === dependentProductName,
-    )
+    const dependentRow = rows.find((r) => r.name === dependentProductName)
     if (!dependentRow) return prev
 
     return {
       ...prev,
       [dependentRow.id]: {
         ...(prev[dependentRow.id] || {}),
-        value: dependentValue,
+        attributeValue: dependentValue,
       },
     }
   })
@@ -217,10 +219,10 @@ export const handleLegacyDependencyRule = ({
   // Update rows
   setRowsCallback((prevRows) => {
     return prevRows.map((row) => {
-      if (row.productName === dependencyRule.dependentProductName) {
+      if (row.name === dependencyRule.dependentProductName) {
         return {
           ...row,
-          value: dependentValue,
+          attributeValue: dependentValue,
           inEdit: true,
         }
       }
@@ -231,7 +233,7 @@ export const handleLegacyDependencyRule = ({
   // Update modifiedCells
   setModifiedCells((prev) => {
     const dependentRow = rows.find(
-      (r) => r.productName === dependencyRule.dependentProductName,
+      (r) => r.name === dependencyRule.dependentProductName,
     )
     if (!dependentRow) return prev
 
@@ -239,7 +241,7 @@ export const handleLegacyDependencyRule = ({
       ...prev,
       [dependentRow.id]: {
         ...dependentRow,
-        value: dependentValue,
+        attributeValue: dependentValue,
         inEdit: true,
       },
     }
@@ -248,7 +250,7 @@ export const handleLegacyDependencyRule = ({
   // Update customModifiedCells
   setCustomModifiedCells((prev) => {
     const dependentRow = rows.find(
-      (r) => r.productName === dependencyRule.dependentProductName,
+      (r) => r.name === dependencyRule.dependentProductName,
     )
     if (!dependentRow) return prev
 
@@ -256,7 +258,7 @@ export const handleLegacyDependencyRule = ({
       ...prev,
       [dependentRow.id]: {
         ...(prev[dependentRow.id] || {}),
-        value: dependentValue,
+        attributeValue: dependentValue,
       },
     }
   })

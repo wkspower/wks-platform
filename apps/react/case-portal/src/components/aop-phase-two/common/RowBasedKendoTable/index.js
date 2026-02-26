@@ -28,7 +28,7 @@ const RowBasedKendoTable = (props) => {
               )
 
               const value = dataItem?.[field]
-              const inputType = dataItem?.inputType
+              const inputType = dataItem?.type
 
               let displayValue = value
 
@@ -36,20 +36,17 @@ const RowBasedKendoTable = (props) => {
                 displayValue =
                   typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
               } else if (inputType === 'date' && value instanceof Date) {
-                displayValue = value.toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                })
+                const year = value.getFullYear()
+                const month = String(value.getMonth() + 1).padStart(2, '0')
+                const day = String(value.getDate()).padStart(2, '0')
+                displayValue = `${year}-${month}-${day}`
               } else if (inputType === 'datetime' && value instanceof Date) {
-                displayValue = value.toLocaleString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true,
-                })
+                const year = value.getFullYear()
+                const month = String(value.getMonth() + 1).padStart(2, '0')
+                const day = String(value.getDate()).padStart(2, '0')
+                const hours = String(value.getHours()).padStart(2, '0')
+                const minutes = String(value.getMinutes()).padStart(2, '0')
+                displayValue = `${year}-${month}-${day} ${hours}:${minutes}`
               } else {
                 // Format numbers with 3 decimal places
                 if (!isNaN(value) && value !== null && value !== '') {
@@ -76,7 +73,6 @@ const RowBasedKendoTable = (props) => {
       return col
     })
   }, [columns, props.externalCustomModifiedCells])
-  console.log('enhancedColumns', enhancedColumns)
 
   return (
     <AdvanceKendoTable {...restProps} columns={enhancedColumns} rows={rows} />

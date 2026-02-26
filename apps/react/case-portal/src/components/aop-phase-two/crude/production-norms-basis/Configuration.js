@@ -15,6 +15,7 @@ import {
   handleValueMappingDependency,
   handleLegacyDependencyRule,
 } from './utils/dependencyUtils'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
 
 const Configuration = () => {
   const keycloak = useSession()
@@ -41,14 +42,14 @@ const Configuration = () => {
   const [dependencyRules, setDependencyRules] = useState({})
 
   // Build dependency rules from row data
-  // Expects rows to have dependencyConfig property on controller fields
+  // Expects rows to have config property on controller fields
   const buildDependencyRules = (rowsData) => {
     const rules = {}
     rowsData.forEach((row) => {
-      if (row.dependencyConfig && row.productName) {
-        rules[row.productName] = {
-          dependentProductName: row.dependencyConfig.dependentProductName,
-          values: row.dependencyConfig.valueMapping || {},
+      if (row.config && row.name) {
+        rules[row.name] = {
+          dependentProductName: row.config.dependentProductName,
+          values: row.config.valueMapping || {},
         }
       }
     })
@@ -57,7 +58,7 @@ const Configuration = () => {
 
   const columns = [
     {
-      field: 'productName',
+      field: 'name',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -66,7 +67,7 @@ const Configuration = () => {
       hidden: false,
     },
     {
-      field: 'UOM',
+      field: 'uom',
       title: 'UOM',
       widthT: 80,
       minWidth: 60,
@@ -74,7 +75,7 @@ const Configuration = () => {
       editable: false,
     },
     {
-      field: 'value',
+      field: 'attributeValue',
       title: 'Value',
       editable: true,
       widthT: 100,
@@ -94,6 +95,11 @@ const Configuration = () => {
     },
   ]
 
+  const nonEditableProduct = [
+    'Norms Cycle Start',
+    'Days remaining time from norms preparation time to AOP next cycle start',
+  ]
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConfigurationData()
@@ -103,29 +109,11 @@ const Configuration = () => {
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
-      // Simulate API call with 1 second delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // const res = await ProductionNormsApiService.getConfigurationData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
-
-      let res
-      if (plantObject.name == 'CDU-1') {
-        res = configurationAndReportManualEntryResponse.data.filter(
-          (item) =>
-            item.normType !== 'PIMS Throughput' &&
-            (!item.plant || item.plant === 'CDU-1'),
-        )
-      } else {
-        res = configurationAndReportManualEntryResponse.data.filter(
-          (item) =>
-            item.normType !== 'PIMS Throughput' &&
-            (!item.plant || item.plant === 'CDU-2'),
-        )
-      }
+      const res = await ProductionNormsApiService.getConfigurationData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -135,26 +123,53 @@ const Configuration = () => {
       }
 
       const formattedData = res?.map((item, index) => {
-        const mappingKeys = item.dependencyConfig?.valueMapping
-          ? Object.keys(item.dependencyConfig.valueMapping)
+        // Parse config from JSON string if it exists
+        let parsedAttributeValue = null
+        if (item.config) {
+          try {
+            parsedAttributeValue =
+              typeof item.config === 'string'
+                ? JSON.parse(item.config)
+                : item.config
+          } catch (e) {
+            console.error('Error parsing config:', e)
+            parsedAttributeValue = null
+          }
+        }
+
+        const mappingKeys = parsedAttributeValue?.valueMapping
+          ? Object.keys(parsedAttributeValue.valueMapping)
           : []
 
-        // Preserve existing inputType (date, dropdown, etc.) or infer from dependencies
-        // Default to 'number' if no inputType is specified
-        const inputType =
-          item.inputType || (mappingKeys.length ? 'dropdown' : undefined)
+        // Preserve existing type (date, dropdown, etc.) or infer from dependencies
+        // Default to 'number' if no type is specified
+        const type = item.type || (mappingKeys.length ? 'dropdown' : undefined)
+
+        // Format date values to YYYY-MM-DD string format
+        let formattedAttributeValue = item.attributeValue
+        if ((type === 'date' || type === 'datetime') && item.attributeValue) {
+          try {
+            const dateObj = new Date(item.attributeValue)
+            if (!isNaN(dateObj.getTime())) {
+              const year = dateObj.getFullYear()
+              const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+              const day = String(dateObj.getDate()).padStart(2, '0')
+              formattedAttributeValue = `${year}-${month}-${day}`
+            }
+          } catch (e) {
+            console.error('Error formatting date:', e)
+          }
+        }
 
         return {
           ...item,
-          inputType,
+          config: parsedAttributeValue,
+          type,
           options: item.options?.length ? item.options : mappingKeys,
           remarks: item.remarks || '',
           id: item?.id || index + 1,
-          // Convert date strings to Date objects for date/datetime inputs
-          value:
-            (inputType === 'date' || inputType === 'datetime') && item.value
-              ? new Date(item.value)
-              : item.value,
+          attributeValue: formattedAttributeValue,
+          isEditable: !nonEditableProduct.includes(item.name),
         }
       })
       setRows(formattedData)
@@ -213,12 +228,12 @@ const Configuration = () => {
       return
     }
 
-    const fieldsToCheck = ['value']
+    const fieldsToCheck = ['attributeValue']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'productName',
+      'name',
     )
 
     if (validationError) {
@@ -231,15 +246,27 @@ const Configuration = () => {
       return
     }
 
-    const payload = modifiedData
+    // Transform payload to stringify config field for backend
+    const payload = modifiedData.map((item) => {
+      const { config, ...rest } = item
+      return {
+        ...rest,
+        // Stringify config if it exists and is an object
+        config:
+          config && typeof config === 'object'
+            ? JSON.stringify(config)
+            : config,
+      }
+    })
+
     try {
       console.log('Saving configuration data:', payload)
 
-      // const response = await ProductionNormsApiService.saveConfigurationData(
-      //   keycloak,
-      //   AOP_YEAR,
-      //   payload,
-      // )
+      const response = await ProductionNormsApiService.saveConfigurationData(
+        keycloak,
+        AOP_YEAR,
+        payload,
+      )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -264,12 +291,12 @@ const Configuration = () => {
 
     setLoading(true)
     try {
-      // const response = await ProductionNormsApiService.importConfigurationExcel(
-      //   file,
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      const response = await ProductionNormsApiService.importConfigurationExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -341,11 +368,11 @@ const Configuration = () => {
     })
 
     try {
-      // await ProductionNormsApiService.exportConfigurationExcel(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      await ProductionNormsApiService.exportConfigurationExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -368,19 +395,19 @@ const Configuration = () => {
   const handleCustomItemChange = (e, setRowsCallback) => {
     const { dataItem, field, value } = e
 
-    if (field !== 'value') return
+    if (field !== 'attributeValue') return
 
-    const currentProductName = dataItem.productName
+    const currentProductName = dataItem.name
 
     // Check if this field has a dependency configuration
-    if (dataItem.dependencyConfig) {
-      const { calculationType, valueMapping } = dataItem.dependencyConfig
+    if (dataItem.config) {
+      const { calculationType, valueMapping } = dataItem.config
 
       // Handle date difference calculation
       if (calculationType === 'dateDifference') {
         handleDateDifferenceCalculation({
           value,
-          dependencyConfig: dataItem.dependencyConfig,
+          dependencyConfig: dataItem.config,
           rows,
           setRowsCallback,
           setModifiedCells,
@@ -393,7 +420,7 @@ const Configuration = () => {
       if (valueMapping) {
         handleValueMappingDependency({
           value,
-          dependencyConfig: dataItem.dependencyConfig,
+          dependencyConfig: dataItem.config,
           rows,
           setRowsCallback,
           setModifiedCells,
@@ -450,7 +477,7 @@ const Configuration = () => {
         customItemChange={handleCustomItemChange}
         externalCustomModifiedCells={customModifiedCells}
         externalSetCustomModifiedCells={setCustomModifiedCells}
-        groupBy={['normType']}
+        groupBy={['normParameterType']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

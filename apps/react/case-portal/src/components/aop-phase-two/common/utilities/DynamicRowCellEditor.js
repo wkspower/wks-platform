@@ -9,7 +9,7 @@ import { DropDownList } from '@progress/kendo-react-dropdowns'
 
 export const DynamicRowCellEditor = (props) => {
   const { dataItem, field, onChange } = props
-  const inputType = dataItem?.inputType
+  const inputType = dataItem?.type
   const rawOptions = dataItem?.options || []
 
   // Convert string array to object array for SelectCellEditor
@@ -75,27 +75,24 @@ export const DynamicRowCellEditor = (props) => {
 export const DynamicRowDisplayCell = (props) => {
   const { dataItem, field, tdProps, format } = props
   const value = dataItem?.[field]
-  const inputType = dataItem?.inputType
+  const inputType = dataItem?.type
 
   let displayValue = value
 
   if (inputType === 'boolean' || inputType === 'yesno') {
     displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
   } else if (inputType === 'date' && value instanceof Date) {
-    displayValue = value.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+    displayValue = `${year}-${month}-${day}`
   } else if (inputType === 'datetime' && value instanceof Date) {
-    displayValue = value.toLocaleString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    })
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+    const hours = String(value.getHours()).padStart(2, '0')
+    const minutes = String(value.getMinutes()).padStart(2, '0')
+    displayValue = `${year}-${month}-${day} ${hours}:${minutes}`
   } else {
     // Format numbers using the format function from column definition
     if (!isNaN(value)) {
