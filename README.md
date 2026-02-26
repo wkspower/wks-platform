@@ -2,8 +2,11 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> ❗ **Critical Note: Spring Boot 4 & Camunda 7 Compatibility**
-> To prevent CI/CD interruptions and security-driven deployment blocks, WKS Platform users should plan their transition to Spring Boot 4.x. Camunda 7 environments require specific architectural refactoring to remain compliant with modern security scanners. **[Get a Transition Action Plan →](https://wkspower.com)**
+> ## ⚠️ CRITICAL NOTE — Spring Boot 4 & Camunda 7 Compatibility
+> **Action required:** plan your migration to Spring Boot 4.x to avoid CI/CD interruptions and security-driven deployment blocks.
+> Camunda 7 environments require targeted architectural refactoring to remain compliant with modern security scanners.
+>
+> [![Contact for a Transition Action Plan](https://img.shields.io/badge/Get%20the%20Transition%20Action%20Plan-orange?style=for-the-badge)](https://wkspower.com)
 
 [On-line documentation](https://docs.wkspower.com/docs/Introduction/)
 
@@ -13,12 +16,17 @@
 
 Table of Contents
 -----------------
-- [Features](#features)
-- [Installation](#installation)
-- [Diagrams](#diagrams)
-- [Screenshots](#screenshots)
-- [License](#license)
-- [Contact](#contact)
+- [WKS Platform](#wks-platform)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Diagrams](#diagrams)
+    - [Architecture overview](#architecture-overview)
+    - [Case Definition structure](#case-definition-structure)
+    - [Event Hub](#event-hub)
+  - [Screenshots](#screenshots)
+  - [License](#license)
+  - [Contact](#contact)
 
 WKS Platform is an open-source Case Management and Process Automation solution that leverages a powerful stack of technologies, including Camunda, MongoDB, Keycloak, Traefik, MinIO, OPA (Open Policy Agent), Form.io, Spring Boot, and React. It provides a comprehensive framework for managing and automating business processes, enabling organizations to streamline their operations, enhance efficiency, and improve decision-making.
 
