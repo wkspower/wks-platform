@@ -810,6 +810,15 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
 	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true);
+	        headerStyle.setFont(headerFont);
+	        headerStyle.setBorderTop(BorderStyle.THIN);
+	        headerStyle.setBorderBottom(BorderStyle.THIN);
+	        headerStyle.setBorderLeft(BorderStyle.THIN);
+	        headerStyle.setBorderRight(BorderStyle.THIN);
+
 	        int currentRow = 0;
 
 	        // (Ensure your header writing is here)
@@ -828,7 +837,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
-	            cell.setCellStyle(normalStyle);
+	            cell.setCellStyle(headerStyle);
 	        }
 
 	        int dataRowCount = dtoList.size();

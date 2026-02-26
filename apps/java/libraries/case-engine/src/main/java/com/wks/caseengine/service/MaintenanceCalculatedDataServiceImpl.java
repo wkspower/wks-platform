@@ -845,7 +845,16 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	            totalUpdatedRows += query.executeUpdate();
 	        }
-
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("maintenance-details");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 	        aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("Updated rows: " + totalUpdatedRows);
 	        return aopMessageVM;
