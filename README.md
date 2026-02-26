@@ -2,6 +2,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+> ❗ **Critical Note: Spring Boot 4 & Camunda 7 Compatibility**
+> To prevent CI/CD interruptions and security-driven deployment blocks, WKS Platform users should plan their transition to Spring Boot 4.x. Camunda 7 environments require specific architectural refactoring to remain compliant with modern security scanners. **[Get a Transition Action Plan →](https://wkspower.com)**
+
 [On-line documentation](https://docs.wkspower.com/docs/Introduction/)
 
 [Contact Form](https://share-eu1.hsforms.com/1tpt0kdYDS5CbimQTH7xmVA2dcag3)
