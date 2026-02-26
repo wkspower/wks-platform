@@ -794,6 +794,89 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    return null;
 	}
 
+	public byte[] exportYieldVMD(String year, String plantId, boolean isAfterSave, List<YieldVMDDTO> dtoList) {
+	    try {
+	        AOPMessageVM aopMessageVM = getSpyroOutputYieldVMD(year,plantId);
+	        if (!isAfterSave) {
+	            dtoList = (List<YieldVMDDTO>) aopMessageVM.getData();
+	        }
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+
+	        CellStyle normalStyle = workbook.createCellStyle();
+	        CellStyle totalRowStyle = workbook.createCellStyle();
+	        totalRowStyle.cloneStyleFrom(normalStyle);
+	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+	        int currentRow = 0;
+
+	        // (Ensure your header writing is here)
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Particulars");
+	        innerHeaders.add("5NE");
+	        innerHeaders.add("5NS");
+	        innerHeaders.add("4NE");
+	        innerHeaders.add("4NS");
+	        innerHeaders.add("3NE");
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(normalStyle);
+	        }
+
+	        int dataRowCount = dtoList.size();
+	        for (int i = 0; i < dataRowCount; i++) {
+	            YieldVMDDTO dto = dtoList.get(i);
+	            Row row = sheet.createRow(currentRow++);
+	            List<Object> rowData = new ArrayList<>();
+	            rowData.add(dto.getParticulars());
+	            rowData.add(dto.getFiveNE());
+	            rowData.add(dto.getFiveNS());
+	            rowData.add(dto.getFourNE());
+	            rowData.add(dto.getFourNS());
+	            rowData.add(dto.getThreeNE());
+	            
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
+
+	            boolean isLastRow = (i == dataRowCount - 1);
+	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
+
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	                cell.setCellStyle(styleToUse);
+	            }
+	        }
+
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
 	@Override
 	public AOPMessageVM importYieldExcel(String year,UUID plantId,MultipartFile file) {
 		// TODO Auto-generated method stub

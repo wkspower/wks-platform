@@ -30,6 +30,8 @@ public interface SpyroOutputService {
 	
 	public byte[] exportYieldDMD(String year, String plantFKId,boolean isAfterSave,List<YieldDMDDTO> dtoList);
 	
+	public byte[] exportYieldVMD(String year, String plantFKId,boolean isAfterSave,List<YieldVMDDTO> dtoList);
+	
 	public AOPMessageVM updateSpyroOutputYieldData( String plantId, String year,  List<YieldDTO> yieldDTOs);
 	
 	public AOPMessageVM updateSpyroOutputYieldDMD( String plantId, String year,  List<YieldDMDDTO> yieldDTOs);
