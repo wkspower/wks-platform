@@ -1,0 +1,65 @@
+[
+  {
+    "field": "particulars",
+    "title": "Particulars",
+    "editable": false,
+    "widthT": 130,
+    "fixedWidth": 130,
+    "width": 130
+  },
+  {
+    "field": "fiveNE",
+    "title": "5NE",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
+  },
+  {
+    "field": "fiveNS",
+    "title": "5NS",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
+  },
+  {
+    "field": "fourNE",
+    "title": "4NE",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
+  },
+  {
+    "field": "fourNS",
+    "title": "4NS",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
+  },
+  {
+    "field": "threeNE",
+    "title": "3NE",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
+  },
+  {
+    "field": "NormParameterFKID",
+    "title": "NormParameterFKID",
+    "hidden": true
+  }
+]

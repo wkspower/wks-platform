@@ -106,7 +106,9 @@ const CrackerConfig = () => {
           : currentTabDisplay === 'Yield'
             ? SITE_NAME == 'NMD'
               ? 'cracker_yield'
-              : 'cracker_yield_dmd'
+              : SITE_NAME == 'VMD'
+                ? 'cracker_yield_vmd'
+                : 'cracker_yield_dmd'
             : 'cracker'
 
     return getEnhancedAOPColDefs({
@@ -340,6 +342,14 @@ const CrackerConfig = () => {
         if (currentTabDisplay == 'Yield') {
           if (SITE_NAME == 'NMD') {
             spyroVMYield1 = await DataService.getSpyroOutputDataYield(
+              keycloak,
+              mode,
+              currentTabDisplay,
+              PLANT_ID,
+              AOP_YEAR,
+            )
+          } else if (SITE_NAME == 'VMD') {
+            spyroVMYield1 = await DataService.getSpyroOutputDataYieldVMD(
               keycloak,
               mode,
               currentTabDisplay,
@@ -581,6 +591,15 @@ const CrackerConfig = () => {
           fourFDPropane: row.fourFDPropane || 0,
           fourFEthane: row.fourFEthane || 0,
         }))
+      } else if (SITE_NAME === 'VMD') {
+        SpyroOutputYield = dataToSave.map((row) => ({
+          particulars: row.particulars,
+          fiveNE: row.fiveNE || 0,
+          fiveNS: row.fiveNS || 0,
+          fourNE: row.fourNE || 0,
+          fourNS: row.fourNS || 0,
+          threeNE: row.threeNE || 0,
+        }))
       } else {
         SpyroOutputYield = dataToSave.map((row) => ({
           particulars: row.particulars,
@@ -622,6 +641,13 @@ const CrackerConfig = () => {
 
       if (SITE_NAME == 'NMD') {
         response = await DataService.saveSpyroOutputYield(
+          SpyroOutputYield,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (SITE_NAME == 'VMD') {
+        response = await DataService.saveSpyroOutputYieldVMD(
           SpyroOutputYield,
           keycloak,
           PLANT_ID,
@@ -677,6 +703,14 @@ const CrackerConfig = () => {
       if (currentTabDisplay === 'Yield') {
         if (SITE_NAME == 'NMD') {
           response = await DataService.importSpyroOutputExcelYield(
+            rawFile,
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        } else if (SITE_NAME == 'VMD') {
+          response = await DataService.importSpyroOutputExcelYieldVMD(
             rawFile,
             keycloak,
             mode,
@@ -784,6 +818,15 @@ const CrackerConfig = () => {
         if (SITE_NAME == 'NMD') {
           const YieldExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
           response = await DataService.exportSpyroOutputExcelYield(
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+            YieldExcelName,
+          )
+        } else if (SITE_NAME == 'VMD') {
+          const YieldExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
+          response = await DataService.exportSpyroOutputExcelYieldVMD(
             keycloak,
             mode,
             PLANT_ID,
