@@ -57,6 +57,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
           }
         })
 
+        injectGlobalVariables(apiDataVariables, task)
         setFormComponents(apiDataFormComponents)
         setVariableValues(apiDataVariables)
         setClaimed(task.assignee !== null && task.assignee !== undefined)
@@ -188,4 +189,10 @@ export const TaskForm = ({ open, handleClose, task }) => {
       </Dialog>
     </div>
   )
+}
+function injectGlobalVariables(apiDataVariables, task) {
+  apiDataVariables['data'] = {
+    ...apiDataVariables.data,
+    processInstanceId: task.processInstanceId,
+  }
 }

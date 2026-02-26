@@ -2,25 +2,20 @@ import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
 import CloseIcon from '@mui/icons-material/Close'
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban'
 import ViewListIcon from '@mui/icons-material/ViewList'
-import { useTheme } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
-import TablePagination from '@mui/material/TablePagination'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Tooltip from '@mui/material/Tooltip'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Typography from '@mui/material/Typography'
 import { useSession } from 'SessionStoreContext'
 import MainCard from 'components/MainCard'
-import Config from 'consts/index'
-import React, {
-  Suspense,
-  createContext,
-  lazy,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CaseService } from '../../services'
 
@@ -44,7 +39,6 @@ const NewCaseForm = lazy(() =>
 )
 
 export const CaseList = ({ status, caseDefId }) => {
-  const PaginationContext = createContext()
   const { t } = useTranslation()
   const [stages, setStages] = useState([])
   const [cases, setCases] = useState([])
@@ -59,7 +53,7 @@ export const CaseList = ({ status, caseDefId }) => {
   const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
   const [filter, setFilter] = useState({
-    sort: '',
+    sort: 'desc',
     limit: 10,
     after: '',
     before: '',
@@ -68,28 +62,9 @@ export const CaseList = ({ status, caseDefId }) => {
     hasNext: false,
   })
 
-  useEffect(() => {
-    if (Config.WebsocketsEnabled) {
-      const websocketUrl = Config.WebsocketUrl
-      const topic = Config.WebsocketsTopicCaseCreated
-      const ws = new WebSocket(`${websocketUrl}/${topic}`)
-      ws.onmessage = () => {
-        fetchCases(
-          setFetching,
-          keycloak,
-          caseDefId,
-          setStages,
-          status,
-          filter,
-          setCases,
-          setFilter,
-        )
-      }
-      return () => {
-        ws.close() // Close WebSocket connection when component unmounts
-      }
-    }
-  }, [])
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
+  const pageSizeOptions = [5, 10, 25, 50]
 
   useEffect(() => {
     fetchCases(
@@ -109,6 +84,19 @@ export const CaseList = ({ status, caseDefId }) => {
       setCaseDefs(resp)
     })
   }, [])
+
+  const handleRefresh = () => {
+    fetchCases(
+      setFetching,
+      keycloak,
+      caseDefId,
+      setStages,
+      status,
+      filter,
+      setCases,
+      setFilter,
+    )
+  }
 
   const makeColumns = () => {
     return [
@@ -235,7 +223,7 @@ export const CaseList = ({ status, caseDefId }) => {
   )
 
   const handlerNextPage = () => {
-    setFetching(true)
+    setFetching(true) / setCases([])
 
     const next = {
       sort: filter.sort,
@@ -263,6 +251,8 @@ export const CaseList = ({ status, caseDefId }) => {
   const handlerPriorPage = () => {
     setFetching(true)
 
+    setCases([])
+
     const prior = {
       sort: filter.sort,
       limit: filter.limit,
@@ -286,152 +276,193 @@ export const CaseList = ({ status, caseDefId }) => {
       })
   }
 
-  function TablePaginationActions(props) {
-    const theme = useTheme()
-    const filter = useContext(PaginationContext)
-    const { onPageChange } = props
-
-    const handleBackButtonClick = (event) => {
-      onPageChange(event, 'back')
-    }
-
-    const handleNextButtonClick = (event) => {
-      onPageChange(event, 'next')
-    }
-
-    const { hasPrevious, hasNext } = filter
-
-    return (
-      <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-        <IconButton
-          onClick={handleBackButtonClick}
-          disabled={!hasPrevious}
-          aria-label='previous page'
-        >
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowRight />
-          ) : (
-            <KeyboardArrowLeft />
-          )}
-        </IconButton>
-        <IconButton
-          onClick={handleNextButtonClick}
-          disabled={!hasNext}
-          aria-label='next page'
-        >
-          {theme.direction === 'rtl' ? (
-            <KeyboardArrowLeft />
-          ) : (
-            <KeyboardArrowRight />
-          )}
-        </IconButton>
-      </Box>
-    )
+  const handlePageSizeClick = (event) => {
+    setAnchorEl(event.currentTarget)
   }
 
-  const CustomPagination = () => {
-    return (
-      <PaginationContext.Provider value={filter}>
-        <TablePagination
-          component='div'
-          count={-1}
-          page={0}
-          labelRowsPerPage={
-            <div style={{ paddingTop: 15 }}>Rows per page:</div>
-          }
-          rowsPerPage={filter.limit}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          getItemAriaLabel={() => ''}
-          labelDisplayedRows={() => ''}
-          onPageChange={(e, type) => {
-            const action = {
-              next: handlerNextPage,
-              back: handlerPriorPage,
-            }
-            action[type]()
-          }}
-          onRowsPerPageChange={(e) => {
-            setFetching(true)
-
-            CaseService.filterCase(keycloak, caseDefId, status, {
-              limit: e.target.value,
-            })
-              .then((resp) => {
-                const { data, paging } = resp
-
-                setCases(data)
-                setFilter({
-                  ...filter,
-                  limit: e.target.value,
-                  cursors: paging.cursors,
-                  hasPrevious: paging.hasPrevious,
-                  hasNext: paging.hasNext,
-                })
-              })
-              .finally(() => {
-                setFetching(false)
-              })
-          }}
-          SelectProps={{
-            inputProps: {
-              'aria-label': 'rows per page',
-            },
-            native: true,
-          }}
-          ActionsComponent={TablePaginationActions}
-        />
-      </PaginationContext.Provider>
-    )
+  const handlePageSizeClose = () => {
+    setAnchorEl(null)
   }
+
+  const handlePageSizeSelect = (pageSize) => {
+    setFetching(true)
+
+    setCases([])
+
+    CaseService.filterCase(keycloak, caseDefId, status, {
+      sort: filter.sort,
+      limit: pageSize,
+    })
+      .then((resp) => {
+        const { data, paging } = resp
+
+        setCases(data)
+        setFilter({
+          ...filter,
+          limit: pageSize,
+          cursors: paging.cursors,
+          hasPrevious: paging.hasPrevious,
+          hasNext: paging.hasNext,
+        })
+      })
+      .finally(() => {
+        setFetching(false)
+      })
+
+    handlePageSizeClose()
+  }
+
+  const processedCases = cases.map((caseItem, index) => ({
+    ...caseItem,
+    tempId: `${caseItem.businessKey}-${index}`,
+  }))
 
   return (
     <div style={{ height: 650, width: '100%' }}>
-      {caseDefId && (
-        <div>
-          <Button
-            id='basic-button'
-            onClick={handleNewCaseAction}
-            variant='contained'
-          >
-            {t('pages.caselist.action.newcase')}
-          </Button>
-        </div>
-      )}
-
-      {caseDefId && (
-        <ToggleButtonGroup
-          orientation='horizontal'
-          value={view}
-          exclusive
-          onChange={handleChangeView}
-        >
-          <ToggleButton value='list' aria-label='list'>
-            <ViewListIcon />
-          </ToggleButton>
-          <ToggleButton value='kanban' aria-label='kanban'>
-            <ViewKanbanIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Box>
+          {caseDefId && (
+            <Button
+              id='basic-button'
+              onClick={handleNewCaseAction}
+              variant='contained'
+            >
+              {t('pages.caselist.action.newcase')}
+            </Button>
+          )}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {caseDefId && (
+            <ToggleButtonGroup
+              orientation='horizontal'
+              value={view}
+              exclusive
+              onChange={handleChangeView}
+              sx={{ mr: 2 }}
+            >
+              <ToggleButton value='list' aria-label='list'>
+                <ViewListIcon />
+              </ToggleButton>
+              <ToggleButton value='kanban' aria-label='kanban'>
+                <ViewKanbanIcon />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          )}
+          <Tooltip title={t('pages.caselist.action.refresh')}>
+            <IconButton
+              onClick={handleRefresh}
+              color='primary'
+              disabled={fetching}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
 
       <MainCard sx={{ mt: 2 }} content={false}>
         <Box>
           {view === 'list' && (
             <div>
               <Suspense fallback={<div>Loading...</div>}>
-                <DataGrid
+                <Box
                   sx={{
                     height: 500,
                     width: '100%',
-                    backgroundColor: '#ffffff',
-                    mt: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
-                  rows={cases}
-                  columns={makeColumns()}
-                  getRowId={(row) => row.businessKey}
-                  loading={fetching}
-                  components={{ Pagination: CustomPagination }}
-                />
+                >
+                  <DataGrid
+                    sx={{
+                      flex: 1,
+                      width: '100%',
+                      backgroundColor: '#ffffff',
+                      mt: 1,
+                      '& .MuiDataGrid-main': { flex: 1 },
+                      '& .MuiDataGrid-footerContainer': {
+                        display: 'none',
+                      },
+                    }}
+                    rows={processedCases}
+                    columns={makeColumns()}
+                    getRowId={(row) => row.id || row.tempId || row.businessKey}
+                    loading={fetching}
+                    hideFooter={true}
+                    disableSelectionOnClick
+                  />
+
+                  <Box
+                    sx={{
+                      padding: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      borderTop: '1px solid rgba(224, 224, 224, 1)',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant='body2' sx={{ mr: 2 }}>
+                        Rows per page:
+                      </Typography>
+                      <Button
+                        aria-controls={open ? 'page-size-menu' : undefined}
+                        aria-haspopup='true'
+                        aria-expanded={open ? 'true' : undefined}
+                        onClick={handlePageSizeClick}
+                        variant='text'
+                        size='small'
+                        endIcon={<KeyboardArrowRight />}
+                        sx={{ minWidth: '75px' }}
+                      >
+                        {filter.limit}
+                      </Button>
+                      <Menu
+                        id='page-size-menu'
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handlePageSizeClose}
+                        MenuListProps={{
+                          'aria-labelledby': 'page-size-button',
+                        }}
+                      >
+                        {pageSizeOptions.map((option) => (
+                          <MenuItem
+                            key={option}
+                            onClick={() => handlePageSizeSelect(option)}
+                            selected={filter.limit === option}
+                          >
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant='body2' sx={{ mx: 2 }}>
+                        {cases.length > 0
+                          ? filter.hasNext
+                            ? `1-${cases.length} of more than ${cases.length}`
+                            : `1-${cases.length} of ${cases.length}`
+                          : '0-0 of 0'}
+                      </Typography>
+
+                      <IconButton
+                        onClick={handlerPriorPage}
+                        disabled={!filter.hasPrevious || fetching}
+                      >
+                        <KeyboardArrowLeft />
+                      </IconButton>
+                      <IconButton
+                        onClick={handlerNextPage}
+                        disabled={!filter.hasNext || fetching}
+                      >
+                        <KeyboardArrowRight />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Box>
               </Suspense>
             </div>
           )}
@@ -439,7 +470,7 @@ export const CaseList = ({ status, caseDefId }) => {
             <Suspense fallback={<div>Loading...</div>}>
               <Kanban
                 stages={stages}
-                cases={cases}
+                cases={processedCases}
                 caseDefId={caseDefId}
                 kanbanConfig={fetchKanbanConfig()}
                 setACase={setACase}
@@ -482,6 +513,7 @@ export const CaseList = ({ status, caseDefId }) => {
     </div>
   )
 }
+
 function fetchCases(
   setFetching,
   keycloak,
@@ -493,6 +525,8 @@ function fetchCases(
   setFilter,
 ) {
   setFetching(true)
+
+  setCases([])
 
   CaseService.getCaseDefinitionsById(keycloak, caseDefId)
     .then((resp) => {

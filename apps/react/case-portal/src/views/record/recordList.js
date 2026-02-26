@@ -29,7 +29,12 @@ export const RecordList = ({ recordTypeId }) => {
             const key = element.key
             const label = element.label
 
-            dynamicColumns.push({ field: key, headerName: label, width: 100 })
+            dynamicColumns.push({
+              field: key,
+              headerName: label,
+              width: 100,
+              flex: 1,
+            })
           })
 
         dynamicColumns.push({
@@ -90,7 +95,10 @@ export const RecordList = ({ recordTypeId }) => {
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
-            getRowId={(row) => row._id.$oid}
+            getRowId={(row) => {
+              console.log(row._id?.$oid ?? row.id)
+              return row._id?.$oid ?? row.id
+            }}
           />
         </Box>
       </MainCard>

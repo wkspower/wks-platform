@@ -11,6 +11,21 @@
  */
 package com.wks.bpm.engine.camunda.client;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,6 +52,7 @@ import org.camunda.community.rest.client.dto.TaskDto;
 import org.camunda.community.rest.client.dto.UserIdDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -92,7 +108,22 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Override
 	public void deploy(final BpmEngine bpmEngine, final String fileName, final String bpmnXml) {
-		throw new UnsupportedOperationException();
+		try {
+			File file = new File(fileName);
+
+			FileWriter writer = new FileWriter(file);
+			writer.write(bpmnXml);
+			writer.close();
+
+			deploymentApi.createDeployment(tenantHolder.getTenantId().get(), null, false, false, fileName, new Date(),
+					file);
+		} catch (IOException e) {
+			log.error("Error parsing the BPMN", e);
+			e.printStackTrace();
+		} catch (ApiException e) {
+			log.error("Error on camunda deployment", e);
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import {
   IconList,
   IconSquareAsterisk,
   IconDatabase,
+  IconLayoutDashboard,
 } from '@tabler/icons-react'
 
 import i18n from '../i18n'
@@ -19,6 +20,7 @@ const icons = {
   IconSquareAsterisk,
   IconList,
   IconDatabase,
+  IconLayoutDashboard,
 }
 
 const workspace = {
@@ -26,6 +28,14 @@ const workspace = {
   title: '',
   type: 'group',
   children: [
+    {
+      id: 'workspace',
+      title: i18n.t('menu.workspace'),
+      type: 'item',
+      url: '/home',
+      icon: icons.IconLayoutDashboard,
+      breadcrumbs: true,
+    },
     {
       id: 'case-list',
       title: i18n.t('menu.case'),

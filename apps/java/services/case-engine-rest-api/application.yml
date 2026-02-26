@@ -52,3 +52,70 @@ case.engine.email-to-case-outbound-process: email-to-case-outbound
 
 case.engine.actuator.enabled: true
 case.engine.swagger.enabled: true
+
+# database drive options: mongo or jpa
+database.type: mongo
+
+# h2
+# spring:
+#   autoconfigure:
+#     exclude:
+#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+#   datasource:
+#     jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#     driver-class-name: org.h2.Driver
+#     username: sa
+#     password:
+#     hikari:
+#       maximum-pool-size: 10
+#       minimum-idle: 2
+#       idle-timeout: 30000
+#       connection-timeout: 30000
+#       max-lifetime: 1800000
+#   jpa:
+#     database-platform: org.hibernate.dialect.H2Dialect
+#     hibernate:
+#       ddl-auto: create
+#     show-sql: true
+#     defer-datasource-initialization: true
+#     properties:
+#       hibernate:
+#         format_sql: true
+#   sql:
+#     init:
+#        schema-locations: classpath:schema-h2.sql
+#        mode: always
+
+# postgres
+# spring:
+#   autoconfigure:
+#     exclude:
+#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+#   datasource:
+#     jdbcUrl: jdbc:postgresql://localhost:5432/wks
+#     driver-class-name: org.postgresql.Driver
+#     username: wks
+#     password: wks00
+#     hikari:
+#       maximum-pool-size: 10
+#       minimum-idle: 2
+#       idle-timeout: 30000
+#       connection-timeout: 30000
+#       max-lifetime: 1800000
+#   jpa:
+#     database-platform: org.hibernate.dialect.PostgreSQLDialect
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
+#     defer-datasource-initialization: true
+#     properties:
+#       hibernate:
+#         format_sql: true
+#   sql:
+#     init:
+#       schema-locations: classpath:schema-postgresql.sql
+#       mode: always
+
+      

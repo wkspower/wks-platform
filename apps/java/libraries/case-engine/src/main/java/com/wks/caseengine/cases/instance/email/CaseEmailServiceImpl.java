@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
 
@@ -32,6 +33,7 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	}
 
 	@Override
+	@Transactional
 	public void start(CaseEmail caseEmail) {
 		if (!caseEmail.isOutbound()) {
 			commandExecutor.execute(new StartCaseEmailCmd(caseEmail));
@@ -41,16 +43,19 @@ public class CaseEmailServiceImpl implements CaseEmailService {
 	}
 
 	@Override
+	@Transactional
 	public CaseEmail save(CaseEmail caseEmail) {
 		return commandExecutor.execute(new SaveCaseEmailCmd(caseEmail));
 	}
 
 	@Override
+	@Transactional
 	public void markAsSent(final String id, final Date sentDateTime) {
 		commandExecutor.execute(new MarkAsSentCaseEmailCmd(id, sentDateTime));
 	}
 
 	@Override
+	@Transactional
 	public void patch(final String id, final CaseEmail mergePatch) {
 		commandExecutor.execute(new PatchCaseEmailCmd(id, mergePatch));
 	}

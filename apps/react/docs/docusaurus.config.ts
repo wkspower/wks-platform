@@ -70,18 +70,13 @@ const config: Config = {
           label: "Intro Video",
         },
         {
-          href: "https://www.wkspower.com/contact",
+          href: "https://www.wkspower.com",
+          label: "WKS Power Website",
+          position: "right",
+        },
+        {
+          href: "https://wkspower.com/contact-us-wks-platform",
           label: "Contact Us",
-          position: "right",
-        },
-        {
-          href: "https://www.wkspower.com/subscribe",
-          label: "Subscribe",
-          position: "right",
-        },
-        {
-          href: "https://wkspower.thinkific.com/courses/wks-platform-acm",
-          label: "In-Company Training",
           position: "right",
         },
         {

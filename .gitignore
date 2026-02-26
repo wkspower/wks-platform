@@ -28,6 +28,14 @@ local.properties
 
 .vscode
 
+### IntelliJ ###
+out/
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
+
 # External tool builders
 .externalToolBuilders/
 

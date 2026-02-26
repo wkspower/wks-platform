@@ -1,61 +1,113 @@
----
-id: installation-option-1
-title: Option 1 - Pre-built Docker Images
----
-
 # WKS Platform Installation Guide
 
 ## Option 1: Running with Pre-built Docker Images
 
-:::warning
-**⚠️ For Development/Test Environments Only ⚠️**<br />
-The provided docker-compose files are recommended only for use in development or test environments.
-:::
+> **⚠️ Warning:** The provided Docker Compose files are recommended **only for development or test environments**.
 
-To quickly set up and run the project in a development environment, you can use pre-built Docker images. This approach ensures that all necessary dependencies and services are configured automatically, providing a seamless and consistent environment.
+This guide outlines the steps to quickly set up and run the WKS Platform using pre-built Docker images. This approach provides a seamless and consistent environment with all necessary dependencies and services pre-configured.
+
+---
+
+## 🔧 Prerequisites
+
+* Docker installed on your system
+* Git installed for cloning the repository
+
+---
+
+## 🚀 Step-by-Step Installation
+
+### 1. Clone the Docker Configuration Repository
 
 ```bash
 git clone https://github.com/wkspower/wks-platform-docker.git
 cd wks-platform-docker
-
-# Now choose one of two options below:
-
-# For camunda 7
-docker-compose -f docker-compose.yaml -f docker-compose.camunda7.yaml -f docker-compose.demo-data-loader.camunda7.yaml -f docker-compose.portal.yaml up -d --build
-
-# For camunda 8
-docker-compose -f docker-compose.yaml -f docker-compose.camunda8.yaml -f docker-compose.demo-data-loader.camunda8.yaml -f docker-compose.portal.yaml up -d --build
 ```
 
-### Add the following lines to your local hosts file
+### 2. Run Docker Compose
+
+Choose one of the following options depending on the version of Camunda you want to use:
+
+#### For Camunda 7
 
 ```bash
-# Required to correctly route case-portal requests to localhost
-127.0.0.1 minio
-::1 minio
+docker-compose \
+  -f docker-compose.yaml \
+  -f docker-compose.camunda7.yaml \
+  -f docker-compose.demo-data-loader.camunda7.yaml \
+  -f docker-compose.portal.yaml \
+  up -d --build
 ```
 
+#### For Camunda 8
 
-After successfully running `docker-compose up` to start the Docker Compose configuration, it may take a while for all the web applications to finish their startup process. Once the startup is complete, you can access the following web applications:
+```bash
+docker-compose \
+  -f docker-compose.yaml \
+  -f docker-compose.camunda8.yaml \
+  -f docker-compose.demo-data-loader.camunda8.yaml \
+  -f docker-compose.portal.yaml \
+  up -d --build
+```
 
-- **WKS Platform Portal**: You can access the WKS Platform Portal by opening your web browser and navigating to [http://localhost:3001](http://localhost:3001). Use the following credentials to log in: 
-    - Username: demo
-    - Password: demo
+### 3. Configure Hostnames
 
-- **Camunda**: To access the Camunda web application, open your web browser and visit [http://localhost:8080](http://localhost:8080). Use the following credentials to log in: 
-    - Username: demo
-    - Password: demo
+Add the following lines to your local `hosts` file to ensure proper routing of portal requests:
 
-- **Keycloak**: Access the Keycloak web application by opening your web browser and visiting [http://localhost:8082](http://localhost:8082). Use the following credentials to log in as an administrator: 
-    - Username: admin
-    - Password: admin
+```
+127.0.0.1 minio
+::1       minio
+```
 
-- **MinIO**: Access the MinIO web application by opening your web browser and visiting [http://localhost:9000](http://localhost:9000). Use the following credentials to log in as an administrator: 
-    - Username: minio
-    - Password: #minio00#
+---
 
-Please note that it may take some time for the web applications to become fully operational, especially if this is the first time you are running them. If you encounter any issues, wait a few moments and try accessing the applications again.
+## 🌐 Accessing the Web Applications
 
-Additionally, the MongoDB database used by these applications is running on port 27017.
+Once all containers have started, you can access the following web applications:
 
-Remember to ensure that you have Docker installed on your system before running the `docker-compose up` command.
+### WKS Platform Portal
+
+* **URL:** [http://localhost:3001](http://localhost:3001)
+* **Username:** `demo`
+* **Password:** `demo`
+
+### Camunda (7 or 8)
+
+* **URL:** [http://localhost:8080](http://localhost:8080)
+* **Username:** `demo`
+* **Password:** `demo`
+
+### Keycloak
+
+* **URL:** [http://localhost:8082](http://localhost:8082)
+* **Username:** `admin`
+* **Password:** `admin`
+
+### MinIO
+
+* **URL:** [http://localhost:9000](http://localhost:9000)
+* **Username:** `minio`
+* **Password:** `#minio00#`
+
+> **Note:** It may take some time for the applications to become fully operational during the first run. If you encounter issues, wait a few moments and try again.
+
+---
+
+## 🛠️ Additional Details
+
+* The **MongoDB** database used by the applications is accessible on port `27017`.
+* Ensure all services are running by checking container statuses with:
+
+```bash
+docker ps
+```
+
+---
+
+## ✅ Summary
+
+This guide enables developers and testers to deploy the WKS Platform using Docker with minimal setup. For production deployments, consult the advanced configuration and security guidelines provided in the full WKS documentation.
+
+---
+
+For support or questions, please refer to the [WKS documentation site](https://github.com/wkspower/wks-platform) or contact your WKS system administrator.

@@ -94,7 +94,15 @@ async function getByKey(keycloak, formKey) {
 
   try {
     const resp = await fetch(url, { headers })
-    return json(keycloak, resp)
+
+    const requested = await json(keycloak, resp)
+
+    const data = requestRemoteDataSourceAndFillRecordTypesIfRequired(
+      requested,
+      keycloak,
+    )
+
+    return Promise.resolve(data)
   } catch (err) {
     console.log(err)
     return await Promise.reject(err)
@@ -116,5 +124,69 @@ async function getVariableById(keycloak, processInstanceId) {
   } catch (err) {
     console.log(err)
     return await Promise.reject(err)
+  }
+}
+
+function requestRemoteDataSourceAndFillRecordTypesIfRequired(
+  original,
+  keycloak,
+) {
+  function processComponentWithContext(components) {
+    return components?.map((item) => {
+      if (item.type === 'recordtype') {
+        const options = item.customOptions
+        const typeRender =
+          options.inputType === 'selectone' ? 'select' : 'selectboxes'
+        const template = options.template
+        const recordId = options.recordType.id
+        const valueProperty = options.valueProperty
+
+        return {
+          ...item,
+          type: typeRender,
+          dataSrc: 'url',
+          template: `<span>${template}</span>`,
+          valueProperty: valueProperty,
+          data: {
+            url: `${Config.CaseEngineUrl}/record/${recordId}`,
+            headers: [
+              {
+                key: 'Authorization',
+                value: `Bearer ${keycloak.token}`,
+              },
+            ],
+          },
+        }
+      }
+
+      // Handle components recursively
+      if (item.components) {
+        return {
+          ...item,
+          components: processComponentWithContext(item.components),
+        }
+      }
+
+      // Handle columns (each column has a "components" array)
+      if (item.columns) {
+        return {
+          ...item,
+          columns: item.columns.map((column) => ({
+            ...column,
+            components: processComponentWithContext(column.components || []),
+          })),
+        }
+      }
+
+      return item
+    })
+  }
+
+  return {
+    ...original,
+    structure: {
+      ...original.structure,
+      components: processComponentWithContext(original.structure?.components),
+    },
   }
 }

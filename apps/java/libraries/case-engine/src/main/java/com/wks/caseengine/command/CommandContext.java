@@ -23,7 +23,6 @@ import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.email.repository.CaseEmailRepository;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
-import com.wks.caseengine.db.EngineMongoDataConnection;
 import com.wks.caseengine.form.FormRepository;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.queue.QueueRepository;
@@ -33,10 +32,6 @@ import com.wks.caseengine.record.type.RecordTypeRepository;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @author victor.franca
- *
- */
 @Component
 @Getter
 @Setter
@@ -88,7 +83,7 @@ public class CommandContext {
 	private GenericBusinessKeyGenerator businessKeyCreator;
 
 	@Autowired
-	private EngineMongoDataConnection connection;
+	private DataConnectionExchange dataConnectionExchange;
 
 	@Autowired
 	private GsonBuilder gsonBuilder;

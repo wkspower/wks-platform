@@ -2,10 +2,12 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
-import { CaseService, RecordService } from 'services'
+import { CaseService, RecordService, MenuEventService } from 'services'
 import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
+import RecordTypeChoice from './components/@formio/RecordTypeChoice'
+import { Formio } from 'formiojs'
 import './App.css'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
@@ -27,6 +29,15 @@ const App = () => {
       RegisterInjectUserSession(keycloak)
       RegisteOptions(keycloak)
       forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
+      registerExtensionModulesFormio()
+
+      const unsubscribe = MenuEventService.subscribeToMenuUpdates(() => {
+        buildMenuItems(keycloak)
+      })
+
+      return () => {
+        if (unsubscribe) unsubscribe()
+      }
     })
 
     keycloak.onAuthRefreshError = () => {
@@ -59,15 +70,34 @@ const App = () => {
     }
   }, [])
 
+  function registerExtensionModulesFormio() {
+    Formio.use(RecordTypeChoice)
+  }
+
   async function forceLogoutIfUserNoMinimalRoleForSystem(keycloak) {
     if (!accountStore.hasAnyRole(keycloak)) {
       return keycloak.logout({ redirectUri: window.location.origin })
     }
   }
 
+  function enableExternalLinkMenuItemIfRequired(menu) {
+    if (!menu.items[0]?.children?.length) {
+      delete menu.items[0]
+    }
+  }
+
   async function buildMenuItems(keycloak) {
     const menu = {
       items: [...menuItemsDefs.items],
+    }
+
+    if (menu.items[1].children) {
+      const recordListMenu = menu.items[1].children.find(
+        (menu) => menu.id === 'record-list',
+      )
+      if (recordListMenu) {
+        recordListMenu.children = []
+      }
     }
 
     await RecordService.getAllRecordTypes(keycloak).then((data) => {
@@ -85,6 +115,15 @@ const App = () => {
           })
       })
     })
+
+    if (menu.items[1].children) {
+      const caseListMenu = menu.items[1].children.find(
+        (menu) => menu.id === 'case-list',
+      )
+      if (caseListMenu) {
+        caseListMenu.children = []
+      }
+    }
 
     await CaseService.getCaseDefinitions(keycloak).then((data) => {
       setCasesDefinitions(data)
@@ -105,6 +144,8 @@ const App = () => {
     if (!accountStore.isManagerUser(keycloak)) {
       delete menu.items[2]
     }
+
+    enableExternalLinkMenuItemIfRequired(menu)
 
     return setMenu(menu)
   }

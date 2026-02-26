@@ -1,0 +1,87 @@
+---
+id: email-to-case
+title: Email to Case tutorial
+---
+
+# 📬 Email to Case
+
+The **Email to Case** feature in the WKS Platform allows emails to be seamlessly integrated into case workflows. Whether it's an inbound message from a user or an outbound email sent by a caseworker, this functionality ensures critical communication is captured and managed directly within the platform.
+
+---
+
+## ✉️ What Is Email to Case?
+
+Email to Case allows users to:
+- Automatically create new case instances from inbound emails
+- Update existing cases by replying or sending new emails linked to case identifiers
+- Send outbound emails from within case activities
+
+Email becomes a first-class component of case management—alongside tasks, comments, documents, and processes.
+
+---
+
+## 🧭 How It Works
+
+### Inbound Emails (Creating or Updating Cases)
+
+1. An **email is sent** to a predefined email address (e.g., `mailto-case+new@domain.com`)
+
+![Screenshot of an email being written and sent to a predefined email address](https://wkspower.com/hs-fs/hubfs/1-sending-email.png?width=2458&height=1412&name=1-sending-email.png)
+2. A **custom email consumer service** (external to WKS) monitors this mailbox
+3. The email consumer sends a request to the **WKS REST API** via the **HCP (Hybrid Cloud Platform)** layer
+4. A **Camunda internal process** is triggered to:
+   - Identify the intent (create new or update existing case)
+   - Create or log the email appropriately
+   - Optionally start or continue a case process
+
+![Gif showing the case created based on the email received](../../../static/img/Reviewing.gif)
+> 🛠 WKS does **not provide** out-of-the-box email consumers.
+
+### Example Address Structure
+- **Creating a new case:** `mailto-case+new-customer-support@yourdomain.com`
+- **Updating a case:** `mailto-case+case-22@yourdomain.com`  
+  (Where `22` is the business key or ID of an existing case)
+
+---
+
+## 📤 Outbound Emails
+
+When a caseworker sends an email:
+1. The action triggers an **outbound Camunda process**
+2. A **Kafka message** is emitted with email content and metadata
+3. A **custom email sender component** listens to the Kafka topic and sends the actual email
+4. The sender then **acknowledges** email delivery via a callback to WKS’s API
+5. The process resumes and logs the email in the case history
+
+> 🔧 WKS provides a simple Node.js-based email sender example in its open-source repository. You’re encouraged to adapt or build your own based on your infrastructure.
+
+---
+
+## 🔁 Internal Camunda Processes
+
+WKS uses **Camunda BPM** to handle internal orchestration:
+- **Email Receive Process:** Manages validation, routing, and case logic
+- **Email Send Process:** Awaits external confirmation before progressing
+- **Case Create Process:** Optionally triggered during email receive
+
+These internal workflows allow:
+- Clear separation of communication logic from business processes
+- Easy error handling and retry mechanisms
+- Traceable and auditable automation paths
+
+---
+
+## ✅ Benefits of Email to Case
+
+- Centralizes email communication inside structured case records
+- Enables asynchronous, scalable email processing
+- Reduces manual copy-pasting and missed updates
+- Supports integrations with any mail provider or messaging stack
+
+---
+
+## 📝 Conclusion
+
+The **Email to Case** feature empowers your team to manage customer or internal communications directly within the WKS platform. By combining your own email integration logic with WKS’s REST API and internal BPM workflows, you gain a powerful and flexible way to ensure email never falls through the cracks.
+
+Need help getting started? Check out our [Email Consumer Example Repo](https://github.com/wkspower) or contact our support team.
