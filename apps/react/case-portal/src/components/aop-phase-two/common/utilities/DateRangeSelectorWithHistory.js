@@ -84,7 +84,7 @@ const DateRangeSelectorWithHistory = ({
       const today = new Date()
       const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
       const fallbackStartDate = new Date(
-        today.getFullYear() - 5,
+        today.getFullYear() - 1,
         today.getMonth(),
         1,
       )
@@ -163,7 +163,7 @@ const DateRangeSelectorWithHistory = ({
   const onLoadTest = async (startDateObj, endDateObj) => {
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-    const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
+    const startDate = new Date(today.getFullYear() - 1, today.getMonth(), 1)
 
     const createPayloadItem = (obj, date) => ({
       apr: date,
