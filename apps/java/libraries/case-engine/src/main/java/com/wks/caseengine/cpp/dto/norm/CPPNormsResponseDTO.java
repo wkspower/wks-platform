@@ -50,6 +50,9 @@ public class CPPNormsResponseDTO {
     private String remarks;
     private String modifiedBy;
     private String modifiedDate;
+    
+    private BigDecimal actualNorm;
+    private Boolean applyActualNormToAll;
 
     // Fields for import/export tracking
     private String saveStatus;

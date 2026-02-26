@@ -61,9 +61,9 @@ public class CPPNormsServiceImpl implements CPPNormsService {
     }
 
     @Override
-    public AOPMessageVM getCPPNorms(UUID cppPlantId, String financialYear) {
+    public AOPMessageVM getCPPNorms(UUID cppPlantId, String financialYear, String fromDate, String toDate) {
         log.info("=== Starting getCPPNorms ===");
-        log.info("CPPPlantId: {}, FinancialYear: {}", cppPlantId, financialYear);
+        log.info("CPPPlantId: {}, FinancialYear: {}, FromDate: {}, ToDate: {}", cppPlantId, financialYear, fromDate, toDate);
 
         AOPMessageVM vm = new AOPMessageVM();
 
@@ -74,6 +74,31 @@ public class CPPNormsServiceImpl implements CPPNormsService {
                 vm.setMessage("CPPPlantId cannot be null");
                 vm.setData(new ArrayList<>());
                 return vm;
+            }
+
+            if (financialYear == null || financialYear.isEmpty()) {
+                log.error("FinancialYear is null or empty");
+                vm.setCode(400);
+                vm.setMessage("FinancialYear cannot be null or empty");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            if (fromDate != null && !fromDate.isEmpty() && toDate != null && !toDate.isEmpty()) {
+                log.info("FromDate and ToDate provided, calculating utility norms first...");
+                try {
+                    AOPMessageVM calcResult = calculateUtilityNorms(financialYear, fromDate, toDate);
+                    
+                    if (calcResult.getCode() != 200) {
+                        log.warn("Failed to calculate utility norms: {}. Continuing with existing calculated norms.", calcResult.getMessage());
+                    } else {
+                        log.info("Utility norms calculated successfully: {}", calcResult.getMessage());
+                    }
+                } catch (Exception calcEx) {
+                    log.warn("Exception during utility norms calculation: {}. Continuing with existing calculated norms.", calcEx.getMessage());
+                }
+            } else {
+                log.info("FromDate/ToDate not provided, fetching with existing calculated norms");
             }
 
             StoredProcedureQuery sp = entityManager
@@ -129,6 +154,8 @@ public class CPPNormsServiceImpl implements CPPNormsService {
                 dto.setRemarks(row[idx++] != null ? row[idx - 1].toString() : null);
                 dto.setModifiedBy(row[idx++] != null ? row[idx - 1].toString() : null);
                 dto.setModifiedDate(row[idx++] != null ? row[idx - 1].toString() : null);
+                dto.setActualNorm(row[idx++] != null ? new BigDecimal(row[idx - 1].toString()) : BigDecimal.ZERO);
+                dto.setApplyActualNormToAll(row[idx++] != null ? (Boolean) row[idx - 1] : false);
 
                 dtoList.add(dto);
             }
@@ -153,7 +180,7 @@ public class CPPNormsServiceImpl implements CPPNormsService {
     public byte[] exportCPPNorms(UUID cppPlantId, String financialYear, boolean isAfterSave, List<CPPNormsResponseDTO> dtoList) {
         try {
             if (!isAfterSave) {
-                AOPMessageVM result = getCPPNorms(cppPlantId, financialYear);
+                AOPMessageVM result = getCPPNorms(cppPlantId, financialYear, null, null);
                 if (result.getData() instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<CPPNormsResponseDTO> data = (List<CPPNormsResponseDTO>) result.getData();
@@ -639,6 +666,7 @@ public class CPPNormsServiceImpl implements CPPNormsService {
                             .registerStoredProcedureParameter("Feb_Norms", BigDecimal.class, ParameterMode.IN)
                             .registerStoredProcedureParameter("Mar_Norms", BigDecimal.class, ParameterMode.IN)
                             .registerStoredProcedureParameter("Remarks", String.class, ParameterMode.IN)
+                            .registerStoredProcedureParameter("ApplyActualNormToAll", Boolean.class, ParameterMode.IN)
                             .registerStoredProcedureParameter("ModifiedBy", String.class, ParameterMode.IN);
 
                     sp.setParameter("Id", dto.getCppNormsId());
@@ -659,6 +687,7 @@ public class CPPNormsServiceImpl implements CPPNormsService {
                     sp.setParameter("Feb_Norms", dto.getFebNorms());
                     sp.setParameter("Mar_Norms", dto.getMarNorms());
                     sp.setParameter("Remarks", dto.getRemarks());
+                    sp.setParameter("ApplyActualNormToAll", dto.getApplyActualNormToAll() != null ? dto.getApplyActualNormToAll() : false);
                     sp.setParameter("ModifiedBy", modifiedBy);
 
                     sp.execute();
@@ -692,6 +721,68 @@ public class CPPNormsServiceImpl implements CPPNormsService {
             vm.setCode(500);
             vm.setMessage("Error: " + e.getMessage());
             vm.setData(null);
+        }
+
+        return vm;
+    }
+
+    private AOPMessageVM calculateUtilityNorms(String financialYear, String fromDate, String toDate) {
+        log.info("=== Starting calculateUtilityNorms ===");
+        log.info("FinancialYear: {}, FromDate: {}, ToDate: {}", financialYear, fromDate, toDate);
+
+        AOPMessageVM vm = new AOPMessageVM();
+
+        try {
+            if (financialYear == null || financialYear.isEmpty()) {
+                log.error("FinancialYear is null or empty");
+                vm.setCode(400);
+                vm.setMessage("FinancialYear cannot be null or empty");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            if (fromDate == null || fromDate.isEmpty()) {
+                log.error("FromDate is null or empty");
+                vm.setCode(400);
+                vm.setMessage("FromDate cannot be null or empty");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            if (toDate == null || toDate.isEmpty()) {
+                log.error("ToDate is null or empty");
+                vm.setCode(400);
+                vm.setMessage("ToDate cannot be null or empty");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            StoredProcedureQuery sp = entityManager
+                    .createStoredProcedureQuery("dbo.CPP_FixedUtilityCalculatedNorms")
+                    .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+
+            sp.setParameter(1, financialYear);
+            sp.setParameter(2, fromDate);
+            sp.setParameter(3, toDate);
+
+            log.info("Executing stored procedure dbo.CPP_FixedUtilityCalculatedNorms ...");
+            sp.execute();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rawResults = sp.getResultList();
+            log.info("Calculated norms result count: {}", rawResults.size());
+
+            vm.setCode(200);
+            vm.setMessage(String.format("Successfully calculated and saved %d utility norms records", rawResults.size()));
+            vm.setData(rawResults.size());
+
+        } catch (Exception e) {
+            log.error("=== ERROR in calculateUtilityNorms ===", e);
+            vm.setCode(500);
+            vm.setMessage("Error: " + e.getMessage());
+            vm.setData(0);
         }
 
         return vm;

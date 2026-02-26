@@ -28,15 +28,17 @@ public class CPPNormsController {
     @GetMapping("/cpp-norms")
     public ResponseEntity<?> getCPPNorms(
             @RequestParam UUID cppPlantId,
-            @RequestParam String financialYear
+            @RequestParam String financialYear,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate
     ) {
         try {
-            log.info("=== GET CPPNorms Request ===");
-            log.info("CPPPlantId: {}, FinancialYear: {}", cppPlantId, financialYear);
+            log.info("=== GET CPP Norms Request ===");
+            log.info("CPPPlantId: {}, FinancialYear: {}, StartDate: {}, EndDate: {}", cppPlantId, financialYear, startDate, endDate);
 
-            AOPMessageVM result = cppNormsService.getCPPNorms(cppPlantId, financialYear);
+            AOPMessageVM result = cppNormsService.getCPPNorms(cppPlantId, financialYear, startDate, endDate);
 
-            log.info("=== CPPNorms Response ===");
+            log.info("=== GET CPP Norms Response ===");
             log.info("Response Code: {}", result.getCode());
 
             return ResponseEntity.ok(result);

@@ -11,7 +11,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface CPPNormsService {
 
-    AOPMessageVM getCPPNorms(UUID cppPlantId, String financialYear);
+    AOPMessageVM getCPPNorms(UUID cppPlantId, String financialYear, String fromDate, String toDate);
 
     AOPMessageVM saveOrUpdateCPPNorms(List<CPPNormsRequestDTO> dtoList, String financialYear, String modifiedBy);
 

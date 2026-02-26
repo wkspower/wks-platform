@@ -34,6 +34,7 @@ public class CPPNormsRequestDTO {
     private BigDecimal marNorms;
 
     private String remarks;
+    private Boolean applyActualNormToAll;
     
     private String generatingPlantName;
     private String utilityName;
