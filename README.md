@@ -6,7 +6,7 @@
 > **Action required:** plan your migration to Spring Boot 4.x to avoid CI/CD interruptions and security-driven deployment blocks.
 > Camunda 7 environments require targeted architectural refactoring to remain compliant with modern security scanners.
 >
-> [![Contact for a Transition Action Plan](https://img.shields.io/badge/Get%20the%20Transition%20Action%20Plan-orange?style=for-the-badge)](https://wkspower.com)
+> [![Contact for a Transition Action Plan](https://img.shields.io/badge/Get%20the%20Transition%20Action%20Plan-orange?style=for-the-badge)](https://wkspower.com/contact-us-wks-platform)
 
 [On-line documentation](https://docs.wkspower.com/docs/Introduction/)
 
