@@ -44,7 +44,7 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
 
     @Query(value = """
         SELECT COUNT(1)
-        FROM AssetAvailability
+        FROM AssetAvailability WITH(NOLOCK)
         WHERE AssetId = :assetId
           AND FinancialYearMonthId = :fymId
         """, nativeQuery = true)  
@@ -84,7 +84,7 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
 
     @Query(value = """
         SELECT AssetId as assetId, FinancialYearMonthId as fymId, Priority as priority
-        FROM AssetAvailability
+        FROM AssetAvailability WITH(NOLOCK)
         WHERE AssetId IN (:assetIds)
           AND FinancialYearMonthId IN (:fymIds)
         """, nativeQuery = true)
@@ -97,7 +97,7 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
     @Query(
         value = """
             SELECT AssetId, FinancialYearMonthId
-            FROM AssetAvailability
+            FROM AssetAvailability WITH(NOLOCK)
             WHERE AssetId IN (:assetIds)
               AND FinancialYearMonthId IN (:financialYearMonthIds)
             """,
@@ -113,12 +113,12 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
         a.Id,
         a.AssetId,
         f.[Month]
-    FROM AssetAvailability a
-    LEFT JOIN FinancialYearMonth f 
+    FROM AssetAvailability a WITH(NOLOCK)
+    LEFT JOIN FinancialYearMonth f WITH(NOLOCK)
         ON f.Id = a.FinancialYearMonthId
     WHERE a.AssetId IN (
         SELECT pga.AssetId
-        FROM powergenerationassets pga
+        FROM powergenerationassets pga WITH(NOLOCK)
         WHERE pga.AssetName = :assetName)
     """,
      nativeQuery = true)

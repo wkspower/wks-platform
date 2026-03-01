@@ -17,6 +17,6 @@ public interface ImportPowerSourceRepository extends JpaRepository<CPPImportPowe
     
     List<CPPImportPowerSourceMapping> findByCppPlantFkIdAndIsActive(UUID cppPlantFkId, Boolean isActive);
     
-    @Query(value = "SELECT * FROM CPPImportPowerSourceMapping WHERE SourceName = :sourceName AND Plant_FK_Id = :plantId", nativeQuery = true)
+    @Query(value = "SELECT * FROM CPPImportPowerSourceMapping WITH(NOLOCK) WHERE SourceName = :sourceName AND Plant_FK_Id = :plantId", nativeQuery = true)
     CPPImportPowerSourceMapping findBySourceNameAndPlantId(@Param("sourceName") String sourceName, @Param("plantId") UUID plantId);
 }

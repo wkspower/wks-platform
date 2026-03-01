@@ -212,7 +212,7 @@ public class HeatRateService {
         // First try: Get from CPP_HRSGHeatRate table (most reliable as it's already populated)
         try {
             assetName = jdbcTemplate.queryForObject(
-                "SELECT TOP 1 AssetName FROM CPP_HRSGHeatRate WHERE Asset_FK_Id = ?",
+                "SELECT TOP 1 AssetName FROM CPP_HRSGHeatRate WITH(NOLOCK) WHERE Asset_FK_Id = ?",
                 String.class,
                 assetId
             );
@@ -223,7 +223,7 @@ public class HeatRateService {
             // Second try: SteamGenerationAssets with AssetName column
             try {
                 assetName = jdbcTemplate.queryForObject(
-                    "SELECT AssetName FROM SteamGenerationAssets WHERE AssetId = ?",
+                    "SELECT AssetName FROM SteamGenerationAssets WITH(NOLOCK) WHERE AssetId = ?",
                     String.class,
                     assetId
                 );
@@ -234,7 +234,7 @@ public class HeatRateService {
                 // Third try: SteamGenerationAssets with displayName column
                 try {
                     assetName = jdbcTemplate.queryForObject(
-                        "SELECT displayName FROM SteamGenerationAssets WHERE AssetId = ?",
+                        "SELECT displayName FROM SteamGenerationAssets WITH(NOLOCK) WHERE AssetId = ?",
                         String.class,
                         assetId
                     );
@@ -468,7 +468,7 @@ public class HeatRateService {
         String assetName = null;
         try {
             assetName = jdbcTemplate.queryForObject(
-                "SELECT displayName FROM PowerGenerationAssets WHERE AssetId = ?",
+                "SELECT displayName FROM PowerGenerationAssets WITH(NOLOCK) WHERE AssetId = ?",
                 String.class,
                 assetId
             );

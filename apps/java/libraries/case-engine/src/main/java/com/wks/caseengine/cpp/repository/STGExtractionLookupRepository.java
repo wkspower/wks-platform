@@ -22,11 +22,11 @@ public interface STGExtractionLookupRepository extends JpaRepository<STGExtracti
     Optional<STGExtractionLookup> findByLoadMW(BigDecimal loadMW);
 
     // Find the closest lower LoadMW for interpolation
-    @Query("SELECT s FROM STGExtractionLookup s WHERE s.loadMW <= :loadMW ORDER BY s.loadMW DESC LIMIT 1")
+    @Query(value = "SELECT TOP 1 * FROM STGExtractionLookup WITH(NOLOCK) WHERE LoadMW <= :loadMW ORDER BY LoadMW DESC", nativeQuery = true)
     Optional<STGExtractionLookup> findClosestLowerLoad(@Param("loadMW") BigDecimal loadMW);
 
     // Find the closest higher LoadMW for interpolation
-    @Query("SELECT s FROM STGExtractionLookup s WHERE s.loadMW >= :loadMW ORDER BY s.loadMW ASC LIMIT 1")
+    @Query(value = "SELECT TOP 1 * FROM STGExtractionLookup WITH(NOLOCK) WHERE LoadMW >= :loadMW ORDER BY LoadMW ASC", nativeQuery = true)
     Optional<STGExtractionLookup> findClosestHigherLoad(@Param("loadMW") BigDecimal loadMW);
 
 }
