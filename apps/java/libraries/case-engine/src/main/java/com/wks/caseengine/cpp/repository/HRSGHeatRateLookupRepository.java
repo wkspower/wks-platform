@@ -28,11 +28,11 @@ public interface HRSGHeatRateLookupRepository extends JpaRepository<HRSGHeatRate
     Optional<HRSGHeatRateLookup> findByEquipmentNameAndHrsgLoad(String equipmentName, BigDecimal hrsgLoad);
 
     // Find the closest lower HRSGLoad for interpolation
-    @Query("SELECT h FROM HRSGHeatRateLookup h WHERE h.equipmentName = :equipmentName AND h.hrsgLoad <= :hrsgLoad ORDER BY h.hrsgLoad DESC LIMIT 1")
+    @Query(value = "SELECT TOP 1 * FROM HRSGHeatRateLookup WITH(NOLOCK) WHERE EquipmentName = :equipmentName AND HRSGLoad <= :hrsgLoad ORDER BY HRSGLoad DESC", nativeQuery = true)
     Optional<HRSGHeatRateLookup> findClosestLowerLoad(@Param("equipmentName") String equipmentName, @Param("hrsgLoad") BigDecimal hrsgLoad);
 
     // Find the closest higher HRSGLoad for interpolation
-    @Query("SELECT h FROM HRSGHeatRateLookup h WHERE h.equipmentName = :equipmentName AND h.hrsgLoad >= :hrsgLoad ORDER BY h.hrsgLoad ASC LIMIT 1")
+    @Query(value = "SELECT TOP 1 * FROM HRSGHeatRateLookup WITH(NOLOCK) WHERE EquipmentName = :equipmentName AND HRSGLoad >= :hrsgLoad ORDER BY HRSGLoad ASC", nativeQuery = true)
     Optional<HRSGHeatRateLookup> findClosestHigherLoad(@Param("equipmentName") String equipmentName, @Param("hrsgLoad") BigDecimal hrsgLoad);
 
 }

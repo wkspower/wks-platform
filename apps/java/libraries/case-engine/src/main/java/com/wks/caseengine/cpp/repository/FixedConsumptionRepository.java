@@ -22,16 +22,16 @@ public interface FixedConsumptionRepository extends JpaRepository<DummyEntity, L
     @Query(value = "EXEC dbo.CPP_NMD_GetFixedConsumptionByPlant :plantId, :financialYear", nativeQuery = true)
     List<FixedConsumptionProjection> getFixedConsumption(@Param("plantId") UUID plantId, @Param("financialYear") String financialYear);
 
-    @Query(value = "SELECT Id, Year, Month FROM FinancialYearMonth", nativeQuery = true)
+    @Query(value = "SELECT Id, Year, Month FROM FinancialYearMonth WITH(NOLOCK)", nativeQuery = true)
     List<FinancialYearMonthProjection> getFinancialYearMonth();
 
-    @Query(value = "SELECT CostCenterId FROM CPPCostCenters WHERE CostCenterCode IN :costCenterCodes", nativeQuery = true)
+    @Query(value = "SELECT CostCenterId FROM CPPCostCenters WITH(NOLOCK) WHERE CostCenterCode IN :costCenterCodes", nativeQuery = true)
     List<String> getCostCenterIds(@Param("costCenterCodes") List<String> costCenterCodes);
 
-    @Query(value = "SELECT Id FROM NormParameters np WHERE np.Id IN ( Select NormParameterFK_Id from CostCenterNormParameterMapping map where map.CostCenterFK_Id IN :costCenterIds)", nativeQuery = true)
+    @Query(value = "SELECT Id FROM NormParameters np WITH(NOLOCK) WHERE np.Id IN ( Select NormParameterFK_Id from CostCenterNormParameterMapping WITH(NOLOCK) where CostCenterFK_Id IN :costCenterIds)", nativeQuery = true)
     List<String> getNormParameterIds(@Param("costCenterIds") List<String> costCenterIds);
 
-    @Query(value = "SELECT Id from UtilityFixedConsumption  WHERE CostCenter_FK_Id IN :costCenterIds AND NormParameter_FK_Id = :normParameterId AND FinancialYearMonth_FK_Id IN :financialYearMonthIds", nativeQuery = true)
+    @Query(value = "SELECT Id from UtilityFixedConsumption WITH(NOLOCK) WHERE CostCenter_FK_Id IN :costCenterIds AND NormParameter_FK_Id = :normParameterId AND FinancialYearMonth_FK_Id IN :financialYearMonthIds", nativeQuery = true)
     List<String> getUtilityFixedConsumptionIds(@Param("costCenterIds") List<String> costCenterIds, @Param("normParameterId") String normParameterId, @Param("financialYearMonthIds") List<String> financialYearMonthIds);
 
    @Modifying
@@ -40,7 +40,7 @@ public interface FixedConsumptionRepository extends JpaRepository<DummyEntity, L
    void updateUtilityFixedConsumption(@Param("consumptionValue") Double consumptionValue, @Param("utilityFixedConsumptionIds") List<String> utilityFixedConsumptionIds, @Param("financialYearMonthId") String financialYearMonthId);
 
    //get FinancialYearMonthIds for UtilityFixedConsumptionIds
-   @Query(value = "SELECT FinancialYearMonth_FK_Id FROM UtilityFixedConsumption WHERE Id IN :utilityFixedConsumptionIds", nativeQuery = true)
+   @Query(value = "SELECT FinancialYearMonth_FK_Id FROM UtilityFixedConsumption WITH(NOLOCK) WHERE Id IN :utilityFixedConsumptionIds", nativeQuery = true)
    List<String> getFinancialYearMonthIdsForUtilityFixedConsumptionIds(@Param("utilityFixedConsumptionIds") List<String> utilityFixedConsumptionIds);
 
    // data entry for missing month
@@ -79,7 +79,7 @@ String insertUtilityFixedConsumption(
         @Param("consumptionValue") Double consumptionValue);
 
 
-      @Query(value = "SELECT Id FROM UtilityFixedConsumption_Remarks where Id  In (:remarkIds)", nativeQuery = true)
+      @Query(value = "SELECT Id FROM UtilityFixedConsumption_Remarks WITH(NOLOCK) where Id  In (:remarkIds)", nativeQuery = true)
       List<UUID> getExistingRemarkIds(@Param("remarkIds") List<UUID> remarkIds);
      
     
