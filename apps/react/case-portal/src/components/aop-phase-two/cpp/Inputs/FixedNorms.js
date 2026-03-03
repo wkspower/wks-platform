@@ -7,17 +7,21 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { validateNestedRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import NestedKendoTable from 'components/aop-phase-two/common/NestedKendoTable/index'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
-import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
+import useConfigurationDates from 'components/aop-phase-two/common/hooks/useConfigurationDates'
+import Notification from 'components/aop-phase-two/common/utilities/Notification'
 
 const FixedNorms = () => {
   const keycloak = useSession()
-  // State management
+  const {
+    startDate,
+    endDate,
+    dateLoading,
+    error: configError,
+  } = useConfigurationDates()
 
+  // State management
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
-  const [dateLoading, setDateLoading] = useState(false)
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -274,9 +278,19 @@ const FixedNorms = () => {
     return `${year}-${month}-${day}`
   }
 
+  // Show error notification if configuration is not set up
+  useEffect(() => {
+    if (configError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: configError,
+        severity: 'warning',
+      })
+    }
+  }, [configError])
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR && startDate && endDate) {
-      setDateLoading(true)
       const formattedStartDate = formatDate(startDate)
       const formattedEndDate = formatDate(endDate)
       fetchNormsData(formattedStartDate, formattedEndDate)
@@ -355,7 +369,6 @@ const FixedNorms = () => {
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
-      setDateLoading(false)
     }
   }
 
@@ -701,20 +714,6 @@ const FixedNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Stack sx={{ mt: 2, mb: 2 }}>
-        <DateRangeSelectorWithHistory
-          onDateChange={({ startDate, endDate }) => {
-            console.log('Dates changed:', startDate, endDate)
-            setStartDate(startDate)
-            setEndDate(endDate)
-          }}
-          disabled={false}
-          timeRequired={false}
-          showLastRefreshed={true}
-          dateLoading={dateLoading}
-          setDateLoading={setDateLoading}
-        />
-      </Stack>
       <NestedKendoTable
         columns={nestedColumns}
         rows={rows}
@@ -740,6 +739,14 @@ const FixedNorms = () => {
         customHeight={70}
         groupBy={['generatingPlantName', 'accountName']}
         customItemChange={handleCustomItemChange}
+      />
+
+      {/* Notification for configuration warnings */}
+      <Notification
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
       />
     </Box>
   )

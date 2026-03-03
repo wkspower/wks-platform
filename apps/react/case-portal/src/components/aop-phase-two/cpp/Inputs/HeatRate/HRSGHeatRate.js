@@ -6,10 +6,9 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
-import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
 import { customValueFormatterPhaseTwo as customValueFormat } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 
-const HRSGHeatRate = () => {
+const HRSGHeatRate = ({ startDate, endDate, dateLoading }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -22,9 +21,6 @@ const HRSGHeatRate = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedPlant, setSelectedPlant] = useState('')
   const [dropdownOptions, setDropdownOptions] = useState([])
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
-  const [dateLoading, setDateLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     plantID,
@@ -650,22 +646,10 @@ const HRSGHeatRate = () => {
     <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        open={!!loading || !!dateLoading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <Stack sx={{ mt: 2, mb: 2 }}>
-        <DateRangeSelectorWithHistory
-          onDateChange={({ startDate, endDate }) => {
-            console.log('Dates changed:', startDate, endDate)
-            setStartDate(startDate)
-            setEndDate(endDate)
-          }}
-          disabled={false}
-          timeRequired={false}
-        />
-      </Stack>
 
       <AdvanceKendoTable
         columns={columns}

@@ -20,6 +20,7 @@ import ExportAvailability from './ExportAvailability'
 import HeatRate from './HeatRate/index'
 import FixedNorms from './FixedNorms'
 import FuelAvailability from './FuelAvailability'
+import AopDesignBasis from './AopDesignBasis'
 
 const Inputs = () => {
   const keycloak = useSession()
@@ -45,6 +46,12 @@ const Inputs = () => {
   // Initialize tabs
   useEffect(() => {
     const tabs = [
+      {
+        id: 'aop-design-basis',
+        name: 'aopDesignBasis',
+        displayName: 'AOP Design Basis',
+        displaySequence: 0,
+      },
       {
         id: 'purchase-power',
         name: 'purchasePowerInput',
@@ -143,6 +150,8 @@ const Inputs = () => {
   // Render tab content based on tab ID
   const renderTabContent = () => {
     switch (currentTab.id) {
+      case 'aop-design-basis':
+        return <AopDesignBasis />
       case 'purchase-power':
         return <ImportPower />
       case 'asset-priority':

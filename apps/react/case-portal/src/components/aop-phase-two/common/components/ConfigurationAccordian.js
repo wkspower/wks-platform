@@ -35,6 +35,7 @@ const ConfigurationAccordian = ({
   const [startDate, setStartDate] = useState()
   const [endDate, setEndDate] = useState()
   const [summary, setSummary] = useState('')
+  const [lastModifiedBy, setLastModifiedBy] = useState('')
   const [dateEdited, setDateEdited] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
@@ -100,6 +101,10 @@ const ConfigurationAccordian = ({
         await onLoadTest(startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
+        // Capture who last modified the data
+        if (details[0]?.User) {
+          setLastModifiedBy(details[0].User)
+        }
       }
     } catch (error) {
       console.error('Error fetching getConfigurationExecutionDetails:', error)
@@ -462,7 +467,7 @@ const ConfigurationAccordian = ({
                       alignSelf: 'flex-end',
                     }}
                   >
-                    {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
+                    {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)}${lastModifiedBy ? ` by ${lastModifiedBy}` : ''} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>
                 )}
               </Box>
