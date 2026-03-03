@@ -349,26 +349,35 @@ def _build_asset_status_json(calculation_result: dict, month: int = None, year: 
                         "MaxCapacity": row[4]
                     }
                 
-                # Get all HRSG assets from HRSGConfig (if table exists)
+                # Get all HRSG assets from SteamGenerationAssets table
                 try:
                     cursor.execute("""
-                        SELECT Name, Priority
-                        FROM HRSGConfig
-                        ORDER BY Priority
+                        SELECT s.AssetName, s.Priority
+                        FROM SteamGenerationAssets s
+                        WHERE s.AssetType = 'HRSG'
+                        ORDER BY s.Priority
                     """)
                     
                     for row in cursor.fetchall():
                         all_hrsg_assets[row[0]] = {
                             "Name": row[0],
-                            "Priority": row[1]
+                            "Priority": row[1] if row[1] is not None else 999
                         }
                 except Exception as hrsg_err:
-                    # HRSGConfig table doesn't exist - will use dispatch data as fallback
-                    pass
+                    print(f"Warning: Could not fetch HRSG assets from SteamGenerationAssets: {hrsg_err}")
+                    # Will use fallback below
         except Exception as e:
             print(f"Warning: Could not fetch all assets: {e}")
         finally:
             cursor.close()
+    
+    # Ensure all_hrsg_assets is always populated (fallback if database query didn't run or failed)
+    if not all_hrsg_assets:
+        all_hrsg_assets = {
+            "HRSG-1": {"Name": "HRSG-1", "Priority": 1},
+            "HRSG-2": {"Name": "HRSG-2", "Priority": 2},
+            "HRSG-3": {"Name": "HRSG-3", "Priority": 3}
+        }
     
     # Create dispatch lookup for easy access
     dispatch_lookup = {asset.get("AssetName", ""): asset for asset in final_dispatch}

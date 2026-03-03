@@ -42,9 +42,15 @@ public class CPPModelCalculationLogController {
      */
     @GetMapping("/cpp-model-logs")
     public ResponseEntity<List<CPPModelCalculationLogListDTO>> getAllParentExecutions() {
-        log.debug("Getting all parent executions");
-        List<CPPModelCalculationLogListDTO> executions = service.getAllParentExecutions();
-        return ResponseEntity.ok(executions);
+        log.info("[CPPModelCalculationLogController] Received request to get all parent executions");
+        try {
+            List<CPPModelCalculationLogListDTO> executions = service.getAllParentExecutions();
+            log.info("[CPPModelCalculationLogController] Successfully retrieved {} parent executions", executions.size());
+            return ResponseEntity.ok(executions);
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving all parent executions: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -55,10 +61,17 @@ public class CPPModelCalculationLogController {
             @RequestParam(required = false) Integer financialYear,
             @RequestParam(required = false) String status) {
         
-        log.debug("Searching parent executions with financialYear={}, status={}", financialYear, status);
-        List<CPPModelCalculationLogListDTO> executions = service.getParentExecutionsWithFilters(
-                financialYear, status);
-        return ResponseEntity.ok(executions);
+        log.info("[CPPModelCalculationLogController] Received request to search parent executions with filters - financialYear: {}, status: {}", financialYear, status);
+        try {
+            List<CPPModelCalculationLogListDTO> executions = service.getParentExecutionsWithFilters(
+                    financialYear, status);
+            log.info("[CPPModelCalculationLogController] Successfully retrieved {} parent executions matching filters", executions.size());
+            return ResponseEntity.ok(executions);
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error searching parent executions with financialYear: {}, status: {} - Error: {}", 
+                    financialYear, status, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -68,12 +81,25 @@ public class CPPModelCalculationLogController {
     public ResponseEntity<CPPModelCalculationLogListDTO> getParentExecutionById(
             @PathVariable UUID parentId) {
         
-        log.debug("Getting parent execution with id={}", parentId);
-        return service.getParentExecutionById(parentId)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, 
-                        "Parent execution not found with id: " + parentId));
+        log.info("[CPPModelCalculationLogController] Received request to get parent execution by ID: {}", parentId);
+        try {
+            return service.getParentExecutionById(parentId)
+                    .map(execution -> {
+                        log.info("[CPPModelCalculationLogController] Successfully retrieved parent execution with ID: {}", parentId);
+                        return ResponseEntity.ok(execution);
+                    })
+                    .orElseThrow(() -> {
+                        log.warn("[CPPModelCalculationLogController] Parent execution not found with ID: {}", parentId);
+                        return new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, 
+                                "Parent execution not found with id: " + parentId);
+                    });
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving parent execution by ID: {} - Error: {}", parentId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -83,16 +109,25 @@ public class CPPModelCalculationLogController {
     public ResponseEntity<List<MonthlyLogDTO>> getMonthlyLogsByParentId(
             @PathVariable UUID parentId) {
         
-        log.debug("Getting monthly logs for parent id={}", parentId);
+        log.info("[CPPModelCalculationLogController] Received request to get monthly logs for parent ID: {}", parentId);
         
-        if (!service.parentExecutionExists(parentId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, 
-                    "Parent execution not found with id: " + parentId);
+        try {
+            if (!service.parentExecutionExists(parentId)) {
+                log.warn("[CPPModelCalculationLogController] Parent execution not found with ID: {}", parentId);
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, 
+                        "Parent execution not found with id: " + parentId);
+            }
+            
+            List<MonthlyLogDTO> monthlyLogs = service.getMonthlyLogsByParentId(parentId);
+            log.info("[CPPModelCalculationLogController] Successfully retrieved {} monthly logs for parent ID: {}", monthlyLogs.size(), parentId);
+            return ResponseEntity.ok(monthlyLogs);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving monthly logs for parent ID: {} - Error: {}", parentId, e.getMessage(), e);
+            throw e;
         }
-        
-        List<MonthlyLogDTO> monthlyLogs = service.getMonthlyLogsByParentId(parentId);
-        return ResponseEntity.ok(monthlyLogs);
     }
 
     /**
@@ -102,12 +137,25 @@ public class CPPModelCalculationLogController {
     public ResponseEntity<MonthlyLogDetailDTO> getMonthlyLogDetail(
             @PathVariable UUID logId) {
         
-        log.debug("Getting monthly log detail for id={}", logId);
-        return service.getMonthlyLogDetail(logId)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, 
-                        "Monthly log not found with id: " + logId));
+        log.info("[CPPModelCalculationLogController] Received request to get monthly log detail for ID: {}", logId);
+        try {
+            return service.getMonthlyLogDetail(logId)
+                    .map(detail -> {
+                        log.info("[CPPModelCalculationLogController] Successfully retrieved monthly log detail for ID: {}", logId);
+                        return ResponseEntity.ok(detail);
+                    })
+                    .orElseThrow(() -> {
+                        log.warn("[CPPModelCalculationLogController] Monthly log not found with ID: {}", logId);
+                        return new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, 
+                                "Monthly log not found with id: " + logId);
+                    });
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving monthly log detail for ID: {} - Error: {}", logId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -118,19 +166,34 @@ public class CPPModelCalculationLogController {
             @PathVariable UUID parentId,
             @PathVariable Integer month) {
         
-        log.debug("Getting monthly log for parent={}, month={}", parentId, month);
+        log.info("[CPPModelCalculationLogController] Received request to get monthly log for parent ID: {}, month: {}", parentId, month);
         
         if (month < 1 || month > 12) {
+            log.warn("[CPPModelCalculationLogController] Invalid month value: {}. Month must be between 1 and 12", month);
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, 
                     "Month must be between 1 and 12");
         }
         
-        return service.getMonthlyLogByParentAndMonth(parentId, month)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, 
-                        "Monthly log not found for parent: " + parentId + ", month: " + month));
+        try {
+            return service.getMonthlyLogByParentAndMonth(parentId, month)
+                    .map(detail -> {
+                        log.info("[CPPModelCalculationLogController] Successfully retrieved monthly log for parent ID: {}, month: {}", parentId, month);
+                        return ResponseEntity.ok(detail);
+                    })
+                    .orElseThrow(() -> {
+                        log.warn("[CPPModelCalculationLogController] Monthly log not found for parent ID: {}, month: {}", parentId, month);
+                        return new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, 
+                                "Monthly log not found for parent: " + parentId + ", month: " + month);
+                    });
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving monthly log for parent ID: {}, month: {} - Error: {}", 
+                    parentId, month, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -138,11 +201,24 @@ public class CPPModelCalculationLogController {
      */
     @GetMapping("/cpp-model-logs/latest")
     public ResponseEntity<CPPModelCalculationLogListDTO> getLatestParentExecution() {
-        log.debug("Getting latest parent execution");
-        return service.getLatestParentExecution()
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, 
-                        "No parent executions found"));
+        log.info("[CPPModelCalculationLogController] Received request to get latest parent execution");
+        try {
+            return service.getLatestParentExecution()
+                    .map(execution -> {
+                        log.info("[CPPModelCalculationLogController] Successfully retrieved latest parent execution with ID: {}", execution.getId());
+                        return ResponseEntity.ok(execution);
+                    })
+                    .orElseThrow(() -> {
+                        log.warn("[CPPModelCalculationLogController] No parent executions found in the system");
+                        return new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, 
+                                "No parent executions found");
+                    });
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[CPPModelCalculationLogController] Error retrieving latest parent execution: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }

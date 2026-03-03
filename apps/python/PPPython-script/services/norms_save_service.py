@@ -449,6 +449,9 @@ def _build_generation_map(result: dict) -> dict:
         ('NMD - Utility/Power Dist', 'MP Steam_Dis', 'STG1_MP STEAM'): mp_stg_ratio,
         ('NMD - Utility/Power Dist', 'MP Steam_Dis', 'MP Steam PRDS SHP'): mp_prds_ratio,
         
+        # HP Steam Distribution - HP only comes from PRDS (no STG extraction)
+        ('NMD - Utility/Power Dist', 'HP Steam_Dis', 'HP Steam PRDS'): 1.0,
+        
         # STG Power Plant - Reverse calculated norms from lookup table
         # SHP Steam_Dis = SHP inlet from STG (MT per KWH)
         ('NMD - STG Power Plant', 'POWERGEN', 'SHP Steam_Dis'): stg_shp_norm,

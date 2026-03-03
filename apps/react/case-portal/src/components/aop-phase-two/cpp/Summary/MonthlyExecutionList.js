@@ -30,7 +30,7 @@ const MonthlyExecutionList = ({ executionId, onViewClick, onBack }) => {
       hidden: true,
     },
     {
-      field: 'financialYear',
+      field: 'financialYearDisplay',
       title: 'Financial Year',
       widthT: 150,
       minWidth: 150,
@@ -92,7 +92,15 @@ const MonthlyExecutionList = ({ executionId, onViewClick, onBack }) => {
         return
       }
 
-      const formattedData = res?.map((item, index) => ({
+      // Sort data in financial year order (April to March)
+      // Months 4-12 come first, then months 1-3
+      const sortedData = res?.sort((a, b) => {
+        const monthA = a.month >= 4 ? a.month : a.month + 12
+        const monthB = b.month >= 4 ? b.month : b.month + 12
+        return monthA - monthB
+      })
+
+      const formattedData = sortedData?.map((item, index) => ({
         ...item,
         id: item?.id || index + 1,
       }))
