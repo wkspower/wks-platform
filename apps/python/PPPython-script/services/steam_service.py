@@ -1657,24 +1657,59 @@ def dispatch_hrsg_load(
             "max_supp_mt": round(hrsg["max_supp_mt"], 2),
             "dispatched_supp_mt": round(dispatched, 2),
             "total_shp_mt": round(dispatched, 2),  # HRSG SHP = supp firing only (free steam is separate)
+            "hourly_rate_mt_hr": round(dispatched / hrsg["hours"], 2) if hrsg["hours"] > 0 else 0,
         })
     
     dispatch_result["total_dispatched_supp_mt"] = round(total_dispatched_supp, 2)
     # Total SHP supply = Only Dispatched Supp Firing (Free Steam is display only)
     dispatch_result["total_shp_supply_mt"] = round(total_dispatched_supp, 2)  # Exclude free steam
     
+    # =========================================================
+    # HRSG HOURLY RATE CONSTRAINT VALIDATION
+    # =========================================================
+    # Check if any HRSG exceeds its maximum hourly capacity (136 MT/hr)
+    hrsg_violations = []
+    for h in dispatch_result["hrsg_dispatch"]:
+        hourly_rate = h["hourly_rate_mt_hr"]
+        hours = h["hours"]
+        
+        # Get max capacity per hour from HRSG assets
+        hrsg_name = h["name"]
+        hrsg_config = hrsg_assets.get(hrsg_name, {})
+        max_capacity_per_hr = hrsg_config.get("max_capacity_mt", 136.0)
+        
+        if hourly_rate > max_capacity_per_hr:
+            violation_pct = ((hourly_rate - max_capacity_per_hr) / max_capacity_per_hr) * 100
+            hrsg_violations.append({
+                "hrsg_name": hrsg_name,
+                "linked_gt": h["linked_gt"],
+                "priority": h["priority"],
+                "dispatched_mt": h["dispatched_supp_mt"],
+                "hours": hours,
+                "hourly_rate_mt_hr": hourly_rate,
+                "max_capacity_mt_hr": max_capacity_per_hr,
+                "excess_mt_hr": round(hourly_rate - max_capacity_per_hr, 2),
+                "violation_pct": round(violation_pct, 2)
+            })
+    
+    # Store violations in result
+    dispatch_result["hrsg_capacity_violations"] = hrsg_violations
+    dispatch_result["has_capacity_violation"] = len(hrsg_violations) > 0
+    
     # Print dispatch summary
     print("\n" + "="*100)
     print("HRSG LOAD DISPATCH (Priority-Based)")
     print("="*100)
-    print(f"  {'HRSG':<10} {'Linked GT':<12} {'Priority':<10} {'Hours':<8} {'MIN Supp':<12} {'MAX Supp':<12} {'Dispatched':<12} {'Status':<15}")
-    print("  " + "-"*95)
+    print(f"  {'HRSG':<10} {'Linked GT':<12} {'Priority':<10} {'Hours':<8} {'MIN Supp':<12} {'MAX Supp':<12} {'Dispatched':<12} {'Rate':<12} {'Status':<15}")
+    print(f"  {'':<10} {'':<12} {'':<10} {'':<8} {'(MT)':<12} {'(MT)':<12} {'(MT)':<12} {'(MT/hr)':<12} {'':<15}")
+    print("  " + "-"*107)
     
     for h in dispatch_result["hrsg_dispatch"]:
         pri_str = str(int(h["priority"])) if h["priority"] != 999 else "-"
         dispatched = h["dispatched_supp_mt"]
         min_supp = h["min_supp_mt"]
         max_supp = h["max_supp_mt"]
+        hourly_rate = h["hourly_rate_mt_hr"]
         
         if dispatched <= min_supp:
             status = "AT MIN"
@@ -1683,11 +1718,11 @@ def dispatch_hrsg_load(
         else:
             status = "PARTIAL"
         
-        print(f"  {h['name']:<10} {h['linked_gt']:<12} {pri_str:<10} {h['hours']:<8.0f} {min_supp:>10.2f}   {max_supp:>10.2f}   {dispatched:>10.2f}   {status:<15}")
+        print(f"  {h['name']:<10} {h['linked_gt']:<12} {pri_str:<10} {h['hours']:<8.0f} {min_supp:>10.2f}   {max_supp:>10.2f}   {dispatched:>10.2f}   {hourly_rate:>10.2f}   {status:<15}")
     
-    print("  " + "-"*95)
-    print(f"  {'TOTAL':<10} {'':<12} {'':<10} {'':<8} {dispatch_result['total_min_supp_mt']:>10.2f}   {dispatch_result['total_max_supp_mt']:>10.2f}   {dispatch_result['total_dispatched_supp_mt']:>10.2f}")
-    print("  " + "="*95)
+    print("  " + "-"*107)
+    print(f"  {'TOTAL':<10} {'':<12} {'':<10} {'':<8} {dispatch_result['total_min_supp_mt']:>10.2f}   {dispatch_result['total_max_supp_mt']:>10.2f}   {dispatch_result['total_dispatched_supp_mt']:>10.2f}   {'':<12}")
+    print("  " + "="*107)
     print(f"\n  SHP BALANCE SUMMARY:")
     print(f"  ├─ Free Steam (display only):   {dispatch_result['total_free_steam_mt']:>12.2f} MT")
     print(f"  ├─ Dispatched Supp Firing:      {dispatch_result['total_dispatched_supp_mt']:>12.2f} MT")
@@ -1695,7 +1730,34 @@ def dispatch_hrsg_load(
     print(f"  ├─ SHP Demand:                  {dispatch_result['shp_demand_mt']:>12.2f} MT")
     print(f"  └─ Balance:                     {dispatch_result['total_shp_supply_mt'] - dispatch_result['shp_demand_mt']:>12.2f} MT")
     
-    if not dispatch_result["can_meet_demand"]:
+    # Check for HRSG capacity violations
+    if dispatch_result["has_capacity_violation"]:
+        print(f"\n  ❌ HRSG CAPACITY VIOLATION DETECTED!")
+        print(f"  " + "="*107)
+        print(f"  The following HRSG(s) exceed their maximum hourly capacity (136 MT/hr):")
+        print(f"\n  {'HRSG':<10} {'Linked GT':<12} {'Priority':<10} {'Hourly Rate':<14} {'Max Capacity':<14} {'Excess':<12} {'Violation %':<12}")
+        print(f"  {'-'*90}")
+        for v in hrsg_violations:
+            print(f"  {v['hrsg_name']:<10} {v['linked_gt']:<12} {v['priority']:<10} {v['hourly_rate_mt_hr']:>12.2f}   {v['max_capacity_mt_hr']:>12.2f}   {v['excess_mt_hr']:>10.2f}   {v['violation_pct']:>10.2f}%")
+        print(f"\n  ⚠️  ERROR: Steam demand CANNOT be met within HRSG capacity constraints!")
+        print(f"  " + "="*107)
+        print(f"\n  RECOMMENDED ACTIONS:")
+        print(f"  1. Adjust GT asset priorities to distribute load across more HRSGs")
+        print(f"  2. Ensure multiple GTs are dispatched to bring additional HRSGs online")
+        print(f"  3. Review asset availability - ensure sufficient HRSGs are operational")
+        print(f"  4. Consider reducing steam demand or increasing HRSG capacity")
+        print(f"\n  EXAMPLE: If GT-2 (priority 3) and GT-3 (priority 4) are available,")
+        print(f"           setting both to priority 3 will distribute load equally,")
+        print(f"           bringing both HRSG-2 and HRSG-3 online to share steam generation.")
+        print("="*100 + "\n")
+        
+        # Raise exception to stop execution
+        raise ValueError(
+            f"HRSG Capacity Violation: {len(hrsg_violations)} HRSG(s) exceed 136 MT/hr maximum capacity. "
+            f"Steam demand cannot be met within physical constraints. "
+            f"Adjust GT priorities or asset availability to distribute load across more HRSGs."
+        )
+    elif not dispatch_result["can_meet_demand"]:
         print(f"\n  ⚠️  CANNOT MEET DEMAND - Shortfall: {dispatch_result.get('shortfall_mt', 0):.2f} MT")
     elif dispatch_result["excess_steam_mt"] > 0:
         print(f"\n  ⚡ EXCESS STEAM at MIN load: {dispatch_result['excess_steam_mt']:.2f} MT")

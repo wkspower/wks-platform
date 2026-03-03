@@ -631,19 +631,21 @@ def calculate_budget_with_iteration(
         hrsg_dispatch_list = hrsg_dispatch.get("hrsg_dispatch", [])
         for hrsg_data in hrsg_dispatch_list:
             hrsg_name = hrsg_data.get("name", "").upper()
+            # Normalize HRSG name: remove hyphens for matching (HRSG-1 -> HRSG1)
+            hrsg_name_normalized = hrsg_name.replace("-", "")
             dispatched_supp = hrsg_data.get("dispatched_supp_mt", 0)
             free_steam = hrsg_data.get("free_steam_mt", 0)
             
             # HRSG is available only if it has free steam or dispatched supp firing
             is_available = (free_steam > 0 or dispatched_supp > 0)
             
-            if 'HRSG1' in hrsg_name:
+            if 'HRSG1' in hrsg_name_normalized:
                 shp_from_hrsg1 = dispatched_supp
                 hrsg1_available = is_available
-            elif 'HRSG2' in hrsg_name:
+            elif 'HRSG2' in hrsg_name_normalized:
                 shp_from_hrsg2 = dispatched_supp
                 hrsg2_available = is_available
-            elif 'HRSG3' in hrsg_name:
+            elif 'HRSG3' in hrsg_name_normalized:
                 shp_from_hrsg3 = dispatched_supp
                 hrsg3_available = is_available
     else:

@@ -31,7 +31,9 @@ public class CPPModelCalculationLogListDTO {
     
     private UUID id;
     private Integer financialYear;
+    private String financialYearDisplay; // e.g., "2025-26"
     private Date executionDateTime;
+    private String executionDateTimeFormatted; // e.g., "03-03-2026 01:30 PM"
     private String status;
     private Integer totalIterations;
     private Integer totalMonthsProcessed;
