@@ -30,10 +30,19 @@ const CppExecutionList = ({ onViewClick }) => {
       hidden: true,
     },
     {
-      field: 'financialYear',
+      field: 'financialYearDisplay',
       title: 'Financial Year',
       widthT: 150,
       minWidth: 150,
+      type: 'text',
+      editable: false,
+      hidden: false,
+    },
+    {
+      field: 'executionDateTimeFormatted',
+      title: 'Execution Date Time',
+      widthT: 180,
+      minWidth: 180,
       type: 'text',
       editable: false,
       hidden: false,
@@ -151,7 +160,7 @@ const CppExecutionList = ({ onViewClick }) => {
       // Default behavior - you can customize this
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Viewing details for ${dataItem.financialYear}`,
+        message: `Viewing details for ${dataItem.financialYearDisplay || dataItem.financialYear}`,
         severity: 'info',
       })
     }

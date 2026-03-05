@@ -22,10 +22,10 @@ public interface PlantImportMappingRepository extends JpaRepository<PlantImportM
     List<UUID> assetIds
 );
 
-    @Query(value = "select Plant_FK_Id from PowerConsumptionPlantMapping where Consumption_FK_Id = :id", nativeQuery = true)
+    @Query(value = "select Plant_FK_Id from PowerConsumptionPlantMapping WITH(NOLOCK) where Consumption_FK_Id = :id", nativeQuery = true)
     List<UUID> findPlantIdsByConsumptionId(@Param("id") UUID id);
 
-    @Query(value = "select Id, Name from Plants where Id in :ids", nativeQuery = true)
+    @Query(value = "select Id, Name from Plants WITH(NOLOCK) where Id in :ids", nativeQuery = true)
     List<Object[]> findPlantsByIds(@Param("ids") List<UUID> ids);
 }
 

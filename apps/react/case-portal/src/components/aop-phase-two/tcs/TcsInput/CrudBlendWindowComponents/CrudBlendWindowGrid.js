@@ -120,7 +120,9 @@ const CrudBlendWindowGrid = ({
           'value_345',
         ].includes(key)
           ? 'number1'
-          : 'text',
+          : ['remarks', 'reasons'].includes(key)
+            ? 'textarea'
+            : 'text',
         minWidth: isRemarkField ? 350 : 150,
         widthT: isRemarkField ? 450 : 250,
         hidden: ['id'].includes(key),

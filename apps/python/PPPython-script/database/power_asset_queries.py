@@ -635,8 +635,8 @@ def fetch_operational_hours(month: int, year: int) -> Dict:
                 p.PlantCode,
                 p.CPPPLANT_FK_Id,
                 COALESCE(oh.OperationalHours, 0) as OperationalHours
-            FROM PowerGenerationAssets p
-            LEFT JOIN OperationalHours oh ON p.AssetId = oh.Asset_FK_Id 
+            FROM PowerGenerationAssets p with(nolock)
+            LEFT JOIN OperationalHours oh with(nolock) ON p.AssetId = oh.Asset_FK_Id 
                 AND oh.FinancialMonthId = ?
             LEFT JOIN AssetAvailability aa ON p.AssetId = aa.AssetId
                 AND aa.FinancialYearMonthId = ?
@@ -1069,8 +1069,8 @@ def fetch_complete_asset_data(month: int, year: int) -> Dict:
                 aa.MaxOperatingCapacity,
                 aa.FixedMin,
                 aa.FixedMax
-            FROM PowerGenerationAssets p
-            LEFT JOIN OperationalHours oh ON p.AssetId = oh.Asset_FK_Id 
+            FROM PowerGenerationAssets p with(nolock)
+            LEFT JOIN OperationalHours oh with(nolock) ON p.AssetId = oh.Asset_FK_Id 
                 AND oh.FinancialMonthId = ?
             LEFT JOIN AssetAvailability aa ON p.AssetId = aa.AssetId 
                 AND aa.FinancialYearMonthId = ?
@@ -1728,8 +1728,8 @@ def get_stg_operating_hours(month: int, year: int) -> float:
     # Get STG operating hours
     cur.execute("""
         SELECT oh.OperationalHours
-        FROM OperationalHours oh
-        INNER JOIN PowerGenerationAssets p ON p.AssetId = oh.Asset_FK_Id
+        FROM OperationalHours oh with(nolock)
+        INNER JOIN PowerGenerationAssets p with(nolock) ON p.AssetId = oh.Asset_FK_Id
         WHERE oh.FinancialMonthId = ?
           AND (p.AssetName LIKE '%STG%' OR p.PlantCode = '40NE')
     """, (fym_id,))
@@ -1920,17 +1920,25 @@ def get_hrsg_heat_rate_for_load(
             "error": "No lookup data available"
         }
     
+    # Normalize HRSG name: remove hyphens to match database format
+    # e.g., "HRSG-1" -> "HRSG1", "HRSG-2" -> "HRSG2"
+    normalized_name = equipment_name.replace("-", "")
+    
     # Filter for specific HRSG
-    hrsg_df = lookup_df[lookup_df["EquipmentName"] == equipment_name]
+    hrsg_df = lookup_df[lookup_df["EquipmentName"] == normalized_name]
     
     if hrsg_df.empty:
+        # Debug: print available equipment names
+        available_names = lookup_df["EquipmentName"].unique().tolist() if not lookup_df.empty else []
+        print(f"  [DEBUG] HRSG lookup failed for '{equipment_name}' (normalized: '{normalized_name}')")
+        print(f"  [DEBUG] Available equipment names in lookup table: {available_names}")
         return {
             "equipment_name": equipment_name,
             "heat_rate_btu_lb": 0.0,
             "ng_norm_mmbtu_mt": 0.0,
             "hrsg_load_tph": hrsg_load_tph,
             "interpolated": False,
-            "error": f"No data for {equipment_name}"
+            "error": f"No data for {equipment_name} (normalized: {normalized_name})"
         }
     
     min_load = hrsg_df["HRSGLoad"].min()

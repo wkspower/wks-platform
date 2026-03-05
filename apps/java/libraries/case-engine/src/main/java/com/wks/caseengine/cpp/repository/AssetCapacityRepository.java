@@ -30,7 +30,7 @@ public interface AssetCapacityRepository extends JpaRepository<DummyEntity, Long
   @Query(
     value = """
         SELECT AssetId, FinancialYearMonthId
-        FROM AssetAvailability
+        FROM AssetAvailability WITH(NOLOCK)
         WHERE AssetId IN (:assetIds)
           AND FinancialYearMonthId IN (:financialYearMonthIds)
         """,
@@ -43,7 +43,7 @@ List<Object[]> getAssetCapacitiesByAssetsAndFYMonths(
 
 @Query(value = """
     SELECT AssetId
-    FROM PowerGenerationAssets
+    FROM PowerGenerationAssets WITH(NOLOCK)
     WHERE AssetName = :assetName
     """, nativeQuery = true)
 UUID  getAssetIdByAssetName(@Param("assetName") String assetName);

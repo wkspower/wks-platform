@@ -6,9 +6,8 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
-import DateRangeSelectorWithHistory from 'components/aop-phase-two/common/utilities/DateRangeSelectorWithHistory'
 import { customValueFormatterPhaseTwo as customValueFormat } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-const GTHeatRate = () => {
+const GTHeatRate = ({ startDate, endDate, dateLoading }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -135,9 +134,6 @@ const GTHeatRate = () => {
   const [originalRows, setOriginalRows] = useState([])
   const [selectedPlant, setSelectedPlant] = useState('')
   const [dropdownOptions, setDropdownOptions] = useState([])
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
-  const [dateLoading, setDateLoading] = useState(false)
 
   const formatDate = (date) => {
     if (!date) return ''
@@ -635,20 +631,6 @@ const GTHeatRate = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Stack sx={{ mt: 2, mb: 2 }}>
-        <DateRangeSelectorWithHistory
-          onDateChange={({ startDate, endDate }) => {
-            console.log('Dates changed:', startDate, endDate)
-            setStartDate(startDate)
-            setEndDate(endDate)
-          }}
-          disabled={false}
-          timeRequired={false}
-          showLastRefreshed={true}
-          dateLoading={dateLoading}
-          setDateLoading={setDateLoading}
-        />
-      </Stack>
       <AdvanceKendoTable
         columns={columns}
         rows={rows}

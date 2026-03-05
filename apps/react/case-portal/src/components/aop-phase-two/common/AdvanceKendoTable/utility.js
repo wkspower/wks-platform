@@ -19,7 +19,11 @@ export const handleTabKeyNavigation = ({
     (col) => !hiddenFields.includes(col.field) && !col.hidden,
   )
   const editableCols = allCols.filter(
-    (col) => col.editable === true && col.type !== 'textarea',
+    (col) =>
+      col.editable === true &&
+      col.type !== 'textarea' &&
+      col.field !== 'remarks' &&
+      col.field !== 'reasons',
   )
   if (editableCols.length === 0) return
 

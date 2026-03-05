@@ -32,6 +32,7 @@ public class MonthlyLogDTO {
     private UUID id;
     private UUID parentExecutionFkId;
     private Integer financialYear;
+    private String financialYearDisplay; // e.g., "2025-26"
     private Integer month;
     private Date executionDateTime;
     private String status;
