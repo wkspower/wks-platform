@@ -21,4 +21,15 @@ List<NormBasisProjection> getAllNormBasis(
      @Param("aopYear") String aopYear
 );
 
+
+@Query(value = "EXEC CRUDE_DTA_CDU1_NormCalculation_1  @plantId = :plantId, @AOPYear = :aopYear, @siteid = :siteid, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo",
+nativeQuery = true)
+void normCalculation(
+     @Param("plantId") UUID plantId,
+     @Param("aopYear") String aopYear,
+     @Param("siteid") UUID siteid,
+     @Param("PeriodFrom") String PeriodFrom,
+     @Param("PeriodTo") String PeriodTo
+);
+
 }
