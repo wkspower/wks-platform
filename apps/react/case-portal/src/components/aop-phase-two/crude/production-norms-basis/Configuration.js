@@ -17,7 +17,7 @@ import {
 } from './utils/dependencyUtils'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
 
-const Configuration = () => {
+const Configuration = ({ startDate, endDate }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -29,8 +29,9 @@ const Configuration = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantObject, year } = dataGridStore
+  const { plantObject, year, siteObject } = dataGridStore
   const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = customValueFormatterPhaseTwo(3)
@@ -203,8 +204,38 @@ const Configuration = () => {
     titleName: 'Configuration',
   }
 
+  const formatDateForAPI = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const saveChanges = async () => {
     setLoading(true)
+
+    // Validate required parameters
+    if (!startDate || !endDate) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message:
+          'Period dates are required. Please ensure dates are loaded from AOP Period Basis.',
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
+    if (!SITE_ID) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Site ID is required.',
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
 
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length === 0) {
@@ -260,12 +291,25 @@ const Configuration = () => {
     })
 
     try {
-      console.log('Saving configuration data:', payload)
+      const periodFrom = formatDateForAPI(startDate)
+      const periodTo = formatDateForAPI(endDate)
+
+      console.log('Saving configuration data:', {
+        payload,
+        plantId: PLANT_ID,
+        siteId: SITE_ID,
+        periodFrom,
+        periodTo,
+      })
 
       const response = await ProductionNormsApiService.saveConfigurationData(
         keycloak,
         AOP_YEAR,
         payload,
+        PLANT_ID,
+        SITE_ID,
+        periodFrom,
+        periodTo,
       )
 
       setModifiedCells({})

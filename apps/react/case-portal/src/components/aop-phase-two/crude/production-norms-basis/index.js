@@ -29,6 +29,8 @@ const ProductionNormsBasis = () => {
   const [loading, setLoading] = useState(false)
   const [tabs, setTabs] = useState([])
   const [availableTabs, setAvailableTabs] = useState([])
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
 
   const getConfigurationTabsMatrix = async () => {
     if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
@@ -80,6 +82,12 @@ const ProductionNormsBasis = () => {
     getConfigurationAvailableTabs()
   }, [PLANT_ID, AOP_YEAR])
 
+  // Callback to receive dates from ConfigurationAccordian
+  const handleDatesChange = (start, end) => {
+    setStartDate(start)
+    setEndDate(end)
+  }
+
   const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
   const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
 
@@ -124,13 +132,13 @@ const ProductionNormsBasis = () => {
 
     switch (currentTabName) {
       case 'Configuration':
-        return <Configuration />
+        return <Configuration startDate={startDate} endDate={endDate} />
       case 'Constants':
-        return <Constants />
+        return <Constants startDate={startDate} endDate={endDate} />
       case 'PIMS Throughput':
-        return <PIMSThroughput />
+        return <PIMSThroughput startDate={startDate} endDate={endDate} />
       case 'Report Manual Entry':
-        return <ReportManualEntry />
+        return <ReportManualEntry startDate={startDate} endDate={endDate} />
       default:
         return null
     }
@@ -145,6 +153,7 @@ const ProductionNormsBasis = () => {
           READ_ONLY={READ_ONLY}
           isOldYear={isOldYear}
           isSummaryRequired={true}
+          onDatesChange={handleDatesChange}
         />
       </Stack>
 
