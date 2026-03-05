@@ -27,6 +27,7 @@ const ConfigurationAccordian = ({
   isOldYear,
   isSummaryRequired = false,
   yearGap = 1,
+  onDatesChange,
 }) => {
   const keycloak = useSession()
   const hasExecutedRef = useRef(false)
@@ -349,6 +350,13 @@ const ConfigurationAccordian = ({
   useEffect(() => {
     computeAndSetDates()
   }, [computeAndSetDates])
+
+  // Notify parent component when dates change
+  useEffect(() => {
+    if (onDatesChange && startDate && endDate) {
+      onDatesChange(startDate, endDate)
+    }
+  }, [startDate, endDate, onDatesChange])
 
   const startDateConfig = configurationExecutionDetails.find(
     (item) => item.Name === 'StartDate',

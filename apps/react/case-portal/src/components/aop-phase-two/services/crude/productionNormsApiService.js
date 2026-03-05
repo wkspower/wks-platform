@@ -43,10 +43,22 @@ async function getConfigurationData(keycloak, plantId, year) {
  * @param {Object} keycloak - Keycloak session
  * @param {string} year - AOP Year
  * @param {Array} payload - Data to save
+ * @param {string} plantId - Plant ID
+ * @param {string} siteId - Site ID
+ * @param {string} periodFrom - Period start date
+ * @param {string} periodTo - Period end date
  * @returns {Promise} Save response
  */
-async function saveConfigurationData(keycloak, year, payload) {
-  const url = `${Config.CaseEngineUrl}/task/norm-basis`
+async function saveConfigurationData(
+  keycloak,
+  year,
+  payload,
+  plantId,
+  siteId,
+  periodFrom,
+  periodTo,
+) {
+  const url = `${Config.CaseEngineUrl}/task/norm-basis?plantId=${plantId}&aopYear=${year}&siteId=${siteId}&periodFrom=${periodFrom}&periodTo=${periodTo}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
