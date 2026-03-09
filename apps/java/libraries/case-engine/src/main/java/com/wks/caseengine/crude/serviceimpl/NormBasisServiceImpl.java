@@ -92,7 +92,7 @@ public class NormBasisServiceImpl implements NormBasisService {
 
 
     @Override
-    public void updateNormBasis(List<NormBasisDTO> normBasisDTOs) {
+    public void updateNormBasis(List<NormBasisDTO> normBasisDTOs, UUID plantId, String aopYear, UUID siteid, String periodFrom, String periodTo) {
        
         List<Object[]> updates = new ArrayList<>();
 
@@ -104,6 +104,8 @@ public class NormBasisServiceImpl implements NormBasisService {
             String sql = "update NormAttributeTransactions set AttributeValue = ?, Remarks = ? where Id = ?";
             jdbcTemplate.batchUpdate(sql, updates);
         }
+
+        normBasisRepository.normCalculation(plantId, aopYear, siteid, periodFrom, periodTo);
   
 
     }

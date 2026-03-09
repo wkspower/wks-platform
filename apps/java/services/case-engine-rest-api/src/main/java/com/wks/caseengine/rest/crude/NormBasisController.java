@@ -34,8 +34,8 @@ public class NormBasisController {
     }
 
     @PostMapping("/norm-basis")
-    public ResponseEntity<Void> updateNormBasis(@RequestBody List<NormBasisDTO> normBasisDTOs) {
-        normBasisService.updateNormBasis(normBasisDTOs);
+    public ResponseEntity<Void> updateNormBasis(@RequestBody List<NormBasisDTO> normBasisDTOs, @RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
+        normBasisService.updateNormBasis(normBasisDTOs, UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
         return ResponseEntity.ok().build();
     }
 

@@ -9,6 +9,6 @@ public interface NormBasisService {
     
     public List<NormBasisDTO> getAllNormBasis(UUID plantId, String aopYear);
 
-    public void updateNormBasis(List<NormBasisDTO> normBasisDTOs);
+    public void updateNormBasis(List<NormBasisDTO> normBasisDTOs, UUID plantId, String aopYear, UUID siteid, String periodFrom, String periodTo);
 
 }
