@@ -24,15 +24,15 @@ export const mockProcess = {
     </bpmn:userTask>
 
     <bpmn:userTask id="EPS_Approval"
-                   name="EPS Approval"
+                   name="EPS_ENGINEER Approval"
                    camunda:candidateGroups="EPS_ENGINEER"/>
 
     <bpmn:userTask id="CTS_APPROVAL"
-                   name="CTS Approval / EPS Head Approval"
+                   name="CTS_HEAD / EPS_HEAD Approval"
                    camunda:candidateGroups="CTS_ENGINEER,EPS_Head_ENGINEER"/>
 
     <bpmn:userTask id="Cluster_Head_APPROVAL"
-                   name="Cluster_Head Approval"
+                   name="CLUSTER_HEAD Approval"
                    camunda:candidateGroups="Cluster_Head_ENGINEER"/>
 				   
 	 <bpmn:userTask id="Pending_state"
