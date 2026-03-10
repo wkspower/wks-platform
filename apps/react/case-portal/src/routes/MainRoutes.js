@@ -74,6 +74,7 @@ import Norms from 'components/aop-phase-two/cpp/Norms'
 import TcsOutput from 'components/aop-phase-two/tcs/TcsOutput/index'
 import PimsOutput from 'components/aop-phase-two/tcs/PimsOutput/PimsOutput'
 import TcsInput from 'components/aop-phase-two/tcs/TcsInput/index'
+import WorkflowDiagram from 'components/aop-phase-two/tcs/workflow-diagram/index'
 import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
 import Summary from 'components/aop-phase-two/cpp/Summary/index'
@@ -264,6 +265,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='tcs-output'>
                 <TcsOutput />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'workflow-design',
+            element: (
+              <PrivateRoute routeId='workflow-design'>
+                <WorkflowDiagram />
               </PrivateRoute>
             ),
           },

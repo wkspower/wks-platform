@@ -1,0 +1,123 @@
+export const mockProcess = {
+  id: 'TCS_APPROVAL_PROCESS:1:123',
+  bpmn20Xml: `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+    id="Definitions_1"
+    targetNamespace="http://example.com/eps">
+
+  <bpmn:process id="TCS_APPROVAL_PROCESS"
+                name="EPS Multi-Form Approval"
+                isExecutable="true"
+                camunda:historyTimeToLive="180">
+
+    <bpmn:startEvent id="StartEvent" name="Process Initiated"/>
+
+    <bpmn:userTask id="SubmitPlantData" name="Submit Plant Data">
+      <bpmn:multiInstanceLoopCharacteristics
+          camunda:collection="\${plantList}"
+          camunda:elementVariable="plant"/>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="EPS_Approval"
+                   name="EPS_ENGINEER Approval"
+                   camunda:candidateGroups="EPS_ENGINEER"/>
+
+    <bpmn:userTask id="CTS_APPROVAL"
+                   name="CTS_HEAD / EPS_HEAD Approval"
+                   camunda:candidateGroups="CTS_ENGINEER,EPS_Head_ENGINEER"/>
+
+    <bpmn:userTask id="Cluster_Head_APPROVAL"
+                   name="CLUSTER_HEAD Approval"
+                   camunda:candidateGroups="Cluster_Head_ENGINEER"/>
+				   
+	 <bpmn:userTask id="Pending_state"
+                   name="Pending"
+                   camunda:candidateGroups="Head_ENGINEER"/>
+
+    <bpmn:endEvent id="EndEvent" name="Process Completed"/>
+
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="flow1" sourceRef="StartEvent" targetRef="SubmitPlantData"/>
+    <bpmn:sequenceFlow id="flow2" sourceRef="SubmitPlantData" targetRef="EPS_Approval"/>
+    <bpmn:sequenceFlow id="flow3" sourceRef="EPS_Approval" targetRef="CTS_APPROVAL"/>
+    <bpmn:sequenceFlow id="flow4" sourceRef="CTS_APPROVAL" targetRef="Cluster_Head_APPROVAL"/>
+    <bpmn:sequenceFlow id="flow5" sourceRef="Cluster_Head_APPROVAL" targetRef="Pending_state"/>
+	
+	<bpmn:sequenceFlow id="flow6" sourceRef="Pending_state" targetRef="EndEvent"/>
+
+  </bpmn:process>
+
+  <!-- DIAGRAM SECTION -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="TCS_APPROVAL_PROCESS">
+
+      <!-- Shapes -->
+      <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
+        <dc:Bounds x="100" y="120" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SubmitPlantData_di" bpmnElement="SubmitPlantData">
+        <dc:Bounds x="200" y="100" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EPS_Approval_di" bpmnElement="EPS_Approval">
+        <dc:Bounds x="380" y="100" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="CTS_APPROVAL_di" bpmnElement="CTS_APPROVAL">
+        <dc:Bounds x="560" y="100" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Cluster_Head_APPROVAL_di" bpmnElement="Cluster_Head_APPROVAL">
+        <dc:Bounds x="740" y="100" width="160" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="940" y="120" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Edges -->
+      <bpmndi:BPMNEdge id="flow1_di" bpmnElement="flow1">
+        <di:waypoint x="136" y="138"/>
+        <di:waypoint x="200" y="138"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow2_di" bpmnElement="flow2">
+        <di:waypoint x="340" y="138"/>
+        <di:waypoint x="380" y="138"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow3_di" bpmnElement="flow3">
+        <di:waypoint x="520" y="138"/>
+        <di:waypoint x="560" y="138"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow4_di" bpmnElement="flow4">
+        <di:waypoint x="700" y="138"/>
+        <di:waypoint x="740" y="138"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="flow5_di" bpmnElement="flow5">
+        <di:waypoint x="900" y="138"/>
+        <di:waypoint x="940" y="138"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- REQUIRED FOR FRONTEND VIEWER -->
+      <!-- Uncomment if viewer throws "no diagram to display" -->
+      <!--
+      <bpmndi:BPMNEdge id="flow6_di" bpmnElement="flow6">
+        <di:waypoint x="900" y="138"/>
+        <di:waypoint x="940" y="138"/>
+      </bpmndi:BPMNEdge>
+      -->
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>`,
+}
