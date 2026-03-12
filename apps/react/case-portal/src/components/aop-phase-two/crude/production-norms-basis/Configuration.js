@@ -96,11 +96,6 @@ const Configuration = ({ startDate, endDate }) => {
     },
   ]
 
-  const nonEditableProduct = [
-    'Norms Cycle Start',
-    'Days remaining time from norms preparation time to AOP next cycle start',
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConfigurationData()
@@ -170,8 +165,7 @@ const Configuration = ({ startDate, endDate }) => {
           remarks: item.remarks || '',
           id: item?.id || index + 1,
           attributeValue: formattedAttributeValue,
-          isEditable:
-            item?.isEditable || !nonEditableProduct.includes(item.name),
+          isEditable: item.isEditable,
         }
       })
       setRows(formattedData)
