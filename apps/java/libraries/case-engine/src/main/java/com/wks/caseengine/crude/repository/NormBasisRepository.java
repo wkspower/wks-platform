@@ -22,7 +22,7 @@ List<NormBasisProjection> getAllNormBasis(
 );
 
 
-@Query(value = "EXEC CRUDE_DTA_CDU1_NormCalculation_1  @plantId = :plantId, @AOPYear = :aopYear, @siteid = :siteid, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo",
+@Query(value = "EXEC CRUDE_DTA_CDU1_NormCalculation  @plantId = :plantId, @AOPYear = :aopYear, @siteid = :siteid, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo",
 nativeQuery = true)
 void normCalculation(
      @Param("plantId") UUID plantId,
