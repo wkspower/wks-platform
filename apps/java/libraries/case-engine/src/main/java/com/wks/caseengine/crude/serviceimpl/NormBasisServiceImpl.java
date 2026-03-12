@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.tcs.repository.NormBasisRepository;
+import com.wks.caseengine.crude.repository.NormBasisRepository;
 import com.wks.caseengine.crude.service.NormBasisService;
 import com.wks.caseengine.crude.dto.NormBasisDTO;
 import com.wks.caseengine.crude.dto.NormBasisProjection;
@@ -89,7 +89,7 @@ public class NormBasisServiceImpl implements NormBasisService {
             .type(projection.getType())
             .normParameterType(projection.getNormParameterType())
             .displayOrder(projection.getDisplayOrder())
-            .isEditable(projection.getIsEditable() == 1)
+            .isEditable(projection.getIsEditable())
             .config(projection.getConfig())
             .build();
     }

@@ -1,4 +1,4 @@
-package com.wks.caseengine.tcs.repository;
+package com.wks.caseengine.crude.repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,3 +33,4 @@ void normCalculation(
 );
 
 }
+
