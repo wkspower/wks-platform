@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.tcs.repository.NormBasisRepository;
+import com.wks.caseengine.crude.repository.NormBasisRepository;
 import com.wks.caseengine.crude.service.NormBasisService;
 import com.wks.caseengine.crude.dto.NormBasisDTO;
 import com.wks.caseengine.crude.dto.NormBasisProjection;
@@ -33,8 +33,11 @@ public class NormBasisServiceImpl implements NormBasisService {
             .map(this::fromProjection)
             .collect(Collectors.toList());
 
-             String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
-                String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
+            //  String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
+            //     String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
+
+            String startYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  );
+            String normCycleStarts = startYear + "-" + "04" + "-" + "01"; 
                 
             String normsPreparationTime = null;
 
@@ -86,6 +89,7 @@ public class NormBasisServiceImpl implements NormBasisService {
             .type(projection.getType())
             .normParameterType(projection.getNormParameterType())
             .displayOrder(projection.getDisplayOrder())
+            .isEditable(projection.getIsEditable())
             .config(projection.getConfig())
             .build();
     }

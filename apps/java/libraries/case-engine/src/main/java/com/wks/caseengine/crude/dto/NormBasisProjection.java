@@ -13,4 +13,5 @@ public interface NormBasisProjection {
     String getType();
     String getNormParameterType();
     String getDisplayOrder();
+    boolean getIsEditable();
 }
