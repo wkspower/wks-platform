@@ -33,8 +33,11 @@ public class NormBasisServiceImpl implements NormBasisService {
             .map(this::fromProjection)
             .collect(Collectors.toList());
 
-             String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
-                String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
+            //  String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
+            //     String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
+
+            String startYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  );
+            String normCycleStarts = startYear + "-" + "04" + "-" + "01"; 
                 
             String normsPreparationTime = null;
 
@@ -86,6 +89,7 @@ public class NormBasisServiceImpl implements NormBasisService {
             .type(projection.getType())
             .normParameterType(projection.getNormParameterType())
             .displayOrder(projection.getDisplayOrder())
+            .isEditable(projection.getIsEditable() == 1)
             .config(projection.getConfig())
             .build();
     }

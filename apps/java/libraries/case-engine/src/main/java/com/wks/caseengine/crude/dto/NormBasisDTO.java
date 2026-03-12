@@ -23,4 +23,5 @@ public class NormBasisDTO {
     private String type;
     private String normParameterType;
     private String displayOrder;
+    private boolean isEditable;
 }
