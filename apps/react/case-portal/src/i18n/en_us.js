@@ -106,6 +106,7 @@ const defs = {
     tcsinput: 'TCS Input',
     tcsoutput: 'TCS Output',
     pimsoutput: 'PIMS Output',
+    workflowdesign: 'Workflow Design',
 
     //SSRS
     normComparisonReport: 'Norm Comparison Report',
