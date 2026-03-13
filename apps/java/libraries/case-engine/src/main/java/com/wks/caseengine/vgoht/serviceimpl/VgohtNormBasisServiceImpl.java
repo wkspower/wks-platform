@@ -163,31 +163,6 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFKId, String viewName) {
 		try {
-			// String sql = "SELECT " + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
-			// 		+ "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
-			// 		+ "    MAX(NAT.Remarks) AS Remarks, " + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
-			// 		+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
-			// 		+ "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
-			// 		+ "    NP.TypeDisplayName AS TypeDisplayName, " + "    NP.ConfigTypeName AS ConfigTypeName, "
-			// 		+ "    NP.TypeName AS TypeName, MAX(NP.DisplayName) " + "FROM " + viewName + " NP "
-			// 		+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
-			// 		+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
-			// 		+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-			// 		+ "  AND NP.Plant_FK_Id = :plantFKId " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
-			// 		+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
-			// 		+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
-			// 		+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
 
 				String sql = "SELECT " + "    NP.Id AS NormParameter_FK_Id, "
 					+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
@@ -231,89 +206,6 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 		}
 	}
 	
-    // @Override
-    // public List<NormBasisDTO> getAllNormBasis(UUID plantId, String aopYear) {
-        
-    //     List<NormBasisProjection> normBasisProjections = normBasisRepository.getAllNormBasis(plantId, aopYear);
-    //     List<NormBasisDTO> normBasisDTOs = normBasisProjections.stream()
-    //         .map(this::fromProjection)
-    //         .collect(Collectors.toList());
 
-    //          String endYear = String.valueOf(Integer.parseInt(aopYear.substring(0, 4))  +1 );
-    //             String normCycleStarts = endYear + "-" + "04" + "-" + "01"; 
-                
-    //         String normsPreparationTime = null;
-
-
-    //             for(NormBasisDTO normBasisDTO : normBasisDTOs) {  
-
-    //                  if( !normBasisDTO.getType().equals("date"))  continue;
-
-    //                 if(normBasisDTO.getName().equals("Norms Preparation Time")) {  
-
-    //                     normsPreparationTime = normBasisDTO.getAttributeValue();
-    //                 }
-    //             }
-
-    //         for(NormBasisDTO normBasisDTO : normBasisDTOs) {  
-
-    //             if( !normBasisDTO.getType().equals("date"))  continue;
-
-    //             if (normBasisDTO.getName().equals("Norms Cycle Start")) {
-   
-    //             // set the attribute value to 1st april of end year
-    //             normBasisDTO.setAttributeValue(normCycleStarts);  
-            
-    //         } 
-
-    //         if(normBasisDTO.getName().equals("Days remaining time from norms preparation time to AOP next cycle start")) {   
-   
-    //              // calculate the days betweeen normsPreparationTime and normCycleStarts
-    //              LocalDate normsPreparationTimeDate = LocalDate.parse(normsPreparationTime);
-    //              LocalDate normCycleStartsDate = LocalDate.parse(normCycleStarts);
-    //              long daysBetween = ChronoUnit.DAYS.between(normsPreparationTimeDate, normCycleStartsDate);
-    //              normBasisDTO.setAttributeValue(String.valueOf(daysBetween));
-
-    //         }
-            
-    //         }
-
-    //         return normBasisDTOs;
-    // }
-
-    // private NormBasisDTO fromProjection(NormBasisProjection projection) {
-    //     return NormBasisDTO.builder()
-    //         .id(UUID.fromString(projection.getId()))
-    //         .name(projection.getName())
-    //         .displayName(projection.getDisplayName())
-    //         .uom(projection.getUOM())
-    //         .attributeValue(projection.getAttributeValue())
-    //         .remarks(projection.getRemarks())
-    //         .type(projection.getType())
-    //         .normParameterType(projection.getNormParameterType())
-    //         .displayOrder(projection.getDisplayOrder())
-    //         .config(projection.getConfig())
-    //         .build();
-    // }
-
-
-    // @Override
-    // public void updateNormBasis(List<NormBasisDTO> normBasisDTOs, UUID plantId, String aopYear, UUID siteid, String periodFrom, String periodTo) {
-       
-    //     List<Object[]> updates = new ArrayList<>();
-
-    //     for(NormBasisDTO normBasisDTO : normBasisDTOs) {
-    //         updates.add(new Object[]{normBasisDTO.getAttributeValue(), normBasisDTO.getRemarks(), normBasisDTO.getId()});
-    //     }
-
-    //     if(updates.size() > 0) {
-    //         String sql = "update NormAttributeTransactions set AttributeValue = ?, Remarks = ? where Id = ?";
-    //         jdbcTemplate.batchUpdate(sql, updates);
-    //     }
-
-    //     normBasisRepository.normCalculation(plantId, aopYear, siteid, periodFrom, periodTo);
-  
-
-    // }
 
 }
