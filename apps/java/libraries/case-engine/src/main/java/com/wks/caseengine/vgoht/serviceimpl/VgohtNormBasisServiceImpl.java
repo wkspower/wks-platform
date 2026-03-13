@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -21,9 +20,10 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.tcs.repository.NormBasisRepository;
+import com.wks.caseengine.vgoht.dto.VgohtNormConfigurationDTO;
 import com.wks.caseengine.vgoht.service.VgohtNormBasisService;
 import jakarta.persistence.Query;
-
+import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -69,80 +69,80 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 			obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			// }
 			
-			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
+			List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList = new ArrayList<>();
 			int i = 0;
 			for (Object[] row : obj) {
-				ConfigurationDTO configurationDTO = new ConfigurationDTO();
-				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+				VgohtNormConfigurationDTO vgohtNormConfigurationDTO = new VgohtNormConfigurationDTO();
+				vgohtNormConfigurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
 
-				configurationDTO.setJan(
+				vgohtNormConfigurationDTO.setJan(
 						(row[1] != null && !row[1].toString().trim().isEmpty())
 								? Double.parseDouble(row[1].toString().trim())
 								: 0.0);
-				configurationDTO.setFeb(
+				vgohtNormConfigurationDTO.setFeb(
 						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
 								: 0.0);
-				configurationDTO.setMar(
+				vgohtNormConfigurationDTO.setMar(
 						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
 								: 0.0);
-				configurationDTO.setApr(
+				vgohtNormConfigurationDTO.setApr(
 						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: 0.0);
-				configurationDTO.setMay(
+				vgohtNormConfigurationDTO.setMay(
 						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Double.parseDouble(row[5].toString())
 								: 0.0);
-				configurationDTO.setJun(
+				vgohtNormConfigurationDTO.setJun(
 						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
 								: 0.0);
-				configurationDTO.setJul(
+				vgohtNormConfigurationDTO.setJul(
 						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
 								: 0.0);
-				configurationDTO.setAug(
+				vgohtNormConfigurationDTO.setAug(
 						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
 								: 0.0);
-				configurationDTO.setSep(
+				vgohtNormConfigurationDTO.setSep(
 						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
 								: 0.0);
-				configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
+				vgohtNormConfigurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
 						? Double.parseDouble(row[10].toString())
 						: 0.0);
-				configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
+				vgohtNormConfigurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
 						? Double.parseDouble(row[11].toString())
 						: 0.0);
-				configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
+				vgohtNormConfigurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
 						? Double.parseDouble(row[12].toString())
 						: 0.0);
-				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
+				vgohtNormConfigurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
 				// if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || verticalName.equalsIgnoreCase("PTA") || (verticalName.equalsIgnoreCase("VCM")) || (verticalName.equalsIgnoreCase("AROMATICS")) || (verticalName.equalsIgnoreCase("ELASTOMER")) || pvc) {
-					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
+					vgohtNormConfigurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
 
-					configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
-					configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
+					vgohtNormConfigurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
+					vgohtNormConfigurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
 
-					configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
-					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
-					// configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
-					// configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
-					configurationDTO.setProductName(row[19] != null ? row[19].toString() : "");
-					configurationDTO.setProductDisplayOrder(row[20] != null ? row[20].toString() : "");
+					vgohtNormConfigurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
+					vgohtNormConfigurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
+					// vgohtNormConfigurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
+					// vgohtNormConfigurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
+					vgohtNormConfigurationDTO.setProductName(row[19] != null ? row[19].toString() : "");
+					vgohtNormConfigurationDTO.setProductDisplayOrder(row[20] != null ? row[20].toString() : "");
 
 				// }
 				/*
 				 * if(verticalName.equalsIgnoreCase("AROMATICS")) {
-				 * configurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); }
+				 * vgohtNormConfigurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); }
 				 */
 
 				// if (verticalName.equalsIgnoreCase("MEG")
 				// 		|| verticalName.equalsIgnoreCase("CRACKER")) {
 
-				// 	configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
-				// 	configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
-				// 	configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
-				// 	configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
-				// 	configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
+				// 	vgohtNormConfigurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
+				// 	vgohtNormConfigurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
+				// 	vgohtNormConfigurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
+				// 	vgohtNormConfigurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
+				// 	vgohtNormConfigurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
 				// }
-				configurationDTOList.add(configurationDTO);
+				vgohtNormConfigurationDTOList.add(vgohtNormConfigurationDTO);
 				if (row[14] == null) {
 					i++;
 				}
@@ -150,7 +150,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 			}
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
-			aopMessageVM.setData(configurationDTOList);
+			aopMessageVM.setData(vgohtNormConfigurationDTOList);
 			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
@@ -206,6 +206,67 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 		}
 	}
 	
+	@Transactional
+	public AOPMessageVM saveConfigurationData(String year, UUID plantFKId, String version,
+			List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList) {
 
+		try {
+
+			for (VgohtNormConfigurationDTO dto : vgohtNormConfigurationDTOList) {
+
+				saveMonthValue(dto.getNormParameterFKId(), year, "1", dto.getJan(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "2", dto.getFeb(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "3", dto.getMar(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "4", dto.getApr(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "5", dto.getMay(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "6", dto.getJun(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "7", dto.getJul(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "8", dto.getAug(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "9", dto.getSep(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "10", dto.getOct(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "11", dto.getNov(), dto.getRemarks());
+				saveMonthValue(dto.getNormParameterFKId(), year, "12", dto.getDec(), dto.getRemarks());
+			}
+
+			AOPMessageVM response = new AOPMessageVM();
+			response.setCode(200);
+			response.setMessage("Configuration saved successfully");
+
+			return response;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error saving configuration data", e);
+		}
+	}
+
+	private void saveMonthValue(String normParameterId, String year, String month, Double value, String remarks) {
+
+		String sql = """
+			MERGE INTO NormAttributeTransactions AS target
+			USING (SELECT :normParameterId AS NormParameter_FK_Id,
+						:year AS AuditYear,
+						:month AS AOPMonth) AS source
+			ON target.NormParameter_FK_Id = source.NormParameter_FK_Id
+			AND target.AuditYear = source.AuditYear
+			AND target.AOPMonth = source.AOPMonth
+
+			WHEN MATCHED THEN
+				UPDATE SET AttributeValue = :value,
+						Remarks = :remarks
+
+			WHEN NOT MATCHED THEN
+				INSERT (Id, NormParameter_FK_Id, AuditYear, AOPMonth, AttributeValue, Remarks)
+				VALUES (NEWID(), :normParameterId, :year, :month, :value, :remarks);
+		""";
+
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("normParameterId", normParameterId);
+		query.setParameter("year", year);
+		query.setParameter("month", month);
+		query.setParameter("value", value);
+		query.setParameter("remarks", remarks);
+
+		query.executeUpdate();
+	}
 
 }

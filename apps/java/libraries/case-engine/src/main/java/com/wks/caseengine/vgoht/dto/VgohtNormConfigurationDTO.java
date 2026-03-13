@@ -1,5 +1,4 @@
-package com.wks.caseengine.dto;
-
+package com.wks.caseengine.vgoht.dto;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.AllArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-public class ConfigurationDTO {
+public class VgohtNormConfigurationDTO {
 	
 	private String id;
     private String normParameterFKId;
@@ -39,6 +38,7 @@ public class ConfigurationDTO {
     private String TypeName;
     private Boolean isEditable;
 	private String productName;
+    private String productDisplayOrder;
     private String saveStatus;
     private String errDescription;
     private String type;
