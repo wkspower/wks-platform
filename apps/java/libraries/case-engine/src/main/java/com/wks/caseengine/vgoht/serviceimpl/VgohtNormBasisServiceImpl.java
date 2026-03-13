@@ -19,7 +19,6 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.tcs.repository.NormBasisRepository;
 import com.wks.caseengine.vgoht.dto.VgohtNormConfigurationDTO;
 import com.wks.caseengine.vgoht.service.VgohtNormBasisService;
 import jakarta.persistence.Query;
@@ -42,8 +41,6 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
     @PersistenceContext
 	private EntityManager entityManager;
     
-    @Autowired
-    private NormBasisRepository normBasisRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
