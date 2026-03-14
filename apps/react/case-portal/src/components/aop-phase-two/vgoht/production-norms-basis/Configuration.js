@@ -200,28 +200,35 @@ const Configuration = () => {
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
-      // Simulate API call with 3 second delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // const res = await ProductionNormsApiService.getConfigurationData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
-
-      const res = configurationAndReportManualEntryResponse.data.filter(
-        (item) => item.normType !== 'Report Manual Entry',
+      const response = await ProductionNormsApiService.getConfigurationData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
-      if (res?.length === 0) {
+      if (response?.code !== 200) {
+        setRows([])
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to fetch data',
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+
+      const res = response?.data || []
+
+      if (res.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
+        setLoading(false)
         return
       }
 
       console.log('Configuration data:', res)
-      const formattedData = res?.map((item, index) => ({
+      const formattedData = res.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
         id: item?.id || index + 1,
@@ -316,6 +323,7 @@ const Configuration = () => {
         keycloak,
         AOP_YEAR,
         payload,
+        PLANT_ID,
       )
 
       setModifiedCells({})
@@ -324,6 +332,7 @@ const Configuration = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
+      await fetchConfigurationData()
     } catch (error) {
       console.error('Error saving configuration data:', error)
       setSnackbarOpen(true)
@@ -472,7 +481,7 @@ const Configuration = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['normType']}
+        groupBy={['TypeDisplayName']}
         // customHeight={60}
         paginationConfig={{
           threshold: 100,
