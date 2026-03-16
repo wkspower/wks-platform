@@ -22,14 +22,11 @@ List<NormBasisProjection> getAllNormBasis(
 );
 
 
-@Query(value = "EXEC CRUDE_DTA_CDU1_NormCalculation  @plantId = :plantId, @AOPYear = :aopYear, @siteid = :siteid, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo",
+@Query(value = "EXEC CRUDE_GetPIMS_Throughput @plantId = :plantId, @aopYear = :aopYear",
 nativeQuery = true)
-void normCalculation(
-     @Param("plantId") UUID plantId,
-     @Param("aopYear") String aopYear,
-     @Param("siteid") UUID siteid,
-     @Param("PeriodFrom") String PeriodFrom,
-     @Param("PeriodTo") String PeriodTo
+List<NormBasisProjection> getPIMSThroughput(
+ @Param("plantId") UUID plantId,
+ @Param("aopYear") String aopYear
 );
 
 }
