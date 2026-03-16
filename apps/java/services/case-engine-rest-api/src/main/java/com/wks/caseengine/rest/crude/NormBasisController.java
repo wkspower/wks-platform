@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.crude.service.NormBasisService;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.UUID;
@@ -34,9 +36,9 @@ public class NormBasisController {
     }
 
     @PostMapping("/norm-basis")
-    public ResponseEntity<Void> updateNormBasis(@RequestBody List<NormBasisDTO> normBasisDTOs, @RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
-        normBasisService.updateNormBasis(normBasisDTOs, UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AOPMessageVM> updateNormBasis(@RequestBody List<NormBasisDTO> normBasisDTOs, @RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
+        AOPMessageVM aopMessageVM = normBasisService.updateNormBasis(normBasisDTOs, UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
+        return ResponseEntity.ok(aopMessageVM);
     }
 
 
