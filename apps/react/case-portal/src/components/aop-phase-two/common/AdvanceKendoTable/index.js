@@ -2220,6 +2220,7 @@ const AdvanceKendoTable = ({
         message={snackbarData?.message || ''}
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
+        autoHide={snackbarData?.autoHide}
       />
 
       {/* Delete Dialog */}

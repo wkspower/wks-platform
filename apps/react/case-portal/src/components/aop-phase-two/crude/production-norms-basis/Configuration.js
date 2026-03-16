@@ -14,6 +14,7 @@ import {
   handleDateDifferenceCalculation,
   handleValueMappingDependency,
   handleLegacyDependencyRule,
+  handleAdditionDependency,
 } from './utils/dependencyUtils'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
 
@@ -41,6 +42,23 @@ const Configuration = ({ startDate, endDate }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [dependencyRules, setDependencyRules] = useState({})
+
+  // Addition dependency configuration for MP Steam fields
+  const additionDependencyConfig = {
+    sourceFields: [
+      '38% Ejector inline for next AOP Cycle',
+      'Additional MP Steam in Main Ejector',
+    ],
+    targetField: 'Additional MP Steam in Ejector, A',
+  }
+
+  // Editability rules: Define when dependent fields should become non-editable
+  const editabilityRules = {
+    '38% Ejector Input': {
+      dependentField: '38% Ejector inline for next AOP Cycle',
+      nonEditableWhen: ['NO', 'No', 'no'], // Values that make dependent field non-editable
+    },
+  }
 
   // Build dependency rules from row data
   // Expects rows to have config property on controller fields
@@ -168,8 +186,37 @@ const Configuration = ({ startDate, endDate }) => {
           isEditable: item.isEditable,
         }
       })
-      setRows(formattedData)
-      setOriginalRows(formattedData)
+
+      // Apply editability rules on initial load
+      const updatedFormattedData = formattedData.map((row) => {
+        // Check if this row is a dependent field in any editability rule
+        for (const [sourceFieldName, rule] of Object.entries(
+          editabilityRules,
+        )) {
+          if (rule.dependentField === row.name) {
+            // Find the source field
+            const sourceField = formattedData.find(
+              (r) => r.name === sourceFieldName,
+            )
+            if (sourceField && sourceField.attributeValue) {
+              // Check if source value makes this field non-editable
+              const shouldBeNonEditable = rule.nonEditableWhen.includes(
+                sourceField.attributeValue,
+              )
+              if (shouldBeNonEditable) {
+                return {
+                  ...row,
+                  isEditable: false,
+                }
+              }
+            }
+          }
+        }
+        return row
+      })
+
+      setRows(updatedFormattedData)
+      setOriginalRows(updatedFormattedData)
 
       // Build dependency rules from the data
       const rules = buildDependencyRules(formattedData)
@@ -256,7 +303,7 @@ const Configuration = ({ startDate, endDate }) => {
 
     const fieldsToCheck = ['attributeValue']
     const validationError = validateRowDataWithRemarks(
-      data,
+      data.filter((item) => item.isEditable == true),
       originalRows,
       fieldsToCheck,
       'name',
@@ -300,11 +347,33 @@ const Configuration = ({ startDate, endDate }) => {
       )
 
       setModifiedCells({})
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: `Successfully saved ${modifiedData.length} changes!`,
-        severity: 'success',
-      })
+
+      if (response?.code === 422) {
+        // Show success notification first
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Successfully saved ${modifiedData.length} changes!`,
+          severity: 'success',
+        })
+
+        // Then show validation error after a delay
+        setTimeout(() => {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: response.message || 'Validation error occurred.',
+            severity: 'error',
+            autoHide: false,
+          })
+        }, 1000)
+      } else {
+        // Code 200 - show only success notification
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Successfully saved ${modifiedData.length} changes!`,
+          severity: 'success',
+        })
+      }
+
       await fetchConfigurationData()
     } catch (error) {
       console.error('Error saving configuration data:', error)
@@ -430,10 +499,25 @@ const Configuration = ({ startDate, endDate }) => {
     if (field !== 'attributeValue') return
 
     const currentProductName = dataItem.name
+    let dependentFieldsToCheck = []
+
+    // Check if this field is part of addition dependency (MP Steam fields)
+    if (additionDependencyConfig.sourceFields.includes(currentProductName)) {
+      handleAdditionDependency({
+        currentFieldName: currentProductName,
+        value,
+        dependencyConfig: additionDependencyConfig,
+        rows,
+        setRowsCallback,
+        setModifiedCells,
+        setCustomModifiedCells,
+      })
+    }
 
     // Check if this field has a dependency configuration
     if (dataItem.config) {
-      const { calculationType, valueMapping } = dataItem.config
+      const { calculationType, valueMapping, dependentProductName } =
+        dataItem.config
 
       // Handle date difference calculation
       if (calculationType === 'dateDifference') {
@@ -449,15 +533,49 @@ const Configuration = ({ startDate, endDate }) => {
       }
 
       // Handle value mapping (dropdown dependencies)
-      if (valueMapping) {
-        handleValueMappingDependency({
-          value,
-          dependencyConfig: dataItem.config,
-          rows,
-          setRowsCallback,
-          setModifiedCells,
-          setCustomModifiedCells,
-        })
+      if (valueMapping && dependentProductName) {
+        const dependentValue = valueMapping[value]
+        if (dependentValue !== undefined) {
+          handleValueMappingDependency({
+            value,
+            dependencyConfig: dataItem.config,
+            rows,
+            setRowsCallback,
+            setModifiedCells,
+            setCustomModifiedCells,
+            sourceFieldName: currentProductName,
+            editabilityRules,
+          })
+
+          // Track dependent field for cascading check
+          dependentFieldsToCheck.push({
+            fieldName: dependentProductName,
+            fieldValue: dependentValue,
+          })
+        }
+
+        // Process cascading dependencies after state updates
+        if (dependentFieldsToCheck.length > 0) {
+          setTimeout(() => {
+            setRowsCallback((currentRows) => {
+              dependentFieldsToCheck.forEach(({ fieldName, fieldValue }) => {
+                // Check if dependent field is part of addition dependency
+                if (additionDependencyConfig.sourceFields.includes(fieldName)) {
+                  handleAdditionDependency({
+                    currentFieldName: fieldName,
+                    value: fieldValue,
+                    dependencyConfig: additionDependencyConfig,
+                    rows: currentRows,
+                    setRowsCallback,
+                    setModifiedCells,
+                    setCustomModifiedCells,
+                  })
+                }
+              })
+              return currentRows
+            })
+          }, 0)
+        }
         return
       }
     }
@@ -472,6 +590,7 @@ const Configuration = ({ startDate, endDate }) => {
         setRowsCallback,
         setModifiedCells,
         setCustomModifiedCells,
+        sourceFieldName: currentProductName,
       })
     }
   }

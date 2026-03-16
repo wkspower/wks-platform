@@ -35,12 +35,13 @@ const Notification = ({
   message = 'An error occurred. Please try again.',
   severity = 'info',
   duration = 3000,
+  autoHide = true,
   onClose,
 }) => {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={duration}
+      autoHideDuration={autoHide ? duration : null}
       onClose={onClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       sx={{ top: '55px !important' }}

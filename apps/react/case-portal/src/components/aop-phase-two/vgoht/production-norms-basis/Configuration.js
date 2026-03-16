@@ -217,7 +217,8 @@ const Configuration = () => {
         return
       }
 
-      const res = response?.data || []
+      // const res = response?.data || []
+      const res = []
 
       if (res.length === 0) {
         setRows([])
