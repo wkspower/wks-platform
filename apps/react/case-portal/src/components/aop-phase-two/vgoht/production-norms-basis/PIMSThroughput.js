@@ -10,7 +10,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
 import RevButtonSection from './components/RevButtonSection'
 
-const PIMSThroughput = () => {
+const PIMSThroughput = ({ startDate, endDate }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -78,14 +78,221 @@ const PIMSThroughput = () => {
     }
   }, [PLANT_ID, AOP_YEAR, revisionUpdated])
 
+  const dummyData = [
+    {
+      id: '2B7E617F-DAA8-4327-8C6C-F3B639D69DE7',
+      normParameterFKId: 'E7A2BA96-B369-40AD-AF80-72239996EDBB',
+      jan: 2920.035,
+      feb: 16461.149,
+      mar: 6405.702,
+      apr: 4812.173,
+      may: 10052.645,
+      jun: 10781.083,
+      jul: 9144.971,
+      aug: 9787.126,
+      sep: 8891.538,
+      oct: 12134.646,
+      nov: 15012.286,
+      dec: 2095.782,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'Cold feed from RTF to VGOHT',
+      productDisplayOrder: '1',
+    },
+    {
+      id: '16E987CF-8AFE-4272-9C8B-FC775B8BEBD2',
+      normParameterFKId: '9C83E851-A359-45A2-B35D-DAFA67135BA0',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'Flushing Oil to VGOHT1',
+      productDisplayOrder: '2',
+    },
+    {
+      id: 'C0923D85-CD6E-4418-880B-FA4DB9CB34EE',
+      normParameterFKId: 'E18DBB72-6745-42D9-8AD3-508C8C1730C4',
+      jan: 124308.004,
+      feb: 111088.591,
+      mar: 101633.016,
+      apr: 114457.432,
+      may: 107590.219,
+      jun: 115834.295,
+      jul: 110321.779,
+      aug: 105408.989,
+      sep: 38813.577,
+      oct: 21301.069,
+      nov: 101892.113,
+      dec: 97473.388,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: '361 HCGO from Coker',
+      productDisplayOrder: '3',
+    },
+    {
+      id: '75F43F2E-11F1-4393-8018-F8AC6B06953E',
+      normParameterFKId: '4DA16870-9F12-4B4E-B460-63440815AC35',
+      jan: 354648.534,
+      feb: 353568.539,
+      mar: 360590.265,
+      apr: 364573.028,
+      may: 352760.289,
+      jun: 356467.534,
+      jul: 349617.985,
+      aug: 310361.24,
+      sep: 139773.935,
+      oct: 40705.809,
+      nov: 353080.684,
+      dec: 365779.406,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'Hot Feed from CDU',
+      productDisplayOrder: '4',
+    },
+    {
+      id: 'C89F357D-8CDD-46F4-90FE-E86D05098AE1',
+      normParameterFKId: '16F6C40C-977D-4923-9A78-96E26E3DD7B6',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'AGO feed from DUF tanks',
+      productDisplayOrder: '5',
+    },
+    {
+      id: '3E57E267-5DD8-4AA4-B205-FDF67F693840',
+      normParameterFKId: 'AA084164-5D68-4DB3-A547-FE8D8A321D1B',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'LCO from FCCU',
+      productDisplayOrder: '6',
+    },
+    {
+      id: '7815BB2A-A67B-40F3-B543-FA1C3EF8CB7E',
+      normParameterFKId: '888FDE42-5884-4EC0-92D1-9DFD63FA79D7',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'Sour vaccum gas oil',
+      productDisplayOrder: '7',
+    },
+    {
+      id: 'CCA0DCA9-51FB-4763-B89E-F77EE2311A0E',
+      normParameterFKId: '40B54589-528D-4202-A483-DBFCB84BFDA6',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: 'Test',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: "VGO T'PUT",
+      productDisplayOrder: '8',
+    },
+    {
+      id: '9724F54D-B9F8-40E3-88D5-E5D16AD71A37',
+      normParameterFKId: 'DDFB6281-7373-47B8-B929-6738AC6F57E5',
+      jan: 0,
+      feb: 0,
+      mar: 0,
+      apr: 0,
+      may: 0,
+      jun: 0,
+      jul: 0,
+      aug: 0,
+      sep: 0,
+      oct: 0,
+      nov: 0,
+      dec: 0,
+      remarks: '',
+      auditYear: '2026-27',
+      UOM: 'MT',
+      ConfigTypeDisplayName: 'Configuration',
+      TypeDisplayName: 'Feed',
+      productName: 'Cold Feed %',
+      productDisplayOrder: '9',
+    },
+  ]
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      const res = configurationAndReportManualEntryResponse.data.filter(
-        (item) => item.normType === 'PIMS Throughput',
-      )
+      const res = dummyData
 
       if (res?.length === 0) {
         setRows([])
@@ -98,6 +305,7 @@ const PIMSThroughput = () => {
       const formattedData = res?.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
+        value: item.apr,
         id: item?.id || index + 1,
       }))
       setRows(formattedData)
@@ -187,7 +395,7 @@ const PIMSThroughput = () => {
     try {
       console.log('Saving configuration data:', payload)
 
-      const response = await ProductionNormsApiService.saveConfigurationData(
+      const response = await ProductionNormsApiService.savePIMSThroughputData(
         keycloak,
         AOP_YEAR,
         payload,
@@ -355,7 +563,7 @@ const PIMSThroughput = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['normType']}
+        groupBy={['TypeDisplayName']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
-import { ProductionNormsApiService } from 'components/aop-phase-two/services/vgoht/productionNormsApiService'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
@@ -10,7 +10,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { configurationAndReportManualEntryResponse } from '../dummyData'
 import RevButtonSection from './components/RevButtonSection'
 
-const PIMSThroughput = () => {
+const PIMSThroughput = ({ startDate, endDate }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -21,8 +21,9 @@ const PIMSThroughput = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantObject, year } = dataGridStore
+  const { plantObject, year, siteObject } = dataGridStore
   const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterPhaseTwo()
@@ -33,9 +34,17 @@ const PIMSThroughput = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [revisionUpdated, setRevisionUpdated] = useState(false)
 
+  const formatDateForAPI = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const columns = [
     {
-      field: 'productName',
+      field: 'displayName',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -44,7 +53,7 @@ const PIMSThroughput = () => {
       hidden: false,
     },
     {
-      field: 'UOM',
+      field: 'uom',
       title: 'UOM',
       widthT: 80,
       minWidth: 60,
@@ -52,7 +61,7 @@ const PIMSThroughput = () => {
       editable: false,
     },
     {
-      field: 'value',
+      field: 'attributeValue',
       title: 'Value',
       editable: true,
       widthT: 100,
@@ -81,17 +90,10 @@ const PIMSThroughput = () => {
   const fetchConfigurationData = async () => {
     setLoading(true)
     try {
-      // Simulate API call with 1 second delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // const res = await ProductionNormsApiService.getConfigurationData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
-
-      const res = configurationAndReportManualEntryResponse.data.filter(
-        (item) => item.normType === 'PIMS Throughput',
+      const res = await ProductionNormsApiService.getPIMSThroughputData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (res?.length === 0) {
@@ -137,6 +139,27 @@ const PIMSThroughput = () => {
   const saveChanges = async () => {
     setLoading(true)
 
+    // Validate required parameters
+    if (!startDate || !endDate) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Start date and end date are required.',
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
+    if (!SITE_ID) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Site ID is required.',
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length === 0) {
       setSnackbarOpen(true)
@@ -159,25 +182,12 @@ const PIMSThroughput = () => {
       return
     }
 
-    const fieldsToCheck = [
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
-    ]
+    const fieldsToCheck = ['attributeValue']
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'particulars',
+      'displayName',
     )
 
     if (validationError) {
@@ -192,12 +202,19 @@ const PIMSThroughput = () => {
 
     const payload = modifiedData
     try {
-      console.log('Saving configuration data:', payload)
+      const periodFrom = formatDateForAPI(startDate)
+      const periodTo = formatDateForAPI(endDate)
 
-      const response = await ProductionNormsApiService.saveConfigurationData(
+      console.log('Saving PIMS Throughput data:', payload)
+
+      const response = await ProductionNormsApiService.savePIMSThroughputData(
         keycloak,
         AOP_YEAR,
         payload,
+        PLANT_ID,
+        SITE_ID,
+        periodFrom,
+        periodTo,
       )
 
       setModifiedCells({})
@@ -363,7 +380,7 @@ const PIMSThroughput = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         // customHeight={60}
-        groupBy={['normType']}
+        groupBy={['normParameterType']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,
