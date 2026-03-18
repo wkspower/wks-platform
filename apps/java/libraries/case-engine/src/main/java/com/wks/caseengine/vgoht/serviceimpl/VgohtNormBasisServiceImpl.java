@@ -316,14 +316,17 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				SELECT NP.Id AS NormParameter_FK_Id,
 					NP.DisplayName,
 					MAX(NAT.AttributeValue) AS value,
-					MAX(NAT.Remarks) AS remarks
+					MAX(NAT.Remarks) AS remarks,
+					NP.UOM,
+					MAX(NPT.DisplayName) AS NormParameterTypeDisplayName
 				FROM NormParameters NP
+				JOIN NormParameterType NPT on NP.NormParameterType_FK_Id = NPT.Id
 				LEFT JOIN NormAttributeTransactions NAT
 					ON NAT.NormParameter_FK_Id = NP.Id
 					AND NAT.AuditYear = :year
 				WHERE NP.Plant_FK_Id = :plantFKId
 				AND NAT.AOPMonth IS NULL
-				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder
+				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder, NP.UOM
 				ORDER BY NP.DisplayOrder
 			""";
 
@@ -340,6 +343,8 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				dto.setProductName(row[1] != null ? row[1].toString() : "");
 				dto.setValue(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
 				dto.setRemarks(row[3] != null ? row[3].toString() : "");
+				dto.setUOM(row[4] != null ? row[4].toString() : "");
+				dto.setTypeDisplayName(row[5] != null ? row[5].toString() : "");
 				dtoList.add(dto);
 			}
 
