@@ -27,6 +27,7 @@ public class VgohtNormConfigurationDTO {
     private Double oct;
     private Double nov;
     private Double dec;
+    private Double value;
     private String remarks;
     private String auditYear;
     private String UOM;

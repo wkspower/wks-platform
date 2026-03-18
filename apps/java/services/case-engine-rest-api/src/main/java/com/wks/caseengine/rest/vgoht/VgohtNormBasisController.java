@@ -45,4 +45,26 @@ public class VgohtNormBasisController {
         return vgohtNormBasisServiceImpl.saveConfigurationData(year, plantFKId, version, vgohtNormConfigurationDTOList);
     }
 
+    @PostMapping(value = "/vgoht/norms-basis/constant")
+    public AOPMessageVM saveYearlyValues(
+        @RequestParam String year,
+        @RequestParam UUID plantFKId,
+        @RequestBody List<VgohtNormConfigurationDTO> yearlyValuesList) {
+
+        if (plantFKId == null || year == null || year.isEmpty()) {
+            throw new IllegalArgumentException("Plant ID and AOP Year are required");
+        }
+
+        return vgohtNormBasisServiceImpl.saveYearlyValues(year, plantFKId, yearlyValuesList);
+    }
+
+    @GetMapping(value="/vgoht/norms-basis/constant")
+    public AOPMessageVM getYearlyValues(@RequestParam String year, @RequestParam UUID plantFKId) {
+        if (plantFKId == null || year == null || year.isEmpty()) {
+            throw new IllegalArgumentException("Plant ID and AOP Year are required");
+        }
+
+        return vgohtNormBasisServiceImpl.getYearlyValues(year, plantFKId);
+    }
+
 }
