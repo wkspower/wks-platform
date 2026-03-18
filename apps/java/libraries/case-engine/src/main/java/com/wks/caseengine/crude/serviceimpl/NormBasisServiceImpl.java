@@ -196,6 +196,38 @@ public class NormBasisServiceImpl implements NormBasisService {
 
     }
 
+    @Override
+    public AOPMessageVM LoadButtonNormCalculation(UUID plantId, String aopYear, UUID siteId, String periodFrom, String periodTo) 
+
+    {
+        Plants plant = plantsRepository.findById(plantId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+        // CRUDE_DTA_CDU1_NormCalculation
+     String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+
+     String errorMessage = executeNormCalculationProcedure(plantId, aopYear, siteId, periodFrom, periodTo, procedureName );
+
+     AOPMessageVM aopMessageVM = new AOPMessageVM();
+
+     if(errorMessage != null ) { 
+    
+        aopMessageVM.setCode(422);
+        aopMessageVM.setMessage(errorMessage);
+        return aopMessageVM;
+
+     }
+
+
+    //    normBasisRepository.normCalculation(plantId, aopYear, siteId, periodFrom, periodTo);
+
+      aopMessageVM.setCode(200);
+      aopMessageVM.setMessage("Norm Calculations Executed Successfully");
+      return aopMessageVM;
+
+}
+
 
 private String executeNormCalculationProcedure(UUID plantId, String aopYear, UUID siteId,
                                              String periodFrom, String periodTo,
