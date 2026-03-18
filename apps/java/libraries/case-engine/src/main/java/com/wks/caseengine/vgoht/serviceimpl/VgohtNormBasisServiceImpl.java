@@ -178,7 +178,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 					+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
 					+ "    CP.DisplayName AS ConfigTypeDisplayName, "
 					+ "    NPT.DisplayName AS TypeDisplayName, " + "    NP.DisplayName AS DisplayName, NP.DisplayOrder AS DisplayOrder "
-					// + "    NP.TypeName AS TypeName, MAX(NP.DisplayName) " 
+					// + "    NP.TypeName AS TypeName, MAX(NP.DisplayName) "
 					+ "    FROM NormParameters NP "
 					+ "    JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id"
 					+ "    JOIN ConfigurationTypes_NormParameter_Mapping CPJ ON CPJ.NormParameter_FK_Id=NP.Id  AND CPJ.NormParamterType_FK_Id = NPT.Id"
@@ -266,4 +266,92 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 		query.executeUpdate();
 	}
 
+
+	@Transactional
+	public AOPMessageVM saveYearlyValues(String year, UUID plantFKId, List<VgohtNormConfigurationDTO> dtoList) {
+
+		try {
+			for (VgohtNormConfigurationDTO dto : dtoList) {
+				if (dto.getValue() != null) {
+					saveYearlyValue(dto.getNormParameterFKId(), year, dto.getValue(), dto.getRemarks());
+				}
+			}
+
+			AOPMessageVM response = new AOPMessageVM();
+			response.setCode(200);
+			response.setMessage("Yearly values saved successfully");
+			return response;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error saving yearly values", e);
+		}
+	}
+	private void saveYearlyValue(String normParameterId, String year, Double value, String remarks) {
+		String sql = """
+			MERGE INTO NormAttributeTransactions AS target
+			USING (SELECT :normParameterId AS NormParameter_FK_Id,
+						:year AS AuditYear) AS source
+			ON target.NormParameter_FK_Id = source.NormParameter_FK_Id
+			AND target.AuditYear = source.AuditYear
+			AND target.AOPMonth IS NULL
+			WHEN MATCHED THEN
+				UPDATE SET AttributeValue = :value,
+						Remarks = :remarks
+			WHEN NOT MATCHED THEN
+				INSERT (Id, NormParameter_FK_Id, AuditYear, AOPMonth, AttributeValue, Remarks)
+				VALUES (NEWID(), :normParameterId, :year, NULL, :value, :remarks);
+		""";
+
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("normParameterId", normParameterId);
+		query.setParameter("year", year);
+		query.setParameter("value", value);
+		query.setParameter("remarks", remarks);
+		query.executeUpdate();
+	}
+	public AOPMessageVM getYearlyValues(String year, UUID plantFKId) {
+
+		try {
+			String sql = """
+				SELECT NP.Id AS NormParameter_FK_Id,
+					NP.DisplayName,
+					MAX(NAT.AttributeValue) AS value,
+					MAX(NAT.Remarks) AS remarks
+				FROM NormParameters NP
+				LEFT JOIN NormAttributeTransactions NAT
+					ON NAT.NormParameter_FK_Id = NP.Id
+					AND NAT.AuditYear = :year
+				WHERE NP.Plant_FK_Id = :plantFKId
+				AND NAT.AOPMonth IS NULL
+				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder
+				ORDER BY NP.DisplayOrder
+			""";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantFKId", plantFKId);
+
+			List<Object[]> resultList = query.getResultList();
+			List<VgohtNormConfigurationDTO> dtoList = new ArrayList<>();
+
+			for (Object[] row : resultList) {
+				VgohtNormConfigurationDTO dto = new VgohtNormConfigurationDTO();
+				dto.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+				dto.setProductName(row[1] != null ? row[1].toString() : "");
+				dto.setValue(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+				dto.setRemarks(row[3] != null ? row[3].toString() : "");
+				dtoList.add(dto);
+			}
+
+			AOPMessageVM response = new AOPMessageVM();
+			response.setCode(200);
+			response.setData(dtoList);
+			response.setMessage("Yearly values fetched successfully");
+
+			return response;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to fetch yearly values", e);
+		}
+	}
 }
