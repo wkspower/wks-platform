@@ -6,12 +6,15 @@
 .k-grid-header {
   border-bottom: 1px solid #ccc !important;
   border-right: 1px solid #ccc !important;
+  border-top: 0.5px solid #ccc !important;
+  border-left: 0.5px solid #ccc !important;
 }
 
 /* Top-level grouped header cells - add bottom border */
 .k-grid-header th.k-header[colspan] {
-  border-bottom: 1px solid #ccc !important;
-  border-right: 1px solid #ccc !important;
+  /* border-bottom: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;*/
+  border: 1px solid #ccc !important;
 }
 
 /* Keep specific cells white even in disabled rows (for alwaysEditable columns) */

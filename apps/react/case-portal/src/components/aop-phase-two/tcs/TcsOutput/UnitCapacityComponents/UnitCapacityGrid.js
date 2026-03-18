@@ -5,7 +5,10 @@ import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOu
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { convertFromKBPSD } from './uomConversionUtils'
-import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import {
+  generateCalendarYearHeaders,
+  generateHeaderNames,
+} from 'components/aop-phase-two/common/utilities/generateHeaders'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -22,7 +25,8 @@ const UnitCapacityGrid = ({
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
-  const headerMap = generateHeaderNames(AOP_YEAR)
+  // const headerMap = generateHeaderNames(AOP_YEAR)
+  const headerMap = generateCalendarYearHeaders(AOP_YEAR)
 
   // State management for this capacity type only
   const [loading, setLoading] = useState(false)
