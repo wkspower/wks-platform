@@ -128,9 +128,9 @@ const TcsOutput = () => {
         }
         // Check if EPS Engineer has submitted
         if (approvalStatus?.ebs_approved === false) {
-          return 'Waiting for EPS Engineer submission'
+          return 'Waiting for AOM submission'
         }
-        return 'Submission is pending from the EPS Engineer, or you have already submitted.'
+        return 'Submission is pending from the AOM, or you have already submitted.'
       } else if (userRole === ROLES.CLUSTER_HEAD) {
         // Check if already submitted
         if (approvalStatus?.cluster_head_approved === true) {

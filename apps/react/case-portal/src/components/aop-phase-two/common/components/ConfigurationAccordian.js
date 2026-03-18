@@ -28,6 +28,8 @@ const ConfigurationAccordian = ({
   isSummaryRequired = false,
   yearGap = 1,
   onDatesChange,
+  onLoadNormCalculation = () => {},
+  normCalculationLoading = false,
 }) => {
   const keycloak = useSession()
   const hasExecutedRef = useRef(false)
@@ -297,6 +299,11 @@ const ConfigurationAccordian = ({
         })
         await fetchConfigurationDetails()
         await fetchSummary()
+
+        // Trigger norm calculation after successful configuration load
+        if (onLoadNormCalculation) {
+          onLoadNormCalculation()
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({

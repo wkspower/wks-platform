@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Stack } from '../../../../../node_modules/@mui/material/index'
+import {
+  Box,
+  Stack,
+  Button,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from '../../../../../node_modules/@mui/material/index'
 import TabSection from 'components/aop-phase-two/common/utilities/Tabs'
 import ConfigurationAccordian from '../../common/components/ConfigurationAccordian'
 import { useSelector } from 'react-redux'
@@ -10,6 +17,8 @@ import Constants from './Constants'
 import ReportManualEntry from './ReportManualEntry'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
 import PIMSThroughput from './PIMSThroughput'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
+import Notification from 'components/aop-phase-two/common/utilities/Notification'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -31,6 +40,14 @@ const ProductionNormsBasis = () => {
   const [availableTabs, setAvailableTabs] = useState([])
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
+  const [normCalculationLoading, setNormCalculationLoading] = useState(false)
+  const [refreshData, setRefreshData] = useState(false)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+    autoHide: true,
+  })
 
   const getConfigurationTabsMatrix = async () => {
     if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
@@ -88,6 +105,88 @@ const ProductionNormsBasis = () => {
     setEndDate(end)
   }
 
+  // Helper function to format date for API
+  const formatDateForAPI = (date) => {
+    if (!date) return null
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // Handler for Load Norm Calculation button
+  const handleLoadNormCalculation = async () => {
+    if (!startDate || !endDate) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Please select both start date and end date',
+        severity: 'warning',
+        autoHide: true,
+      })
+      return
+    }
+
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Missing required parameters',
+        severity: 'error',
+        autoHide: true,
+      })
+      return
+    }
+
+    setNormCalculationLoading(true)
+    try {
+      const periodFrom = formatDateForAPI(startDate)
+      const periodTo = formatDateForAPI(endDate)
+
+      const response =
+        await ProductionNormsApiService.loadButtonNormCalculation(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+          periodFrom,
+          periodTo,
+        )
+
+      if (response?.code === 422) {
+        // Then show validation error after a delay
+        setTimeout(() => {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: response.message || 'Validation error occurred.',
+            severity: 'error',
+            autoHide: false,
+          })
+          setRefreshData(true)
+        }, 500)
+      } else {
+        // Code 200 - show only success notification
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message:
+            response?.message || 'Norm calculation completed successfully!',
+          severity: 'success',
+          autoHide: true,
+        })
+        setRefreshData(true)
+      }
+    } catch (error) {
+      console.error('Error in norm calculation:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to calculate norms. Please try again.',
+        severity: 'error',
+        autoHide: true,
+      })
+    } finally {
+      setNormCalculationLoading(false)
+    }
+  }
+
   const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
   const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
 
@@ -132,7 +231,13 @@ const ProductionNormsBasis = () => {
 
     switch (currentTabName) {
       case 'Configuration':
-        return <Configuration startDate={startDate} endDate={endDate} />
+        return (
+          <Configuration
+            startDate={startDate}
+            endDate={endDate}
+            refreshData={refreshData}
+          />
+        )
       case 'Constants':
         return <Constants startDate={startDate} endDate={endDate} />
       case 'PIMS Throughput':
@@ -154,6 +259,8 @@ const ProductionNormsBasis = () => {
           isOldYear={isOldYear}
           isSummaryRequired={true}
           onDatesChange={handleDatesChange}
+          onLoadNormCalculation={handleLoadNormCalculation}
+          normCalculationLoading={normCalculationLoading}
         />
       </Stack>
 
@@ -173,6 +280,14 @@ const ProductionNormsBasis = () => {
 
       {/* Tab Content */}
       <Box sx={{ mt: 2 }}>{renderTab()}</Box>
+      {/* Notification */}
+      <Notification
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarData.message}
+        severity={snackbarData.severity}
+        autoHide={snackbarData.autoHide}
+      />
     </div>
   )
 }

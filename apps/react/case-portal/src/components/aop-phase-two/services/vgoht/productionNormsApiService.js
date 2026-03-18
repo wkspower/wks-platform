@@ -121,7 +121,7 @@ async function exportConfigurationExcel(keycloak, plantId, year) {
  * @returns {Promise} Constants data
  */
 async function getConstantsData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/vgoht/norms-basis/constants?year=${year}&plantFKId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/vgoht/norms-basis/constant?year=${year}&plantFKId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -146,8 +146,8 @@ async function getConstantsData(keycloak, plantId, year) {
  * @param {Array} payload - Data to save
  * @returns {Promise} Save response
  */
-async function saveConstantsData(keycloak, year, payload) {
-  const url = `${Config.CaseEngineUrl}/task/vgoht/norms-basis/constants?year=${year}`
+async function saveConstantsData(keycloak, year, plantId, payload) {
+  const url = `${Config.CaseEngineUrl}/task/vgoht/norms-basis/constant?year=${year}&plantFKId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
