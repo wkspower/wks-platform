@@ -74,6 +74,26 @@ const RemarkCell = ({ text, maxLength = 100 }) => {
   )
 }
 
+// Helper function to map role codes to display names
+const getRoleDisplayName = (roleCode) => {
+  if (!roleCode) return '-'
+
+  switch (roleCode) {
+    case 'plant_manager':
+      return 'CTS Engineer'
+    case 'eps_engineer':
+      return 'AOM'
+    case 'cts_head':
+      return 'CTS Head'
+    case 'eps_head':
+      return 'EPS Head'
+    case 'cluster_head':
+      return 'R&M Cluster Head'
+    default:
+      return roleCode
+  }
+}
+
 const HistoryDialog = ({
   open,
   onClose,
@@ -107,13 +127,14 @@ const HistoryDialog = ({
         {
           id: 1,
           label: 'Step 1',
-          role: 'Plant Manager',
+          // role: 'Plant Manager',
+          role: 'CTS Engineer',
           status: 'active',
         },
         {
           id: 2,
           label: 'Step 2',
-          role: 'EPS Engineer',
+          role: 'AOM',
           status: 'pending',
         },
         {
@@ -352,7 +373,8 @@ const HistoryDialog = ({
     if (statusLower === 'pending') {
       switch (userRole) {
         case ROLES.PLANT_MANAGER:
-          return 'Pending for approval of EPS Engineer'
+          // return 'Pending for approval of EPS Engineer'
+          return 'Pending for approval of AOM'
         case ROLES.EPS_ENGINEER:
           return 'Pending for approval of CTS Head / EPS Head'
         case ROLES.CTS_HEAD:
@@ -368,7 +390,8 @@ const HistoryDialog = ({
     if (statusLower === 'approved') {
       switch (userRole) {
         case ROLES.PLANT_MANAGER:
-          return 'Approved by EPS Engineer'
+          // return 'Approved by EPS Engineer'
+          return 'Approved by AOM'
         case ROLES.EPS_ENGINEER:
           return 'Approved by CTS Head / EPS Head'
         case ROLES.CTS_HEAD:
@@ -384,7 +407,8 @@ const HistoryDialog = ({
     if (statusLower === 'rejected') {
       switch (userRole) {
         case ROLES.PLANT_MANAGER:
-          return 'Rejected by EPS Engineer'
+          // return 'Rejected by EPS Engineer'
+          return 'Rejected by AOM'
         case ROLES.EPS_ENGINEER:
           return 'Rejected by CTS Head / EPS Head'
         case ROLES.CTS_HEAD:
@@ -406,11 +430,12 @@ const HistoryDialog = ({
   const getTitle = () => {
     switch (userRole) {
       case ROLES.PLANT_MANAGER:
-        return 'Plant Manager History'
+        return 'CTS Engineer History'
       case ROLES.CTS_HEAD:
-        return 'CTS Head History'
+      case ROLES.EPS_HEAD:
+        return 'EPS/CTS Head History'
       case ROLES.EPS_ENGINEER:
-        return 'EPS Engineer History'
+        return 'AOM History'
       default:
         return title
     }
@@ -576,6 +601,19 @@ const HistoryDialog = ({
                               col.field === 'verifiedRemark' ||
                               col.field === 'submissionRemark' ? (
                               <RemarkCell text={item[col.field]} />
+                            ) : col.field === 'submittedBy' ||
+                              col.field === 'verifiedBy' ? (
+                              <Typography
+                                variant='body2'
+                                sx={{
+                                  whiteSpace: 'pre-wrap',
+                                  wordBreak: 'break-word',
+                                  overflowY: 'auto',
+                                  pr: 1,
+                                }}
+                              >
+                                {getRoleDisplayName(item[col.field])}
+                              </Typography>
                             ) : (
                               <Typography
                                 variant='body2'

@@ -104,9 +104,10 @@ const RemarkDialog = ({
   const getTitle = () => {
     switch (role) {
       case ROLES.PLANT_MANAGER:
-        return 'Plant Manager Remark Submission'
+        // return 'Plant Manager Remark Submission'
+        return 'CTS Engineer Remark Submission'
       case ROLES.EPS_ENGINEER:
-        return 'EPS Engineer Remark Submission'
+        return 'AOM Remark Submission'
       case ROLES.CTS_HEAD:
         return 'CTS Head Remark Submission'
       case ROLES.EPS_HEAD:

@@ -18,7 +18,7 @@ import {
 } from './utils/dependencyUtils'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/crude/productionNormsApiService'
 
-const Configuration = ({ startDate, endDate }) => {
+const Configuration = ({ startDate, endDate, refreshData }) => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -118,7 +118,7 @@ const Configuration = ({ startDate, endDate }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConfigurationData()
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR, refreshData])
 
   const fetchConfigurationData = async () => {
     setLoading(true)

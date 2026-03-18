@@ -29,7 +29,7 @@ const Constants = () => {
 
   const columns = [
     {
-      field: 'Name',
+      field: 'productName',
       title: 'Particulars',
       widthT: 300,
       minWidth: 250,
@@ -46,7 +46,7 @@ const Constants = () => {
       editable: false,
     },
     {
-      field: 'ConstantValue',
+      field: 'value',
       title: 'Value',
       editable: true,
       widthT: 150,
@@ -57,7 +57,7 @@ const Constants = () => {
       format: '{0:0.00}',
     },
     {
-      field: 'Remarks',
+      field: 'remarks',
       title: 'Remark',
       widthT: 350,
       type: 'textarea',
@@ -78,15 +78,15 @@ const Constants = () => {
       // Simulate API call with 1 second delay
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      // const res = await ProductionNormsApiService.getConstantsData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      const res = await ProductionNormsApiService.getConstantsData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
-      const res = productionAndNormsBasisConstant.data
+      // const res = productionAndNormsBasisConstant.data
 
-      if (res?.length === 0) {
+      if (res?.data?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
@@ -94,7 +94,7 @@ const Constants = () => {
       }
 
       console.log('Constants data:', res)
-      const formattedData = res?.map((item, index) => ({
+      const formattedData = res?.data?.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
         id: item?.id || index + 1,
@@ -155,7 +155,7 @@ const Constants = () => {
       data,
       originalRows,
       fieldsToCheck,
-      'particulars',
+      'productName',
     )
 
     if (validationError) {
@@ -175,6 +175,7 @@ const Constants = () => {
       const response = await ProductionNormsApiService.saveConstantsData(
         keycloak,
         AOP_YEAR,
+        PLANT_ID,
         payload,
       )
 
@@ -332,7 +333,7 @@ const Constants = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['NormTypeName']}
+        groupBy={['TypeDisplayName']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

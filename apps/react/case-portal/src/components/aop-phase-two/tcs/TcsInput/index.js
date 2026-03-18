@@ -76,7 +76,7 @@ const TcsInput = () => {
     if (!isSubmitEligible) {
       return 'Plant submission already done'
     }
-    return 'Submit plant data to EPS Engineer for approval'
+    return 'Submit plant data to AOM for approval'
   }, [isSubmitEligible])
 
   // Check workflow status on mount
