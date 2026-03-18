@@ -332,6 +332,7 @@ const Constants = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        groupBy={['NormTypeName']}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,

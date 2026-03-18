@@ -1,3 +1,90 @@
+import { recalcDuration, recalcEndDate } from '../commonUtilityFunctions'
+
+/**
+ * Apply date calculations based on dateCalculationConfig
+ * @param {Object} rowData - The row data object
+ * @param {string} field - The field being changed
+ * @param {any} value - The new value
+ * @param {Object} config - Date calculation configuration
+ * @param {boolean} convertToISO - Whether to convert dates to ISO strings
+ * @returns {Object} Object with calculated field updates
+ */
+export const applyDateCalculations = (
+  rowData,
+  field,
+  value,
+  config,
+  convertToISO = false,
+) => {
+  if (!config) return {}
+
+  const { dateField1, dateField2, daysField, requiredInHr, roundDaysAndDates } =
+    config
+  const updates = {}
+
+  // Scenario 1: If both dates exist and one is changed, calculate duration
+  if (field === dateField1 || field === dateField2) {
+    if (rowData[dateField1] && rowData[dateField2]) {
+      const duration = recalcDuration(
+        rowData[dateField1],
+        rowData[dateField2],
+        requiredInHr,
+      )
+      updates[daysField] = roundDaysAndDates ? Math.floor(duration) : duration
+    }
+    // Scenario 4: If startDate is changed and days exists (but no endDate), calculate endDate
+    else if (
+      field === dateField1 &&
+      rowData[daysField] &&
+      !rowData[dateField2]
+    ) {
+      const newEnd = recalcEndDate(value, rowData[daysField], requiredInHr)
+      if (newEnd) {
+        updates[dateField2] = convertToISO ? newEnd.toISOString() : newEnd
+      }
+    }
+    // Scenario 5: If endDate is changed and days exists (but no startDate), calculate startDate
+    else if (
+      field === dateField2 &&
+      rowData[daysField] &&
+      !rowData[dateField1]
+    ) {
+      const days = requiredInHr
+        ? parseFloat(rowData[daysField]) / 24
+        : parseFloat(rowData[daysField])
+      if (!isNaN(days) && days >= 0) {
+        const newStart = new Date(
+          new Date(value).getTime() - days * 24 * 60 * 60000,
+        )
+        updates[dateField1] = convertToISO ? newStart.toISOString() : newStart
+      }
+    }
+  }
+  // Scenario 2: If duration is changed and startDate exists, calculate endDate
+  else if (field === daysField && rowData[dateField1] && value) {
+    const newEnd = recalcEndDate(rowData[dateField1], value, requiredInHr)
+    if (newEnd) {
+      updates[dateField2] = convertToISO ? newEnd.toISOString() : newEnd
+    }
+  }
+  // Scenario 3: If duration is changed and endDate exists (but no startDate), calculate startDate
+  else if (
+    field === daysField &&
+    !rowData[dateField1] &&
+    rowData[dateField2] &&
+    value
+  ) {
+    const endDate = new Date(rowData[dateField2])
+    const days = requiredInHr ? parseFloat(value) / 24 : parseFloat(value)
+    if (!isNaN(days) && days >= 0) {
+      const newStart = new Date(endDate.getTime() - days * 24 * 60 * 60000)
+      updates[dateField1] = convertToISO ? newStart.toISOString() : newStart
+    }
+  }
+
+  return updates
+}
+
 export const handleTabKeyNavigation = ({
   e,
   activeCellRef,

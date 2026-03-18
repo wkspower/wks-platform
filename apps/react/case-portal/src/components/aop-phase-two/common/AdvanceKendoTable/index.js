@@ -13,7 +13,7 @@ import '../../../../../src/kendo-data-grid.css'
 import '../../css/advance-kendo-table.css'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
-import { handleTabKeyNavigation } from './utility'
+import { handleTabKeyNavigation, applyDateCalculations } from './utility'
 import RemarkDialog from './components/RemarkDialog'
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
@@ -481,6 +481,29 @@ const AdvanceKendoTable = ({
       }
 
       const itemId = dataItem.id
+
+      // First update modifiedCells to accumulate all changes
+      let updatedModifiedCells
+      setModifiedCells((prev) => {
+        // Merge with previous modified cells to get all accumulated changes
+        const previousModified = prev[itemId] || {}
+        const base = { ...dataItem, ...previousModified, [field]: value }
+
+        // Apply date calculations if config is provided (convert dates to ISO strings)
+        const dateUpdates = applyDateCalculations(
+          base,
+          field,
+          value,
+          dateCalculationConfig,
+          true,
+        )
+        Object.assign(base, dateUpdates)
+
+        updatedModifiedCells = base
+        return { ...prev, [itemId]: base }
+      })
+
+      // Then update rows using the accumulated modified data
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
@@ -501,38 +524,21 @@ const AdvanceKendoTable = ({
             updated[field] = value
           }
 
-          if (dateCalculationConfig) {
-            const {
-              dateField1,
-              dateField2,
-              daysField,
-              requiredInHr,
-              roundDaysAndDates,
-            } = dateCalculationConfig
+          // Apply date calculations using the accumulated modified data
+          if (updatedModifiedCells && dateCalculationConfig) {
+            const { dateField1, dateField2, daysField } = dateCalculationConfig
+            // Copy calculated date fields from modifiedCells (which has ISO strings)
+            if (updatedModifiedCells[dateField1] && field !== dateField1) {
+              updated[dateField1] = new Date(updatedModifiedCells[dateField1])
+            }
+            if (updatedModifiedCells[dateField2] && field !== dateField2) {
+              updated[dateField2] = new Date(updatedModifiedCells[dateField2])
+            }
             if (
-              dateField1 in updated &&
-              dateField2 in updated &&
-              daysField in updated
+              updatedModifiedCells[daysField] !== undefined &&
+              field !== daysField
             ) {
-              if (field === dateField1 || field === dateField2) {
-                const duration = recalcDuration(
-                  updated[dateField1],
-                  updated[dateField2],
-                  requiredInHr,
-                )
-                updated[daysField] = roundDaysAndDates
-                  ? Math.floor(duration)
-                  : duration
-              } else if (field === daysField) {
-                const newEnd = recalcEndDate(
-                  updated[dateField1],
-                  value,
-                  requiredInHr,
-                )
-                if (newEnd) {
-                  updated[dateField2] = newEnd
-                }
-              }
+              updated[daysField] = updatedModifiedCells[daysField]
             }
           }
 
@@ -540,79 +546,20 @@ const AdvanceKendoTable = ({
         }),
       )
 
-      setModifiedCells((prev) => {
-        const base = { ...dataItem, [field]: value }
-
-        if (dateCalculationConfig) {
-          const {
-            dateField1,
-            dateField2,
-            daysField,
-            requiredInHr,
-            roundDaysAndDates,
-          } = dateCalculationConfig
-          if (dateField1 in base && dateField2 in base && daysField in base) {
-            if (field === dateField1 || field === dateField2) {
-              const duration = recalcDuration(
-                base[dateField1],
-                base[dateField2],
-                requiredInHr,
-              )
-              base[daysField] = roundDaysAndDates
-                ? Math.floor(duration)
-                : duration
-            } else if (field === daysField) {
-              const newEnd = recalcEndDate(
-                base[dateField1],
-                value,
-                requiredInHr,
-              )
-              if (newEnd) base[dateField2] = newEnd.toISOString()
-            }
-          }
-        }
-
-        return { ...prev, [itemId]: base }
-      })
-
       // customModifiedCells: always set per-row custom changes (include months if percentChange)
       setCustomModifiedCells((prev) => {
         const base = { ...(prev[itemId] || {}), [field]: value }
 
-        if (dateCalculationConfig) {
-          const {
-            dateField1,
-            dateField2,
-            daysField,
-            requiredInHr,
-            roundDaysAndDates,
-          } = dateCalculationConfig
-          if (
-            dateField1 in dataItem &&
-            dateField2 in dataItem &&
-            daysField in dataItem
-          ) {
-            if (field === dateField1 || field === dateField2) {
-              // When dates change, also highlight the calculated duration field
-              const calculatedDuration = recalcDuration(
-                field === dateField1 ? value : dataItem[dateField1],
-                field === dateField2 ? value : dataItem[dateField2],
-                requiredInHr,
-              )
-              base[daysField] = roundDaysAndDates
-                ? Math.floor(calculatedDuration)
-                : calculatedDuration
-            } else if (field === daysField) {
-              // When duration changes, also highlight the calculated end date field
-              const newEnd = recalcEndDate(
-                dataItem[dateField1],
-                value,
-                requiredInHr,
-              )
-              if (newEnd) base[dateField2] = newEnd.toISOString()
-            }
-          }
-        }
+        // For customModifiedCells, use dataItem as source for unchanged fields
+        const sourceData = { ...dataItem, ...base }
+        const dateUpdates = applyDateCalculations(
+          sourceData,
+          field,
+          value,
+          dateCalculationConfig,
+          true,
+        )
+        Object.assign(base, dateUpdates)
 
         return {
           ...prev,

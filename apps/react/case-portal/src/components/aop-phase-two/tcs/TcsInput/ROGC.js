@@ -3,7 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import {
+  generateCalendarYearHeaders,
+  generateHeaderNames,
+} from 'components/aop-phase-two/common/utilities/generateHeaders'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import { Stack } from '../../../../../node_modules/@mui/material/index'
@@ -175,7 +178,12 @@ const ROGC = ({
   }, [PLANT_ID, AOP_YEAR, SITE_ID, fetchRogcData])
 
   // Generate header names with month-year format
-  const headerMap = useMemo(() => generateHeaderNames(AOP_YEAR), [AOP_YEAR])
+  const headerMap = useMemo(
+    () =>
+      // generateHeaderNames(AOP_YEAR),
+      generateCalendarYearHeaders(AOP_YEAR),
+    [AOP_YEAR],
+  )
 
   // Column configuration for ROGC - hardcoded like FixedConsumption.js
   const columns = useMemo(() => {
@@ -188,6 +196,33 @@ const ROGC = ({
         minWidth: 150,
         type: 'text',
         editable: false,
+      },
+      {
+        field: 'jan',
+        title: headerMap[1],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'feb',
+        title: headerMap[2],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'mar',
+        title: headerMap[3],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
       },
       {
         field: 'apr',
@@ -264,33 +299,6 @@ const ROGC = ({
       {
         field: 'dec',
         title: headerMap[12],
-        editable: true,
-        width: 100,
-        minWidth: 80,
-        type: 'number1',
-        format: valueFormat,
-      },
-      {
-        field: 'jan',
-        title: headerMap[1],
-        editable: true,
-        width: 100,
-        minWidth: 80,
-        type: 'number1',
-        format: valueFormat,
-      },
-      {
-        field: 'feb',
-        title: headerMap[2],
-        editable: true,
-        width: 100,
-        minWidth: 80,
-        type: 'number1',
-        format: valueFormat,
-      },
-      {
-        field: 'mar',
-        title: headerMap[3],
         editable: true,
         width: 100,
         minWidth: 80,
