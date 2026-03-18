@@ -41,5 +41,11 @@ public class NormBasisController {
         return ResponseEntity.ok(aopMessageVM);
     }
 
+    @GetMapping("/load-button-norm-calculation")
+    public ResponseEntity<AOPMessageVM> loadButtonNormCalculation(@RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
+        AOPMessageVM aopMessageVM = normBasisService.LoadButtonNormCalculation(UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
+        return ResponseEntity.ok(aopMessageVM);
+    }
+
 
 }
