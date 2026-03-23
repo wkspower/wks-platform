@@ -1,9 +1,12 @@
 package com.wks.caseengine.vgoht.serviceimpl;
 
+import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,8 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.StoredProcedureQuery;
 
 @Service
 public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
@@ -41,7 +46,6 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
     @PersistenceContext
 	private EntityManager entityManager;
     
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -268,7 +272,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 
 	@Transactional
-	public AOPMessageVM saveYearlyValues(String year, UUID plantFKId, List<VgohtNormConfigurationDTO> dtoList) {
+	public AOPMessageVM saveYearlyValues(String year, UUID plantFKId, List<VgohtNormConfigurationDTO> dtoList, String periodFrom, String periodTo) { 
 
 		try {
 			for (VgohtNormConfigurationDTO dto : dtoList) {
@@ -277,10 +281,30 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				}
 			}
 
-			AOPMessageVM response = new AOPMessageVM();
-			response.setCode(200);
-			response.setMessage("Yearly values saved successfully");
-			return response;
+			
+        // call the norm calculation procedure
+
+        Plants plant = plantsRepository.findById(plantFKId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+		// VGOHT_DTA_VGOHT1_NormCalculation
+		String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+
+		String errorMessage = executeNormCalculationProcedure(plantFKId, year, site.getId(), periodFrom, periodTo, procedureName );
+
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+
+		if(errorMessage != null ) { 
+			aopMessageVM.setCode(422);
+			aopMessageVM.setMessage(errorMessage);
+			return aopMessageVM;
+		}
+
+		AOPMessageVM response = new AOPMessageVM();
+		response.setCode(200);
+		response.setMessage("Yearly values saved successfully");
+		return response;
 
 		} catch (Exception e) {
 			throw new RuntimeException("Error saving yearly values", e);
@@ -348,6 +372,8 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				dtoList.add(dto);
 			}
 
+			
+
 			AOPMessageVM response = new AOPMessageVM();
 			response.setCode(200);
 			response.setData(dtoList);
@@ -357,6 +383,141 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to fetch yearly values", e);
+		}
+	}
+
+	public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+			// String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
+			String plantVerticalName = plantsRepository.findPlantNameAndVerticalNameByPlantId(UUID.fromString(plantFKId));
+			String procedureName = plantVerticalName + "_GetConfiguration_Constant";
+			List<Object[]> obj = new ArrayList<>();
+			// if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
+			// 		|| verticalName.equalsIgnoreCase("CRACKER") || verticalName.equalsIgnoreCase("VCM")
+			// 		|| verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
+			obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
+			// }
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+				map.put("NormTypeName", row[0]);
+				map.put("NormParameter_FK_Id", row[1]);
+				map.put("Name", row[2]);
+				map.put("DisplayName", row[3]);
+				map.put("UOM", row[4]);
+				map.put("ConstantValue", (row[5] != null) ? Double.parseDouble(row[5].toString()) : 0.0);
+				map.put("AuditYear", row[6]);
+				map.put("Remarks", row[7]);
+				boolean isEditable;
+				Object flagObj = row[8];
+				if (flagObj instanceof Boolean) {
+					isEditable = (Boolean) flagObj;
+				} else if (flagObj instanceof Number) {
+					isEditable = ((Number) flagObj).intValue() == 1;
+				} else {
+					isEditable = false; 
+				}
+				map.put("isEditable", isEditable);
+				map.put("Types", row[9]);
+				configurationConstantsList.add(map); 
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationConstantsList);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> findConstantsByYearAndPlantFkId(String aopYear, String plantId, String procedureName) {
+		try {
+			String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Override
+    public AOPMessageVM LoadButtonNormCalculation(UUID plantId, String aopYear, UUID siteId, String periodFrom, String periodTo) {
+        Plants plant = plantsRepository.findById(plantId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+		// VGOHT_DTA_VGOHTAOPConsumptionNormDTO1_NormCalculation
+		String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+
+		String errorMessage = executeNormCalculationProcedure(plantId, aopYear, siteId, periodFrom, periodTo, procedureName );
+
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+
+		if(errorMessage != null ) { 
+		
+			aopMessageVM.setCode(422);
+			aopMessageVM.setMessage(errorMessage);
+			return aopMessageVM;
+
+		}
+
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Norm Calculations Executed Successfully");
+		return aopMessageVM;
+
+	}
+
+	
+	private String executeNormCalculationProcedure(UUID plantId, String aopYear, UUID siteId,
+												String periodFrom, String periodTo,
+												String procedureName) {
+
+		try {
+
+			StoredProcedureQuery query = entityManager
+					.createStoredProcedureQuery(procedureName);
+
+			// Input parameters
+			query.registerStoredProcedureParameter("plantId", String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter("AOPYear", String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter("siteid", String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter("PeriodFrom", String.class, ParameterMode.IN);
+			query.registerStoredProcedureParameter("PeriodTo", String.class, ParameterMode.IN);
+
+			// OUTPUT parameter
+			query.registerStoredProcedureParameter("ErrorMessage", String.class, ParameterMode.OUT);
+
+			query.setParameter("plantId", plantId.toString());
+			query.setParameter("AOPYear", aopYear);
+			query.setParameter("siteid", siteId.toString());
+			query.setParameter("PeriodFrom", periodFrom);
+			query.setParameter("PeriodTo", periodTo);
+
+			query.execute();
+
+			try {
+				query.getResultList(); // flush any pending result sets
+			} catch (Exception ignored) {}
+
+			String errorMessage = (String) query.getOutputParameterValue("ErrorMessage");
+
+			System.out.println("errorMessage string: " + errorMessage);
+
+			return errorMessage;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to execute procedure", ex);
 		}
 	}
 }

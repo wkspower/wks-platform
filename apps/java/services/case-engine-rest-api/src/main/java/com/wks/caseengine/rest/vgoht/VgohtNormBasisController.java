@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.vgoht;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,13 +50,13 @@ public class VgohtNormBasisController {
     public AOPMessageVM saveYearlyValues(
         @RequestParam String year,
         @RequestParam UUID plantFKId,
-        @RequestBody List<VgohtNormConfigurationDTO> yearlyValuesList) {
+        @RequestBody List<VgohtNormConfigurationDTO> yearlyValuesList, @RequestParam String periodFrom, @RequestParam String periodTo)  {
 
         if (plantFKId == null || year == null || year.isEmpty()) {
             throw new IllegalArgumentException("Plant ID and AOP Year are required");
         }
 
-        return vgohtNormBasisServiceImpl.saveYearlyValues(year, plantFKId, yearlyValuesList);
+        return vgohtNormBasisServiceImpl.saveYearlyValues(year, plantFKId, yearlyValuesList, periodFrom, periodTo);
     }
 
     @GetMapping(value="/vgoht/norms-basis/constant")
@@ -67,4 +68,14 @@ public class VgohtNormBasisController {
         return vgohtNormBasisServiceImpl.getYearlyValues(year, plantFKId);
     }
 
+    @GetMapping(value="/vgoht/norms-basis/constant-sp")
+	public AOPMessageVM getConfigurationConstants(@RequestParam String year,@RequestParam String plantFKId) {
+		return vgohtNormBasisServiceImpl.getConfigurationConstants(year,plantFKId);
+	}
+
+    @GetMapping("/load-button-norm-calculation")
+    public ResponseEntity<AOPMessageVM> loadButtonNormCalculation(@RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
+        AOPMessageVM aopMessageVM = vgohtNormBasisServiceImpl.LoadButtonNormCalculation(UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
+        return ResponseEntity.ok(aopMessageVM);
+    }
 }
