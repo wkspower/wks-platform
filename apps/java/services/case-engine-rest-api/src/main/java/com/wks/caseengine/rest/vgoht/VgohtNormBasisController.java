@@ -73,7 +73,7 @@ public class VgohtNormBasisController {
 		return vgohtNormBasisServiceImpl.getConfigurationConstants(year,plantFKId);
 	}
 
-    @GetMapping("/load-button-norm-calculation")
+    @GetMapping("vgoht/load-button-norm-calculation")
     public ResponseEntity<AOPMessageVM> loadButtonNormCalculation(@RequestParam String plantId, @RequestParam String aopYear, @RequestParam String siteId, @RequestParam String periodFrom, @RequestParam String periodTo) {
         AOPMessageVM aopMessageVM = vgohtNormBasisServiceImpl.LoadButtonNormCalculation(UUID.fromString(plantId), aopYear, UUID.fromString(siteId), periodFrom, periodTo);
         return ResponseEntity.ok(aopMessageVM);
