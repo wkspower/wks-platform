@@ -420,7 +420,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 					ON NAT.NormParameter_FK_Id = NP.Id
 					AND NAT.AuditYear = :year
 					AND NAT.AOPMonth = 4
-				WHERE NP.Plant_FK_Id = :plantFKId
+				WHERE NP.Plant_FK_Id = :plantFKId AND NPT.Name = 'Constant'
 				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder, NP.UOM, NP.Type
 				ORDER BY NP.DisplayOrder
 			""";
