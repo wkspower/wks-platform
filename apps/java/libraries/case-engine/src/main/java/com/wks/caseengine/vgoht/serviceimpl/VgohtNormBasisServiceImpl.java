@@ -443,7 +443,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 					try {
 						dto.setValue(Double.parseDouble(value));
 					} catch (NumberFormatException e) {
-						dto.setValue(null); // or 0.0 based on business need
+						dto.setValue(0.0); // or 0.0 based on business need
 					}
 				} else {
 					dto.setValue(0.0);
