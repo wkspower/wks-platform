@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -30,6 +32,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.StoredProcedureQuery;
+import java.io.ByteArrayOutputStream;
+
+import org.apache.poi.ss.usermodel.*;
 
 @Service
 public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
@@ -282,24 +287,24 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 			}
 
 			
-        // call the norm calculation procedure
+        // // call the norm calculation procedure
 
-        Plants plant = plantsRepository.findById(plantFKId).get();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+        // Plants plant = plantsRepository.findById(plantFKId).get();
+		// Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
-		// VGOHT_DTA_VGOHT1_NormCalculation
-		String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+		// // VGOHT_DTA_VGOHT1_NormCalculation
+		// String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
 
-		String errorMessage = executeNormCalculationProcedure(plantFKId, year, site.getId(), periodFrom, periodTo, procedureName );
+		// String errorMessage = executeNormCalculationProcedure(plantFKId, year, site.getId(), periodFrom, periodTo, procedureName );
 
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		// AOPMessageVM aopMessageVM = new AOPMessageVM();
 
-		if(errorMessage != null ) { 
-			aopMessageVM.setCode(422);
-			aopMessageVM.setMessage(errorMessage);
-			return aopMessageVM;
-		}
+		// if(errorMessage != null ) { 
+		// 	aopMessageVM.setCode(422);
+		// 	aopMessageVM.setMessage(errorMessage);
+		// 	return aopMessageVM;
+		// }
 
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);
@@ -317,7 +322,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 						:year AS AuditYear) AS source
 			ON target.NormParameter_FK_Id = source.NormParameter_FK_Id
 			AND target.AuditYear = source.AuditYear
-			AND target.AOPMonth IS NULL
+			AND target.AOPMonth = 4
 			WHEN MATCHED THEN
 				UPDATE SET AttributeValue = :value,
 						Remarks = :remarks
@@ -333,24 +338,90 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 		query.setParameter("remarks", remarks);
 		query.executeUpdate();
 	}
+
+	@Transactional
+	public AOPMessageVM importYearlyValues(
+			String year,
+			UUID plantFKId,
+			String periodFrom,
+			String periodTo,
+			MultipartFile file
+	) {
+
+		try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			if (sheet == null || sheet.getPhysicalNumberOfRows() == 0) {
+				throw new RuntimeException("Excel sheet is empty");
+			}
+
+			// ✅ Read header
+			Row headerRow = sheet.getRow(0);
+			Map<String, Integer> headerMap = getHeaderMap(headerRow);
+
+			// ✅ Validate required headers
+			validateHeaders(headerMap);
+
+			// ✅ Preload parameter mapping (Performance Optimization 🔥)
+			Map<String, String> parameterMap = getNormParameterMap(plantFKId);
+
+			List<VgohtNormConfigurationDTO> dtoList = new ArrayList<>();
+
+			// ✅ Read data rows
+			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+				Row row = sheet.getRow(i);
+				if (row == null) continue;
+
+				String parameterName = getCellString(getCell(row, headerMap, "parameter"));
+				Double value = getCellDouble(getCell(row, headerMap, "value"));
+				String remarks = getCellString(getCell(row, headerMap, "remarks"));
+
+				if (parameterName.isEmpty()) continue;
+
+				// ✅ Map name → ID
+				String normParameterId = parameterMap.get(parameterName.toLowerCase());
+
+				if (normParameterId == null) {
+					throw new RuntimeException("Invalid Parameter at row " + (i + 1) + ": " + parameterName);
+				}
+
+				VgohtNormConfigurationDTO dto = new VgohtNormConfigurationDTO();
+				dto.setNormParameterFKId(normParameterId);
+				dto.setProductName(parameterName);
+				dto.setValue(value);
+				dto.setRemarks(remarks);
+
+				dtoList.add(dto);
+			}
+
+			// ✅ Call existing save method
+			return saveYearlyValues(year, plantFKId, dtoList, periodFrom, periodTo);
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error importing yearly values: " + e.getMessage(), e);
+		}
+	}
 	public AOPMessageVM getYearlyValues(String year, UUID plantFKId) {
 
-		try {
+		// try {
 			String sql = """
 				SELECT NP.Id AS NormParameter_FK_Id,
 					NP.DisplayName,
 					MAX(NAT.AttributeValue) AS value,
 					MAX(NAT.Remarks) AS remarks,
 					NP.UOM,
-					MAX(NPT.DisplayName) AS NormParameterTypeDisplayName
+					MAX(NPT.DisplayName) AS NormParameterTypeDisplayName,
+					NP.Type
 				FROM NormParameters NP
 				JOIN NormParameterType NPT on NP.NormParameterType_FK_Id = NPT.Id
 				LEFT JOIN NormAttributeTransactions NAT
 					ON NAT.NormParameter_FK_Id = NP.Id
 					AND NAT.AuditYear = :year
+					AND NAT.AOPMonth = 4
 				WHERE NP.Plant_FK_Id = :plantFKId
-				AND NAT.AOPMonth IS NULL
-				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder, NP.UOM
+				GROUP BY NP.Id, NP.DisplayName, NP.DisplayOrder, NP.UOM, NP.Type
 				ORDER BY NP.DisplayOrder
 			""";
 
@@ -365,10 +436,22 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				VgohtNormConfigurationDTO dto = new VgohtNormConfigurationDTO();
 				dto.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
 				dto.setProductName(row[1] != null ? row[1].toString() : "");
-				dto.setValue(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+				// dto.setValue(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+				if (row[2] != null) {
+					String value = row[2].toString().trim();
+
+					try {
+						dto.setValue(Double.parseDouble(value));
+					} catch (NumberFormatException e) {
+						dto.setValue(null); // or 0.0 based on business need
+					}
+				} else {
+					dto.setValue(0.0);
+				}
 				dto.setRemarks(row[3] != null ? row[3].toString() : "");
 				dto.setUOM(row[4] != null ? row[4].toString() : "");
 				dto.setTypeDisplayName(row[5] != null ? row[5].toString() : "");
+				dto.setType(row[6] != null ? row[6].toString() : "");
 				dtoList.add(dto);
 			}
 
@@ -381,8 +464,62 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 			return response;
 
+		// } catch (Exception e) {
+		// 	System.out.println(e);
+		// 	throw new RuntimeException("Failed to fetch yearly values", e);
+		// }
+	}
+
+	public byte[] exportYearlyValues(String year, UUID plantFKId) {
+
+		AOPMessageVM response = getYearlyValues(year, plantFKId);
+		List<VgohtNormConfigurationDTO> data =
+				(List<VgohtNormConfigurationDTO>) response.getData();
+
+		try (Workbook workbook = new XSSFWorkbook();
+			ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+			Sheet sheet = workbook.createSheet("Norms Basis Constant");
+
+			// Header Row
+			Row header = sheet.createRow(0);
+			header.createCell(0).setCellValue("Parameter");
+			header.createCell(1).setCellValue("Value");
+			header.createCell(2).setCellValue("Remarks");
+			header.createCell(3).setCellValue("UOM");
+			header.createCell(4).setCellValue("Type");
+			header.createCell(5).setCellValue("ConstantType");
+			// header.createCell(6).setCellValue("NormParameter_FK_Id");
+
+			// Data Rows
+			int rowIdx = 1;
+			for (VgohtNormConfigurationDTO dto : data) {
+				Row row = sheet.createRow(rowIdx++);
+
+				row.createCell(0).setCellValue(dto.getProductName());
+				row.createCell(1).setCellValue(dto.getValue());
+				row.createCell(2).setCellValue(dto.getRemarks());
+				row.createCell(3).setCellValue(dto.getUOM());
+				row.createCell(4).setCellValue(dto.getTypeDisplayName());
+				row.createCell(5).setCellValue(dto.getType());
+				// row.createCell(6).setCellValue(dto.getNormParameterFKId());
+
+			}
+			
+
+			// Auto-size columns
+			for (int i = 0; i < 6; i++) {
+				sheet.autoSizeColumn(i);
+			}
+
+			// Hide the column
+			// sheet.setColumnHidden(6, true);
+
+			workbook.write(out);
+			return out.toByteArray();
+
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to fetch yearly values", e);
+			throw new RuntimeException("Failed to export yearly values", e);
 		}
 	}
 
@@ -451,27 +588,27 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 	@Override
     public AOPMessageVM LoadButtonNormCalculation(UUID plantId, String aopYear, UUID siteId, String periodFrom, String periodTo) {
-        Plants plant = plantsRepository.findById(plantId).get();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+        // Plants plant = plantsRepository.findById(plantId).get();
+		// Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
-		// VGOHT_DTA_VGOHTAOPConsumptionNormDTO1_NormCalculation
-		String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+		// // VGOHT_DTA_VGOHTAOPConsumptionNormDTO1_NormCalculation
+		// String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
 
-		String errorMessage = executeNormCalculationProcedure(plantId, aopYear, siteId, periodFrom, periodTo, procedureName );
+		// String errorMessage = executeNormCalculationProcedure(plantId, aopYear, siteId, periodFrom, periodTo, procedureName );
 
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 
-		if(errorMessage != null ) { 
+		// if(errorMessage != null ) { 
 		
-			aopMessageVM.setCode(422);
-			aopMessageVM.setMessage(errorMessage);
-			return aopMessageVM;
+		// 	aopMessageVM.setCode(422);
+		// 	aopMessageVM.setMessage(errorMessage);
+		// 	return aopMessageVM;
 
-		}
+		// }
 
 		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Norm Calculations Executed Successfully");
+		// aopMessageVM.setMessage("Norm Calculations Executed Successfully");
 		return aopMessageVM;
 
 	}
@@ -519,5 +656,88 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to execute procedure", ex);
 		}
+	}
+
+	private Map<String, Integer> getHeaderMap(Row headerRow) {
+
+		Map<String, Integer> headerMap = new HashMap<>();
+
+		for (Cell cell : headerRow) {
+			headerMap.put(
+					cell.getStringCellValue().trim().toLowerCase(),
+					cell.getColumnIndex()
+			);
+		}
+
+		return headerMap;
+	}
+
+	private void validateHeaders(Map<String, Integer> headerMap) {
+
+		List<String> requiredHeaders = List.of("parameter", "value");
+
+		for (String header : requiredHeaders) {
+			if (!headerMap.containsKey(header)) {
+				throw new RuntimeException("Missing required column: " + header);
+			}
+		}
+	}
+
+	private Cell getCell(Row row, Map<String, Integer> headerMap, String columnName) {
+		Integer index = headerMap.get(columnName.toLowerCase());
+		return index != null ? row.getCell(index) : null;
+	}
+
+	private String getCellString(Cell cell) {
+		if (cell == null) return "";
+
+		switch (cell.getCellType()) {
+			case STRING:
+				return cell.getStringCellValue().trim();
+			case NUMERIC:
+				return String.valueOf(cell.getNumericCellValue());
+			case BOOLEAN:
+				return String.valueOf(cell.getBooleanCellValue());
+			default:
+				return "";
+		}
+	}
+
+	private Double getCellDouble(Cell cell) {
+		if (cell == null) return 0.0;
+
+		try {
+			if (cell.getCellType() == CellType.NUMERIC) {
+				return cell.getNumericCellValue();
+			} else {
+				return Double.parseDouble(cell.toString());
+			}
+		} catch (Exception e) {
+			return 0.0;
+		}
+	}
+	private Map<String, String> getNormParameterMap(UUID plantFKId) {
+
+		String sql = """
+			SELECT Id, DisplayName 
+			FROM NormParameters 
+			WHERE Plant_FK_Id = :plantFKId
+		""";
+
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("plantFKId", plantFKId);
+
+		List<Object[]> results = query.getResultList();
+
+		Map<String, String> map = new HashMap<>();
+
+		for (Object[] row : results) {
+			String id = row[0].toString();
+			String name = row[1].toString().toLowerCase();
+
+			map.put(name, id);
+		}
+
+		return map;
 	}
 }
