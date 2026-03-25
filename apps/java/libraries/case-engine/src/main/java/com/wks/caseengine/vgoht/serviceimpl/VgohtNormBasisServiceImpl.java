@@ -405,7 +405,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 	}
 	public AOPMessageVM getYearlyValues(String year, UUID plantFKId) {
 
-		// try {
+		try {
 			String sql = """
 				SELECT NP.Id AS NormParameter_FK_Id,
 					NP.DisplayName,
@@ -464,10 +464,10 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 			return response;
 
-		// } catch (Exception e) {
-		// 	System.out.println(e);
-		// 	throw new RuntimeException("Failed to fetch yearly values", e);
-		// }
+		} catch (Exception e) {
+			System.out.println(e);
+			throw new RuntimeException("Failed to fetch yearly values", e);
+		}
 	}
 
 	public byte[] exportYearlyValues(String year, UUID plantFKId) {
