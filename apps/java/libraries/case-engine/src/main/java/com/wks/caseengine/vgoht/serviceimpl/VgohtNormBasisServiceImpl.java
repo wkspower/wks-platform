@@ -465,7 +465,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 			return response;
 
 		} catch (Exception e) {
-			System.out.println(e);
+			// System.out.println(e);
 			throw new RuntimeException("Failed to fetch yearly values", e);
 		}
 	}
@@ -483,32 +483,30 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 
 			// Header Row
 			Row header = sheet.createRow(0);
-			header.createCell(0).setCellValue("Parameter");
-			header.createCell(1).setCellValue("Value");
-			header.createCell(2).setCellValue("Remarks");
-			header.createCell(3).setCellValue("UOM");
-			header.createCell(4).setCellValue("Type");
-			header.createCell(5).setCellValue("ConstantType");
+			header.createCell(0).setCellValue("Type");
+			header.createCell(1).setCellValue("Parameter");
+			header.createCell(2).setCellValue("UOM");
+			header.createCell(3).setCellValue("Value");
+			header.createCell(4).setCellValue("Remarks");
 			// header.createCell(6).setCellValue("NormParameter_FK_Id");
 
 			// Data Rows
 			int rowIdx = 1;
 			for (VgohtNormConfigurationDTO dto : data) {
 				Row row = sheet.createRow(rowIdx++);
-
-				row.createCell(0).setCellValue(dto.getProductName());
-				row.createCell(1).setCellValue(dto.getValue());
-				row.createCell(2).setCellValue(dto.getRemarks());
-				row.createCell(3).setCellValue(dto.getUOM());
-				row.createCell(4).setCellValue(dto.getTypeDisplayName());
-				row.createCell(5).setCellValue(dto.getType());
+				row.createCell(0).setCellValue(dto.getType());
+				row.createCell(1).setCellValue(dto.getProductName());
+				row.createCell(2).setCellValue(dto.getUOM());
+				row.createCell(3).setCellValue(dto.getValue());
+				row.createCell(4).setCellValue(dto.getRemarks());
+				// row.createCell(4).setCellValue(dto.getTypeDisplayName());
 				// row.createCell(6).setCellValue(dto.getNormParameterFKId());
 
 			}
 			
 
 			// Auto-size columns
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < 5; i++) {
 				sheet.autoSizeColumn(i);
 			}
 
