@@ -328,7 +328,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 						Remarks = :remarks
 			WHEN NOT MATCHED THEN
 				INSERT (Id, NormParameter_FK_Id, AuditYear, AOPMonth, AttributeValue, Remarks)
-				VALUES (NEWID(), :normParameterId, :year, NULL, :value, :remarks);
+				VALUES (NEWID(), :normParameterId, :year, 4, :value, :remarks);
 		""";
 
 		Query query = entityManager.createNativeQuery(sql);
