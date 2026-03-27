@@ -43,13 +43,13 @@ public class VgohtNormBasisController {
             @RequestParam String year,
             @RequestParam UUID plantFKId,
             @RequestParam(required = false) String version,
-            @RequestBody List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList) {
+            @RequestBody List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList, @RequestParam String periodFrom, @RequestParam String periodTo) {
 
         if (plantFKId == null || year == null || year.isEmpty()) {
             throw new IllegalArgumentException("Plant ID and AOP Year are required");
         }
 
-        return vgohtNormBasisServiceImpl.saveConfigurationData(year, plantFKId, version, vgohtNormConfigurationDTOList);
+        return vgohtNormBasisServiceImpl.saveConfigurationData(year, plantFKId, version, vgohtNormConfigurationDTOList, periodFrom, periodTo);
     }
 
     @PostMapping(value = "/vgoht/norms-basis/constant")

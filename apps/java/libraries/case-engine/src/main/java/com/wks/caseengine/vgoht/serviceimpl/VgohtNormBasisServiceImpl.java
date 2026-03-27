@@ -214,7 +214,7 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 	
 	@Transactional
 	public AOPMessageVM saveConfigurationData(String year, UUID plantFKId, String version,
-			List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList) {
+			List<VgohtNormConfigurationDTO> vgohtNormConfigurationDTOList, String periodFrom, String periodTo) {
 
 		try {
 
@@ -234,6 +234,24 @@ public class VgohtNormBasisServiceImpl implements VgohtNormBasisService {
 				saveMonthValue(dto.getNormParameterFKId(), year, "12", dto.getDec(), dto.getRemarks());
 			}
 
+			        // call the norm calculation procedure
+
+        Plants plant = plantsRepository.findById(plantFKId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+		// VGOHT_DTA_VGOHT1_NormCalculation
+		String procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+
+		String errorMessage = executeNormCalculationProcedure(plantFKId, year, site.getId(), periodFrom, periodTo, procedureName );
+
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+
+		if(errorMessage != null ) { 
+			aopMessageVM.setCode(422);
+			aopMessageVM.setMessage(errorMessage);
+			return aopMessageVM;
+		}
 			AOPMessageVM response = new AOPMessageVM();
 			response.setCode(200);
 			response.setMessage("Configuration saved successfully");
