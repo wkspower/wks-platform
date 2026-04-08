@@ -18,19 +18,6 @@ services:
         volumes:
             - minio:/data:rw
 
-    mongodb:
-        image: mongo:6.0.14
-        ports:
-            - 27017:27017
-        healthcheck:
-            test: mongosh --eval 'db.stats().ok' --quiet
-            interval: 10s
-            retries: 3
-            start_period: 5s
-            timeout: 10s
-        volumes:
-            - mongo:/data/db:rw
-
     opa:
         image: openpolicyagent/opa:0.49.2-static
         ports:
@@ -79,9 +66,8 @@ services:
                 condition: service_healthy
 
 volumes:
-    mongo:
-        driver: local
     minio:
         driver: local
     keycloak:
-        driver: local                
+        driver: local
+                
