@@ -1,0 +1,21 @@
+# Minimise build context — everything here is either reproduced by the build
+# or shouldn't ship to a container.
+
+.git/
+.github/
+.idea/
+.vscode/
+**/node_modules/
+**/target/
+**/dist/
+**/*.log
+**/*.tsbuildinfo
+data/
+.env
+.env.local
+*.md
+!README.md
+docs/
+specs/
+templates/
+_bmad-output/

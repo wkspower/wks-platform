@@ -1,0 +1,33 @@
+# WKS Platform — zero-config dev stack.
+#
+#   cd docker && docker compose up --build
+#
+# H2 data persists across container restarts via the wks-data volume.
+# Switch to PostgreSQL (or MySQL) by setting WKS_DB_URL + WKS_DB_USER +
+# WKS_DB_PASSWORD in a .env file and SPRING_PROFILES_ACTIVE=production.
+
+services:
+  wks-platform:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: wkspower/wks-platform:2.0.0-dev
+    container_name: wks-platform
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: UTC
+      SPRING_PROFILES_ACTIVE: dev
+    volumes:
+      - wks-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  wks-data:
+    driver: local
