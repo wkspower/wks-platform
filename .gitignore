@@ -5,6 +5,11 @@ dist/
 
 # Frontend
 node_modules/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+frontend/vitest.config.js
+frontend/vitest.config.d.ts
 
 # Runtime data (H2 file mode writes here)
 data/
