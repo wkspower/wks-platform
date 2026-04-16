@@ -1,0 +1,3 @@
+-- v2 baseline. Schema arrives with domain models in later stories.
+-- This migration exists so Flyway records a starting version and subsequent
+-- migrations have a deterministic parent in flyway_schema_history.

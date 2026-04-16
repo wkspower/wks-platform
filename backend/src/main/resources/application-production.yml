@@ -1,0 +1,28 @@
+# WKS Platform — production profile overrides
+#
+# Activate with SPRING_PROFILES_ACTIVE=production. All secrets/config come
+# from env vars; the image itself has no production defaults baked in.
+
+spring:
+  datasource:
+    url: ${WKS_DB_URL}
+    username: ${WKS_DB_USER}
+    password: ${WKS_DB_PASSWORD}
+    # Driver inferred from URL (postgresql://). Override only if needed.
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+wks:
+  locale: ${WKS_LOCALE:en-IN}
+  cors:
+    origins: ${WKS_CORS_ORIGINS:}
+  storage:
+    endpoint: ${WKS_STORAGE_ENDPOINT:}
+    key: ${WKS_STORAGE_KEY:}
+
+logging:
+  level:
+    root: INFO
+    com.wkspower: INFO
