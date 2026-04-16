@@ -1,8 +1,0 @@
-http:
-  middlewares:
-    delpath:
-      stripPrefix:
-        prefixes:
-          - "/engine"
-          - "/inbound"
-          - "/s3"
