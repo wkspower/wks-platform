@@ -19,21 +19,28 @@ RUN npm run build
 
 # ---------------------------------------------------------------------------
 # Stage 2: build the Spring Boot JAR (embeds the SPA static assets)
+#
+# Uses the `mvn` that ships with the base image (not the project's `./mvnw`):
+# inside a fresh container the wrapper would re-download Maven 3.9 for no
+# gain. `mvnw` stays in the repo for local dev.
+#
+# BuildKit cache mount on /root/.m2 means subsequent builds skip the
+# dependency download entirely (~200 MB of Spring Boot + CIB seven jars).
 # ---------------------------------------------------------------------------
 FROM maven:3.9-eclipse-temurin-21 AS backend-build
 WORKDIR /app
 
 # Layer cache: resolve deps before copying src.
 COPY backend/pom.xml ./pom.xml
-COPY backend/.mvn ./.mvn
-COPY backend/mvnw ./mvnw
-RUN chmod +x ./mvnw && ./mvnw -B -q dependency:go-offline
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -ntp dependency:go-offline
 
 COPY backend/src ./src
 # Embed SPA dist inside the JAR's static resources.
 COPY --from=frontend-build /app/dist ./src/main/resources/static
 
-RUN ./mvnw -B -q -DskipTests package
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -ntp -DskipTests package
 
 
 # ---------------------------------------------------------------------------
