@@ -1,3 +1,0 @@
-[submodule "camunda-docker"]
-	path = camunda-docker
-	url = https://github.com/camunda/docker-camunda-bpm-platform
