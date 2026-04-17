@@ -7,17 +7,22 @@ const ROOT = path.resolve(__dirname, '../..');
 const INDEX_HTML = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const INDEX_CSS = fs.readFileSync(path.join(ROOT, 'src/index.css'), 'utf8');
 
+// Matches an off-origin fetch target: href / src / url() with an http(s)
+// URL. The SVG xmlns="http://www.w3.org/2000/svg" namespace attribute is
+// intentionally ignored — it's not a fetch, just an identifier.
+const OFF_ORIGIN_FETCH_RE = /(?:href|src)=["']https?:\/\/|url\(\s*["']?https?:\/\//i;
+
 describe('fonts', () => {
   it('index.html does not reference any external font CDN', () => {
     expect(INDEX_HTML).not.toMatch(/googleapis\.com/);
     expect(INDEX_HTML).not.toMatch(/gstatic\.com/);
-    expect(INDEX_HTML.match(/https?:\/\//) ?? []).toEqual([]);
+    expect(INDEX_HTML).not.toMatch(OFF_ORIGIN_FETCH_RE);
   });
 
   it('index.css does not reference any off-origin URL', () => {
     expect(INDEX_CSS).not.toMatch(/googleapis\.com/);
     expect(INDEX_CSS).not.toMatch(/gstatic\.com/);
-    expect(INDEX_CSS).not.toMatch(/https?:\/\//);
+    expect(INDEX_CSS).not.toMatch(OFF_ORIGIN_FETCH_RE);
   });
 
   it('committed font assets exist on disk', () => {
