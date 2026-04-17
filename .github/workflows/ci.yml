@@ -56,6 +56,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Story 1.3 AC #13: at least 4 woff2 font files (Poppins SemiBold/Bold,
+      # Rubik Regular/Medium) must land in the production bundle. Story 6.1
+      # raises this to >= 6 when JetBrains Mono ships with the Developer
+      # Console. Failing this assertion fails the build.
+      - name: Font count assertion
+        run: |
+          count=$(find dist/assets -name '*.woff2' | wc -l)
+          echo "Found $count woff2 files in dist/assets"
+          if [ "$count" -lt 4 ]; then
+            echo "Expected >= 4 woff2 files, found $count" >&2
+            exit 1
+          fi
+
   docker-build:
     name: Docker image (build only, no push)
     runs-on: ubuntu-latest

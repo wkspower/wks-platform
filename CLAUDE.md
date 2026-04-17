@@ -130,6 +130,31 @@ cd backend && ./mvnw test
 cd frontend && npm test
 ```
 
+## Local CI gate before opening a PR
+
+**Rule:** Before pushing a branch and opening a PR, run **every** `run:` step the CI workflow (`.github/workflows/ci.yml`) executes, in the same order — not a curated subset. Skipping even one step produces avoidable CI failures that waste review cycles.
+
+Current CI step sequence (keep this list in sync with `ci.yml` — when the workflow adds a step, add it here in the same commit):
+
+```bash
+# Backend job
+cd backend && ./mvnw -B -ntp verify
+
+# Frontend job
+cd frontend
+npm ci                         # if deps changed
+npm run lint
+npm run format:check           # easy to forget — runs Prettier
+npm test
+npm run build
+find dist/assets -name '*.woff2' | wc -l   # must be >= 4 (Story 1.3 AC #13)
+
+# Docker job
+docker buildx build -f docker/Dockerfile -t wks:ci .
+```
+
+"Lint + test + build" is **not** the full set. `format:check` is a separate step and Prettier regressions only surface there. When in doubt, grep `ci.yml` for `run:` and copy every command verbatim.
+
 ---
 
 ## Story 1.1 artifacts
@@ -202,3 +227,32 @@ Rules added for future agents: `JwtTokenProvider` is the **only** class
 allowed to import `io.jsonwebtoken.*`; `api/` and `security/` must not
 import `infrastructure.persistence.entity.*` (ArchUnit enforces both).
 
+
+## Story 1.3 artifacts
+
+Story 1.3 (Frontend application shell & design system) replaced the
+"Coming Soon" placeholder with the full frontend chrome. New top-level
+folders under `frontend/src/`: `api/`, `components/{ui,layout,errors,
+routing}/`, `hooks/`, `i18n/`, `lib/`, `pages/`, `providers/`, `stores/`,
+`styles/`, `test/`, `types/`, `assets/fonts/`. The token contract lives
+in `frontend/src/styles/tokens.css` (CSS custom properties); Tailwind 4
+maps tokens via the `@theme inline { ... }` block in
+`frontend/src/index.css`.
+
+Rules added for future agents:
+
+- **Never `bg-[#…]` or raw px in style props** — ESLint's
+  `no-restricted-syntax` rules ban hex literals and px values outside
+  `src/styles/**` and tests. Reference tokens via Tailwind utilities
+  (`bg-primary`) or `bg-[var(--token)]`.
+- **Single fetch entry point.** `src/api/client.ts` (`apiFetch`) is
+  the only place allowed to call `fetch()`. The
+  `api/no-direct-fetch.test.ts` greps the source tree to enforce it.
+- **MSW for all fetch mocking.** Per-test handlers go through
+  `server.use(...)`; lifecycle is owned by `src/test/setup.ts`. Do
+  not `vi.spyOn(globalThis, 'fetch')`.
+- **Use `renderWithProviders`** (`src/test/renderWithProviders.tsx`)
+  for every component test — it owns MemoryRouter +
+  QueryClientProvider + auth-store seeding.
+- **Self-hosted fonts only.** No `googleapis.com` / `gstatic.com` in
+  `index.html` or `index.css` — guarded by `styles/fonts.test.ts`.
