@@ -202,3 +202,32 @@ Rules added for future agents: `JwtTokenProvider` is the **only** class
 allowed to import `io.jsonwebtoken.*`; `api/` and `security/` must not
 import `infrastructure.persistence.entity.*` (ArchUnit enforces both).
 
+
+## Story 1.3 artifacts
+
+Story 1.3 (Frontend application shell & design system) replaced the
+"Coming Soon" placeholder with the full frontend chrome. New top-level
+folders under `frontend/src/`: `api/`, `components/{ui,layout,errors,
+routing}/`, `hooks/`, `i18n/`, `lib/`, `pages/`, `providers/`, `stores/`,
+`styles/`, `test/`, `types/`, `assets/fonts/`. The token contract lives
+in `frontend/src/styles/tokens.css` (CSS custom properties); Tailwind 4
+maps tokens via the `@theme inline { ... }` block in
+`frontend/src/index.css`.
+
+Rules added for future agents:
+
+- **Never `bg-[#…]` or raw px in style props** — ESLint's
+  `no-restricted-syntax` rules ban hex literals and px values outside
+  `src/styles/**` and tests. Reference tokens via Tailwind utilities
+  (`bg-primary`) or `bg-[var(--token)]`.
+- **Single fetch entry point.** `src/api/client.ts` (`apiFetch`) is
+  the only place allowed to call `fetch()`. The
+  `api/no-direct-fetch.test.ts` greps the source tree to enforce it.
+- **MSW for all fetch mocking.** Per-test handlers go through
+  `server.use(...)`; lifecycle is owned by `src/test/setup.ts`. Do
+  not `vi.spyOn(globalThis, 'fetch')`.
+- **Use `renderWithProviders`** (`src/test/renderWithProviders.tsx`)
+  for every component test — it owns MemoryRouter +
+  QueryClientProvider + auth-store seeding.
+- **Self-hosted fonts only.** No `googleapis.com` / `gstatic.com` in
+  `index.html` or `index.css` — guarded by `styles/fonts.test.ts`.

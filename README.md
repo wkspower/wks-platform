@@ -12,6 +12,31 @@ your clients — no backend code required.
 
 Evaluate it in 30 minutes with `docker compose up`.
 
+## Design system
+
+The frontend ships a single design-token file at
+`frontend/src/styles/tokens.css` (CSS custom properties on `:root`).
+Tailwind 4 reads them via the `@theme inline { ... }` block in
+`frontend/src/index.css` so utilities like `bg-primary`, `text-muted-
+foreground`, and `rounded-lg` resolve to the tokens. Components
+reference tokens — never raw hex literals (an ESLint rule enforces it).
+
+Application routes (Phase 0):
+
+- `/login` — credentials screen on the brand-navy background.
+- `/cases` — placeholder Cases list (real implementation in Epic 2).
+- `/tasks` — placeholder Tasks list (Epic 8).
+- `/admin` — admin-only landing (Epic 5).
+- `/dev` — developer-console landing (Epic 6).
+
+Strings live in `frontend/src/i18n/en.json` and are looked up via a
+small `t('key')` helper. `react-i18next` arrives in Phase 1; until
+then the bundle is English-only and a Vitest guardrail asserts every
+`t('...')` reference has an entry. Self-hosted Poppins + Rubik fonts
+are bundled (no Google Fonts CDN). The full design vocabulary lives
+in the
+[UX spec](_bmad-output/planning-artifacts/ux/ux-design-spec.md).
+
 ## Quick start
 
 Requires Docker 24+ and ~2 GB of free RAM. No Java, no Node, no additional

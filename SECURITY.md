@@ -20,6 +20,11 @@
 - **First-boot admin.** See README "First-boot admin credentials" — in
   production both `WKS_ADMIN_EMAIL` and `WKS_ADMIN_PASSWORD` are mandatory
   and the application fails to start (`WKS-API-051`) if either is absent.
+- **Frontend session handling.** The frontend keeps session state in memory
+  only (Zustand auth store). The session cookie is the single source of
+  truth. On `401`, the UI surfaces an inline session-expired banner rather
+  than navigating away; the user's current page content remains readable
+  until they click "Log in again".
 
 ## Supported versions
 
