@@ -1,5 +1,26 @@
 # Security policy
 
+## Authentication model (v2)
+
+- **Credentials.** Stored as Argon2id hashes (Spring Security's
+  `Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()`). Plaintext is
+  never stored, logged, or returned.
+- **Session token.** A short-lived JWT (default TTL: 8 hours, configurable
+  via `WKS_JWT_TTL_HOURS`) signed with HS256 using `WKS_JWT_SECRET`.
+  Tokens carry only the user id, email, and roles — no other PII.
+- **Transport.** The JWT is delivered **only** in an `HttpOnly`,
+  `SameSite=Lax`, `Secure` (in production) cookie named `WKS_SESSION`.
+  Never in response bodies, never in localStorage, never in URL params.
+- **Filter chain.** Stateless — no `JSESSIONID`, no `HttpSession`. CSRF is
+  disabled on `/api/**` (the `HttpOnly` + `SameSite=Lax` cookie combination
+  already blocks the cross-site abuse surface CSRF tokens defend against).
+- **Logout.** Clears the cookie. Because JWTs are stateless, Phase 0 does
+  not maintain a server-side revocation list — the 8-hour TTL is the
+  mitigation. A DB-backed revocation list is a Phase 1 follow-up.
+- **First-boot admin.** See README "First-boot admin credentials" — in
+  production both `WKS_ADMIN_EMAIL` and `WKS_ADMIN_PASSWORD` are mandatory
+  and the application fails to start (`WKS-API-051`) if either is absent.
+
 ## Supported versions
 
 | Version | Supported? | Notes |

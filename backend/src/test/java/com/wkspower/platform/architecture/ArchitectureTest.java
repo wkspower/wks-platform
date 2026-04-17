@@ -53,6 +53,49 @@ class ArchitectureTest {
   }
 
   @Test
+  void apiAndSecurityDoNotDependOnPersistenceEntities() {
+    noClasses()
+        .that()
+        .resideInAnyPackage("..api..", "..security..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAPackage("..infrastructure.persistence.entity..")
+        .because(
+            "Controllers and the security package use the UserRepository port and domain "
+                + "records — not JPA entities. Keeping api/security off entity imports prevents "
+                + "password-hash leaks into responses and keeps the hexagonal boundary honest.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void onlySecurityImportsJjwt() {
+    noClasses()
+        .that()
+        .resideOutsideOfPackage("..security..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAPackage("io.jsonwebtoken..")
+        .because(
+            "JJWT is a security-package implementation detail. Limiting imports to security/ "
+                + "makes future JWT library upgrades a local change.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void domainDoesNotDependOnJjwtOrSpringSecurity() {
+    noClasses()
+        .that()
+        .resideInAPackage("..domain..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("io.jsonwebtoken..", "org.springframework.security..")
+        .because(
+            "Domain is framework-free. Covered by the blanket rule but made explicit here so a "
+                + "regression surfaces a clearer failure message.")
+        .check(CLASSES);
+  }
+
+  @Test
   void hexagonalLayering() {
     Architectures.layeredArchitecture()
         .consideringAllDependencies()

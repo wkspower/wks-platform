@@ -27,6 +27,7 @@
         <archunit.version>1.3.0</archunit.version>
         <logstash-logback.version>8.0</logstash-logback.version>
         <springdoc.version>2.6.0</springdoc.version>
+        <jjwt.version>0.12.6</jjwt.version>
 
         <spotless.version>2.43.0</spotless.version>
         <google-java-format.version>1.22.0</google-java-format.version>
@@ -100,9 +101,39 @@
             <version>${springdoc.version}</version>
         </dependency>
 
-        <!-- NOTE: spring-boot-starter-security is intentionally OMITTED in Story 1.1.
-             Auth arrives in Story 1.2; adding it here would either ship a permissive
-             filter chain (security risk) or block /api/health (breaks AC #10). -->
+        <!-- Security (Story 1.2) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- BouncyCastle — runtime backend for Argon2PasswordEncoder. Spring Security's
+             Argon2PasswordEncoder delegates to BouncyCastle's Argon2Parameters implementation;
+             without this artifact the encoder throws NoClassDefFoundError on first encode. -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.78.1</version>
+        </dependency>
+
+        <!-- JJWT 0.12.x — three split artifacts (umbrella jjwt is not maintained for 0.12+) -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- Test -->
         <dependency>
@@ -114,6 +145,11 @@
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
