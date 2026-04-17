@@ -30,7 +30,7 @@ export function RequireAuth({ children, requiredRole }: RequireAuthProps) {
   }
 
   if (status === 'unauthenticated' || !user) {
-    const returnTo = encodeURIComponent(location.pathname + location.search);
+    const returnTo = encodeURIComponent(location.pathname + location.search + location.hash);
     return <Navigate to={`/login?returnTo=${returnTo}`} replace />;
   }
 

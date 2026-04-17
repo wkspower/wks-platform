@@ -28,25 +28,41 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, BoundaryState>
   }
 }
 
-const queryClient = createQueryClient();
+const STARTUP_FALLBACK_HTML =
+  '<main style="min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;color:#0B1437"><div style="text-align:center"><h1>WKS Platform failed to start</h1><p>Please reload the page or contact support.</p></div></main>';
+
+function renderStartupFallback(): void {
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.innerHTML = STARTUP_FALLBACK_HTML;
+  }
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  // Story 1.1 deferred fix: surface a visible fallback rather than a
-  // blank screen if index.html is misconfigured.
-  document.body.innerHTML =
-    '<main style="min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;color:#0B1437"><div style="text-align:center"><h1>WKS Platform failed to start</h1><p>Missing #root element in index.html. Please contact support.</p></div></main>';
+  renderStartupFallback();
   throw new Error('Missing #root element in index.html');
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <AppErrorBoundary>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </AuthProvider>
-    </AppErrorBoundary>
-  </StrictMode>,
-);
+try {
+  const queryClient = createQueryClient();
+  createRoot(rootElement).render(
+    <StrictMode>
+      <AppErrorBoundary>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </AuthProvider>
+      </AppErrorBoundary>
+    </StrictMode>,
+  );
+} catch (err) {
+  // Synchronous failure during createRoot/render means AppErrorBoundary
+  // never mounted — surface the same inline HTML fallback so users see
+  // a visible message instead of a blank page. The error is re-thrown
+  // so bundled telemetry (when it lands) can still capture it.
+  renderStartupFallback();
+  // eslint-disable-next-line no-console
+  console.error('[main] startup failed', err);
+  throw err;
+}

@@ -8,9 +8,12 @@ const INDEX_HTML = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const INDEX_CSS = fs.readFileSync(path.join(ROOT, 'src/index.css'), 'utf8');
 
 // Matches an off-origin fetch target: href / src / url() with an http(s)
-// URL. The SVG xmlns="http://www.w3.org/2000/svg" namespace attribute is
-// intentionally ignored — it's not a fetch, just an identifier.
-const OFF_ORIGIN_FETCH_RE = /(?:href|src)=["']https?:\/\/|url\(\s*["']?https?:\/\//i;
+// URL or a protocol-relative `//host` URL (which the browser resolves to
+// the page scheme and still constitutes an off-origin request). The SVG
+// xmlns="http://www.w3.org/2000/svg" namespace attribute is intentionally
+// ignored — it's not a fetch, just an identifier.
+const OFF_ORIGIN_FETCH_RE =
+  /(?:href|src)=["'](?:https?:)?\/\/[a-z]|url\(\s*["']?(?:https?:)?\/\/[a-z]/i;
 
 describe('fonts', () => {
   it('index.html does not reference any external font CDN', () => {

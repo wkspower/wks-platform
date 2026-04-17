@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { RouteErrorBoundary } from '@/components/errors/RouteErrorBoundary';
 
@@ -8,6 +8,7 @@ import { SkipLink } from './SkipLink';
 import { TopBar } from './TopBar';
 
 export function AppShell() {
+  const location = useLocation();
   return (
     <div className="grid min-h-screen grid-cols-[auto_1fr]">
       <SkipLink />
@@ -17,9 +18,14 @@ export function AppShell() {
         <TopBar />
         <main
           id="main"
-          className="flex-1 bg-[var(--background)] p-[var(--space-6)] text-[var(--foreground)]"
+          tabIndex={-1}
+          className="flex-1 bg-[var(--background)] p-[var(--space-6)] text-[var(--foreground)] focus:outline-none"
         >
-          <RouteErrorBoundary>
+          {/* Keying the boundary on pathname remounts it on route change, so a
+              thrown error on one route clears automatically when the user
+              navigates to another via the sidebar. Without this the boundary
+              traps the user on the fallback card until a full reload. */}
+          <RouteErrorBoundary key={location.pathname}>
             <Outlet />
           </RouteErrorBoundary>
         </main>

@@ -16,8 +16,12 @@ const noLiteralJsxText = {
     'Literal JSX text is banned — wrap user-visible strings in t(\'...\') so they land in the i18n bundle.',
 };
 
+// Match only valid CSS hex lengths (3, 4, 6, 8) AND require at least one
+// a–f letter so numeric-only tokens like issue references ('#1234') or
+// error codes ('#0001') aren't misclassified as colors.
 const noRawHexInStyles = {
-  selector: "Literal[value=/^#[0-9a-fA-F]{3,8}$/]",
+  selector:
+    "Literal[value=/^#(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{3}([0-9a-fA-F])?([0-9a-fA-F]{2})?([0-9a-fA-F]{2})?$/]",
   message:
     'Raw hex color literals are banned — reference a design token via Tailwind utilities (bg-primary) or arbitrary value (bg-[var(--token)]).',
 };
@@ -81,6 +85,8 @@ export default [
         HTMLSelectElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
         React: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
         // Node-ish (used by tests + ts files that read fs)
         __dirname: 'readonly',
         __filename: 'readonly',

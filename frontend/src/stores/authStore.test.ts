@@ -55,7 +55,7 @@ describe('authStore', () => {
     expect(useAuthStore.getState().error).toBeNull();
   });
 
-  it('login on 401 records the error message and rethrows', async () => {
+  it('login on 401 clears error (UI reads ApiError directly) and rethrows', async () => {
     vi.spyOn(authApi, 'login').mockRejectedValue(
       new ApiError({
         status: 401,
@@ -65,6 +65,15 @@ describe('authStore', () => {
     );
     await expect(useAuthStore.getState().login('a@b.c', 'pw')).rejects.toBeInstanceOf(ApiError);
     expect(useAuthStore.getState().status).toBe('unauthenticated');
-    expect(useAuthStore.getState().error).toBe('Invalid email or password');
+    // 401 meaning is carried by status + the thrown ApiError; store.error
+    // never surfaces backend-controlled text.
+    expect(useAuthStore.getState().error).toBeNull();
+  });
+
+  it('login on non-ApiError sets generic sentinel and rethrows', async () => {
+    vi.spyOn(authApi, 'login').mockRejectedValue(new Error('boom'));
+    await expect(useAuthStore.getState().login('a@b.c', 'pw')).rejects.toBeInstanceOf(Error);
+    expect(useAuthStore.getState().status).toBe('unauthenticated');
+    expect(useAuthStore.getState().error).toBe('unexpected');
   });
 });

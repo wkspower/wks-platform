@@ -46,11 +46,12 @@ class SpaRoutingIT {
 
   @Test
   void unknownApiPathIsNotSwallowedBySpaForward() {
-    // Unknown /api/** paths hit SecurityConfig's authenticated() matcher before Spring MVC
-    // handler resolution, so they return 401 rather than 404 — but crucially, they do NOT
-    // forward to index.html. The SPA forward never intercepts /api/*.
+    // The SPA forward must never intercept /api/*. We tolerate either 401 (when auth config
+    // requires authentication ahead of handler resolution) or 404 (when the path is under a
+    // permitted segment) — the invariant we actually care about is "response is not the SPA
+    // index.html". Asserting a specific status couples this routing test to SecurityConfig.
     ResponseEntity<String> response = rest.getForEntity("/api/does-not-exist", String.class);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(response.getStatusCode()).isIn(HttpStatus.UNAUTHORIZED, HttpStatus.NOT_FOUND);
     assertThat(response.getBody()).doesNotContain("<div id=\"root\">");
   }
 
