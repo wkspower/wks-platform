@@ -35,9 +35,20 @@ export interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, size, asChild = false, ...props },
+  { className, variant, size, asChild = false, type, ...props },
   ref,
 ) {
   const Comp = asChild ? Slot : 'button';
-  return <Comp ref={ref} className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+  // Default real <button> elements to type="button" so a Button placed inside
+  // a <form> without an explicit type doesn't accidentally submit the form.
+  // Slot/asChild callers own their child element's type (or its absence).
+  const resolvedType = asChild ? type : (type ?? 'button');
+  return (
+    <Comp
+      ref={ref}
+      type={resolvedType}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
 });

@@ -29,4 +29,14 @@ describe('Button', () => {
     );
     expect(getByRole('link')).toHaveAccessibleName('Go');
   });
+
+  it('defaults to type="button" so it does not accidentally submit forms', () => {
+    const { getByRole } = renderWithProviders(<Button>Save</Button>);
+    expect(getByRole('button')).toHaveAttribute('type', 'button');
+  });
+
+  it('honors an explicit type="submit"', () => {
+    const { getByRole } = renderWithProviders(<Button type="submit">Submit</Button>);
+    expect(getByRole('button')).toHaveAttribute('type', 'submit');
+  });
 });
