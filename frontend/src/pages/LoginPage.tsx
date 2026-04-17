@@ -9,10 +9,22 @@ import { Input } from '@/components/ui/Input';
 import { t } from '@/i18n';
 import { useAuthStore } from '@/stores/authStore';
 
-function safeReturnTo(value: string | null): string {
+export function safeReturnTo(value: string | null): string {
   if (!value) return '/cases';
-  if (!value.startsWith('/') || value.startsWith('//')) return '/cases';
-  return value;
+  // Parse against the current origin; this normalizes every encoding and
+  // backslash/whitespace edge case that ad-hoc `startsWith` checks miss.
+  // Reject anything that resolves to a different origin, and bounce the
+  // `/login` self-reference so we can't recursively redirect users back
+  // to the login screen.
+  let url: URL;
+  try {
+    url = new URL(value, window.location.origin);
+  } catch {
+    return '/cases';
+  }
+  if (url.origin !== window.location.origin) return '/cases';
+  if (url.pathname === '/login') return '/cases';
+  return url.pathname + url.search + url.hash;
 }
 
 export function LoginPage() {
@@ -53,7 +65,11 @@ export function LoginPage() {
           {t('login.title')}
         </h1>
       </CardHeader>
-      <form onSubmit={handleSubmit} aria-describedby={errorMessage ? 'login-error' : undefined}>
+      <form
+        onSubmit={handleSubmit}
+        autoComplete="on"
+        aria-describedby={errorMessage ? 'login-error' : undefined}
+      >
         <CardContent className="flex flex-col gap-[var(--space-4)]">
           <label className="flex flex-col gap-[var(--space-2)] text-sm">
             <span>{t('login.email')}</span>

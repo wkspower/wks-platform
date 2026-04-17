@@ -56,12 +56,29 @@ describe('LoginPage', () => {
     expect(alert).toHaveTextContent(/something went wrong/i);
   });
 
-  it('double-submit protection: only one network request is fired', async () => {
+  it('native :invalid blocks submission when required fields are empty', async () => {
+    let callCount = 0;
+    server.use(
+      http.post('/api/auth/login', () => {
+        callCount += 1;
+        return HttpResponse.json({ data: null, meta: {} }, { status: 200 });
+      }),
+    );
+    const user = userEvent.setup();
+    const { getByLabelText, getByRole } = loginAt();
+    await user.click(getByRole('button', { name: /sign in/i }));
+    // No custom client-side error message, no network request.
+    expect(callCount).toBe(0);
+    const emailInput = getByLabelText(/email/i) as HTMLInputElement;
+    expect(emailInput.validity.valid).toBe(false);
+  });
+
+  it('double-submit protection: only one network request is fired and the button is disabled during the in-flight call', async () => {
     let callCount = 0;
     server.use(
       http.post('/api/auth/login', async () => {
         callCount += 1;
-        await delay(150);
+        await delay(200);
         return HttpResponse.json(
           {
             data: { id: 'u', email: 'a@b.c', roles: ['admin'] },
@@ -78,6 +95,8 @@ describe('LoginPage', () => {
     const button = getByRole('button', { name: /sign in/i });
     // Click twice in immediate succession; the second click should be a no-op.
     await user.click(button);
+    // The button must be disabled while the first request is in flight.
+    expect(button).toBeDisabled();
     await user.click(button);
     expect(await findByText('cases page')).toBeInTheDocument();
     expect(callCount).toBe(1);
