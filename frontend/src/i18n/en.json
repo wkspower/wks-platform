@@ -1,0 +1,46 @@
+{
+  "app.brandName": "WKS Platform",
+  "login.title": "Sign in to WKS",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Sign in",
+  "login.submitting": "Signing in…",
+  "login.error.invalid": "Invalid email or password",
+  "login.error.generic": "Something went wrong. Please try again.",
+
+  "nav.primary": "Primary navigation",
+  "nav.cases": "Cases",
+  "nav.tasks": "Tasks",
+  "nav.admin": "Admin",
+  "nav.developer": "Developer",
+  "nav.collapse": "Collapse sidebar",
+  "nav.expand": "Expand sidebar",
+
+  "page.cases.title": "Cases",
+  "page.cases.placeholder": "Implementation arrives with later stories.",
+  "page.tasks.title": "Tasks",
+  "page.tasks.placeholder": "Implementation arrives with later stories.",
+  "page.admin.title": "Admin",
+  "page.admin.placeholder": "Implementation arrives with later stories.",
+  "page.dev.title": "Developer Console",
+  "page.dev.placeholder": "Implementation arrives with later stories.",
+
+  "page.notFound.title": "Page not found",
+  "page.notFound.body": "The page you tried to open does not exist.",
+  "page.notFound.home": "Back to home",
+
+  "page.forbidden.title": "You don't have access to this page",
+  "page.forbidden.body": "Your account doesn't have the required role.",
+  "page.forbidden.back": "Go back",
+
+  "session.expired": "Your session has expired.",
+  "session.reauth": "Log in again",
+  "session.dismiss": "Dismiss",
+
+  "error.title": "Something unexpected happened",
+  "error.savedServerSide": "Your work is saved on the server.",
+  "error.reload": "Reload",
+  "error.details": "Technical details",
+
+  "a11y.skipToMain": "Skip to main content"
+}
