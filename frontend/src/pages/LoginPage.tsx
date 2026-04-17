@@ -78,11 +78,7 @@ export function LoginPage() {
             />
           </label>
           {errorMessage ? (
-            <Alert
-              id="login-error"
-              variant="destructive"
-              className="py-[var(--space-2)] text-xs"
-            >
+            <Alert id="login-error" variant="destructive" className="py-[var(--space-2)] text-xs">
               {errorMessage}
             </Alert>
           ) : null}

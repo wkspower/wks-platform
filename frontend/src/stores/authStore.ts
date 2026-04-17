@@ -26,8 +26,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const user = await loginRequest(email, password);
       set({ user, status: 'authenticated', error: null });
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : 'Unexpected error during login';
+      const message = err instanceof ApiError ? err.message : 'Unexpected error during login';
       set({ user: null, status: 'unauthenticated', error: message });
       throw err;
     }

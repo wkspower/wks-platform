@@ -18,12 +18,7 @@ export function SessionExpiryBanner() {
         <Button variant="link" size="sm" onClick={triggerLogin}>
           {t('session.reauth')}
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={dismiss}
-          aria-label={t('session.dismiss')}
-        >
+        <Button variant="ghost" size="icon" onClick={dismiss} aria-label={t('session.dismiss')}>
           <X className="size-4" aria-hidden="true" />
         </Button>
       </div>

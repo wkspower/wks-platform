@@ -10,16 +10,22 @@ import { router } from '@/routes';
 
 import '@/index.css';
 
-interface BoundaryState { error: Error | null }
+interface BoundaryState {
+  error: Error | null;
+}
 
 class AppErrorBoundary extends Component<{ children: ReactNode }, BoundaryState> {
   state: BoundaryState = { error: null };
-  static getDerivedStateFromError(error: Error): BoundaryState { return { error }; }
+  static getDerivedStateFromError(error: Error): BoundaryState {
+    return { error };
+  }
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // eslint-disable-next-line no-console
     console.error('[AppErrorBoundary]', error, info.componentStack);
   }
-  render() { return this.state.error ? <AppErrorFallback /> : this.props.children; }
+  render() {
+    return this.state.error ? <AppErrorFallback /> : this.props.children;
+  }
 }
 
 const queryClient = createQueryClient();

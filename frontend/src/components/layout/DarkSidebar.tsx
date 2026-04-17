@@ -1,6 +1,13 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cva } from 'class-variance-authority';
-import { ChevronLeft, ChevronRight, FolderKanban, ListTodo, Settings, Terminal } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  FolderKanban,
+  ListTodo,
+  Settings,
+  Terminal,
+} from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 

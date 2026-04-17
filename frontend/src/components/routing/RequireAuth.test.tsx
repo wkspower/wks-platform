@@ -10,7 +10,14 @@ function shellAt(path: string, ui: ReactElement, opts?: Parameters<typeof render
   return renderWithProviders(
     <Routes>
       <Route path="/login" element={<div>login page</div>} />
-      <Route path="/admin" element={<RequireAuth requiredRole="admin"><div>admin content</div></RequireAuth>} />
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth requiredRole="admin">
+            <div>admin content</div>
+          </RequireAuth>
+        }
+      />
       <Route path="/cases" element={<RequireAuth>{ui}</RequireAuth>} />
     </Routes>,
     { initialPath: path, ...opts },

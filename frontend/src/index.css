@@ -1,5 +1,5 @@
-@import "./styles/tokens.css";
-@import "tailwindcss";
+@import './styles/tokens.css';
+@import 'tailwindcss';
 
 @theme inline {
   --color-primary: var(--primary);
@@ -33,35 +33,35 @@
 }
 
 @font-face {
-  font-family: "Poppins";
+  font-family: 'Poppins';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("@/assets/fonts/Poppins-SemiBold.woff2") format("woff2");
+  src: url('@/assets/fonts/Poppins-SemiBold.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: "Poppins";
+  font-family: 'Poppins';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("@/assets/fonts/Poppins-Bold.woff2") format("woff2");
+  src: url('@/assets/fonts/Poppins-Bold.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: "Rubik";
+  font-family: 'Rubik';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("@/assets/fonts/Rubik-Regular.woff2") format("woff2");
+  src: url('@/assets/fonts/Rubik-Regular.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: "Rubik";
+  font-family: 'Rubik';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("@/assets/fonts/Rubik-Medium.woff2") format("woff2");
+  src: url('@/assets/fonts/Rubik-Medium.woff2') format('woff2');
 }
 
 html {
@@ -75,7 +75,12 @@ body {
   min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
 }
 

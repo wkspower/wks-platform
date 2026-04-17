@@ -1,6 +1,9 @@
 import { locale } from '@/i18n';
 
-export function formatDate(value: Date | number | string, options?: Intl.DateTimeFormatOptions): string {
+export function formatDate(
+  value: Date | number | string,
+  options?: Intl.DateTimeFormatOptions,
+): string {
   const date = value instanceof Date ? value : new Date(value);
   return new Intl.DateTimeFormat(locale, options ?? { dateStyle: 'medium' }).format(date);
 }

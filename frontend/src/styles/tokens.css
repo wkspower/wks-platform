@@ -1,39 +1,39 @@
 :root {
   /* Brand + semantic colors */
-  --primary: #3B5BDB;
-  --primary-foreground: #FFFFFF;
-  --secondary: #22D3EE;
-  --secondary-foreground: #0B1437;
-  --brand-navy: #0B1437;
-  --sidebar-bg: #0F1729;
-  --background: #FAFAFA;
-  --card: #FFFFFF;
-  --muted: #F4F4F5;
-  --border: #E4E4E7;
-  --muted-foreground: #71717A;
-  --foreground: #09090B;
-  --destructive: #DC2626;
-  --warning: #D97706;
+  --primary: #3b5bdb;
+  --primary-foreground: #ffffff;
+  --secondary: #22d3ee;
+  --secondary-foreground: #0b1437;
+  --brand-navy: #0b1437;
+  --sidebar-bg: #0f1729;
+  --background: #fafafa;
+  --card: #ffffff;
+  --muted: #f4f4f5;
+  --border: #e4e4e7;
+  --muted-foreground: #71717a;
+  --foreground: #09090b;
+  --destructive: #dc2626;
+  --warning: #d97706;
   --success: #059669;
-  --info: #2563EB;
+  --info: #2563eb;
   --ring: var(--primary);
 
   /* Status palette */
-  --status-open: #3B82F6;
-  --status-in-progress: #F59E0B;
-  --status-review: #8B5CF6;
-  --status-resolved: #10B981;
-  --status-closed: #A1A1AA;
-  --status-escalated: #EF4444;
-  --status-cyan: #06B6D4;
-  --status-rose: #F43F5E;
-  --status-indigo: #6366F1;
-  --status-teal: #14B8A6;
+  --status-open: #3b82f6;
+  --status-in-progress: #f59e0b;
+  --status-review: #8b5cf6;
+  --status-resolved: #10b981;
+  --status-closed: #a1a1aa;
+  --status-escalated: #ef4444;
+  --status-cyan: #06b6d4;
+  --status-rose: #f43f5e;
+  --status-indigo: #6366f1;
+  --status-teal: #14b8a6;
 
   /* Typography */
-  --font-heading: "Poppins", system-ui, sans-serif;
-  --font-body: "Rubik", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-heading: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Rubik', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   /* Spacing (4px base) */
   --space-1: 0.25rem;

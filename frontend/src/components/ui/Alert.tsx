@@ -20,14 +20,14 @@ export const alertVariants = cva(
 );
 
 export interface AlertProps
-  extends HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {}
+  extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {}
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   { className, variant = 'info', role, ...props },
   ref,
 ) {
-  const inferredRole = role ?? (variant === 'destructive' || variant === 'warning' ? 'alert' : 'status');
+  const inferredRole =
+    role ?? (variant === 'destructive' || variant === 'warning' ? 'alert' : 'status');
   return (
     <div
       ref={ref}
