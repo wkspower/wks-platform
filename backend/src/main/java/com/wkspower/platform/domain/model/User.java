@@ -9,4 +9,9 @@ import java.util.UUID;
  * UserRepository.findAuthMaterialByEmail} for use by {@code security/}. This prevents the hash from
  * accidentally appearing in controller responses or logs.
  */
-public record User(UUID id, String email, Set<String> roles, boolean active) {}
+public record User(UUID id, String email, Set<String> roles, boolean active) {
+
+  public User {
+    roles = roles == null ? Set.of() : Set.copyOf(roles);
+  }
+}

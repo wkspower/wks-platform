@@ -52,14 +52,16 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  // TODO: rate-limit (Phase 1) — tracked on the Story 1.2 PR; JWT in HttpOnly cookie + SameSite=Lax
-  // mitigates the cross-site abuse surface; brute-force throttling comes with admin controls.
+  // TODO: rate-limit (Phase 1) — tracked in Story 1.2 PR (link in story 1-2 review findings); JWT
+  // in HttpOnly cookie + SameSite=Lax mitigates the cross-site abuse surface; brute-force
+  // throttling and Argon2 CPU-DoS protection come with admin controls.
   public ResponseEntity<ApiResponse<AuthUserDto>> login(@Valid @RequestBody LoginRequest request) {
+    String email = request.email() == null ? null : request.email().strip();
     Authentication authentication;
     try {
       authentication =
           authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+              new UsernamePasswordAuthenticationToken(email, request.password()));
     } catch (AuthenticationException ex) {
       throw new WksAuthenticationException();
     }

@@ -3,9 +3,9 @@ package com.wkspower.platform.security;
 import com.wkspower.platform.domain.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -51,6 +51,10 @@ public class JwtTokenProvider {
       @Value("${wks.jwt.secret:}") String secretBase64,
       @Value("${wks.jwt.ttl-hours:8}") int ttlHours,
       Environment environment) {
+    if (ttlHours <= 0) {
+      throw new IllegalStateException(
+          "WKS-API-053 wks.jwt.ttl-hours must be a positive integer (got " + ttlHours + ").");
+    }
     this.signingKey = resolveKey(secretBase64, environment);
     this.tokenTtl = Duration.ofHours(ttlHours);
   }
@@ -92,7 +96,7 @@ public class JwtTokenProvider {
         return Optional.empty();
       }
       return Optional.of(new AuthenticatedUser(id, email, roles));
-    } catch (RuntimeException ex) {
+    } catch (JwtException | IllegalArgumentException ex) {
       log.debug("JWT rejected: {}", ex.getClass().getSimpleName());
       return Optional.empty();
     }
@@ -115,7 +119,8 @@ public class JwtTokenProvider {
   private static SecretKey resolveKey(String secretBase64, Environment environment) {
     boolean production =
         Arrays.asList(environment.getActiveProfiles()).contains(PROFILE_PRODUCTION);
-    if (secretBase64 == null || secretBase64.isBlank()) {
+    String trimmed = secretBase64 == null ? "" : secretBase64.strip();
+    if (trimmed.isEmpty()) {
       if (production) {
         throw new IllegalStateException(
             "WKS-API-053 JWT signing secret is required in production. Set WKS_JWT_SECRET to a "
@@ -126,7 +131,16 @@ public class JwtTokenProvider {
       log.info("WKS-API-052 Ephemeral dev JWT secret generated; tokens invalidate on restart.");
       return Keys.hmacShaKeyFor(random);
     }
-    byte[] decoded = decodeSecret(secretBase64);
+    byte[] decoded;
+    try {
+      decoded = Base64.getDecoder().decode(trimmed);
+    } catch (IllegalArgumentException ex) {
+      throw new IllegalStateException(
+          "WKS-API-053 WKS_JWT_SECRET is not valid Base64. Provide a Base64-encoded random value "
+              + "of at least "
+              + MIN_SECRET_BYTES
+              + " bytes.");
+    }
     if (decoded.length < MIN_SECRET_BYTES) {
       throw new IllegalStateException(
           "WKS-API-053 WKS_JWT_SECRET must decode to at least "
@@ -134,15 +148,5 @@ public class JwtTokenProvider {
               + " bytes (256 bits). Provide Base64-encoded randomness.");
     }
     return Keys.hmacShaKeyFor(decoded);
-  }
-
-  private static byte[] decodeSecret(String base64) {
-    try {
-      return Base64.getDecoder().decode(base64);
-    } catch (IllegalArgumentException ex) {
-      // Fall back to raw UTF-8 bytes so that operators who paste a plain string at least
-      // get a clear "too short" message rather than a confusing base64 stack trace.
-      return base64.getBytes(StandardCharsets.UTF_8);
-    }
   }
 }

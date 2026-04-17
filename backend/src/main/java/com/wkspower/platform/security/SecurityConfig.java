@@ -1,10 +1,12 @@
 package com.wkspower.platform.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wkspower.platform.domain.model.AuthenticationMaterial;
 import com.wkspower.platform.domain.port.UserRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +22,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,6 +38,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * <ul>
  *   <li>{@code GET /api/health}, {@code POST /api/auth/login}, {@code POST /api/auth/logout} →
  *       permitAll
+ *   <li>All CORS preflights ({@code OPTIONS *}) → permitAll
  *   <li>Everything else under {@code /api/**} → authenticated
  *   <li>Static assets → permitAll (SPA shell is served from the same JAR)
  * </ul>
@@ -53,8 +55,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private static final String[] PERMIT_ALL_API =
-      new String[] {"/api/health", "/api/auth/login", "/api/auth/logout"};
+  private static final Pattern ORIGIN_PATTERN = Pattern.compile("^https?://[^/\\s*]+$");
+  private static final String DUMMY_PASSWORD_PROBE =
+      "__wks_timing_equalization_probe_not_a_real_password__";
 
   @Bean
   public SecurityFilterChain securityFilterChain(
@@ -72,7 +75,9 @@ public class SecurityConfig {
         .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(HttpMethod.GET, "/api/health")
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/health")
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/logout")
                     .permitAll()
@@ -85,8 +90,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  public WksAuthenticationEntryPoint wksAuthenticationEntryPoint() {
-    return new WksAuthenticationEntryPoint();
+  public WksAuthenticationEntryPoint wksAuthenticationEntryPoint(ObjectMapper objectMapper) {
+    return new WksAuthenticationEntryPoint(objectMapper);
   }
 
   @Bean
@@ -94,15 +99,22 @@ public class SecurityConfig {
     return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
   }
 
+  /**
+   * Returns a {@link UserDetailsService} that equalizes timing between the "user exists" and "user
+   * missing / inactive" branches by returning a dummy {@link User} with a pre-computed Argon2 hash
+   * when no real match is found. Without this, the missing-user path skips the encoder and
+   * completes much faster than a wrong-password path, allowing attackers to enumerate accounts via
+   * response latency.
+   */
   @Bean
-  public UserDetailsService userDetailsService(UserRepository users) {
+  public UserDetailsService userDetailsService(UserRepository users, PasswordEncoder encoder) {
+    final String dummyHash = encoder.encode(DUMMY_PASSWORD_PROBE);
     return email ->
         users
             .findAuthMaterialByEmail(email)
             .filter(AuthenticationMaterial::active)
             .map(SecurityConfig::toSpringUser)
-            .orElseThrow(
-                () -> new UsernameNotFoundException("Authentication failed")); // generic — no enum
+            .orElseGet(() -> dummyUser(email, dummyHash));
   }
 
   @Bean
@@ -117,18 +129,31 @@ public class SecurityConfig {
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource(
-      @Value("${wks.cors.origins:http://localhost:5173}") String originsCsv,
-      Environment environment) {
+      @Value("${wks.cors.origins:http://localhost:5173}") String originsCsv) {
     List<String> origins =
         Arrays.stream(originsCsv.split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .collect(Collectors.toUnmodifiableList());
 
-    CorsConfiguration config = new CorsConfiguration();
-    if (!origins.isEmpty()) {
-      config.setAllowedOrigins(origins);
+    if (origins.isEmpty()) {
+      throw new IllegalStateException(
+          "WKS-API-054 wks.cors.origins resolved to an empty list. Set WKS_CORS_ORIGINS to at "
+              + "least one explicit origin (e.g. http://localhost:5173).");
     }
+    for (String origin : origins) {
+      if ("null".equalsIgnoreCase(origin)
+          || "*".equals(origin)
+          || !ORIGIN_PATTERN.matcher(origin).matches()) {
+        throw new IllegalStateException(
+            "WKS-API-054 invalid CORS origin: \""
+                + origin
+                + "\". Each WKS_CORS_ORIGINS entry must be an absolute http(s) URL without path.");
+      }
+    }
+
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(origins);
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Content-Type"));
     config.setExposedHeaders(List.of("X-Correlation-Id"));
@@ -152,15 +177,32 @@ public class SecurityConfig {
   public record ProductionProfile(boolean active) {}
 
   private static User toSpringUser(AuthenticationMaterial m) {
+    // Spring's User ctor args: username, password, enabled, accountNonExpired,
+    // credentialsNonExpired, accountNonLocked, authorities. Inactive users are already filtered
+    // upstream, so "enabled" is always true here.
     return new User(
         m.email(),
         m.passwordHash(),
-        true, /* active */
+        true,
         true,
         true,
         true,
         m.roles().stream()
             .map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase(Locale.ROOT)))
             .collect(Collectors.toUnmodifiableSet()));
+  }
+
+  private static User dummyUser(String email, String dummyHash) {
+    // Presented to DaoAuthenticationProvider so it still executes the encoder match, equalizing
+    // latency with the real-user wrong-password path. The match always fails →
+    // BadCredentialsException.
+    return new User(
+        email == null || email.isBlank() ? "__unknown__" : email,
+        dummyHash,
+        true,
+        true,
+        true,
+        true,
+        List.of());
   }
 }

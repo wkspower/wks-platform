@@ -26,17 +26,23 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Slice test for {@link AuthController}. {@code @Import(SecurityConfig.class)} so the filter chain
@@ -145,5 +151,52 @@ class AuthControllerTest {
         .andExpect(status().isNoContent())
         .andExpect(cookie().exists("WKS_SESSION"))
         .andExpect(cookie().maxAge("WKS_SESSION", 0));
+  }
+
+  /**
+   * The three login-failure modes the spec names — unknown email, wrong password, inactive user —
+   * must return byte-identical response bodies so attackers cannot enumerate accounts through
+   * error-message differences. At this slice level all three surface to the controller as {@link
+   * AuthenticationException}, so parameterising over distinct subclasses proves the controller +
+   * handler produce one canonical envelope regardless of upstream cause.
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("genericAuthFailureCases")
+  void allAuthFailureModesReturnIdenticalGenericEnvelope(String label, AuthenticationException ex)
+      throws Exception {
+    when(authenticationManager.authenticate(any())).thenThrow(ex);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                post("/api/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(new LoginRequest(label + "@x.com", "pw"))))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error.code").value("WKS-API-401"))
+            .andExpect(jsonPath("$.error.message").value("Invalid email or password"))
+            .andExpect(jsonPath("$.error.field").doesNotExist())
+            .andExpect(jsonPath("$.data").doesNotExist())
+            .andReturn();
+
+    // Body must be byte-identical across failure modes — no stray fields leaking cause.
+    String body = result.getResponse().getContentAsString();
+    assertThatBodyMatchesCanonicalEnvelope(body);
+  }
+
+  private static java.util.stream.Stream<Arguments> genericAuthFailureCases() {
+    return java.util.stream.Stream.of(
+        Arguments.of("unknown-email", new BadCredentialsException("Bad credentials")),
+        Arguments.of("wrong-password", new BadCredentialsException("Bad credentials")),
+        Arguments.of("inactive-user", new DisabledException("User is disabled")));
+  }
+
+  private static void assertThatBodyMatchesCanonicalEnvelope(String body) {
+    org.assertj.core.api.Assertions.assertThat(body)
+        .contains("\"code\":\"WKS-API-401\"")
+        .contains("\"message\":\"Invalid email or password\"")
+        .doesNotContain("Bad credentials")
+        .doesNotContain("disabled");
   }
 }

@@ -22,8 +22,7 @@ class JwtTokenProviderTest {
   private static final String SECRET_BASE64 = base64Secret();
 
   private final MockEnvironment devEnv = new MockEnvironment().withProperty("ignore", "x");
-  private final MockEnvironment productionEnv =
-      (MockEnvironment) new MockEnvironment().withProperty("ignore", "x");
+  private final MockEnvironment productionEnv = new MockEnvironment().withProperty("ignore", "x");
 
   {
     productionEnv.setActiveProfiles("production");
@@ -127,6 +126,36 @@ class JwtTokenProviderTest {
             () ->
                 new JwtTokenProvider(
                     Base64.getEncoder().encodeToString(new byte[16]), 8, productionEnv))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("WKS-API-053");
+  }
+
+  @Test
+  void rejectsNonBase64SecretInsteadOfSilentlyUsingRawBytes() {
+    // "not_base_64!!!" contains chars outside the Base64 alphabet; must fail-fast, NOT fall back
+    // to UTF-8 bytes of the literal string.
+    assertThatThrownBy(() -> new JwtTokenProvider("not_base_64!!!", 8, productionEnv))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("WKS-API-053");
+  }
+
+  @Test
+  void stripsWhitespaceAroundSecret() {
+    // A newline/space sneaks in from a k8s Secret mounted file — must still decode cleanly.
+    JwtTokenProvider provider = new JwtTokenProvider("  " + SECRET_BASE64 + "\n", 1, devEnv);
+    AuthenticatedUser parsed =
+        provider
+            .parse(provider.issue(new User(UUID.randomUUID(), "u@x", Set.of("admin"), true)))
+            .orElseThrow();
+    assertThat(parsed.email()).isEqualTo("u@x");
+  }
+
+  @Test
+  void rejectsZeroOrNegativeTtl() {
+    assertThatThrownBy(() -> new JwtTokenProvider(SECRET_BASE64, 0, devEnv))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("WKS-API-053");
+    assertThatThrownBy(() -> new JwtTokenProvider(SECRET_BASE64, -1, devEnv))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("WKS-API-053");
   }

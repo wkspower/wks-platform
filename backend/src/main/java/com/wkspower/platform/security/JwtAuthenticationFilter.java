@@ -32,6 +32,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
+    // Per-request thread-local reset is handled by Spring Security's SecurityContextHolderFilter
+    // in STATELESS session policy; we avoid a redundant clearContext() here because it would
+    // wipe test-injected Authentication set via MockMvc's .with(authentication(...))
+    // post-processor.
     String token = extractToken(request);
     if (token != null) {
       tokenProvider
@@ -53,11 +57,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (cookies == null) {
       return null;
     }
+    String found = null;
     for (Cookie cookie : cookies) {
       if (COOKIE_NAME.equals(cookie.getName())) {
-        return cookie.getValue();
+        if (found != null) {
+          // Ambiguous cookie state (sibling-subdomain injection, legacy cookie overlap, …).
+          // Refuse to pick — downstream 401 is safer than authenticating the wrong token.
+          return null;
+        }
+        found = cookie.getValue();
       }
     }
-    return null;
+    return found;
   }
 }
