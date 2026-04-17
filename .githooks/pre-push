@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Mirrors .github/workflows/ci.yml verbatim so local green == CI green.
+# Enable once per clone: git config core.hooksPath .githooks
+# Emergency skip: WKS_SKIP_CI_LOCAL=1 git push   (use only if you know why)
+set -euo pipefail
+
+if [[ "${WKS_SKIP_CI_LOCAL:-0}" == "1" ]]; then
+  echo "pre-push: WKS_SKIP_CI_LOCAL=1 — skipping local CI mirror" >&2
+  exit 0
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+echo "pre-push: backend — mvnw verify (incl. spotless, unit, ArchUnit)"
+( cd backend && ./mvnw -B -ntp verify )
+
+echo "pre-push: frontend — npm ci + lint + format:check + test + build"
+(
+  cd frontend
+  npm ci --no-audit --no-fund
+  npm run lint
+  npm run format:check
+  npm test
+  npm run build
+
+  count=$(find dist/assets -name '*.woff2' | wc -l | tr -d ' ')
+  echo "pre-push: found $count woff2 files in dist/assets"
+  if [ "$count" -lt 4 ]; then
+    echo "pre-push: expected >= 4 woff2 files, found $count" >&2
+    exit 1
+  fi
+)
+
+echo "pre-push: local CI mirror passed"

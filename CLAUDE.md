@@ -155,6 +155,16 @@ docker buildx build -f docker/Dockerfile -t wks:ci .
 
 "Lint + test + build" is **not** the full set. `format:check` is a separate step and Prettier regressions only surface there. When in doubt, grep `ci.yml` for `run:` and copy every command verbatim.
 
+### Pre-push hook (one-time setup)
+
+A committed `pre-push` hook at `.githooks/pre-push` runs the full CI mirror automatically. Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Emergency bypass (use only if you know why): `WKS_SKIP_CI_LOCAL=1 git push`. Do **not** use `--no-verify` — the hook exists because the memory-backed "match CI locally" rule kept getting violated.
+
 ---
 
 ## Story 1.1 artifacts
