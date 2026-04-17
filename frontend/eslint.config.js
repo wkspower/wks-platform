@@ -102,6 +102,13 @@ export default [
     },
     rules: {
       'no-console': 'error',
+      // The base rule double-flags TS interface members and overload params.
+      // The @typescript-eslint version understands them.
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'import/order': [
