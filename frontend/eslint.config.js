@@ -74,6 +74,8 @@ export default [
         HTMLButtonElement: 'readonly',
         HTMLDivElement: 'readonly',
         Node: 'readonly',
+        SVGSVGElement: 'readonly',
+        SVGElement: 'readonly',
         // Node-ish (used by tests + ts files that read fs)
         __dirname: 'readonly',
         __filename: 'readonly',

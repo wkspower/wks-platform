@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
+import { t } from '@/i18n';
 import { useAuthStore } from '@/stores/authStore';
 
 interface AuthProviderProps {
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             className="size-10 animate-spin rounded-full border-2 border-muted border-t-primary"
             aria-hidden="true"
           />
-          <p className="font-heading text-lg">{'WKS Platform'}</p>
+          <p className="font-heading text-lg">{t('app.brandName')}</p>
         </div>
       </div>
     );
