@@ -4,7 +4,7 @@ Case management platform for system integrators. OSS core (Apache 2.0). Embedded
 
 ## Project Status
 
-v2 is a full rewrite. v1 code will be archived (tagged `v1-final`, `v1` branch) when v2 development begins.
+v2 is a full rewrite. v1 code is archived (tagged `v1-final`, on the `v1` branch). During v2 development, the active trunk is **`v2-develop`** (forked from `develop` at `v1-final`); `develop` stays frozen at v1 until a bulk merge-back decision. Feature branches target `v2-develop`, not `develop`.
 
 ## Architecture
 
