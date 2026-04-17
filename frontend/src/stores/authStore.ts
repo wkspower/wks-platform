@@ -6,6 +6,19 @@ import type { AuthUser } from '@/types/auth';
 
 export type AuthStatus = 'pending' | 'authenticated' | 'unauthenticated';
 
+// 401 carries the "invalid credentials" meaning via status='unauthenticated'; the
+// localized message belongs to the UI layer (LoginPage reads the thrown ApiError
+// directly). Non-ApiError failures collapse to a single generic sentinel so
+// store.error never surfaces backend-controlled text to future consumers.
+export const LOGIN_ERROR_GENERIC = 'unexpected';
+
+// Hydrate in-flight latch — prevents StrictMode's double-invoke (and any other
+// concurrent caller) from firing a second /api/auth/me. The canonical pending→
+// authenticated/unauthenticated status alone can't distinguish "not started"
+// from "in flight" because both leave status='pending'.
+let hydrating = false;
+const HYDRATE_TIMEOUT_MS = 8_000;
+
 export interface AuthState {
   user: AuthUser | null;
   status: AuthStatus;
@@ -26,8 +39,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const user = await loginRequest(email, password);
       set({ user, status: 'authenticated', error: null });
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Unexpected error during login';
-      set({ user: null, status: 'unauthenticated', error: message });
+      const isAuthFailure = err instanceof ApiError && err.status === 401;
+      set({
+        user: null,
+        status: 'unauthenticated',
+        error: isAuthFailure ? null : LOGIN_ERROR_GENERIC,
+      });
       throw err;
     }
   },
@@ -42,13 +59,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async hydrate() {
-    // React 19 StrictMode runs effects twice in dev. The store guards
-    // against a second hydrate while the first is still in flight by
-    // checking the canonical pending->authenticated/unauthenticated
-    // transition: re-entering hydrate() during 'pending' is a no-op.
-    if (get().status !== 'pending' && get().user !== null) return;
+    if (hydrating) return;
+    if (get().status === 'authenticated') return;
+    hydrating = true;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), HYDRATE_TIMEOUT_MS);
     try {
-      const user = await getMe();
+      const user = await getMe(controller.signal);
       set({ user, status: 'authenticated', error: null });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -58,6 +75,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // eslint-disable-next-line no-console
       console.warn('[auth] hydrate failed', err);
       set({ user: null, status: 'unauthenticated', error: null });
+    } finally {
+      clearTimeout(timer);
+      hydrating = false;
     }
   },
 }));

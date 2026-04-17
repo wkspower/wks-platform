@@ -85,6 +85,8 @@ export default [
         HTMLSelectElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
         React: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
         // Node-ish (used by tests + ts files that read fs)
         __dirname: 'readonly',
         __filename: 'readonly',

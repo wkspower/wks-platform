@@ -14,7 +14,7 @@ export async function logout(): Promise<void> {
   await apiFetch<void>('/api/auth/logout', { method: 'POST' });
 }
 
-export async function getMe(): Promise<AuthUser> {
-  const result = await apiFetch<AuthUser>('/api/auth/me');
+export async function getMe(signal?: AbortSignal): Promise<AuthUser> {
+  const result = await apiFetch<AuthUser>('/api/auth/me', { signal });
   return result.data;
 }
