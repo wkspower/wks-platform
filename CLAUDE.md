@@ -130,6 +130,31 @@ cd backend && ./mvnw test
 cd frontend && npm test
 ```
 
+## Local CI gate before opening a PR
+
+**Rule:** Before pushing a branch and opening a PR, run **every** `run:` step the CI workflow (`.github/workflows/ci.yml`) executes, in the same order — not a curated subset. Skipping even one step produces avoidable CI failures that waste review cycles.
+
+Current CI step sequence (keep this list in sync with `ci.yml` — when the workflow adds a step, add it here in the same commit):
+
+```bash
+# Backend job
+cd backend && ./mvnw -B -ntp verify
+
+# Frontend job
+cd frontend
+npm ci                         # if deps changed
+npm run lint
+npm run format:check           # easy to forget — runs Prettier
+npm test
+npm run build
+find dist/assets -name '*.woff2' | wc -l   # must be >= 4 (Story 1.3 AC #13)
+
+# Docker job
+docker buildx build -f docker/Dockerfile -t wks:ci .
+```
+
+"Lint + test + build" is **not** the full set. `format:check` is a separate step and Prettier regressions only surface there. When in doubt, grep `ci.yml` for `run:` and copy every command verbatim.
+
 ---
 
 ## Story 1.1 artifacts
