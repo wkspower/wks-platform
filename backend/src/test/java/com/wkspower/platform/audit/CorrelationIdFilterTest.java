@@ -44,9 +44,7 @@ class CorrelationIdFilterTest {
     filter.doFilter(request, response, chain);
 
     assertThat(mdcDuringChain.get()).as("MDC populated inside chain").isNotBlank();
-    assertThat(MDC.get(CorrelationIdFilter.MDC_KEY))
-        .as("MDC cleared after chain returns")
-        .isNull();
+    assertThat(MDC.get(CorrelationIdFilter.MDC_KEY)).as("MDC cleared after chain returns").isNull();
   }
 
   @Test

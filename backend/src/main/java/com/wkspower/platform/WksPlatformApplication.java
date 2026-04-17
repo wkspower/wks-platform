@@ -11,8 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * application.yml (belt-and-suspenders).
  *
  * <p>The auto-config is referenced by <b>string name</b> rather than class literal so this
- * bootstrap file does not import {@code org.cibseven.*} — that keeps the ArchUnit rule
- * ({@code onlyEngineImportsCibSeven}) strict without exceptions.
+ * bootstrap file does not import {@code org.cibseven.*} — that keeps the ArchUnit rule ({@code
+ * onlyEngineImportsCibSeven}) strict without exceptions.
  */
 @SpringBootApplication(
     excludeName = {"org.cibseven.bpm.spring.boot.starter.CamundaBpmAutoConfiguration"})
