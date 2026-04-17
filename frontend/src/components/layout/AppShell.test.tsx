@@ -1,6 +1,6 @@
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
 import { Route, Routes } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
 
 import { sessionBus } from '@/api/sessionBus';
 import { renderWithProviders } from '@/test/renderWithProviders';

@@ -76,6 +76,11 @@ export default [
         Node: 'readonly',
         SVGSVGElement: 'readonly',
         SVGElement: 'readonly',
+        HTMLFormElement: 'readonly',
+        HTMLLabelElement: 'readonly',
+        HTMLSelectElement: 'readonly',
+        HTMLTextAreaElement: 'readonly',
+        React: 'readonly',
         // Node-ish (used by tests + ts files that read fs)
         __dirname: 'readonly',
         __filename: 'readonly',
