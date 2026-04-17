@@ -1,65 +1,52 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { HttpResponse, http } from 'msw';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { server } from '@/test/server';
 
 import { ApiError, apiFetch } from './client';
 import { SESSION_EXPIRED, sessionBus, type SessionExpiredEvent } from './sessionBus';
 
-interface MockResponseInit {
-  status?: number;
-  body?: unknown;
-  headers?: Record<string, string>;
-}
-
-function mockResponse({ status = 200, body, headers = {} }: MockResponseInit): Response {
-  const responseHeaders = new Headers(headers);
-  if (body !== undefined && !responseHeaders.has('Content-Type')) {
-    responseHeaders.set('Content-Type', 'application/json');
-  }
-  const responseBody = body === undefined ? null : JSON.stringify(body);
-  return new Response(responseBody, { status, headers: responseHeaders });
-}
+afterEach(() => {
+  // setup.ts already calls server.resetHandlers; remove any leftover bus
+  // listeners between tests so emit-counts are accurate.
+  sessionBus.dispatchEvent(new Event('reset'));
+});
 
 describe('apiFetch', () => {
-  const fetchSpy = vi.spyOn(globalThis, 'fetch');
-
-  beforeEach(() => {
-    fetchSpy.mockReset();
-  });
-
-  afterEach(() => {
-    fetchSpy.mockReset();
-  });
-
   it('returns the data envelope on 2xx', async () => {
-    fetchSpy.mockResolvedValueOnce(
-      mockResponse({ status: 200, body: { data: { id: 'abc' }, meta: {} } }),
+    server.use(
+      http.get('/api/anything', () =>
+        HttpResponse.json({ data: { id: 'abc' }, meta: {} }, { status: 200 }),
+      ),
     );
-    const result = await apiFetch<{ id: string }>('/api/auth/me');
+    const result = await apiFetch<{ id: string }>('/api/anything');
     expect(result.data).toEqual({ id: 'abc' });
   });
 
-  it('always sends credentials: include', async () => {
-    fetchSpy.mockResolvedValueOnce(mockResponse({ status: 200, body: { data: null, meta: {} } }));
-    await apiFetch('/api/anything');
-    const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
-    expect(init.credentials).toBe('include');
-  });
-
-  it('sets Content-Type when sending a JSON body', async () => {
-    fetchSpy.mockResolvedValueOnce(mockResponse({ status: 200, body: { data: null, meta: {} } }));
-    await apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: 'x' }) });
-    const headers = (fetchSpy.mock.calls[0]?.[1] as RequestInit).headers as Headers;
-    expect(headers.get('Content-Type')).toBe('application/json');
+  it('always sends credentials: include and JSON content-type for bodies', async () => {
+    let received: Request | null = null;
+    server.use(
+      http.post('/api/echo', ({ request }) => {
+        received = request;
+        return HttpResponse.json({ data: null, meta: {} }, { status: 200 });
+      }),
+    );
+    await apiFetch('/api/echo', { method: 'POST', body: JSON.stringify({ x: 1 }) });
+    expect(received).not.toBeNull();
+    expect(received!.credentials).toBe('include');
+    expect(received!.headers.get('Content-Type')).toBe('application/json');
   });
 
   it('throws a typed ApiError on non-2xx with the envelope fields', async () => {
-    fetchSpy.mockResolvedValueOnce(
-      mockResponse({
-        status: 422,
-        body: { error: { code: 'WKS-API-422', message: 'Bad', field: 'email' }, meta: {} },
-        headers: { 'X-Correlation-Id': 'corr-1' },
-      }),
+    server.use(
+      http.get('/api/bad', () =>
+        HttpResponse.json(
+          { error: { code: 'WKS-API-422', message: 'Bad', field: 'email' }, meta: {} },
+          { status: 422, headers: { 'X-Correlation-Id': 'corr-1' } },
+        ),
+      ),
     );
-    await expect(apiFetch('/api/something')).rejects.toMatchObject({
+    await expect(apiFetch('/api/bad')).rejects.toMatchObject({
       name: 'ApiError',
       status: 422,
       code: 'WKS-API-422',
@@ -70,11 +57,13 @@ describe('apiFetch', () => {
   });
 
   it('emits session-expired on 401 for non-login paths', async () => {
-    fetchSpy.mockResolvedValueOnce(
-      mockResponse({
-        status: 401,
-        body: { error: { code: 'WKS-API-401', message: 'Unauthorized' }, meta: {} },
-      }),
+    server.use(
+      http.get('/api/cases', () =>
+        HttpResponse.json(
+          { error: { code: 'WKS-API-401', message: 'unauth', field: null }, meta: {} },
+          { status: 401 },
+        ),
+      ),
     );
     const handler = vi.fn();
     sessionBus.addEventListener(SESSION_EXPIRED, handler as EventListener);
@@ -86,21 +75,24 @@ describe('apiFetch', () => {
   });
 
   it('does NOT emit session-expired on 401 for the login path', async () => {
-    fetchSpy.mockResolvedValueOnce(
-      mockResponse({
-        status: 401,
-        body: { error: { code: 'WKS-API-401', message: 'Invalid email or password' }, meta: {} },
-      }),
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json(
+          { error: { code: 'WKS-API-401', message: 'invalid', field: null }, meta: {} },
+          { status: 401 },
+        ),
+      ),
     );
     const handler = vi.fn();
     sessionBus.addEventListener(SESSION_EXPIRED, handler as EventListener);
-    await expect(apiFetch('/api/auth/login', { method: 'POST' })).rejects.toBeInstanceOf(ApiError);
+    await expect(
+      apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: 'a' }) }),
+    ).rejects.toBeInstanceOf(ApiError);
     sessionBus.removeEventListener(SESSION_EXPIRED, handler as EventListener);
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('returns undefined data on 204 No Content', async () => {
-    fetchSpy.mockResolvedValueOnce(mockResponse({ status: 204 }));
+  it('returns undefined data on 204 No Content (logout)', async () => {
     const result = await apiFetch<void>('/api/auth/logout', { method: 'POST' });
     expect(result.data).toBeUndefined();
   });
