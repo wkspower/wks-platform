@@ -42,6 +42,14 @@ camunda:
 
 wks:
   locale: en-IN
+  admin:
+    email: ${WKS_ADMIN_EMAIL:}
+    password: ${WKS_ADMIN_PASSWORD:}
+  jwt:
+    secret: ${WKS_JWT_SECRET:}
+    ttl-hours: ${WKS_JWT_TTL_HOURS:8}
+  cors:
+    origins: ${WKS_CORS_ORIGINS:http://localhost:5173}
 
 logging:
   level:

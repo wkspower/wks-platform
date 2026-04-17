@@ -27,6 +27,19 @@ Open `http://localhost:8080/`. The REST health probe is at
 `http://localhost:8080/api/health`. Cold boot after the first image build
 takes under two minutes on a 16 GB SSD dev machine.
 
+### First-boot admin credentials
+
+In **dev**, the platform seeds a default admin on first boot:
+`admin@wkspower.local` / `admin`. Startup logs a WARN
+(`WKS-API-050`) whenever the fallback is used — set `WKS_ADMIN_EMAIL` and
+`WKS_ADMIN_PASSWORD` to override.
+
+In **production** (`SPRING_PROFILES_ACTIVE=production`), both
+`WKS_ADMIN_EMAIL` and `WKS_ADMIN_PASSWORD` **must** be set or the
+application refuses to start (`WKS-API-051`). There is no production
+fallback. Also set `WKS_JWT_SECRET` (Base64-encoded, ≥32 bytes) to keep
+sessions stable across restarts.
+
 ## v1 is archived
 
 v1 code lives on the [`v1` branch](https://github.com/wkspower/wks-platform/tree/v1)

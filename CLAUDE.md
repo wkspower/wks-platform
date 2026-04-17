@@ -164,3 +164,41 @@ Story 1.1 intentionally creates **scaffolding only**. Domain models,
 security config, and business logic belong to Stories 1.2–1.5 and later
 epics — do not add them here.
 
+## Story 1.2 artifacts
+
+Story 1.2 (Authentication & session management) added the auth stack. Key
+files:
+
+- `backend/pom.xml` — added `spring-boot-starter-security`,
+  `io.jsonwebtoken:jjwt-{api,impl,jackson}:0.12.6`, `bcprov-jdk18on`
+- `backend/src/main/resources/db/migration/V202604170001__create_users_and_roles.sql` —
+  `users` / `roles` / `user_roles` schema, fixed-UUID admin role seed
+- `backend/src/main/java/com/wkspower/platform/domain/model/{User,Role,AuthenticationMaterial}.java` —
+  framework-free records. Domain `User` has no `passwordHash` — the hash
+  is exposed only by `UserRepository.findAuthMaterialByEmail`
+- `backend/src/main/java/com/wkspower/platform/domain/port/UserRepository.java` —
+  port with `findByEmail`, `findAuthMaterialByEmail`, `save`, `existsWithRole`
+- `backend/src/main/java/com/wkspower/platform/domain/exception/{WksException,WksAuthenticationException,WksAuthorizationException,WksValidationException}.java`
+- `backend/src/main/java/com/wkspower/platform/infrastructure/persistence/{UserRepositoryAdapter.java,entity/{UserEntity,RoleEntity}.java,repository/{UserEntityRepository,RoleEntityRepository}.java}`
+- `backend/src/main/java/com/wkspower/platform/security/{SecurityConfig,JwtTokenProvider,JwtAuthenticationFilter,WksUserPrincipal,WksAuthenticationEntryPoint,AuthenticatedUser,AdminUserSeeder}.java`
+- `backend/src/main/java/com/wkspower/platform/api/controller/AuthController.java` —
+  `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`
+- `backend/src/main/java/com/wkspower/platform/api/dto/{request/LoginRequest,response/AuthUserDto}.java`
+- `backend/src/main/java/com/wkspower/platform/api/GlobalExceptionHandler.java` —
+  expanded with `WksAuthenticationException`, `WksAuthorizationException`,
+  `WksValidationException`, `MethodArgumentNotValidException`,
+  `HttpMessageNotReadableException` handlers
+- `backend/src/main/java/com/wkspower/platform/infrastructure/config/FilterConfig.java` —
+  orders `CorrelationIdFilter` first, suppresses duplicate
+  auto-registration of `JwtAuthenticationFilter`
+- `backend/src/main/resources/application.yml` — `wks.admin.*`,
+  `wks.jwt.*`, `wks.cors.*` config keys
+- Tests: `JwtTokenProviderTest`, `AdminUserSeederTest`,
+  `AuthControllerTest`, `HealthControllerTest` (updated to import
+  `SecurityConfig`), `AuthFlowIT`; `ArchitectureTest` grew rules for
+  api/security ↛ entity, JJWT-only-in-security, and domain ↛ jjwt.
+
+Rules added for future agents: `JwtTokenProvider` is the **only** class
+allowed to import `io.jsonwebtoken.*`; `api/` and `security/` must not
+import `infrastructure.persistence.entity.*` (ArchUnit enforces both).
+
