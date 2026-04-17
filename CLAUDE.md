@@ -44,7 +44,7 @@ wks-platform/
 ## Tech Stack
 
 ### Backend
-- Java 17 (minimum), Java 21 (recommended — virtual threads for SSE)
+- Java 21 (required — compiler target `--release 21`; virtual threads for SSE)
 - Spring Boot 3.x
 - CIB seven (embedded, Spring Boot starter)
 - JPA/Hibernate + Flyway migrations
@@ -115,7 +115,7 @@ Zero-config for dev (H2 + local storage + console logging). Production:
 
 ```bash
 # Start everything (dev mode, zero config)
-docker compose up
+cd docker && docker compose up
 
 # Backend only
 cd backend && ./mvnw spring-boot:run

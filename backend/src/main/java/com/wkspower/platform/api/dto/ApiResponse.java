@@ -7,14 +7,19 @@ import java.util.Map;
  * Standard WKS API envelope. Every REST response — success or error — has this shape.
  *
  * <pre>
- * { "data": { ... } | null, "error": { "code": "...", "message": "...", "field": "..." } | null, "meta": { ... } }
+ * Success: { "data": { ... }, "meta": { ... } }
+ * Error:   { "error": { "code": "...", "message": "...", "field": "..." }, "meta": { ... } }
  * </pre>
+ *
+ * <p>{@code NON_NULL} omits absent fields: success responses have no {@code "error"} key; error
+ * responses have no {@code "data"} key. This keeps the wire format clean and matches the spec
+ * envelope exactly.
  *
  * @param data the response payload on success, {@code null} on error
  * @param error error details on failure, {@code null} on success
  * @param meta optional metadata (pagination, timings) — always serialised, never {@code null}
  */
-@JsonInclude(JsonInclude.Include.ALWAYS)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ApiResponse<T>(T data, ErrorPayload error, Map<String, Object> meta) {
 
   public static <T> ApiResponse<T> success(T data) {

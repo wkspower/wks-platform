@@ -33,9 +33,14 @@ export default [
     },
     settings: {
       react: { version: 'detect' },
+      'import/resolver': {
+        typescript: { alwaysTryTypes: true },
+      },
     },
     rules: {
       'no-console': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'import/order': [
         'error',
         {

@@ -64,10 +64,14 @@ class ArchitectureTest {
         .definedBy("..infrastructure..")
         .layer("engine")
         .definedBy("..engine..")
+        // No declared layer (domain, infrastructure, engine) may reach into api.
         .whereLayer("api")
         .mayNotBeAccessedByAnyLayer()
+        // No declared layer (api, domain, engine) may reach into infrastructure.
+        // This prevents api→infrastructure shortcuts that bypass domain.
         .whereLayer("infrastructure")
         .mayNotBeAccessedByAnyLayer()
+        // engine is accessed only by infrastructure — no declared layer bypasses the port.
         .whereLayer("engine")
         .mayNotBeAccessedByAnyLayer()
         .check(CLASSES);

@@ -46,18 +46,18 @@ deployment. Case types are YAML files; lifecycle rules are BPMN processes;
 the UI is rendered from a server-generated JSON schema so no case-specific
 frontend code is needed.
 
-See [docs/architecture.md](./docs/architecture.md) for the full decision log.
+See [docs/architecture.md](./docs/architecture.md) for the full decision log (document in progress).
 
 ## Links
 
-- **API** — `http://localhost:8080/swagger-ui.html` (real endpoints arrive in Story 1.4)
-- **Architecture** — [docs/architecture.md](./docs/architecture.md)
+- **API** — `http://localhost:8080/swagger-ui/index.html` (real endpoints arrive in Story 1.4)
+- **Architecture** — [docs/architecture.md](./docs/architecture.md) _(in progress)_
 - **Security policy** — [SECURITY.md](./SECURITY.md)
 - **Code of conduct** — [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 
 ## Project status
 
-v2 is under active development on `develop`. The roadmap is published as
+v2 is under active development on `v2-develop`. The roadmap is published as
 per-epic story specs under `_bmad-output/implementation-artifacts/` in
 the planning repo. Pre-1.0 releases will be cut from `main` once the
 Phase-0 epics (1–9) are complete.
