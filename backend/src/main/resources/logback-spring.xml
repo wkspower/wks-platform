@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false">
+
+    <!-- Dev: human-readable console output at DEBUG (JSON is too noisy for local dev).
+         Production: JSON to stdout at INFO. MDC fields surface in both shapes. -->
+
+    <springProfile name="!production">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} [cid=%X{correlationId:-} case=%X{caseId:-} user=%X{userId:-}] - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.wkspower" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="production">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <!-- MDC keys are propagated automatically; we list them here so the
+                     field set is documented and greppable in production dashboards. -->
+                <includeMdcKeyName>correlationId</includeMdcKeyName>
+                <includeMdcKeyName>caseId</includeMdcKeyName>
+                <includeMdcKeyName>userId</includeMdcKeyName>
+                <includeMdcKeyName>wksErrorCode</includeMdcKeyName>
+                <timeZone>UTC</timeZone>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

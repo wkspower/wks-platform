@@ -1,0 +1,11 @@
+WKS Platform v2
+Copyright 2026 WKS Power Limited
+
+This product includes software developed by CIB seven (https://cibseven.org/),
+licensed under the Apache License, Version 2.0.
+
+The v1 codebase (accessible via the `v1` branch and `v1-final` tag) was
+licensed under the MIT License and remains so on that branch. Starting
+with v2, the project is relicensed to Apache License, Version 2.0, to
+align with the embedded CIB seven engine and to add an explicit patent
+grant.
