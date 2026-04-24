@@ -33,9 +33,7 @@ Strings live in `frontend/src/i18n/en.json` and are looked up via a
 small `t('key')` helper. `react-i18next` arrives in Phase 1; until
 then the bundle is English-only and a Vitest guardrail asserts every
 `t('...')` reference has an entry. Self-hosted Poppins + Rubik fonts
-are bundled (no Google Fonts CDN). The full design vocabulary lives
-in the
-[UX spec](_bmad-output/planning-artifacts/ux/ux-design-spec.md).
+are bundled (no Google Fonts CDN).
 
 ## Quick start
 
@@ -72,11 +70,33 @@ sessions stable across restarts.
 
 v1 code lives on the [`v1` branch](https://github.com/wkspower/wks-platform/tree/v1)
 and the [`v1-final` tag](https://github.com/wkspower/wks-platform/releases/tag/v1-final).
-It is frozen — no new features, no security updates. v2 is a full rewrite
+It is frozen — no new features, no security updates (see
+[`SECURITY.md`](./SECURITY.md#supported-versions)). v2 is a full rewrite
 because v1's monorepo-of-microservices (seven services, shared Docker
 network, Keycloak + OPA for auth) made evaluation painful and deployment
 brittle. v2 is a single-container monolith with strict hexagonal
 boundaries so the evaluation takes 30 minutes instead of 30 hours.
+
+For a fuller archival summary see [`docs/v1-archival.md`](./docs/v1-archival.md).
+
+## Project status
+
+**What works today?** The platform foundation is complete: project
+skeleton + `docker compose up` boot, authentication + session
+management, React application shell + design system, and the REST API
+foundation with H2/PostgreSQL persistence. Login works, `/api/health`
+is live, and Swagger UI serves the real endpoints.
+
+**What's next?** Case lifecycle and workspace — YAML case-type
+configuration, embedded CIB seven BPMN deployment, case CRUD, and the
+split-pane workspace. That milestone is the first evaluable build.
+
+**When can I try the 30-minute demo?** After the case-lifecycle
+milestone ships. The
+[public roadmap](./ROADMAP.md) tracks shipped vs. next vs. later —
+watch this README or follow
+[Victor on LinkedIn](https://www.linkedin.com/in/victorhugof/) for the
+announcement.
 
 ## Architecture
 
@@ -87,21 +107,19 @@ deployment. Case types are YAML files; lifecycle rules are BPMN processes;
 the UI is rendered from a server-generated JSON schema so no case-specific
 frontend code is needed.
 
-See [docs/architecture.md](./docs/architecture.md) for the full decision log (document in progress).
+See [docs/architecture.md](./docs/architecture.md) for the full decision
+log (growing per epic).
 
 ## Links
 
-- **API** — `http://localhost:8080/swagger-ui/index.html` (real endpoints arrive in Story 1.4)
-- **Architecture** — [docs/architecture.md](./docs/architecture.md) _(in progress)_
-- **Security policy** — [SECURITY.md](./SECURITY.md)
-- **Code of conduct** — [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
-
-## Project status
-
-v2 is under active development on `v2-develop`. The roadmap is published as
-per-epic story specs under `_bmad-output/implementation-artifacts/` in
-the planning repo. Pre-1.0 releases will be cut from `main` once the
-Phase-0 epics (1–9) are complete.
+- **API reference** — `http://localhost:8080/swagger-ui/index.html`
+- **Architecture** — [`docs/architecture.md`](./docs/architecture.md)
+- **API conventions** — [`docs/api-conventions.md`](./docs/api-conventions.md)
+- **Roadmap** — [`ROADMAP.md`](./ROADMAP.md)
+- **Contributing** — [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- **Security policy** — [`SECURITY.md`](./SECURITY.md)
+- **Code of conduct** — [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- **v1 archival** — [`docs/v1-archival.md`](./docs/v1-archival.md)
 
 ## License
 
