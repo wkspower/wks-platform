@@ -1,11 +1,13 @@
 package com.wkspower.platform.architecture;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.library.Architectures;
+import jakarta.persistence.Entity;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -92,6 +94,34 @@ class ArchitectureTest {
         .because(
             "Domain is framework-free. Covered by the blanket rule but made explicit here so a "
                 + "regression surfaces a clearer failure message.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void domainDoesNotDependOnSpringdocOrSwagger() {
+    noClasses()
+        .that()
+        .resideInAPackage("..domain..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("org.springdoc..", "io.swagger..")
+        .because(
+            "OpenAPI / Swagger annotations are a transport concern and belong in api/ controllers "
+                + "and infrastructure/config. Domain stays framework-free — Story 1.4 AC12.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void jpaEntitiesLiveOnlyInPersistenceEntityPackage() {
+    classes()
+        .that()
+        .areAnnotatedWith(Entity.class)
+        .should()
+        .resideInAPackage("..infrastructure.persistence.entity..")
+        .because(
+            "@Entity classes (and therefore BaseJpaEntity subclasses) must stay inside the "
+                + "persistence-entity package so the hexagonal boundary between domain and JPA "
+                + "remains honest — Story 1.4 AC12.")
         .check(CLASSES);
   }
 

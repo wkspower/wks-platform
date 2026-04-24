@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -77,5 +78,19 @@ class GlobalExceptionHandlerTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().error().code()).isEqualTo("WKS-API-001");
     assertThat(response.getBody().error().field()).isEqualTo("email");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void notFoundExceptionMapsTo404WithWksApi404() {
+    ResponseEntity<ApiResponse<Void>> response =
+        handler.handleNotFound(new WksNotFoundException("user xyz not found"));
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().error().code()).isEqualTo("WKS-API-404");
+    assertThat(response.getBody().error().message()).isEqualTo("user xyz not found");
+    assertThat(response.getBody().error().field()).isNull();
+    assertThat(response.getBody().data()).isNull();
   }
 }

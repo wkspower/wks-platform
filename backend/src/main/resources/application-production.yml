@@ -14,6 +14,11 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  flyway:
+    # Dialect-specific layout (Story 1.4): `common/` runs on every profile; `postgresql/` is the
+    # Postgres-specific slot. Keeps H2-only scripts out of the production container entirely.
+    locations: classpath:db/migration/common,classpath:db/migration/postgresql
+
 wks:
   locale: ${WKS_LOCALE:en-IN}
   cors:
@@ -21,6 +26,15 @@ wks:
   storage:
     endpoint: ${WKS_STORAGE_ENDPOINT:}
     key: ${WKS_STORAGE_KEY:}
+
+# OpenAPI / Swagger UI — disabled in production by default. Set WKS_OPENAPI_ENABLED=true to opt
+# in (SecurityConfig reads the same env var to permit the paths). Unauthenticated
+# `/v3/api-docs` in production is a recurring CVE vector.
+springdoc:
+  api-docs:
+    enabled: ${WKS_OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${WKS_OPENAPI_ENABLED:false}
 
 logging:
   level:

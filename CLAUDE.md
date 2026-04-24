@@ -266,3 +266,30 @@ Rules added for future agents:
   QueryClientProvider + auth-store seeding.
 - **Self-hosted fonts only.** No `googleapis.com` / `gstatic.com` in
   `index.html` or `index.css` — guarded by `styles/fonts.test.ts`.
+
+
+## Flyway conventions
+
+Migrations live under `backend/src/main/resources/db/migration/` and are split by dialect:
+
+```
+db/migration/
+├── common/         — runs on every profile (dialect-portable SQL only)
+├── h2/             — dev profile only (H2-specific variants)
+└── postgresql/     — production profile only (Postgres-specific variants)
+```
+
+`spring.flyway.locations` picks the right pair per profile:
+
+- Dev (`application.yml`): `classpath:db/migration/common,classpath:db/migration/h2`
+- Production (`application-production.yml`): `classpath:db/migration/common,classpath:db/migration/postgresql`
+
+**Rules**:
+
+- **Append-only.** Never edit a committed migration — add a new `V{YYYYMMDD}{seq}__…sql` file. The numeric date is lexicographic and avoids conflicts.
+- **No conditional SQL.** Don't branch on `CURRENT_SCHEMA` or database name inside a script — split into dialect folders instead. Conditional SQL is how the lowercase-identifier bug bites.
+- **Default location: `common/`.** Use dialect folders only when one database needs a genuine variant (e.g. `UUID` type, `CITEXT`, native JSON operators).
+- **`ALTER TABLE … ADD COLUMN IF NOT EXISTS`** is portable across H2 (≥ 1.4) and Postgres (≥ 9.6) — prefer it when adding columns.
+- **Identifiers stay lowercase.** H2 upper-cases unquoted identifiers by default; mixing cases is the fastest way to hit a "relation does not exist" surprise under Postgres. Keep `users`, `user_roles`, `password_hash` — not `Users`, `UserRoles`.
+
+Example: a dialect-portable audit-column addition belongs in `common/`; a Postgres-specific `CREATE EXTENSION pg_trgm` belongs in `postgresql/`.

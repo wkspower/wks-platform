@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -64,8 +65,13 @@ public class SecurityConfig {
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
       CorsConfigurationSource corsConfigurationSource,
-      WksAuthenticationEntryPoint authenticationEntryPoint)
+      WksAuthenticationEntryPoint authenticationEntryPoint,
+      Environment environment,
+      @Value("${WKS_OPENAPI_ENABLED:false}") boolean openApiEnabledInProduction)
       throws Exception {
+    boolean production = environment.acceptsProfiles(Profiles.of("production"));
+    boolean exposeOpenApi = !production || openApiEnabledInProduction;
+
     return http.cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -74,17 +80,27 @@ public class SecurityConfig {
         .logout(logout -> logout.disable())
         .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
         .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers(HttpMethod.OPTIONS, "/**")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/health")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/logout")
-                    .permitAll()
-                    .requestMatchers("/api/**")
-                    .authenticated()
-                    .anyRequest()
-                    .permitAll())
+            auth -> {
+              auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                  .permitAll()
+                  .requestMatchers(HttpMethod.GET, "/api/health")
+                  .permitAll()
+                  .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/logout")
+                  .permitAll();
+              if (exposeOpenApi) {
+                // OpenAPI / Swagger UI — always open under dev; under production only when the
+                // WKS_OPENAPI_ENABLED env var is set. Default production behaviour: springdoc is
+                // disabled in application-production.yml so the paths 404 anyway.
+                auth.requestMatchers(
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs.yaml",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html")
+                    .permitAll();
+              }
+              auth.requestMatchers("/api/**").authenticated().anyRequest().permitAll();
+            })
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

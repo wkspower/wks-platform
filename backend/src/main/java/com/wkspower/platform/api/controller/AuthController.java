@@ -9,6 +9,10 @@ import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.security.JwtTokenProvider;
 import com.wkspower.platform.security.SecurityConfig.ProductionProfile;
 import com.wkspower.platform.security.WksUserPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -52,6 +56,22 @@ public class AuthController {
   }
 
   @PostMapping("/login")
+  @Operation(
+      summary = "Log in",
+      description =
+          "Exchanges email + password for a WKS_SESSION cookie (HttpOnly, SameSite=Lax). Sets the "
+              + "cookie on 200; clients should rely on it for subsequent calls.",
+      responses = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Authenticated",
+            content = @Content(schema = @Schema(implementation = AuthUserDto.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Invalid email or password",
+            content = @Content)
+      })
+  @SecurityRequirements // login is the entry point — no existing auth needed
   // TODO: rate-limit (Phase 1) — tracked in Story 1.2 PR (link in story 1-2 review findings); JWT
   // in HttpOnly cookie + SameSite=Lax mitigates the cross-site abuse surface; brute-force
   // throttling and Argon2 CPU-DoS protection come with admin controls.
@@ -81,6 +101,19 @@ public class AuthController {
   }
 
   @GetMapping("/me")
+  @Operation(
+      summary = "Current user",
+      description = "Returns the authenticated user extracted from WKS_SESSION.",
+      responses = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Authenticated caller",
+            content = @Content(schema = @Schema(implementation = AuthUserDto.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "No session or expired token",
+            content = @Content)
+      })
   public ApiResponse<AuthUserDto> currentUser() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !(auth.getPrincipal() instanceof WksUserPrincipal principal)) {
@@ -94,6 +127,16 @@ public class AuthController {
   }
 
   @PostMapping("/logout")
+  @Operation(
+      summary = "Log out",
+      description = "Clears the WKS_SESSION cookie. Always 204 regardless of prior auth state.",
+      responses = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "204",
+            description = "Cookie cleared",
+            content = @Content)
+      })
+  @SecurityRequirements // logout works whether the caller was authenticated or not
   public ResponseEntity<Void> logout(HttpServletResponse response) {
     ResponseCookie expired = sessionCookie("", 0);
     response.addHeader(HttpHeaders.SET_COOKIE, expired.toString());
