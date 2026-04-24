@@ -93,6 +93,29 @@ return PageMetaBuilder.paged(page, MyMapper::toDto);
 Codes are defined once in `domain/exception/ErrorCode.java`. Wire strings are part of the public
 contract — never renumber or reuse a code once shipped.
 
+### Config validation codes (WKS-CFG-001..099)
+
+Case-type YAML validation (Story 2.1). Every entry carries `field` (dotted JSON-Pointer-flavour
+path — e.g. `fields[2].type`, `roles[0].permissions[1]`, 0-based array indices) and `line`
+(1-based YAML line number when derivable). Collected all at once; the validator never fails on
+first error.
+
+| Code          | HTTP | Reason                                                                                 |
+| ------------- | ---- | -------------------------------------------------------------------------------------- |
+| `WKS-CFG-001` | 422  | Required key missing (top-level or nested)                                             |
+| `WKS-CFG-002` | 422  | Invalid field `type` — not one of `text\|number\|date\|select\|checkbox\|textarea\|file` |
+| `WKS-CFG-003` | 422  | Duplicate id (field / status / role / listColumn)                                      |
+| `WKS-CFG-004` | 422  | `fields.length > 50` (or `roles > 20`, `permissions per role > 10`, `options > 50`)    |
+| `WKS-CFG-005` | 422  | `listColumns.length > 12` OR references unknown field id / system column               |
+| `WKS-CFG-006` | 422  | `statuses.length > 10`                                                                 |
+| `WKS-CFG-007` | 422  | Any `displayName` exceeds 40 characters                                                |
+| `WKS-CFG-008` | 422  | Unknown enum literal (status color, role permission verb)                              |
+| `WKS-CFG-009` | 422  | Malformed id — fails `[a-z][a-z0-9-]{1,62}` (field ids also accept `_`)                |
+| `WKS-CFG-011` | 422  | Registry rejected `replace` — incoming version older than registered (not validator)   |
+| `WKS-CFG-099` | 422  | YAML parse / I/O failure (catastrophic)                                                |
+
+Codes `010` and `012..021` are reserved for Story 2.2 (BPMN validation).
+
 ## Interactive docs
 
 `GET /v3/api-docs` returns the OpenAPI 3 JSON; Swagger UI lives at `GET /swagger-ui/index.html`.

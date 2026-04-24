@@ -23,4 +23,8 @@ public record ErrorDetail(String code, String message, String field, Integer lin
   public static ErrorDetail ofField(String code, String message, String field) {
     return new ErrorDetail(code, message, field, null);
   }
+
+  public static ErrorDetail ofFieldLine(String code, String message, String field, Integer line) {
+    return new ErrorDetail(code, message, field, line);
+  }
 }

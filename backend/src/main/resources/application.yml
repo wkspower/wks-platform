@@ -52,6 +52,13 @@ wks:
     ttl-hours: ${WKS_JWT_TTL_HOURS:8}
   cors:
     origins: ${WKS_CORS_ORIGINS:http://localhost:5173}
+  case-types:
+    # Directory scanned on startup (Story 2.1). Valid YAMLs register; invalid ones log a WARN
+    # and are skipped. In container the default resolves to /app/case-types/.
+    dir: ${WKS_CASE_TYPES_DIR:./case-types/}
+    # Default: boot with the registered subset. Set to true for fail-fast in CI or strict
+    # production rollouts.
+    fail-on-invalid: ${WKS_CASE_TYPES_FAIL_ON_INVALID:false}
 
 logging:
   level:

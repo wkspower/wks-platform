@@ -100,6 +100,17 @@
             <artifactId>cibseven-bpm-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- YAML parsing (Story 2.1 — case-type configuration). BOM-managed version. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <!-- Record deserialisation — register explicitly on the YAMLMapper (not auto-picked). -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-parameter-names</artifactId>
+        </dependency>
+
         <!-- Structured JSON logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -152,6 +163,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- JSON Schema Draft 2020-12 validator — Story 2.1 schema round-trip tests only.
+             Do NOT move to main scope; the generator produces Schemas, it does not validate. -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

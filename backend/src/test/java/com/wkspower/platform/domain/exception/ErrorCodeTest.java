@@ -33,6 +33,31 @@ class ErrorCodeTest {
   }
 
   @Test
+  void caseTypeValidationBandIsPopulated() {
+    // Story 2.1 must add the 001..009 + 099 band. Guard so future edits can't silently
+    // drop a code and pass the uniqueness check.
+    var cfgCodes =
+        Arrays.stream(ErrorCode.values())
+            .map(ErrorCode::wire)
+            .filter(w -> w.startsWith("WKS-CFG-"))
+            .collect(Collectors.toSet());
+    assertThat(cfgCodes)
+        .as("Story 2.1 introduces 001..009 and 099 in the WKS-CFG band")
+        .contains(
+            "WKS-CFG-001",
+            "WKS-CFG-002",
+            "WKS-CFG-003",
+            "WKS-CFG-004",
+            "WKS-CFG-005",
+            "WKS-CFG-006",
+            "WKS-CFG-007",
+            "WKS-CFG-008",
+            "WKS-CFG-009",
+            "WKS-CFG-011",
+            "WKS-CFG-099");
+  }
+
+  @Test
   void wireStringsFollowWksTripleHyphenFormat() {
     for (ErrorCode code : ErrorCode.values()) {
       assertThat(code.wire())
