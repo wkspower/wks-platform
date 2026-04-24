@@ -3,8 +3,8 @@ name: CI
 on:
   pull_request:
   push:
-    # v2-develop is the active trunk for v2 work; develop stays frozen at
-    # v1-final until Victor decides to merge v2 in.
+    # v2-develop is the active trunk for v2 work; develop stays frozen
+    # at v1-final until v2 is merged in.
     branches: [v2-develop, develop]
 
 jobs:

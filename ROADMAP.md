@@ -69,8 +69,7 @@ Grouped roughly in the order of shipping, not a commitment:
   follow releases.
 - **Watch this file** — it moves entries from _Next_ to _Shipped_ as
   each milestone closes.
-- **Follow [Victor on LinkedIn](https://www.linkedin.com/in/victorhugof/)**
-  for milestone announcements.
+- **Watch the repository's Releases page** for milestone announcements.
 
 ## Pre-1.0 caveat
 

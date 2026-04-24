@@ -94,8 +94,7 @@ split-pane workspace. That milestone is the first evaluable build.
 **When can I try the 30-minute demo?** After the case-lifecycle
 milestone ships. The
 [public roadmap](./ROADMAP.md) tracks shipped vs. next vs. later —
-watch this README or follow
-[Victor on LinkedIn](https://www.linkedin.com/in/victorhugof/) for the
+watch this README or the repository's Releases page for the
 announcement.
 
 ## Architecture
