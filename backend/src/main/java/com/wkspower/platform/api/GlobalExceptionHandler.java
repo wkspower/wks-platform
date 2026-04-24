@@ -2,8 +2,12 @@ package com.wkspower.platform.api;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.ErrorPayload;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
+import com.wkspower.platform.domain.exception.WksConfigException;
+import com.wkspower.platform.domain.exception.WksException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +35,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   static final String MDC_KEY = "wksErrorCode";
-  static final String CODE_INTERNAL = "WKS-RTM-500";
-  static final String CODE_JSON = "WKS-API-002";
+  static final String CODE_INTERNAL = ErrorCode.WKS_RTM_500.wire();
+  static final String CODE_JSON = ErrorCode.WKS_API_002.wire();
 
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
@@ -60,6 +64,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
   }
 
+  @ExceptionHandler(WksConfigException.class)
+  public ResponseEntity<ApiResponse<Void>> handleConfig(WksConfigException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Configuration invalid: {} ({} error(s))", ex.getCode(), ex.getErrors().size());
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+          .body(
+              ApiResponse.error(
+                  ErrorPayload.ofAggregate(ex.getCode(), ex.getMessage(), ex.getErrors())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @ExceptionHandler(WksNotFoundException.class)
+  public ResponseEntity<ApiResponse<Void>> handleNotFound(WksNotFoundException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Resource not found: {}", ex.getCode());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
   @ExceptionHandler(WksValidationException.class)
   public ResponseEntity<ApiResponse<Void>> handleDomainValidation(WksValidationException ex) {
     MDC.put(MDC_KEY, ex.getCode());
@@ -80,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       org.springframework.http.HttpHeaders headers,
       HttpStatusCode status,
       WebRequest request) {
-    String code = WksValidationException.CODE;
+    String code = ErrorCode.WKS_API_001.wire();
     MDC.put(MDC_KEY, code);
     try {
       String field =
@@ -110,6 +140,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       log.warn("Malformed JSON body: {}", CODE_JSON);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.error(ErrorPayload.of(CODE_JSON, "Malformed JSON body")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  /**
+   * Fallback for any {@link WksException} subclass without a dedicated handler. Preserves the
+   * exception's wire code (never collapses to {@code WKS-RTM-500}) and defaults the status to 500 —
+   * any new subclass that needs a different status must add a more specific
+   * {@code @ExceptionHandler} above this one.
+   */
+  @ExceptionHandler(WksException.class)
+  public ResponseEntity<ApiResponse<Void>> handleWks(WksException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.error("Unhandled WksException subtype (defaulting to 500): {}", ex.getCode(), ex);
+      return ResponseEntity.internalServerError()
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
     } finally {
       MDC.remove(MDC_KEY);
     }

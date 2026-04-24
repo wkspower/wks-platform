@@ -1,6 +1,7 @@
 package com.wkspower.platform.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,7 +45,7 @@ public class WksAuthenticationEntryPoint implements AuthenticationEntryPoint {
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
     Map<String, Object> error = new LinkedHashMap<>();
-    error.put("code", WksAuthenticationException.CODE);
+    error.put("code", ErrorCode.WKS_API_401.wire());
     error.put("message", WksAuthenticationException.DEFAULT_MESSAGE);
     error.put("field", null);
     Map<String, Object> body = new LinkedHashMap<>();

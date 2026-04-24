@@ -32,7 +32,9 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-    locations: classpath:db/migration
+    # Dialect-specific layout (Story 1.4): `common/` always runs; `h2/` is dev-only. Postgres
+    # scripts live in `postgresql/` and are activated by application-production.yml, never here.
+    locations: classpath:db/migration/common,classpath:db/migration/h2
 
 # Belt-and-suspenders: @SpringBootApplication(exclude = CamundaBpmAutoConfiguration.class)
 # already disables the engine; this prevents any accidental re-enablement via property scan.

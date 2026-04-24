@@ -2,6 +2,10 @@ package com.wkspower.platform.api.controller;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.HealthDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import org.springframework.beans.factory.ObjectProvider;
@@ -35,6 +39,17 @@ public class HealthController {
   }
 
   @GetMapping("/health")
+  @Operation(
+      summary = "Liveness probe",
+      description =
+          "Returns backend version and process uptime. Unauthenticated — safe for load balancers.",
+      responses = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Backend is up",
+            content = @Content(schema = @Schema(implementation = HealthDto.class)))
+      })
+  @SecurityRequirements // public — no auth required
   public ApiResponse<HealthDto> health() {
     String version = buildProperties != null ? buildProperties.getVersion() : "0.0.0-unknown";
     String uptime = Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()).toString();

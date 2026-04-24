@@ -49,8 +49,11 @@ docker compose up --build
 ```
 
 Open `http://localhost:8080/`. The REST health probe is at
-`http://localhost:8080/api/health`. Cold boot after the first image build
-takes under two minutes on a 16 GB SSD dev machine.
+`http://localhost:8080/api/health`. Interactive API docs (Swagger UI)
+live at `http://localhost:8080/swagger-ui/index.html`; see
+[`docs/api-conventions.md`](docs/api-conventions.md) for envelope,
+pagination, and error-code conventions. Cold boot after the first
+image build takes under two minutes on a 16 GB SSD dev machine.
 
 ### First-boot admin credentials
 

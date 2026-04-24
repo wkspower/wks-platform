@@ -6,14 +6,18 @@ package com.wkspower.platform.domain.exception;
  */
 public class WksAuthenticationException extends WksException {
 
-  public static final String CODE = "WKS-API-401";
+  /**
+   * @deprecated prefer {@link ErrorCode#WKS_API_401}; kept for downstream call-sites.
+   */
+  @Deprecated public static final String CODE = ErrorCode.WKS_API_401.wire();
+
   public static final String DEFAULT_MESSAGE = "Invalid email or password";
 
   public WksAuthenticationException() {
-    super(CODE, DEFAULT_MESSAGE);
+    super(ErrorCode.WKS_API_401, DEFAULT_MESSAGE);
   }
 
   public WksAuthenticationException(String message) {
-    super(CODE, message);
+    super(ErrorCode.WKS_API_401, message);
   }
 }
