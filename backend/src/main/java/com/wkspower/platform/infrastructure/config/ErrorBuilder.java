@@ -21,13 +21,4 @@ final class ErrorBuilder {
     Integer line = lines.lineOfOrNearest(field).orElse(null);
     return ErrorDetail.ofFieldLine(code.wire(), message, field, line);
   }
-
-  ErrorDetail errorAt(ErrorCode code, String message, String field, String lineLookupField) {
-    Integer line = lines.lineOfOrNearest(lineLookupField).orElse(null);
-    return ErrorDetail.ofFieldLine(code.wire(), message, field, line);
-  }
-
-  ErrorDetail errorNoLine(ErrorCode code, String message, String field) {
-    return ErrorDetail.ofField(code.wire(), message, field);
-  }
 }

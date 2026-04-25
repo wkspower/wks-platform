@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldOption;
-import com.wkspower.platform.domain.config.model.FieldType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -84,12 +83,8 @@ public class JsonSchemaGenerator {
         node.put("type", "string");
         node.put("format", "uri");
       }
+      default -> throw new IllegalStateException("Unsupported field type: " + f.type());
     }
     return node;
-  }
-
-  /** Allow other components (or tests) to reuse a matching node factory. */
-  public static FieldType describe(FieldDefinition f) {
-    return f.type();
   }
 }

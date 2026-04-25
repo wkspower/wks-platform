@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,37 +65,49 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
    */
   @Override
   public RegistrationResult register(CaseTypeConfig config) {
+    Objects.requireNonNull(config, "config");
     Registered incoming = new Registered(config, schemaGenerator.generate(config));
-    Registered existing = byId.get(config.id());
+    AtomicReference<RegistrationResult> outcome = new AtomicReference<>();
 
-    if (existing == null) {
-      Registered prior = byId.putIfAbsent(config.id(), incoming);
-      if (prior == null) {
-        return RegistrationResult.registered();
-      }
-      // Lost the race — fall through to version check against whatever landed.
-      existing = prior;
-    }
+    byId.compute(
+        config.id(),
+        (k, existing) -> {
+          if (existing == null) {
+            outcome.set(RegistrationResult.registered());
+            return incoming;
+          }
+          if (config.version() == existing.config.version()) {
+            outcome.set(RegistrationResult.idempotent());
+            return existing;
+          }
+          if (config.version() < existing.config.version()) {
+            outcome.set(
+                RegistrationResult.rejectedOlderVersion(
+                    ErrorDetail.ofField(
+                        ErrorCode.WKS_CFG_011.wire(),
+                        "Incoming version "
+                            + config.version()
+                            + " is older than registered version "
+                            + existing.config.version()
+                            + " for id '"
+                            + config.id()
+                            + "'",
+                        "version")));
+            return existing;
+          }
+          outcome.set(RegistrationResult.replaced());
+          return incoming;
+        });
+    return outcome.get();
+  }
 
-    if (config.version() == existing.config.version()) {
-      return RegistrationResult.idempotent();
-    }
-    if (config.version() < existing.config.version()) {
-      return RegistrationResult.rejectedOlderVersion(
-          ErrorDetail.ofField(
-              ErrorCode.WKS_CFG_011.wire(),
-              "Incoming version "
-                  + config.version()
-                  + " is older than registered version "
-                  + existing.config.version()
-                  + " for id '"
-                  + config.id()
-                  + "'",
-              "version"));
-    }
-    // Atomic swap at the key.
-    byId.put(config.id(), incoming);
-    return RegistrationResult.replaced();
+  /**
+   * Equivalent to {@link #register(CaseTypeConfig)} — exposed under the AC7 literal name {@code
+   * replace}. The version compare-and-swap semantics are identical: same-version is idempotent,
+   * lower-version is rejected with {@code WKS-CFG-011}.
+   */
+  public RegistrationResult replace(CaseTypeConfig config) {
+    return register(config);
   }
 
   /** Package-private removal — not part of the read port. */

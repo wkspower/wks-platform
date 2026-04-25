@@ -126,6 +126,56 @@ class CaseTypeRegistryTest {
         .isZero();
   }
 
+  @Test
+  void concurrentWritersDoNotDemoteVersion() throws Exception {
+    int writers = 4;
+    int perWriterMax = 50;
+    var start = new java.util.concurrent.CyclicBarrier(writers);
+    var pool = java.util.concurrent.Executors.newFixedThreadPool(writers);
+    try {
+      java.util.List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+      for (int t = 0; t < writers; t++) {
+        futures.add(
+            pool.submit(
+                () -> {
+                  try {
+                    start.await();
+                    for (int v = 1; v <= perWriterMax; v++) {
+                      registry.register(config("conc", v));
+                    }
+                  } catch (Exception e) {
+                    throw new RuntimeException(e);
+                  }
+                }));
+      }
+      for (var f : futures) {
+        f.get(5, java.util.concurrent.TimeUnit.SECONDS);
+      }
+    } finally {
+      pool.shutdown();
+      pool.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS);
+    }
+    assertThat(registry.find("conc").orElseThrow().version())
+        .as("final state must equal max version, no demotion under contention")
+        .isEqualTo(perWriterMax);
+  }
+
+  @Test
+  void registerRejectsNullConfig() {
+    org.junit.jupiter.api.Assertions.assertThrows(
+        NullPointerException.class, () -> registry.register(null));
+  }
+
+  @Test
+  void replaceIsAliasForRegister() {
+    var v1 = config("rep", 1);
+    assertThat(registry.replace(v1).outcome()).isEqualTo(RegistrationResult.Outcome.REGISTERED);
+    assertThat(registry.replace(config("rep", 2)).outcome())
+        .isEqualTo(RegistrationResult.Outcome.REPLACED);
+    assertThat(registry.replace(config("rep", 1)).outcome())
+        .isEqualTo(RegistrationResult.Outcome.REJECTED_OLDER_VERSION);
+  }
+
   private static CaseTypeConfig config(String id, int version) {
     return new CaseTypeConfig(
         id,

@@ -67,11 +67,16 @@ public class ConfigValidator {
               "displayName must be ≤ " + CaseTypeLimits.MAX_DISPLAY_NAME_CHARS + " characters",
               "displayName"));
     }
+    if (raw.description() != null && raw.description().length() > 400) {
+      errors.add(
+          eb.error(ErrorCode.WKS_CFG_007, "description must be ≤ 400 characters", "description"));
+    }
 
     List<FieldDefinition> fields = checkFields(raw.fields(), eb, errors);
     List<StatusDefinition> statuses = checkStatuses(raw.statuses(), eb, errors);
     List<RoleDefinition> roles = checkRoles(raw.roles(), eb, errors);
-    List<String> listColumns = checkListColumns(raw.listColumns(), fields, eb, errors);
+    List<String> listColumns =
+        checkListColumns(raw.listColumns(), fields, raw.fields() != null, eb, errors);
 
     if (!errors.isEmpty()) {
       return ValidationResult.invalid(errors);
@@ -95,7 +100,7 @@ public class ConfigValidator {
 
   private boolean checkRequiredString(
       String path, String value, ErrorBuilder eb, List<ErrorDetail> errors) {
-    if (value == null || value.isEmpty()) {
+    if (value == null || value.isBlank()) {
       errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: " + path, path));
       return false;
     }
@@ -107,7 +112,7 @@ public class ConfigValidator {
     if (value == null) {
       errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: " + path, path));
     } else if (value <= 0) {
-      errors.add(eb.error(ErrorCode.WKS_CFG_001, "version must be a positive integer", path));
+      errors.add(eb.error(ErrorCode.WKS_CFG_002, "version must be a positive integer", path));
     }
   }
 
@@ -152,13 +157,16 @@ public class ConfigValidator {
       boolean hasDn = checkRequiredString(base + ".displayName", f.displayName(), eb, errors);
       boolean hasType = checkRequiredString(base + ".type", f.type(), eb, errors);
 
+      boolean idOk = hasId;
       if (hasId && !CaseTypeLimits.FIELD_ID_PATTERN.matcher(f.id()).matches()) {
         errors.add(
             eb.error(
                 ErrorCode.WKS_CFG_009, "Field id must match [a-z][a-z0-9_-]{1,62}", base + ".id"));
+        idOk = false;
       }
       if (hasId && !seenIds.add(f.id())) {
         errors.add(eb.error(ErrorCode.WKS_CFG_003, "Duplicate field id: " + f.id(), base + ".id"));
+        idOk = false;
       }
       if (hasDn && f.displayName().length() > CaseTypeLimits.MAX_DISPLAY_NAME_CHARS) {
         errors.add(
@@ -186,14 +194,14 @@ public class ConfigValidator {
 
       List<FieldOption> opts = checkFieldOptions(f, ft, base, eb, errors);
 
-      if (hasId && hasDn && ft != null) {
+      if (idOk && hasDn && ft != null) {
         out.add(
             new FieldDefinition(
                 f.id(),
                 f.displayName(),
                 ft,
                 Boolean.TRUE.equals(f.required()),
-                f.order() == null ? i * 10 : f.order(),
+                f.order() == null ? Integer.MAX_VALUE : f.order(),
                 opts,
                 new FieldDefinition.TypeSlots(
                     f.minLength(),
@@ -242,12 +250,32 @@ public class ConfigValidator {
               base + ".options"));
     }
     List<FieldOption> out = new ArrayList<>();
+    Set<String> seenValues = new HashSet<>();
     for (int i = 0; i < raws.size(); i++) {
       RawCaseTypeConfig.RawOption o = raws.get(i);
       String opath = base + ".options[" + i + "]";
-      if (o == null || o.label() == null || o.value() == null) {
+      if (o == null) {
         errors.add(
             eb.error(ErrorCode.WKS_CFG_001, "option requires both 'label' and 'value'", opath));
+        continue;
+      }
+      boolean labelOk = o.label() != null && !o.label().isBlank();
+      boolean valueOk = o.value() != null && !o.value().isBlank();
+      if (!labelOk) {
+        errors.add(
+            eb.error(ErrorCode.WKS_CFG_001, "option label must not be blank", opath + ".label"));
+      }
+      if (!valueOk) {
+        errors.add(
+            eb.error(ErrorCode.WKS_CFG_001, "option value must not be blank", opath + ".value"));
+      }
+      if (!labelOk || !valueOk) {
+        continue;
+      }
+      if (!seenValues.add(o.value())) {
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_CFG_003, "Duplicate option value: " + o.value(), opath + ".value"));
         continue;
       }
       out.add(new FieldOption(o.label(), o.value()));
@@ -342,16 +370,19 @@ public class ConfigValidator {
         continue;
       }
       boolean hasName = checkRequiredString(base + ".name", r.name(), eb, errors);
+      boolean nameOk = hasName;
       if (hasName && !CaseTypeLimits.ID_PATTERN.matcher(r.name()).matches()) {
         errors.add(
             eb.error(
                 ErrorCode.WKS_CFG_009,
                 "Role name must match [a-z][a-z0-9-]{1,62}",
                 base + ".name"));
+        nameOk = false;
       }
       if (hasName && !seen.add(r.name())) {
         errors.add(
             eb.error(ErrorCode.WKS_CFG_003, "Duplicate role name: " + r.name(), base + ".name"));
+        nameOk = false;
       }
 
       List<String> rawPerms = r.permissions();
@@ -377,17 +408,22 @@ public class ConfigValidator {
           String v = rawPerms.get(j);
           var parsed = Permission.fromWire(v);
           if (parsed.isEmpty()) {
+            String allow =
+                java.util.Arrays.stream(Permission.values())
+                    .map(Permission::wire)
+                    .collect(java.util.stream.Collectors.joining("|"));
             errors.add(
                 eb.error(
                     ErrorCode.WKS_CFG_008,
-                    "Unknown permission '" + v + "'",
+                    "Unknown permission '" + v + "' — allowed: " + allow,
                     base + ".permissions[" + j + "]"));
           } else {
             perms.add(parsed.get());
           }
         }
       }
-      if (hasName && !perms.isEmpty()) {
+      boolean permsOk = rawPerms != null && !rawPerms.isEmpty() && perms.size() == rawPerms.size();
+      if (nameOk && permsOk) {
         out.add(new RoleDefinition(r.name(), perms));
       }
     }
@@ -395,7 +431,11 @@ public class ConfigValidator {
   }
 
   private List<String> checkListColumns(
-      List<String> raws, List<FieldDefinition> fields, ErrorBuilder eb, List<ErrorDetail> errors) {
+      List<String> raws,
+      List<FieldDefinition> fields,
+      boolean fieldsParentPresent,
+      ErrorBuilder eb,
+      List<ErrorDetail> errors) {
     if (raws == null || raws.isEmpty()) {
       errors.add(
           eb.error(ErrorCode.WKS_CFG_001, "Required key missing: listColumns", "listColumns"));
@@ -424,17 +464,24 @@ public class ConfigValidator {
         errors.add(eb.error(ErrorCode.WKS_CFG_001, "listColumn entry is empty", path));
         continue;
       }
+      boolean refOk = true;
       if (!seen.add(ref)) {
         errors.add(eb.error(ErrorCode.WKS_CFG_003, "Duplicate listColumn: " + ref, path));
+        refOk = false;
       }
-      if (!fieldIds.contains(ref) && !CaseTypeLimits.SYSTEM_LIST_COLUMNS.contains(ref)) {
+      if (fieldsParentPresent
+          && !fieldIds.contains(ref)
+          && !CaseTypeLimits.SYSTEM_LIST_COLUMNS.contains(ref)) {
         errors.add(
             eb.error(
                 ErrorCode.WKS_CFG_005,
                 "listColumn references unknown field id or system column: " + ref,
                 path));
+        refOk = false;
       }
-      out.add(ref);
+      if (refOk) {
+        out.add(ref);
+      }
     }
     return out;
   }

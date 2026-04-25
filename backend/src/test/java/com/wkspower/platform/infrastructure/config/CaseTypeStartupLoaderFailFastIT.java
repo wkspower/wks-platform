@@ -59,7 +59,7 @@ class CaseTypeStartupLoaderFailFastIT {
     try {
       SpringApplication.run(WksPlatformApplication.class, args).close();
       org.junit.jupiter.api.Assertions.fail("Expected fail-on-invalid to abort startup");
-    } catch (Exception e) {
+    } catch (ApplicationContextException | IllegalStateException e) {
       // Look for CaseTypesStartupException in the chain.
       Throwable cursor = e;
       boolean found = false;

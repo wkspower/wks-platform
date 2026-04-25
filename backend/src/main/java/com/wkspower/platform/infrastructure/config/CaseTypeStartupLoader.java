@@ -4,8 +4,10 @@ import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.service.ConfigService;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ public class CaseTypeStartupLoader {
 
   private final ConfigService configService;
   private final Path dir;
+  private final String dirSpec;
   private final boolean failOnInvalid;
 
   public CaseTypeStartupLoader(
@@ -38,12 +41,26 @@ public class CaseTypeStartupLoader {
       @Value("${wks.case-types.dir:./case-types/}") String dir,
       @Value("${wks.case-types.fail-on-invalid:false}") boolean failOnInvalid) {
     this.configService = configService;
-    this.dir = Path.of(dir).toAbsolutePath();
+    this.dirSpec = dir;
+    Path resolved;
+    try {
+      resolved = Path.of(dir).toAbsolutePath();
+    } catch (InvalidPathException e) {
+      resolved = null;
+    }
+    this.dir = resolved;
     this.failOnInvalid = failOnInvalid;
   }
 
   @EventListener(ApplicationReadyEvent.class)
   public void loadOnStartup() {
+    if (dir == null) {
+      log.atWarn()
+          .addKeyValue("wksErrorCode", "-")
+          .addKeyValue("dir", dirSpec)
+          .log("invalid case-types dir path; skipping");
+      return;
+    }
     if (!Files.isDirectory(dir)) {
       log.atInfo()
           .addKeyValue("wksErrorCode", "-")
@@ -62,7 +79,7 @@ public class CaseTypeStartupLoader {
           files
               .filter(Files::isRegularFile)
               .filter(CaseTypeStartupLoader::isYaml)
-              .sorted()
+              .sorted(Comparator.comparing(Path::toString))
               .toList();
 
       for (Path file : yamls) {
@@ -90,12 +107,17 @@ public class CaseTypeStartupLoader {
           .addKeyValue("dir", dir.toString())
           .log("case-types directory listing failed: {}", e.getMessage());
       skipped++;
+      if (failOnInvalid) {
+        throw new CaseTypesStartupException(
+            "Case-type startup failed in fail-on-invalid mode — directory listing failed: "
+                + e.getMessage());
+      }
     }
 
     log.atInfo()
-        .addKeyValue("wks.config.startup.registered", registered)
-        .addKeyValue("wks.config.startup.rejected", rejected)
-        .addKeyValue("wks.config.startup.skipped", skipped)
+        .addKeyValue("registered", registered)
+        .addKeyValue("rejected", rejected)
+        .addKeyValue("skipped", skipped)
         .log("wks.config.startup.summary");
 
     if (failOnInvalid && rejected > 0) {
@@ -108,7 +130,11 @@ public class CaseTypeStartupLoader {
   }
 
   private static boolean isYaml(Path p) {
-    String name = p.getFileName().toString().toLowerCase();
+    String fileName = p.getFileName().toString();
+    if (fileName.startsWith(".")) {
+      return false;
+    }
+    String name = fileName.toLowerCase();
     return name.endsWith(".yaml") || name.endsWith(".yml");
   }
 }

@@ -44,8 +44,8 @@ public class ConfigService {
   }
 
   /** Byte-driven variant — used by the admin deploy endpoint (Story 2.2). */
-  public ValidationResult validateAndRegister(String source, byte[] bytes) {
-    ValidationResult result = this.source.loadBytes(source, bytes);
+  public ValidationResult validateAndRegister(String sourceName, byte[] bytes) {
+    ValidationResult result = this.source.loadBytes(sourceName, bytes);
     if (result.isInvalid() || result.config().isEmpty()) {
       return result;
     }

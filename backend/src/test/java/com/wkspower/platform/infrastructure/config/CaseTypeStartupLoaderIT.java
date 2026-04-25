@@ -2,20 +2,17 @@ package com.wkspower.platform.infrastructure.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -32,6 +29,7 @@ import org.springframework.test.context.DynamicPropertySource;
  */
 @SpringBootTest
 @ActiveProfiles("dev")
+@ExtendWith(OutputCaptureExtension.class)
 class CaseTypeStartupLoaderIT {
 
   @TempDir static Path sharedDir;
@@ -47,20 +45,6 @@ class CaseTypeStartupLoaderIT {
 
   @Autowired CaseTypeReader registry;
 
-  private ListAppender<ILoggingEvent> appender;
-
-  @BeforeEach
-  void attachAppender() {
-    appender = new ListAppender<>();
-    appender.start();
-    ((Logger) LoggerFactory.getLogger(CaseTypeStartupLoader.class)).addAppender(appender);
-  }
-
-  @AfterEach
-  void detachAppender() {
-    ((Logger) LoggerFactory.getLogger(CaseTypeStartupLoader.class)).detachAppender(appender);
-  }
-
   @Test
   void onlyValidConfigsRegister() {
     assertThat(registry.all()).as("green YAML registers, red + malformed do not").hasSize(1);
@@ -69,14 +53,10 @@ class CaseTypeStartupLoaderIT {
   }
 
   @Test
-  void summaryLogLineIsEmitted() {
-    boolean summarySeen =
-        appender.list.stream().anyMatch(e -> e.getMessage().contains("wks.config.startup.summary"));
-    // Appender is attached after startup completes — we may miss the event; skip-if-empty rather
-    // than fail. The happy path assertion above proves registration.
-    if (!appender.list.isEmpty()) {
-      assertThat(summarySeen).isTrue();
-    }
+  void summaryLogLineIsEmitted(CapturedOutput output) {
+    assertThat(output.getAll())
+        .as("startup summary log line must land in stdout")
+        .contains("wks.config.startup.summary");
   }
 
   private static void writeFixtures(Path dir) throws IOException {
