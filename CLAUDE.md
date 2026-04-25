@@ -293,3 +293,15 @@ db/migration/
 - **Identifiers stay lowercase.** H2 upper-cases unquoted identifiers by default; mixing cases is the fastest way to hit a "relation does not exist" surprise under Postgres. Keep `users`, `user_roles`, `password_hash` — not `Users`, `UserRoles`.
 
 Example: a dialect-portable audit-column addition belongs in `common/`; a Postgres-specific `CREATE EXTENSION pg_trgm` belongs in `postgresql/`.
+
+## Case type configuration
+
+Case types are declared as YAML files in a directory mounted into the container. Story 2.1 ships the loader, multi-error validator, JSON Schema generator, and in-memory hot-reloadable registry; Story 2.2 adds the admin deploy endpoint.
+
+- **Directory**: `WKS_CASE_TYPES_DIR` env var; defaults to `./case-types/` — resolves to `/app/case-types/` in container, relative to `backend/` in local `./mvnw spring-boot:run`. See the canonical example in the Story 2.1 file (`_bmad-output/implementation-artifacts/2-1-*.md`).
+- **Startup scan**: on `ApplicationReadyEvent`, every `*.yaml|*.yml` in the directory is parsed, validated, and — on success — registered. Invalid files log one WARN per error (`wksErrorCode`, `file`, `errorField`, `line`) and are skipped; startup does not abort by default.
+- **Fail-fast mode**: `WKS_CASE_TYPES_FAIL_ON_INVALID=true` (or `wks.case-types.fail-on-invalid: true`) aborts the context when any file fails validation — use in strict CI or production rollouts. The context-failure exits the container non-zero.
+- **Hot reload contract**: file-driven on startup; programmatic via `ConfigService.validateAndRegister(Path)` — the admin deploy endpoint (Story 2.2) calls the same method. Higher `version` in a replace swaps atomically; same version is idempotent; lower version is rejected with `WKS-CFG-011`.
+- **Validation philosophy**: collect-all. The validator returns a `ValidationResult` with every violation — never throws, never stops at the first failure. Reviewers grep for early `return` / `throw` inside validator methods during review.
+- **Error taxonomy**: `WKS-CFG-001..099` (see `docs/api-conventions.md`). `field` paths are JSON-Pointer-flavour minus the leading slash (`fields[2].type`); `line` is 1-based.
+- **Not in scope for 2.1**: `POST /api/admin/deploy` (Story 2.2), BPMN validation (`WKS-CFG-010..021`, Story 2.2), SSE deploy events (Stories 2.2 + 4.3), frontend Schema consumption (Stories 2.5 / 2.7), role enforcement (Story 5.2).

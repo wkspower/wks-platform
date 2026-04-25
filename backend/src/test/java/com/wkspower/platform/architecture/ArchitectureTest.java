@@ -126,6 +126,53 @@ class ArchitectureTest {
   }
 
   @Test
+  void caseTypeDomainDoesNotDependOnYamlOrJacksonOrNetworknt() {
+    // AC11 scope: the case-type config subtree (records + service + ports) must not import
+    // YAML, Jackson databind, or networknt. ErrorDetail's @JsonInclude annotation is the
+    // pre-existing 1.4 exception — deliberately limited by package.
+    noClasses()
+        .that()
+        .resideInAnyPackage("..domain.config..", "..domain.service..", "..domain.port..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "org.yaml..",
+            "com.fasterxml.jackson.databind..",
+            "com.fasterxml.jackson.dataformat..",
+            "com.networknt..")
+        .because(
+            "Case-type config records + service + ports stay pure Java. YAML parsing, JSON "
+                + "Schema trees, and JSON-Schema validation are infrastructure concerns. "
+                + "Story 2.1 AC11.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void caseTypeConfigPlumbingLivesInInfrastructureConfig() {
+    classes()
+        .that()
+        .haveSimpleName("CaseTypeYamlLoader")
+        .or()
+        .haveSimpleName("ConfigValidator")
+        .or()
+        .haveSimpleName("JsonSchemaGenerator")
+        .or()
+        .haveSimpleName("CaseTypeRegistry")
+        .or()
+        .haveSimpleName("CaseTypeStartupLoader")
+        .or()
+        .haveSimpleName("YamlLineIndex")
+        .or()
+        .haveSimpleName("RawCaseTypeConfig")
+        .should()
+        .resideInAPackage("..infrastructure.config..")
+        .because(
+            "Story 2.1 AC11: YAML/Jackson/networknt mechanics must not leak out of "
+                + "infrastructure/config/.")
+        .check(CLASSES);
+  }
+
+  @Test
   void hexagonalLayering() {
     Architectures.layeredArchitecture()
         .consideringAllDependencies()
