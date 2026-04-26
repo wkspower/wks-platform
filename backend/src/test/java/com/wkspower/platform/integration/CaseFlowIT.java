@@ -54,7 +54,7 @@ class CaseFlowIT {
   // Uses the seeded `admin` role (V202604170001) — the only role that exists out of the box. The
   // case-type below grants admin every verb so the full happy + conflict paths can run end-to-end.
   private static final String EMAIL = "caseflow-admin@wkspower.local";
-  private static final String PASSWORD = "caseflow-pw";
+  private static final String PASSWORD = "admin";
   private static final String CASE_TYPE_ID = "loan-application";
   private static final String PROCESS_KEY = "loan-application-flow";
 

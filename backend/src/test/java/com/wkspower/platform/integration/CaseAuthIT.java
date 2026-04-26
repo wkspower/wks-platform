@@ -63,7 +63,7 @@ import org.springframework.test.context.TestPropertySource;
 class CaseAuthIT {
 
   private static final String EMAIL = "auth-it-admin@wkspower.local";
-  private static final String PASSWORD = "pw-auth-it";
+  private static final String PASSWORD = "admin";
   private static final String CASE_TYPE_ID = "loan-application";
 
   @Autowired private TestRestTemplate rest;
