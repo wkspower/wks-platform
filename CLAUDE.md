@@ -85,10 +85,12 @@ wks-platform/
 
 ## Error Code Taxonomy
 
-- `WKS-CFG-001–099`: Configuration validation
-- `WKS-CFG-100–199`: BPMN validation
-- `WKS-CFG-200–299`: Template validation
-- `WKS-API-001–099`: API input validation
+- `WKS-CFG-001–009, 011, 099`: Case-type YAML validation (Story 2.1)
+- `WKS-CFG-010, 012, 020, 021`: BPMN validation (Story 2.2 — variance from `architecture.md`
+  §Decision 14 which lists `100..199`; we use the contiguous `010..099` band per the epic AC, so
+  all deploy-time validation codes stay below 100. Architecture doc gets a follow-up patch.)
+- `WKS-CFG-200–299`: Template validation (reserved)
+- `WKS-API-001–099`: API input validation (`WKS-API-413` for multipart cap, Story 2.2)
 - `WKS-RTM-001–099`: Runtime errors
 - Error structure: `{ code, message, field, line }`
 - Collection pattern: collect ALL errors, never fail-on-first
@@ -305,3 +307,20 @@ Case types are declared as YAML files in a directory mounted into the container.
 - **Validation philosophy**: collect-all. The validator returns a `ValidationResult` with every violation — never throws, never stops at the first failure. Reviewers grep for early `return` / `throw` inside validator methods during review.
 - **Error taxonomy**: `WKS-CFG-001..099` (see `docs/api-conventions.md`). `field` paths are JSON-Pointer-flavour minus the leading slash (`fields[2].type`); `line` is 1-based.
 - **Not in scope for 2.1**: `POST /api/admin/deploy` (Story 2.2), BPMN validation (`WKS-CFG-010..021`, Story 2.2), SSE deploy events (Stories 2.2 + 4.3), frontend Schema consumption (Stories 2.5 / 2.7), role enforcement (Story 5.2).
+- **BPMN deploy (Story 2.2)**: `workflow.bpmn` is a path **relative to the YAML file's parent
+  directory**. `POST /api/admin/deploy` is a multipart endpoint with two parts (`caseType`,
+  `bpmn`), each capped at 1 MB; `ROLE_ADMIN` required; success returns `{caseTypeId, version,
+  deploymentId, processDefinitionId, schemaUri}`. Every `bpmn:userTask` must declare exactly one
+  archetype (`draft_section` / `submit_for_processing` / `business_final`) via
+  `<camunda:properties><camunda:property name="archetype" value="..."/></camunda:properties>`.
+  `enableDuplicateFiltering(true)` makes redeploy of identical bytes a no-op; whitespace-only
+  edits trip a new engine version (by design — engine hashes resource bytes).
+
+## Change Log
+
+- 2026-04-26 — Story 2.2: BPMN engine activated (embedded), `POST /api/admin/deploy` shipped,
+  BPMN validator codes `WKS-CFG-010/012/020/021/022` added. The `WKS-CFG-010..099` band is now
+  the shipped home for BPMN validation. `architecture.md` §Decision 14 still records the
+  earlier `100..199` allocation; that document gets a follow-up patch (logged as a deferred
+  item against Story 2.2 code review) — the wire contract here in CLAUDE.md and
+  `docs/api-conventions.md` is the source of truth for shipped codes.

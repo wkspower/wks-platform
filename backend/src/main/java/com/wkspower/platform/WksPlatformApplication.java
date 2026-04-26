@@ -6,16 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Entry point.
  *
- * <p>CIB seven auto-configuration is excluded in Story 1.1; the engine is activated in Story 2.2
- * once schema and case-type configuration exist. See also {@code camunda.bpm.enabled: false} in
- * application.yml (belt-and-suspenders).
+ * <p>The embedded BPMN engine is active (Story 2.2). Activation is configuration-only — see {@code
+ * camunda.bpm.enabled: true} in {@code application.yml} and the {@link
+ * com.wkspower.platform.engine} adapter package.
  *
- * <p>The auto-config is referenced by <b>string name</b> rather than class literal so this
- * bootstrap file does not import {@code org.cibseven.*} — that keeps the ArchUnit rule ({@code
- * onlyEngineImportsCibSeven}) strict without exceptions.
+ * <p>The bootstrap deliberately stays free of any engine-SDK import so the ArchUnit {@code
+ * workflowEngineImportsLiveOnlyInEnginePackage} rule keeps its no-exceptions stance.
  */
-@SpringBootApplication(
-    excludeName = {"org.cibseven.bpm.spring.boot.starter.CamundaBpmAutoConfiguration"})
+@SpringBootApplication
 public class WksPlatformApplication {
 
   public static void main(String[] args) {

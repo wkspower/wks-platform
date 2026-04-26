@@ -54,6 +54,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
 
   private static final Pattern ORIGIN_PATTERN = Pattern.compile("^https?://[^/\\s*]+$");

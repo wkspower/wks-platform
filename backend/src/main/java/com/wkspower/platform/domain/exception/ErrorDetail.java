@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * producers ({@code WksConfigException}) need to reference it and the hexagonal layering rule in
  * {@code ArchitectureTest} forbids domain→api imports. The transport ({@link
  * com.wkspower.platform.api.dto.ErrorPayload}) reads it from here. The Jackson annotation is a
- * permitted dependency — domain is forbidden from importing Spring / JPA / CIB seven only.
+ * permitted dependency — domain is forbidden from importing Spring, JPA, and the BPMN engine SDK
+ * only.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorDetail(String code, String message, String field, Integer line) {

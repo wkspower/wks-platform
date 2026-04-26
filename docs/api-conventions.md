@@ -87,6 +87,7 @@ return PageMetaBuilder.paged(page, MyMapper::toDto);
 | `WKS-API-401` | 401  | Authentication failed                                                    |
 | `WKS-API-403` | 403  | Forbidden                                                                |
 | `WKS-API-404` | 404  | Resource not found                                                       |
+| `WKS-API-413` | 413  | Multipart upload exceeds the 1 MB per-part / 2 MB per-request cap        |
 | `WKS-CFG-000` | 422  | Multi-error config aggregate (umbrella for `WksConfigException`)         |
 | `WKS-RTM-500` | 500  | Uncaught exception                                                       |
 
@@ -114,7 +115,26 @@ first error.
 | `WKS-CFG-011` | 422  | Registry rejected `replace` — incoming version older than registered (not validator)   |
 | `WKS-CFG-099` | 422  | YAML parse / I/O failure (catastrophic)                                                |
 
-Codes `010` and `012..021` are reserved for Story 2.2 (BPMN validation).
+### BPMN validation codes (WKS-CFG-010..099)
+
+BPMN parse + structural validation (Story 2.2). Runs after YAML validation and before the engine
+deploy on `POST /api/admin/deploy` and the startup loader's BPMN-present path. Same collect-all
+discipline as the YAML validator — every offending user task / expression surfaces a separate
+`ErrorDetail` rather than fail-on-first.
+
+| Code          | HTTP | Reason                                                                                 |
+| ------------- | ---- | -------------------------------------------------------------------------------------- |
+| `WKS-CFG-010` | 422  | BPMN file missing / unreadable / not a BPMN 2.0 document                               |
+| `WKS-CFG-012` | 422  | Variable in BPMN expression not declared in the YAML case type (and not in the well-known set: `taskAssignee`, `caseId`, `caseStatus`) |
+| `WKS-CFG-020` | 422  | User task missing the required `archetype` declaration in `camunda:properties` (allowed: `draft_section`, `submit_for_processing`, `business_final`) |
+| `WKS-CFG-021` | 422  | Archetype contradiction — `business_final` carries `camunda:asyncAfter="true"`, OR `draft_section` has an outgoing flow targeting another task |
+
+Codes `013..019` and `022..099` are reserved for future BPMN findings — do not fill in this band
+until a real validator failure mode needs a stable code.
+
+> **Variance from `architecture.md` §Decision 14.** That table allocates `WKS-CFG-100..199` to
+> BPMN validation. Story 2.2 follows the epic AC's `010..099` band so all "deploy-time validation"
+> codes stay contiguous below 100. Architecture doc gets a follow-up patch.
 
 ## Interactive docs
 

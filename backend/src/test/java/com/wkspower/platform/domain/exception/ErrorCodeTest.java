@@ -58,6 +58,25 @@ class ErrorCodeTest {
   }
 
   @Test
+  void bpmnValidationBandIsPopulated() {
+    // Story 2.2 introduces 010, 012, 020, 021. Codes 013..019 and 022..099 are reserved.
+    var cfgCodes =
+        Arrays.stream(ErrorCode.values())
+            .map(ErrorCode::wire)
+            .filter(w -> w.startsWith("WKS-CFG-"))
+            .collect(Collectors.toSet());
+    assertThat(cfgCodes)
+        .as("Story 2.2 introduces 010, 012, 020, 021 in the WKS-CFG band")
+        .contains("WKS-CFG-010", "WKS-CFG-012", "WKS-CFG-020", "WKS-CFG-021");
+  }
+
+  @Test
+  void multipartUploadCodeIsExposed() {
+    // Story 2.2 admin deploy endpoint maps Spring's MaxUploadSizeExceededException to this code.
+    assertThat(ErrorCode.WKS_API_413.wire()).isEqualTo("WKS-API-413");
+  }
+
+  @Test
   void wireStringsFollowWksTripleHyphenFormat() {
     for (ErrorCode code : ErrorCode.values()) {
       assertThat(code.wire())
