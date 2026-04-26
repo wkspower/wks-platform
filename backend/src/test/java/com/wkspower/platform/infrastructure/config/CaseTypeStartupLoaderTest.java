@@ -124,6 +124,21 @@ class CaseTypeStartupLoaderTest {
           public String startProcessInstance(String key, java.util.Map<String, Object> variables) {
             return "pi-noop";
           }
+
+          @Override
+          public Optional<com.wkspower.platform.domain.model.Task> findTask(String taskId) {
+            return Optional.empty();
+          }
+
+          @Override
+          public void completeTask(String taskId, java.util.Map<String, Object> variables) {}
+
+          @Override
+          public void claimTask(String taskId, java.util.UUID userId) {}
+
+          @Override
+          public void signalTransition(
+              String processInstanceId, String action, java.util.Map<String, Object> variables) {}
         },
         event -> {});
   }

@@ -53,7 +53,7 @@ public class BpmnValidator implements BpmnValidationService {
    * matches the wire-shape documented in Dev Notes §Variable binding.
    */
   private static final Set<String> WELL_KNOWN_VARIABLES =
-      Set.of("taskAssignee", "caseId", "caseStatus");
+      Set.of("taskAssignee", "caseId", "caseTypeId", "caseStatus");
 
   private static final Pattern EXPRESSION_TOKEN = Pattern.compile("[\\$#]\\{([^}]+)\\}");
 

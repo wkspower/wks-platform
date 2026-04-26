@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  targetNamespace="http://wkspower.com/bpmn/test"
+                  id="Definitions_case_transition_fixture">
+  <bpmn:message id="Message_submit" name="submit"/>
+  <bpmn:process id="case-transition-fixture" isExecutable="true" camunda:historyTimeToLive="30">
+    <bpmn:startEvent id="start"/>
+    <bpmn:userTask id="draft" name="Draft section">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="archetype" value="draft_section"/>
+        </camunda:properties>
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="awaiting-submit" name="Awaiting submit">
+      <bpmn:messageEventDefinition id="MessageEventDefinition_submit" messageRef="Message_submit"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="approved" name="Approved">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="status" value="approved"/>
+        </camunda:properties>
+      </bpmn:extensionElements>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="draft"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="draft" targetRef="awaiting-submit"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="awaiting-submit" targetRef="approved"/>
+  </bpmn:process>
+</bpmn:definitions>

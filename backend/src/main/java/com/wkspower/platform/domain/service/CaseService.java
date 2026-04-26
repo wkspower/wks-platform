@@ -95,7 +95,7 @@ public class CaseService {
                             + " — case create requires a deployed workflow"));
     String processInstanceId =
         workflowEngine.startProcessInstance(
-            processDefinitionKey, Map.of("caseId", caseId.toString()));
+            processDefinitionKey, Map.of("caseId", caseId.toString(), "caseTypeId", caseType.id()));
 
     Instant now = clock.now();
     Case toPersist =
@@ -162,6 +162,32 @@ public class CaseService {
     Case persisted = caseRepository.save(updated);
     eventPublisher.publish(new CaseUpdated(persisted.id(), actorId, now, changedFieldIds));
     return persisted;
+  }
+
+  /**
+   * Advance a case through its BPMN process via message correlation (Story 2.4 AC1). The {@code
+   * action} string is the BPMN message name. The transactional {@code CaseStatusListener} fires
+   * inside {@code workflowEngine.signalTransition} and updates {@code cases.status}; this method
+   * re-loads the row so callers receive the post-transition state.
+   */
+  public Case transition(UUID caseId, String action, Map<String, Object> variables, UUID actorId) {
+    Objects.requireNonNull(caseId, "caseId");
+    Objects.requireNonNull(action, "action");
+    Objects.requireNonNull(actorId, "actorId");
+    Case existing =
+        caseRepository
+            .findById(caseId)
+            .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
+    if (existing.processInstanceId() == null || existing.processInstanceId().isBlank()) {
+      throw new WksWorkflowEngineException(
+          "Case " + caseId + " has no associated process instance — cannot transition");
+    }
+    Map<String, Object> safeVars = TaskService.sanitiseVariables(variables);
+    workflowEngine.signalTransition(existing.processInstanceId(), action, safeVars);
+    return caseRepository
+        .findById(caseId)
+        .orElseThrow(
+            () -> new WksNotFoundException("Case " + caseId + " not found after transition"));
   }
 
   /** Lookup by id; 404 if not found. */

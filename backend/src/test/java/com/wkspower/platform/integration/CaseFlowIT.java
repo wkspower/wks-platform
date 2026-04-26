@@ -13,15 +13,22 @@ import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
+import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.model.User;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
+import com.wkspower.platform.infrastructure.persistence.repository.CaseEntityRepository;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.awaitility.Awaitility;
+import org.cibseven.bpm.engine.ProcessEngine;
 import org.cibseven.bpm.engine.RepositoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +36,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,6 +60,8 @@ import org.springframework.test.context.DynamicPropertySource;
  * CaseTypePermissionEvaluator} chain runs end-to-end.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@org.springframework.test.context.ActiveProfiles("dev")
+@Import(CaseFlowIT.RecorderConfig.class)
 class CaseFlowIT {
 
   // Uses the seeded `admin` role (V202604170001) — the only role that exists out of the box. The
@@ -57,6 +70,7 @@ class CaseFlowIT {
   private static final String PASSWORD = "admin";
   private static final String CASE_TYPE_ID = "loan-application";
   private static final String PROCESS_KEY = "loan-application-flow";
+  private static final String TRANSITION_CASE_TYPE_ID = "case-transition-fixture";
 
   @TempDir static java.nio.file.Path dbDir;
 
@@ -76,8 +90,11 @@ class CaseFlowIT {
   @Autowired private PasswordEncoder encoder;
   @Autowired private CaseTypeRegistry registry;
   @Autowired private RepositoryService repositoryService;
+  @Autowired private ProcessEngine processEngine;
+  @Autowired private CaseEntityRepository caseEntities;
   @Autowired private ApplicationEventPublisher events;
   @Autowired private ObjectMapper json;
+  @Autowired private StatusEventRecorder recorder;
 
   @BeforeEach
   void setup() {
@@ -186,6 +203,143 @@ class CaseFlowIT {
         List.of(
             new RoleDefinition(
                 "admin", List.of(Permission.VIEW, Permission.CREATE, Permission.EDIT))));
+  }
+
+  // ---- Story 2.4 — full create → transition end-to-end ----------------
+
+  @Test
+  void createTransitionRoundTripUpdatesStatusAndPublishesEvent() throws Exception {
+    registerTransitionCaseType();
+    deployTransitionFixture();
+    String cookie = login();
+    recorder.events.clear();
+
+    // POST create — engine starts the process; user task `draft` becomes active.
+    ResponseEntity<String> created =
+        exchange(
+            "/api/cases",
+            HttpMethod.POST,
+            cookie,
+            "{\"caseTypeId\":\"" + TRANSITION_CASE_TYPE_ID + "\",\"data\":{\"name\":\"Asha\"}}");
+    assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    String caseId = json.readTree(created.getBody()).path("data").path("id").asText();
+    UUID caseUuid = UUID.fromString(caseId);
+
+    // The current user task is `draft`. Complete it through the public API so the listener fires.
+    String taskId =
+        processEngine
+            .getTaskService()
+            .createTaskQuery()
+            .processInstanceId(caseEntities.findById(caseUuid).orElseThrow().getProcessInstanceId())
+            .singleResult()
+            .getId();
+    ResponseEntity<String> completed =
+        exchange("/api/tasks/" + taskId + "/complete", HttpMethod.POST, cookie, "{}");
+    assertThat(completed.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(completed.getBody()).contains("\"archetype\":\"draft_section\"");
+
+    // POST transition correlates the `submit` message → process advances to the `approved` end
+    // event → CaseStatusListener writes status="approved" and publishes CaseStatusChanged.
+    long transitionStartNanos = System.nanoTime();
+    ResponseEntity<String> tx =
+        exchange(
+            "/api/cases/" + caseId + "/transition",
+            HttpMethod.POST,
+            cookie,
+            "{\"action\":\"submit\"}");
+    long transitionElapsedMs = (System.nanoTime() - transitionStartNanos) / 1_000_000L;
+    assertThat(tx.getStatusCode()).isEqualTo(HttpStatus.OK);
+    // Story 2.4 AC1 — transition wall-clock latency must be < 500 ms for the fixture process.
+    assertThat(transitionElapsedMs)
+        .as("Story 2.4 AC1 — POST /transition wall-clock latency must be < 500 ms")
+        .isLessThan(500L);
+
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () ->
+                assertThat(caseEntities.findById(caseUuid).orElseThrow().getStatus())
+                    .isEqualTo("approved"));
+
+    assertThat(recorder.events)
+        .anySatisfy(
+            evt -> {
+              assertThat(evt.caseId()).isEqualTo(caseUuid);
+              assertThat(evt.newStatus()).isEqualTo("approved");
+            });
+  }
+
+  private void registerTransitionCaseType() {
+    registry.register(transitionCaseType());
+  }
+
+  private void deployTransitionFixture() throws java.io.IOException {
+    byte[] bytes;
+    try (InputStream in = getClass().getResourceAsStream("/bpmn/case-transition-fixture.bpmn")) {
+      if (in == null) {
+        throw new IllegalStateException("BPMN fixture missing on classpath");
+      }
+      bytes = in.readAllBytes();
+    }
+    org.cibseven.bpm.engine.repository.Deployment deployment =
+        repositoryService
+            .createDeployment()
+            .name("transition-it-" + TRANSITION_CASE_TYPE_ID)
+            .addInputStream(
+                TRANSITION_CASE_TYPE_ID + ".bpmn", new java.io.ByteArrayInputStream(bytes))
+            .deploy();
+    String processDefinitionId =
+        repositoryService
+            .createProcessDefinitionQuery()
+            .deploymentId(deployment.getId())
+            .singleResult()
+            .getId();
+    events.publishEvent(
+        new ConfigDeployed(
+            TRANSITION_CASE_TYPE_ID,
+            1,
+            deployment.getId(),
+            TRANSITION_CASE_TYPE_ID,
+            processDefinitionId,
+            null,
+            Instant.now()));
+  }
+
+  private static CaseTypeConfig transitionCaseType() {
+    return new CaseTypeConfig(
+        TRANSITION_CASE_TYPE_ID,
+        "Case Transition Fixture",
+        1,
+        null,
+        new WorkflowRef(TRANSITION_CASE_TYPE_ID + ".bpmn"),
+        List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+        List.of(
+            new StatusDefinition("open", "Open", StatusColor.ZINC),
+            new StatusDefinition("approved", "Approved", StatusColor.EMERALD)),
+        List.of("name"),
+        List.of(
+            new RoleDefinition(
+                "admin",
+                List.of(
+                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))));
+  }
+
+  /** Captures published CaseStatusChanged events so the test can assert listener firing. */
+  static class StatusEventRecorder {
+    final java.util.List<CaseStatusChanged> events = new CopyOnWriteArrayList<>();
+
+    @EventListener
+    public void on(CaseStatusChanged e) {
+      events.add(e);
+    }
+  }
+
+  @TestConfiguration
+  static class RecorderConfig {
+    @Bean
+    StatusEventRecorder statusEventRecorder() {
+      return new StatusEventRecorder();
+    }
   }
 
   private static String simpleBpmn(String key) {

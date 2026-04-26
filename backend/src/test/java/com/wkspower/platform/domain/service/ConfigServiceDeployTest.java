@@ -33,6 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -202,6 +208,102 @@ class ConfigServiceDeployTest {
     assertThat(registrar.removed).contains(incoming.id());
   }
 
+  // ---- folded debt #2: per-caseTypeId deploy serialization (Story 2.4 Task 7.2) ----------
+
+  /**
+   * Folded debt #2 — Story 2.4 review decision 4. The per-{@code caseTypeId} mutex in {@code
+   * ConfigService.deploy} must serialize concurrent deploys of the same id so that the {@code
+   * reader.find → registrar.register → workflowEngine.deploy} window is atomic. A deterministic
+   * two-thread test (latch-coordinated, not stress) is the way to assert the lock actually holds —
+   * a stress test would be flaky and architecturally redundant.
+   */
+  @Test
+  void concurrentDeploysOfSameCaseTypeAreSerialized() throws Exception {
+    StubSource source = new StubSource(ValidationResult.ok(caseType()));
+    StubBpmn bpmn = new StubBpmn(BpmnValidationResult.ok("applicationProcess"));
+    StubRegistrar registrar = new StubRegistrar();
+    AtomicInteger concurrentInDeploy = new AtomicInteger(0);
+    AtomicInteger maxObservedConcurrency = new AtomicInteger(0);
+    CountDownLatch insideEngineDeploy = new CountDownLatch(1);
+    CountDownLatch holdInEngineDeploy = new CountDownLatch(1);
+    AtomicInteger deployCount = new AtomicInteger(0);
+
+    WorkflowEngine engine =
+        new WorkflowEngine() {
+          @Override
+          public DeploymentResult deploy(DeploymentRequest request) {
+            int now = concurrentInDeploy.incrementAndGet();
+            maxObservedConcurrency.updateAndGet(prev -> Math.max(prev, now));
+            insideEngineDeploy.countDown();
+            try {
+              holdInEngineDeploy.await(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+            }
+            int n = deployCount.incrementAndGet();
+            concurrentInDeploy.decrementAndGet();
+            return new DeploymentResult(
+                "deployment-" + n,
+                request.processDefinitionKey(),
+                "procDef-" + n,
+                1,
+                Instant.now());
+          }
+
+          @Override
+          public Optional<DeploymentInfo> latestDeployment(String key) {
+            return Optional.empty();
+          }
+
+          @Override
+          public String startProcessInstance(String key, Map<String, Object> vars) {
+            throw new UnsupportedOperationException();
+          }
+
+          @Override
+          public Optional<com.wkspower.platform.domain.model.Task> findTask(String taskId) {
+            return Optional.empty();
+          }
+
+          @Override
+          public void completeTask(String taskId, Map<String, Object> variables) {}
+
+          @Override
+          public void claimTask(String taskId, java.util.UUID userId) {}
+
+          @Override
+          public void signalTransition(String pid, String action, Map<String, Object> vars) {}
+        };
+
+    ConfigService svc =
+        new ConfigService(
+            source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
+
+    ExecutorService pool = Executors.newFixedThreadPool(2);
+    try {
+      Future<DeployResult> a = pool.submit(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, "thread-a"));
+      // Wait until thread A is parked inside engine.deploy holding the per-id lock.
+      assertThat(insideEngineDeploy.await(2, TimeUnit.SECONDS)).isTrue();
+      Future<DeployResult> b = pool.submit(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, "thread-b"));
+      // Give B a chance to attempt to enter; if the lock is broken it would barge into
+      // engine.deploy.
+      Thread.sleep(100);
+      assertThat(concurrentInDeploy.get())
+          .as("Thread B must NOT have entered engine.deploy while A holds the per-caseTypeId lock")
+          .isEqualTo(1);
+      holdInEngineDeploy.countDown();
+      a.get(2, TimeUnit.SECONDS);
+      b.get(2, TimeUnit.SECONDS);
+    } finally {
+      pool.shutdown();
+    }
+
+    assertThat(maxObservedConcurrency.get())
+        .as("Per-caseTypeId lock must serialize concurrent deploys (max concurrency = 1)")
+        .isEqualTo(1);
+    assertThat(deployCount.get()).isEqualTo(2);
+  }
+
   // ---- helpers + stubs ---------------------------------------------------
 
   private static ValidationResult invalidYaml(String code, String msg) {
@@ -341,6 +443,21 @@ class ConfigServiceDeployTest {
         String processDefinitionKey, java.util.Map<String, Object> variables) {
       throw new UnsupportedOperationException("not exercised by ConfigServiceDeployTest");
     }
+
+    @Override
+    public Optional<com.wkspower.platform.domain.model.Task> findTask(String taskId) {
+      return Optional.empty();
+    }
+
+    @Override
+    public void completeTask(String taskId, java.util.Map<String, Object> variables) {}
+
+    @Override
+    public void claimTask(String taskId, java.util.UUID userId) {}
+
+    @Override
+    public void signalTransition(
+        String processInstanceId, String action, java.util.Map<String, Object> variables) {}
   }
 
   private static final class RecordingPublisher implements EventPublisher {

@@ -59,6 +59,55 @@ class ArchitectureTest {
   }
 
   @Test
+  void taskDomainHasNoSpringOrEngineImports() {
+    // Story 2.4 AC8 — explicit gate on the new task-domain types. Covered by the blanket
+    // domainHasNoFrameworkImports rule; this rule pins it specifically so a regression surfaces a
+    // Story-2.4-attributable failure message.
+    noClasses()
+        .that()
+        .haveSimpleName("Task")
+        .or()
+        .haveSimpleName("TaskService")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("org.springframework..", "org.cibseven..")
+        .because(
+            "Task domain model + TaskService stay framework-free — Story 2.4 AC8. CIB seven types"
+                + " never reach domain code; the engine adapter translates engine exceptions into"
+                + " WksConflictException / WksNotFoundException at the boundary.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void onlyEngineAdapterAndListenersImportTheEngineDelegateApi() {
+    // Story 2.4 AC8 — the engine-callback hexagonal pattern requires that ONLY the engine adapter
+    // (CibSevenWorkflowEngine + CaseStatusEnginePlugin) and engine/listeners/* hold imports of
+    // org.cibseven.bpm.engine.delegate.* (the API CIB seven calls into via reflection).
+    // Everything else goes through the WorkflowEngine port + the CaseStatusUpdater port.
+    //
+    // Scope is narrower than ..engine.. on purpose (Story 2.4 review): a regression that adds a
+    // delegate import to a sibling class under engine/ (e.g. engine/CibSevenJobAdapter) would
+    // otherwise pass the rule.
+    noClasses()
+        .that()
+        .resideOutsideOfPackage("..engine.listeners..")
+        .and()
+        .haveSimpleNameNotEndingWith("WorkflowEngine")
+        .and()
+        .haveSimpleNameNotEndingWith("EnginePlugin")
+        .and()
+        .haveSimpleNameNotEndingWith("BpmnParseListener")
+        .should()
+        .dependOnClassesThat()
+        .resideInAPackage("org.cibseven.bpm.engine.delegate..")
+        .because(
+            "ExecutionListener + DelegateExecution are engine-callback types — they belong inside"
+                + " CibSevenWorkflowEngine, CaseStatusEnginePlugin, the BpmnParseListener, and"
+                + " engine/listeners/ (the CaseStatusListener). Story 2.4 AC8.")
+        .check(CLASSES);
+  }
+
+  @Test
   void apiAndSecurityDoNotDependOnPersistenceEntities() {
     noClasses()
         .that()

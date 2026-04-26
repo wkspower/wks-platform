@@ -12,6 +12,7 @@ import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.ConfigService;
+import com.wkspower.platform.domain.service.TaskService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,6 +33,11 @@ public class ConfigServiceConfig {
       EventPublisher eventPublisher) {
     return new ConfigService(
         source, registrar, reader, bpmnValidator, workflowEngine, eventPublisher);
+  }
+
+  @Bean
+  public TaskService wksTaskService(WorkflowEngine workflowEngine) {
+    return new TaskService(workflowEngine);
   }
 
   @Bean
