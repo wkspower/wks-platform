@@ -16,6 +16,7 @@ export const caseQueryKeys = {
   all: () => ['cases'] as const,
   lists: () => ['cases', 'list'] as const,
   list: (query: CaseListQuery) => ['cases', 'list', query] as const,
+  detail: (id: string) => ['case', id] as const,
 } as const;
 
 export const caseTypeQueryKeys = {

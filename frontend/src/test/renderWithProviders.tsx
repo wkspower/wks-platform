@@ -3,6 +3,7 @@ import { render, type RenderOptions, type RenderResult } from '@testing-library/
 import type { ReactElement, ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { TooltipProvider } from '@/components/ui/Tooltip';
 import { useAuthStore, type AuthState, type AuthStatus } from '@/stores/authStore';
 import type { AuthUser } from '@/types/auth';
 
@@ -49,7 +50,9 @@ export function renderWithProviders(
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={client}>
-        <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>
+        <TooltipProvider delayDuration={0}>
+          <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>
+        </TooltipProvider>
       </QueryClientProvider>
     );
   }

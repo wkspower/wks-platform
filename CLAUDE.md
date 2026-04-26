@@ -398,7 +398,73 @@ Case types are declared as YAML files in a directory mounted into the container.
 - **Performance budget**: `CaseDataTable.perf.test.tsx` renders 1,000 fixture rows under 1000 ms
   wall-clock on CI (paginated to 50 visible rows). Virtualisation is Phase 1.
 
+### Case Workspace & Split-Pane (Story 2.6)
+
+- **Two CSS states, no width animation**: `components/workspace/CaseWorkspace.tsx` is a Flexbox
+  shell with discrete `workspace-list-only` (list `flex-1`) and `workspace-list-and-detail`
+  (list `w-[380px] shrink-0` + detail `flex-1 min-w-[500px]`) classes. `transition-none`
+  defeats inherited transitions — UX spec rejects layout-thrash animation explicitly.
+- **URL-driven selection**: `/cases` and `/cases/:caseId` both render `CasesPage`. Selection
+  state is read from `useParams<{caseId?: string}>()`; transitions go through `useNavigate()`.
+  Browser back/forward and deep links work without extra plumbing. Selected case ID is **not**
+  persisted across sessions — only `caseListFilters` and `sidebarCollapsed` are.
+- **Keyboard navigation**: workspace-level `document` keydown listener handles Esc (close),
+  J (next case in `sortedRows`), K (previous case). Skips when target is `<input>`,
+  `<textarea>`, contenteditable, or `event.isComposing` (IME guard, mirroring the 2.5 `/`
+  keybind fix). J on last row / K on first row are no-ops per UX spec.
+- **Focus management**: detail `<h1>` carries `tabIndex={-1}` and grabs focus after the next
+  paint when the panel mounts; on close, focus restores to `[data-row-id="..."]` of the
+  previously selected row, falling back to the first row, then the workspace heading.
+- **Responsive auto-close**: `useViewport()` returns `{width, height}` from a rAF-debounced
+  `resize` listener (SSR-safe default `{1280, 800}`). Breakpoints in `lib/layoutBreakpoints.ts`:
+  `MIN_VIEWPORT_FOR_DETAIL = 1140` (sidebar expanded) / `MIN_VIEWPORT_WHEN_SIDEBAR_COLLAPSED = 884`.
+  Below threshold, the workspace renders `list-only` plus a banner with a "Re-open" action
+  that toggles `sidebarCollapsed = true` to reclaim 208px.
+- **Tabs primitive**: `components/ui/Tabs.tsx` wraps `@radix-ui/react-tabs` (Arrow Left/Right
+  keyboard nav out of the box). `CaseDetailPanel` uses Activity / Properties / Documents
+  with default = Properties. Active tab is **not** persisted across selections — every
+  selection opens to Properties.
+- **Tooltip primitive**: `components/ui/Tooltip.tsx` wraps `@radix-ui/react-tooltip`. Single
+  `<TooltipProvider delayDuration={300}>` mounted at root in `main.tsx`. Used by the
+  `id`-cell trigger (Story 2.6 closes the deferred-work tooltip debt) and Properties-tab
+  label ellipsis.
+- **Popover primitive**: `components/ui/Popover.tsx` wraps `@radix-ui/react-popover` — used by
+  the `CaseFilterBar` narrowed-variant overflow ("N filters" pill) since multi-select chip
+  dismiss can't reuse `DropdownMenu` (its `onSelect` closes on every click).
+- **Properties tab — read-only Phase 0**: `lib/fieldFormatters.ts` exports the value-formatter
+  shared with `lib/buildCaseColumns.tsx` (table cells); `lib/renderFieldValue.tsx` adds the
+  Properties-tab specifics (`whitespace-pre-wrap` for textarea, "See Documents tab" copy for
+  file). Inline edit is **Phase 1**.
+- **Embedded `caseType` in `CaseDto`**: `useCase(id)` returns the full `CaseDto` whose
+  embedded `caseType: CaseTypeView` is frozen at the case's `caseTypeVersion`. Properties
+  tab uses this — not a separate `useCaseType(caseDto.caseTypeId)` call — so the rendered
+  fields match the version the case was created/updated with.
+- **`useCase(id)` query key**: `['case', id]`. Story 4.3 SSE will
+  `queryClient.invalidateQueries({queryKey: ['case', id]})` on `CaseStatusChanged`; keep this
+  shape stable.
+- **Filter chip overflow when narrowed**: `CaseFilterBar variant='narrowed'` collapses chips
+  to a single "N filters" pill that opens the chip list in a Radix Popover; empty narrowed
+  state shows a single "Add filter" ghost button. Full-width variant unchanged from 2.5.
+
 ## Change Log
+
+- 2026-04-26 — Story 2.6: Split-pane workspace and case detail — `CaseWorkspace` (two CSS
+  states, URL-driven selection, J/K/Esc keyboard nav, focus management, responsive
+  auto-close), `CaseDetailPanel` (header + tabs shell + 404/403/error states + skeleton),
+  `PropertiesTab` (read-only `<dl>` against `caseTypeView.fields[]`),
+  `ActivityTabPlaceholder` / `DocumentsTabPlaceholder` (Epic 4 / 3 swap-out points),
+  `CaseBreadcrumbs`, `useViewport`, `useCase(id)` (TanStack Query key `['case', id]`),
+  `lib/layoutBreakpoints.ts`, `lib/fieldFormatters.ts` (extracted from `buildCaseColumns`)
+  + `lib/renderFieldValue.tsx`. Routes add `/cases/:caseId` (both routes render
+  `CasesPage`). Design system gains `Tabs` / `Tooltip` / `Popover` Radix primitives;
+  `<TooltipProvider delayDuration={300}>` lives at root in `main.tsx`. `CaseDataTable`
+  gains `onSortedRowsChange` callback (workspace lifts row order for J/K nav) and
+  `data-row-id={row.original.id}` attribute (focus restoration target). `CaseFilterBar`
+  gains `variant` prop with narrowed-variant chip overflow ("N filters" pill +
+  Popover). Folded debt: `id`-column native `title` → Radix Tooltip with focusable
+  trigger (closes deferred-work line 195); `pointerToField` nested-field handling
+  re-pinned to Story 2.7 (form-submit path). New deps: `@radix-ui/react-tabs`,
+  `@radix-ui/react-popover`. No backend changes.
 
 - 2026-04-26 — Story 2.5: Case list view with config-driven table — `pages/CasesPage.tsx`,
   `CaseDataTable`, `CaseFilterBar`, `StatusBadge`, `lib/buildCaseColumns.tsx`,

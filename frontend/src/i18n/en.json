@@ -73,5 +73,43 @@
   "cases.search.noResults": "No results",
   "cases.pagination.page": "Page {page} of {total}",
   "cases.pagination.next": "Next",
-  "cases.pagination.prev": "Previous"
+  "cases.pagination.prev": "Previous",
+
+  "workspace.label": "Case workspace",
+  "workspace.detailHidden": "Detail panel hidden — viewport too narrow",
+  "workspace.reopen": "Re-open",
+
+  "case.close": "Close case detail",
+  "case.notFound.title": "Case not found",
+  "case.notFound.body": "We couldn't find a case with this id. It may have been deleted, or you may not have access.",
+  "case.notFound.backToList": "Back to all cases",
+  "case.forbidden.title": "You don't have access to this case",
+  "case.forbidden.body": "Ask your admin if you need access. Other cases on your list are unaffected.",
+  "case.forbidden.backToList": "Back to all cases",
+  "case.error.title": "Couldn't load case detail",
+  "case.error.body": "Your filter and selection are intact. Try again, or pick a different case.",
+  "case.heading": "Case {idShort}",
+  "case.detail.announcement": "Case detail: {idShort}",
+
+  "breadcrumbs.label": "Breadcrumbs",
+
+  "tabs.activity": "Activity",
+  "tabs.properties": "Properties",
+  "tabs.documents": "Documents",
+
+  "properties.empty": "This case type has no fields defined.",
+  "properties.file.placeholder": "See Documents tab",
+
+  "activity.placeholder.title": "Activity feed coming soon",
+  "activity.placeholder.body": "Real-time case activity arrives in Epic 4.",
+
+  "documents.placeholder.title": "Documents coming soon",
+  "documents.placeholder.body": "Document upload and download arrive in Epic 3.",
+
+  "cases.filter.nFilters": "{count} filters",
+  "cases.filter.oneFilter": "1 filter",
+  "cases.filter.add": "Add filter",
+  "cases.idTooltip.label": "Full case id",
+
+  "common.retry": "Retry"
 }

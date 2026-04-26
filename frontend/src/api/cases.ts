@@ -1,7 +1,12 @@
 import type { CaseListQuery } from '@/lib/queryKeys';
-import type { CaseSummary } from '@/types/case';
+import type { CaseDto, CaseSummary } from '@/types/case';
 
 import { apiFetch } from './client';
+
+export async function getCase(id: string): Promise<CaseDto> {
+  const result = await apiFetch<CaseDto>(`/api/cases/${encodeURIComponent(id)}`);
+  return result.data;
+}
 
 /**
  * `GET /api/cases?caseType=…&status=…&page=…&size=…&sort=…` — Story 2.3 contract.

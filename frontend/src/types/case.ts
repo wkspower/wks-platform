@@ -19,6 +19,24 @@ export interface CaseSummary {
   fields: Record<string, unknown>;
 }
 
+import type { CaseTypeView } from './caseType';
+
+export interface CaseDto {
+  id: string;
+  caseTypeId: string;
+  caseTypeVersion: number;
+  status: string;
+  assignee: string | null;
+  data: Record<string, unknown>;
+  processInstanceId: string | null;
+  documentCount: number;
+  createdAt: string;
+  createdBy: string | null;
+  updatedAt: string;
+  version: number;
+  caseType: CaseTypeView;
+}
+
 export interface CaseRow extends CaseSummary {
   hasUnreadActivity: boolean;
   slaBreached: boolean;
