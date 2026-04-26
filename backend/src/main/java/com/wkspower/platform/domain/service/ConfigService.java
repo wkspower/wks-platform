@@ -18,7 +18,11 @@ import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Orchestrates load + validate + register for case-type YAML and the joint YAML+BPMN deploy. Pure
@@ -31,12 +35,22 @@ import java.util.Optional;
  */
 public class ConfigService {
 
+  private static final Logger log = LoggerFactory.getLogger(ConfigService.class);
+
   private final CaseTypeSource source;
   private final CaseTypeRegistrar registrar;
   private final CaseTypeReader reader;
   private final BpmnValidationService bpmnValidator;
   private final WorkflowEngine workflowEngine;
   private final EventPublisher eventPublisher;
+
+  /**
+   * Per-{@code caseTypeId} mutex (Story 2.4 folded debt #2 — TOCTOU on concurrent deploys of the
+   * same case-type id). Two threads racing the {@code reader.find → registrar.register} window
+   * could both observe the same prior state, leading to interleaved registry writes. Locking on a
+   * stable per-key monitor closes that window.
+   */
+  private final Map<String, Object> deployLocks = new ConcurrentHashMap<>();
 
   public ConfigService(
       CaseTypeSource source,
@@ -109,37 +123,45 @@ public class ConfigService {
       return DeployResult.invalid(aggregate);
     }
 
-    Optional<CaseTypeConfig> priorState = reader.find(caseType.id());
-
-    RegistrationResult reg = registrar.register(caseType);
-    if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
-      return DeployResult.invalid(reg.errors());
-    }
-
+    Object lock = deployLocks.computeIfAbsent(caseType.id(), k -> new Object());
+    Optional<CaseTypeConfig> priorState;
+    RegistrationResult reg;
     DeploymentResult deployment;
-    try {
-      deployment =
-          workflowEngine.deploy(
-              new DeploymentRequest(
-                  caseType.id() + " v" + caseType.version(),
-                  bpmnResult.processDefinitionKey().orElseThrow(),
-                  bpmnBytes,
-                  caseType.id(),
-                  caseType.version()));
-    } catch (RuntimeException ex) {
-      restoreRegistryAfterEngineFailure(caseType.id(), priorState);
-      throw ex;
-    }
+    synchronized (lock) {
+      priorState = reader.find(caseType.id());
 
-    eventPublisher.publish(
-        new ConfigDeployed(
-            caseType.id(),
-            caseType.version(),
-            deployment.deploymentId(),
-            deployment.processDefinitionKey(),
-            deployment.processDefinitionId(),
-            actorEmail,
-            deployment.deployedAt()));
+      reg = registrar.register(caseType);
+      if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
+        return DeployResult.invalid(reg.errors());
+      }
+
+      try {
+        deployment =
+            workflowEngine.deploy(
+                new DeploymentRequest(
+                    caseType.id() + " v" + caseType.version(),
+                    bpmnResult.processDefinitionKey().orElseThrow(),
+                    bpmnBytes,
+                    caseType.id(),
+                    caseType.version()));
+      } catch (RuntimeException ex) {
+        restoreRegistryAfterEngineFailure(caseType.id(), priorState);
+        throw ex;
+      }
+
+      // Publish inside the lock so two concurrent deploys of the same caseTypeId cannot interleave
+      // their event publication and leave the ProcessDefinitionKeyCache stuck on an older mapping
+      // (Story 2.4 review).
+      eventPublisher.publish(
+          new ConfigDeployed(
+              caseType.id(),
+              caseType.version(),
+              deployment.deploymentId(),
+              deployment.processDefinitionKey(),
+              deployment.processDefinitionId(),
+              actorEmail,
+              deployment.deployedAt()));
+    }
 
     return DeployResult.ok(caseType, deployment);
   }
@@ -184,10 +206,15 @@ public class ConfigService {
       if (prior.isPresent()) {
         registrar.register(prior.get());
       }
-    } catch (RuntimeException ignored) {
-      // Best-effort restore. Cascading the secondary failure would mask the original engine
-      // exception. The caller still sees the original WksWorkflowEngineException; the registry
-      // may briefly advertise an unbacked config — see Dev Notes §Atomic deploy.
+    } catch (RuntimeException secondary) {
+      // Best-effort restore. Cascading would mask the original engine exception, so we log at
+      // ERROR and let the original bubble. The registry may end up empty for this caseTypeId
+      // until the next successful deploy — operators can see this in the logs (Story 2.4 review).
+      log.error(
+          "ConfigService: registry rollback after engine failure for caseTypeId={} also failed —"
+              + " registry may have no entry for this id until the next successful deploy",
+          id,
+          secondary);
     }
   }
 }

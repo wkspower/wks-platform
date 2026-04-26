@@ -2,6 +2,7 @@ package com.wkspower.platform.api.controller;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.request.CreateCaseRequest;
+import com.wkspower.platform.api.dto.request.TransitionRequest;
 import com.wkspower.platform.api.dto.request.UpdateCaseRequest;
 import com.wkspower.platform.api.dto.response.CaseDto;
 import com.wkspower.platform.api.dto.response.CaseSummaryDto;
@@ -134,6 +135,25 @@ public class CaseController {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "edit");
     Case updated = caseService.update(id, request.data(), request.version(), actor.id());
+    CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
+    return ApiResponse.success(CaseDtoMapper.toDto(updated, caseType));
+  }
+
+  /**
+   * Story 2.4 AC1 — advance the case through its BPMN process. Loads the case first so an unknown
+   * id surfaces 404 before the verb check; the {@code transition} verb gates message dispatch.
+   * Engine-side conflicts (no enabled receiver, optimistic lock) are translated to {@code
+   * WKS-RTM-409} inside {@code CibSevenWorkflowEngine}; missing process instance surfaces {@code
+   * WKS-RTM-500}.
+   */
+  @PostMapping("/{id}/transition")
+  public ApiResponse<CaseDto> transition(
+      @PathVariable("id") UUID id,
+      @Valid @RequestBody TransitionRequest request,
+      @AuthenticationPrincipal WksUserPrincipal actor) {
+    Case found = caseService.findById(id);
+    requireVerb(actor, found.caseTypeId(), "transition");
+    Case updated = caseService.transition(id, request.action(), request.variables(), actor.id());
     CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
     return ApiResponse.success(CaseDtoMapper.toDto(updated, caseType));
   }

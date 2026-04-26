@@ -104,6 +104,41 @@ class CaseAuthIT {
   }
 
   @Test
+  void transitionEndpointRequiresJwt() {
+    // Anonymous POST to transition → 401 (proves the JwtAuthenticationFilter sits in front of the
+    // 2.4 endpoint). Closes Story 2.2 deferred "JWT role-prefix integration coverage on a
+    // role-gated mutation".
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+    ResponseEntity<String> resp =
+        rest.exchange(
+            "/api/cases/" + UUID.randomUUID() + "/transition",
+            HttpMethod.POST,
+            new HttpEntity<>("{\"action\":\"submit\"}", headers),
+            String.class);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(resp.getBody()).contains("WKS-API-401");
+  }
+
+  @Test
+  void authenticatedTransitionAgainstUnknownCaseHits404() {
+    // Auth pipeline reaches the controller — unknown case-id 404s before the verb gate fires.
+    // Proves the JWT filter → WksUserPrincipal → handler chain works end-to-end on the new POST
+    // endpoint (the 401 path is covered above; this case proves auth passed all the way through).
+    String cookie = login(EMAIL);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+    headers.add(HttpHeaders.COOKIE, cookie);
+    ResponseEntity<String> resp =
+        rest.exchange(
+            "/api/cases/" + UUID.randomUUID() + "/transition",
+            HttpMethod.POST,
+            new HttpEntity<>("{\"action\":\"submit\"}", headers),
+            String.class);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  @Test
   void authenticatedRequestForUnknownCaseTypeReturnsForbidden() {
     String cookie = login(EMAIL);
 

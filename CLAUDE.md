@@ -336,7 +336,48 @@ Case types are declared as YAML files in a directory mounted into the container.
   the transaction cleanly; DB failure after engine success leaves a dangling process instance
   (accepted Phase 0 partial state — Phase 1 wraps in an outbox).
 
+### Case Transitions & Tasks (Story 2.4)
+
+- **Endpoints**: `POST /api/cases/{id}/transition`, `POST /api/tasks/{id}/complete`,
+  `POST /api/tasks/{id}/claim` — all gate on the `transition` verb (see
+  `docs/api-conventions.md`).
+- **Transition dispatch**: Phase 0 supports BPMN message correlation only — `action` is the
+  `<bpmn:message name="...">` attached to an `intermediateCatchEvent`/`receiveTask`. Signal-based
+  transitions can be added in Story 8.2 if a real template requires them.
+- **Engine-callback hexagonal pattern**: `CaseStatusListener` (a CIB seven `ExecutionListener`)
+  reads `caseId` from the process variable and updates `cases.status` via the `CaseStatusUpdater`
+  port — never via direct JPA writes inside the listener. The JPA adapter
+  (`CaseStatusAdapter`) participates in the engine transaction so a listener failure rolls back
+  both the engine state and the case-row update atomically. The listener is registered on every
+  user-task and end-event `end` event by `CaseStatusEnginePlugin` (a
+  `ProcessEnginePlugin` + `BpmnParseListener`) so BPMN XML stays free of
+  `camunda:executionListener` boilerplate.
+- **Status mapping**: an end event's status comes from `<camunda:property name="status"/>` (or
+  the element id when absent). For user-task end, the listener picks the next active activity id
+  via `runtimeService.getActiveActivityIds(...)`.
+- **Three-archetype response surface**: `TaskActionResponse` carries the `archetype` read from
+  the user task's `<camunda:property name="archetype"/>` so Story 2.8's `TaskLifecycleButton` can
+  drive the right UI state without a follow-up call. Backend never blocks on downstream BPMN work
+  for `submit_for_processing` — the SSE bridge (Story 4.3) confirms eventual completion.
+- **Persistent process-definition mapping** (folded debt #1 from 2.3): the `case_type_deployments`
+  Flyway table holds the `caseTypeId → processDefinitionKey` mapping durably; the in-memory
+  cache becomes a write-through layer. JVM restart no longer drops admin-deployed mappings.
+- **Concurrent-deploy hardening** (folded debt #2 from 2.2): `ConfigService.deploy` now holds a
+  per-`caseTypeId` lock around the `reader.find → registrar.register` window so two concurrent
+  deploys of the same case-type id can no longer interleave.
+
 ## Change Log
+
+- 2026-04-26 — Story 2.4: Case status transitions via BPMN — `POST /api/cases/{id}/transition`,
+  `POST /api/tasks/{id}/complete`, `POST /api/tasks/{id}/claim`. New `Task` domain record +
+  `TaskService`, `WorkflowEngine` port extended with `findTask` / `completeTask` / `claimTask` /
+  `signalTransition`, `CaseStatusListener` engine-callback adapter via the new `CaseStatusUpdater`
+  port + `CaseStatusEnginePlugin`. New `case_type_deployments` Flyway table makes the
+  `caseTypeId → processDefinitionKey` mapping durable (closes 2.3 deferred); per-`caseTypeId` lock
+  in `ConfigService.deploy` closes the 2.2 TOCTOU deferred. ArchUnit rules added for the
+  task-domain and engine-delegate import surfaces (AC8). `CaseFlowIT` extended with the
+  create→complete→transition end-to-end path; `CaseAuthIT` extended with JWT round-trip on the
+  transition endpoint. No new `WKS-*` wire codes — `WKS-RTM-409` is reused for engine conflicts.
 
 - 2026-04-26 — Story 2.3: Case CRUD shipped — `POST/GET/PUT /api/cases`, JSON column for
   dynamic case data (H2 native + Postgres JSONB upgrade via Java Flyway migration),

@@ -298,6 +298,21 @@ class CaseServiceTest {
       if (failure != null) throw failure;
       return returnedPi;
     }
+
+    @Override
+    public Optional<com.wkspower.platform.domain.model.Task> findTask(String taskId) {
+      return Optional.empty();
+    }
+
+    @Override
+    public void completeTask(String taskId, Map<String, Object> variables) {}
+
+    @Override
+    public void claimTask(String taskId, UUID userId) {}
+
+    @Override
+    public void signalTransition(
+        String processInstanceId, String action, Map<String, Object> variables) {}
   }
 
   private static final class StubPublisher implements EventPublisher {

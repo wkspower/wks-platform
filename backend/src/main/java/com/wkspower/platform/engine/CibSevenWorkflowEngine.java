@@ -1,6 +1,9 @@
 package com.wkspower.platform.engine;
 
+import com.wkspower.platform.domain.exception.WksConflictException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
@@ -8,15 +11,27 @@ import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import org.cibseven.bpm.engine.MismatchingMessageCorrelationException;
+import org.cibseven.bpm.engine.OptimisticLockingException;
 import org.cibseven.bpm.engine.ProcessEngineException;
 import org.cibseven.bpm.engine.RepositoryService;
 import org.cibseven.bpm.engine.RuntimeService;
+import org.cibseven.bpm.engine.TaskAlreadyClaimedException;
+import org.cibseven.bpm.engine.TaskService;
+import org.cibseven.bpm.engine.exception.NullValueException;
 import org.cibseven.bpm.engine.repository.Deployment;
 import org.cibseven.bpm.engine.repository.ProcessDefinition;
 import org.cibseven.bpm.engine.runtime.ProcessInstance;
+import org.cibseven.bpm.model.bpmn.BpmnModelInstance;
+import org.cibseven.bpm.model.bpmn.instance.ExtensionElements;
+import org.cibseven.bpm.model.bpmn.instance.UserTask;
+import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperties;
+import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,11 +39,16 @@ import org.springframework.stereotype.Component;
 /**
  * CIB seven adapter for the {@link WorkflowEngine} port. Sole class outside the test tree allowed
  * to import {@code org.cibseven.*} (enforced by {@code
- * ArchitectureTest.onlyEngineImportsCibSeven}).
+ * ArchitectureTest.onlyEngineAdapterImportsTheBpmnEngineSdk}).
  *
  * <p>{@code enableDuplicateFiltering(true)} makes redeploy of an unchanged BPMN a no-op — CIB seven
  * hashes the resource bytes. This is the engine-side counterpart to the case-type registry's
  * idempotent same-version path.
+ *
+ * <p>Story 2.4 expands the surface with task lifecycle ({@link #findTask}, {@link #completeTask},
+ * {@link #claimTask}) and message-correlation transitions ({@link #signalTransition}). Engine-side
+ * exceptions translate inside this adapter so domain/api code never sees an {@code org.cibseven.*}
+ * type.
  */
 @Component
 public class CibSevenWorkflowEngine implements WorkflowEngine {
@@ -40,11 +60,13 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
 
   private final RepositoryService repositoryService;
   private final RuntimeService runtimeService;
+  private final TaskService taskService;
 
   public CibSevenWorkflowEngine(
-      RepositoryService repositoryService, RuntimeService runtimeService) {
+      RepositoryService repositoryService, RuntimeService runtimeService, TaskService taskService) {
     this.repositoryService = repositoryService;
     this.runtimeService = runtimeService;
+    this.taskService = taskService;
   }
 
   @Override
@@ -177,5 +199,209 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
           "CIB seven returned no ProcessInstance for processDefinitionKey=" + processDefinitionKey);
     }
     return instance.getId();
+  }
+
+  @Override
+  public Optional<Task> findTask(String taskId) {
+    Objects.requireNonNull(taskId, "taskId");
+    org.cibseven.bpm.engine.task.Task engineTask;
+    try {
+      engineTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+    } catch (ProcessEngineException ex) {
+      throw new WksWorkflowEngineException("CIB seven task query failed for taskId=" + taskId, ex);
+    }
+    if (engineTask == null) {
+      return Optional.empty();
+    }
+
+    Map<String, Object> processVars;
+    try {
+      processVars = runtimeService.getVariables(engineTask.getProcessInstanceId());
+    } catch (NullValueException ex) {
+      // Process instance completed between the task query and the variable read — surface as
+      // not-found rather than 500 (Story 2.4 review — findTask TOCTOU).
+      return Optional.empty();
+    } catch (ProcessEngineException ex) {
+      String msg = ex.getMessage() == null ? "" : ex.getMessage();
+      if (msg.contains("execution") && msg.contains("doesn't exist")) {
+        // Defensive: some CIB seven paths surface execution-gone as ProcessEngineException without
+        // a NullValueException subtype.
+        return Optional.empty();
+      }
+      throw new WksWorkflowEngineException(
+          "CIB seven process-variable lookup failed for taskId=" + taskId, ex);
+    }
+    UUID caseId = parseCaseId(processVars.get("caseId"), taskId);
+    String caseTypeId = (String) processVars.get("caseTypeId");
+    if (caseTypeId == null) {
+      throw new WksWorkflowEngineException(
+          "Process instance "
+              + engineTask.getProcessInstanceId()
+              + " is missing the 'caseTypeId' variable expected on every WKS process — task="
+              + taskId);
+    }
+
+    String archetype =
+        readArchetype(engineTask.getProcessDefinitionId(), engineTask.getTaskDefinitionKey());
+    UUID assignee = parseAssignee(engineTask.getAssignee());
+
+    Instant createdAt =
+        engineTask.getCreateTime() == null ? Instant.EPOCH : engineTask.getCreateTime().toInstant();
+    Instant dueAt = engineTask.getDueDate() == null ? null : engineTask.getDueDate().toInstant();
+
+    return Optional.of(
+        new Task(
+            engineTask.getId(),
+            engineTask.getProcessInstanceId(),
+            caseId,
+            caseTypeId,
+            engineTask.getTaskDefinitionKey(),
+            engineTask.getName(),
+            assignee,
+            archetype,
+            createdAt,
+            dueAt));
+  }
+
+  @Override
+  public void completeTask(String taskId, Map<String, Object> variables) {
+    Objects.requireNonNull(taskId, "taskId");
+    Map<String, Object> safeVars = variables == null ? Map.of() : Map.copyOf(variables);
+    try {
+      taskService.complete(taskId, safeVars);
+    } catch (NullValueException ex) {
+      // CIB seven's TaskService.complete throws NullValueException when the task does not exist
+      // (already completed or never existed).
+      throw new WksNotFoundException(
+          "Task " + taskId + " not found (already completed or unknown)");
+    } catch (TaskAlreadyClaimedException ex) {
+      // Spec Task 2.2 names this exception explicitly. Surfaces when complete() runs against a
+      // task whose assignee differs from the actor at the engine boundary (defence-in-depth on
+      // top of the service-layer assignee check).
+      throw new WksConflictException(
+          "Task " + taskId + " is assigned to another user — complete denied", ex);
+    } catch (OptimisticLockingException ex) {
+      throw new WksConflictException(
+          "Task " + taskId + " was modified by another transaction; reload and retry", ex);
+    } catch (ProcessEngineException ex) {
+      // ProcessEngineException with no specific subtype here is genuine engine failure (DB error,
+      // expression evaluation, etc.) — surface as 500. The two known client-fixable conditions
+      // (not-found, claimed-by-other) are caught above by their explicit subtypes.
+      throw new WksWorkflowEngineException(
+          "CIB seven completeTask failed for taskId=" + taskId, ex);
+    }
+  }
+
+  @Override
+  public void claimTask(String taskId, UUID userId) {
+    Objects.requireNonNull(taskId, "taskId");
+    Objects.requireNonNull(userId, "userId");
+    try {
+      taskService.claim(taskId, userId.toString());
+    } catch (TaskAlreadyClaimedException ex) {
+      throw new WksConflictException(
+          "Task " + taskId + " is already claimed (current assignee follows engine state)", ex);
+    } catch (NullValueException ex) {
+      throw new WksNotFoundException("Task " + taskId + " not found");
+    } catch (ProcessEngineException ex) {
+      // Genuine engine failure (DB / persistence). Surface as 500 — the two client-fixable
+      // conditions (not-found, already-claimed) are caught above by their explicit subtypes.
+      throw new WksWorkflowEngineException(
+          "CIB seven claimTask failed for taskId=" + taskId, ex);
+    }
+  }
+
+  @Override
+  public void signalTransition(
+      String processInstanceId, String action, Map<String, Object> variables) {
+    Objects.requireNonNull(processInstanceId, "processInstanceId");
+    Objects.requireNonNull(action, "action");
+    Map<String, Object> safeVars = variables == null ? Map.of() : Map.copyOf(variables);
+    try {
+      runtimeService
+          .createMessageCorrelation(action)
+          .processInstanceId(processInstanceId)
+          .setVariables(safeVars)
+          .correlate();
+    } catch (MismatchingMessageCorrelationException ex) {
+      throw new WksConflictException(
+          "No active receiver for action '" + action + "' on process instance " + processInstanceId,
+          ex);
+    } catch (OptimisticLockingException ex) {
+      throw new WksConflictException(
+          "Process instance "
+              + processInstanceId
+              + " was modified by another transaction; reload and retry",
+          ex);
+    } catch (ProcessEngineException ex) {
+      // Genuine engine failure — DB/persistence/expression. Conflict-shaped errors are caught
+      // above by their explicit subtypes (Story 2.4 review — narrow conflict mapping).
+      throw new WksWorkflowEngineException(
+          "CIB seven signalTransition failed for processInstanceId=" + processInstanceId, ex);
+    }
+  }
+
+  /** Read the {@code archetype} camunda:property of a user task from the parsed BPMN model. */
+  private String readArchetype(String processDefinitionId, String taskDefinitionKey) {
+    if (processDefinitionId == null || taskDefinitionKey == null) {
+      return null;
+    }
+    BpmnModelInstance model;
+    try {
+      model = repositoryService.getBpmnModelInstance(processDefinitionId);
+    } catch (ProcessEngineException ex) {
+      throw new WksWorkflowEngineException(
+          "CIB seven BPMN model lookup failed for processDefinitionId=" + processDefinitionId, ex);
+    }
+    if (model == null) {
+      return null;
+    }
+    var element = model.getModelElementById(taskDefinitionKey);
+    if (!(element instanceof UserTask userTask)) {
+      return null;
+    }
+    ExtensionElements ext = userTask.getExtensionElements();
+    if (ext == null) {
+      return null;
+    }
+    Collection<CamundaProperties> blocks = ext.getChildElementsByType(CamundaProperties.class);
+    for (CamundaProperties block : blocks) {
+      for (CamundaProperty p : block.getCamundaProperties()) {
+        if ("archetype".equals(p.getCamundaName())) {
+          return p.getCamundaValue();
+        }
+      }
+    }
+    return null;
+  }
+
+  private static UUID parseCaseId(Object raw, String taskId) {
+    if (raw == null) {
+      throw new WksWorkflowEngineException(
+          "Process instance is missing the 'caseId' variable expected on every WKS process — task="
+              + taskId);
+    }
+    try {
+      return UUID.fromString(raw.toString());
+    } catch (IllegalArgumentException ex) {
+      throw new WksWorkflowEngineException(
+          "Process variable 'caseId' is not a UUID for task=" + taskId + " value=" + raw, ex);
+    }
+  }
+
+  private static UUID parseAssignee(String engineAssignee) {
+    if (engineAssignee == null || engineAssignee.isBlank()) {
+      return null;
+    }
+    try {
+      return UUID.fromString(engineAssignee);
+    } catch (IllegalArgumentException ex) {
+      // Engine accepts arbitrary string assignees; non-UUID strings are pre-2.4 / external. Map to
+      // null so the API surfaces "unassigned" rather than 500. Logged at debug to aid diagnosis.
+      log.debug(
+          "Task assignee '{}' is not a UUID; surfacing as unassigned in domain Task",
+          engineAssignee);
+      return null;
+    }
   }
 }

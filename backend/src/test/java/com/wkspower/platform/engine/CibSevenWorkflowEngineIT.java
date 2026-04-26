@@ -3,7 +3,10 @@ package com.wkspower.platform.engine;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.wkspower.platform.domain.exception.WksConflictException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
@@ -139,6 +142,97 @@ class CibSevenWorkflowEngineIT {
     assertThat(pi)
         .as("Story 2.3 AC4: startProcessInstance returns a non-blank engine-assigned id")
         .isNotBlank();
+  }
+
+  // ---- Story 2.4 — task lifecycle + transition --------------------------
+
+  @Test
+  void findTaskReturnsEmptyWhenUnknown() {
+    assertThat(workflowEngine.findTask("does-not-exist")).isEmpty();
+  }
+
+  @Test
+  void findTaskReadsCaseIdAndArchetypeFromBpmn() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("find-task-process", caseId, "loan-application");
+
+    String taskId = currentTaskId(pi);
+    Optional<Task> resolved = workflowEngine.findTask(taskId);
+
+    assertThat(resolved).isPresent();
+    assertThat(resolved.get().caseId()).isEqualTo(caseId);
+    assertThat(resolved.get().caseTypeId()).isEqualTo("loan-application");
+    assertThat(resolved.get().taskDefinitionKey()).isEqualTo("draft");
+    assertThat(resolved.get().archetype()).isEqualTo("submit_for_processing");
+  }
+
+  @Test
+  void claimTaskAssignsThenSecondClaimConflicts() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("claim-process", caseId, "loan-application");
+    String taskId = currentTaskId(pi);
+    UUID userOne = UUID.randomUUID();
+    UUID userTwo = UUID.randomUUID();
+
+    workflowEngine.claimTask(taskId, userOne);
+    Optional<Task> claimed = workflowEngine.findTask(taskId);
+    assertThat(claimed).isPresent();
+    assertThat(claimed.get().assignee()).isEqualTo(userOne);
+
+    assertThatThrownBy(() -> workflowEngine.claimTask(taskId, userTwo))
+        .isInstanceOf(WksConflictException.class);
+  }
+
+  @Test
+  void claimUnknownTaskThrowsNotFound() {
+    assertThatThrownBy(() -> workflowEngine.claimTask("nope", UUID.randomUUID()))
+        .isInstanceOfAny(WksNotFoundException.class, WksConflictException.class);
+  }
+
+  @Test
+  void completeTaskRemovesItFromQuery() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("complete-process", caseId, "loan-application");
+    String taskId = currentTaskId(pi);
+
+    workflowEngine.completeTask(taskId, Map.of());
+
+    assertThat(workflowEngine.findTask(taskId)).isEmpty();
+  }
+
+  @Test
+  void completeUnknownTaskThrowsNotFound() {
+    assertThatThrownBy(() -> workflowEngine.completeTask("nope", Map.of()))
+        .isInstanceOf(WksNotFoundException.class);
+  }
+
+  @Test
+  void signalTransitionWithUnknownActionConflicts() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("signal-process", caseId, "loan-application");
+
+    assertThatThrownBy(() -> workflowEngine.signalTransition(pi, "no-such-message", Map.of()))
+        .isInstanceOf(WksConflictException.class);
+  }
+
+  private String startWithUserTask(String key, UUID caseId, String caseTypeId) {
+    byte[] bpmn = simpleBpmn(key).getBytes(StandardCharsets.UTF_8);
+    workflowEngine.deploy(new DeploymentRequest(key, key, bpmn, caseTypeId, 1));
+    return workflowEngine.startProcessInstance(
+        key, Map.of("caseId", caseId.toString(), "caseTypeId", caseTypeId));
+  }
+
+  private String currentTaskId(String processInstanceId) {
+    org.cibseven.bpm.engine.task.Task t =
+        processEngine
+            .getTaskService()
+            .createTaskQuery()
+            .processInstanceId(processInstanceId)
+            .singleResult();
+    if (t == null) {
+      throw new AssertionError("expected a single task on process instance " + processInstanceId);
+    }
+    return t.getId();
   }
 
   @Test

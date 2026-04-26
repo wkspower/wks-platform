@@ -1,10 +1,12 @@
 package com.wkspower.platform.domain.port;
 
+import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Outbound port for the embedded BPMN engine.
@@ -13,7 +15,9 @@ import java.util.Optional;
  *   <li>Story 2.2 surface — {@link #deploy(DeploymentRequest)} and {@link
  *       #latestDeployment(String)}.
  *   <li>Story 2.3 surface — {@link #startProcessInstance(String, Map)}.
- *   <li>Process completion / transition lifecycle remains absent until Stories 2.4 / 2.8.
+ *   <li>Story 2.4 surface — {@link #findTask(String)}, {@link #completeTask(String, Map)}, {@link
+ *       #claimTask(String, UUID)}, {@link #signalTransition(String, String, Map)} for case status
+ *       transitions and user-task lifecycle.
  * </ul>
  *
  * <p>Implementations live in {@code engine/} only.
@@ -42,4 +46,39 @@ public interface WorkflowEngine {
    * into {@link com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
    */
   String startProcessInstance(String processDefinitionKey, Map<String, Object> variables);
+
+  /**
+   * Lookup a single user task by engine-assigned id. Returns {@link Optional#empty()} when the task
+   * does not exist (already completed, or never existed); the calling service translates that to
+   * {@link com.wkspower.platform.domain.exception.WksNotFoundException}. Implementations MUST
+   * translate engine exceptions other than not-found into {@link
+   * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
+   */
+  Optional<Task> findTask(String taskId);
+
+  /**
+   * Complete a user task. {@code variables} are merged into process variables — pass simple scalars
+   * only. Implementations MUST translate already-completed / wrong-assignee / optimistic lock
+   * failures into {@link com.wkspower.platform.domain.exception.WksConflictException} and
+   * unknown-task into {@link com.wkspower.platform.domain.exception.WksNotFoundException}.
+   */
+  void completeTask(String taskId, Map<String, Object> variables);
+
+  /**
+   * Claim an unassigned user task for {@code userId}. Implementations MUST translate
+   * already-claimed into {@link com.wkspower.platform.domain.exception.WksConflictException} (with
+   * a message identifying the current assignee) and unknown-task into {@link
+   * com.wkspower.platform.domain.exception.WksNotFoundException}.
+   */
+  void claimTask(String taskId, UUID userId);
+
+  /**
+   * Advance a process instance via message correlation (Story 2.4 Phase 0 supports message
+   * correlation only — see Dev Notes §Transition dispatch). The {@code action} string is the BPMN
+   * message name. {@code variables} flow into the correlation as process variables.
+   *
+   * <p>Implementations MUST translate "no enabled receiver" / mismatching-correlation into {@link
+   * com.wkspower.platform.domain.exception.WksConflictException}.
+   */
+  void signalTransition(String processInstanceId, String action, Map<String, Object> variables);
 }

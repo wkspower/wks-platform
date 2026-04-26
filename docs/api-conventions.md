@@ -160,6 +160,52 @@ allow-list is `[updatedAt, createdAt, status]`. The JSON `data` column is never 
 list path (server-side projection) — list rows carry only system columns plus the case-type's
 `listColumns` field projections.
 
+## Case transitions and tasks (Story 2.4)
+
+Three endpoints expose BPMN-driven case lifecycle. All three gate on the `transition` verb (per
+case-type YAML role grants).
+
+| Method | Path                                  | Verb gate    | Wire success                                          |
+| ------ | ------------------------------------- | ------------ | ----------------------------------------------------- |
+| `POST` | `/api/cases/{id}/transition`          | `transition` | `200 ApiResponse<CaseDto>` (post-transition state)    |
+| `POST` | `/api/tasks/{id}/complete`            | `transition` | `200 ApiResponse<TaskActionResponse>`                 |
+| `POST` | `/api/tasks/{id}/claim`               | `transition` | `200 ApiResponse<TaskActionResponse>` (with assignee) |
+
+`POST /api/cases/{id}/transition` body: `{ "action": "<bpmn-message-name>", "variables": { ... } }`.
+**Phase 0 supports message correlation only** — `action` is the BPMN message name attached to an
+`<bpmn:intermediateCatchEvent>`/`<bpmn:receiveTask>` of type `messageEventDefinition`. Signal-based
+transitions arrive in Story 8.2 if a real BPMN template requires them. Unknown / non-enabled
+actions surface `WKS-RTM-409` (no enabled receiver).
+
+`POST /api/tasks/{id}/complete` body: `{ "variables": { ... } }` (variables optional). Response:
+
+```json
+{
+  "data": {
+    "taskId": "engine-task-id",
+    "processInstanceId": null,
+    "caseId": "uuid",
+    "archetype": "draft_section | submit_for_processing | business_final",
+    "assignee": null,
+    "at": "2026-04-26T10:00:00Z"
+  }
+}
+```
+
+`archetype` is read from the user task's `<camunda:property name="archetype" .../>` and reflects
+the deploy-time invariant enforced by the BPMN validator (`WKS-CFG-020` / `WKS-CFG-021`); the
+runtime path does **not** re-validate. The frontend's `TaskLifecycleButton` (Story 2.8) uses this
+field to drive the three-layer async UI states defined in `architecture.md §Decision 9` — the
+backend never blocks on downstream BPMN work for `submit_for_processing`.
+
+`POST /api/tasks/{id}/claim` has no body. Response carries the new `assignee`. Already-claimed
+tasks (by anyone, including the same caller) surface `WKS-RTM-409`.
+
+Status changes are pushed by an engine-side `ExecutionListener` (`CaseStatusListener`) that fires
+on user-task and end-event commit. The listener writes `cases.status` through the
+`CaseStatusUpdater` port and publishes `CaseStatusChanged` via `EventPublisher`. Subscribers (audit
+log in Story 4.1, SSE bridge in Story 4.3) attach without touching this code.
+
 ## Interactive docs
 
 `GET /v3/api-docs` returns the OpenAPI 3 JSON; Swagger UI lives at `GET /swagger-ui/index.html`.
