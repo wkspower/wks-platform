@@ -3,7 +3,9 @@ package com.wkspower.platform.api.pagination;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -83,8 +85,16 @@ public record PageRequestParams(int page, int size, List<String> sort) {
     if (specs.isEmpty()) {
       return PageRequest.of(page, effectiveSize);
     }
-    List<Sort.Order> orders = new ArrayList<>(specs.size());
+    // Story 2.5 AC11 #1 — last-wins dedup. `?sort=name,asc&sort=name,desc` should not emit two
+    // ORDER BY clauses on the same column. Insertion order is preserved for unique properties; on
+    // a duplicate property the entry rewrites in place (LinkedHashMap.put semantics: key keeps its
+    // original slot, value updates).
+    Map<String, SortSpec> deduped = new LinkedHashMap<>();
     for (SortSpec spec : specs) {
+      deduped.put(spec.property(), spec);
+    }
+    List<Sort.Order> orders = new ArrayList<>(deduped.size());
+    for (SortSpec spec : deduped.values()) {
       whitelist.assertAllowed(spec.property());
       orders.add(new Sort.Order(spec.direction().toSpring(), spec.property()));
     }

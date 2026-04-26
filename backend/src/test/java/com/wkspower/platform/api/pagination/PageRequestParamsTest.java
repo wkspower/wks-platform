@@ -96,4 +96,62 @@ class PageRequestParamsTest {
     assertThat(p.getSort().getOrderFor("updatedAt").getDirection()).isEqualTo(Sort.Direction.DESC);
     assertThat(p.getSort().getOrderFor("createdAt").getDirection()).isEqualTo(Sort.Direction.ASC);
   }
+
+  // -- Story 2.5 AC11 #1 --------------------------------------------------
+
+  /**
+   * Story 2.5 AC11 #1 — when a single token has both a bad direction AND a bad property the
+   * direction error fires first ({@code WKS-API-005}), letting the client correct one fault per
+   * round-trip rather than a confusing simultaneous-error UX. Locks in the contract so a
+   * future refactor of {@link SortSpec#parse(String)} cannot silently flip the precedence.
+   */
+  @Test
+  void badDirectionWinsOverBadPropertyOnSameToken() {
+    assertThatThrownBy(
+            () ->
+                new PageRequestParams(0, 20, List.of("mysteryField,sideways"))
+                    .toPageable(WHITELIST))
+        .isInstanceOf(WksValidationException.class)
+        .satisfies(
+            ex -> {
+              WksValidationException e = (WksValidationException) ex;
+              assertThat(e.getCode()).isEqualTo(ErrorCode.WKS_API_005.wire());
+              assertThat(e.getField()).isEqualTo("sort");
+            });
+  }
+
+  /**
+   * Story 2.5 AC11 #1 — duplicate-sort dedup with last-wins. {@code ?sort=updatedAt,asc&sort=updatedAt,desc}
+   * resolves to a single ORDER BY updatedAt DESC, not two. Insertion position of the first
+   * occurrence is preserved so the user-visible "primary sort" doesn't shuffle on a duplicate
+   * write — only the direction updates.
+   */
+  @Test
+  void duplicateSortPropertyDedupsLastWins() {
+    Pageable p =
+        new PageRequestParams(0, 20, List.of("updatedAt,asc", "updatedAt,desc"))
+            .toPageable(WHITELIST);
+
+    assertThat(p.getSort()).hasSize(1);
+    Sort.Order order = p.getSort().getOrderFor("updatedAt");
+    assertThat(order).isNotNull();
+    assertThat(order.getDirection()).isEqualTo(Sort.Direction.DESC);
+  }
+
+  @Test
+  void duplicateSortPropertyPreservesFirstSlotOrder() {
+    Pageable p =
+        new PageRequestParams(
+                0,
+                20,
+                List.of("updatedAt,asc", "createdAt,asc", "updatedAt,desc"))
+            .toPageable(WHITELIST);
+
+    // updatedAt was first; despite the dedup pulling its later (desc) value, it retains slot #0.
+    List<Sort.Order> orders = p.getSort().toList();
+    assertThat(orders).hasSize(2);
+    assertThat(orders.get(0).getProperty()).isEqualTo("updatedAt");
+    assertThat(orders.get(0).getDirection()).isEqualTo(Sort.Direction.DESC);
+    assertThat(orders.get(1).getProperty()).isEqualTo("createdAt");
+  }
 }

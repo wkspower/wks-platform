@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Story 2.5 AC11 #4 — fixture proving CaseStatusListener honours camunda:property name="status"
+  on an end event when the property value differs from the element id. Mirrors
+  case-transition-fixture.bpmn but the end event has id="end" with property value="resolved",
+  so a passing test demonstrates the property branch fired (not the element-id fallback).
+-->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  targetNamespace="http://wkspower.com/bpmn/test"
+                  id="Definitions_case_status_property_fixture">
+  <bpmn:message id="Message_submit" name="submit"/>
+  <bpmn:process id="case-status-property-fixture" isExecutable="true" camunda:historyTimeToLive="30">
+    <bpmn:startEvent id="start"/>
+    <bpmn:userTask id="draft" name="Draft section">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="archetype" value="draft_section"/>
+        </camunda:properties>
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="awaiting-submit" name="Awaiting submit">
+      <bpmn:messageEventDefinition id="MessageEventDefinition_submit" messageRef="Message_submit"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="end" name="End">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="status" value="resolved"/>
+        </camunda:properties>
+      </bpmn:extensionElements>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="draft"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="draft" targetRef="awaiting-submit"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="awaiting-submit" targetRef="end"/>
+  </bpmn:process>
+</bpmn:definitions>

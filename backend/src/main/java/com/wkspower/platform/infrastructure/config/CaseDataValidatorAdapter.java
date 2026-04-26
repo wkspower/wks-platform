@@ -7,6 +7,7 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.CaseDataValidator;
@@ -14,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,6 +25,17 @@ import org.springframework.stereotype.Component;
  * the networknt JSON Schema validator. Returns the full list of violations — never short-circuits
  * (collect-all invariant). The Jackson {@link ObjectMapper} comes from Story 1.4's {@code
  * JacksonConfig}; the schema factory is built once per JVM (Draft 2020-12).
+ *
+ * <p>Story 2.5 AC11 #3 — generated {@link JsonSchema} instances are cached by
+ * {@code (caseTypeId, version)}. The {@link JsonSchemaGenerator} build + networknt schema
+ * compilation are pure functions of the case-type config, so a per-version cache is safe and
+ * eliminates the per-call rebuild cost on hot validation paths
+ * ({@code POST /api/cases}, {@code PUT /api/cases/\{id\}}, future Story 2.7 form submits).
+ *
+ * <p>The cache is invalidated for a case-type id when {@link ConfigDeployed} fires for that
+ * id — a redeploy may bump the version or change the schema shape. The eviction key is the
+ * case-type id (all versions are dropped) since the redeployed version will repopulate on its
+ * next validate call.
  */
 @Component
 class CaseDataValidatorAdapter implements CaseDataValidator {
@@ -30,6 +45,7 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   private final JsonSchemaGenerator schemaGenerator;
   private final ObjectMapper objectMapper;
+  private final ConcurrentMap<CacheKey, JsonSchema> schemaCache = new ConcurrentHashMap<>();
 
   CaseDataValidatorAdapter(JsonSchemaGenerator schemaGenerator, ObjectMapper objectMapper) {
     this.schemaGenerator = schemaGenerator;
@@ -38,8 +54,10 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   @Override
   public List<ErrorDetail> validate(CaseTypeConfig caseType, Map<String, Object> data) {
-    JsonNode schemaNode = schemaGenerator.generate(caseType);
-    JsonSchema schema = SCHEMA_FACTORY.getSchema(schemaNode);
+    JsonSchema schema =
+        schemaCache.computeIfAbsent(
+            new CacheKey(caseType.id(), caseType.version()),
+            k -> SCHEMA_FACTORY.getSchema(schemaGenerator.generate(caseType)));
     JsonNode payload = objectMapper.valueToTree(data == null ? Map.of() : data);
     Set<ValidationMessage> messages = schema.validate(payload);
 
@@ -50,6 +68,23 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
     }
     return List.copyOf(errors);
   }
+
+  /**
+   * On {@link ConfigDeployed} drop every cached schema for the redeployed case type. A redeploy
+   * may rev the version or change the field set — keeping the old compiled schema would silently
+   * validate against a stale shape.
+   */
+  @EventListener
+  void onConfigDeployed(ConfigDeployed event) {
+    schemaCache.keySet().removeIf(key -> key.caseTypeId().equals(event.caseTypeId()));
+  }
+
+  /** Visible for tests — assert cache state without exposing the map. */
+  int cacheSize() {
+    return schemaCache.size();
+  }
+
+  private record CacheKey(String caseTypeId, int version) {}
 
   private static String pointerToField(String pointer) {
     if (pointer == null || pointer.isEmpty() || "$".equals(pointer)) {
