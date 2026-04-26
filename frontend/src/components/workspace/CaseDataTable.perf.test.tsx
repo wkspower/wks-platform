@@ -1,6 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { TooltipProvider } from '@/components/ui/Tooltip';
 import { buildCaseColumns } from '@/lib/buildCaseColumns';
 import {
   buildCaseListFixture,
@@ -9,6 +11,10 @@ import {
 import { toCaseRow } from '@/types/case';
 
 import { CaseDataTable } from './CaseDataTable';
+
+function render(ui: ReactElement) {
+  return rtlRender(<TooltipProvider delayDuration={0}>{ui}</TooltipProvider>);
+}
 
 /**
  * Story 2.5 AC8 — first interactive paint of `CaseDataTable` with 1,000 rows must be under

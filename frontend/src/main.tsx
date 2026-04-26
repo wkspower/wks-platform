@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 
 import { AppErrorFallback } from '@/components/errors/AppErrorFallback';
+import { TooltipProvider } from '@/components/ui/Tooltip';
 import { createQueryClient } from '@/lib/queryClient';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { router } from '@/routes';
@@ -50,7 +51,9 @@ try {
       <AppErrorBoundary>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
+            <TooltipProvider delayDuration={300}>
+              <RouterProvider router={router} />
+            </TooltipProvider>
           </QueryClientProvider>
         </AuthProvider>
       </AppErrorBoundary>

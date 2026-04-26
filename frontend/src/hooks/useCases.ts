@@ -1,8 +1,8 @@
-import { useQueries } from '@tanstack/react-query';
+import { skipToken, useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import { listCases } from '@/api/cases';
+import { getCase, listCases } from '@/api/cases';
 import { caseQueryKeys, type CaseListQuery } from '@/lib/queryKeys';
-import { toCaseRow, type CaseRow } from '@/types/case';
+import { toCaseRow, type CaseDto, type CaseRow } from '@/types/case';
 
 const STALE_TIME_MS = 30_000;
 
@@ -71,5 +71,22 @@ export function useCases({ caseTypeIds, status, size = 100, sort }: UseCasesArgs
       }
       return { data: rows, isLoading: false, isError, errors };
     },
+  });
+}
+
+/**
+ * Story 2.6 — single-case fetch for the detail panel. Short-circuits when `id` is null
+ * (URL has no caseId). Query key is `['case', id]` — Story 4.3 SSE invalidation will hit
+ * this exact shape.
+ */
+export function useCase(id: string | null): UseQueryResult<CaseDto, Error> {
+  // `skipToken` is the v5-blessed way to disable a query without inventing a sentinel
+  // queryKey. It also makes the unsafe `id as string` cast unnecessary — when `id` is null
+  // TanStack never invokes the queryFn, so `getCase` only ever sees a real id.
+  return useQuery<CaseDto, Error>({
+    queryKey: id ? caseQueryKeys.detail(id) : caseQueryKeys.detail('__disabled__'),
+    queryFn: id ? () => getCase(id) : skipToken,
+    staleTime: STALE_TIME_MS,
+    refetchOnWindowFocus: true,
   });
 }

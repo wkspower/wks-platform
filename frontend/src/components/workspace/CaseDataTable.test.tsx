@@ -1,7 +1,9 @@
-import { render, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { TooltipProvider } from '@/components/ui/Tooltip';
 import { buildCaseColumns } from '@/lib/buildCaseColumns';
 import {
   buildCaseListFixture,
@@ -10,6 +12,10 @@ import {
 import { toCaseRow, type CaseRow } from '@/types/case';
 
 import { CaseDataTable } from './CaseDataTable';
+
+function render(ui: ReactElement) {
+  return rtlRender(<TooltipProvider delayDuration={0}>{ui}</TooltipProvider>);
+}
 
 describe('CaseDataTable', () => {
   const caseType = loanApplicationCaseTypeView();

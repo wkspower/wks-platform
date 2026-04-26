@@ -1,5 +1,5 @@
 import { ChevronDown, X } from 'lucide-react';
-import { forwardRef, useEffect, useMemo, useRef, type ChangeEvent } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import {
@@ -11,10 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu';
 import { Input } from '@/components/ui/Input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover';
 import { t } from '@/i18n';
 import { useUiStore, type CaseListFilters } from '@/stores/uiStore';
 import type { CaseTypeSummary, CaseTypeView } from '@/types/caseType';
 import { PRIORITIES, type Priority } from '@/types/priority';
+
+export type CaseFilterBarVariant = 'full-width' | 'narrowed';
 
 export interface CaseFilterBarProps {
   caseTypes: CaseTypeSummary[];
@@ -23,6 +26,14 @@ export interface CaseFilterBarProps {
   /** Search input value (controlled by the parent so debouncing happens upstream). */
   searchInput: string;
   onSearchInputChange: (value: string) => void;
+  /** Story 2.6 — when narrowed, chips collapse to an "N filters" pill with overflow popover. */
+  variant?: CaseFilterBarVariant;
+}
+
+function formatFilterCount(count: number): string {
+  return count === 1
+    ? t('cases.filter.oneFilter')
+    : t('cases.filter.nFilters', { count: String(count) });
 }
 
 /**
@@ -33,7 +44,7 @@ export interface CaseFilterBarProps {
  * persisted (UX spec §View memory).
  */
 export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(function CaseFilterBar(
-  { caseTypes, selectedCaseTypeViews, searchInput, onSearchInputChange },
+  { caseTypes, selectedCaseTypeViews, searchInput, onSearchInputChange, variant = 'full-width' },
   ref,
 ) {
   const filters = useUiStore((s) => s.caseListFilters);
@@ -183,7 +194,7 @@ export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(func
         />
       </div>
 
-      {hasAny ? (
+      {hasAny && variant === 'full-width' ? (
         <div
           ref={chipRowRef}
           tabIndex={-1}
@@ -196,9 +207,208 @@ export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(func
           </Button>
         </div>
       ) : null}
+
+      {variant === 'narrowed' ? (
+        <NarrowedOverflow
+          filters={filters}
+          caseTypes={caseTypes}
+          statusOptions={statusOptions}
+          searchActive={(searchInput ?? '').length > 0}
+          setFilters={(next) => setFilters(next)}
+          clearFilters={() => clearFilters()}
+          toggleStatus={toggleStatus}
+          togglePriority={togglePriority}
+          toggleCaseType={toggleCaseType}
+        />
+      ) : null}
     </div>
   );
 });
+
+interface NarrowedOverflowProps {
+  filters: CaseListFilters;
+  caseTypes: CaseTypeSummary[];
+  statusOptions: { id: string; displayName: string }[];
+  /** True when the search input has any text — counted in the pill so search isn't invisible. */
+  searchActive: boolean;
+  setFilters: (next: CaseListFilters) => void;
+  clearFilters: () => void;
+  toggleStatus: (id: string) => void;
+  togglePriority: (id: Priority) => void;
+  toggleCaseType: (id: string) => void;
+}
+
+function NarrowedOverflow({
+  filters,
+  caseTypes,
+  statusOptions,
+  searchActive,
+  setFilters,
+  clearFilters,
+  toggleStatus,
+  togglePriority,
+  toggleCaseType,
+}: NarrowedOverflowProps) {
+  const [open, setOpen] = useState(false);
+  const chipCount =
+    filters.caseTypeIds.length + filters.statusIds.length + filters.priorities.length;
+  // Search counts as one active filter so the user can see at a glance that something is narrowing
+  // the list — pill never silently reads "0 filters" while a search is hiding rows.
+  const activeCount = chipCount + (searchActive ? 1 : 0);
+
+  if (chipCount === 0 && !searchActive) {
+    // Empty state — wire the "Add filter" button to a popover that exposes the same three
+    // filter dropdowns the full-width bar does (AC9 — "same controls as the full-width bar but
+    // each in a single popover so the bar stays one-row").
+    return (
+      <div className="flex items-center">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="narrowed-filter-add"
+              aria-label={t('cases.filter.add')}
+            >
+              {t('cases.filter.add')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <NarrowedAddFilterMenu
+              filters={filters}
+              caseTypes={caseTypes}
+              statusOptions={statusOptions}
+              toggleStatus={toggleStatus}
+              togglePriority={togglePriority}
+              toggleCaseType={toggleCaseType}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" data-testid="narrowed-filter-pill">
+            {formatFilterCount(activeCount)}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex flex-col gap-1">
+            {renderChips(filters, caseTypes, statusOptions, setFilters)}
+            {chipCount === 0 && searchActive ? (
+              // Pill exists only because of search — surface the chip-row controls so the user can
+              // still add structured filters without leaving narrowed mode.
+              <NarrowedAddFilterMenu
+                filters={filters}
+                caseTypes={caseTypes}
+                statusOptions={statusOptions}
+                toggleStatus={toggleStatus}
+                togglePriority={togglePriority}
+                toggleCaseType={toggleCaseType}
+              />
+            ) : (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-1">
+                {t('cases.filter.clearAll')}
+              </Button>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+interface NarrowedAddFilterMenuProps {
+  filters: CaseListFilters;
+  caseTypes: CaseTypeSummary[];
+  statusOptions: { id: string; displayName: string }[];
+  toggleStatus: (id: string) => void;
+  togglePriority: (id: Priority) => void;
+  toggleCaseType: (id: string) => void;
+}
+
+function NarrowedAddFilterMenu({
+  filters,
+  caseTypes,
+  statusOptions,
+  toggleStatus,
+  togglePriority,
+  toggleCaseType,
+}: NarrowedAddFilterMenuProps) {
+  return (
+    <div className="flex flex-col gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="justify-between">
+            {t('cases.filter.status')}
+            <ChevronDown aria-hidden className="size-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{t('cases.filter.status')}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {statusOptions.map((s) => (
+            <DropdownMenuCheckboxItem
+              key={s.id}
+              checked={filters.statusIds.includes(s.id)}
+              onCheckedChange={() => toggleStatus(s.id)}
+            >
+              {s.displayName}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="justify-between">
+            {t('cases.filter.priority')}
+            <ChevronDown aria-hidden className="size-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{t('cases.filter.priority')}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {PRIORITIES.map((p) => (
+            <DropdownMenuCheckboxItem
+              key={p}
+              checked={filters.priorities.includes(p)}
+              onCheckedChange={() => togglePriority(p)}
+            >
+              {t(`cases.priority.${p}`)}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="justify-between">
+            {t('cases.filter.caseType')}
+            <ChevronDown aria-hidden className="size-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{t('cases.filter.caseType')}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {caseTypes.map((ct) => (
+            <DropdownMenuCheckboxItem
+              key={ct.id}
+              checked={filters.caseTypeIds.includes(ct.id)}
+              onCheckedChange={() => toggleCaseType(ct.id)}
+            >
+              {ct.displayName}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
 
 function renderChips(
   filters: CaseListFilters,

@@ -43,6 +43,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: '/cases', element: <CasesPage /> },
+      { path: '/cases/:caseId', element: <CasesPage /> },
       { path: '/tasks', element: <TasksPage /> },
       {
         path: '/admin',

@@ -1,7 +1,9 @@
 import type { CellContext } from '@tanstack/react-table';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { TooltipProvider } from '@/components/ui/Tooltip';
 import { loanApplicationCaseTypeView } from '@/test/fixtures/buildCaseListFixture';
 import { toCaseRow } from '@/types/case';
 import type { CaseRow } from '@/types/case';
@@ -24,7 +26,7 @@ function renderCell(
     getValue: () => (accessor ? accessor(row) : undefined),
   } as unknown as CellContext<CaseRow, unknown>;
   const node = typeof col.cell === 'function' ? col.cell(ctx) : col.cell;
-  return render(<>{node}</>);
+  return render(<TooltipProvider delayDuration={0}>{node}</TooltipProvider>);
 }
 
 describe('buildCaseColumns', () => {
@@ -57,6 +59,44 @@ describe('buildCaseColumns', () => {
     r1.unmount();
     const r2 = renderCell('field:amount', caseType, row);
     expect(r2.container.textContent).toContain('—');
+  });
+
+  it('id cell renders short hex with Radix Tooltip on full UUID (Story 2.6 AC11)', async () => {
+    const user = userEvent.setup();
+    const fullId = '00000000-0000-0000-0000-0000abcdef12';
+    const row = toCaseRow({
+      id: fullId,
+      caseTypeId: caseType.id,
+      status: 'open',
+      assignee: null,
+      createdAt: '2026-04-01T00:00:00Z',
+      updatedAt: '2026-04-01T00:00:00Z',
+      fields: {},
+    });
+    const r = renderCell('id', caseType, row);
+    const trigger = r.container.querySelector('span[tabindex="0"]') as HTMLElement;
+    expect(trigger).toBeTruthy();
+    expect(trigger.textContent).toBe('abcdef12');
+    expect(trigger.getAttribute('title')).toBeNull(); // native title removed (no double-announce)
+    await user.hover(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(fullId);
+  });
+
+  it('id cell tooltip opens on focus (keyboard reachable)', async () => {
+    const user = userEvent.setup();
+    const fullId = '00000000-0000-0000-0000-0000abcdef34';
+    const row = toCaseRow({
+      id: fullId,
+      caseTypeId: caseType.id,
+      status: 'open',
+      assignee: null,
+      createdAt: '2026-04-01T00:00:00Z',
+      updatedAt: '2026-04-01T00:00:00Z',
+      fields: {},
+    });
+    renderCell('id', caseType, row);
+    await user.tab();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(fullId);
   });
 
   it('drops unknown listColumn ids and warns', () => {

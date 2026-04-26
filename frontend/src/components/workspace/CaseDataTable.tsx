@@ -48,6 +48,11 @@ export interface CaseDataTableProps<TRow extends CaseRow = CaseRow> {
    * live-region — `data.length` upstream of the table is the pre-search count.
    */
   onFilteredCountChange?: (count: number) => void;
+  /**
+   * Fired whenever TanStack Table's sorted row order changes. Story 2.6 — the workspace lifts
+   * the row order to drive J/K keyboard navigation across the split-pane.
+   */
+  onSortedRowsChange?: (rows: TRow[]) => void;
 }
 
 const PAGE_SIZE = 50;
@@ -80,6 +85,7 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
   narrowedVisibleColumnIds,
   hiddenColumnIds,
   onFilteredCountChange,
+  onSortedRowsChange,
 }: CaseDataTableProps<TRow>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -135,12 +141,29 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
     return rows;
   }, [sorting, tableRows]);
 
+  // Story 2.6 — J/K keyboard nav must walk the full filtered+sorted set, not the paginated
+  // page slice. `getRowModel().rows` is post-pagination (50 rows). `getSortedRowModel().rows`
+  // is post-filter, post-sort, pre-pagination — exactly the "current sortedRows order across
+  // pages" the workspace needs.
+  const navRowsSource = table.getSortedRowModel().rows;
+  const navRows = useMemo(() => {
+    if (sorting.length > 0) return navRowsSource;
+    const rows = [...navRowsSource];
+    rows.sort((a, b) => urgencyDefaultSort(a.original, b.original));
+    return rows;
+  }, [sorting, navRowsSource]);
+
   const filteredCount = table.getFilteredRowModel().rows.length;
   const showEmpty = !isLoading && filteredCount === 0;
 
   useEffect(() => {
     onFilteredCountChange?.(filteredCount);
   }, [filteredCount, onFilteredCountChange]);
+
+  useEffect(() => {
+    if (!onSortedRowsChange) return;
+    onSortedRowsChange(navRows.map((r) => r.original));
+  }, [navRows, onSortedRowsChange]);
 
   // AC5 — when the search input is non-empty OR the parent declared a filtered context, render the
   // 'filtered' empty copy. Earlier ternary form was parsed as `showEmpty && (cond1 ? true : cond2)`
@@ -239,6 +262,7 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
               <Tr
                 key={row.id}
                 data-row
+                data-row-id={row.original.id}
                 data-state={row.getIsSelected() ? 'selected' : undefined}
                 tabIndex={idx === Math.min(activeRowIndex, sortedRows.length - 1) ? 0 : -1}
                 onFocus={() => setActiveRowIndex(idx)}
