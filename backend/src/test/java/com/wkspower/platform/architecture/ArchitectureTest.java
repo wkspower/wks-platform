@@ -220,6 +220,50 @@ class ArchitectureTest {
   }
 
   @Test
+  void caseDomainHasNoSpringOrJpaImports() {
+    // Story 2.3 AC9 — explicit gate on the new case-domain types. Covered by
+    // domainHasNoFrameworkImports as a blanket; this rule pins it specifically so a regression
+    // surfaces a Story-2.3-attributable failure message.
+    noClasses()
+        .that()
+        .resideInAnyPackage(
+            "..domain.model..",
+            "..domain.service..",
+            "..domain.event..",
+            "..domain.page..",
+            "..domain.exception..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "org.springframework..",
+            "jakarta.persistence..",
+            "com.fasterxml.jackson.databind..",
+            "com.networknt..",
+            "org.cibseven..")
+        .because(
+            "Case domain (model, service, events, pagination, exceptions) stays framework-free — "
+                + "Story 2.3 AC9. Engine-first ordering and JSON-schema validation live behind"
+                + " ports.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void caseRepositoryImplementationsLiveInInfrastructure() {
+    // Story 2.3 AC9 — defense against a future repository-shaped class showing up in engine/ or
+    // api/. Implementations of CaseRepository must sit in infrastructure/persistence/ only.
+    classes()
+        .that()
+        .implement("com.wkspower.platform.domain.port.CaseRepository")
+        .should()
+        .resideInAPackage("..infrastructure.persistence..")
+        .allowEmptyShould(true)
+        .because(
+            "CaseRepository implementations belong inside infrastructure/persistence/ — Story 2.3"
+                + " AC9.")
+        .check(CLASSES);
+  }
+
+  @Test
   void hexagonalLayering() {
     Architectures.layeredArchitecture()
         .consideringAllDependencies()

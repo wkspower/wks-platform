@@ -91,7 +91,7 @@ wks-platform/
   all deploy-time validation codes stay below 100. Architecture doc gets a follow-up patch.)
 - `WKS-CFG-200–299`: Template validation (reserved)
 - `WKS-API-001–099`: API input validation (`WKS-API-413` for multipart cap, Story 2.2)
-- `WKS-RTM-001–099`: Runtime errors
+- `WKS-RTM-001–099`: Runtime errors (`WKS-RTM-409` optimistic-lock conflict, Story 2.3)
 - Error structure: `{ code, message, field, line }`
 - Collection pattern: collect ALL errors, never fail-on-first
 
@@ -316,7 +316,36 @@ Case types are declared as YAML files in a directory mounted into the container.
   `enableDuplicateFiltering(true)` makes redeploy of identical bytes a no-op; whitespace-only
   edits trip a new engine version (by design — engine hashes resource bytes).
 
+### Case CRUD (Story 2.3)
+
+- **Endpoints**: `POST/GET/PUT /api/cases` and `GET /api/cases/{id}` (see `docs/api-conventions.md`).
+- **JSON column**: `cases.data` is `JSON` on H2 and `JSONB` on Postgres (Java migration
+  `V202604260002` upgrades the column on Postgres only). Hibernate 6.6+ native `@JdbcTypeCode(SqlTypes.JSON)`
+  maps it — no third-party hibernate-types adapter.
+- **Initial status**: comes from the case-type YAML's `statuses[0].id` (declaration order).
+  Story 2.4's BPMN execution listener will keep it in sync once transitions ship.
+- **Optimistic locking**: `cases.version` (from `BaseJpaEntity.@Version`) drives `PUT` semantics.
+  Mismatch → HTTP 409 `WKS-RTM-409`.
+- **`documentCount` is always 0** in the response until Epic 3 wires the document store.
+- **`case_type_version` snapshot**: the case row records the case-type version at create time.
+  Phase 0 forward-compat: validation runs against the **current** schema, not the snapshot.
+- **Permission gating**: `@PreAuthorize` SpEL bean refs into `CaseTypePermissionEvaluator` —
+  `create` on POST, `view` on GET / list / PUT (PUT-on-`view` is the Phase 0 simplification —
+  the YAML grammar already supports `edit` since Story 2.1; tightening is Story 5.2 territory).
+- **Engine ordering**: `CaseService.create` is engine-first / DB-second. Engine failure aborts
+  the transaction cleanly; DB failure after engine success leaves a dangling process instance
+  (accepted Phase 0 partial state — Phase 1 wraps in an outbox).
+
 ## Change Log
+
+- 2026-04-26 — Story 2.3: Case CRUD shipped — `POST/GET/PUT /api/cases`, JSON column for
+  dynamic case data (H2 native + Postgres JSONB upgrade via Java Flyway migration),
+  `WorkflowEngine.startProcessInstance` extension, `BaseJpaEntity.equals/hashCode`
+  (id-based, transient-aware), `WKS-RTM-409` optimistic-locking code, ArchUnit rules for the
+  case-domain boundary. Picks up Epic 1 retro action #5 (BaseJpaEntity equals/hashCode), Story
+  1.4 chunk-3 deferred (`AdminUserSeeder.run()` broaden catch for
+  `ObjectOptimisticLockingFailureException`). Networknt JSON-Schema-validator promoted from
+  test to compile scope to power case-data validation.
 
 - 2026-04-26 — Story 2.2: BPMN engine activated (embedded), `POST /api/admin/deploy` shipped,
   BPMN validator codes `WKS-CFG-010/012/020/021/022` added. The `WKS-CFG-010..099` band is now

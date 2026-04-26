@@ -6,8 +6,10 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
 import com.wkspower.platform.domain.exception.WksConfigException;
+import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.exception.WksValidationAggregateException;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -121,6 +124,56 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
               ApiResponse.error(
                   ErrorPayload.of(
                       code, "Multipart upload exceeds the configured size cap (1 MB per part)")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @ExceptionHandler(WksValidationAggregateException.class)
+  public ResponseEntity<ApiResponse<Void>> handleValidationAggregate(
+      WksValidationAggregateException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Validation aggregate: {} ({} error(s))", ex.getCode(), ex.getErrors().size());
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+          .body(
+              ApiResponse.error(
+                  ErrorPayload.ofAggregate(ex.getCode(), ex.getMessage(), ex.getErrors())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @ExceptionHandler(WksConflictException.class)
+  public ResponseEntity<ApiResponse<Void>> handleConflict(WksConflictException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Optimistic-lock conflict: {}", ex.getCode());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  /**
+   * Pinned debt from Story 1.4 chunk-3 deferred — surface {@link
+   * ObjectOptimisticLockingFailureException} as {@code WKS-RTM-409} for any persistence adapter
+   * that hasn't pre-translated to {@link WksConflictException}. {@code AdminUserSeeder}'s catch
+   * broaden (Task 9.4) closes the seeder-side path; this handler covers anything else.
+   */
+  @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+  public ResponseEntity<ApiResponse<Void>> handleOptimisticLock(
+      ObjectOptimisticLockingFailureException ex) {
+    String code = ErrorCode.WKS_RTM_409.wire();
+    MDC.put(MDC_KEY, code);
+    try {
+      log.warn("Optimistic-lock conflict (Spring): {}", code);
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              ApiResponse.error(
+                  ErrorPayload.of(
+                      code, "Resource was modified by another transaction; reload and retry")));
     } finally {
       MDC.remove(MDC_KEY);
     }

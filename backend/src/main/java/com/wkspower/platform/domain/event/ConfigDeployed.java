@@ -14,6 +14,7 @@ public record ConfigDeployed(
     String caseTypeId,
     int version,
     String deploymentId,
+    String processDefinitionKey,
     String processDefinitionId,
     String actorEmail,
     Instant timestamp) {}

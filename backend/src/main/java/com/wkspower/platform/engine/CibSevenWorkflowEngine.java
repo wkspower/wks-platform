@@ -8,10 +8,15 @@ import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import org.cibseven.bpm.engine.ProcessEngineException;
 import org.cibseven.bpm.engine.RepositoryService;
+import org.cibseven.bpm.engine.RuntimeService;
 import org.cibseven.bpm.engine.repository.Deployment;
 import org.cibseven.bpm.engine.repository.ProcessDefinition;
+import org.cibseven.bpm.engine.runtime.ProcessInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,9 +39,12 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
   private static final long DEPLOY_WARN_THRESHOLD_MS = 2000L;
 
   private final RepositoryService repositoryService;
+  private final RuntimeService runtimeService;
 
-  public CibSevenWorkflowEngine(RepositoryService repositoryService) {
+  public CibSevenWorkflowEngine(
+      RepositoryService repositoryService, RuntimeService runtimeService) {
     this.repositoryService = repositoryService;
+    this.runtimeService = runtimeService;
   }
 
   @Override
@@ -150,5 +158,24 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
             definition.getId(),
             definition.getVersion(),
             deployment.getDeploymentTime().toInstant()));
+  }
+
+  @Override
+  public String startProcessInstance(String processDefinitionKey, Map<String, Object> variables) {
+    Objects.requireNonNull(processDefinitionKey, "processDefinitionKey");
+    Map<String, Object> safeVariables = variables == null ? Map.of() : Map.copyOf(variables);
+    ProcessInstance instance;
+    try {
+      instance = runtimeService.startProcessInstanceByKey(processDefinitionKey, safeVariables);
+    } catch (ProcessEngineException ex) {
+      throw new WksWorkflowEngineException(
+          "CIB seven startProcessInstance failed for processDefinitionKey=" + processDefinitionKey,
+          ex);
+    }
+    if (instance == null || instance.getId() == null) {
+      throw new WksWorkflowEngineException(
+          "CIB seven returned no ProcessInstance for processDefinitionKey=" + processDefinitionKey);
+    }
+    return instance.getId();
   }
 }

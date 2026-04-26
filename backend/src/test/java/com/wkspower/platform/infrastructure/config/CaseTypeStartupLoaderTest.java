@@ -119,6 +119,11 @@ class CaseTypeStartupLoaderTest {
           public Optional<DeploymentInfo> latestDeployment(String key) {
             return Optional.empty();
           }
+
+          @Override
+          public String startProcessInstance(String key, java.util.Map<String, Object> variables) {
+            return "pi-noop";
+          }
         },
         event -> {});
   }

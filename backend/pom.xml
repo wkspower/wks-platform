@@ -165,13 +165,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- JSON Schema Draft 2020-12 validator — Story 2.1 schema round-trip tests only.
-             Do NOT move to main scope; the generator produces Schemas, it does not validate. -->
+        <!-- JSON Schema Draft 2020-12 validator — used by CaseDataValidatorAdapter (Story 2.3)
+             to validate dynamic case data against the schema generated from the case-type YAML. -->
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>1.5.3</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.tngtech.archunit</groupId>

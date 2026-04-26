@@ -71,6 +71,13 @@ class ErrorCodeTest {
   }
 
   @Test
+  void optimisticLockCodeIsExposed() {
+    // Story 2.3 introduces WKS-RTM-409 for optimistic-lock conflicts on PUT /api/cases/{id}
+    // and any future entity update via BaseJpaEntity.@Version.
+    assertThat(ErrorCode.WKS_RTM_409.wire()).isEqualTo("WKS-RTM-409");
+  }
+
+  @Test
   void multipartUploadCodeIsExposed() {
     // Story 2.2 admin deploy endpoint maps Spring's MaxUploadSizeExceededException to this code.
     assertThat(ErrorCode.WKS_API_413.wire()).isEqualTo("WKS-API-413");

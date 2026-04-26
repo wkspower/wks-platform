@@ -335,6 +335,12 @@ class ConfigServiceDeployTest {
     public Optional<DeploymentInfo> latestDeployment(String key) {
       return Optional.empty();
     }
+
+    @Override
+    public String startProcessInstance(
+        String processDefinitionKey, java.util.Map<String, Object> variables) {
+      throw new UnsupportedOperationException("not exercised by ConfigServiceDeployTest");
+    }
   }
 
   private static final class RecordingPublisher implements EventPublisher {

@@ -89,6 +89,7 @@ return PageMetaBuilder.paged(page, MyMapper::toDto);
 | `WKS-API-404` | 404  | Resource not found                                                       |
 | `WKS-API-413` | 413  | Multipart upload exceeds the 1 MB per-part / 2 MB per-request cap        |
 | `WKS-CFG-000` | 422  | Multi-error config aggregate (umbrella for `WksConfigException`)         |
+| `WKS-RTM-409` | 409  | Optimistic-locking conflict (case update raced with another transaction) |
 | `WKS-RTM-500` | 500  | Uncaught exception                                                       |
 
 Codes are defined once in `domain/exception/ErrorCode.java`. Wire strings are part of the public
@@ -135,6 +136,29 @@ until a real validator failure mode needs a stable code.
 > **Variance from `architecture.md` §Decision 14.** That table allocates `WKS-CFG-100..199` to
 > BPMN validation. Story 2.2 follows the epic AC's `010..099` band so all "deploy-time validation"
 > codes stay contiguous below 100. Architecture doc gets a follow-up patch.
+
+## Case CRUD endpoints (Story 2.3)
+
+The case-lifecycle surface is rooted at `/api/cases`:
+
+| Method | Path                | Verb gate (per case-type YAML) | Wire success                                          |
+| ------ | ------------------- | ------------------------------ | ----------------------------------------------------- |
+| `POST` | `/api/cases`        | `create`                       | `201 ApiResponse<CaseDto>`                            |
+| `GET`  | `/api/cases/{id}`   | `view`                         | `200 ApiResponse<CaseDto>` (with embedded `caseType`) |
+| `GET`  | `/api/cases`        | `view`                         | `200 ApiResponse<List<CaseSummaryDto>>` + meta        |
+| `PUT`  | `/api/cases/{id}`   | `view` (Phase 0 simplification — `edit` arrives in Story 5.2) | `200 ApiResponse<CaseDto>` |
+
+`POST` request body: `{ "caseTypeId": "...", "data": { ... }, "assignee": "uuid|null" }`.
+`PUT` request body: `{ "data": { ... }, "version": <expected version> }` — version mismatch surfaces
+as `WKS-RTM-409` with HTTP 409.
+
+The `documentCount` field on `CaseDto` is always `0` until Epic 3 (Documents). The shape is frozen
+here so Story 3.2 can fill it without a DTO bump.
+
+The list endpoint paginates via the standard `?page=...&size=...&sort=...` envelope; the sort
+allow-list is `[updatedAt, createdAt, status]`. The JSON `data` column is never fetched on the
+list path (server-side projection) — list rows carry only system columns plus the case-type's
+`listColumns` field projections.
 
 ## Interactive docs
 

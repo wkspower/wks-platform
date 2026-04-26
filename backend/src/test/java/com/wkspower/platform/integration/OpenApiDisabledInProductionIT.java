@@ -29,6 +29,10 @@ import org.springframework.test.context.TestPropertySource;
       "WKS_DB_PASSWORD=",
       "spring.datasource.driver-class-name=org.h2.Driver",
       "spring.jpa.hibernate.ddl-auto=validate",
+      // Override Flyway locations: production profile defaults to common/+postgresql/, but this
+      // test boots production with an H2 datasource. postgresql/ migrations (V202604260002 JSONB
+      // upgrade) are not H2-compatible, so we narrow to common/+h2/ here.
+      "spring.flyway.locations=classpath:db/migration/common,classpath:db/migration/h2",
       "WKS_CORS_ORIGINS=http://localhost:5173",
       "WKS_ADMIN_EMAIL=admin@wkspower.local",
       "WKS_ADMIN_PASSWORD=admin-test-only",

@@ -100,6 +100,14 @@ public enum ErrorCode {
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
 
+  // 409 — runtime conflict.
+  /**
+   * Optimistic-locking conflict on update — the row was modified by another transaction between
+   * read and write. Story 2.3 introduces this code; produced by {@code
+   * GlobalExceptionHandler.handleOptimisticLock} and {@code WksConflictException}.
+   */
+  WKS_RTM_409("WKS-RTM-409"),
+
   // 500.
   /** Uncaught exception — last resort. */
   WKS_RTM_500("WKS-RTM-500");

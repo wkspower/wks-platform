@@ -1,0 +1,282 @@
+package com.wkspower.platform.api.controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wkspower.platform.api.GlobalExceptionHandler;
+import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.FieldDefinition;
+import com.wkspower.platform.domain.config.model.FieldType;
+import com.wkspower.platform.domain.config.model.Permission;
+import com.wkspower.platform.domain.config.model.RoleDefinition;
+import com.wkspower.platform.domain.config.model.StatusColor;
+import com.wkspower.platform.domain.config.model.StatusDefinition;
+import com.wkspower.platform.domain.config.model.WorkflowRef;
+import com.wkspower.platform.domain.exception.ErrorDetail;
+import com.wkspower.platform.domain.exception.WksConflictException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.exception.WksValidationAggregateException;
+import com.wkspower.platform.domain.model.Case;
+import com.wkspower.platform.domain.model.CaseQuery;
+import com.wkspower.platform.domain.model.CaseSummary;
+import com.wkspower.platform.domain.page.Page;
+import com.wkspower.platform.domain.page.PageRequest;
+import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.security.AuthenticatedUser;
+import com.wkspower.platform.security.CaseTypePermissionEvaluator;
+import com.wkspower.platform.security.JwtAuthenticationFilter;
+import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SecurityConfig;
+import com.wkspower.platform.security.WksUserPrincipal;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+/** Slice test for {@link CaseController}. Covers the four endpoints + the SpEL permission gate. */
+@WebMvcTest(CaseController.class)
+@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@ActiveProfiles("dev")
+class CaseControllerTest {
+
+  private static final UUID ACTOR_ID = UUID.randomUUID();
+  private static final Instant NOW = Instant.parse("2026-04-26T10:00:00Z");
+
+  @Autowired MockMvc mockMvc;
+  @Autowired ObjectMapper objectMapper;
+
+  @MockitoBean(name = "wksCaseService")
+  CaseService caseService;
+
+  @MockitoBean(name = "caseTypePermissionEvaluator")
+  CaseTypePermissionEvaluator caseTypePermissionEvaluator;
+
+  @MockitoBean JwtTokenProvider jwtTokenProvider;
+  @MockitoBean UserRepository userRepository;
+
+  // ---- POST /api/cases ---------------------------------------------------
+
+  @Test
+  void postReturns201OnHappyPath() throws Exception {
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("create")))
+        .thenReturn(true);
+    when(caseService.create(eq("loan-application"), any(), any(), eq(ACTOR_ID)))
+        .thenReturn(sampleCase());
+    when(caseService.requireCaseType(eq("loan-application"))).thenReturn(loanType());
+
+    mockMvc
+        .perform(
+            post("/api/cases")
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"caseTypeId\":\"loan-application\",\"data\":{\"name\":\"Asha\"}}"))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").exists())
+        .andExpect(jsonPath("$.data.documentCount").value(0))
+        .andExpect(jsonPath("$.data.caseType.displayName").value("Loan Application"));
+  }
+
+  @Test
+  void postReturns403WhenCreateVerbDenied() throws Exception {
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("create"))).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post("/api/cases")
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"caseTypeId\":\"loan-application\",\"data\":{}}"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void postReturns422OnDataValidationFailure() throws Exception {
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("create"))).thenReturn(true);
+    when(caseService.create(anyString(), any(), any(), any()))
+        .thenThrow(
+            new WksValidationAggregateException(
+                "validation",
+                List.of(ErrorDetail.ofField("WKS-API-001", "must not be blank", "name"))));
+
+    mockMvc
+        .perform(
+            post("/api/cases")
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"caseTypeId\":\"loan-application\",\"data\":{}}"))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.error.code").value("WKS-API-002"));
+  }
+
+  // ---- GET /api/cases/{id} -----------------------------------------------
+
+  @Test
+  void getReturns200WithEmbeddedCaseType() throws Exception {
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseService.requireCaseType("loan-application")).thenReturn(loanType());
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+
+    mockMvc
+        .perform(get("/api/cases/" + sample.id()).with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.caseType.id").value("loan-application"))
+        .andExpect(jsonPath("$.data.caseType.statuses[0].id").value("open"));
+  }
+
+  @Test
+  void getReturns404WhenServiceThrows() throws Exception {
+    UUID id = UUID.randomUUID();
+    Case sample = sampleCase(id);
+    when(caseService.findById(id)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    when(caseService.requireCaseType(anyString())).thenThrow(new WksNotFoundException("not found"));
+
+    mockMvc
+        .perform(get("/api/cases/" + id).with(officerAuth()))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error.code").value("WKS-API-404"));
+  }
+
+  // ---- GET /api/cases (list) ---------------------------------------------
+
+  @Test
+  void listReturns200WithMeta() throws Exception {
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    Case s = sampleCase();
+    when(caseService.list(any(CaseQuery.class), any(PageRequest.class)))
+        .thenReturn(
+            new Page<>(
+                List.of(
+                    new CaseSummary(
+                        s.id(),
+                        s.caseTypeId(),
+                        s.status(),
+                        null,
+                        s.createdAt(),
+                        s.updatedAt(),
+                        Map.of())),
+                1,
+                0,
+                20));
+
+    mockMvc
+        .perform(get("/api/cases?caseType=loan-application").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.length()").value(1))
+        .andExpect(jsonPath("$.meta.total").value(1))
+        .andExpect(jsonPath("$.meta.size").value(20));
+  }
+
+  @Test
+  void listWithoutCaseTypeParamReturns400() throws Exception {
+    mockMvc.perform(get("/api/cases").with(officerAuth())).andExpect(status().isBadRequest());
+  }
+
+  // ---- PUT /api/cases/{id} -----------------------------------------------
+
+  @Test
+  void putReturns200OnHappyPath() throws Exception {
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseService.requireCaseType("loan-application")).thenReturn(loanType());
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("edit")))
+        .thenReturn(true);
+    when(caseService.update(eq(sample.id()), any(), eq(0L), eq(ACTOR_ID))).thenReturn(sample);
+
+    mockMvc
+        .perform(
+            put("/api/cases/" + sample.id())
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"data\":{\"name\":\"Bob\"},\"version\":0}"))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void putReturns409OnVersionMismatch() throws Exception {
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("edit"))).thenReturn(true);
+    when(caseService.update(any(), any(), any(Long.class), any()))
+        .thenThrow(new WksConflictException("modified"));
+
+    mockMvc
+        .perform(
+            put("/api/cases/" + sample.id())
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"data\":{\"name\":\"Bob\"},\"version\":99}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.error.code").value("WKS-RTM-409"));
+  }
+
+  // ---- helpers -----------------------------------------------------------
+
+  private static Case sampleCase() {
+    return sampleCase(UUID.randomUUID());
+  }
+
+  private static Case sampleCase(UUID id) {
+    return new Case(
+        id,
+        "loan-application",
+        1,
+        "open",
+        null,
+        Map.of("name", "Asha"),
+        "pi-1",
+        NOW,
+        ACTOR_ID,
+        NOW,
+        0L);
+  }
+
+  private static CaseTypeConfig loanType() {
+    return new CaseTypeConfig(
+        "loan-application",
+        "Loan Application",
+        1,
+        null,
+        new WorkflowRef("loan-application.bpmn"),
+        List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("name"),
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+  }
+
+  /** Authenticated post-processor with a valid {@link AuthenticatedUser} principal. */
+  private static org.springframework.test.web.servlet.request.RequestPostProcessor officerAuth() {
+    AuthenticatedUser user = new AuthenticatedUser(ACTOR_ID, "officer@x", Set.of("officer"));
+    WksUserPrincipal principal = new WksUserPrincipal(user);
+    Authentication auth =
+        new UsernamePasswordAuthenticationToken(
+            principal,
+            principal.getPassword(),
+            List.of(new SimpleGrantedAuthority("ROLE_officer")));
+    return authentication(auth);
+  }
+}

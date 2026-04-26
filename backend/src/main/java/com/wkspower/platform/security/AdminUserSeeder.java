@@ -12,6 +12,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -73,6 +74,14 @@ public class AdminUserSeeder implements ApplicationRunner {
       log.info("Seeded initial admin user ({}).", creds.email());
     } catch (DataIntegrityViolationException race) {
       log.info("Admin seed raced with a concurrent startup — continuing ({}).", race.getMessage());
+    } catch (ObjectOptimisticLockingFailureException race) {
+      // Pinned debt — Story 1.4 chunk-3 deferred → Story 2.3 Task 9.4. Two concurrent JVMs
+      // racing to seed the same admin row produce an optimistic-locking failure on the
+      // BaseJpaEntity @Version column once both have read-then-written. Treat identically to
+      // the integrity-violation path: at most one row exists by design.
+      log.info(
+          "Admin seed lost an optimistic-lock race with a concurrent startup — continuing ({}).",
+          race.getMessage());
     }
   }
 
