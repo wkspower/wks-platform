@@ -206,6 +206,57 @@ on user-task and end-event commit. The listener writes `cases.status` through th
 `CaseStatusUpdater` port and publishes `CaseStatusChanged` via `EventPublisher`. Subscribers (audit
 log in Story 4.1, SSE bridge in Story 4.3) attach without touching this code.
 
+## Case types (Story 2.5)
+
+Public read surface for case-type metadata so the frontend can render the case-type filter,
+generate `CaseDataTable` columns, and resolve status colors without `ROLE_ADMIN`. Distinct from the
+admin authoring path (`/api/admin/...`) — this surface is read-only and gated by the per-case-type
+`view` verb.
+
+`GET /api/case-types`
+
+Returns the case types the caller has the `view` verb on, sorted by `displayName` ascending.
+
+```json
+{
+  "data": [
+    { "id": "loan-application", "displayName": "Loan Application", "version": 1,
+      "statusCount": 5, "fieldCount": 8 }
+  ],
+  "meta": {}
+}
+```
+
+`statusCount` and `fieldCount` are convenience counts for a future case-type selector — the heavy
+fields (`fields[]`, `statuses[]`, `listColumns`) live on the detail endpoint below.
+
+`GET /api/case-types/{id}`
+
+```json
+{
+  "data": {
+    "id": "loan-application",
+    "displayName": "Loan Application",
+    "version": 1,
+    "fields": [ { "id": "name", "displayName": "Name", "type": "text", "required": true, "order": 0,
+                  "options": [], "slots": null } ],
+    "statuses": [ { "id": "open", "displayName": "Open", "color": "zinc" } ],
+    "listColumns": [ "name" ]
+  },
+  "meta": {}
+}
+```
+
+- `404 WKS-API-404` — unknown id.
+- `403 WKS-API-403` — caller lacks `view` on this case type.
+- `401 WKS-API-401` — anonymous (JWT filter).
+
+`field.type` and `status.color` are emitted as lowercase wire tokens (`text`, `number`, `date`,
+`select`, `checkbox`, `textarea`, `file`; `blue`, `amber`, `violet`, `emerald`, `zinc`, `red`,
+`cyan`, `rose`, `indigo`, `teal`). The `roles[]` and the workflow `bpmn` reference are
+intentionally NOT echoed — the role/permission matrix is authorization metadata and the BPMN file
+path is internal.
+
 ## Interactive docs
 
 `GET /v3/api-docs` returns the OpenAPI 3 JSON; Swagger UI lives at `GET /swagger-ui/index.html`.

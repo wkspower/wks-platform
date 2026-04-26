@@ -269,6 +269,136 @@ class CaseFlowIT {
             });
   }
 
+  // ---- Story 2.5 AC11 #4 — end-event status-property branch -----------
+
+  private static final String STATUS_PROPERTY_CASE_TYPE_ID = "case-status-property-fixture";
+
+  /**
+   * Story 2.5 AC11 #4 — pin the end-event {@code camunda:property name="status"} branch of {@link
+   * com.wkspower.platform.engine.listeners.CaseStatusListener#resolveNewStatus}. The existing
+   * {@code case-transition-fixture.bpmn} has matching id + property ({@code "approved"} for both),
+   * so a passing test there does not distinguish which branch fired. The new {@code
+   * case-status-property-fixture.bpmn} has end event id={@code "end"} but property value={@code
+   * "resolved"} — the test passes only when the listener reads the property.
+   */
+  @Test
+  void endEventStatusProperty() throws Exception {
+    registerStatusPropertyCaseType();
+    deployStatusPropertyFixture();
+    String cookie = login();
+    recorder.events.clear();
+
+    ResponseEntity<String> created =
+        exchange(
+            "/api/cases",
+            HttpMethod.POST,
+            cookie,
+            "{\"caseTypeId\":\""
+                + STATUS_PROPERTY_CASE_TYPE_ID
+                + "\",\"data\":{\"name\":\"Asha\"}}");
+    assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    String caseId = json.readTree(created.getBody()).path("data").path("id").asText();
+    UUID caseUuid = UUID.fromString(caseId);
+
+    String taskId =
+        processEngine
+            .getTaskService()
+            .createTaskQuery()
+            .processInstanceId(caseEntities.findById(caseUuid).orElseThrow().getProcessInstanceId())
+            .singleResult()
+            .getId();
+    ResponseEntity<String> completed =
+        exchange("/api/tasks/" + taskId + "/complete", HttpMethod.POST, cookie, "{}");
+    assertThat(completed.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    ResponseEntity<String> tx =
+        exchange(
+            "/api/cases/" + caseId + "/transition",
+            HttpMethod.POST,
+            cookie,
+            "{\"action\":\"submit\"}");
+    assertThat(tx.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () ->
+                assertThat(caseEntities.findById(caseUuid).orElseThrow().getStatus())
+                    .as(
+                        "status should be the camunda:property value 'resolved', not the end event id 'end'")
+                    .isEqualTo("resolved"));
+
+    assertThat(recorder.events)
+        .anySatisfy(
+            evt -> {
+              assertThat(evt.caseId()).isEqualTo(caseUuid);
+              assertThat(evt.newStatus()).isEqualTo("resolved");
+            });
+  }
+
+  private void registerStatusPropertyCaseType() {
+    registry.register(statusPropertyCaseType());
+  }
+
+  private void deployStatusPropertyFixture() throws java.io.IOException {
+    byte[] bytes;
+    try (InputStream in =
+        getClass().getResourceAsStream("/bpmn/case-status-property-fixture.bpmn")) {
+      if (in == null) {
+        throw new IllegalStateException("BPMN fixture missing on classpath");
+      }
+      bytes = in.readAllBytes();
+    }
+    // Avoid pollution across repeated test runs in the same JVM — remove any prior deployment of
+    // this fixture before re-deploying. Cascade removes process definitions, instances, history.
+    repositoryService
+        .createDeploymentQuery()
+        .deploymentName("status-property-it-" + STATUS_PROPERTY_CASE_TYPE_ID)
+        .list()
+        .forEach(d -> repositoryService.deleteDeployment(d.getId(), true));
+    org.cibseven.bpm.engine.repository.Deployment deployment =
+        repositoryService
+            .createDeployment()
+            .name("status-property-it-" + STATUS_PROPERTY_CASE_TYPE_ID)
+            .addInputStream(
+                STATUS_PROPERTY_CASE_TYPE_ID + ".bpmn", new java.io.ByteArrayInputStream(bytes))
+            .deploy();
+    String processDefinitionId =
+        repositoryService
+            .createProcessDefinitionQuery()
+            .deploymentId(deployment.getId())
+            .singleResult()
+            .getId();
+    events.publishEvent(
+        new ConfigDeployed(
+            STATUS_PROPERTY_CASE_TYPE_ID,
+            1,
+            deployment.getId(),
+            STATUS_PROPERTY_CASE_TYPE_ID,
+            processDefinitionId,
+            null,
+            Instant.now()));
+  }
+
+  private static CaseTypeConfig statusPropertyCaseType() {
+    return new CaseTypeConfig(
+        STATUS_PROPERTY_CASE_TYPE_ID,
+        "Case Status Property Fixture",
+        1,
+        null,
+        new WorkflowRef(STATUS_PROPERTY_CASE_TYPE_ID + ".bpmn"),
+        List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+        List.of(
+            new StatusDefinition("open", "Open", StatusColor.ZINC),
+            new StatusDefinition("resolved", "Resolved", StatusColor.EMERALD)),
+        List.of("name"),
+        List.of(
+            new RoleDefinition(
+                "admin",
+                List.of(
+                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))));
+  }
+
   private void registerTransitionCaseType() {
     registry.register(transitionCaseType());
   }

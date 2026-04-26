@@ -366,7 +366,55 @@ Case types are declared as YAML files in a directory mounted into the container.
   per-`caseTypeId` lock around the `reader.find → registrar.register` window so two concurrent
   deploys of the same case-type id can no longer interleave.
 
+### Case List & Config-Driven Tables (Story 2.5)
+
+- **Frontend**: `pages/CasesPage.tsx` mounts `CaseFilterBar` + `CaseDataTable` (TanStack Table v8).
+  Columns are generated from `CaseTypeView` by `lib/buildCaseColumns.tsx` — id + status (system),
+  one cell per `caseType.listColumns[]` field id (in declared order, dispatched by `field.type`),
+  then `updatedAt` (default-sort target). Unknown listColumn ids drop with a `console.warn`
+  (defensive — server already rejects at deploy).
+- **Status palette mapping**: `lib/statusColor.ts` maps the ten lowercase wire tokens
+  (`blue, amber, violet, emerald, zinc, red, cyan, rose, indigo, teal`) to `var(--status-*)`
+  CSS custom properties shipped in 1.3 `tokens.css`. `StatusBadge` reads `caseType.statuses[].color`
+  and falls back to `--status-closed` + `console.warn` on unknown ids.
+- **Phase-0 client-side filtering scope**: Filters / sort / search are all client-side. Backend
+  list call is `GET /api/cases?caseType=…&size=100`; multi-case-type selection fans out into
+  parallel `useQueries` calls (one per id) with results merged in `hooks/useCases.ts`. Phase 1
+  collapses to a single backend call once the list endpoint accepts comma-separated case types.
+- **Public case-types endpoint**: `GET /api/case-types` (list, filtered to view-verb holders)
+  and `GET /api/case-types/{id}` (full `CaseTypeView`) — the frontend's only path to status
+  palettes and field metadata. Distinct from `/api/admin/case-types` (admin authoring path).
+- **Wire-shape contract**: `StatusColor` and `FieldType` enums are emitted as their lowercase
+  `wire()` token via `@JsonValue` (Story 2.5 fix); the frontend column generator and status
+  mapper read these tokens verbatim. `roles[]` and the workflow `bpmn` reference are NOT echoed
+  on the public surface.
+- **Search**: `/` keybind focuses the filter-bar input; substring match (no fuzzy library) over
+  id, status, every visible YAML-derived column. 150 ms debounce. Live-region announces result
+  count after a 200 ms idle.
+- **a11y**: semantic `<table>` + `<th scope="col">`, `aria-sort` on sortable headers, every
+  `StatusBadge` shows colour + text label (never colour alone), `border-l-3 border-primary` rows
+  paired with `<span className="sr-only">{t('cases.row.newActivity')}</span>`. Arrow keys move
+  row focus, Enter / Space fires `onRowSelect`.
+- **Performance budget**: `CaseDataTable.perf.test.tsx` renders 1,000 fixture rows under 1000 ms
+  wall-clock on CI (paginated to 50 visible rows). Virtualisation is Phase 1.
+
 ## Change Log
+
+- 2026-04-26 — Story 2.5: Case list view with config-driven table — `pages/CasesPage.tsx`,
+  `CaseDataTable`, `CaseFilterBar`, `StatusBadge`, `lib/buildCaseColumns.tsx`,
+  `lib/statusColor.ts`, `lib/queryKeys.ts`, plus `api/cases.ts`, `api/caseTypes.ts`, hooks, and
+  types layer (`types/case.ts`, `types/caseType.ts`, `types/priority.ts`,
+  `types/fieldType.ts`, `types/statusColor.ts`). Backend ships public-readable
+  `GET /api/case-types` + `GET /api/case-types/{id}` (`CaseTypeController`) and a new
+  `CaseTypeSummaryDto`. Wire shape: `@JsonValue` on `StatusColor` and `FieldType` so the
+  frontend column generator + status palette map read lowercase tokens directly. Folded
+  backend debt: `PageRequestParams.toPageable` now last-wins-dedups duplicate sort properties
+  and locks WKS-API-005 precedence over WKS-API-004; `CaseDataValidatorAdapter` caches
+  compiled `JsonSchema` by `(caseTypeId, version)` with `ConfigDeployed` invalidation; new
+  BPMN fixture `case-status-property-fixture.bpmn` + `CaseFlowIT.endEventStatusProperty` test
+  pinning the listener's `camunda:property name="status"` branch; `CaseStatusIndexIT` locks
+  the existing `idx_cases_status` from V202604260001 against future-migration regression.
+  TanStack Table v8 + Radix DropdownMenu added as new frontend deps.
 
 - 2026-04-26 — Story 2.4: Case status transitions via BPMN — `POST /api/cases/{id}/transition`,
   `POST /api/tasks/{id}/complete`, `POST /api/tasks/{id}/claim`. New `Task` domain record +

@@ -1,0 +1,75 @@
+import { useQueries } from '@tanstack/react-query';
+
+import { listCases } from '@/api/cases';
+import { caseQueryKeys, type CaseListQuery } from '@/lib/queryKeys';
+import { toCaseRow, type CaseRow } from '@/types/case';
+
+const STALE_TIME_MS = 30_000;
+
+export interface UseCasesArgs {
+  caseTypeIds: string[];
+  status?: string;
+  size?: number;
+  sort?: string[];
+}
+
+export interface UseCasesResult {
+  data: CaseRow[];
+  isLoading: boolean;
+  isError: boolean;
+  errors: Error[];
+}
+
+/**
+ * Story 2.5 Multi-case-type fetch — see Dev Notes §Multi-case-type fetch.
+ *
+ * The backend list endpoint requires exactly one `caseType` per call. When the user selects
+ * N case types in the filter bar this hook issues N parallel `useQuery`s and merges the rows
+ * client-side. Phase 1 collapses to a single backend call once `GET /api/cases` accepts an
+ * array of case-type ids.
+ */
+export function useCases({ caseTypeIds, status, size = 100, sort }: UseCasesArgs): UseCasesResult {
+  // `combine` runs inside react-query and returns a stable reference between renders when none
+  // of the underlying query results changed. Without it, `useQueries` returns a fresh array each
+  // render, which would cascade through downstream `useMemo`s (filtered rows, columns) and
+  // re-render TanStack Table on every parent state change — defeating the AC8 perf budget.
+  return useQueries({
+    queries: caseTypeIds.map((caseType) => {
+      const query: CaseListQuery = { caseType, status, size, sort, page: 0 };
+      return {
+        queryKey: caseQueryKeys.list(query),
+        queryFn: () => listCases(query),
+        staleTime: STALE_TIME_MS,
+        refetchOnWindowFocus: true,
+      };
+    }),
+    combine: (results): UseCasesResult => {
+      const errors: Error[] = [];
+      let isError = false;
+      // The aggregate is "loading" until every active query has either data or an error. This
+      // wipes stale rows during chip-toggle transitions: when the user adds a new case type, its
+      // query starts without cached data, so the table renders the skeleton instead of mixing
+      // already-cached rows from other chips with the in-flight new chip. Without this, the user
+      // sees a partial table that doesn't match the chip selection.
+      let isPending = false;
+      for (const q of results) {
+        if (q.isError) {
+          isError = true;
+          if (q.error instanceof Error) errors.push(q.error);
+          continue;
+        }
+        if (q.data === undefined) isPending = true;
+      }
+      if (isPending) {
+        return { data: [], isLoading: true, isError, errors };
+      }
+      const rows: CaseRow[] = [];
+      for (const q of results) {
+        if (q.data) {
+          for (const summary of q.data) rows.push(toCaseRow(summary));
+        }
+      }
+      return { data: rows, isLoading: false, isError, errors };
+    },
+  });
+}

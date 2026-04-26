@@ -1,0 +1,33 @@
+/**
+ * Mirrors the backend `CaseSummaryDto` from Story 2.3 (`GET /api/cases`). The frontend table row
+ * type (`CaseRow`) extends the wire shape with two derived fields plumbed from elsewhere:
+ *
+ * - `hasUnreadActivity` — Phase 0 always `false`; lit by Story 4.4 (sidebar badges) once the
+ *   SSE bridge from Story 4.3 is in place. The visual `border-l-3 border-primary` row treatment
+ *   ships now so the rendering path doesn't have to change when the feature flag flips.
+ * - `slaBreached` — Phase 0 always `false`; SLA semantics arrive in Phase 1. The default-sort
+ *   composite already tiers on this so the comparator does not branch on Phase 0 vs Phase 1.
+ */
+
+export interface CaseSummary {
+  id: string;
+  caseTypeId: string;
+  status: string;
+  assignee: string | null;
+  createdAt: string;
+  updatedAt: string;
+  fields: Record<string, unknown>;
+}
+
+export interface CaseRow extends CaseSummary {
+  hasUnreadActivity: boolean;
+  slaBreached: boolean;
+}
+
+export function toCaseRow(summary: CaseSummary): CaseRow {
+  return {
+    ...summary,
+    hasUnreadActivity: false,
+    slaBreached: false,
+  };
+}
