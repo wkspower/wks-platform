@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Primary;
  * Explicit {@code @Primary} DataSource bean.
  *
  * <p>Only {@code dataSource()} carries {@code @Primary}. {@code dataSourceProperties()} does not —
- * adding {@code @Primary} there would conflict with CIB seven's own {@code DataSourceProperties}
- * bean when the engine activates in Story 2.2.
+ * adding {@code @Primary} there would conflict with the BPMN engine starter's own {@code
+ * DataSourceProperties} bean when the engine activates in Story 2.2.
  *
- * <p>CIB seven registers its own DataSource when the engine activates (Story 2.2). Without a
+ * <p>The BPMN engine registers its own DataSource when activated (Story 2.2). Without a
  * {@code @Primary} marker on ours, Spring would fail to pick between the two. Establishing the
  * pattern now prevents regression later.
  */

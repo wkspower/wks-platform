@@ -40,6 +40,13 @@ public enum ErrorCode {
   /** Umbrella code for multi-error configuration / deploy aggregates. */
   WKS_CFG_000("WKS-CFG-000"),
 
+  // 413 — multipart upload caps (Story 2.2 admin deploy endpoint).
+  /**
+   * Multipart part exceeded the configured cap (1 MB per part / 2 MB per request). Field carries
+   * the offending part name when extractable.
+   */
+  WKS_API_413("WKS-API-413"),
+
   // 422 — case-type YAML validation band (Story 2.1). Codes 010, 012–021 are
   // reserved for Story 2.2 (BPMN validation) — leave gaps, do not renumber.
   /** Required key missing (top-level or nested). */
@@ -60,11 +67,36 @@ public enum ErrorCode {
   WKS_CFG_008("WKS-CFG-008"),
   /** Malformed id — fails {@code [a-z][a-z0-9-]{1,62}} (or {@code [_-]} for field ids). */
   WKS_CFG_009("WKS-CFG-009"),
+  /** BPMN file missing, unreadable, or not a BPMN 2.0 document (Story 2.2). */
+  WKS_CFG_010("WKS-CFG-010"),
   /**
    * Reserved for Story 2.2 and the registry: emitted when {@code replace} rejects an incoming
    * config whose version is lower than the currently registered one. NOT produced by the validator.
    */
   WKS_CFG_011("WKS-CFG-011"),
+  /**
+   * BPMN expression references a variable not declared in the YAML case-type and not in the
+   * well-known set ({@code taskAssignee}, {@code caseId}, {@code caseStatus}). One per missing
+   * reference (Story 2.2).
+   */
+  WKS_CFG_012("WKS-CFG-012"),
+  /**
+   * BPMN user task is missing the required {@code archetype} declaration in {@code
+   * camunda:properties}. One per offending user task (Story 2.2).
+   */
+  WKS_CFG_020("WKS-CFG-020"),
+  /**
+   * BPMN archetype contradiction (e.g. {@code business_final} carries {@code
+   * camunda:asyncAfter="true"}, or {@code draft_section} has a downstream task). One per offence
+   * (Story 2.2).
+   */
+  WKS_CFG_021("WKS-CFG-021"),
+  /**
+   * BPMN file declares more than one executable {@code <bpmn:process>} (Story 2.2 D3).
+   * Collaboration diagrams are allowed — exactly one process must be marked {@code
+   * isExecutable=true}; any additional executable processes trip this code.
+   */
+  WKS_CFG_022("WKS-CFG-022"),
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
 

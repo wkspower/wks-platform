@@ -11,6 +11,13 @@ spring:
   application:
     name: wks-platform
 
+  servlet:
+    multipart:
+      # Story 2.2 admin /api/admin/deploy: 1 MB per part, 2 MB per request (caseType + bpmn).
+      # Spring throws MaxUploadSizeExceededException → mapped to WKS-API-413 by the handler.
+      max-file-size: 1MB
+      max-request-size: 2MB
+
   # H2 FILE mode (never in-memory — data must survive restart).
   # See ./data/ volume declaration in docker-compose.yml.
   datasource:
@@ -36,11 +43,28 @@ spring:
     # scripts live in `postgresql/` and are activated by application-production.yml, never here.
     locations: classpath:db/migration/common,classpath:db/migration/h2
 
-# Belt-and-suspenders: @SpringBootApplication(exclude = CamundaBpmAutoConfiguration.class)
-# already disables the engine; this prevents any accidental re-enablement via property scan.
+# ENGINE NOW ON — see Story 2.2. The bootstrap drops its excludeName and the embedded BPMN engine
+# activates via the property below. WKS owns deployment through the WorkflowEngine port
+# (auto-deployment-enabled false); the engine owns its own DDL on the SAME primary DataSource
+# (database.schema-update true, Flyway never touches ACT_*). history-level pinned to 'full' —
+# never AUTO; see project-context.md for rationale.
+#
+# Property keys are the upstream Camunda namespace, retained by the current engine distribution
+# for backwards compatibility — they are config-system identifiers, not a product reference.
 camunda:
   bpm:
-    enabled: false
+    enabled: true
+    history-level: full
+    job-execution:
+      enabled: true                        # async-after / async-before continuations need this
+    auto-deployment-enabled: false         # WKS deploys via WorkflowEngine, not classpath scan
+    generic-properties:
+      properties:
+        jdbc-batch-processing: true
+    metrics:
+      enabled: false                       # noisy in dev; production overrides flip this on
+    database:
+      schema-update: true                  # engine owns its own ACT_* DDL — Flyway is hands-off
 
 wks:
   locale: en-IN

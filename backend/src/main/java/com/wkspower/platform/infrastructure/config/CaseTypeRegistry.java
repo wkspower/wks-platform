@@ -110,8 +110,9 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
     return register(config);
   }
 
-  /** Package-private removal — not part of the read port. */
-  void remove(String id) {
+  /** Removal exposed via {@link CaseTypeRegistrar} — used by deploy rollback. */
+  @Override
+  public void remove(String id) {
     byId.remove(id);
   }
 

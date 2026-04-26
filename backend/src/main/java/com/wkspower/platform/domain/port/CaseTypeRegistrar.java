@@ -16,4 +16,10 @@ public interface CaseTypeRegistrar {
    * with {@code WKS-CFG-011}.
    */
   RegistrationResult register(CaseTypeConfig config);
+
+  /**
+   * Remove the registered config for {@code id}. Used by {@code ConfigService.deploy} to roll back
+   * a registration when the engine deploy fails. Idempotent: removing an unknown id is a no-op.
+   */
+  void remove(String id);
 }

@@ -9,6 +9,7 @@ import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
+import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -16,10 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -64,6 +67,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleSpringAccessDenied(AccessDeniedException ex) {
+    String code = ErrorCode.WKS_API_403.wire();
+    MDC.put(MDC_KEY, code);
+    try {
+      log.warn("Authorization failed (Spring access denied): {}", code);
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(ApiResponse.error(ErrorPayload.of(code, "Access denied")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
   @ExceptionHandler(WksConfigException.class)
   public ResponseEntity<ApiResponse<Void>> handleConfig(WksConfigException ex) {
     MDC.put(MDC_KEY, ex.getCode());
@@ -85,6 +101,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       log.warn("Resource not found: {}", ex.getCode());
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+      MaxUploadSizeExceededException ex,
+      org.springframework.http.HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+    String code = ErrorCode.WKS_API_413.wire();
+    MDC.put(MDC_KEY, code);
+    try {
+      log.warn("Multipart upload too large: {}", code);
+      return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+          .body(
+              ApiResponse.error(
+                  ErrorPayload.of(
+                      code, "Multipart upload exceeds the configured size cap (1 MB per part)")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @ExceptionHandler(WksWorkflowEngineException.class)
+  public ResponseEntity<ApiResponse<Void>> handleEngineFailure(WksWorkflowEngineException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.error("Workflow engine failure: {}", ex.getCode(), ex);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), "Internal error")));
     } finally {
       MDC.remove(MDC_KEY);
     }

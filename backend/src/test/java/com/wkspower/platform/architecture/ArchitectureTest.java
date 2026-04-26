@@ -35,13 +35,15 @@ class ArchitectureTest {
         .dependOnClassesThat()
         .resideInAnyPackage("org.springframework..", "jakarta.persistence..", "org.cibseven..")
         .because(
-            "Domain must be pure Java — no Spring, no JPA, no CIB seven imports. "
-                + "This is NFR36 and is non-negotiable.")
+            "Domain must be pure Java — no Spring, no JPA, no embedded BPMN engine SDK. "
+                + "This is NFR36 and is non-negotiable. The org.cibseven.. literal is the current "
+                + "engine distribution; the rule purpose is generic — keep the engine SDK out of "
+                + "domain regardless of vendor.")
         .check(CLASSES);
   }
 
   @Test
-  void onlyEngineImportsCibSeven() {
+  void onlyEngineAdapterImportsTheBpmnEngineSdk() {
     noClasses()
         .that()
         .resideOutsideOfPackage("..engine..")
@@ -49,8 +51,10 @@ class ArchitectureTest {
         .dependOnClassesThat()
         .resideInAPackage("org.cibseven..")
         .because(
-            "CIB seven imports belong exclusively to engine/. "
-                + "This is NFR35 and isolates the BPMN engine behind a port.")
+            "BPMN engine SDK imports belong exclusively to engine/. This is NFR35 and isolates "
+                + "the engine behind a port. The org.cibseven.. literal is the current engine "
+                + "distribution; the boundary is generic — only engine/ may import the SDK "
+                + "regardless of which vendor it is.")
         .check(CLASSES);
   }
 
@@ -169,6 +173,49 @@ class ArchitectureTest {
         .because(
             "Story 2.1 AC11: YAML/Jackson/networknt mechanics must not leak out of "
                 + "infrastructure/config/.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void workflowDomainHasNoSpringOrEngineImports() {
+    // Story 2.2 AC2: domain/workflow records (DeploymentRequest, DeploymentResult, DeploymentInfo)
+    // are plain Java. Engine-specific types belong only inside engine/.
+    noClasses()
+        .that()
+        .resideInAPackage("..domain.workflow..")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage("org.springframework..", "org.cibseven..")
+        .because("Workflow domain records stay framework-free — Story 2.2 AC2.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void workflowEngineImplementationsLiveOnlyInEnginePackage() {
+    // Story 2.2 AC2/AC3: the WorkflowEngine port lives in domain/port, but every implementer
+    // must reside in ..engine.. so the only-engine-imports-cib-seven rule remains airtight.
+    classes()
+        .that()
+        .implement("com.wkspower.platform.domain.port.WorkflowEngine")
+        .should()
+        .resideInAPackage("..engine..")
+        .allowEmptyShould(true)
+        .because("WorkflowEngine implementations belong inside engine/ — Story 2.2 AC2/AC3.")
+        .check(CLASSES);
+  }
+
+  @Test
+  void workflowEngineAdapterLivesOnlyInEnginePackage() {
+    // Story 2.2 AC3: the adapter is the sole non-test class allowed to import the engine SDK's
+    // RepositoryService — pin its location explicitly so a misplaced future copy fails the build
+    // with a clearer message than the blanket boundary rule.
+    classes()
+        .that()
+        .haveSimpleName("CibSevenWorkflowEngine")
+        .should()
+        .resideInAPackage("..engine..")
+        .allowEmptyShould(true)
+        .because("Workflow engine adapter resides exclusively in engine/ — Story 2.2 AC3.")
         .check(CLASSES);
   }
 

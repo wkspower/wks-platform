@@ -19,6 +19,22 @@ spring:
     # Postgres-specific slot. Keeps H2-only scripts out of the production container entirely.
     locations: classpath:db/migration/common,classpath:db/migration/postgresql
 
+# Engine activation mirrors application.yml; production flips metrics on.
+camunda:
+  bpm:
+    enabled: true
+    history-level: full
+    job-execution:
+      enabled: true
+    auto-deployment-enabled: false
+    generic-properties:
+      properties:
+        jdbc-batch-processing: true
+    metrics:
+      enabled: true
+    database:
+      schema-update: true
+
 wks:
   locale: ${WKS_LOCALE:en-IN}
   cors:
