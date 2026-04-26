@@ -212,10 +212,10 @@ class ConfigServiceDeployTest {
 
   /**
    * Folded debt #2 — Story 2.4 review decision 4. The per-{@code caseTypeId} mutex in {@code
-   * ConfigService.deploy} must serialize concurrent deploys of the same id so that the
-   * {@code reader.find → registrar.register → workflowEngine.deploy} window is atomic. A
-   * deterministic two-thread test (latch-coordinated, not stress) is the way to assert the lock
-   * actually holds — a stress test would be flaky and architecturally redundant.
+   * ConfigService.deploy} must serialize concurrent deploys of the same id so that the {@code
+   * reader.find → registrar.register → workflowEngine.deploy} window is atomic. A deterministic
+   * two-thread test (latch-coordinated, not stress) is the way to assert the lock actually holds —
+   * a stress test would be flaky and architecturally redundant.
    */
   @Test
   void concurrentDeploysOfSameCaseTypeAreSerialized() throws Exception {
@@ -243,7 +243,11 @@ class ConfigServiceDeployTest {
             int n = deployCount.incrementAndGet();
             concurrentInDeploy.decrementAndGet();
             return new DeploymentResult(
-                "deployment-" + n, request.processDefinitionKey(), "procDef-" + n, 1, Instant.now());
+                "deployment-" + n,
+                request.processDefinitionKey(),
+                "procDef-" + n,
+                1,
+                Instant.now());
           }
 
           @Override
@@ -272,7 +276,8 @@ class ConfigServiceDeployTest {
         };
 
     ConfigService svc =
-        new ConfigService(source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
+        new ConfigService(
+            source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
 
     ExecutorService pool = Executors.newFixedThreadPool(2);
     try {
@@ -280,7 +285,8 @@ class ConfigServiceDeployTest {
       // Wait until thread A is parked inside engine.deploy holding the per-id lock.
       assertThat(insideEngineDeploy.await(2, TimeUnit.SECONDS)).isTrue();
       Future<DeployResult> b = pool.submit(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, "thread-b"));
-      // Give B a chance to attempt to enter; if the lock is broken it would barge into engine.deploy.
+      // Give B a chance to attempt to enter; if the lock is broken it would barge into
+      // engine.deploy.
       Thread.sleep(100);
       assertThat(concurrentInDeploy.get())
           .as("Thread B must NOT have entered engine.deploy while A holds the per-caseTypeId lock")

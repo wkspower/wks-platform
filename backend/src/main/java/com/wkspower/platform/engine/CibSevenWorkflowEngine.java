@@ -306,8 +306,7 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
     } catch (ProcessEngineException ex) {
       // Genuine engine failure (DB / persistence). Surface as 500 — the two client-fixable
       // conditions (not-found, already-claimed) are caught above by their explicit subtypes.
-      throw new WksWorkflowEngineException(
-          "CIB seven claimTask failed for taskId=" + taskId, ex);
+      throw new WksWorkflowEngineException("CIB seven claimTask failed for taskId=" + taskId, ex);
     }
   }
 

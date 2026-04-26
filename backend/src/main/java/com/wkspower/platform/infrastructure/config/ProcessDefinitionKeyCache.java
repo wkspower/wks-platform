@@ -41,9 +41,9 @@ class ProcessDefinitionKeyCache implements ProcessDefinitionKeyResolver {
    * Populate the cache from the durable mapping after the application context is fully ready.
    * Driven by {@link ApplicationReadyEvent} (rather than {@code @PostConstruct}) so that (a) the
    * Spring transactional proxy is wired by the time we touch JPA, and (b) any {@link
-   * ConfigDeployed} event already fired during boot has had a chance to populate the cache —
-   * {@code putIfAbsent} avoids clobbering an entry the deploy stream has already advanced past
-   * the row we are about to read (Story 2.4 review).
+   * ConfigDeployed} event already fired during boot has had a chance to populate the cache — {@code
+   * putIfAbsent} avoids clobbering an entry the deploy stream has already advanced past the row we
+   * are about to read (Story 2.4 review).
    */
   @EventListener(ApplicationReadyEvent.class)
   @Transactional(readOnly = true)
