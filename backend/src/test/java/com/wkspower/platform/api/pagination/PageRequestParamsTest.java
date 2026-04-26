@@ -102,8 +102,8 @@ class PageRequestParamsTest {
   /**
    * Story 2.5 AC11 #1 — when a single token has both a bad direction AND a bad property the
    * direction error fires first ({@code WKS-API-005}), letting the client correct one fault per
-   * round-trip rather than a confusing simultaneous-error UX. Locks in the contract so a
-   * future refactor of {@link SortSpec#parse(String)} cannot silently flip the precedence.
+   * round-trip rather than a confusing simultaneous-error UX. Locks in the contract so a future
+   * refactor of {@link SortSpec#parse(String)} cannot silently flip the precedence.
    */
   @Test
   void badDirectionWinsOverBadPropertyOnSameToken() {
@@ -121,10 +121,10 @@ class PageRequestParamsTest {
   }
 
   /**
-   * Story 2.5 AC11 #1 — duplicate-sort dedup with last-wins. {@code ?sort=updatedAt,asc&sort=updatedAt,desc}
-   * resolves to a single ORDER BY updatedAt DESC, not two. Insertion position of the first
-   * occurrence is preserved so the user-visible "primary sort" doesn't shuffle on a duplicate
-   * write — only the direction updates.
+   * Story 2.5 AC11 #1 — duplicate-sort dedup with last-wins. {@code
+   * ?sort=updatedAt,asc&sort=updatedAt,desc} resolves to a single ORDER BY updatedAt DESC, not two.
+   * Insertion position of the first occurrence is preserved so the user-visible "primary sort"
+   * doesn't shuffle on a duplicate write — only the direction updates.
    */
   @Test
   void duplicateSortPropertyDedupsLastWins() {
@@ -141,10 +141,7 @@ class PageRequestParamsTest {
   @Test
   void duplicateSortPropertyPreservesFirstSlotOrder() {
     Pageable p =
-        new PageRequestParams(
-                0,
-                20,
-                List.of("updatedAt,asc", "createdAt,asc", "updatedAt,desc"))
+        new PageRequestParams(0, 20, List.of("updatedAt,asc", "createdAt,asc", "updatedAt,desc"))
             .toPageable(WHITELIST);
 
     // updatedAt was first; despite the dedup pulling its later (desc) value, it retains slot #0.

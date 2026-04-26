@@ -73,8 +73,7 @@ class CaseStatusIndexIT {
       // ALWAYS picks the index" because at low row counts a seq scan is genuinely cheaper.
       stmt.execute("SET LOCAL enable_seqscan = off");
       try (var rs =
-          stmt.executeQuery(
-              "EXPLAIN SELECT id FROM cases WHERE status = 'open' ORDER BY status")) {
+          stmt.executeQuery("EXPLAIN SELECT id FROM cases WHERE status = 'open' ORDER BY status")) {
         StringBuilder plan = new StringBuilder();
         while (rs.next()) {
           plan.append(rs.getString(1)).append('\n');

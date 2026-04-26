@@ -8,8 +8,8 @@ import java.util.Optional;
  * The seven field types supported by Phase 0 case-type YAML. Wire form is the lowercase enum name;
  * any YAML mapper lives in infrastructure so this enum stays framework-free.
  *
- * <p>Story 2.5 fixed Jackson serialisation to honour {@link #wire()} so {@code
- * GET /api/case-types/{id}} emits lowercase tokens that the frontend column generator
+ * <p>Story 2.5 fixed Jackson serialisation to honour {@link #wire()} so {@code GET
+ * /api/case-types/{id}} emits lowercase tokens that the frontend column generator
  * (`lib/buildCaseColumns.ts`) dispatches on.
  */
 public enum FieldType {

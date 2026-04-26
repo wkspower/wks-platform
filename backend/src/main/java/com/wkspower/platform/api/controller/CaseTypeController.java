@@ -6,7 +6,7 @@ import com.wkspower.platform.api.dto.response.CaseTypeViewDto;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
-import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.util.Comparator;
@@ -34,11 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/case-types")
 public class CaseTypeController {
 
-  private final CaseTypeRegistry registry;
+  private final CaseTypeReader reader;
   private final CaseTypePermissionEvaluator evaluator;
 
-  public CaseTypeController(CaseTypeRegistry registry, CaseTypePermissionEvaluator evaluator) {
-    this.registry = registry;
+  public CaseTypeController(CaseTypeReader reader, CaseTypePermissionEvaluator evaluator) {
+    this.reader = reader;
     this.evaluator = evaluator;
   }
 
@@ -47,7 +47,7 @@ public class CaseTypeController {
       @AuthenticationPrincipal WksUserPrincipal actor) {
     requireAuthenticated(actor);
     List<CaseTypeSummaryDto> data =
-        registry.all().stream()
+        reader.all().stream()
             .filter(ct -> evaluator.hasVerb(actor.authenticated(), ct.id(), "view"))
             .sorted(Comparator.comparing(CaseTypeConfig::displayName))
             .map(
@@ -67,7 +67,7 @@ public class CaseTypeController {
       @PathVariable("id") String id, @AuthenticationPrincipal WksUserPrincipal actor) {
     requireAuthenticated(actor);
     CaseTypeConfig caseType =
-        registry
+        reader
             .find(id)
             .orElseThrow(() -> new WksNotFoundException("Case type " + id + " not found"));
     if (!evaluator.hasVerb(actor.authenticated(), caseType.id(), "view")) {

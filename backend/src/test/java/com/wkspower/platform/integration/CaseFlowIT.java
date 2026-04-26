@@ -274,12 +274,12 @@ class CaseFlowIT {
   private static final String STATUS_PROPERTY_CASE_TYPE_ID = "case-status-property-fixture";
 
   /**
-   * Story 2.5 AC11 #4 — pin the end-event {@code camunda:property name="status"} branch of
-   * {@link com.wkspower.platform.engine.listeners.CaseStatusListener#resolveNewStatus}. The
-   * existing {@code case-transition-fixture.bpmn} has matching id + property ({@code "approved"}
-   * for both), so a passing test there does not distinguish which branch fired. The new
-   * {@code case-status-property-fixture.bpmn} has end event id={@code "end"} but property
-   * value={@code "resolved"} — the test passes only when the listener reads the property.
+   * Story 2.5 AC11 #4 — pin the end-event {@code camunda:property name="status"} branch of {@link
+   * com.wkspower.platform.engine.listeners.CaseStatusListener#resolveNewStatus}. The existing
+   * {@code case-transition-fixture.bpmn} has matching id + property ({@code "approved"} for both),
+   * so a passing test there does not distinguish which branch fired. The new {@code
+   * case-status-property-fixture.bpmn} has end event id={@code "end"} but property value={@code
+   * "resolved"} — the test passes only when the listener reads the property.
    */
   @Test
   void endEventStatusProperty() throws Exception {
@@ -324,7 +324,8 @@ class CaseFlowIT {
         .untilAsserted(
             () ->
                 assertThat(caseEntities.findById(caseUuid).orElseThrow().getStatus())
-                    .as("status should be the camunda:property value 'resolved', not the end event id 'end'")
+                    .as(
+                        "status should be the camunda:property value 'resolved', not the end event id 'end'")
                     .isEqualTo("resolved"));
 
     assertThat(recorder.events)
@@ -341,7 +342,8 @@ class CaseFlowIT {
 
   private void deployStatusPropertyFixture() throws java.io.IOException {
     byte[] bytes;
-    try (InputStream in = getClass().getResourceAsStream("/bpmn/case-status-property-fixture.bpmn")) {
+    try (InputStream in =
+        getClass().getResourceAsStream("/bpmn/case-status-property-fixture.bpmn")) {
       if (in == null) {
         throw new IllegalStateException("BPMN fixture missing on classpath");
       }

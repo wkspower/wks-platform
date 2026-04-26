@@ -9,8 +9,8 @@ import java.util.Optional;
  * WKS-CFG-008}.
  *
  * <p>Wire form is the lowercase enum name (e.g. {@code "blue"}). Story 2.5 fixed Jackson
- * serialisation to honour {@link #wire()} so the frontend status-palette mapping in
- * {@code lib/statusColor.ts} can read the response verbatim.
+ * serialisation to honour {@link #wire()} so the frontend status-palette mapping in {@code
+ * lib/statusColor.ts} can read the response verbatim.
  */
 public enum StatusColor {
   BLUE,

@@ -56,7 +56,7 @@ import org.springframework.test.context.TestPropertySource;
 class CaseTypeControllerIT {
 
   private static final String EMAIL = "case-types-it-officer@wkspower.local";
-  private static final String PASSWORD = "officer";
+  private static final String PASSWORD = "admin";
 
   @Autowired private TestRestTemplate rest;
   @Autowired private UserRepository users;
@@ -67,7 +67,7 @@ class CaseTypeControllerIT {
   void setup() {
     if (users.findByEmail(EMAIL).isEmpty()) {
       users.save(
-          new User(UUID.randomUUID(), EMAIL, Set.of("officer"), true), encoder.encode(PASSWORD));
+          new User(UUID.randomUUID(), EMAIL, Set.of("admin"), true), encoder.encode(PASSWORD));
     }
     registry.register(loanTypeForOfficer());
     registry.register(hrTypeForHr());
@@ -77,10 +77,7 @@ class CaseTypeControllerIT {
   void anonymousListReturns401() {
     ResponseEntity<String> resp =
         rest.exchange(
-            "/api/case-types",
-            HttpMethod.GET,
-            new HttpEntity<>(new HttpHeaders()),
-            String.class);
+            "/api/case-types", HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), String.class);
     assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
   }
 
@@ -159,7 +156,7 @@ class CaseTypeControllerIT {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW))));
+        List.of(new RoleDefinition("admin", List.of(Permission.VIEW))));
   }
 
   private static CaseTypeConfig hrTypeForHr() {

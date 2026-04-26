@@ -26,16 +26,16 @@ import org.springframework.stereotype.Component;
  * (collect-all invariant). The Jackson {@link ObjectMapper} comes from Story 1.4's {@code
  * JacksonConfig}; the schema factory is built once per JVM (Draft 2020-12).
  *
- * <p>Story 2.5 AC11 #3 — generated {@link JsonSchema} instances are cached by
- * {@code (caseTypeId, version)}. The {@link JsonSchemaGenerator} build + networknt schema
- * compilation are pure functions of the case-type config, so a per-version cache is safe and
- * eliminates the per-call rebuild cost on hot validation paths
- * ({@code POST /api/cases}, {@code PUT /api/cases/\{id\}}, future Story 2.7 form submits).
+ * <p>Story 2.5 AC11 #3 — generated {@link JsonSchema} instances are cached by {@code (caseTypeId,
+ * version)}. The {@link JsonSchemaGenerator} build + networknt schema compilation are pure
+ * functions of the case-type config, so a per-version cache is safe and eliminates the per-call
+ * rebuild cost on hot validation paths ({@code POST /api/cases}, {@code PUT /api/cases/\{id\}},
+ * future Story 2.7 form submits).
  *
- * <p>The cache is invalidated for a case-type id when {@link ConfigDeployed} fires for that
- * id — a redeploy may bump the version or change the schema shape. The eviction key is the
- * case-type id (all versions are dropped) since the redeployed version will repopulate on its
- * next validate call.
+ * <p>The cache is invalidated for a case-type id when {@link ConfigDeployed} fires for that id — a
+ * redeploy may bump the version or change the schema shape. The eviction key is the case-type id
+ * (all versions are dropped) since the redeployed version will repopulate on its next validate
+ * call.
  */
 @Component
 class CaseDataValidatorAdapter implements CaseDataValidator {
@@ -70,8 +70,8 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
   }
 
   /**
-   * On {@link ConfigDeployed} drop every cached schema for the redeployed case type. A redeploy
-   * may rev the version or change the field set — keeping the old compiled schema would silently
+   * On {@link ConfigDeployed} drop every cached schema for the redeployed case type. A redeploy may
+   * rev the version or change the field set — keeping the old compiled schema would silently
    * validate against a stale shape.
    */
   @EventListener

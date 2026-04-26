@@ -17,8 +17,8 @@ import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.UserRepository;
-import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -50,7 +50,7 @@ class CaseTypeControllerTest {
 
   @Autowired MockMvc mockMvc;
 
-  @MockitoBean CaseTypeRegistry caseTypeRegistry;
+  @MockitoBean CaseTypeReader caseTypeReader;
 
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator caseTypePermissionEvaluator;
@@ -64,7 +64,7 @@ class CaseTypeControllerTest {
   void listReturns200AndFiltersToViewVerbHolders() throws Exception {
     CaseTypeConfig loan = loanType();
     CaseTypeConfig hr = hrType();
-    when(caseTypeRegistry.all()).thenReturn(List.of(loan, hr));
+    when(caseTypeReader.all()).thenReturn(List.of(loan, hr));
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
         .thenReturn(true);
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("hr-onboarding"), eq("view")))
@@ -85,7 +85,7 @@ class CaseTypeControllerTest {
   void listSortsByDisplayNameAsc() throws Exception {
     CaseTypeConfig loan = loanType(); // "Loan Application"
     CaseTypeConfig hr = hrType(); // "HR Onboarding"
-    when(caseTypeRegistry.all()).thenReturn(List.of(loan, hr));
+    when(caseTypeReader.all()).thenReturn(List.of(loan, hr));
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
         .thenReturn(true);
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("hr-onboarding"), eq("view")))
@@ -107,7 +107,7 @@ class CaseTypeControllerTest {
 
   @Test
   void getReturns200WithFullViewDto() throws Exception {
-    when(caseTypeRegistry.find("loan-application")).thenReturn(Optional.of(loanType()));
+    when(caseTypeReader.find("loan-application")).thenReturn(Optional.of(loanType()));
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
         .thenReturn(true);
 
@@ -127,7 +127,7 @@ class CaseTypeControllerTest {
 
   @Test
   void getReturns404WhenIdUnknown() throws Exception {
-    when(caseTypeRegistry.find("missing")).thenReturn(Optional.empty());
+    when(caseTypeReader.find("missing")).thenReturn(Optional.empty());
 
     mockMvc
         .perform(get("/api/case-types/missing").with(officerAuth()))
@@ -137,7 +137,7 @@ class CaseTypeControllerTest {
 
   @Test
   void getReturns403WhenViewVerbDenied() throws Exception {
-    when(caseTypeRegistry.find("loan-application")).thenReturn(Optional.of(loanType()));
+    when(caseTypeReader.find("loan-application")).thenReturn(Optional.of(loanType()));
     when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
         .thenReturn(false);
 

@@ -36,8 +36,7 @@ class CaseDataValidatorAdapterTest {
 
   private final JsonSchemaGenerator generator = spy(new JsonSchemaGenerator());
   private final ObjectMapper mapper = new ObjectMapper();
-  private final CaseDataValidatorAdapter adapter =
-      new CaseDataValidatorAdapter(generator, mapper);
+  private final CaseDataValidatorAdapter adapter = new CaseDataValidatorAdapter(generator, mapper);
 
   @Test
   void cachesSchemaPerVersion() {
@@ -104,8 +103,7 @@ class CaseDataValidatorAdapterTest {
     assertThat(adapter.cacheSize()).isEqualTo(1);
 
     adapter.onConfigDeployed(
-        new ConfigDeployed(
-            "hr-onboarding", 1, "d", "hr", "hr:1:1", null, Instant.now()));
+        new ConfigDeployed("hr-onboarding", 1, "d", "hr", "hr:1:1", null, Instant.now()));
 
     assertThat(adapter.cacheSize()).isEqualTo(1);
     adapter.validate(loan, Map.of("name", "Asha"));
