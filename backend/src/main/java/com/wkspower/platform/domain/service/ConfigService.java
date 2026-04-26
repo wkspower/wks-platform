@@ -136,6 +136,7 @@ public class ConfigService {
             caseType.id(),
             caseType.version(),
             deployment.deploymentId(),
+            deployment.processDefinitionKey(),
             deployment.processDefinitionId(),
             actorEmail,
             deployment.deployedAt()));
@@ -166,6 +167,7 @@ public class ConfigService {
             caseType.id(),
             caseType.version(),
             deployment.deploymentId(),
+            deployment.processDefinitionKey(),
             deployment.processDefinitionId(),
             actorEmail,
             deployment.deployedAt()));

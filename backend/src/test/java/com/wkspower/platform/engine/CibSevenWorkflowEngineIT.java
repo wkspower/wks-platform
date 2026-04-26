@@ -1,7 +1,9 @@
 package com.wkspower.platform.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
@@ -10,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import javax.sql.DataSource;
 import org.cibseven.bpm.engine.ProcessEngine;
 import org.junit.jupiter.api.Test;
@@ -120,6 +124,33 @@ class CibSevenWorkflowEngineIT {
                 + "(local %d ms, CI %d ms)",
             SLA_MS_LOCAL, SLA_MS_CI)
         .isLessThan(ceiling);
+  }
+
+  @Test
+  void startProcessInstanceReturnsEngineProcessInstanceId() {
+    byte[] bpmn = simpleBpmn("start-process").getBytes(StandardCharsets.UTF_8);
+    workflowEngine.deploy(
+        new DeploymentRequest("start-test", "start-process", bpmn, "start-process", 1));
+
+    String pi =
+        workflowEngine.startProcessInstance(
+            "start-process", Map.of("caseId", UUID.randomUUID().toString()));
+
+    assertThat(pi)
+        .as("Story 2.3 AC4: startProcessInstance returns a non-blank engine-assigned id")
+        .isNotBlank();
+  }
+
+  @Test
+  void startProcessInstanceWithUnknownKeyWrapsEngineException() {
+    assertThatThrownBy(
+            () ->
+                workflowEngine.startProcessInstance(
+                    "process-that-does-not-exist", Map.of("caseId", UUID.randomUUID().toString())))
+        .as(
+            "Story 2.3 AC4: ProcessEngineException for unknown key wraps to"
+                + " WksWorkflowEngineException")
+        .isInstanceOf(WksWorkflowEngineException.class);
   }
 
   /** Minimal BPMN 2.0 fixture used by every test in this class. */
