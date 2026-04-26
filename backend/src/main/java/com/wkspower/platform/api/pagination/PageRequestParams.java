@@ -88,10 +88,11 @@ public record PageRequestParams(int page, int size, List<String> sort) {
     // Story 2.5 AC11 #1 — last-wins dedup. `?sort=name,asc&sort=name,desc` should not emit two
     // ORDER BY clauses on the same column. Insertion order is preserved for unique properties; on
     // a duplicate property the entry rewrites in place (LinkedHashMap.put semantics: key keeps its
-    // original slot, value updates).
+    // original slot, value updates). Dedup key is lower-cased so `?sort=name,asc&sort=NAME,desc`
+    // collapses too — SortWhitelist treats property names case-insensitively in practice.
     Map<String, SortSpec> deduped = new LinkedHashMap<>();
     for (SortSpec spec : specs) {
-      deduped.put(spec.property(), spec);
+      deduped.put(spec.property().toLowerCase(java.util.Locale.ROOT), spec);
     }
     List<Sort.Order> orders = new ArrayList<>(deduped.size());
     for (SortSpec spec : deduped.values()) {

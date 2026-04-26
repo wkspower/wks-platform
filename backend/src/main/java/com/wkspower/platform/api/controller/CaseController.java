@@ -92,14 +92,19 @@ public class CaseController {
       @RequestParam(value = "status", required = false) String status,
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "size", required = false) Integer size,
-      @RequestParam(value = "sort", required = false) List<String> sort,
+      // Bind as String[] so Spring's ConversionService does NOT split on commas — sort tokens are
+      // `property,direction` (e.g. `updatedAt,desc`) and the comma is part of the wire shape.
+      // Multi-sort uses repeated `?sort=` params, not CSV. List<String> binding here would split
+      // `updatedAt,desc` into [`updatedAt`, `desc`] and reject `desc` as a bad property.
+      @RequestParam(value = "sort", required = false) String[] sort,
       @AuthenticationPrincipal WksUserPrincipal actor) {
     if (caseType == null || caseType.isBlank()) {
       throw new WksValidationException(
           ErrorCode.WKS_API_001, "caseType query parameter is required", "caseType");
     }
     requireVerb(actor, caseType, "view");
-    PageRequestParams params = PageRequestParams.of(page, size, sort);
+    PageRequestParams params =
+        PageRequestParams.of(page, size, sort == null ? null : List.of(sort));
     // toPageable validates page/size bounds and the sort allow-list; we use the parsed sort
     // (not the Spring Pageable) to translate into our domain SortOrder list.
     params.toPageable(CASE_LIST_SORT);

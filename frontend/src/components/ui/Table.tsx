@@ -53,11 +53,13 @@ export const Tr = forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTableRowEle
 });
 
 export const Th = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCellElement>>(
-  function Th({ className, ...props }, ref) {
+  function Th({ className, scope, ...props }, ref) {
+    // `scope` must be destructured out of `props` before the spread, otherwise `{...props}`
+    // would overwrite the defaulted attribute below with `undefined` from the original props bag.
     return (
       <th
         ref={ref}
-        scope={props.scope ?? 'col'}
+        scope={scope ?? 'col'}
         className={cn(
           'h-10 px-2 text-left align-middle font-medium text-[var(--muted-foreground)]',
           className,

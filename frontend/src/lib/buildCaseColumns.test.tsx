@@ -30,11 +30,12 @@ function renderCell(
 describe('buildCaseColumns', () => {
   const caseType = loanApplicationCaseTypeView();
 
-  it('emits id, status, every listColumn field (in declared order), updatedAt', () => {
+  it('emits id, status, caseType, every listColumn field (in declared order), updatedAt', () => {
     const cols = buildCaseColumns(caseType);
     expect(cols.map((c) => c.id)).toEqual([
       'id',
       'status',
+      'caseType',
       'field:applicant_name',
       'field:amount',
       'updatedAt',

@@ -349,6 +349,13 @@ class CaseFlowIT {
       }
       bytes = in.readAllBytes();
     }
+    // Avoid pollution across repeated test runs in the same JVM — remove any prior deployment of
+    // this fixture before re-deploying. Cascade removes process definitions, instances, history.
+    repositoryService
+        .createDeploymentQuery()
+        .deploymentName("status-property-it-" + STATUS_PROPERTY_CASE_TYPE_ID)
+        .list()
+        .forEach(d -> repositoryService.deleteDeployment(d.getId(), true));
     org.cibseven.bpm.engine.repository.Deployment deployment =
         repositoryService
             .createDeployment()

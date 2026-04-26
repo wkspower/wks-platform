@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { buildCaseColumns } from '@/lib/buildCaseColumns';
@@ -18,7 +18,7 @@ import { CaseDataTable } from './CaseDataTable';
  * a future regression that breaks pagination (e.g., naïve virtualisation removal).
  */
 describe('CaseDataTable perf-guardrail', () => {
-  it('renders 1000 rows under 1000ms wall-clock', () => {
+  it('renders 1000 rows under 1000ms wall-clock to first interactive paint', async () => {
     const caseType = loanApplicationCaseTypeView();
     const columns = buildCaseColumns(caseType);
     const data = buildCaseListFixture(1000).map(toCaseRow);
@@ -27,6 +27,8 @@ describe('CaseDataTable perf-guardrail', () => {
     const { unmount } = render(
       <CaseDataTable columns={columns} data={data} emptyState="no-data" ariaLabel="Cases" />,
     );
+    // AC8 — measure to "first interactive paint": wait until at least one body row is queryable.
+    await screen.findAllByRole('row');
     const elapsed = performance.now() - start;
     unmount();
 

@@ -67,6 +67,7 @@ export default [
         history: 'readonly',
         location: 'readonly',
         navigator: 'readonly',
+        requestAnimationFrame: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',

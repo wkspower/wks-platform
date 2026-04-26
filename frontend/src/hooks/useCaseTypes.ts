@@ -28,6 +28,9 @@ export function useCaseType(id: string | undefined) {
  * Multi-fetch helper for the case list. The backend `GET /api/cases` requires exactly one
  * `caseType` query parameter (Story 2.3 AC7); when multiple case types are selected on the
  * filter bar the frontend fans out one query per id and merges results client-side.
+ *
+ * Uses `combine` so the returned reference is stable when no underlying result changed —
+ * downstream `useMemo`s on the views array stay valid across renders.
  */
 export function useCaseTypeViews(ids: string[]) {
   return useQueries({
@@ -37,5 +40,6 @@ export function useCaseTypeViews(ids: string[]) {
       staleTime: STALE_TIME_MS,
       refetchOnWindowFocus: true,
     })),
+    combine: (results) => results,
   });
 }

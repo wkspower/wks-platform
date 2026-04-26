@@ -36,6 +36,18 @@ export interface CaseDataTableProps<TRow extends CaseRow = CaseRow> {
   ariaLabel: string;
   /** Column ids to keep visible when `variant === 'narrowed'`. Default: first three. */
   narrowedVisibleColumnIds?: string[];
+  /**
+   * Column ids to hide unconditionally (in addition to the narrowed-variant logic). The case list
+   * uses this to drop the `caseType` column when exactly one case type is selected (it would be
+   * redundant — every row shares the same type).
+   */
+  hiddenColumnIds?: string[];
+  /**
+   * Fired whenever TanStack Table's filtered row count changes (after status/priority filters AND
+   * the global search filter are applied). Lets the parent surface an accurate count to a
+   * live-region — `data.length` upstream of the table is the pre-search count.
+   */
+  onFilteredCountChange?: (count: number) => void;
 }
 
 const PAGE_SIZE = 50;
@@ -66,30 +78,38 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
   globalFilter,
   ariaLabel,
   narrowedVisibleColumnIds,
+  hiddenColumnIds,
+  onFilteredCountChange,
 }: CaseDataTableProps<TRow>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // AC7 #4 — roving tabindex. Only the active row carries `tabIndex={0}` so Tab leaves the
+  // table after a single stop instead of walking every row. Initial entry point is row 0; on
+  // `onFocus` the active index follows the user's last-focused row, so Tab back into the table
+  // restores their position. Clamped down when the row count shrinks (filter / pagination).
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
 
   // Apply narrowed-variant visibility via the TanStack visibility API (not CSS) so screen
   // readers don't see hidden columns.
   useEffect(() => {
-    if (variant !== 'narrowed') {
-      setColumnVisibility({});
-      return;
-    }
-    const keep =
-      narrowedVisibleColumnIds ??
-      columns
-        .slice(0, 3)
-        .map((c) => c.id ?? '')
-        .filter(Boolean);
     const next: VisibilityState = {};
-    for (const col of columns) {
-      const id = col.id ?? '';
-      if (id) next[id] = keep.includes(id);
+    if (variant === 'narrowed') {
+      const keep =
+        narrowedVisibleColumnIds ??
+        columns
+          .slice(0, 3)
+          .map((c) => c.id ?? '')
+          .filter(Boolean);
+      for (const col of columns) {
+        const id = col.id ?? '';
+        if (id) next[id] = keep.includes(id);
+      }
+    }
+    if (hiddenColumnIds) {
+      for (const id of hiddenColumnIds) next[id] = false;
     }
     setColumnVisibility(next);
-  }, [variant, columns, narrowedVisibleColumnIds]);
+  }, [variant, columns, narrowedVisibleColumnIds, hiddenColumnIds]);
 
   const table = useReactTable<TRow>({
     data,
@@ -118,11 +138,17 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
   const filteredCount = table.getFilteredRowModel().rows.length;
   const showEmpty = !isLoading && filteredCount === 0;
 
-  // AC5 — when search produced 0 hits, switch the empty copy to 'filtered'.
+  useEffect(() => {
+    onFilteredCountChange?.(filteredCount);
+  }, [filteredCount, onFilteredCountChange]);
+
+  // AC5 — when the search input is non-empty OR the parent declared a filtered context, render the
+  // 'filtered' empty copy. Earlier ternary form was parsed as `showEmpty && (cond1 ? true : cond2)`
+  // which silently flipped the meaning when a sibling caller passed `globalFilter` with
+  // `emptyState='no-data'`.
+  const isSearching = (globalFilter ?? '').length > 0;
   const effectiveEmpty: EmptyState =
-    showEmpty && (globalFilter && globalFilter.length > 0 ? true : emptyState === 'filtered')
-      ? 'filtered'
-      : emptyState;
+    showEmpty && (isSearching || emptyState === 'filtered') ? 'filtered' : emptyState;
 
   function handleRowKeyDown(
     event: KeyboardEvent<HTMLTableRowElement>,
@@ -136,12 +162,18 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      const tbody = event.currentTarget.parentElement;
+      const tbody = event.currentTarget.closest('tbody');
       if (!tbody) return;
       const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr[data-row]'));
+      // Use the DOM position of the current row instead of the React `index` — when sorted, the
+      // React `index` reflects sortedRows order, which may differ from DOM order if the upstream
+      // table state changes between render and keystroke.
+      const currentIdx = rows.indexOf(event.currentTarget);
+      const startIdx = currentIdx >= 0 ? currentIdx : index;
       const dir = event.key === 'ArrowDown' ? 1 : -1;
-      const nextIdx = Math.max(0, Math.min(rows.length - 1, index + dir));
+      const nextIdx = Math.max(0, Math.min(rows.length - 1, startIdx + dir));
       rows[nextIdx]?.focus();
+      setActiveRowIndex(nextIdx);
     }
   }
 
@@ -208,7 +240,8 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
                 key={row.id}
                 data-row
                 data-state={row.getIsSelected() ? 'selected' : undefined}
-                tabIndex={0}
+                tabIndex={idx === Math.min(activeRowIndex, sortedRows.length - 1) ? 0 : -1}
+                onFocus={() => setActiveRowIndex(idx)}
                 onKeyDown={(e) => handleRowKeyDown(e, row, idx)}
                 onClick={() => onRowSelect?.(row.original)}
                 className={cn(

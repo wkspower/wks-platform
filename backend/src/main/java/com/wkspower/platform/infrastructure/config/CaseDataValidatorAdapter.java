@@ -45,6 +45,16 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   private final JsonSchemaGenerator schemaGenerator;
   private final ObjectMapper objectMapper;
+
+  /**
+   * Defensive upper bound on cache size. With per-case-type eviction on {@link ConfigDeployed} the
+   * cache normally tops out at one entry per active case type, but a long-running JVM that sees
+   * many version bumps without redeploys (or distinct case types created over time) can drift
+   * upward. When the bound is hit we flush wholesale — schema generation is cheap on a cold call
+   * and this is preferable to an LRU dependency for a Phase-0 surface.
+   */
+  static final int MAX_CACHE_SIZE = 256;
+
   private final ConcurrentMap<CacheKey, JsonSchema> schemaCache = new ConcurrentHashMap<>();
 
   CaseDataValidatorAdapter(JsonSchemaGenerator schemaGenerator, ObjectMapper objectMapper) {
@@ -54,6 +64,9 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   @Override
   public List<ErrorDetail> validate(CaseTypeConfig caseType, Map<String, Object> data) {
+    if (schemaCache.size() > MAX_CACHE_SIZE) {
+      schemaCache.clear();
+    }
     JsonSchema schema =
         schemaCache.computeIfAbsent(
             new CacheKey(caseType.id(), caseType.version()),

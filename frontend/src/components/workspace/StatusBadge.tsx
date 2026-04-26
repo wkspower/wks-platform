@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/Badge';
+import { t } from '@/i18n';
 import { statusColorVar } from '@/lib/statusColor';
 import type { CaseTypeView } from '@/types/caseType';
 
@@ -26,12 +27,13 @@ export function StatusBadge({ status, caseType }: StatusBadgeProps) {
     return (
       <Badge
         variant="solid"
+        title={status}
         style={{
           backgroundColor: 'var(--status-closed)',
           color: 'var(--primary-foreground)',
         }}
       >
-        {status}
+        {t('cases.status.unknown')}
       </Badge>
     );
   }

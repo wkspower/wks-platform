@@ -26,9 +26,14 @@ function renderField(field: FieldDefinition, value: unknown): string {
         : t('cases.field.checkbox.false');
     case 'file':
       return t('cases.field.file.placeholder');
+    case 'select': {
+      // Resolve to the option's display label when available; fall back to the raw value if the
+      // option list does not include this token (e.g., legacy data after a YAML rename).
+      const match = field.options?.find((opt) => opt.value === value);
+      return match ? match.label : String(value);
+    }
     case 'text':
     case 'textarea':
-    case 'select':
     default:
       return String(value);
   }
@@ -57,10 +62,21 @@ const SORTABLE_FIELD_TYPES = new Set<FieldDefinition['type']>([
  * `caseType.fields[]` the entry is dropped with a `console.warn` (server already rejects this
  * at deploy time per WKS-CFG-006, but a stale TanStack Query cache could surface it).
  */
+export interface BuildCaseColumnsOptions {
+  /**
+   * Lookup of case-type id → displayName, used by the `caseType` column cell renderer. When
+   * absent, the cell falls back to the raw `caseTypeId`. The column itself is always emitted —
+   * visibility is controlled at the table level (multi-case-type select shows it; single hides).
+   */
+  caseTypesById?: Map<string, string>;
+}
+
 export function buildCaseColumns(
   caseType: Pick<CaseTypeView, 'fields' | 'statuses' | 'listColumns'>,
+  options: BuildCaseColumnsOptions = {},
 ): ColumnDef<CaseRow>[] {
   const fieldsById = new Map(caseType.fields.map((f) => [f.id, f]));
+  const caseTypesById = options.caseTypesById;
 
   const idColumn: ColumnDef<CaseRow> = {
     id: 'id',
@@ -83,6 +99,16 @@ export function buildCaseColumns(
     header: () => t('cases.column.status'),
     accessorKey: 'status',
     cell: ({ row }) => <StatusBadge status={row.original.status} caseType={caseType} />,
+    enableSorting: true,
+  };
+
+  // AC4 — case-type column. Always emitted; the parent table hides it via columnVisibility when
+  // exactly one case type is selected (redundant — every row shares the same type).
+  const caseTypeColumn: ColumnDef<CaseRow> = {
+    id: 'caseType',
+    header: () => t('cases.column.caseType'),
+    accessorFn: (row) => caseTypesById?.get(row.caseTypeId) ?? row.caseTypeId,
+    cell: ({ getValue }) => String(getValue() ?? '—'),
     enableSorting: true,
   };
 
@@ -112,7 +138,7 @@ export function buildCaseColumns(
     enableSorting: true,
   };
 
-  return [idColumn, statusColumn, ...fieldColumns, updatedAtColumn];
+  return [idColumn, statusColumn, caseTypeColumn, ...fieldColumns, updatedAtColumn];
 }
 
 /**
@@ -123,5 +149,13 @@ export function buildCaseColumns(
 export function urgencyDefaultSort(a: CaseRow, b: CaseRow): number {
   const slaCmp = (b.slaBreached ? 1 : 0) - (a.slaBreached ? 1 : 0);
   if (slaCmp !== 0) return slaCmp;
-  return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  // Guard against missing/garbled `updatedAt` values — `Date.parse('garbage')` → NaN, and
+  // `NaN - NaN === NaN` poisons Array.sort comparators (treated as 0, but unstable). Treat
+  // unparseable timestamps as the oldest possible value so they fall to the bottom rather than
+  // randomising sibling order.
+  const aT = new Date(a.updatedAt).getTime();
+  const bT = new Date(b.updatedAt).getTime();
+  const aV = Number.isFinite(aT) ? aT : -Infinity;
+  const bV = Number.isFinite(bT) ? bT : -Infinity;
+  return bV - aV;
 }

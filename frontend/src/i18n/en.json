@@ -54,6 +54,7 @@
   "cases.empty.filtered": "No cases match current filters",
   "cases.empty.clearFilters": "Clear filters",
   "cases.row.newActivity": "new activity",
+  "cases.status.unknown": "Unknown",
   "cases.field.checkbox.true": "Yes",
   "cases.field.checkbox.false": "No",
   "cases.field.file.placeholder": "—",

@@ -6,16 +6,18 @@ const SIDEBAR_KEY = 'wks.ui.sidebar.collapsed';
 const FILTERS_KEY = 'wks.ui.cases.filters';
 
 function readCollapsed(): boolean {
+  if (typeof window === 'undefined') return false;
   try {
-    return localStorage.getItem(SIDEBAR_KEY) === 'true';
+    return window.localStorage.getItem(SIDEBAR_KEY) === 'true';
   } catch {
     return false;
   }
 }
 
 function writeCollapsed(value: boolean): void {
+  if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(SIDEBAR_KEY, value ? 'true' : 'false');
+    window.localStorage.setItem(SIDEBAR_KEY, value ? 'true' : 'false');
   } catch {
     // Ignore — Safari private mode etc. State stays in memory only.
   }
@@ -30,8 +32,9 @@ export interface CaseListFilters {
 const EMPTY_FILTERS: CaseListFilters = { caseTypeIds: [], statusIds: [], priorities: [] };
 
 function readFilters(): CaseListFilters {
+  if (typeof window === 'undefined') return EMPTY_FILTERS;
   try {
-    const raw = localStorage.getItem(FILTERS_KEY);
+    const raw = window.localStorage.getItem(FILTERS_KEY);
     if (!raw) return EMPTY_FILTERS;
     const parsed = JSON.parse(raw) as Partial<CaseListFilters>;
     return {
@@ -45,8 +48,9 @@ function readFilters(): CaseListFilters {
 }
 
 function writeFilters(value: CaseListFilters): void {
+  if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(FILTERS_KEY, JSON.stringify(value));
+    window.localStorage.setItem(FILTERS_KEY, JSON.stringify(value));
   } catch {
     // Ignore — same Safari private-mode rationale as above.
   }

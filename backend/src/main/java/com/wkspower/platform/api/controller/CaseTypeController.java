@@ -5,6 +5,7 @@ import com.wkspower.platform.api.dto.response.CaseTypeSummaryDto;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
@@ -49,7 +50,9 @@ public class CaseTypeController {
     List<CaseTypeSummaryDto> data =
         reader.all().stream()
             .filter(ct -> evaluator.hasVerb(actor.authenticated(), ct.id(), "view"))
-            .sorted(Comparator.comparing(CaseTypeConfig::displayName))
+            .sorted(
+                Comparator.comparing(
+                    CaseTypeConfig::displayName, Comparator.nullsLast(String::compareTo)))
             .map(
                 ct ->
                     new CaseTypeSummaryDto(
@@ -79,7 +82,9 @@ public class CaseTypeController {
 
   private static void requireAuthenticated(WksUserPrincipal actor) {
     if (actor == null) {
-      throw new AccessDeniedException("Authentication required");
+      // JWT filter normally short-circuits before we get here; this is a defence-in-depth fallback
+      // that maps to 401 (AuthN), not 403 (AuthZ), via GlobalExceptionHandler.
+      throw new WksAuthenticationException("Authentication required");
     }
   }
 }

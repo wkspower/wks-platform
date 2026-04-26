@@ -40,6 +40,7 @@ export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(func
   const setFilters = useUiStore((s) => s.setCaseListFilters);
   const clearFilters = useUiStore((s) => s.clearCaseListFilters);
   const searchRef = useRef<HTMLInputElement>(null);
+  const chipRowRef = useRef<HTMLDivElement>(null);
 
   // Compose the union of statuses across selected case types.
   const statusOptions = useMemo(() => {
@@ -56,10 +57,14 @@ export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(func
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      // Skip when an IME composition is active — '/' may be a literal character in the
+      // composing buffer (e.g., CJK input methods). Stealing focus would abort composition.
+      if (e.isComposing) return;
       const target = e.target as HTMLElement | null;
       if (!target) return;
       const tag = target.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable)
+        return;
       e.preventDefault();
       searchRef.current?.focus();
     }
@@ -179,7 +184,12 @@ export const CaseFilterBar = forwardRef<HTMLDivElement, CaseFilterBarProps>(func
       </div>
 
       {hasAny ? (
-        <div className="flex flex-wrap items-center gap-1">
+        <div
+          ref={chipRowRef}
+          tabIndex={-1}
+          className="flex flex-wrap items-center gap-1 outline-none"
+          data-chip-row
+        >
           {renderChips(filters, caseTypes, statusOptions, (next) => setFilters(next))}
           <Button variant="ghost" size="sm" onClick={() => clearFilters()} className="ml-auto">
             {t('cases.filter.clearAll')}
@@ -259,14 +269,39 @@ interface ChipProps {
 }
 
 function Chip({ label, value, ariaLabel, onRemove }: ChipProps) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
+    // AC4 — Backspace on a focused chip dismisses it. After removal, advance focus to the
+    // sibling chip's X (next, then previous), or fall back to the chip-row container so the user
+    // never lands on document.body.
+    if (e.key !== 'Backspace') return;
+    e.preventDefault();
+    const button = e.currentTarget;
+    const row = button.closest('[data-chip-row]');
+    const buttons = row
+      ? Array.from(row.querySelectorAll<HTMLButtonElement>('button[data-chip-remove]'))
+      : [];
+    const idx = buttons.indexOf(button);
+    const next = buttons[idx + 1] ?? buttons[idx - 1] ?? null;
+    onRemove();
+    // Defer focus until React has flushed the DOM removal of this chip.
+    requestAnimationFrame(() => {
+      if (next && document.body.contains(next)) {
+        next.focus();
+      } else if (row instanceof HTMLElement) {
+        row.focus();
+      }
+    });
+  }
   return (
     <span className="inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--muted)] px-2 py-0.5 text-xs">
       <span className="text-[var(--muted-foreground)]">{`${label}:`}</span>
       <span>{value}</span>
       <button
         type="button"
+        data-chip-remove
         aria-label={ariaLabel}
         onClick={onRemove}
+        onKeyDown={handleKeyDown}
         className="ml-1 rounded p-0.5 hover:bg-[var(--border)]"
       >
         <X aria-hidden className="size-3" />

@@ -68,9 +68,13 @@ class CaseStatusIndexIT {
   void plannerUsesStatusIndexWhenSeqScanDisabled() throws Exception {
     try (var conn = dataSource.getConnection();
         var stmt = conn.createStatement()) {
-      // With enable_seqscan disabled the planner is forced onto the cheapest non-seq path —
-      // proves idx_cases_status is functional, not just declared. We don't assert "the planner
-      // ALWAYS picks the index" because at low row counts a seq scan is genuinely cheaper.
+      // Note: we don't pre-populate rows here. Inserting into `cases` would require a valid
+      // `created_by` referencing the seeded admin user (FK constraint), and threading that
+      // through the testcontainers boot order is more friction than this test warrants. The
+      // first test (`casesStatusIndexExists`) is the durable contract — it pins the index name
+      // against pg_indexes and fails closed if a future migration drops or renames it. This
+      // EXPLAIN check is a defence-in-depth confirmation that the index is valid, queryable,
+      // and selected when the planner is forced onto a non-seq path.
       stmt.execute("SET LOCAL enable_seqscan = off");
       try (var rs =
           stmt.executeQuery("EXPLAIN SELECT id FROM cases WHERE status = 'open' ORDER BY status")) {
