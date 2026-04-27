@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog';
+import { FormErrorsBanner, type FormErrorEntry } from '@/components/ui/FormErrorsBanner';
 import { FormField, type FormFieldRenderProps } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { MutationButton, type MutationButtonState } from '@/components/ui/MutationButton';
@@ -248,6 +249,12 @@ export function NewCaseDialog({ open, caseType, onOpenChange }: NewCaseDialogPro
             ) : (
               requiredFields.map((f) => renderField(f, isPending, form))
             )}
+            {form.formState.isSubmitted ? (
+              <FormErrorsBanner
+                errors={collectFormErrors(form, requiredFields)}
+                onAnchorClick={(field) => form.setFocus(field)}
+              />
+            ) : null}
             {serverError ? (
               <Alert
                 ref={bannerRef}
@@ -284,6 +291,20 @@ export function NewCaseDialog({ open, caseType, onOpenChange }: NewCaseDialogPro
       </DialogContent>
     </Dialog>
   );
+}
+
+function collectFormErrors(
+  form: UseFormReturn<Record<string, unknown>>,
+  requiredFields: FieldDefinition[],
+): FormErrorEntry[] {
+  const errs = form.formState.errors;
+  const out: FormErrorEntry[] = [];
+  for (const f of requiredFields) {
+    if (errs[f.id]) {
+      out.push({ field: f.id, displayName: f.displayName, order: f.order });
+    }
+  }
+  return out;
 }
 
 function renderField(
