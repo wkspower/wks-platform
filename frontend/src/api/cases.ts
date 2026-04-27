@@ -26,3 +26,20 @@ export async function listCases(query: CaseListQuery): Promise<CaseSummary[]> {
   const result = await apiFetch<CaseSummary[]>(`/api/cases?${params.toString()}`);
   return result.data;
 }
+
+/** Story 2.7 — request body for `POST /api/cases`. */
+export interface CreateCaseRequest {
+  caseTypeId: string;
+  data: Record<string, unknown>;
+  assignee?: string | null;
+}
+
+/** Story 2.7 — `POST /api/cases` (Story 2.3 endpoint, first consumed from a UI surface here). */
+export async function createCase(req: CreateCaseRequest): Promise<CaseDto> {
+  const result = await apiFetch<CaseDto>('/api/cases', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  return result.data;
+}

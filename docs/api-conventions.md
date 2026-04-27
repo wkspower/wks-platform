@@ -95,6 +95,12 @@ return PageMetaBuilder.paged(page, MyMapper::toDto);
 Codes are defined once in `domain/exception/ErrorCode.java`. Wire strings are part of the public
 contract — never renumber or reuse a code once shipped.
 
+### Story 2.7 — additions
+
+- `WKS-CFG-013` — case-type YAML marks a `file`-typed field as `requiredOnCreate: true` but file
+  upload is not yet supported on the create form. WARN-level finding (case-type still loads); the
+  create-form treats the field as optional until Story 3.1 ships document upload.
+
 ### Config validation codes (WKS-CFG-001..099)
 
 Case-type YAML validation (Story 2.1). Every entry carries `field` (dotted JSON-Pointer-flavour
@@ -221,7 +227,7 @@ Returns the case types the caller has the `view` verb on, sorted by `displayName
 {
   "data": [
     { "id": "loan-application", "displayName": "Loan Application", "version": 1,
-      "statusCount": 5, "fieldCount": 8 }
+      "statusCount": 5, "fieldCount": 8, "permissions": ["view", "create"] }
   ],
   "meta": {}
 }
@@ -229,6 +235,13 @@ Returns the case types the caller has the `view` verb on, sorted by `displayName
 
 `statusCount` and `fieldCount` are convenience counts for a future case-type selector — the heavy
 fields (`fields[]`, `statuses[]`, `listColumns`) live on the detail endpoint below.
+
+`permissions[]` (Story 2.7) is the verb subset the **caller** holds on the case-type — a subset
+of the declared `view`, `create`, `edit`, `transition`, `assign`, `upload-document` verbs.
+The frontend uses this to filter the Create-Case dropdown to entries the user can actually act
+on, without an extra round-trip per case-type. The list endpoint still gates entries by the
+`view` verb; `permissions[]` only surfaces info the caller is otherwise entitled to derive from
+their own roles + the YAML.
 
 `GET /api/case-types/{id}`
 
@@ -238,14 +251,30 @@ fields (`fields[]`, `statuses[]`, `listColumns`) live on the detail endpoint bel
     "id": "loan-application",
     "displayName": "Loan Application",
     "version": 1,
-    "fields": [ { "id": "name", "displayName": "Name", "type": "text", "required": true, "order": 0,
-                  "options": [], "slots": null } ],
+    "fields": [ { "id": "applicant_name", "displayName": "Applicant name", "type": "text",
+                  "required": true, "requiredOnCreate": true, "order": 0, "options": [],
+                  "maxLength": 80 } ],
     "statuses": [ { "id": "open", "displayName": "Open", "color": "zinc" } ],
-    "listColumns": [ "name" ]
+    "listColumns": [ "applicant_name" ]
   },
   "meta": {}
 }
 ```
+
+`fields[]` (Story 2.7 widening): every entry is a flattened `FieldView` carrying the per-type
+validation slots the frontend Zod builder reads — `minLength`/`maxLength` for `text`/`textarea`,
+`min`/`max`/`step` for `number`, `dateMin`/`dateMax` for `date`, `options[]` for `select`,
+`maxBytes`/`allowedMimeTypes` for `file`. Slots are nullable; only the slots relevant to `type`
+are populated. `requiredOnCreate` (default = `required`) controls whether the create-form dialog
+asks for this field at case-creation time. The wire field names mirror the YAML grammar tokens
+exactly (camelCase) so the validation contract is one shape end-to-end.
+
+`POST /api/cases` 422 (Story 2.7 AC10): every `errors[].field` is the YAML-declared field id
+verbatim (e.g., `applicant_name`), **not** a JSON-Pointer fragment (`/data/applicant_name`).
+The backend `CaseDataValidatorAdapter.pointerToField` resolver strips the `$.` / `/data/`
+prefix and (for nested paths, defensively — Phase 0 grammar is flat) returns the leaf segment.
+Empty / root pointer maps to the wire literal `data` so the frontend banner code can render it
+as a form-level violation. The frontend RHF `setError` mapping depends on this contract.
 
 - `404 WKS-API-404` — unknown id.
 - `403 WKS-API-403` — caller lacks `view` on this case type.

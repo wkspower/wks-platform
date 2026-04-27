@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CaseDataTable } from '@/components/workspace/CaseDataTable';
 import { CaseFilterBar } from '@/components/workspace/CaseFilterBar';
 import { CaseWorkspace } from '@/components/workspace/CaseWorkspace';
+import { NewCaseButton } from '@/components/workspace/NewCaseButton';
 import { useCases } from '@/hooks/useCases';
 import { useCaseTypes, useCaseTypeViews } from '@/hooks/useCaseTypes';
 import { t } from '@/i18n';
@@ -163,7 +164,10 @@ export function CasesPage() {
   return (
     <section className="flex flex-1 flex-col">
       {selectedCaseId === null ? (
-        <h1 className="font-heading text-2xl font-semibold">{t('cases.title')}</h1>
+        <header className="flex items-center justify-between">
+          <h1 className="font-heading text-2xl font-semibold">{t('cases.title')}</h1>
+          <NewCaseButton />
+        </header>
       ) : null}
 
       <div className="mt-4 flex flex-1 flex-col gap-4">

@@ -72,7 +72,8 @@ public class ConfigValidator {
           eb.error(ErrorCode.WKS_CFG_007, "description must be ≤ 400 characters", "description"));
     }
 
-    List<FieldDefinition> fields = checkFields(raw.fields(), eb, errors);
+    List<ErrorDetail> warnings = new ArrayList<>();
+    List<FieldDefinition> fields = checkFields(raw.fields(), eb, errors, warnings);
     List<StatusDefinition> statuses = checkStatuses(raw.statuses(), eb, errors);
     List<RoleDefinition> roles = checkRoles(raw.roles(), eb, errors);
     List<String> listColumns =
@@ -93,7 +94,7 @@ public class ConfigValidator {
             statuses,
             listColumns,
             roles);
-    return ValidationResult.ok(config);
+    return ValidationResult.ok(config, warnings);
   }
 
   // ---- per-section checks -------------------------------------------------
@@ -129,7 +130,10 @@ public class ConfigValidator {
   }
 
   private List<FieldDefinition> checkFields(
-      List<RawCaseTypeConfig.RawField> raws, ErrorBuilder eb, List<ErrorDetail> errors) {
+      List<RawCaseTypeConfig.RawField> raws,
+      ErrorBuilder eb,
+      List<ErrorDetail> errors,
+      List<ErrorDetail> warnings) {
     if (raws == null || raws.isEmpty()) {
       errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: fields", "fields"));
       return List.of();
@@ -195,12 +199,27 @@ public class ConfigValidator {
       List<FieldOption> opts = checkFieldOptions(f, ft, base, eb, errors);
 
       if (idOk && hasDn && ft != null) {
+        boolean required = Boolean.TRUE.equals(f.required());
+        // Default requiredOnCreate to required when YAML omits the slot — preserves seed behavior.
+        boolean requiredOnCreate = f.requiredOnCreate() == null ? required : f.requiredOnCreate();
+        if (requiredOnCreate && ft == FieldType.FILE) {
+          warnings.add(
+              eb.error(
+                  ErrorCode.WKS_CFG_013,
+                  "Field '"
+                      + f.id()
+                      + "' is type 'file' with requiredOnCreate: true, but file upload is not"
+                      + " supported on the create form (Story 3.1 will close this). The create"
+                      + " form will treat this field as optional until 3.1 ships.",
+                  base + ".requiredOnCreate"));
+        }
         out.add(
             new FieldDefinition(
                 f.id(),
                 f.displayName(),
                 ft,
-                Boolean.TRUE.equals(f.required()),
+                required,
+                requiredOnCreate,
                 f.order() == null ? Integer.MAX_VALUE : f.order(),
                 opts,
                 new FieldDefinition.TypeSlots(

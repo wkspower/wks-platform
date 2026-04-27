@@ -498,6 +498,56 @@ class ConfigValidatorTest {
     return validator.validate(r.raw(), r.lines());
   }
 
+  // ---- Story 2.7 — requiredOnCreate grammar extension + WKS-CFG-013 ----
+
+  @Test
+  void requiredOnCreateDefaultsToRequiredWhenOmitted() {
+    var result = validate(GREEN_YAML);
+    assertThat(result.isInvalid()).isFalse();
+    var fields = result.config().get().fields();
+    var applicantName =
+        fields.stream().filter(f -> f.id().equals("applicant_name")).findFirst().get();
+    var loanAmount = fields.stream().filter(f -> f.id().equals("loan_amount")).findFirst().get();
+    assertThat(applicantName.required()).isTrue();
+    assertThat(applicantName.requiredOnCreate())
+        .as("applicant_name has required:true and no requiredOnCreate slot — defaults to required")
+        .isTrue();
+    assertThat(loanAmount.required()).isFalse();
+    assertThat(loanAmount.requiredOnCreate()).isFalse();
+  }
+
+  @Test
+  void requiredOnCreateExplicitFalseOnRequiredFieldIsHonored() {
+    var yaml =
+        GREEN_YAML.replace(
+            "    type: text\n    required: true",
+            "    type: text\n    required: true\n    requiredOnCreate: false");
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isFalse();
+    var f =
+        result.config().get().fields().stream()
+            .filter(x -> x.id().equals("applicant_name"))
+            .findFirst()
+            .get();
+    assertThat(f.required()).isTrue();
+    assertThat(f.requiredOnCreate()).isFalse();
+  }
+
+  @Test
+  void wksCfg013_fileFieldRequiredOnCreateEmitsWarning() {
+    var yaml =
+        GREEN_YAML.replace(
+            "  - id: loan_amount\n    displayName: Loan amount\n    type: number",
+            "  - id: id_proof\n    displayName: ID proof\n    type: file\n"
+                + "    requiredOnCreate: true");
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("WKS-CFG-013 is a warning, not a blocking error").isFalse();
+    assertThat(result.warnings()).hasSize(1);
+    assertThat(result.warnings().get(0).code()).isEqualTo("WKS-CFG-013");
+    assertThat(result.warnings().get(0).field()).contains("requiredOnCreate");
+    assertThat(result.config()).isPresent();
+  }
+
   private ErrorDetail assertErrorOn(List<ErrorDetail> errors, String code, String field) {
     var match =
         errors.stream().filter(e -> code.equals(e.code()) && field.equals(e.field())).findFirst();

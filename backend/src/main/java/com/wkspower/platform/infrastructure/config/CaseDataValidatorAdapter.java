@@ -7,11 +7,13 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +78,7 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
     List<ErrorDetail> errors = new ArrayList<>();
     for (ValidationMessage m : messages) {
-      String field = pointerToField(m.getInstanceLocation().toString());
+      String field = pointerToField(m.getInstanceLocation().toString(), caseType);
       errors.add(ErrorDetail.ofField(ErrorCode.WKS_API_001.wire(), m.getMessage(), field));
     }
     return List.copyOf(errors);
@@ -99,17 +101,77 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   private record CacheKey(String caseTypeId, int version) {}
 
-  private static String pointerToField(String pointer) {
-    if (pointer == null || pointer.isEmpty() || "$".equals(pointer)) {
-      return null;
+  /**
+   * Resolves a networknt validator instance-location string (either JsonPath-style {@code $.foo} or
+   * JSON-Pointer-style {@code /data/foo} / {@code /foo/bar}) to the YAML-declared field id the
+   * frontend RHF form references. Phase 0 grammar is flat — there is no nested object schema — but
+   * the resolver is defensive against future schema evolution per Story 2.7 AC10.
+   *
+   * <p>Resolution rules (Story 2.7 AC10):
+   *
+   * <ol>
+   *   <li>Empty / root pointer → wire literal {@code "data"} (form-level violation).
+   *   <li>Strip the leading {@code $.} or {@code /} (and a literal {@code data/} or {@code data.}
+   *       segment — networknt uses both styles depending on schema-draft and version).
+   *   <li>If the remainder matches a top-level field id from the case-type, return it verbatim.
+   *   <li>Otherwise return the leaf path token (last {@code /}- or {@code .}-delimited segment) —
+   *       belt-and-braces fallback for nested validators that may surface in future drafts. Never
+   *       converts {@code /} to {@code .} since YAML field ids may contain {@code _}/{@code -} but
+   *       never {@code .}.
+   * </ol>
+   *
+   * <p>Package-private to keep the unit-test surface tight; previously {@code private static}.
+   */
+  static String pointerToField(String pointer, CaseTypeConfig caseType) {
+    if (pointer == null || pointer.isEmpty() || "$".equals(pointer) || "/".equals(pointer)) {
+      return "data";
     }
-    // networknt 1.5 uses JsonPath-style locations like "$.applicant_name". Strip the prefix.
-    if (pointer.startsWith("$.")) {
-      return pointer.substring(2);
+    String stripped = pointer;
+    if (stripped.startsWith("$.")) {
+      stripped = stripped.substring(2);
+    } else if (stripped.startsWith("$")) {
+      stripped = stripped.substring(1);
     }
-    if (pointer.startsWith("/")) {
-      return pointer.substring(1);
+    if (stripped.startsWith("/")) {
+      stripped = stripped.substring(1);
     }
-    return pointer;
+    // Strip a leading "data/" or "data." segment when the schema wraps payloads under /data.
+    if (stripped.startsWith("data/")) {
+      stripped = stripped.substring("data/".length());
+    } else if (stripped.startsWith("data.")) {
+      stripped = stripped.substring("data.".length());
+    } else if ("data".equals(stripped)) {
+      return "data";
+    }
+    if (stripped.isEmpty()) {
+      return "data";
+    }
+    Set<String> declared = declaredFieldIds(caseType);
+    if (declared.contains(stripped)) {
+      return stripped;
+    }
+    // Nested or unknown path: take the leaf segment as a best-effort. Only return it when it
+    // matches a YAML-declared field id — otherwise fall back to "data" so the frontend renders a
+    // form-level banner instead of setError on a non-existent RHF field (which RHF accepts
+    // silently, making the error vanish).
+    int slash = stripped.lastIndexOf('/');
+    int dot = stripped.lastIndexOf('.');
+    int cut = Math.max(slash, dot);
+    String leaf = cut >= 0 ? stripped.substring(cut + 1) : stripped;
+    if (leaf.isEmpty()) {
+      return "data";
+    }
+    return declared.contains(leaf) ? leaf : "data";
+  }
+
+  private static Set<String> declaredFieldIds(CaseTypeConfig caseType) {
+    if (caseType == null || caseType.fields() == null) {
+      return Set.of();
+    }
+    Set<String> ids = new LinkedHashSet<>();
+    for (FieldDefinition f : caseType.fields()) {
+      ids.add(f.id());
+    }
+    return ids;
   }
 }

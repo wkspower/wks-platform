@@ -120,7 +120,6 @@ describe('buildCaseColumns', () => {
           required: false,
           order: 2,
           options: [],
-          slots: null,
         } satisfies FieldDefinition,
         {
           id: 'attach',
@@ -129,7 +128,6 @@ describe('buildCaseColumns', () => {
           required: false,
           order: 3,
           options: [],
-          slots: null,
         } satisfies FieldDefinition,
       ],
       listColumns: [...caseType.listColumns, 'notes', 'attach'],

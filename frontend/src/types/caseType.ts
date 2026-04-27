@@ -1,9 +1,14 @@
 /**
  * 1:1 mirror of the backend `CaseTypeViewDto` (Story 2.3 → exposed by Story 2.5 on
- * `GET /api/case-types/{id}`). The frontend never invents derived fields here — derived state
- * (e.g. resolved status colors, accessor functions) lives in `lib/`.
+ * `GET /api/case-types/{id}`, widened in Story 2.7). The frontend never invents derived fields
+ * here — derived state (e.g. resolved status colors, accessor functions) lives in `lib/`.
  *
- * The `CaseTypeSummary` mirrors `CaseTypeSummaryDto` for the list endpoint.
+ * Story 2.7 widens `FieldDefinition` to the flattened `FieldView` wire shape: per-type validation
+ * slots (`minLength`, `maxLength`, `min`, `max`, `step`, etc.) are top-level + nullable, and
+ * `requiredOnCreate` controls whether the create-form dialog asks for the field at case creation.
+ *
+ * `CaseTypeSummary` gains `permissions: string[]` — the verbs the caller holds on this case-type,
+ * used to filter the Create-Case selector dropdown without an extra round-trip.
  */
 
 import type { FieldType } from './fieldType';
@@ -14,7 +19,19 @@ export interface FieldOption {
   label: string;
 }
 
-export interface FieldTypeSlots {
+export interface FieldDefinition {
+  id: string;
+  displayName: string;
+  type: FieldType;
+  required: boolean;
+  /**
+   * Story 2.7 — controls whether the create-form dialog asks for this field. Optional in TS for
+   * backward-compat with pre-2.7 fixtures; the wire shape always includes it.
+   */
+  requiredOnCreate?: boolean;
+  order: number;
+  options: FieldOption[];
+  // Per-type validation slots — only the slots relevant to `type` are populated.
   minLength?: number | null;
   maxLength?: number | null;
   min?: number | null;
@@ -24,16 +41,6 @@ export interface FieldTypeSlots {
   dateMax?: string | null;
   maxBytes?: number | null;
   allowedMimeTypes?: string[] | null;
-}
-
-export interface FieldDefinition {
-  id: string;
-  displayName: string;
-  type: FieldType;
-  required: boolean;
-  order: number;
-  options: FieldOption[];
-  slots: FieldTypeSlots | null;
 }
 
 export interface StatusDefinition {
@@ -48,6 +55,11 @@ export interface CaseTypeSummary {
   version: number;
   statusCount: number;
   fieldCount: number;
+  /**
+   * Story 2.7 — verbs the caller holds on this case-type. Subset of declared role verbs.
+   * Optional in TS for backward-compat with pre-2.7 fixtures; the wire shape always includes it.
+   */
+  permissions?: string[];
 }
 
 export interface CaseTypeView {
