@@ -28,7 +28,11 @@ export function formatFieldValue(field: FieldDefinition, value: unknown): string
     case 'file':
       return t('cases.field.file.placeholder');
     case 'select': {
-      const match = field.options?.find((opt) => opt.value === value);
+      // Story 2.8 AC12 — coerce both sides to string before compare. YAML may declare numeric
+      // option values (`value: 1`) while the JSONB round-trip stringifies stored data; strict
+      // equality across that type boundary silently fails to label-match.
+      const stored = String(value);
+      const match = field.options?.find((opt) => String(opt.value) === stored);
       if (match) return match.label;
       // eslint-disable-next-line no-console
       console.warn(`formatFieldValue: select '${field.id}' has no option for '${String(value)}'`);
