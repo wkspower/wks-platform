@@ -45,6 +45,12 @@ export interface MutationButtonProps extends Omit<
   failedLabel?: string;
   /** Optional retry slot; renders only on `failed`. */
   retryAction?: ReactNode;
+  /**
+   * Optional override for the `aria-live` announcement. When provided, the live region announces
+   * this string instead of the visible-state label — used by `TaskLifecycleButton` to surface the
+   * "Press Enter to refresh." hint on the conflict path without changing the visible button text.
+   */
+  announcement?: string;
 }
 
 export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>(
@@ -57,6 +63,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
       confirmedLabel = 'Confirmed',
       failedLabel = 'Failed',
       retryAction,
+      announcement,
       className,
       disabled,
       ...rest
@@ -84,7 +91,8 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
     // makes some AT engines drop region tracking. Failed state is still loud because the text
     // changes, the region just doesn't switch to assertive.
     const announce =
-      state === 'confirming'
+      announcement ??
+      (state === 'confirming'
         ? confirmingLabel
         : state === 'processing'
           ? processingLabel
@@ -92,7 +100,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
             ? confirmedLabel
             : state === 'failed'
               ? failedLabel
-              : '';
+              : '');
 
     const stateClass =
       state === 'confirming'
@@ -118,6 +126,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
           ref={ref}
           type={rest.type ?? 'submit'}
           aria-busy={state === 'confirming' || state === 'processing' ? true : undefined}
+          aria-disabled={buttonDisabled || undefined}
           disabled={buttonDisabled}
           data-state={confirmedFaded && state === 'confirmed' ? 'idle' : state}
           className={cn(stateClass, className)}

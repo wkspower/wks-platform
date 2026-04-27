@@ -284,9 +284,14 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
     if (engineTasks.isEmpty()) {
       return List.of();
     }
+    // Cache caseTypeId by processInstanceId — multiple pending tasks on the same process instance
+    // share variables, so a single getVariables call serves them all.
+    Map<String, String> caseTypeByProcessInstance = new java.util.HashMap<>();
     java.util.ArrayList<Task> out = new java.util.ArrayList<>(engineTasks.size());
     for (org.cibseven.bpm.engine.task.Task engineTask : engineTasks) {
-      String caseTypeId = readCaseTypeId(engineTask, caseId);
+      String pi = engineTask.getProcessInstanceId();
+      String caseTypeId =
+          caseTypeByProcessInstance.computeIfAbsent(pi, k -> readCaseTypeId(engineTask, caseId));
       if (caseTypeId == null) {
         // Process instance terminated between query and variable read — drop the task rather than
         // 500 the whole list.
@@ -376,10 +381,12 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
     try {
       taskService.complete(taskId, safeVars);
     } catch (NullValueException ex) {
-      // CIB seven's TaskService.complete throws NullValueException when the task does not exist
-      // (already completed or never existed).
-      throw new WksNotFoundException(
-          "Task " + taskId + " not found (already completed or unknown)");
+      // Task is gone between the load and the complete call — typically another action (another
+      // tab, another user) already completed it. AC5 requires this surface as a conflict (the
+      // truth has moved on), not 404 — the [Refresh case] recovery action depends on the 409
+      // envelope.
+      throw new WksConflictException(
+          "Task " + taskId + " was already completed. Refresh to see the latest case state.", ex);
     } catch (TaskAlreadyClaimedException ex) {
       // Spec Task 2.2 names this exception explicitly. Surfaces when complete() runs against a
       // task whose assignee differs from the actor at the engine boundary (defence-in-depth on

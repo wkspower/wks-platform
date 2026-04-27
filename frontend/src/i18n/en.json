@@ -91,6 +91,7 @@
   "case.heading": "Case {idShort}",
   "case.detail.announcement": "Case detail: {idShort}",
   "case.nextCaseHint": "Next case ({shortcut})",
+  "case.tasks.error": "Couldn't load actions for this case.",
 
   "breadcrumbs.label": "Breadcrumbs",
 
@@ -132,6 +133,7 @@
   "task.refreshCase": "Refresh case",
   "task.conflict.completedByOther": "This task was already completed by {name}. No changes were made.",
   "task.conflict.completedByUnknown": "This task was already completed. No changes were made.",
+  "task.conflict.refreshAnnouncement": "This task was already completed. Press Enter to refresh.",
 
   "cases.create.button": "New case",
   "cases.create.dialogTitle": "New {caseTypeName}",

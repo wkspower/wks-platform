@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { useCaseTasks } from '@/hooks/useTasks';
 import { t } from '@/i18n';
 
@@ -35,9 +36,19 @@ export function CaseActionBar({ caseId }: CaseActionBarProps) {
   }, [caseId, tasksQuery.isLoading, hasTasks]);
 
   if (tasksQuery.isError) {
-    // Phase 0 — fail quietly. The case panel owns the case-level error UI; surfacing a second
-    // error band here would double-announce. Re-fetch happens on focus (TanStack Query default).
-    return null;
+    // Surface an honest, retryable error rather than silently hiding the CTA. The case panel's
+    // case-level error UI does not cover the tasks endpoint specifically.
+    return (
+      <div
+        data-testid="case-action-bar-error"
+        className="flex items-center gap-2 px-4 py-2 text-xs text-[var(--destructive)]"
+      >
+        <span>{t('case.tasks.error')}</span>
+        <Button type="button" variant="ghost" onClick={() => tasksQuery.refetch()}>
+          {t('common.retry')}
+        </Button>
+      </div>
+    );
   }
 
   if (!tasksQuery.data || tasksQuery.data.length === 0) {

@@ -53,13 +53,25 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
       http.get(`/api/cases/${CASE_ID}/tasks`, () => HttpResponse.json({ data: [], meta: {} })),
     );
     render(wrap(<CaseActionBar caseId={CASE_ID} />));
-    // Wait for the empty data to land first
-    await waitFor(() => expect(screen.queryByTestId('case-action-bar')).not.toBeInTheDocument());
-    expect(screen.queryByTestId('case-action-bar-empty-hint')).not.toBeInTheDocument();
+    // Wait for the empty-data state to settle: the populated bar is gone, the empty hint is not
+    // yet visible (4s timer not yet fired).
+    await waitFor(() => {
+      expect(screen.queryByTestId('case-action-bar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('case-action-bar-empty-hint')).not.toBeInTheDocument();
+    });
     act(() => {
       vi.advanceTimersByTime(4_500);
     });
     expect(screen.getByTestId('case-action-bar-empty-hint')).toBeInTheDocument();
     expect(screen.getByText('Next case (J)')).toBeInTheDocument();
+  });
+
+  it('renders an inline retry when the tasks endpoint fails', async () => {
+    server.use(
+      http.get(`/api/cases/${CASE_ID}/tasks`, () => HttpResponse.json({}, { status: 500 })),
+    );
+    render(wrap(<CaseActionBar caseId={CASE_ID} />));
+    await waitFor(() => expect(screen.getByTestId('case-action-bar-error')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
   });
 });

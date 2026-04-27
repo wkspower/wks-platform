@@ -11,6 +11,7 @@ import type { ConflictReason, TaskActionResponse, TaskDto } from '@/types/task';
 
 const PROCESSING_TIMER_MS = 2_000;
 const TAKING_LONGER_TIMER_MS = 30_000;
+const CONFIRMED_FADE_MS = 2_000;
 
 /**
  * Story 2.8 AC2 / AC3 / AC4 — universal mutation lifecycle for backend mutations whose true
@@ -18,11 +19,6 @@ const TAKING_LONGER_TIMER_MS = 30_000;
  * internally via {@code useReducer}; composes {@link MutationButton} for the four shared visual
  * states (idle / confirming / confirmed / failed) and adds the {@code processing} visual + the
  * task-specific {@code [Retry]} / {@code [View Updated Case]} / {@code [Refresh case]} actions.
- *
- * <p>Phase 1 (Story 2.8) — REST-only. The 2s `processing` timer is armed at `confirming` entry
- * but cleared the instant the REST response lands; Phase 1 therefore never enters `processing`.
- * Phase 2 (Story 4.3) — SSE flips the source-of-truth: {@code VITE_WKS_SSE_ENABLED=true} arms
- * `processing` pre-emptively while the component waits for the SSE confirmation event.
  */
 export interface TaskLifecycleButtonProps {
   task: TaskDto;
@@ -65,6 +61,9 @@ function reducer(state: State, action: Action): State {
       if (state.kind !== 'confirming' && state.kind !== 'processing') return state;
       return { kind: 'confirmed' };
     case 'rest_failure':
+      // Only accept failures from in-flight states. Late dispatches from a previous mutation
+      // (e.g. retried after success) must not demote a `confirmed` UI back to `failed`.
+      if (state.kind !== 'confirming' && state.kind !== 'processing') return state;
       return {
         kind: 'failed',
         message: action.message,
@@ -80,6 +79,39 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+interface ConflictPayload {
+  reason: ConflictReason;
+  actorName: string | null;
+}
+
+function parseConflictPayload(err: ApiError): ConflictPayload {
+  // The 409 envelope (GlobalExceptionHandler) carries `{ error: { code: 'WKS-RTM-409', message } }`.
+  // Phase 0 messages do not carry a structured `completedBy` actor name yet; we best-effort parse a
+  // trailing `by {name}` substring so Phase 1 backend upgrades light up the {name} interpolation
+  // automatically. Engine reasons are derived from the message text — narrow recognised patterns
+  // map to the typed ConflictReason; everything else falls to 'unknown'.
+  const msg = err.message ?? '';
+  const lower = msg.toLowerCase();
+  let reason: ConflictReason;
+  if (lower.includes('already completed') || lower.includes('already_completed')) {
+    reason = 'already_completed';
+  } else if (
+    lower.includes('reassigned') ||
+    lower.includes('claimed') ||
+    lower.includes('assignee')
+  ) {
+    reason = 'reassigned';
+  } else if (lower.includes('engine') || lower.includes('unavailable')) {
+    reason = 'engine_unavailable';
+  } else {
+    reason = 'unknown';
+  }
+  // Best-effort actor parse: "...completed by {Name}" or "...completed by {Name}.".
+  const byMatch = /\bby\s+([^.]+?)(?:\.|$)/i.exec(msg);
+  const actorName = byMatch?.[1]?.trim() ?? null;
+  return { reason, actorName };
+}
+
 function classifyError(err: unknown): {
   message: string;
   conflict: boolean;
@@ -88,12 +120,17 @@ function classifyError(err: unknown): {
 } {
   if (err instanceof ApiError) {
     if (err.status === 409) {
-      // Phase 0: the engine returns a generic message without the actor's display name. The copy
-      // degrades to the no-name variant per AC5.
+      const { reason, actorName } = parseConflictPayload(err);
+      const message =
+        reason === 'already_completed' && actorName
+          ? t('task.conflict.completedByOther', { name: actorName })
+          : reason === 'already_completed'
+            ? t('task.conflict.completedByUnknown')
+            : err.message;
       return {
-        message: t('task.conflict.completedByUnknown'),
+        message,
         conflict: true,
-        conflictReason: 'already_completed',
+        conflictReason: reason,
         retryable: false,
       };
     }
@@ -105,7 +142,6 @@ function classifyError(err: unknown): {
         retryable: false,
       };
     }
-    // 5xx: retryable.
     return {
       message: err.message,
       conflict: false,
@@ -113,7 +149,6 @@ function classifyError(err: unknown): {
       retryable: err.status >= 500,
     };
   }
-  // Network / unknown — treat as retryable.
   return {
     message: err instanceof Error ? err.message : String(err),
     conflict: false,
@@ -126,38 +161,27 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
   const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(reducer, { kind: 'idle' } as State);
   const completeTask = useCompleteTask();
-  const processingTimerRef = useRef<number | null>(null);
-  const takingLongerTimerRef = useRef<number | null>(null);
   const [takingLonger, setTakingLonger] = useReducer(
     (_prev: boolean, next: boolean) => next,
     false,
   );
-  // Story 4.3 will flip this to true; keep wiring in place so 4.3 only flips the env flag.
   const sseEnabled = import.meta.env.VITE_WKS_SSE_ENABLED === 'true';
 
-  // Arm the processing timer on `confirming` entry; clear it on any other state.
   useEffect(() => {
     if (state.kind === 'confirming') {
       const handle = window.setTimeout(() => {
         dispatch({ type: 'processing_timer' });
       }, PROCESSING_TIMER_MS);
-      processingTimerRef.current = handle;
-      return () => {
-        clearTimeout(handle);
-        processingTimerRef.current = null;
-      };
+      return () => clearTimeout(handle);
     }
     return undefined;
   }, [state.kind]);
 
-  // Arm the 30s "Taking longer than expected" timer on `processing` entry.
   useEffect(() => {
     if (state.kind === 'processing') {
       const handle = window.setTimeout(() => setTakingLonger(true), TAKING_LONGER_TIMER_MS);
-      takingLongerTimerRef.current = handle;
       return () => {
         clearTimeout(handle);
-        takingLongerTimerRef.current = null;
         setTakingLonger(false);
       };
     }
@@ -165,13 +189,24 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
     return undefined;
   }, [state.kind]);
 
-  // Reset to idle a brief moment after `confirmed` so the user can act again or move on. The
-  // green chip fade is owned by MutationButton (2s); we don't auto-reset here in Phase 1 because
-  // task completion typically navigates the user to the next task or the case detail refetch
-  // surfaces a new pending task.
-  // Phase 2 (SSE) arrival → `confirmed` is dispatched by the SSE listener; same handling.
+  // Auto-reset confirmed → idle after the fade window, and refresh the task list at the same
+  // moment. Keeping byCase invalidation here (instead of in `useCompleteTask.onSettled`) lets the
+  // user see the green "Confirmed" chip for the full 2s before the parent refetch unmounts the
+  // button (Story 2.8 P4 — invalidation race fix).
+  useEffect(() => {
+    if (state.kind !== 'confirmed') return undefined;
+    const handle = window.setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: taskQueryKeys.byCase(task.caseId) });
+      dispatch({ type: 'reset' });
+    }, CONFIRMED_FADE_MS);
+    return () => clearTimeout(handle);
+  }, [state.kind, queryClient, task.caseId]);
 
   function fire(): void {
+    // P16 — guard against concurrent mutations from a fast retry / double-click. Reset any
+    // previous mutation result before kicking off a fresh attempt.
+    if (completeTask.isPending) return;
+    completeTask.reset();
     dispatch({ type: 'click' });
     completeTask.mutate(
       { taskId: task.id, caseId: task.caseId },
@@ -192,8 +227,6 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
         },
       },
     );
-    // Phase 2 (SSE on): keep `processing` armed; success arrives via SSE. Phase 1 (SSE off): the
-    // REST onSuccess above lands well before the 2s timer in the common case.
     void sseEnabled;
   }
 
@@ -211,13 +244,15 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
   const failedReason = state.kind === 'failed' ? state.message : null;
   const failedLabel = failedReason
     ? t('task.failed', { reason: failedReason })
-    : t('task.failed', { reason: '' });
+    : t('common.lifecycle.failedNoReason');
+
+  // P2 — AC11: conflict path announces "...Press Enter to refresh." via the same live region.
+  const announcement =
+    state.kind === 'failed' && state.conflict ? t('task.conflict.refreshAnnouncement') : undefined;
 
   const retryRef = useRef<HTMLButtonElement | null>(null);
   const refreshRef = useRef<HTMLButtonElement | null>(null);
 
-  // AC11 — focus the recovery action when state lands in `failed`. Conflict path focuses
-  // [Refresh case]; retryable failures focus [Retry].
   useEffect(() => {
     if (state.kind !== 'failed') return;
     const handle = requestAnimationFrame(() => {
@@ -284,6 +319,7 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
         processingLabel={t('task.processing')}
         confirmedLabel={t('task.confirmed')}
         failedLabel={failedLabel}
+        announcement={announcement}
         onClick={() => {
           if (state.kind === 'idle') fire();
         }}
@@ -298,7 +334,7 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
         {idleLabel}
       </MutationButton>
       {state.kind === 'processing' && takingLonger ? (
-        <span className="text-xs text-[var(--muted-foreground)]" aria-live="polite">
+        <span className="text-xs text-[var(--muted-foreground)]">
           {t('task.processing.takingLonger')}
         </span>
       ) : null}

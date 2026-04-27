@@ -23,7 +23,11 @@ export function useCaseTasks(caseId: string | null): UseQueryResult<TaskDto[], E
     queryKey: caseId ? taskQueryKeys.byCase(caseId) : taskQueryKeys.byCase('__disabled__'),
     queryFn: caseId ? () => listTasksByCase(caseId) : skipToken,
     staleTime: STALE_TIME_MS,
-    refetchOnWindowFocus: true,
+    // Story 2.8 — task list invalidation is driven by `useCompleteTask` (on error) and by the
+    // lifecycle button after the confirmed fade. A focus-refetch here would silently hide the
+    // CTA in the conflict-replay scenario (J6) before the second tab can fire the duplicate
+    // request that surfaces the 409 + [Refresh case] recovery — defeating AC5.
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -48,9 +52,12 @@ export function useCompleteTask(): UseMutationResult<TaskActionResponse, Error, 
     mutationKey: ['tasks', 'complete'],
     mutationFn: ({ taskId, variables }) => completeTask(taskId, variables ?? {}),
     onSettled: (_data, _error, { caseId }) => {
-      // Both success and failure refresh the case + task views — on 409 the truth has moved on,
-      // and on 5xx a refetch may still pick up partial engine state for diagnostics.
-      queryClient.invalidateQueries({ queryKey: taskQueryKeys.byCase(caseId) });
+      // Refresh case detail so the user sees the engine's truth (status / data). Task list
+      // invalidation is intentionally NOT done here — on success it is handled by
+      // `TaskLifecycleButton` after the 2s confirmed fade so the green chip survives, and on
+      // error (especially 409 conflict) invalidating would unmount the button before the user
+      // sees the failed state and the [Refresh case] / [Retry] recovery actions. The user-driven
+      // actions invalidate the task list themselves when invoked.
       queryClient.invalidateQueries({ queryKey: caseQueryKeys.detail(caseId) });
     },
     retry: false,

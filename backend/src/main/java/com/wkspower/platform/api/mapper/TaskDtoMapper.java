@@ -55,7 +55,14 @@ public final class TaskDtoMapper {
     if (cached != null) {
       return cached;
     }
-    String resolved = lookup.apply(task.processDefinitionId(), task.taskDefinitionKey());
+    String resolved;
+    try {
+      resolved = lookup.apply(task.processDefinitionId(), task.taskDefinitionKey());
+    } catch (RuntimeException ex) {
+      // One unloadable BPMN model must not 500 the entire list. Fall back to task.name and cache
+      // the fallback so subsequent tasks with the same key don't retry the failing lookup.
+      resolved = task.name();
+    }
     if (resolved == null || resolved.isBlank()) {
       resolved = task.name();
     }
