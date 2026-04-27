@@ -218,6 +218,7 @@ class TaskControllerTest {
     return new Task(
         "t1",
         "pi-1",
+        "pd-1",
         CASE_ID,
         "loan-application",
         "draft",

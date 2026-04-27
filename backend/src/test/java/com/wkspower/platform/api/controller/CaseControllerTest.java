@@ -69,6 +69,9 @@ class CaseControllerTest {
   @MockitoBean(name = "wksCaseService")
   CaseService caseService;
 
+  @MockitoBean(name = "wksTaskService")
+  com.wkspower.platform.domain.service.TaskService taskService;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator caseTypePermissionEvaluator;
 
@@ -194,6 +197,106 @@ class CaseControllerTest {
   @Test
   void listWithoutCaseTypeParamReturns400() throws Exception {
     mockMvc.perform(get("/api/cases").with(officerAuth())).andExpect(status().isBadRequest());
+  }
+
+  // ---- GET /api/cases/{id}/tasks (Story 2.8 AC1) -------------------------
+
+  @Test
+  void listTasksReturns200WithPendingTasks() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(taskService.findByCase(caseId))
+        .thenReturn(
+            List.of(
+                new com.wkspower.platform.domain.model.Task(
+                    "t1",
+                    "pi-1",
+                    "pd-1",
+                    caseId,
+                    "loan-application",
+                    "draft",
+                    "Draft application",
+                    null,
+                    "draft_section",
+                    NOW,
+                    null)));
+    when(taskService.readActionLabel("pd-1", "draft")).thenReturn("Draft application");
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.length()").value(1))
+        .andExpect(jsonPath("$.data[0].id").value("t1"))
+        .andExpect(jsonPath("$.data[0].actionLabel").value("Draft application"))
+        .andExpect(jsonPath("$.data[0].caseId").value(caseId.toString()));
+  }
+
+  @Test
+  void listTasksReturns200EmptyForTerminalCase() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    when(taskService.findByCase(caseId)).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.length()").value(0));
+  }
+
+  @Test
+  void listTasksReturns403WithoutViewVerb() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(false);
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void listTasksReturns404WhenCaseUnknown() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    when(caseService.findById(caseId)).thenThrow(new WksNotFoundException("missing"));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void listTasksFallsBackToTaskNameWhenActionLabelMissing() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    when(taskService.findByCase(caseId))
+        .thenReturn(
+            List.of(
+                new com.wkspower.platform.domain.model.Task(
+                    "t1",
+                    "pi-1",
+                    "pd-1",
+                    caseId,
+                    "loan-application",
+                    "draft",
+                    "Review",
+                    null,
+                    "draft_section",
+                    NOW,
+                    null)));
+    when(taskService.readActionLabel("pd-1", "draft")).thenReturn(null);
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].actionLabel").value("Review"));
   }
 
   // ---- PUT /api/cases/{id} -----------------------------------------------

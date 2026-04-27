@@ -6,6 +6,7 @@ import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +35,23 @@ public class TaskService {
 
   public TaskService(WorkflowEngine workflowEngine) {
     this.workflowEngine = Objects.requireNonNull(workflowEngine, "workflowEngine");
+  }
+
+  /**
+   * List active user tasks for a case (Story 2.8 AC1). Empty list when the case is at a terminal
+   * end-event or no active tasks remain — callers MUST NOT translate empty to 404.
+   */
+  public List<Task> findByCase(UUID caseId) {
+    Objects.requireNonNull(caseId, "caseId");
+    return workflowEngine.findTasksByCase(caseId);
+  }
+
+  /**
+   * Read the {@code actionLabel} for a task definition (Story 2.8 AC1). Falls back to the
+   * userTask's {@code name} attribute when the property is absent.
+   */
+  public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
+    return workflowEngine.readActionLabel(processDefinitionId, taskDefinitionKey);
   }
 
   /** Lookup a task by id; 404 if unknown. */

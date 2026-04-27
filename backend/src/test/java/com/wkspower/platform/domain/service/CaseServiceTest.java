@@ -313,6 +313,16 @@ class CaseServiceTest {
     @Override
     public void signalTransition(
         String processInstanceId, String action, Map<String, Object> variables) {}
+
+    @Override
+    public List<com.wkspower.platform.domain.model.Task> findTasksByCase(UUID caseId) {
+      return List.of();
+    }
+
+    @Override
+    public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
+      return null;
+    }
   }
 
   private static final class StubPublisher implements EventPublisher {

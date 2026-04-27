@@ -201,6 +201,46 @@ class CibSevenWorkflowEngineIT {
   }
 
   @Test
+  void findTasksByCaseFiltersByCaseIdVar() {
+    // Story 2.8 AC1 — list pending tasks scoped to a single caseId. A second case in the same
+    // process must NOT bleed through.
+    UUID caseA = UUID.randomUUID();
+    UUID caseB = UUID.randomUUID();
+    String piA = startWithUserTask("by-case-a", caseA, "loan-application");
+    String piB = startWithUserTask("by-case-b", caseB, "loan-application");
+
+    java.util.List<Task> tasksA = workflowEngine.findTasksByCase(caseA);
+    java.util.List<Task> tasksB = workflowEngine.findTasksByCase(caseB);
+
+    assertThat(tasksA).hasSize(1);
+    assertThat(tasksA.get(0).caseId()).isEqualTo(caseA);
+    assertThat(tasksA.get(0).processInstanceId()).isEqualTo(piA);
+    assertThat(tasksB).hasSize(1);
+    assertThat(tasksB.get(0).caseId()).isEqualTo(caseB);
+    assertThat(tasksB.get(0).processInstanceId()).isEqualTo(piB);
+  }
+
+  @Test
+  void findTasksByCaseReturnsEmptyForUnknownCase() {
+    assertThat(workflowEngine.findTasksByCase(UUID.randomUUID())).isEmpty();
+  }
+
+  @Test
+  void readActionLabelFallsBackToTaskName() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("read-action-label", caseId, "loan-application");
+    String taskId = currentTaskId(pi);
+    Optional<Task> task = workflowEngine.findTask(taskId);
+    assertThat(task).isPresent();
+    String label =
+        workflowEngine.readActionLabel(
+            task.get().processDefinitionId(), task.get().taskDefinitionKey());
+    // The minimal BPMN fixture sets no actionLabel property and no userTask name — null is the
+    // honest answer; the DTO mapper's fallback to task.name() handles the rest.
+    assertThat(label).isNull();
+  }
+
+  @Test
   void completeUnknownTaskThrowsNotFound() {
     assertThatThrownBy(() -> workflowEngine.completeTask("nope", Map.of()))
         .isInstanceOf(WksNotFoundException.class);

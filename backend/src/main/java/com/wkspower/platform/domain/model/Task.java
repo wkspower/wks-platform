@@ -19,6 +19,10 @@ import java.util.UUID;
  * @param processInstanceId BPMN process instance id (correlates with engine logs); used to populate
  *     {@code TaskActionResponse.processInstanceId} on the {@code /complete} and {@code /claim}
  *     responses since the snapshot is taken before completion (Story 2.4 review).
+ * @param processDefinitionId BPMN process definition id (engine-assigned). Story 2.8 surfaces it so
+ *     the API mapper can read user-task BPMN extension properties (e.g. {@code actionLabel}) via
+ *     {@code WorkflowEngine.readActionLabel} without an extra engine round-trip. Nullable for
+ *     backward compatibility with pre-2.8 producers; populate from the engine in new paths.
  * @param caseId case the task belongs to (read from the {@code caseId} process variable set by
  *     {@code CaseService.create} in Story 2.3)
  * @param caseTypeId case type id from the case row — needed by the API layer's permission gate
@@ -33,6 +37,7 @@ import java.util.UUID;
 public record Task(
     String id,
     String processInstanceId,
+    String processDefinitionId,
     UUID caseId,
     String caseTypeId,
     String taskDefinitionKey,
