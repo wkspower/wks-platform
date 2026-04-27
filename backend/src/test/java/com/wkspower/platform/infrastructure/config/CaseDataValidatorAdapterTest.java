@@ -97,6 +97,33 @@ class CaseDataValidatorAdapterTest {
   }
 
   @Test
+  void pointerToFieldStripsDataPrefixForKnownTopLevel() {
+    CaseTypeConfig ct = caseType("loan-application", 1);
+    assertThat(CaseDataValidatorAdapter.pointerToField("/data/name", ct)).isEqualTo("name");
+    assertThat(CaseDataValidatorAdapter.pointerToField("$.name", ct)).isEqualTo("name");
+    assertThat(CaseDataValidatorAdapter.pointerToField("name", ct)).isEqualTo("name");
+  }
+
+  @Test
+  void pointerToFieldEmptyOrRootMapsToData() {
+    CaseTypeConfig ct = caseType("loan-application", 1);
+    assertThat(CaseDataValidatorAdapter.pointerToField("", ct)).isEqualTo("data");
+    assertThat(CaseDataValidatorAdapter.pointerToField("/", ct)).isEqualTo("data");
+    assertThat(CaseDataValidatorAdapter.pointerToField("$", ct)).isEqualTo("data");
+    assertThat(CaseDataValidatorAdapter.pointerToField("/data/", ct)).isEqualTo("data");
+    assertThat(CaseDataValidatorAdapter.pointerToField(null, ct)).isEqualTo("data");
+  }
+
+  @Test
+  void pointerToFieldNestedReturnsLeafSegment() {
+    CaseTypeConfig ct = caseType("loan-application", 1);
+    // Nested is defensive — Phase 0 grammar is flat. Leaf wins; no slash-to-dot conversion.
+    assertThat(CaseDataValidatorAdapter.pointerToField("/data/applicant/name", ct))
+        .isEqualTo("name");
+    assertThat(CaseDataValidatorAdapter.pointerToField("$.applicant.name", ct)).isEqualTo("name");
+  }
+
+  @Test
   void invalidationForUnrelatedCaseTypeIsNoop() {
     CaseTypeConfig loan = caseType("loan-application", 1);
     adapter.validate(loan, Map.of("name", "Asha"));

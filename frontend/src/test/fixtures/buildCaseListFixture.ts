@@ -1,5 +1,5 @@
 import type { CaseSummary } from '@/types/case';
-import type { CaseTypeView } from '@/types/caseType';
+import type { CaseTypeSummary, CaseTypeView } from '@/types/caseType';
 
 /**
  * Story 2.5 AC8 perf-guardrail support — builds N synthetic `CaseSummary` rows for the
@@ -42,18 +42,21 @@ export function loanApplicationCaseTypeView(): CaseTypeView {
         displayName: 'Applicant',
         type: 'text',
         required: true,
+        requiredOnCreate: true,
         order: 0,
         options: [],
-        slots: null,
+        maxLength: 100,
       },
       {
         id: 'amount',
         displayName: 'Amount',
         type: 'number',
         required: false,
+        requiredOnCreate: true,
         order: 1,
         options: [],
-        slots: null,
+        min: 1,
+        max: 1_000_000,
       },
     ],
     statuses: [
@@ -63,5 +66,17 @@ export function loanApplicationCaseTypeView(): CaseTypeView {
       { id: 'resolved', displayName: 'Resolved', color: 'emerald' },
     ],
     listColumns: ['applicant_name', 'amount'],
+  };
+}
+
+export function caseTypeSummaryFixture(over: Partial<CaseTypeSummary> = {}): CaseTypeSummary {
+  return {
+    id: 'loan-application',
+    displayName: 'Loan Application',
+    version: 1,
+    statusCount: 4,
+    fieldCount: 2,
+    permissions: ['view', 'create'],
+    ...over,
   };
 }

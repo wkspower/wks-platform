@@ -20,7 +20,6 @@ function ctView(over: Partial<CaseTypeView> = {}): CaseTypeView {
         required: true,
         order: 0,
         options: [],
-        slots: null,
       },
       {
         id: 'amount',
@@ -29,7 +28,6 @@ function ctView(over: Partial<CaseTypeView> = {}): CaseTypeView {
         required: false,
         order: 1,
         options: [],
-        slots: null,
       },
       {
         id: 'priority',
@@ -41,7 +39,6 @@ function ctView(over: Partial<CaseTypeView> = {}): CaseTypeView {
           { value: 'low', label: 'Low' },
           { value: 'high', label: 'High' },
         ],
-        slots: null,
       },
     ],
     statuses: [],

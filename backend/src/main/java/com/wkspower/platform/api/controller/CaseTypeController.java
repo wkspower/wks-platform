@@ -60,7 +60,8 @@ public class CaseTypeController {
                         ct.displayName(),
                         ct.version(),
                         ct.statuses().size(),
-                        ct.fields().size()))
+                        ct.fields().size(),
+                        List.copyOf(evaluator.verbsOf(actor.authenticated(), ct.id()))))
             .toList();
     return ApiResponse.success(data);
   }

@@ -120,6 +120,23 @@ class CaseTypeControllerIT {
   }
 
   @Test
+  void summaryIncludesPermissionsForCaller() {
+    // P28 / AC9 — the case-types list response must include the caller's verbs per case-type so
+    // the frontend dropdown can filter to creatable types client-side without a second round-trip.
+    String cookie = login(EMAIL);
+
+    ResponseEntity<String> resp = exchange("/api/case-types", HttpMethod.GET, cookie);
+
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+    String body = resp.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body)
+        .contains("\"id\":\"loan-application\"")
+        .contains("\"permissions\":[\"view\"]")
+        .doesNotContain("\"hr-onboarding\"");
+  }
+
+  @Test
   void unknownCaseTypeReturns404() {
     String cookie = login(EMAIL);
 

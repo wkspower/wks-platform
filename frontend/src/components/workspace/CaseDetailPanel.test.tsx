@@ -39,7 +39,6 @@ const dto: CaseDto = {
         required: true,
         order: 0,
         options: [],
-        slots: null,
       },
     ],
     statuses: [],

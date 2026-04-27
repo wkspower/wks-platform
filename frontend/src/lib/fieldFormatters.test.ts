@@ -12,7 +12,6 @@ function field(over: Partial<FieldDefinition>): FieldDefinition {
     required: false,
     order: 0,
     options: [],
-    slots: null,
     ...over,
   };
 }

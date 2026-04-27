@@ -58,6 +58,24 @@ class CaseTypePermissionEvaluatorTest {
   }
 
   @Test
+  void verbsOfReturnsCallerVerbSubset() {
+    CaseTypePermissionEvaluator eval = new CaseTypePermissionEvaluator(reader(loanType()));
+
+    assertThat(eval.verbsOf(OFFICER, "loan-application"))
+        .containsExactlyInAnyOrder("view", "create");
+    assertThat(eval.verbsOf(CUSTOMER, "loan-application")).containsExactly("view");
+  }
+
+  @Test
+  void verbsOfReturnsEmptyForUnknownCaseTypeOrNullInputs() {
+    CaseTypePermissionEvaluator eval = new CaseTypePermissionEvaluator(reader(loanType()));
+
+    assertThat(eval.verbsOf(OFFICER, "no-such-type")).isEmpty();
+    assertThat(eval.verbsOf(null, "loan-application")).isEmpty();
+    assertThat(eval.verbsOf(OFFICER, null)).isEmpty();
+  }
+
+  @Test
   void nullInputsReturnFalse() {
     CaseTypePermissionEvaluator eval = new CaseTypePermissionEvaluator(reader(loanType()));
 

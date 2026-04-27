@@ -230,6 +230,9 @@ public class CaseTypeStartupLoader {
       logErrors(yamlResult.errors(), file);
       return FileOutcome.yamlRejected();
     }
+    if (yamlResult.hasWarnings()) {
+      logWarnings(yamlResult.warnings(), file);
+    }
     CaseTypeConfig caseType = yamlResult.config().orElseThrow();
 
     DeployResult bpmnResult;
@@ -260,6 +263,18 @@ public class CaseTypeStartupLoader {
           .addKeyValue("errorField", e.field())
           .addKeyValue("line", e.line())
           .log("case-type validation error: {}", e.message());
+    }
+  }
+
+  /** Story 2.7 — log validator warnings (non-blocking findings, e.g. WKS-CFG-013) at WARN. */
+  private static void logWarnings(List<ErrorDetail> warnings, Path file) {
+    for (ErrorDetail w : warnings) {
+      log.atWarn()
+          .addKeyValue("wksErrorCode", w.code())
+          .addKeyValue("file", file.getFileName().toString())
+          .addKeyValue("warningField", w.field())
+          .addKeyValue("line", w.line())
+          .log("case-type validation warning: {}", w.message());
     }
   }
 

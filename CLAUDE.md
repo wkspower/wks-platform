@@ -446,7 +446,61 @@ Case types are declared as YAML files in a directory mounted into the container.
   to a single "N filters" pill that opens the chip list in a Radix Popover; empty narrowed
   state shows a single "Add filter" ghost button. Full-width variant unchanged from 2.5.
 
+### Forms (RHF + Zod + FormField) — Story 2.7
+
+- **Stack**: `react-hook-form@^7` + `zod@^3` + `@hookform/resolvers/zod`. RHF mode
+  `onBlur` + `reValidateMode: onChange` + `shouldFocusError: true` is the canonical
+  config — first error focuses on submit, then per-field rechecks are immediate.
+- **`<FormField>`** (`components/ui/FormField.tsx`): render-prop wrapper. Wires
+  `id` / `htmlFor` / `aria-invalid` / `aria-describedby` / `aria-required` from RHF
+  context automatically. Consumer renders the input via `children(fieldProps)` —
+  full control over input element + attrs, no kitchen-sink wrapper.
+- **`buildZodFromFieldDefs(fields, mode)`** (`lib/buildZodFromFieldDefs.ts`): pure
+  function. Reads case-type `FieldDefinition[]` (post-filter to `requiredOnCreate`
+  for `'create'` mode) and returns a `z.ZodObject` with per-type validation slots
+  mirrored (text → `.min(1).max(maxLength)`, number → `z.coerce.number().min().max()`,
+  date → `.regex(YYYY-MM-DD).refine(dateRange)`, select → `z.enum(options[].value)`,
+  checkbox → required-on-create boolean, file → `z.unknown().optional()` until
+  Story 3.1). Specific error message per slot from `i18n/en.json` (`cases.create.errors.*`).
+- **`<MutationButton>`** (`components/ui/MutationButton.tsx`): 4-state slice of
+  `TaskLifecycleButton` (`idle | confirming | confirmed | failed`). Presentational
+  only — parent drives transitions via `state` prop. Story 2.8 extends with
+  `processing` (5th state, 2s-without-confirmation timer) for task-completion
+  surfaces; the TS literal-union is forward-compatible.
+- **`LoginPage` is the reference pattern**. Read `pages/LoginPage.tsx` for the
+  canonical wiring of `FormProvider` + `useForm({resolver: zodResolver(schema)})` +
+  `<FormField>` + `<MutationButton>`. The case-creation dialog inherits the same
+  shape.
+- **Server errors via `setError`**. On 422 with `errors[].field` (`WKS-API-001`),
+  map onto RHF via `form.setError(fieldName, {type: 'server', message})` —
+  `pointerToField` on the backend guarantees `field` is the YAML-declared id, not
+  a JSON-Pointer fragment. Envelope-level errors (no field) render in a banner
+  above the form following the confidence-not-safety pattern: "Couldn't create
+  case. Your input is preserved. Try again or correct the highlighted fields."
+
 ## Change Log
+
+- 2026-04-27 — Story 2.7: Case Creation Flow — backend YAML grammar gains
+  `requiredOnCreate: bool` (default-on-omit = `required`), `WKS-CFG-013` reserved
+  for file-on-create warning (validator emits at `ValidationResult.warnings`,
+  startup loader logs at WARN level). Wire shape: `CaseTypeViewDto.fields[]`
+  widens from domain-record echo to flattened `FieldView` carrying every per-type
+  validation slot; `CaseTypeSummaryDto` gains `permissions: string[]` (caller's
+  verbs). New `CaseTypePermissionEvaluator.verbsOf` cheap look-up. Frontend:
+  `react-hook-form` + `zod` + `@hookform/resolvers` + `@radix-ui/react-select` +
+  `@radix-ui/react-checkbox` deps. Owned-source primitives `Dialog`, `Select`,
+  `Checkbox`, `Textarea` join `Tabs`/`Tooltip`/`Popover` shelf.
+  `components/ui/FormField.tsx` + `components/ui/MutationButton.tsx` (4-state
+  slice). `lib/buildZodFromFieldDefs.ts` (runtime Zod builder). `useCreateCase`
+  TanStack mutation primes detail cache + invalidates list, no auto-retry on 5xx.
+  `useUiStore.recentlyCreatedCaseIds` (6s TTL, SSR-safe). `NewCaseButton` +
+  `NewCaseDialog` mounted in workspace header — 0/1/≥2 case-type selector
+  behavior. `LoginPage` retrofitted to RHF + Zod as the reference pattern. 35
+  new i18n keys (`cases.create.*`, `common.lifecycle.*`, `login.errors.*`).
+  Closes 1.3 deferred-work entries (LoginPage RHF retrofit + FormField
+  aria-describedby) + 2.5 re-pinned `pointerToField` nested handling.
+  `CaseDataValidatorAdapter.pointerToField` package-private + `CaseTypeConfig`-
+  aware. ApiError carries `envelopeErrors[]` for multi-field 422 mapping.
 
 - 2026-04-26 — Story 2.6: Split-pane workspace and case detail — `CaseWorkspace` (two CSS
   states, URL-driven selection, J/K/Esc keyboard nav, focus management, responsive

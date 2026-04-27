@@ -111,5 +111,47 @@
   "cases.filter.add": "Add filter",
   "cases.idTooltip.label": "Full case id",
 
-  "common.retry": "Retry"
+  "common.retry": "Retry",
+
+  "common.cancel": "Cancel",
+  "common.close": "Close",
+  "common.lifecycle.confirming": "Confirming…",
+  "common.lifecycle.confirmed": "Confirmed",
+  "common.lifecycle.failed": "Failed — {reason}",
+  "common.lifecycle.failedNoReason": "Failed",
+  "common.lifecycle.retry": "Retry",
+
+  "cases.create.button": "New case",
+  "cases.create.dialogTitle": "New {caseTypeName}",
+  "cases.create.dialogClose": "Close create case dialog",
+  "cases.create.submit": "Create case",
+  "cases.create.cancel": "Cancel",
+  "cases.create.noTypes": "No case type available — load a template or ask an admin",
+  "cases.create.noRequired": "No fields are required to create a {caseTypeName}. Click create to start.",
+  "cases.create.fileNotYet": "File upload arrives in Epic 3 — Story 3.1.",
+  "cases.create.errorsCount": "{count} fields need attention",
+  "cases.create.errorBanner.title": "Couldn't create case",
+  "cases.create.errorBanner.body": "Your input is preserved. Try again or correct the highlighted fields.",
+  "cases.create.errorBanner.networkBody": "Couldn't reach the server. Your input is preserved — check your connection and try again.",
+  "cases.create.errorBanner.forbiddenTitle": "You no longer have permission",
+  "cases.create.errorBanner.forbiddenBody": "Your account no longer has permission to create this case type. Refresh and check with your admin.",
+  "cases.create.errorBanner.retry": "Try again",
+  "cases.create.selectPlaceholder": "Choose…",
+
+  "cases.create.errors.required": "This field is required",
+  "cases.create.errors.tooShort": "Must be at least {min} characters",
+  "cases.create.errors.tooLong": "Must be {max} characters or fewer",
+  "cases.create.errors.notNumber": "Must be a number",
+  "cases.create.errors.notMultipleOf": "Must be a multiple of {step}",
+  "cases.create.errors.lt": "Must be at least {min}",
+  "cases.create.errors.gt": "Must be at most {max}",
+  "cases.create.errors.notDate": "Must be a date (YYYY-MM-DD)",
+  "cases.create.errors.dateRange": "Must be between {min} and {max}",
+  "cases.create.errors.notInList": "Pick one of the available options",
+  "cases.create.errors.mustCheck": "You must check this box to proceed",
+
+  "cases.created.announcement": "Case {idShort} created",
+
+  "login.errors.notEmail": "Enter a valid email address",
+  "login.errors.passwordRequired": "Password is required"
 }

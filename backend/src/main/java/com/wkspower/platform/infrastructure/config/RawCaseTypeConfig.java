@@ -34,6 +34,7 @@ public record RawCaseTypeConfig(
       String displayName,
       String type,
       Boolean required,
+      Boolean requiredOnCreate,
       Integer order,
       List<RawOption> options,
       Integer minLength,

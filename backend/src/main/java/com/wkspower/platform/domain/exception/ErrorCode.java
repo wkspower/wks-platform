@@ -81,6 +81,13 @@ public enum ErrorCode {
    */
   WKS_CFG_012("WKS-CFG-012"),
   /**
+   * Case-type YAML marks a {@code file}-typed field as {@code requiredOnCreate: true} but file
+   * upload is not yet supported on the create form (closes in Story 3.1 — Document Upload). The
+   * case-type still loads; the validator emits this as a WARN-level finding so operators get a
+   * heads-up. Story 2.7 introduces this code.
+   */
+  WKS_CFG_013("WKS-CFG-013"),
+  /**
    * BPMN user task is missing the required {@code archetype} declaration in {@code
    * camunda:properties}. One per offending user task (Story 2.2).
    */

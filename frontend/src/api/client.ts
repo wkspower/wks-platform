@@ -4,11 +4,24 @@ import { sessionBus } from './sessionBus';
 
 const LOGIN_PATH = '/api/auth/login';
 
+export interface ApiEnvelopeError {
+  code: string;
+  message: string;
+  field?: string | null;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
   readonly field: string | null;
   readonly correlationId: string | null;
+  /**
+   * Story 2.7 — multi-error aggregate from {@code error.errors[]} (Story 2.3 envelope, populated
+   * for {@code WKS-API-001} 422s and {@code WKS-CFG-000} aggregates). The single-field {@code
+   * field} property reflects the envelope's top-level field; {@code envelopeErrors} surfaces
+   * every individual validation error the backend produced. Null when the envelope had no array.
+   */
+  readonly envelopeErrors: ApiEnvelopeError[] | null;
 
   constructor(init: {
     status: number;
@@ -16,6 +29,7 @@ export class ApiError extends Error {
     message: string;
     field?: string | null;
     correlationId?: string | null;
+    envelopeErrors?: ApiEnvelopeError[] | null;
   }) {
     super(init.message);
     this.name = 'ApiError';
@@ -23,6 +37,7 @@ export class ApiError extends Error {
     this.code = init.code;
     this.field = init.field ?? null;
     this.correlationId = init.correlationId ?? null;
+    this.envelopeErrors = init.envelopeErrors ?? null;
   }
 }
 
@@ -74,11 +89,13 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     errorBody = null;
   }
 
+  const errors = (errorBody?.error as { errors?: ApiEnvelopeError[] } | undefined)?.errors;
   throw new ApiError({
     status: response.status,
     code: errorBody?.error.code ?? `WKS-API-${response.status}`,
     message: errorBody?.error.message ?? response.statusText,
     field: errorBody?.error.field ?? null,
     correlationId,
+    envelopeErrors: Array.isArray(errors) ? errors : null,
   });
 }

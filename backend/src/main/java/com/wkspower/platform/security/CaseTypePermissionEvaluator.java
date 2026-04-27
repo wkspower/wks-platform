@@ -3,7 +3,9 @@ package com.wkspower.platform.security;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,5 +47,30 @@ public class CaseTypePermissionEvaluator {
         .flatMap(r -> r.permissions().stream())
         .map(Permission::wire)
         .anyMatch(verb::equals);
+  }
+
+  /**
+   * Returns the verb subset (as wire strings) that the caller holds on the given case-type. Used by
+   * {@code GET /api/case-types} to populate {@code CaseTypeSummaryDto.permissions[]} so the
+   * frontend can filter the Create-Case dropdown to entries the user can actually act on without
+   * round-tripping per case-type. Story 2.7 introduces this method.
+   *
+   * @return immutable set of verb wire strings; empty set for null inputs or unknown case-types.
+   */
+  public Set<String> verbsOf(AuthenticatedUser user, String caseTypeId) {
+    if (user == null || caseTypeId == null) {
+      return Set.of();
+    }
+    Optional<CaseTypeConfig> config = caseTypeReader.find(caseTypeId);
+    if (config.isEmpty()) {
+      return Set.of();
+    }
+    Set<String> verbs = new LinkedHashSet<>();
+    config.get().roles().stream()
+        .filter(r -> user.roles().contains(r.name()))
+        .flatMap(r -> r.permissions().stream())
+        .map(Permission::wire)
+        .forEach(verbs::add);
+    return Set.copyOf(verbs);
   }
 }

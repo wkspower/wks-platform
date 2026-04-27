@@ -1,12 +1,16 @@
-import { type FormEvent, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ApiError } from '@/api/client';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/Card';
+import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
+import { MutationButton, type MutationButtonState } from '@/components/ui/MutationButton';
 import { t } from '@/i18n';
+import { loginSchema, type LoginValues } from '@/pages/login/loginSchema';
 import { useAuthStore } from '@/stores/authStore';
 
 export function safeReturnTo(value: string | null): string {
@@ -27,31 +31,44 @@ export function safeReturnTo(value: string | null): string {
   return url.pathname + url.search + url.hash;
 }
 
+/**
+ * Story 2.7 AC11 — LoginPage retrofitted to RHF + Zod. The reference pattern the case-creation
+ * dialog inherits. {@code MutationButton} drives the 4-state visual; the existing 1-3 auth
+ * envelope wiring (401 → invalid copy, anything else → generic copy) is unchanged.
+ */
 export function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const login = useAuthStore((s) => s.login);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<{ message: string } | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
-    e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    setErrorMessage(null);
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    shouldFocusError: true,
+    defaultValues: { email: '', password: '' },
+  });
+
+  const state: MutationButtonState = form.formState.isSubmitting
+    ? 'confirming'
+    : form.formState.isSubmitSuccessful
+      ? 'confirmed'
+      : serverError
+        ? 'failed'
+        : 'idle';
+
+  async function onSubmit(values: LoginValues): Promise<void> {
+    setServerError(null);
     try {
-      await login(email, password);
+      await login(values.email, values.password);
       navigate(safeReturnTo(params.get('returnTo')), { replace: true });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setErrorMessage(t('login.error.invalid'));
+        setServerError({ message: t('login.error.invalid') });
       } else {
-        setErrorMessage(t('login.error.generic'));
+        setServerError({ message: t('login.error.generic') });
       }
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -65,46 +82,53 @@ export function LoginPage() {
           {t('login.title')}
         </h1>
       </CardHeader>
-      <form
-        onSubmit={handleSubmit}
-        autoComplete="on"
-        aria-describedby={errorMessage ? 'login-error' : undefined}
-      >
-        <CardContent className="flex flex-col gap-[var(--space-4)]">
-          <label className="flex flex-col gap-[var(--space-2)] text-sm">
-            <span>{t('login.email')}</span>
-            <Input
-              type="email"
-              autoComplete="username"
-              required
-              disabled={submitting}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-          <label className="flex flex-col gap-[var(--space-2)] text-sm">
-            <span>{t('login.password')}</span>
-            <Input
-              type="password"
-              autoComplete="current-password"
-              required
-              disabled={submitting}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
-          {errorMessage ? (
-            <Alert id="login-error" variant="destructive" className="py-[var(--space-2)] text-xs">
-              {errorMessage}
-            </Alert>
-          ) : null}
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" disabled={submitting} className="w-full">
-            {submitting ? t('login.submitting') : t('login.submit')}
-          </Button>
-        </CardFooter>
-      </form>
+      <FormProvider {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          autoComplete="on"
+          noValidate
+          aria-describedby={serverError ? 'login-error' : undefined}
+        >
+          <CardContent className="flex flex-col gap-[var(--space-4)]">
+            <FormField<LoginValues> name="email" label={t('login.email')} required>
+              {(field) => (
+                <Input
+                  type="email"
+                  autoComplete="username"
+                  disabled={state === 'confirming'}
+                  {...field}
+                />
+              )}
+            </FormField>
+            <FormField<LoginValues> name="password" label={t('login.password')} required>
+              {(field) => (
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={state === 'confirming'}
+                  {...field}
+                />
+              )}
+            </FormField>
+            {serverError ? (
+              <Alert id="login-error" variant="destructive" className="py-[var(--space-2)] text-xs">
+                {serverError.message}
+              </Alert>
+            ) : null}
+          </CardContent>
+          <CardFooter>
+            <MutationButton
+              state={state}
+              className="w-full"
+              confirmingLabel={t('login.submitting')}
+              confirmedLabel={t('login.submit')}
+              failedLabel={t('common.lifecycle.failed')}
+            >
+              {t('login.submit')}
+            </MutationButton>
+          </CardFooter>
+        </form>
+      </FormProvider>
     </Card>
   );
 }

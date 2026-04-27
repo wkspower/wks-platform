@@ -172,6 +172,44 @@ class CaseFlowIT {
     assertThat(conflict.getBody()).contains("WKS-RTM-409");
   }
 
+  @Test
+  void createReturns422WithFieldId() throws Exception {
+    // P28 / AC10 / Story 2.7 — POST /api/cases with a payload that omits a required field returns
+    // 422 with errors[].field set to the YAML-declared field id ("name"), NOT a JSON-Pointer path
+    // like "/data/name". The frontend RHF setError(field, ...) path depends on this exact shape;
+    // any drift makes inline validation messages vanish silently.
+    String cookie = login();
+
+    // Send `name: 123` (a number where the schema declares string) — networknt assigns this
+    // violation to the property location `/name`, exercising the pointerToField field-id roundtrip
+    // that the frontend setError() path depends on. (A `data: {}` payload would attribute the
+    // missing-required violation to the parent location instead, returning "data".)
+    ResponseEntity<String> resp =
+        exchange(
+            "/api/cases",
+            HttpMethod.POST,
+            cookie,
+            "{\"caseTypeId\":\"" + CASE_TYPE_ID + "\",\"data\":{\"name\":123}}");
+
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    JsonNode body = json.readTree(resp.getBody());
+    JsonNode errors = body.path("error").path("errors");
+    assertThat(errors.isArray()).isTrue();
+    assertThat(errors.size()).isGreaterThan(0);
+    boolean hasNameFieldError = false;
+    for (JsonNode err : errors) {
+      String field = err.path("field").asText();
+      // P11 — must be the YAML id, not "/data/name", "data.name" or "data".
+      if ("name".equals(field)) {
+        hasNameFieldError = true;
+        break;
+      }
+    }
+    assertThat(hasNameFieldError)
+        .as("at least one error must carry the YAML-declared field id 'name'")
+        .isTrue();
+  }
+
   private String login() {
     ResponseEntity<String> resp =
         rest.postForEntity("/api/auth/login", new LoginRequest(EMAIL, PASSWORD), String.class);

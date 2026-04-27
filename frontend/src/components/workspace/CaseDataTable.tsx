@@ -11,13 +11,14 @@ import {
   type VisibilityState,
 } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Table, TBody, THead, Th, Td, Tr } from '@/components/ui/Table';
 import { t } from '@/i18n';
 import { urgencyDefaultSort } from '@/lib/buildCaseColumns';
 import { cn } from '@/lib/cn';
+import { useUiStore } from '@/stores/uiStore';
 import type { CaseRow } from '@/types/case';
 
 export type EmptyState = 'no-data' | 'filtered';
@@ -89,6 +90,12 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
 }: CaseDataTableProps<TRow>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  // P5 — AC8: highlighted-row affordance + announcement for the freshly-created case. The set
+  // self-clears 6s after each push (uiStore TTL); subscribing here means a row repaints once the
+  // dialog pushes its id, and again when the timer trims it.
+  const recentlyCreated = useUiStore((s) => s.recentlyCreatedCaseIds);
+  const announcedRef = useRef<Set<string>>(new Set());
+  const [announceMessage, setAnnounceMessage] = useState<string>('');
   // AC7 #4 — roving tabindex. Only the active row carries `tabIndex={0}` so Tab leaves the
   // table after a single stop instead of walking every row. Initial entry point is row 0; on
   // `onFocus` the active index follows the user's last-focused row, so Tab back into the table
@@ -164,6 +171,21 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
     if (!onSortedRowsChange) return;
     onSortedRowsChange(navRows.map((r) => r.original));
   }, [navRows, onSortedRowsChange]);
+
+  // P5 — AC8: announce the freshly-created case once per id. Walks the recently-created set;
+  // any id that appears in `data` AND has not yet been announced gets a one-shot polite live-
+  // region update. The id is recorded in `announcedRef` so re-renders don't re-announce.
+  useEffect(() => {
+    if (recentlyCreated.size === 0) return;
+    for (const id of recentlyCreated) {
+      if (announcedRef.current.has(id)) continue;
+      const matched = data.find((row) => row.id === id);
+      if (!matched) continue;
+      announcedRef.current.add(id);
+      const idShort = id.length > 8 ? `${id.slice(0, 8)}…` : id;
+      setAnnounceMessage(t('cases.created.announcement', { idShort }));
+    }
+  }, [recentlyCreated, data]);
 
   // AC5 — when the search input is non-empty OR the parent declared a filtered context, render the
   // 'filtered' empty copy. Earlier ternary form was parsed as `showEmpty && (cond1 ? true : cond2)`
@@ -269,7 +291,10 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
                 onKeyDown={(e) => handleRowKeyDown(e, row, idx)}
                 onClick={() => onRowSelect?.(row.original)}
                 className={cn(
-                  row.original.hasUnreadActivity && 'border-l-[3px] border-[var(--primary)]',
+                  // P5 — recentlyCreated reuses the same border-l affordance as unread activity
+                  // (AC8 explicitly says "the same affordance 2.5 §AC11 added for hasUnreadActivity").
+                  (row.original.hasUnreadActivity || recentlyCreated.has(row.original.id)) &&
+                    'border-l-[3px] border-[var(--primary)]',
                   'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]',
                 )}
               >
@@ -286,6 +311,9 @@ export function CaseDataTable<TRow extends CaseRow = CaseRow>({
           )}
         </TBody>
       </Table>
+      <div role="status" aria-live="polite" className="sr-only">
+        {announceMessage}
+      </div>
       {!isLoading && filteredCount > PAGE_SIZE ? (
         <div className="flex items-center justify-end gap-2 px-2 py-2 text-sm">
           <Button

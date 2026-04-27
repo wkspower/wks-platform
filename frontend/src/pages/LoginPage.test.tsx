@@ -49,14 +49,14 @@ describe('LoginPage', () => {
     );
     const user = userEvent.setup();
     const { findByRole, getByLabelText, getByRole } = loginAt();
-    await user.type(getByLabelText(/email/i), 'a@b.c');
+    await user.type(getByLabelText(/email/i), 'a@b.com');
     await user.type(getByLabelText(/password/i), 'pw');
     await user.click(getByRole('button', { name: /sign in/i }));
     const alert = await findByRole('alert');
     expect(alert).toHaveTextContent(/something went wrong/i);
   });
 
-  it('native :invalid blocks submission when required fields are empty', async () => {
+  it('RHF + Zod blocks submission and shows a field-level error when required fields are empty (Story 2.7 retrofit)', async () => {
     let callCount = 0;
     server.use(
       http.post('/api/auth/login', () => {
@@ -65,12 +65,13 @@ describe('LoginPage', () => {
       }),
     );
     const user = userEvent.setup();
-    const { getByLabelText, getByRole } = loginAt();
+    const { findAllByRole, getByRole } = loginAt();
     await user.click(getByRole('button', { name: /sign in/i }));
     // No custom client-side error message, no network request.
     expect(callCount).toBe(0);
-    const emailInput = getByLabelText(/email/i) as HTMLInputElement;
-    expect(emailInput.validity.valid).toBe(false);
+    // RHF + Zod surfaces the error via role="alert" on the FormField wrapper.
+    const alerts = await findAllByRole('alert');
+    expect(alerts.length).toBeGreaterThan(0);
   });
 
   it('double-submit protection: only one network request is fired and the button is disabled during the in-flight call', async () => {
@@ -90,7 +91,7 @@ describe('LoginPage', () => {
     );
     const user = userEvent.setup();
     const { getByLabelText, getByRole, findByText } = loginAt();
-    await user.type(getByLabelText(/email/i), 'a@b.c');
+    await user.type(getByLabelText(/email/i), 'a@b.com');
     await user.type(getByLabelText(/password/i), 'pw');
     const button = getByRole('button', { name: /sign in/i });
     // Click twice in immediate succession; the second click should be a no-op.
