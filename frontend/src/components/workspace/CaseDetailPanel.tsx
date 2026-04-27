@@ -9,6 +9,7 @@ import { useCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
 
 import { ActivityTabPlaceholder } from './ActivityTabPlaceholder';
+import { CaseActionBar } from './CaseActionBar';
 import { CaseBreadcrumbs } from './CaseBreadcrumbs';
 import { DocumentsTabPlaceholder } from './DocumentsTabPlaceholder';
 import { PropertiesTab } from './PropertiesTab';
@@ -212,6 +213,7 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
           {t('case.detail.announcement', { idShort })}
         </span>
       </header>
+      <CaseActionBar caseId={caseId} />
       <Tabs value={tab} onValueChange={setTab} className="flex flex-1 flex-col">
         <TabsList className="px-4">
           <TabsTrigger value="activity">{t('tabs.activity')}</TabsTrigger>
