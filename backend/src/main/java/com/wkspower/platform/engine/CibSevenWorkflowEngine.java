@@ -279,8 +279,7 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
               .asc()
               .list();
     } catch (ProcessEngineException ex) {
-      throw new WksWorkflowEngineException(
-          "CIB seven task query failed for caseId=" + caseId, ex);
+      throw new WksWorkflowEngineException("CIB seven task query failed for caseId=" + caseId, ex);
     }
     if (engineTasks.isEmpty()) {
       return List.of();
@@ -300,8 +299,7 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
           engineTask.getCreateTime() == null
               ? Instant.EPOCH
               : engineTask.getCreateTime().toInstant();
-      Instant dueAt =
-          engineTask.getDueDate() == null ? null : engineTask.getDueDate().toInstant();
+      Instant dueAt = engineTask.getDueDate() == null ? null : engineTask.getDueDate().toInstant();
       out.add(
           new Task(
               engineTask.getId(),

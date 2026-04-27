@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Story 2.8 AC1 — wire shape for {@code GET /api/cases/{id}/tasks}. One entry per pending
- * (active, uncompleted) BPMN user task in engine create-time order.
+ * Story 2.8 AC1 — wire shape for {@code GET /api/cases/{id}/tasks}. One entry per pending (active,
+ * uncompleted) BPMN user task in engine create-time order.
  *
  * <p>{@code actionLabel} is the user-facing CTA copy shown on the {@code TaskLifecycleButton}. It
  * is read from the BPMN {@code userTask} {@code camunda:property name="actionLabel"} when present,

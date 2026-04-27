@@ -59,8 +59,8 @@ public interface WorkflowEngine {
 
   /**
    * List active (uncompleted, unsuspended) user tasks for a case, ordered by engine create time.
-   * Story 2.8 AC1 — backs {@code GET /api/cases/{id}/tasks}. Returns an empty list when the case has
-   * reached a terminal end-event (no active tasks); callers MUST NOT translate empty to 404.
+   * Story 2.8 AC1 — backs {@code GET /api/cases/{id}/tasks}. Returns an empty list when the case
+   * has reached a terminal end-event (no active tasks); callers MUST NOT translate empty to 404.
    *
    * <p>Implementations MUST translate engine exceptions into {@link
    * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
