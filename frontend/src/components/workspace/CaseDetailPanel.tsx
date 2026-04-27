@@ -9,9 +9,11 @@ import { useCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
 
 import { ActivityTabPlaceholder } from './ActivityTabPlaceholder';
+import { CaseActionBar } from './CaseActionBar';
 import { CaseBreadcrumbs } from './CaseBreadcrumbs';
 import { DocumentsTabPlaceholder } from './DocumentsTabPlaceholder';
 import { PropertiesTab } from './PropertiesTab';
+import { StatusBadge } from './StatusBadge';
 
 const HEADING_ID = 'case-detail-heading';
 
@@ -205,13 +207,17 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
           <CaseBreadcrumbs caseIdShort={idShort} />
           <CloseButton onClose={onClose} />
         </div>
-        <HeadingFocusable shouldFocus={shouldFocusHeading}>
-          {t('case.heading', { idShort })}
-        </HeadingFocusable>
+        <div className="flex items-center gap-2">
+          <HeadingFocusable shouldFocus={shouldFocusHeading}>
+            {t('case.heading', { idShort })}
+          </HeadingFocusable>
+          <StatusBadge status={caseDto.status} caseType={caseDto.caseType} />
+        </div>
         <span className="sr-only" aria-live="polite">
           {t('case.detail.announcement', { idShort })}
         </span>
       </header>
+      <CaseActionBar caseId={caseId} />
       <Tabs value={tab} onValueChange={setTab} className="flex flex-1 flex-col">
         <TabsList className="px-4">
           <TabsTrigger value="activity">{t('tabs.activity')}</TabsTrigger>

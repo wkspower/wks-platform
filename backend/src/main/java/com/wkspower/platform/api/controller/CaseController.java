@@ -6,7 +6,9 @@ import com.wkspower.platform.api.dto.request.TransitionRequest;
 import com.wkspower.platform.api.dto.request.UpdateCaseRequest;
 import com.wkspower.platform.api.dto.response.CaseDto;
 import com.wkspower.platform.api.dto.response.CaseSummaryDto;
+import com.wkspower.platform.api.dto.response.TaskDto;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
+import com.wkspower.platform.api.mapper.TaskDtoMapper;
 import com.wkspower.platform.api.pagination.PageRequestParams;
 import com.wkspower.platform.api.pagination.SortSpec;
 import com.wkspower.platform.api.pagination.SortWhitelist;
@@ -20,6 +22,7 @@ import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.page.SortOrder;
 import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.WksUserPrincipal;
 import jakarta.validation.Valid;
@@ -58,10 +61,13 @@ public class CaseController {
       () -> Set.of("updatedAt", "createdAt", "status");
 
   private final CaseService caseService;
+  private final TaskService taskService;
   private final CaseTypePermissionEvaluator evaluator;
 
-  public CaseController(CaseService caseService, CaseTypePermissionEvaluator evaluator) {
+  public CaseController(
+      CaseService caseService, TaskService taskService, CaseTypePermissionEvaluator evaluator) {
     this.caseService = caseService;
+    this.taskService = taskService;
     this.evaluator = evaluator;
   }
 
@@ -84,6 +90,21 @@ public class CaseController {
     requireVerb(actor, found.caseTypeId(), "view");
     CaseTypeConfig caseType = caseService.requireCaseType(found.caseTypeId());
     return ApiResponse.success(CaseDtoMapper.toDto(found, caseType));
+  }
+
+  /**
+   * Story 2.8 AC1 — list pending (active, uncompleted) BPMN user tasks for a case. 404 when the
+   * case does not exist; 403 when the caller lacks the {@code view} verb on its case-type. An empty
+   * list (case at terminal end-event) returns {@code 200 data: []}.
+   */
+  @GetMapping("/{id}/tasks")
+  public ApiResponse<List<TaskDto>> listTasks(
+      @PathVariable("id") UUID id, @AuthenticationPrincipal WksUserPrincipal actor) {
+    Case found = caseService.findById(id);
+    requireVerb(actor, found.caseTypeId(), "view");
+    List<TaskDto> dtos =
+        TaskDtoMapper.toDtos(taskService.findByCase(id), taskService::readActionLabel);
+    return ApiResponse.success(dtos);
   }
 
   @GetMapping

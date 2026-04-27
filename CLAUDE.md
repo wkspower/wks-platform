@@ -462,11 +462,35 @@ Case types are declared as YAML files in a directory mounted into the container.
   date → `.regex(YYYY-MM-DD).refine(dateRange)`, select → `z.enum(options[].value)`,
   checkbox → required-on-create boolean, file → `z.unknown().optional()` until
   Story 3.1). Specific error message per slot from `i18n/en.json` (`cases.create.errors.*`).
-- **`<MutationButton>`** (`components/ui/MutationButton.tsx`): 4-state slice of
-  `TaskLifecycleButton` (`idle | confirming | confirmed | failed`). Presentational
-  only — parent drives transitions via `state` prop. Story 2.8 extends with
-  `processing` (5th state, 2s-without-confirmation timer) for task-completion
-  surfaces; the TS literal-union is forward-compatible.
+- **`<MutationButton>`** (`components/ui/MutationButton.tsx`): 4-state presentational
+  primitive (`idle | confirming | confirmed | failed`). Story 2.8 widened the TS
+  union to add `processing` — non-breaking. Parent drives transitions via `state`
+  prop. Use this for **synchronous** form submits (case creation, login, etc.)
+  where the REST round-trip is the source of truth.
+- **`<TaskLifecycleButton>`** (`components/workspace/TaskLifecycleButton.tsx`):
+  5-state owner (`idle | confirming | processing | confirmed | failed`) that
+  composes `MutationButton` for the four shared states and adds the `processing`
+  visual + task-specific footer actions (`[Retry]` for 5xx, `[Refresh case]` for
+  409 conflict, `[View Updated Case]`). Owns its state machine internally via
+  `useReducer`. Use this for backend mutations whose true completion is signalled
+  async (Phase 2 SSE, Story 4.3) **or** that may genuinely take >2s.
+- **Universal mutation lifecycle** (Story 2.8 AC7): every platform mutation —
+  task completion, escalation/reassignment/add-note (Epic 8), document upload
+  (Epic 3), config deploy (Epic 6) — MUST follow one of these two components.
+  No parallel patterns. The 5-state superset is opt-in for surfaces whose backend
+  may genuinely take >2s; otherwise stay on `MutationButton`.
+- **Confidence-not-safety copy**: "Confirmed" / "This task was already completed
+  by {name}. No changes were made." — confirm the user's mental model rather
+  than reassure them about platform safety. Failure copy interpolates `{reason}`
+  via `t('task.failed', { reason })` so the SR announcement and visible chip
+  carry the actual server message.
+- **`<FormErrorsBanner>`** (`components/ui/FormErrorsBanner.tsx`): Story 2.8
+  generic multi-field errors-count banner. ICU-style singular/plural via two i18n
+  keys (`cases.create.errorsCount.one` + `.errorsCount`). One anchor link per
+  failing field, sorted by `field.order` ascending. Anchor click routes through
+  RHF's `form.setFocus(name)` so controlled Radix primitives focus via
+  `field.ref`. Single ARIA-live region (`role="alert"` + `aria-live="polite"`);
+  per-field inline errors continue to render alongside the banner.
 - **`LoginPage` is the reference pattern**. Read `pages/LoginPage.tsx` for the
   canonical wiring of `FormProvider` + `useForm({resolver: zodResolver(schema)})` +
   `<FormField>` + `<MutationButton>`. The case-creation dialog inherits the same
@@ -479,6 +503,29 @@ Case types are declared as YAML files in a directory mounted into the container.
   case. Your input is preserved. Try again or correct the highlighted fields."
 
 ## Change Log
+
+- 2026-04-27 — Story 2.8: Task Completion with Honest Lifecycle — backend
+  `WorkflowEngine` port gains `findTasksByCase(UUID)` + `readActionLabel(pdId,
+  taskKey)`; CIB seven adapter implements via `taskService.createTaskQuery()
+  .processVariableValueEquals("caseId", ...).active()` and reads the BPMN
+  `camunda:property name="actionLabel"` (fallback userTask.name). New `TaskDto`
+  + `TaskDtoMapper` (per-request `(processDefinitionId, taskDefinitionKey)`
+  cache); domain `Task` gains nullable `processDefinitionId`. New endpoint
+  `GET /api/cases/{id}/tasks` (verb gate `view`, 200 with `data: []` on
+  terminal end-event). Frontend: `MutationButton` literal-union widens to add
+  `processing` (non-breaking). New `TaskLifecycleButton` (5-state owner with
+  internal `useReducer`, `VITE_WKS_SSE_ENABLED` flag for Phase 2 SSE plumbing,
+  conflict-vs-retryable failure classification, `[Retry]`/`[Refresh case]`/
+  `[View Updated Case]` actions). New `CaseActionBar` slotted into
+  `CaseDetailPanel` between heading row and tabs; renders primary CTA with
+  `task.actionLabel` and the "Next case (`J`)" hint after 4s on empty. New
+  `FormErrorsBanner` (generic, owned-source) wired into `NewCaseDialog` —
+  closes 2.7 deferred-work entry "AC4 errors-count banner with anchor links".
+  `formatFieldValue` select coercion fix — `String(stored) === String(opt
+  .value)` — closes 2.6 deferred-work entry "select-field strict-equality".
+  New `frontend/src/api/tasks.ts`, `types/task.ts`, `taskQueryKeys`,
+  `useCaseTasks` + `useCompleteTask`. ~12 new i18n keys (`task.*` +
+  `case.nextCaseHint` + `cases.create.errorsCount.one`).
 
 - 2026-04-27 — Story 2.7: Case Creation Flow — backend YAML grammar gains
   `requiredOnCreate: bool` (default-on-omit = `required`), `WKS-CFG-013` reserved

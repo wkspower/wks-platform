@@ -115,6 +115,18 @@ describe('NewCaseDialog — submit failure paths (AC5/P2/P4)', () => {
     await waitFor(() => expect(screen.getByText('Amount too high')).toBeInTheDocument());
   });
 
+  it('renders the multi-field errors banner with anchor links after submit (Story 2.8 AC9)', async () => {
+    const user = userEvent.setup();
+    const view = loanApplicationCaseTypeView();
+    renderWithProviders(<NewCaseDialog open caseType={view} onOpenChange={() => {}} />);
+    // Submit empty — both required fields fail at once.
+    await user.click(screen.getByRole('button', { name: /create case/i }));
+    await waitFor(() => expect(screen.getByText(/2 fields need attention/i)).toBeInTheDocument());
+    // Anchor links exist for each failing field, with role=button (FormErrorsBanner uses buttons).
+    expect(screen.getAllByRole('button', { name: /Applicant/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /Amount/i }).length).toBeGreaterThan(0);
+  });
+
   it('403 surfaces auth-specific banner copy (P4)', async () => {
     const user = userEvent.setup();
     const view = loanApplicationCaseTypeView();

@@ -139,6 +139,17 @@ class CaseTypeStartupLoaderTest {
           @Override
           public void signalTransition(
               String processInstanceId, String action, java.util.Map<String, Object> variables) {}
+
+          @Override
+          public java.util.List<com.wkspower.platform.domain.model.Task> findTasksByCase(
+              java.util.UUID caseId) {
+            return java.util.List.of();
+          }
+
+          @Override
+          public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
+            return null;
+          }
         },
         event -> {});
   }

@@ -90,6 +90,8 @@
   "case.error.body": "Your filter and selection are intact. Try again, or pick a different case.",
   "case.heading": "Case {idShort}",
   "case.detail.announcement": "Case detail: {idShort}",
+  "case.nextCaseHint": "Next case ({shortcut})",
+  "case.tasks.error": "Couldn't load actions for this case.",
 
   "breadcrumbs.label": "Breadcrumbs",
 
@@ -121,6 +123,18 @@
   "common.lifecycle.failedNoReason": "Failed",
   "common.lifecycle.retry": "Retry",
 
+  "task.confirming": "Confirming…",
+  "task.processing": "Processing…",
+  "task.processing.takingLonger": "Taking longer than expected",
+  "task.confirmed": "Confirmed",
+  "task.failed": "Failed — {reason}",
+  "task.retry": "Retry",
+  "task.viewUpdatedCase": "View updated case",
+  "task.refreshCase": "Refresh case",
+  "task.conflict.completedByOther": "This task was already completed by {name}. No changes were made.",
+  "task.conflict.completedByUnknown": "This task was already completed. No changes were made.",
+  "task.conflict.refreshAnnouncement": "This task was already completed. Press Enter to refresh.",
+
   "cases.create.button": "New case",
   "cases.create.dialogTitle": "New {caseTypeName}",
   "cases.create.dialogClose": "Close create case dialog",
@@ -130,6 +144,7 @@
   "cases.create.noRequired": "No fields are required to create a {caseTypeName}. Click create to start.",
   "cases.create.fileNotYet": "File upload arrives in Epic 3 — Story 3.1.",
   "cases.create.errorsCount": "{count} fields need attention",
+  "cases.create.errorsCount.one": "1 field needs attention",
   "cases.create.errorBanner.title": "Couldn't create case",
   "cases.create.errorBanner.body": "Your input is preserved. Try again or correct the highlighted fields.",
   "cases.create.errorBanner.networkBody": "Couldn't reach the server. Your input is preserved — check your connection and try again.",

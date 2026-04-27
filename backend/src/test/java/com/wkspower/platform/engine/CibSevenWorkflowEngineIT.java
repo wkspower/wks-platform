@@ -201,9 +201,70 @@ class CibSevenWorkflowEngineIT {
   }
 
   @Test
-  void completeUnknownTaskThrowsNotFound() {
+  void findTasksByCaseFiltersByCaseIdVar() {
+    // Story 2.8 AC1 — list pending tasks scoped to a single caseId. A second case in the same
+    // process must NOT bleed through.
+    UUID caseA = UUID.randomUUID();
+    UUID caseB = UUID.randomUUID();
+    String piA = startWithUserTask("by-case-a", caseA, "loan-application");
+    String piB = startWithUserTask("by-case-b", caseB, "loan-application");
+
+    java.util.List<Task> tasksA = workflowEngine.findTasksByCase(caseA);
+    java.util.List<Task> tasksB = workflowEngine.findTasksByCase(caseB);
+
+    assertThat(tasksA).hasSize(1);
+    assertThat(tasksA.get(0).caseId()).isEqualTo(caseA);
+    assertThat(tasksA.get(0).processInstanceId()).isEqualTo(piA);
+    assertThat(tasksB).hasSize(1);
+    assertThat(tasksB.get(0).caseId()).isEqualTo(caseB);
+    assertThat(tasksB.get(0).processInstanceId()).isEqualTo(piB);
+  }
+
+  @Test
+  void findTasksByCaseReturnsEmptyForUnknownCase() {
+    assertThat(workflowEngine.findTasksByCase(UUID.randomUUID())).isEmpty();
+  }
+
+  @Test
+  void readActionLabelFallsBackToTaskName() {
+    // AC1 — when the userTask has no `actionLabel` camunda:property but does set the `name`
+    // attribute, readActionLabel returns the userTask name (not null).
+    UUID caseId = UUID.randomUUID();
+    String key = "read-action-label";
+    byte[] bpmn = bpmnWithUserTaskName(key, "Draft application").getBytes(StandardCharsets.UTF_8);
+    workflowEngine.deploy(new DeploymentRequest(key, key, bpmn, "loan-application", 1));
+    String pi =
+        workflowEngine.startProcessInstance(
+            key, Map.of("caseId", caseId.toString(), "caseTypeId", "loan-application"));
+    String taskId = currentTaskId(pi);
+    Optional<Task> task = workflowEngine.findTask(taskId);
+    assertThat(task).isPresent();
+    String label =
+        workflowEngine.readActionLabel(
+            task.get().processDefinitionId(), task.get().taskDefinitionKey());
+    assertThat(label).isEqualTo("Draft application");
+  }
+
+  @Test
+  void readActionLabelReturnsNullWhenBothPropertyAndNameAbsent() {
+    UUID caseId = UUID.randomUUID();
+    String pi = startWithUserTask("read-action-label-empty", caseId, "loan-application");
+    String taskId = currentTaskId(pi);
+    Optional<Task> task = workflowEngine.findTask(taskId);
+    assertThat(task).isPresent();
+    String label =
+        workflowEngine.readActionLabel(
+            task.get().processDefinitionId(), task.get().taskDefinitionKey());
+    assertThat(label).isNull();
+  }
+
+  @Test
+  void completeUnknownTaskThrowsConflict() {
+    // Story 2.8 — "task is gone" at the engine layer surfaces as conflict (AC5), so the
+    // controller can return 409 and the frontend renders [Refresh case]. 404 would short-circuit
+    // the conflict UX.
     assertThatThrownBy(() -> workflowEngine.completeTask("nope", Map.of()))
-        .isInstanceOf(WksNotFoundException.class);
+        .isInstanceOf(WksConflictException.class);
   }
 
   @Test
@@ -245,6 +306,32 @@ class CibSevenWorkflowEngineIT {
             "Story 2.3 AC4: ProcessEngineException for unknown key wraps to"
                 + " WksWorkflowEngineException")
         .isInstanceOf(WksWorkflowEngineException.class);
+  }
+
+  /** Variant of {@link #simpleBpmn} that sets the userTask name attribute. */
+  private static String bpmnWithUserTaskName(String key, String userTaskName) {
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        + "<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\""
+        + " xmlns:camunda=\"http://camunda.org/schema/1.0/bpmn\""
+        + " targetNamespace=\"http://wkspower.com/bpmn/test\">"
+        + "<bpmn:process id=\""
+        + key
+        + "\" isExecutable=\"true\" camunda:historyTimeToLive=\"30\">"
+        + "<bpmn:startEvent id=\"start\"/>"
+        + "<bpmn:userTask id=\"draft\" name=\""
+        + userTaskName
+        + "\">"
+        + "<bpmn:extensionElements>"
+        + "<camunda:properties>"
+        + "<camunda:property name=\"archetype\" value=\"submit_for_processing\"/>"
+        + "</camunda:properties>"
+        + "</bpmn:extensionElements>"
+        + "</bpmn:userTask>"
+        + "<bpmn:endEvent id=\"end\"/>"
+        + "<bpmn:sequenceFlow id=\"f1\" sourceRef=\"start\" targetRef=\"draft\"/>"
+        + "<bpmn:sequenceFlow id=\"f2\" sourceRef=\"draft\" targetRef=\"end\"/>"
+        + "</bpmn:process>"
+        + "</bpmn:definitions>";
   }
 
   /** Minimal BPMN 2.0 fixture used by every test in this class. */

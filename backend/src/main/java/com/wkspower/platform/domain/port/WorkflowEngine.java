@@ -4,6 +4,7 @@ import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,6 +56,25 @@ public interface WorkflowEngine {
    * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
    */
   Optional<Task> findTask(String taskId);
+
+  /**
+   * List active (uncompleted, unsuspended) user tasks for a case, ordered by engine create time.
+   * Story 2.8 AC1 — backs {@code GET /api/cases/{id}/tasks}. Returns an empty list when the case
+   * has reached a terminal end-event (no active tasks); callers MUST NOT translate empty to 404.
+   *
+   * <p>Implementations MUST translate engine exceptions into {@link
+   * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
+   */
+  List<Task> findTasksByCase(UUID caseId);
+
+  /**
+   * Read the {@code actionLabel} {@code camunda:property} for a user task definition, falling back
+   * to the {@code userTask.name} when the property is absent or blank. Returns {@code null} only
+   * when the BPMN cannot be located (defensive — should not happen for an active task). Story 2.8
+   * AC1 surfaces this on {@code TaskDto.actionLabel}; the domain {@link Task} model intentionally
+   * does not carry it (lean domain).
+   */
+  String readActionLabel(String processDefinitionId, String taskDefinitionKey);
 
   /**
    * Complete a user task. {@code variables} are merged into process variables — pass simple scalars

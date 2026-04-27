@@ -13,16 +13,18 @@ import { cn } from '@/lib/cn';
 import { Button } from './Button';
 
 /**
- * Story 2.7 — 4-state slice of the TaskLifecycleButton state machine (UX spec §TaskLifecycleButton
- * lines 716-744). The 5-state owner with the {@code processing} state ships in Story 2.8 — at that
- * point this component is either renamed or wrapped. The TS literal-union here is forward-
- * compatible: 2.8 widens the union to add {@code 'processing'}.
+ * Story 2.7 — 4-state slice of the lifecycle. Story 2.8 widened the union to add {@code
+ * 'processing'} (5-state superset owned by {@code TaskLifecycleButton} for backend mutations that
+ * may genuinely take >2s or whose true completion is signalled async via SSE — Story 4.3). This
+ * component remains the 4-state presentational primitive; consumers like the case-creation form
+ * (synchronous backend) stay on it. {@code TaskLifecycleButton} composes it for the four shared
+ * states and adds the {@code processing} visual itself.
  *
  * Presentational: parents drive transitions via the {@code state} prop (typically derived from
  * RHF's {@code formState.isSubmitting} + a TanStack Query mutation's {@code isPending} /
  * {@code isSuccess} / {@code isError}). The component itself owns no state machine.
  */
-export type MutationButtonState = 'idle' | 'confirming' | 'confirmed' | 'failed';
+export type MutationButtonState = 'idle' | 'confirming' | 'processing' | 'confirmed' | 'failed';
 
 const CONFIRMED_FADE_MS = 2_000;
 
@@ -35,12 +37,20 @@ export interface MutationButtonProps extends Omit<
   children: ReactNode;
   /** Label for confirming state — parent supplies localised string. */
   confirmingLabel?: string;
+  /** Label for processing state — Story 2.8; only shown when `state === 'processing'`. */
+  processingLabel?: string;
   /** Label for confirmed state — parent supplies localised string. */
   confirmedLabel?: string;
   /** Reason-bearing label for failed state — parent supplies localised string. */
   failedLabel?: string;
   /** Optional retry slot; renders only on `failed`. */
   retryAction?: ReactNode;
+  /**
+   * Optional override for the `aria-live` announcement. When provided, the live region announces
+   * this string instead of the visible-state label — used by `TaskLifecycleButton` to surface the
+   * "Press Enter to refresh." hint on the conflict path without changing the visible button text.
+   */
+  announcement?: string;
 }
 
 export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>(
@@ -49,9 +59,11 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
       state,
       children,
       confirmingLabel = 'Confirming…',
+      processingLabel = 'Processing…',
       confirmedLabel = 'Confirmed',
       failedLabel = 'Failed',
       retryAction,
+      announcement,
       className,
       disabled,
       ...rest
@@ -79,44 +91,54 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
     // makes some AT engines drop region tracking. Failed state is still loud because the text
     // changes, the region just doesn't switch to assertive.
     const announce =
-      state === 'confirming'
+      announcement ??
+      (state === 'confirming'
         ? confirmingLabel
-        : state === 'confirmed'
-          ? confirmedLabel
-          : state === 'failed'
-            ? failedLabel
-            : '';
+        : state === 'processing'
+          ? processingLabel
+          : state === 'confirmed'
+            ? confirmedLabel
+            : state === 'failed'
+              ? failedLabel
+              : '');
 
     const stateClass =
       state === 'confirming'
         ? 'bg-[var(--ring)] text-white animate-pulse'
-        : state === 'confirmed'
-          ? confirmedFaded
-            ? ''
-            : 'bg-emerald-600 text-white hover:bg-emerald-600'
-          : state === 'failed'
-            ? 'bg-[var(--destructive)] text-white hover:bg-[var(--destructive)]'
-            : '';
+        : state === 'processing'
+          ? // Slower pulse to differentiate from `confirming`; same indigo accent.
+            'bg-[var(--ring)] text-white animate-pulse [animation-duration:2s]'
+          : state === 'confirmed'
+            ? confirmedFaded
+              ? ''
+              : 'bg-emerald-600 text-white hover:bg-emerald-600'
+            : state === 'failed'
+              ? 'bg-[var(--destructive)] text-white hover:bg-[var(--destructive)]'
+              : '';
 
     const isVisuallyConfirmed = state === 'confirmed' && !confirmedFaded;
-    const buttonDisabled = disabled || state === 'confirming' || isVisuallyConfirmed;
+    const buttonDisabled =
+      disabled || state === 'confirming' || state === 'processing' || isVisuallyConfirmed;
 
     return (
       <div className={cn('inline-flex items-center gap-2')}>
         <Button
           ref={ref}
           type={rest.type ?? 'submit'}
-          aria-busy={state === 'confirming' ? true : undefined}
+          aria-busy={state === 'confirming' || state === 'processing' ? true : undefined}
+          aria-disabled={buttonDisabled || undefined}
           disabled={buttonDisabled}
           data-state={confirmedFaded && state === 'confirmed' ? 'idle' : state}
           className={cn(stateClass, className)}
           {...rest}
         >
           {state === 'confirming' && <Loader2 className="size-4 animate-spin" aria-hidden />}
+          {state === 'processing' && <Loader2 className="size-4 animate-spin" aria-hidden />}
           {isVisuallyConfirmed && <Check className="size-4" aria-hidden />}
           {state === 'failed' && <X className="size-4" aria-hidden />}
           {(state === 'idle' || (state === 'confirmed' && confirmedFaded)) && children}
           {state === 'confirming' && confirmingLabel}
+          {state === 'processing' && processingLabel}
           {isVisuallyConfirmed && confirmedLabel}
           {state === 'failed' && failedLabel}
           <span key={announceKey.current} className="sr-only" aria-live="polite">

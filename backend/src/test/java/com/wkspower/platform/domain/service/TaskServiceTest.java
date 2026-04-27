@@ -89,6 +89,7 @@ class TaskServiceTest {
         new Task(
             "t1",
             "pi-1",
+            "pd-1",
             CASE,
             "loan-application",
             "draft",
@@ -115,6 +116,7 @@ class TaskServiceTest {
         new Task(
             "t1",
             "pi-1",
+            "pd-1",
             CASE,
             "loan-application",
             "draft",
@@ -169,6 +171,7 @@ class TaskServiceTest {
         new Task(
             "t1",
             "pi-1",
+            "pd-1",
             CASE,
             "loan-application",
             "draft",
@@ -210,6 +213,7 @@ class TaskServiceTest {
     return new Task(
         id,
         "pi-1",
+        "pd-1",
         CASE,
         "loan-application",
         "draft",
@@ -291,6 +295,16 @@ class TaskServiceTest {
     public void signalTransition(
         String processInstanceId, String action, Map<String, Object> variables) {
       throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Task> findTasksByCase(UUID caseId) {
+      return List.of();
+    }
+
+    @Override
+    public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
+      return null;
     }
   }
 }

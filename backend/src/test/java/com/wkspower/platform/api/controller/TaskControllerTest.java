@@ -110,13 +110,20 @@ class TaskControllerTest {
   }
 
   @Test
-  void completeReturns404WhenTaskUnknown() throws Exception {
+  void completeReturns409WhenTaskAlreadyCompleted() throws Exception {
+    // Story 2.8 AC5 — a task that disappeared between client load and the complete click
+    // (typically: another user / another tab completed it concurrently) MUST surface as 409 so
+    // the frontend conflict path renders the [Refresh case] recovery action. Returning 404 here
+    // breaks AC5 because `classifyError` would treat it as a generic non-conflict failure.
     when(taskService.findById("nope")).thenThrow(new WksNotFoundException("task missing"));
 
     mockMvc
         .perform(post("/api/tasks/nope/complete").with(officerAuth()))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.error.code").value("WKS-API-404"));
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.error.code").value("WKS-RTM-409"))
+        .andExpect(
+            jsonPath("$.error.message")
+                .value(org.hamcrest.Matchers.containsString("already completed")));
   }
 
   @Test
@@ -144,6 +151,46 @@ class TaskControllerTest {
         .perform(post("/api/tasks/t1/complete").with(officerAuth()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.archetype").value("business_final"));
+  }
+
+  // ---- AC13-named coverage (Story 2.8) -----------------------------------
+  // The three tests below mirror the named cases listed in Story 2.8 AC13. They duplicate the
+  // scenarios already covered above with the spec-aligned identifiers so the test surface matches
+  // the AC text verbatim.
+
+  @Test
+  void complete_409_unknown_task_treated_as_already_completed() throws Exception {
+    // AC5 contract: any "task is gone" condition surfaces as 409 (conflict), not 404. The Phase
+    // 0 backend cannot distinguish "never existed" from "already completed" at the engine layer
+    // — both paths surface as the same conflict copy because that's the realistic root cause
+    // from a UI driven by server-supplied task ids.
+    when(taskService.findById("nope")).thenThrow(new WksNotFoundException("task missing"));
+    mockMvc
+        .perform(post("/api/tasks/nope/complete").with(officerAuth()))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.error.code").value("WKS-RTM-409"));
+  }
+
+  @Test
+  void complete_403_missing_verb() throws Exception {
+    when(taskService.findById("t1")).thenReturn(sampleTask("draft_section", null));
+    when(evaluator.hasVerb(any(), anyString(), eq("transition"))).thenReturn(false);
+    mockMvc
+        .perform(post("/api/tasks/t1/complete").with(officerAuth()))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.error.code").value("WKS-API-403"));
+  }
+
+  @Test
+  void complete_409_already_completed_by_other() throws Exception {
+    when(taskService.findById("t1")).thenReturn(sampleTask("draft_section", null));
+    when(evaluator.hasVerb(any(), anyString(), eq("transition"))).thenReturn(true);
+    when(taskService.complete(eq("t1"), any(), any()))
+        .thenThrow(new WksConflictException("Task t1 already completed"));
+    mockMvc
+        .perform(post("/api/tasks/t1/complete").with(officerAuth()))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.error.code").value("WKS-RTM-409"));
   }
 
   // ---- POST /api/tasks/{id}/claim ----------------------------------------
@@ -218,6 +265,7 @@ class TaskControllerTest {
     return new Task(
         "t1",
         "pi-1",
+        "pd-1",
         CASE_ID,
         "loan-application",
         "draft",
