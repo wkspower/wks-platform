@@ -8,6 +8,7 @@ import com.wkspower.platform.domain.config.model.FieldOption;
 import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
+import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
@@ -39,6 +40,21 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigValidator {
+
+  /**
+   * Reserved stage ids — Story 3.1 AC1 (Sprint-1 triage Q4: initial set, extend on first conflict).
+   * Lives here as a private constant so the validator owns the rule; if a future story needs to
+   * extend, the touch-point is one place.
+   */
+  private static final Set<String> RESERVED_STAGE_IDS = Set.of("case", "stage", "none", "all");
+
+  /**
+   * Stage id pattern (Story 3.1 AC1) — same kebab-case shape as status / role ids, but allows a
+   * 1-character id (regex {@code [a-z][a-z0-9-]{0,62}}). Stages live on the URL surface (Story 3.3)
+   * so no underscore variant.
+   */
+  private static final java.util.regex.Pattern STAGE_ID_PATTERN =
+      java.util.regex.Pattern.compile("[a-z][a-z0-9-]{0,62}");
 
   public ValidationResult validate(RawCaseTypeConfig raw, YamlLineIndex lines) {
     if (raw == null) {
@@ -78,6 +94,7 @@ public class ConfigValidator {
     List<RoleDefinition> roles = checkRoles(raw.roles(), eb, errors);
     List<String> listColumns =
         checkListColumns(raw.listColumns(), fields, raw.fields() != null, eb, errors);
+    List<StageDefinition> stages = checkStages(raw.stages(), eb, errors);
 
     if (!errors.isEmpty()) {
       return ValidationResult.invalid(errors);
@@ -93,8 +110,92 @@ public class ConfigValidator {
             fields,
             statuses,
             listColumns,
-            roles);
+            roles,
+            stages);
     return ValidationResult.ok(config, warnings);
+  }
+
+  /**
+   * Story 3.1 AC1 — validate the optional {@code stages} list. {@code null} or empty produces an
+   * empty list (legal — no error). Collect-all idiom: every duplicate / pattern / reserved-word
+   * violation is appended; checks never short-circuit on first error.
+   */
+  private List<StageDefinition> checkStages(
+      List<RawCaseTypeConfig.RawStage> raws, ErrorBuilder eb, List<ErrorDetail> errors) {
+    if (raws == null || raws.isEmpty()) {
+      return List.of();
+    }
+    List<StageDefinition> out = new ArrayList<>();
+    Set<String> seen = new HashSet<>();
+    for (int i = 0; i < raws.size(); i++) {
+      RawCaseTypeConfig.RawStage s = raws.get(i);
+      String base = "stages[" + i + "]";
+      if (s == null || s.id() == null || s.id().isBlank()) {
+        errors.add(eb.error(ErrorCode.WKS_CFG_001, "Stage entry requires 'id'", base + ".id"));
+        continue;
+      }
+      String id = s.id();
+      boolean idOk = true;
+      if (!STAGE_ID_PATTERN.matcher(id).matches()) {
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_CFG_032, "Stage id must match [a-z][a-z0-9-]{0,62}", base + ".id"));
+        idOk = false;
+      }
+      if (idOk && RESERVED_STAGE_IDS.contains(id)) {
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_CFG_033,
+                "Stage id '" + id + "' is reserved (reserved: " + RESERVED_STAGE_IDS + ")",
+                base + ".id"));
+        idOk = false;
+      }
+      if (idOk && !seen.add(id)) {
+        errors.add(eb.error(ErrorCode.WKS_CFG_031, "Duplicate stage id: " + id, base + ".id"));
+        idOk = false;
+      }
+      if (idOk) {
+        String displayName =
+            s.displayName() == null || s.displayName().isBlank()
+                ? toTitleCase(id)
+                : s.displayName();
+        // Story 3.1 code review S3 (2026-05-05): stage displayName shares the
+        // MAX_DISPLAY_NAME_CHARS=40 cap with field/status displayName (WKS-CFG-007). Catch the
+        // overflow at validate-time so it never reaches the column.
+        if (displayName.length() > CaseTypeLimits.MAX_DISPLAY_NAME_CHARS) {
+          errors.add(
+              eb.error(
+                  ErrorCode.WKS_CFG_007,
+                  "displayName must be ≤ " + CaseTypeLimits.MAX_DISPLAY_NAME_CHARS + " characters",
+                  base + ".displayName"));
+          continue;
+        }
+        out.add(new StageDefinition(id, displayName, i));
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Title-case a kebab-case stage id (Story 3.1 AC1): {@code "intake"} → {@code "Intake"}, {@code
+   * "loan-decision"} → {@code "Loan Decision"}.
+   */
+  private static String toTitleCase(String kebab) {
+    String[] parts = kebab.split("-");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < parts.length; i++) {
+      if (parts[i].isEmpty()) {
+        continue;
+      }
+      if (sb.length() > 0) {
+        sb.append(' ');
+      }
+      sb.append(Character.toUpperCase(parts[i].charAt(0)));
+      if (parts[i].length() > 1) {
+        sb.append(parts[i].substring(1));
+      }
+    }
+    return sb.toString();
   }
 
   // ---- per-section checks -------------------------------------------------

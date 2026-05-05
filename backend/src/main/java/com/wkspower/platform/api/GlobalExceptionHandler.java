@@ -9,6 +9,7 @@ import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.exception.WksStageException;
 import com.wkspower.platform.domain.exception.WksValidationAggregateException;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
@@ -174,6 +175,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
               ApiResponse.error(
                   ErrorPayload.of(
                       code, "Resource was modified by another transaction; reload and retry")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  /**
+   * Story 3.1 AC10 — map stage-lifecycle exceptions per AC9: {@code WKS-STG-001} → 409 (already
+   * complete), {@code WKS-STG-002} → 422 (backward skip), {@code WKS-STG-003} → 409 (concurrent
+   * transition; reload and retry), {@code WKS-STG-004} → 404 (unknown caseId).
+   */
+  @ExceptionHandler(WksStageException.class)
+  public ResponseEntity<ApiResponse<Void>> handleStage(WksStageException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Stage lifecycle error: {}", ex.getCode());
+      HttpStatus status =
+          switch (ex.getCode()) {
+            case "WKS-STG-002" -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case "WKS-STG-004" -> HttpStatus.NOT_FOUND;
+            default -> HttpStatus.CONFLICT; // WKS-STG-001, WKS-STG-003
+          };
+      return ResponseEntity.status(status)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
     } finally {
       MDC.remove(MDC_KEY);
     }

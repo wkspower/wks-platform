@@ -43,6 +43,18 @@ public class CaseEntity extends BaseJpaEntity {
   @Column(name = "process_instance_id", length = 64)
   private String processInstanceId;
 
+  /**
+   * Story 3.1 — denormalised cache of the latest ACTIVE stage. {@code null} on zero-stage cases
+   * (CaseType declares no stages) and after the last stage is completed (Story 3.1 AC7).
+   * Authoritative state lives in {@code case_stage_history}; this column is rebuildable.
+   */
+  @Column(name = "current_stage_id", length = 64)
+  private String currentStageId;
+
+  /** Story 3.1 — convenience companion to {@link #currentStageId} for ordering / fast lookup. */
+  @Column(name = "current_stage_ordinal")
+  private Integer currentStageOrdinal;
+
   @Column(name = "created_by", nullable = false)
   private UUID createdBy;
 
@@ -119,6 +131,22 @@ public class CaseEntity extends BaseJpaEntity {
 
   public void setProcessInstanceId(String processInstanceId) {
     this.processInstanceId = processInstanceId;
+  }
+
+  public String getCurrentStageId() {
+    return currentStageId;
+  }
+
+  public void setCurrentStageId(String currentStageId) {
+    this.currentStageId = currentStageId;
+  }
+
+  public Integer getCurrentStageOrdinal() {
+    return currentStageOrdinal;
+  }
+
+  public void setCurrentStageOrdinal(Integer currentStageOrdinal) {
+    this.currentStageOrdinal = currentStageOrdinal;
   }
 
   public UUID getCreatedBy() {
