@@ -1,0 +1,7 @@
+# Per-client artefacts (env files, license files, rendered compose) MUST
+# never be committed. Only the synthetic CI fixture under _fixture/ may live
+# in git. Enforced by Story 14.7 AC9.
+*
+!.gitignore
+!_fixture/
+!_fixture/**
