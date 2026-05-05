@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# Tenant invariant (D25) — Zero tenant_id lint
+#
+# Phase 0 scope: backend domain/persistence/audit. Frontend has no equivalent
+# packages today; expand the SCAN_PATHS variable when frontend grows a domain
+# layer (post-Epic 6 if Developer Console introduces one).
+#
+# Source of truth: docs/zero-tenant-id.md
+# Background: Decision 25 in _bmad-output/planning-artifacts/architecture.md
+#             (planning repo) — wks-platform2.
+#
+# Invoked from .github/workflows/ci.yml and runnable locally from any cwd.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+
+SCAN_PATHS=(
+  "backend/src/main/java/com/wkspower/platform/domain"
+  "backend/src/main/java/com/wkspower/platform/infrastructure/persistence"
+  "backend/src/main/java/com/wkspower/platform/audit"
+  "backend/src/test/java/com/wkspower/platform/domain"
+  "backend/src/test/java/com/wkspower/platform/infrastructure/persistence"
+  "backend/src/test/java/com/wkspower/platform/audit"
+)
+
+FORBIDDEN='(tenant_id|tenantId|WHERE[[:space:]]+tenant_id|@TenantId)'
+ALLOWLIST_FILE="backend/.ci/tenant-invariant-allowlist.txt"
+DOC_LINK="docs/zero-tenant-id.md"
+FAIL_SUFFIX="Forbidden by Decision 25 (Zero tenant_id invariant). See ${DOC_LINK} for the rationale and approved alternatives."
+
+# Load allowlist globs (skip blank/# lines). Tolerate missing file.
+allowlist=()
+if [[ -f "$ALLOWLIST_FILE" ]]; then
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      ''|\#*) continue ;;
+      *) allowlist+=("$line") ;;
+    esac
+  done < "$ALLOWLIST_FILE"
+fi
+
+is_allowlisted() {
+  local path="$1"
+  local glob
+  for glob in "${allowlist[@]+"${allowlist[@]}"}"; do
+    # shellcheck disable=SC2254
+    case "$path" in
+      $glob) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# Build existing-paths list (silently skip missing — first-run safety).
+existing=()
+for p in "${SCAN_PATHS[@]}"; do
+  [[ -d "$p" ]] && existing+=("$p")
+done
+
+violations=0
+files_seen=""  # newline-delimited; uniqued at end (bash 3.2 has no assoc arrays)
+
+if [[ ${#existing[@]} -gt 0 ]]; then
+  # grep returns non-zero when no matches — tolerate via || true.
+  while IFS= read -r match; do
+    [[ -z "$match" ]] && continue
+    # match format: path:line:content
+    path="${match%%:*}"
+    rest="${match#*:}"
+    line="${rest%%:*}"
+    content="${rest#*:}"
+
+    if is_allowlisted "$path"; then
+      continue
+    fi
+
+    # Identify which forbidden token matched (first hit on the line).
+    if [[ "$content" =~ WHERE[[:space:]]+tenant_id ]]; then
+      ident="WHERE tenant_id"
+    elif [[ "$content" =~ @TenantId ]]; then
+      ident="@TenantId"
+    elif [[ "$content" =~ tenantId ]]; then
+      ident="tenantId"
+    elif [[ "$content" =~ tenant_id ]]; then
+      ident="tenant_id"
+    else
+      ident="(unknown)"
+    fi
+
+    printf '%s:%s: %s — %s\n' "$path" "$line" "$ident" "$FAIL_SUFFIX"
+    violations=$((violations + 1))
+    files_seen="${files_seen}${path}"$'\n'
+  done < <(grep -RnE "$FORBIDDEN" "${existing[@]}" || true)
+fi
+
+if [[ "$violations" -eq 0 ]]; then
+  echo "Tenant invariant (D25) OK"
+  exit 0
+fi
+
+file_count=$(printf '%s' "$files_seen" | sort -u | grep -c .)
+echo "Tenant invariant (D25) FAILED: ${violations} violations across ${file_count} files"
+exit 1

@@ -69,6 +69,14 @@ jobs:
             exit 1
           fi
 
+  tenant-invariant:
+    name: Tenant invariant (D25)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan protected packages
+        run: ./backend/.ci/check-tenant-invariant.sh
+
   docker-build:
     name: Docker image (build only, no push)
     runs-on: ubuntu-latest
