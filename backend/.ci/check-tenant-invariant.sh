@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Tenant invariant (D25) — Zero tenant_id lint
 #
-# Phase 0 scope: backend domain/persistence/audit. Frontend has no equivalent
+# Phase 0 scope: backend domain/persistence/audit (Java) + Flyway migrations
+# (SQL/XML under src/main/resources/db/migration). Frontend has no equivalent
 # packages today; expand the SCAN_PATHS variable when frontend grows a domain
 # layer (post-Epic 6 if Developer Console introduces one).
 #
@@ -23,7 +24,9 @@ SCAN_PATHS=(
   "backend/src/test/java/com/wkspower/platform/domain"
   "backend/src/test/java/com/wkspower/platform/infrastructure/persistence"
   "backend/src/test/java/com/wkspower/platform/audit"
+  "backend/src/main/resources/db/migration"
 )
+INCLUDE_GLOBS=(--include='*.java' --include='*.sql' --include='*.xml')
 
 FORBIDDEN='(tenant_id|tenantId|WHERE[[:space:]]+tenant_id|@TenantId)'
 ALLOWLIST_FILE="backend/.ci/tenant-invariant-allowlist.txt"
@@ -31,9 +34,11 @@ DOC_LINK="docs/zero-tenant-id.md"
 FAIL_SUFFIX="Forbidden by Decision 25 (Zero tenant_id invariant). See ${DOC_LINK} for the rationale and approved alternatives."
 
 # Load allowlist globs (skip blank/# lines). Tolerate missing file.
+# Strip trailing CR so Windows-edited allowlists do not silently fail to match.
 allowlist=()
 if [[ -f "$ALLOWLIST_FILE" ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
     case "$line" in
       ''|\#*) continue ;;
       *) allowlist+=("$line") ;;
@@ -53,18 +58,27 @@ is_allowlisted() {
   return 1
 }
 
-# Build existing-paths list (silently skip missing — first-run safety).
+# Build existing-paths list. Tolerate individual missing paths (first-run /
+# refactor safety), but FAIL if every configured path is missing — that almost
+# certainly means a rename or refactor moved the protected packages and the
+# scan would otherwise vacuously pass.
 existing=()
 for p in "${SCAN_PATHS[@]}"; do
   [[ -d "$p" ]] && existing+=("$p")
 done
 
+if [[ ${#existing[@]} -eq 0 ]]; then
+  echo "Tenant invariant (D25) FAILED: none of the configured SCAN_PATHS exist." >&2
+  echo "If the protected packages were renamed, update SCAN_PATHS in $0 in the same PR." >&2
+  exit 1
+fi
+
 violations=0
 files_seen=""  # newline-delimited; uniqued at end (bash 3.2 has no assoc arrays)
 
-if [[ ${#existing[@]} -gt 0 ]]; then
-  # grep returns non-zero when no matches — tolerate via || true.
-  while IFS= read -r match; do
+# grep -I skips binary files; --include filters keep migration tree narrow.
+# grep returns non-zero when no matches — tolerate via || true.
+while IFS= read -r match; do
     [[ -z "$match" ]] && continue
     # match format: path:line:content
     path="${match%%:*}"
@@ -92,8 +106,7 @@ if [[ ${#existing[@]} -gt 0 ]]; then
     printf '%s:%s: %s — %s\n' "$path" "$line" "$ident" "$FAIL_SUFFIX"
     violations=$((violations + 1))
     files_seen="${files_seen}${path}"$'\n'
-  done < <(grep -RnE "$FORBIDDEN" "${existing[@]}" || true)
-fi
+done < <(grep -IRnE "${INCLUDE_GLOBS[@]}" "$FORBIDDEN" "${existing[@]}" || true)
 
 if [[ "$violations" -eq 0 ]]; then
   echo "Tenant invariant (D25) OK"

@@ -23,3 +23,5 @@ If you genuinely need a tenant concept, you are violating D25 — open a PR amen
 ## CI enforcement
 
 The lint script `backend/.ci/check-tenant-invariant.sh` greps the protected packages for the forbidden identifiers on every PR via the GitHub Actions job `Tenant invariant (D25)` in `.github/workflows/ci.yml`. The script is a single source of truth — invoke it locally before pushing.
+
+The scan is textual: it flags the forbidden identifiers anywhere in a file under the protected packages — code, comments, Javadoc, and string literals alike. This is intentional. Comments saying "we used to use `tenantId`" or strings containing the word still signal pre-pivot thinking that an SI partner reading the code would see, which D25 forbids. If you genuinely need to reference the term in prose (e.g., explaining the invariant itself), do it from outside the protected packages.
