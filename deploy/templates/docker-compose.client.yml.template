@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 WKS Power Limited
+#
+# Phase-0 baseline production-shaped per-client compose template.
+# Story 14.1 (Production Docker Profile) will harden this — preserve the
+# per-client isolation contract (containers/volumes/networks per client,
+# license file mount, ZERO tenant_id) when extending.
+#
+# Phase-0 isolated-per-client compose. Phase-1 (Story 15.1) replaces this
+# with Hetzner Cloud API + Terraform module per Decision 25.
+#
+# Rendered from this template by deploy/wks-deploy.sh via envsubst. After
+# rendering, validate with `docker compose -f <rendered> config -q`.
+
+name: wks-${WKS_CLIENT_SLUG}
+
+services:
+  wks-${WKS_CLIENT_SLUG}:
+    image: ${WKS_IMAGE_TAG}
+    container_name: wks-${WKS_CLIENT_SLUG}
+    depends_on:
+      - postgres-${WKS_CLIENT_SLUG}
+      - minio-${WKS_CLIENT_SLUG}
+    environment:
+      WKS_DB_URL: jdbc:postgresql://postgres-${WKS_CLIENT_SLUG}:5432/wks
+      WKS_DB_USER: wks
+      WKS_DB_PASSWORD: ${WKS_DB_PASSWORD}
+      WKS_STORAGE_ENDPOINT: http://minio-${WKS_CLIENT_SLUG}:9000
+      WKS_STORAGE_KEY: minioadmin
+      WKS_STORAGE_SECRET: ${WKS_MINIO_ROOT_PASSWORD}
+      WKS_ADMIN_EMAIL: ${WKS_ADMIN_EMAIL}
+      WKS_ADMIN_PASSWORD: ${WKS_ADMIN_PASSWORD}
+      WKS_LICENSE_PATH: ${WKS_LICENSE_PATH}
+      WKS_PUBLIC_URL: ${WKS_PUBLIC_URL}
+      WKS_LOCALE: en
+      WKS_CORS_ORIGINS: ${WKS_PUBLIC_URL}
+      SPRING_PROFILES_ACTIVE: production
+    volumes:
+      - ${WKS_CLIENT_LICENSE_HOST_PATH}:${WKS_LICENSE_PATH}:ro
+    ports:
+      - "${WKS_HOST_PORT:-18080}:8080"
+    networks:
+      - wksnet-${WKS_CLIENT_SLUG}
+    restart: unless-stopped
+
+  postgres-${WKS_CLIENT_SLUG}:
+    image: postgres:16-alpine
+    container_name: postgres-${WKS_CLIENT_SLUG}
+    environment:
+      POSTGRES_DB: wks
+      POSTGRES_USER: wks
+      POSTGRES_PASSWORD: ${WKS_DB_PASSWORD}
+    volumes:
+      - pgdata-${WKS_CLIENT_SLUG}:/var/lib/postgresql/data
+    networks:
+      - wksnet-${WKS_CLIENT_SLUG}
+    restart: unless-stopped
+
+  minio-${WKS_CLIENT_SLUG}:
+    image: minio/minio:latest
+    container_name: minio-${WKS_CLIENT_SLUG}
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: ${WKS_MINIO_ROOT_PASSWORD}
+    volumes:
+      - miniodata-${WKS_CLIENT_SLUG}:/data
+    networks:
+      - wksnet-${WKS_CLIENT_SLUG}
+    restart: unless-stopped
+
+volumes:
+  pgdata-${WKS_CLIENT_SLUG}:
+    name: pgdata-${WKS_CLIENT_SLUG}
+  miniodata-${WKS_CLIENT_SLUG}:
+    name: miniodata-${WKS_CLIENT_SLUG}
+
+networks:
+  wksnet-${WKS_CLIENT_SLUG}:
+    name: wksnet-${WKS_CLIENT_SLUG}

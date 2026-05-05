@@ -77,6 +77,54 @@ jobs:
       - name: Scan protected packages
         run: ./backend/.ci/check-tenant-invariant.sh
 
+  deploy-runbook:
+    name: Deploy runbook (Story 14.7)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck + envsubst
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck gettext-base
+
+      - name: Shellcheck deploy scripts
+        run: shellcheck deploy/wks-deploy.sh deploy/probes/check-runtime-no-tenant-id.sh
+
+      - name: Render compose template against fixture
+        env:
+          WKS_CLIENT_LICENSE_HOST_PATH: /tmp/license.jwt
+          WKS_HOST_PORT: "18080"
+        run: |
+          set -a
+          # shellcheck disable=SC1091
+          . deploy/clients/_fixture/client.env
+          set +a
+          mkdir -p /tmp/wks-fixture
+          envsubst '${WKS_CLIENT_SLUG} ${WKS_PUBLIC_URL} ${WKS_DB_PASSWORD} ${WKS_MINIO_ROOT_PASSWORD} ${WKS_ADMIN_EMAIL} ${WKS_ADMIN_PASSWORD} ${WKS_LICENSE_PATH} ${WKS_IMAGE_TAG} ${WKS_CLIENT_LICENSE_HOST_PATH} ${WKS_HOST_PORT}' \
+            < deploy/templates/docker-compose.client.yml.template \
+            > /tmp/wks-fixture/docker-compose.yml
+          docker compose -f /tmp/wks-fixture/docker-compose.yml config -q
+
+      - name: Tenant invariant scan — operator surfaces (deploy/clients/)
+        # Story 14.7 AC9.3: dedicated scan of operator-supplied env files where
+        # tenant_id leakage would be a real bug. Story 3.0's narrow Java/SQL
+        # lint is intentionally left untouched — see docs/ops/per-client-deploy-runbook.md
+        # and the Dev Notes block of 14-7-per-client-deploy-runbook.md for the
+        # rationale (deploy scripts + templates + runbook intentionally
+        # reference the forbidden tokens to ENFORCE the invariant).
+        run: |
+          if grep -RIE '(tenant_id|tenantId|@TenantId)' \
+               --exclude-dir=_fixture \
+               deploy/clients 2>/dev/null; then
+            echo "Tenant invariant (D25) FAILED in deploy/clients/. See docs/zero-tenant-id.md." >&2
+            exit 1
+          fi
+          echo "Operator-surface tenant invariant (D25) OK"
+
+      - name: Re-run Story 3.0 static lint
+        run: ./backend/.ci/check-tenant-invariant.sh
+
   docker-build:
     name: Docker image (build only, no push)
     runs-on: ubuntu-latest
