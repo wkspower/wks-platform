@@ -91,6 +91,7 @@ REQUIRED_KEYS=(
   WKS_ADMIN_PASSWORD
   WKS_LICENSE_PATH
   WKS_IMAGE_TAG
+  WKS_JWT_SECRET
 )
 
 # --- Step 2: validate keys + values ----------------------------------------
@@ -185,7 +186,7 @@ mkdir -p "$CLIENT_DIR"
 # envsubst with explicit variable list = no surprise substitutions. Single
 # quotes are intentional: envsubst itself parses the ${...} tokens, not bash.
 # shellcheck disable=SC2016
-SUBST_VARS='${WKS_CLIENT_SLUG} ${WKS_PUBLIC_URL} ${WKS_DB_PASSWORD} ${WKS_MINIO_ROOT_PASSWORD} ${WKS_ADMIN_EMAIL} ${WKS_ADMIN_PASSWORD} ${WKS_LICENSE_PATH} ${WKS_IMAGE_TAG} ${WKS_CLIENT_LICENSE_HOST_PATH} ${WKS_HOST_PORT}'
+SUBST_VARS='${WKS_CLIENT_SLUG} ${WKS_PUBLIC_URL} ${WKS_DB_PASSWORD} ${WKS_MINIO_ROOT_PASSWORD} ${WKS_ADMIN_EMAIL} ${WKS_ADMIN_PASSWORD} ${WKS_LICENSE_PATH} ${WKS_IMAGE_TAG} ${WKS_JWT_SECRET} ${WKS_CLIENT_LICENSE_HOST_PATH} ${WKS_HOST_PORT}'
 envsubst "$SUBST_VARS" < "$TEMPLATE" > "$RENDERED_COMPOSE"
 echo "Rendered compose: ${RENDERED_COMPOSE}"
 

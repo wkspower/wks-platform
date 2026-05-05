@@ -34,6 +34,7 @@ services:
       WKS_PUBLIC_URL: ${WKS_PUBLIC_URL}
       WKS_LOCALE: en
       WKS_CORS_ORIGINS: ${WKS_PUBLIC_URL}
+      WKS_JWT_SECRET: ${WKS_JWT_SECRET}
       SPRING_PROFILES_ACTIVE: production
     volumes:
       - ${WKS_CLIENT_LICENSE_HOST_PATH}:${WKS_LICENSE_PATH}:ro

@@ -82,6 +82,12 @@ else
   echo "      Phase-0 placeholder accepted; Story 7.1 will deliver the real LicenseService." >&2
 fi
 
+if [[ "$probed" -eq 0 ]]; then
+  echo "RUNTIME INVARIANT INCONCLUSIVE: 0 surfaces responded — application is not running on ${BASE}." >&2
+  echo "       Inspect: docker compose logs" >&2
+  exit 1
+fi
+
 if [[ "$violations" -ne 0 ]]; then
   echo "RUNTIME INVARIANT FAILED: ${violations} violations across ${probed} probed surfaces" >&2
   exit 1

@@ -71,6 +71,7 @@ Edit `deploy/clients/<client-slug>/client.env`. Generate secrets:
 openssl rand -base64 32   # WKS_DB_PASSWORD
 openssl rand -base64 32   # WKS_MINIO_ROOT_PASSWORD
 openssl rand -base64 24   # WKS_ADMIN_PASSWORD
+openssl rand -base64 48   # WKS_JWT_SECRET (Base64, ≥32 bytes — required by production profile)
 ```
 
 Place the customer's license file:
@@ -90,6 +91,7 @@ WKS_ADMIN_EMAIL=ops@acme.example.com
 WKS_ADMIN_PASSWORD=<generated>
 WKS_LICENSE_PATH=/etc/wks/license.jwt
 WKS_IMAGE_TAG=ghcr.io/wkspower/wks-platform:0.5.0
+WKS_JWT_SECRET=<generated>
 ```
 
 `deploy/clients/<client-slug>/` is gitignored — never commit per-client artefacts.
@@ -220,5 +222,7 @@ If either grep returns a row, remove the leftover by name (`docker volume rm <na
 - **No automated health monitoring beyond the deploy-time probe.** Phase 1+.
 - **TLS termination is the operator's reverse-proxy responsibility.** Decision 8 — runbook does NOT bundle one.
 - **Hetzner-specific provisioning (`hcloud server create ...`) is intentionally out of scope.** The runbook works on any Docker host so Story 15.1 can wrap it later.
+- **Production environment table is provisional.** This Phase-0 template carries the minimum env vars needed for the runbook + driver + probe to be reviewable. Story 14.1 (Production Docker Profile) owns the canonical, hardened production env contract — its work supersedes this template's env block.
+- **Open known issue (Story 14.1 territory):** the current `production` Spring profile in v2-develop bundles the H2 driver and does not autoconfigure the Postgres datasource from `WKS_DB_URL`/`WKS_DB_USER`/`WKS_DB_PASSWORD` alone. The smoke run during Story 14.7 development confirmed this: containers come up, compose validates, the runtime probe correctly reports `INCONCLUSIVE` when no surfaces respond, but the WKS application crashes on Flyway init with `Driver org.h2.Driver claims to not accept jdbcUrl, jdbc:postgresql://...`. Story 14.1 owns wiring the production profile to honour the per-client compose env contract. Until 14.1 lands, this runbook is reviewable end-to-end but not boot-clean against an unmodified `production` profile image.
 
 Each limitation is a future story. Nothing here is permanent — the boundary is documented so a reader six months from now knows where to push.

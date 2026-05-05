@@ -101,7 +101,7 @@ jobs:
           . deploy/clients/_fixture/client.env
           set +a
           mkdir -p /tmp/wks-fixture
-          envsubst '${WKS_CLIENT_SLUG} ${WKS_PUBLIC_URL} ${WKS_DB_PASSWORD} ${WKS_MINIO_ROOT_PASSWORD} ${WKS_ADMIN_EMAIL} ${WKS_ADMIN_PASSWORD} ${WKS_LICENSE_PATH} ${WKS_IMAGE_TAG} ${WKS_CLIENT_LICENSE_HOST_PATH} ${WKS_HOST_PORT}' \
+          envsubst '${WKS_CLIENT_SLUG} ${WKS_PUBLIC_URL} ${WKS_DB_PASSWORD} ${WKS_MINIO_ROOT_PASSWORD} ${WKS_ADMIN_EMAIL} ${WKS_ADMIN_PASSWORD} ${WKS_LICENSE_PATH} ${WKS_IMAGE_TAG} ${WKS_JWT_SECRET} ${WKS_CLIENT_LICENSE_HOST_PATH} ${WKS_HOST_PORT}' \
             < deploy/templates/docker-compose.client.yml.template \
             > /tmp/wks-fixture/docker-compose.yml
           docker compose -f /tmp/wks-fixture/docker-compose.yml config -q
