@@ -42,6 +42,22 @@ import org.springframework.stereotype.Component;
 public class ConfigValidator {
 
   /**
+   * Story 4.2 AC5 — Mapping Layer validator. Constructor-injected so tests can pass {@code null}
+   * via the {@link #ConfigValidator() no-arg constructor} when only stage / field / role rules are
+   * exercised. The {@link #validate(RawCaseTypeConfig, YamlLineIndex, java.util.Map) overload with
+   * BPMN bytes} requires this dependency to be non-null.
+   */
+  private final MappingValidator mappingValidator;
+
+  public ConfigValidator() {
+    this(null);
+  }
+
+  public ConfigValidator(MappingValidator mappingValidator) {
+    this.mappingValidator = mappingValidator;
+  }
+
+  /**
    * Reserved stage ids — Story 3.1 AC1 (Sprint-1 triage Q4: initial set, extend on first conflict).
    * Lives here as a private constant so the validator owns the rule; if a future story needs to
    * extend, the touch-point is one place.
@@ -57,6 +73,17 @@ public class ConfigValidator {
       java.util.regex.Pattern.compile("[a-z][a-z0-9-]{0,62}");
 
   public ValidationResult validate(RawCaseTypeConfig raw, YamlLineIndex lines) {
+    return validate(raw, lines, java.util.Map.of());
+  }
+
+  /**
+   * Story 4.2 AC5 — overload that runs {@link MappingValidator} after stage validation and merges
+   * its findings into the same {@link ValidationResult}. The {@code bpmnFiles} map (filename →
+   * bytes) is supplied by the caller; the validator is I/O-free and never reads the filesystem.
+   * Missing entries for declared {@code attachments[].file} produce {@code WKS-MAP-005}.
+   */
+  public ValidationResult validate(
+      RawCaseTypeConfig raw, YamlLineIndex lines, java.util.Map<String, byte[]> bpmnFiles) {
     if (raw == null) {
       return ValidationResult.invalid(
           List.of(
@@ -95,6 +122,18 @@ public class ConfigValidator {
     List<String> listColumns =
         checkListColumns(raw.listColumns(), fields, raw.fields() != null, eb, errors);
     List<StageDefinition> stages = checkStages(raw.stages(), eb, errors);
+
+    // Story 4.2 AC5 — Mapping Layer validation runs after stage validation, with the stage id set
+    // already known. The validator is collect-all; its findings merge into {@code errors} so a
+    // single ValidationResult surfaces both stage and mapping failures (no parallel call site).
+    if (mappingValidator != null) {
+      Set<String> stageIds = new HashSet<>();
+      for (StageDefinition sd : stages) {
+        stageIds.add(sd.id());
+      }
+      MappingValidator.Result mappingResult = mappingValidator.validate(raw, stageIds, bpmnFiles);
+      errors.addAll(mappingResult.errors());
+    }
 
     if (!errors.isEmpty()) {
       return ValidationResult.invalid(errors);

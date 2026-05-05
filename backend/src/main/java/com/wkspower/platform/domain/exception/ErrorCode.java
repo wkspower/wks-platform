@@ -105,6 +105,29 @@ public enum ErrorCode {
    */
   WKS_CFG_022("WKS-CFG-022"),
   /**
+   * Mapping references a BPMN userTask id that does not exist in the attached BPMN file (Story 4.2
+   * AC2 / architecture §828). Canonical wire code for {@code userTasks.<id>} and {@code
+   * properties[].on=userTask:<id>} cross-reference failures. Distinguishes from {@code
+   * WKS-MAP-001}, which fires on non-userTask element refs (signals, events).
+   */
+  WKS_CFG_027("WKS-CFG-027"),
+  /**
+   * Mapping {@code events.endEvent.stageTransition} (or signal stageTransition) references a stage
+   * adjacency the CaseType does not declare (Story 4.2 AC2 / architecture §832). Canonical wire
+   * code for stage-adjacency failures; {@code WKS-MAP-007} is reserved as an alias-not-emitted to
+   * give Story 4.6's Admin UI a Mapping-namespaced label option without changing the wire string.
+   */
+  WKS_CFG_028("WKS-CFG-028"),
+  /**
+   * Mapping-class change requires a CaseType version bump (Story 4.2 AC2 / architecture §833 / D20
+   * cross-ref). RESERVED in Story 4.2 — emitted by Story 3.8's blast-radius validator when {@link
+   * com.wkspower.platform.infrastructure.config.MappingDiff#classify} returns {@code
+   * MappingChangeClass.MUTATE_CLASS} and the deployer did not supply {@code --bump}. {@code
+   * MappingValidator} does not emit this code; the constant exists here so 3.8 can reference it
+   * without re-allocating.
+   */
+  WKS_CFG_029("WKS-CFG-029"),
+  /**
    * Duplicate stage id within a case-type YAML (Story 3.1 AC1). Deploy-time validator code;
    * surfaces with a {@code stages[i].id} field path.
    */
@@ -122,6 +145,60 @@ public enum ErrorCode {
   WKS_CFG_033("WKS-CFG-033"),
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
+
+  // 422 — Mapping Layer wire codes (Story 4.2 AC2). Epic-namespaced sibling band of the
+  // architecture-document codes WKS-CFG-027/028/029 above. Codes 001..006 are emitted by
+  // MappingValidator; 007 is reserved-and-not-emitted (alias of WKS-CFG-028) to give Story 4.6's
+  // Admin UI a Mapping-namespaced label without changing the wire string.
+  /**
+   * Mapping references a BPMN element id that does not exist in the attached BPMN file (Story 4.2
+   * AC2 / epics.md AC1). Fires for non-userTask references — {@code map.events.signal.<id>} that is
+   * absent in the BPMN, or an {@code endEvent} rule declared on a BPMN with zero {@code
+   * <bpmn:endEvent>}. UserTask references emit {@link #WKS_CFG_027} instead.
+   */
+  WKS_MAP_001("WKS-MAP-001"),
+  /**
+   * Two mappings target the same {@code (stage, status)} from different BPMN events without an
+   * explicit precedence declaration (Story 4.2 AC2 / epics.md AC2). Phase-0 disallows ambiguity;
+   * Phase-1 may relax once a precedence vocabulary lands.
+   */
+  WKS_MAP_002("WKS-MAP-002"),
+  /**
+   * Mapping {@code scope: stage:<id>} (or {@code emits.scope: stage:<id>}) references a stage that
+   * does not exist on the CaseType (Story 4.2 AC2 / epics.md AC3). The validator collects every
+   * dangling reference in one pass.
+   */
+  WKS_MAP_003("WKS-MAP-003"),
+  /**
+   * {@code attachments[].type} is not a known adapter kind (Story 4.2 AC2 / AC6). Phase-0 allows
+   * only {@code bpmn}; future adapter kinds extend the {@link
+   * com.wkspower.platform.infrastructure.config.MappingValidator} allow-list (see Story 4.9 for the
+   * next allow-list addition).
+   */
+  WKS_MAP_004("WKS-MAP-004"),
+  /**
+   * {@code attachments[].file} is missing, unreadable, or fails the BPMN 2.0 sniff when {@code
+   * type: bpmn} (Story 4.2 AC2 / AC3 / AC5). Also fires when the caller did not supply BPMN bytes
+   * for the declared filename — the validator is I/O-free and does not fall back to a filesystem
+   * search path.
+   */
+  WKS_MAP_005("WKS-MAP-005"),
+  /**
+   * Two {@code attachments} declare the same {@code scope} (Story 4.2 AC2). Phase-0 disallows for
+   * clarity (e.g. two {@code scope: case} or two {@code scope: stage:underwriting} entries);
+   * Phase-1 may relax once layered adapters have a precedence vocabulary.
+   */
+  WKS_MAP_006("WKS-MAP-006"),
+  /**
+   * RESERVED-AND-NOT-EMITTED in Story 4.2 (AC2 aliasing rule). Functionally an alias of {@link
+   * #WKS_CFG_028} — the canonical wire code for stage-adjacency failures stays {@code WKS-CFG-028}.
+   * {@code WKS-MAP-007} is reserved so Story 4.6's Admin UI Mapping Inspector can surface a
+   * Mapping-namespaced label for the same rule without changing the wire string emitted by the
+   * backend. The constant is not produced by any validator path. Per {@code
+   * feedback_error_codes_are_wire_contract.md}: a reserved code may never be reused for a different
+   * meaning.
+   */
+  WKS_MAP_007("WKS-MAP-007"),
 
   // 409 / 422 / 404 — Stage lifecycle runtime errors (Story 3.1 AC9). Band: WKS-STG-001..099.
   /**

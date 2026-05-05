@@ -313,6 +313,36 @@ class ArchitectureTest {
   }
 
   @Test
+  void mappingDomainModelHasNoFrameworkImports() {
+    // Story 4.2 AC10 task 5 / AC4 — the new mapping value-object types (MappingDefinition,
+    // AttachmentDefinition, MappingChangeClass) stay framework-free. Reuse BackendSignalKind
+    // from domain/port; never duplicate the enum.
+    //
+    // Scope is pinned by simple-name on purpose: FieldType / StatusColor (Story 2.1) carry
+    // Jackson annotations as a documented pre-existing exception. Pinning the rule to the
+    // Story-4.2 types keeps the assertion tight without weakening 2.1's posture.
+    noClasses()
+        .that()
+        .haveSimpleName("MappingDefinition")
+        .or()
+        .haveSimpleName("AttachmentDefinition")
+        .or()
+        .haveSimpleName("MappingChangeClass")
+        .should()
+        .dependOnClassesThat()
+        .resideInAnyPackage(
+            "org.springframework..",
+            "com.fasterxml.jackson..",
+            "jakarta.persistence..",
+            "org.cibseven..")
+        .because(
+            "MappingDefinition / AttachmentDefinition / MappingChangeClass stay pure Java —"
+                + " Story 4.2 AC4 / NFR36. Reuse BackendSignalKind from domain/port; never"
+                + " duplicate the enum.")
+        .check(CLASSES);
+  }
+
+  @Test
   void hexagonalLayering() {
     Architectures.layeredArchitecture()
         .consideringAllDependencies()
