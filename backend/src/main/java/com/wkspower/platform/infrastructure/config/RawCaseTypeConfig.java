@@ -1,5 +1,6 @@
 package com.wkspower.platform.infrastructure.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
@@ -23,7 +24,8 @@ public record RawCaseTypeConfig(
     List<RawField> fields,
     List<RawStatus> statuses,
     List<String> listColumns,
-    List<RawRole> roles) {
+    List<RawRole> roles,
+    List<RawStage> stages) {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawWorkflow(String bpmn) {}
@@ -55,4 +57,47 @@ public record RawCaseTypeConfig(
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawRole(String name, List<String> permissions) {}
+
+  /**
+   * Story 3.1 — supports both YAML forms:
+   *
+   * <pre>
+   *   stages: [intake, underwriting]            # string-list form (each element parses via fromString)
+   *   stages:
+   *     - id: intake
+   *       displayName: "Intake"                  # rich-object form
+   * </pre>
+   *
+   * Jackson dispatches via {@link JsonCreator} on the matching type — string scalars hit {@link
+   * #fromString} and produce a {@code RawStage(id, null)}; mappings hit {@link #fromObject} via
+   * Jackson's default record deserialization.
+   */
+  /**
+   * Story 3.1 — wrapper record that supports BOTH YAML forms in a single list:
+   *
+   * <pre>
+   *   stages: [intake, underwriting]            # bare-string form
+   *   stages:
+   *     - id: intake
+   *       displayName: "Intake"                  # rich-object form
+   * </pre>
+   *
+   * <p>The string form lands via {@link #fromString} (single-arg DELEGATING creator); the object
+   * form lands via {@link #fromObject} (PROPERTIES creator). Both produce the same record shape so
+   * the validator can iterate uniformly.
+   */
+  public record RawStage(String id, String displayName) {
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static RawStage fromString(String id) {
+      return new RawStage(id, null);
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public static RawStage fromObject(
+        @com.fasterxml.jackson.annotation.JsonProperty("id") String id,
+        @com.fasterxml.jackson.annotation.JsonProperty("displayName") String displayName) {
+      return new RawStage(id, displayName);
+    }
+  }
 }

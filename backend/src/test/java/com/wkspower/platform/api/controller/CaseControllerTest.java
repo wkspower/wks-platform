@@ -72,6 +72,11 @@ class CaseControllerTest {
   @MockitoBean(name = "wksTaskService")
   com.wkspower.platform.domain.service.TaskService taskService;
 
+  @MockitoBean(name = "wksStageAdvancer")
+  com.wkspower.platform.domain.service.WksStageAdvancer stageAdvancer;
+
+  @MockitoBean com.wkspower.platform.domain.port.StageRepository stageRepository;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator caseTypePermissionEvaluator;
 
@@ -335,6 +340,41 @@ class CaseControllerTest {
                 .content("{\"data\":{\"name\":\"Bob\"},\"version\":99}"))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.error.code").value("WKS-RTM-409"));
+  }
+
+  // ---- POST /api/cases/{id}/advance-stage & /skip-stage (Story 3.1 AC10) -
+
+  @Test
+  void advanceStageReturns404WithStg004WhenCaseUnknown() throws Exception {
+    // Story 3.1 code review S2 (2026-05-05): unknown caseId on stage endpoints must surface
+    // WKS-STG-004 (the wire-contract code for "advance/skip references unknown caseId"), not the
+    // generic WKS-API-404 from the loaded-first findById precheck.
+    UUID id = UUID.randomUUID();
+    when(caseService.findById(id)).thenThrow(new WksNotFoundException("missing"));
+
+    mockMvc
+        .perform(
+            post("/api/cases/" + id + "/advance-stage")
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error.code").value("WKS-STG-004"));
+  }
+
+  @Test
+  void skipStageReturns404WithStg004WhenCaseUnknown() throws Exception {
+    UUID id = UUID.randomUUID();
+    when(caseService.findById(id)).thenThrow(new WksNotFoundException("missing"));
+
+    mockMvc
+        .perform(
+            post("/api/cases/" + id + "/skip-stage")
+                .with(officerAuth())
+                .contentType("application/json")
+                .content("{\"targetStageId\":\"decision\"}"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error.code").value("WKS-STG-004"));
   }
 
   // ---- helpers -----------------------------------------------------------

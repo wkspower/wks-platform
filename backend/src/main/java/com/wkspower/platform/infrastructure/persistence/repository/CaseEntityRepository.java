@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,4 +33,21 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
    */
   @Query("SELECT c FROM CaseEntity c WHERE c.id IN :ids")
   List<CaseEntity> findDataByIds(@Param("ids") Collection<UUID> ids);
+
+  /**
+   * Update the denormalised stage-cache columns on the {@code cases} row (Story 3.1). Bypasses the
+   * {@code @Version} optimistic lock by design — stage transitions own their own concurrency
+   * surface via {@link CaseStageHistoryJpaRepository}'s conditional updates; the {@code cases}
+   * cache is just a follower.
+   */
+  @Modifying
+  @Query(
+      "UPDATE CaseEntity c "
+          + "   SET c.currentStageId = :stageId, "
+          + "       c.currentStageOrdinal = :ordinal "
+          + " WHERE c.id = :caseId")
+  int updateStageCache(
+      @Param("caseId") UUID caseId,
+      @Param("stageId") String stageId,
+      @Param("ordinal") Integer ordinal);
 }

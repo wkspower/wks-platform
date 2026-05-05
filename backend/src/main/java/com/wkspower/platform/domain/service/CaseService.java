@@ -47,6 +47,7 @@ public class CaseService {
   private final ProcessDefinitionKeyResolver processKeyResolver;
   private final EventPublisher eventPublisher;
   private final Clock clock;
+  private final WksStageAdvancer stageAdvancer;
 
   public CaseService(
       CaseRepository caseRepository,
@@ -55,7 +56,8 @@ public class CaseService {
       WorkflowEngine workflowEngine,
       ProcessDefinitionKeyResolver processKeyResolver,
       EventPublisher eventPublisher,
-      Clock clock) {
+      Clock clock,
+      WksStageAdvancer stageAdvancer) {
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
     this.caseDataValidator = Objects.requireNonNull(caseDataValidator, "caseDataValidator");
@@ -63,6 +65,7 @@ public class CaseService {
     this.processKeyResolver = Objects.requireNonNull(processKeyResolver, "processKeyResolver");
     this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher");
     this.clock = Objects.requireNonNull(clock, "clock");
+    this.stageAdvancer = Objects.requireNonNull(stageAdvancer, "stageAdvancer");
   }
 
   /**
@@ -112,6 +115,11 @@ public class CaseService {
             now,
             0L);
     Case persisted = caseRepository.save(toPersist);
+
+    // Story 3.1 AC4 — materialise stages and flip stage 0 to ACTIVE inside the same transaction
+    // as the case insert. Empty stage list is a no-op (Decision 19: stage-less paths must remain
+    // unbranched — the loop in stageAdvancer.bootstrap is the single source of truth).
+    stageAdvancer.bootstrap(persisted.id(), caseType.stages(), "wks-auto-rule", "case-create");
 
     eventPublisher.publish(
         new CaseCreated(persisted.id(), caseType.id(), caseType.version(), actorId, now));

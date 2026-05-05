@@ -8,6 +8,7 @@ import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
+import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
@@ -28,6 +29,7 @@ import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
+import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
@@ -67,8 +69,10 @@ class CaseServiceTest {
   }
 
   private CaseService svc(CaseTypeConfig config) {
+    WksStageAdvancer advancer =
+        new WksStageAdvancer(new NoopStageRepository(), publisher, () -> FIXED);
     return new CaseService(
-        repo, reader(config), validator, engine, resolver, publisher, () -> FIXED);
+        repo, reader(config), validator, engine, resolver, publisher, () -> FIXED, advancer);
   }
 
   @Test
@@ -332,6 +336,24 @@ class CaseServiceTest {
     public void publish(Object event) {
       events.add(event);
     }
+  }
+
+  /**
+   * Stage repo stub — never persists, returns empty history. CaseService stubs use zero-stage
+   * CaseTypes.
+   */
+  private static final class NoopStageRepository implements StageRepository {
+    @Override
+    public List<com.wkspower.platform.domain.model.Stage> loadHistory(UUID caseId) {
+      return List.of();
+    }
+
+    @Override
+    public void materialiseStages(
+        UUID caseId, List<StageDefinition> stages, java.time.Instant createdAt) {}
+
+    @Override
+    public void appendTransition(Transition transition) {}
   }
 
   private static final class StubResolver implements ProcessDefinitionKeyResolver {

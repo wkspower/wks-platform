@@ -62,6 +62,11 @@ class CaseTransitionControllerTest {
   @MockitoBean(name = "wksTaskService")
   com.wkspower.platform.domain.service.TaskService taskService;
 
+  @MockitoBean(name = "wksStageAdvancer")
+  com.wkspower.platform.domain.service.WksStageAdvancer stageAdvancer;
+
+  @MockitoBean com.wkspower.platform.domain.port.StageRepository stageRepository;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator evaluator;
 

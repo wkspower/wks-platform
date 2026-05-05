@@ -104,8 +104,40 @@ public enum ErrorCode {
    * isExecutable=true}; any additional executable processes trip this code.
    */
   WKS_CFG_022("WKS-CFG-022"),
+  /**
+   * Duplicate stage id within a case-type YAML (Story 3.1 AC1). Deploy-time validator code;
+   * surfaces with a {@code stages[i].id} field path.
+   */
+  WKS_CFG_031("WKS-CFG-031"),
+  /**
+   * Stage id violates the {@code [a-z][a-z0-9-]{0,62}} pattern (Story 3.1 AC1). Same regex shape as
+   * status / role ids, no underscore variant — stages live on the URL surface (Story 3.3) so they
+   * stay strictly kebab-case.
+   */
+  WKS_CFG_032("WKS-CFG-032"),
+  /**
+   * Stage id collides with a reserved word (Story 3.1 AC1). Initial reserved set: {@code case},
+   * {@code stage}, {@code none}, {@code all}. Extend cautiously — the wire is a contract.
+   */
+  WKS_CFG_033("WKS-CFG-033"),
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
+
+  // 409 / 422 / 404 — Stage lifecycle runtime errors (Story 3.1 AC9). Band: WKS-STG-001..099.
+  /**
+   * advance / skipTo invoked on a case whose stages are already all completed, or on a zero-stage
+   * case (no active stage to advance). HTTP 409.
+   */
+  WKS_STG_001("WKS-STG-001"),
+  /** Skip target is at or below the currently-active stage ordinal (backward skip). HTTP 422. */
+  WKS_STG_002("WKS-STG-002"),
+  /**
+   * Concurrent stage transition — two callers raced and the conditional-update lost the row. The
+   * caller should reload and retry. HTTP 409.
+   */
+  WKS_STG_003("WKS-STG-003"),
+  /** advance / skipTo references an unknown caseId. HTTP 404. */
+  WKS_STG_004("WKS-STG-004"),
 
   // 409 — runtime conflict.
   /**

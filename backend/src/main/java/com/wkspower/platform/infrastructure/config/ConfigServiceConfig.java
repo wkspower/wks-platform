@@ -9,10 +9,12 @@ import com.wkspower.platform.domain.port.CaseTypeSource;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
+import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.TaskService;
+import com.wkspower.platform.domain.service.WksStageAdvancer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,7 +50,8 @@ public class ConfigServiceConfig {
       WorkflowEngine workflowEngine,
       ProcessDefinitionKeyResolver processKeyResolver,
       EventPublisher eventPublisher,
-      Clock clock) {
+      Clock clock,
+      WksStageAdvancer stageAdvancer) {
     return new CaseService(
         caseRepository,
         caseTypeReader,
@@ -56,6 +59,21 @@ public class ConfigServiceConfig {
         workflowEngine,
         processKeyResolver,
         eventPublisher,
-        clock);
+        clock,
+        stageAdvancer);
+  }
+
+  /**
+   * Story 3.1 — wires the framework-free {@link WksStageAdvancer}. The {@code @Transactional}
+   * boundary is applied at this layer (via {@link
+   * org.springframework.transaction.annotation.Transactional} on the calling code paths — {@code
+   * CaseService.create} sits inside Spring's transactional proxy already, and the stage-advance
+   * HTTP endpoints declare {@code @Transactional} on the controller bodies). The domain class
+   * itself stays Spring-free per Decision 4 / NFR36.
+   */
+  @Bean
+  public WksStageAdvancer wksStageAdvancer(
+      StageRepository stageRepository, EventPublisher eventPublisher, Clock clock) {
+    return new WksStageAdvancer(stageRepository, eventPublisher, clock);
   }
 }
