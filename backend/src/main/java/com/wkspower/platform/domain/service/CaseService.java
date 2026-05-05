@@ -87,18 +87,29 @@ public class CaseService {
     UUID caseId = UUID.randomUUID();
     String initialStatus = initialStatus(caseType);
 
-    String processDefinitionKey =
-        processKeyResolver
-            .resolve(caseType.id())
-            .orElseThrow(
-                () ->
-                    new WksWorkflowEngineException(
-                        "No deployed BPMN process definition for case type "
-                            + caseType.id()
-                            + " — case create requires a deployed workflow"));
-    String processInstanceId =
-        workflowEngine.startProcessInstance(
-            processDefinitionKey, Map.of("caseId", caseId.toString(), "caseTypeId", caseType.id()));
+    // Story 3.2 AC2 — engine call is OPTIONAL. Process-less CaseTypes (workflow: omitted) skip the
+    // resolver + start call entirely. Decision 19 / 3.2 unbranched-paths invariant: do not branch
+    // on caseType.hasWorkflow() — iterate via Optional.ifPresent and let absence be the no-op.
+    String[] processInstanceIdHolder = new String[] {null};
+    caseType
+        .workflowOpt()
+        .ifPresent(
+            wf -> {
+              String processDefinitionKey =
+                  processKeyResolver
+                      .resolve(caseType.id())
+                      .orElseThrow(
+                          () ->
+                              new WksWorkflowEngineException(
+                                  "No deployed BPMN process definition for case type "
+                                      + caseType.id()
+                                      + " — case create requires a deployed workflow"));
+              processInstanceIdHolder[0] =
+                  workflowEngine.startProcessInstance(
+                      processDefinitionKey,
+                      Map.of("caseId", caseId.toString(), "caseTypeId", caseType.id()));
+            });
+    String processInstanceId = processInstanceIdHolder[0];
 
     Instant now = clock.now();
     Case toPersist =
