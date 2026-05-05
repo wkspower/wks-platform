@@ -27,6 +27,10 @@ import java.util.UUID;
  * @param createdBy user id of the actor who created the case
  * @param updatedAt last-update timestamp
  * @param version optimistic-locking version (from {@code @Version} on the JPA row)
+ * @param currentStageId Story 3.1 / 3.2 — denormalised cache of the latest ACTIVE stage id; {@code
+ *     null} on zero-stage CaseTypes and after the last stage is completed
+ * @param currentStageOrdinal Story 3.1 / 3.2 — companion ordinal to {@code currentStageId}; {@code
+ *     null} when {@code currentStageId} is {@code null}
  */
 public record Case(
     UUID id,
@@ -39,7 +43,41 @@ public record Case(
     Instant createdAt,
     UUID createdBy,
     Instant updatedAt,
-    long version) {
+    long version,
+    String currentStageId,
+    Integer currentStageOrdinal) {
+
+  /**
+   * Story 3.2 — backward-compat constructor for callers (and tests) that predate the stage-cache
+   * fields. Defaults both stage-cache slots to {@code null} (zero-stage shape).
+   */
+  public Case(
+      UUID id,
+      String caseTypeId,
+      int caseTypeVersion,
+      String status,
+      UUID assignee,
+      Map<String, Object> data,
+      String processInstanceId,
+      Instant createdAt,
+      UUID createdBy,
+      Instant updatedAt,
+      long version) {
+    this(
+        id,
+        caseTypeId,
+        caseTypeVersion,
+        status,
+        assignee,
+        data,
+        processInstanceId,
+        createdAt,
+        createdBy,
+        updatedAt,
+        version,
+        null,
+        null);
+  }
 
   public Case {
     Objects.requireNonNull(id, "id");

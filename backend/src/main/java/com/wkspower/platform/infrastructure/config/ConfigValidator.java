@@ -106,7 +106,7 @@ public class ConfigValidator {
             raw.displayName(),
             raw.version(),
             raw.description(),
-            new WorkflowRef(raw.workflow().bpmn()),
+            toWorkflowRef(raw.workflow()),
             fields,
             statuses,
             listColumns,
@@ -218,16 +218,28 @@ public class ConfigValidator {
     }
   }
 
+  /**
+   * Story 3.2 AC1 — {@code workflow:} is now an OPTIONAL slot. Omitted or blank ⇒ no error
+   * (Decision 19 / 3.2: process-less paths must remain unbranched; zero-process is the trivial
+   * shape, not an alarm). The downstream mapper at {@link #toWorkflowRef} returns {@code null} for
+   * those cases. WKS-CFG-001 is preserved for the slots that ARE still required (id, displayName,
+   * version, fields, statuses, listColumns, roles).
+   */
   private void checkWorkflow(
       RawCaseTypeConfig.RawWorkflow wf, ErrorBuilder eb, List<ErrorDetail> errors) {
-    if (wf == null) {
-      errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: workflow", "workflow"));
-      return;
+    // Intentionally empty — workflow is optional. BpmnValidator surfaces missing-file errors at
+    // deploy time when a workflow IS declared.
+  }
+
+  /**
+   * Story 3.2 AC1 — null-safe builder for the domain {@link WorkflowRef}. Returns {@code null} when
+   * the YAML omits the slot or supplies a blank {@code bpmn} value.
+   */
+  private static WorkflowRef toWorkflowRef(RawCaseTypeConfig.RawWorkflow wf) {
+    if (wf == null || wf.bpmn() == null || wf.bpmn().isBlank()) {
+      return null;
     }
-    if (wf.bpmn() == null || wf.bpmn().isBlank()) {
-      errors.add(
-          eb.error(ErrorCode.WKS_CFG_001, "Required key missing: workflow.bpmn", "workflow.bpmn"));
-    }
+    return new WorkflowRef(wf.bpmn());
   }
 
   private List<FieldDefinition> checkFields(
@@ -403,11 +415,23 @@ public class ConfigValidator {
     return out;
   }
 
+  /**
+   * Story 3.2 AC8 — canonical two-element default applied when YAML omits or empties {@code
+   * statuses:}. Two elements are the minimum viable contract — a single-status default has no
+   * transition target and traps the case at create. Single-source-of-truth at parse time;
+   * downstream services treat {@link CaseTypeConfig#statuses()} as authoritative without a presence
+   * check.
+   */
+  private static final List<StatusDefinition> DEFAULT_STATUSES =
+      List.of(
+          new StatusDefinition("open", "Open", StatusColor.BLUE),
+          new StatusDefinition("closed", "Closed", StatusColor.ZINC));
+
   private List<StatusDefinition> checkStatuses(
       List<RawCaseTypeConfig.RawStatus> raws, ErrorBuilder eb, List<ErrorDetail> errors) {
     if (raws == null || raws.isEmpty()) {
-      errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: statuses", "statuses"));
-      return List.of();
+      // Story 3.2 AC8 — apply canonical default; do NOT raise WKS-CFG-001.
+      return DEFAULT_STATUSES;
     }
     if (raws.size() > CaseTypeLimits.MAX_STATUSES) {
       errors.add(

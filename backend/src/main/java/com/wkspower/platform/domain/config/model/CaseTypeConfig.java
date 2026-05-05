@@ -12,6 +12,12 @@ import java.util.Optional;
  * YAML omits {@code stages:} or declares an empty list, this field is {@link List#of()} and every
  * downstream service treats the absence as a no-op (Decision 19: "stage-less paths must remain
  * unbranched").
+ *
+ * <p>Story 3.2 — {@code workflow} is now <strong>nullable</strong>. A CaseType may declare no
+ * {@code workflow:} block in YAML; the component is then {@code null} and {@link #workflowOpt()}
+ * returns {@link Optional#empty()}. Process-less paths must remain unbranched in code by the same
+ * rule as stage-less paths (Decision 19 — Story 3.2 extension): {@link #workflowOpt()} is iterated
+ * via {@code Optional.ifPresent(...)}, never via {@code if (caseType.workflow() != null)}.
  */
 public record CaseTypeConfig(
     String id,
@@ -63,5 +69,14 @@ public record CaseTypeConfig(
   /** Convenience lookup used by the JSON Schema generator and (future) case-data validation. */
   public Optional<FieldDefinition> field(String fieldId) {
     return fields.stream().filter(f -> f.id().equals(fieldId)).findFirst();
+  }
+
+  /**
+   * Story 3.2 — {@link Optional} view of the (now nullable) {@link #workflow()} component. Call
+   * sites that need to skip engine work for process-less CaseTypes use {@code
+   * workflowOpt().ifPresent(...)} per Decision 19's unbranched-paths invariant.
+   */
+  public Optional<WorkflowRef> workflowOpt() {
+    return Optional.ofNullable(workflow);
   }
 }

@@ -35,7 +35,11 @@ public final class CaseDtoMapper {
         domain.createdBy(),
         domain.updatedAt(),
         domain.version(),
-        toCaseTypeView(caseType));
+        toCaseTypeView(caseType),
+        // Story 3.2 AC5 — null on zero-stage CaseTypes; populated from the cases table cache cols
+        // (Story 3.1) for staged cases.
+        domain.currentStageId(),
+        domain.currentStageOrdinal());
   }
 
   public static CaseSummaryDto toSummaryDto(CaseSummary summary) {

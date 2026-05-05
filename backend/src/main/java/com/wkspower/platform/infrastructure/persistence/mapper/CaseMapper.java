@@ -25,7 +25,11 @@ public final class CaseMapper {
         entity.getCreatedAt(),
         entity.getCreatedBy(),
         entity.getUpdatedAt(),
-        entity.getVersion());
+        entity.getVersion(),
+        // Story 3.2 AC5 — propagate the Story 3.1 stage-cache columns into the domain model so the
+        // CaseDto and the (Story 3.3) timeline UI can read them. Zero-stage CaseTypes ⇒ null/null.
+        entity.getCurrentStageId(),
+        entity.getCurrentStageOrdinal());
   }
 
   public static CaseEntity toEntity(Case domain) {

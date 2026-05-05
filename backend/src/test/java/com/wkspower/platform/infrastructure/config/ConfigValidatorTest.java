@@ -488,6 +488,100 @@ class ConfigValidatorTest {
     assertThat(result.errors().size()).isGreaterThanOrEqualTo(5);
   }
 
+  // ---- Story 3.2 AC1 — workflow: is now OPTIONAL ----
+
+  @Test
+  void story32_workflowOmitted_validates() {
+    String yaml =
+        """
+        id: zero-zero
+        displayName: Zero Zero
+        version: 1
+        fields:
+          - id: subject
+            displayName: Subject
+            type: text
+        statuses:
+          - id: open
+            displayName: Open
+        listColumns: [subject]
+        roles:
+          - name: officer
+            permissions: [view, create]
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid())
+        .as("workflow-omitted YAML must NOT raise WKS-CFG-001 — got %s", result.errors())
+        .isFalse();
+    assertThat(result.config()).isPresent();
+    assertThat(result.config().get().workflow()).isNull();
+    assertThat(result.config().get().workflowOpt()).isEmpty();
+  }
+
+  @Test
+  void story32_workflowPresentButBlankBpmn_validates() {
+    String yaml =
+        """
+        id: zero-zero
+        displayName: Zero Zero
+        version: 1
+        workflow:
+          bpmn: ""
+        fields:
+          - id: subject
+            displayName: Subject
+            type: text
+        statuses:
+          - id: open
+            displayName: Open
+        listColumns: [subject]
+        roles:
+          - name: officer
+            permissions: [view, create]
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid())
+        .as("workflow.bpmn blank must be treated as omitted — got %s", result.errors())
+        .isFalse();
+    assertThat(result.config().get().workflowOpt()).isEmpty();
+  }
+
+  @Test
+  void story32_workflowDeclared_stillValidatesAsToday() {
+    var result = validate(GREEN_YAML);
+    assertThat(result.isInvalid()).isFalse();
+    assertThat(result.config().get().workflowOpt()).isPresent();
+    assertThat(result.config().get().workflowOpt().get().bpmn()).isEqualTo("loan-application.bpmn");
+  }
+
+  // ---- Story 3.2 AC8 — default status set when YAML omits statuses ----
+
+  @Test
+  void story32_statusesOmitted_defaultsToOpenClosed() {
+    String yaml =
+        """
+        id: zero-zero
+        displayName: Zero Zero
+        version: 1
+        fields:
+          - id: subject
+            displayName: Subject
+            type: text
+        listColumns: [subject]
+        roles:
+          - name: officer
+            permissions: [view, create]
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid())
+        .as("statuses-omitted YAML must use the default — got %s", result.errors())
+        .isFalse();
+    var statuses = result.config().get().statuses();
+    assertThat(statuses).hasSize(2);
+    assertThat(statuses.get(0).id()).isEqualTo("open");
+    assertThat(statuses.get(1).id()).isEqualTo("closed");
+  }
+
   // ---- helpers ----
 
   private ValidationResult validate(String yaml) {
