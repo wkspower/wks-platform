@@ -24,7 +24,23 @@ public record CaseTypeViewDto(
     int version,
     List<FieldView> fields,
     List<StatusDefinition> statuses,
-    List<String> listColumns) {
+    List<String> listColumns,
+    List<StageDefinitionView> stages) {
+
+  /**
+   * Compact constructor — defensive-copy {@code stages} so the wire shape is immutable end-to-end.
+   * Story 3.3 — added {@code stages} for the timeline UI; declared in YAML order, never reordered.
+   */
+  public CaseTypeViewDto {
+    stages = stages == null ? List.of() : List.copyOf(stages);
+  }
+
+  /**
+   * Wire-shape projection of {@code StageDefinition} for the case-type detail endpoint and the
+   * embedded {@link CaseDto#caseType()} sub-object. Mirrors the YAML grammar 1:1 so the timeline
+   * has the declared display name + ordinal without a second round-trip. Story 3.3.
+   */
+  public record StageDefinitionView(String id, String displayName, int ordinal) {}
 
   /**
    * Wire-shape projection of {@code FieldDefinition} for the case-type detail endpoint. Every

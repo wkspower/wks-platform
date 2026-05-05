@@ -154,6 +154,73 @@ class CaseControllerTest {
         .andExpect(jsonPath("$.data.caseType.statuses[0].id").value("open"));
   }
 
+  // ---- Story 3.3 AC3 — stage timeline projection on GET /api/cases/{id} -------
+
+  @Test
+  void getReturnsStageTimelineForMultiStageCase() throws Exception {
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseService.requireCaseType("loan-application")).thenReturn(threeStageLoanType());
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(stageRepository.loadHistory(sample.id())).thenReturn(threeStageHistory(sample.id()));
+
+    mockMvc
+        .perform(get("/api/cases/" + sample.id()).with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.stages.length()").value(3))
+        // Ordered by ordinal ASC: intake (COMPLETED) → underwriting (ACTIVE) → decision (PENDING).
+        .andExpect(jsonPath("$.data.stages[0].stageId").value("intake"))
+        .andExpect(jsonPath("$.data.stages[0].ordinal").value(0))
+        .andExpect(jsonPath("$.data.stages[0].state").value("COMPLETED"))
+        .andExpect(jsonPath("$.data.stages[0].displayName").value("Intake"))
+        .andExpect(jsonPath("$.data.stages[1].stageId").value("underwriting"))
+        .andExpect(jsonPath("$.data.stages[1].state").value("ACTIVE"))
+        .andExpect(jsonPath("$.data.stages[2].stageId").value("decision"))
+        .andExpect(jsonPath("$.data.stages[2].state").value("PENDING"))
+        // CaseTypeViewDto also exposes the declared stages for the timeline schema.
+        .andExpect(jsonPath("$.data.caseType.stages.length()").value(3))
+        .andExpect(jsonPath("$.data.caseType.stages[0].id").value("intake"))
+        .andExpect(jsonPath("$.data.caseType.stages[0].ordinal").value(0));
+  }
+
+  @Test
+  void getReturnsEmptyStageTimelineForZeroStageCase() throws Exception {
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseService.requireCaseType("loan-application")).thenReturn(loanType());
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(stageRepository.loadHistory(sample.id())).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/cases/" + sample.id()).with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.stages.length()").value(0))
+        .andExpect(jsonPath("$.data.caseType.stages.length()").value(0));
+  }
+
+  @Test
+  void getReturnsSkippedStageInOrdinalPositionForBypassedCase() throws Exception {
+    // AC3 — skipped stages stay in the list at their declared ordinal; the timeline never omits.
+    Case sample = sampleCase();
+    when(caseService.findById(sample.id())).thenReturn(sample);
+    when(caseService.requireCaseType("loan-application")).thenReturn(threeStageLoanType());
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(stageRepository.loadHistory(sample.id()))
+        .thenReturn(threeStageHistoryWithSkip(sample.id()));
+
+    mockMvc
+        .perform(get("/api/cases/" + sample.id()).with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.stages.length()").value(3))
+        .andExpect(jsonPath("$.data.stages[0].state").value("COMPLETED"))
+        .andExpect(jsonPath("$.data.stages[1].stageId").value("underwriting"))
+        .andExpect(jsonPath("$.data.stages[1].state").value("SKIPPED"))
+        .andExpect(jsonPath("$.data.stages[2].state").value("ACTIVE"));
+  }
+
   @Test
   void getReturns404WhenServiceThrows() throws Exception {
     UUID id = UUID.randomUUID();
@@ -409,6 +476,101 @@ class CaseControllerTest {
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
         List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+  }
+
+  /** Story 3.3 — three-stage CaseType fixture (intake → underwriting → decision). */
+  private static CaseTypeConfig threeStageLoanType() {
+    return new CaseTypeConfig(
+        "loan-application",
+        "Loan Application",
+        1,
+        null,
+        new WorkflowRef("loan-application.bpmn"),
+        List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("name"),
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(
+            new com.wkspower.platform.domain.config.model.StageDefinition("intake", "Intake", 0),
+            new com.wkspower.platform.domain.config.model.StageDefinition(
+                "underwriting", "Underwriting", 1),
+            new com.wkspower.platform.domain.config.model.StageDefinition(
+                "decision", "Decision", 2)));
+  }
+
+  /** Story 3.3 — happy path: stage 0 COMPLETED, stage 1 ACTIVE, stage 2 PENDING. */
+  private static List<com.wkspower.platform.domain.model.Stage> threeStageHistory(UUID caseId) {
+    Instant t0 = NOW;
+    Instant t1 = NOW.plusSeconds(60);
+    return List.of(
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "intake",
+            0,
+            com.wkspower.platform.domain.model.StageState.COMPLETED,
+            t0,
+            t1,
+            "manual",
+            null),
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "underwriting",
+            1,
+            com.wkspower.platform.domain.model.StageState.ACTIVE,
+            t1,
+            null,
+            "manual",
+            null),
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "decision",
+            2,
+            com.wkspower.platform.domain.model.StageState.PENDING,
+            null,
+            null,
+            null,
+            null));
+  }
+
+  /** Story 3.3 — bypass case: stage 0 COMPLETED, stage 1 SKIPPED, stage 2 ACTIVE. */
+  private static List<com.wkspower.platform.domain.model.Stage> threeStageHistoryWithSkip(
+      UUID caseId) {
+    Instant t0 = NOW;
+    Instant t1 = NOW.plusSeconds(60);
+    return List.of(
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "intake",
+            0,
+            com.wkspower.platform.domain.model.StageState.COMPLETED,
+            t0,
+            t1,
+            "manual",
+            null),
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "underwriting",
+            1,
+            com.wkspower.platform.domain.model.StageState.SKIPPED,
+            null,
+            t1,
+            "manual",
+            null),
+        new com.wkspower.platform.domain.model.Stage(
+            UUID.randomUUID(),
+            caseId,
+            "decision",
+            2,
+            com.wkspower.platform.domain.model.StageState.ACTIVE,
+            t1,
+            null,
+            "manual",
+            null));
   }
 
   /** Authenticated post-processor with a valid {@link AuthenticatedUser} principal. */

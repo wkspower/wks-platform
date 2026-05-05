@@ -13,6 +13,7 @@ import { CaseActionBar } from './CaseActionBar';
 import { CaseBreadcrumbs } from './CaseBreadcrumbs';
 import { DocumentsTabPlaceholder } from './DocumentsTabPlaceholder';
 import { PropertiesTab } from './PropertiesTab';
+import { StageTimeline } from './StageTimeline';
 import { StatusBadge } from './StatusBadge';
 
 const HEADING_ID = 'case-detail-heading';
@@ -213,6 +214,16 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
           </HeadingFocusable>
           <StatusBadge status={caseDto.status} caseType={caseDto.caseType} />
         </div>
+        {/*
+          Story 3.3 — Stage timeline. Single truthy-length gate (AC2 / Decision 19): the absence
+          of stages is the empty list, no `else` branch. `caseType.stages` is optional in TS for
+          backward-compat with pre-3.3 fixtures; the runtime read is wire-driven.
+        */}
+        {(caseDto.caseType.stages?.length ?? 0) > 0 && caseDto.stages.length > 0 && (
+          <div className="mt-3">
+            <StageTimeline stages={caseDto.stages} caseTypeStageDefs={caseDto.caseType.stages} />
+          </div>
+        )}
         <span className="sr-only" aria-live="polite">
           {t('case.detail.announcement', { idShort })}
         </span>

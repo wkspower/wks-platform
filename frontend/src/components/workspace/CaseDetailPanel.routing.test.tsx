@@ -32,6 +32,7 @@ const dto: CaseDto = {
     statuses: [],
     listColumns: [],
   },
+  stages: [],
 };
 
 function HostedDetail() {
