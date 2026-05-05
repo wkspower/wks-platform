@@ -110,13 +110,20 @@ public class CaseController {
         .body(ApiResponse.success(CaseDtoMapper.toDto(created, caseType)));
   }
 
+  /**
+   * Story 3.3 AC3 — the read-model surface that drives the Stage Timeline UI. Loads the case-stage
+   * history (one row per declared stage on the bound CaseType@version, including SKIPPED rows at
+   * their declared ordinal) and passes it to the mapper so the wire {@link CaseDto#stages()} array
+   * is populated in a single round-trip. Zero-stage CaseTypes return {@code stages: []}.
+   */
   @GetMapping("/{id}")
   public ApiResponse<CaseDto> get(
       @PathVariable("id") UUID id, @AuthenticationPrincipal WksUserPrincipal actor) {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "view");
     CaseTypeConfig caseType = caseService.requireCaseType(found.caseTypeId());
-    return ApiResponse.success(CaseDtoMapper.toDto(found, caseType));
+    List<Stage> history = stageRepository.loadHistory(id);
+    return ApiResponse.success(CaseDtoMapper.toDto(found, caseType, history));
   }
 
   /**

@@ -62,6 +62,18 @@ export interface CaseTypeSummary {
   permissions?: string[];
 }
 
+/**
+ * Story 3.3 — one entry per stage declared in the YAML, in declared order. The frontend reads
+ * `stages.length` to gate the `StageTimeline` component (zero-stage CaseTypes do not render the
+ * timeline at all per AC2 / Decision 19). `displayName` mirrors the YAML — Title-cased fallback
+ * applied server-side per Story 3.1 AC1, so the frontend never derives display names client-side.
+ */
+export interface StageDefinitionView {
+  id: string;
+  displayName: string;
+  ordinal: number;
+}
+
 export interface CaseTypeView {
   id: string;
   displayName: string;
@@ -69,4 +81,10 @@ export interface CaseTypeView {
   fields: FieldDefinition[];
   statuses: StatusDefinition[];
   listColumns: string[];
+  /**
+   * Story 3.3 — the declared stage schema (display names, ordinals). Optional in TS for
+   * backward-compat with pre-3.3 fixtures; the wire shape always includes it. The
+   * `StageTimeline` component treats `undefined` and `[]` identically (component returns null).
+   */
+  stages?: StageDefinitionView[];
 }

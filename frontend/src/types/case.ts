@@ -21,6 +21,33 @@ export interface CaseSummary {
 
 import type { CaseTypeView } from './caseType';
 
+/**
+ * Story 3.3 — wire enum for `StageView.state`. UPPERCASE strings, mirroring how `Status` is
+ * serialised today via `StatusDefinition.id`. Frontend maps to a lowercase CSS-class-name
+ * client-side. Renaming any of these is a multi-PR cascade — they are a wire contract per
+ * `feedback_error_codes_are_wire_contract.md`.
+ */
+export type StageState = 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'SKIPPED';
+
+/**
+ * Story 3.3 — one entry per stage declared on the bound CaseType@version. Skipped stages stay in
+ * the list at their declared ordinal; the list is always ordered by `ordinal` ASC. Backend is the
+ * sole source of truth for `state` — the frontend never infers `ACTIVE` or `SKIPPED` from any
+ * other field.
+ */
+export interface StageView {
+  stageId: string;
+  displayName: string;
+  ordinal: number;
+  state: StageState;
+  /** ISO-8601 wire format. `null` for `PENDING`, and for `SKIPPED` rows that never went active. */
+  enteredAt: string | null;
+  /** ISO-8601 wire format. `null` while `PENDING` or `ACTIVE`. */
+  exitedAt: string | null;
+  source: 'wks-auto-rule' | 'manual' | 'backend-signal' | null;
+  sourceRef: string | null;
+}
+
 export interface CaseDto {
   id: string;
   caseTypeId: string;
@@ -35,6 +62,12 @@ export interface CaseDto {
   updatedAt: string;
   version: number;
   caseType: CaseTypeView;
+  /**
+   * Story 3.3 — full stage history for the timeline UI. Empty for zero-stage CaseTypes; never
+   * null. Owned by Story 3.3. The two scalar fields `currentStageId` / `currentStageOrdinal` are
+   * owned by Story 3.2 and added under that PR per the locked Sprint 2 split.
+   */
+  stages: StageView[];
 }
 
 export interface CaseRow extends CaseSummary {

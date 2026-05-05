@@ -32,6 +32,7 @@ const fixture: CaseDto = {
     statuses: [],
     listColumns: [],
   },
+  stages: [],
 };
 
 function wrapper({ children }: { children: ReactNode }) {

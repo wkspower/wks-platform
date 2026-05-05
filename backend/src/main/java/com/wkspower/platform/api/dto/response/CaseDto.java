@@ -1,6 +1,7 @@
 package com.wkspower.platform.api.dto.response;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,10 +19,10 @@ import java.util.UUID;
  *       {@code null}.
  * </ul>
  *
- * Future consumer: Story 3.3 (StageTimeline frontend component) reads both fields to highlight the
- * active stage. Story 3.3 ALSO ships a {@code stages: List<StageView>} array field on this DTO (the
- * timeline payload); the two scalars and the array are additive, not redundant — scalars give O(1)
- * "which stage am I on?" without iterating the array.
+ * <p>Story 3.3 — appended {@code stages: List<StageView>} (always non-null; empty for zero-stage
+ * CaseTypes). The two scalar denormalised cache fields above are owned by Story 3.2; the array is
+ * owned by Story 3.3 per the locked Sprint 2 coordination split. Scalars give O(1) "which stage am
+ * I on?" without iterating the array.
  */
 public record CaseDto(
     UUID id,
@@ -38,4 +39,14 @@ public record CaseDto(
     long version,
     CaseTypeViewDto caseType,
     String currentStageId,
-    Integer currentStageOrdinal) {}
+    Integer currentStageOrdinal,
+    List<StageView> stages) {
+
+  /**
+   * Compact constructor — defensive-copy {@code stages} so the wire shape is immutable end-to-end
+   * (mirrors {@code CaseTypeConfig}'s {@code List.copyOf} discipline).
+   */
+  public CaseDto {
+    stages = stages == null ? List.of() : List.copyOf(stages);
+  }
+}

@@ -62,6 +62,7 @@ function caseDto(data: Record<string, unknown>): CaseDto {
     updatedAt: '2026-04-02T00:00:00Z',
     version: 1,
     caseType: ctView(),
+    stages: [],
   };
 }
 

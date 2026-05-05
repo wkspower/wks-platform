@@ -168,5 +168,22 @@
   "cases.created.announcement": "Case {idShort} created",
 
   "login.errors.notEmail": "Enter a valid email address",
-  "login.errors.passwordRequired": "Password is required"
+  "login.errors.passwordRequired": "Password is required",
+
+  "stageTimeline.aria.label": "Stage timeline",
+  "stageTimeline.aria.list": "Stages",
+  "stageTimeline.aria.announcement": "Stage timeline. List of {n} stages. {summary}",
+  "stageTimeline.aria.itemSummary": "{ordinal}. {name} — {state}",
+  "stageTimeline.state.completed": "Completed",
+  "stageTimeline.state.active": "Current",
+  "stageTimeline.state.skipped": "Skipped",
+  "stageTimeline.state.pending": "Pending",
+  "stageTimeline.popover.completed.duration": "In stage for {duration}",
+  "stageTimeline.popover.active.currentSince": "Current since {timestamp}",
+  "stageTimeline.popover.skipped": "Skipped",
+  "stageTimeline.timestamp.entered": "Entered {date}",
+  "stageTimeline.timestamp.exited": "Exited {date}",
+  "stageTimeline.timestamp.enteredAndExited": "Entered {entered} · Exited {exited}",
+  "stageTimeline.timestamp.skippedOn": "Skipped {date}",
+  "stageTimeline.timestamp.currentSince": "Current since {date}"
 }
