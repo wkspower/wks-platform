@@ -2,7 +2,9 @@ package com.wkspower.platform.infrastructure.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Transport-shaped mirror of the case-type YAML tree. Every field is a boxed nullable so the
@@ -25,7 +27,38 @@ public record RawCaseTypeConfig(
     List<RawStatus> statuses,
     List<String> listColumns,
     List<RawRole> roles,
-    List<RawStage> stages) {
+    List<RawStage> stages,
+    List<RawAttachment> attachments) {
+
+  /**
+   * Backward-compat constructor for callers (and tests) authored before Story 4.2 introduced the
+   * {@code attachments} slot. Treats absent attachments as the empty list — equivalent to a YAML
+   * with no {@code attachments:} key (AC1).
+   */
+  public RawCaseTypeConfig(
+      String id,
+      String displayName,
+      Integer version,
+      String description,
+      RawWorkflow workflow,
+      List<RawField> fields,
+      List<RawStatus> statuses,
+      List<String> listColumns,
+      List<RawRole> roles,
+      List<RawStage> stages) {
+    this(
+        id,
+        displayName,
+        version,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages,
+        null);
+  }
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawWorkflow(String bpmn) {}
@@ -59,20 +92,6 @@ public record RawCaseTypeConfig(
   public record RawRole(String name, List<String> permissions) {}
 
   /**
-   * Story 3.1 — supports both YAML forms:
-   *
-   * <pre>
-   *   stages: [intake, underwriting]            # string-list form (each element parses via fromString)
-   *   stages:
-   *     - id: intake
-   *       displayName: "Intake"                  # rich-object form
-   * </pre>
-   *
-   * Jackson dispatches via {@link JsonCreator} on the matching type — string scalars hit {@link
-   * #fromString} and produce a {@code RawStage(id, null)}; mappings hit {@link #fromObject} via
-   * Jackson's default record deserialization.
-   */
-  /**
    * Story 3.1 — wrapper record that supports BOTH YAML forms in a single list:
    *
    * <pre>
@@ -95,9 +114,54 @@ public record RawCaseTypeConfig(
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static RawStage fromObject(
-        @com.fasterxml.jackson.annotation.JsonProperty("id") String id,
-        @com.fasterxml.jackson.annotation.JsonProperty("displayName") String displayName) {
+        @JsonProperty("id") String id, @JsonProperty("displayName") String displayName) {
       return new RawStage(id, displayName);
     }
   }
+
+  // ---------------------------------------------------------------------------------------------
+  // Story 4.2 — attachments + mapping (architecture §790–809)
+  // ---------------------------------------------------------------------------------------------
+
+  /** One {@code attachments[]} entry. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawAttachment(String type, String file, String scope, RawAttachmentMap map) {}
+
+  /** {@code map: { userTasks, events, properties }} block inside an attachment. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawAttachmentMap(
+      Map<String, RawUserTaskMapping> userTasks,
+      RawEventMappings events,
+      List<RawPropertyEmissionRule> properties) {}
+
+  /** {@code map.userTasks.<id>} entry. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawUserTaskMapping(String wksTask, String form) {}
+
+  /** {@code map.events: { endEvent, signal }} block. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawEventMappings(
+      RawEndEventMapping endEvent, Map<String, RawSignalMapping> signal) {}
+
+  /** {@code map.events.endEvent} entry. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawEndEventMapping(String stageTransition) {}
+
+  /** {@code map.events.signal.<id>} entry. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawSignalMapping(String stageTransition) {}
+
+  /**
+   * {@code map.properties[]} entry. The YAML key {@code camunda:property} is colon-bearing; Jackson
+   * needs an explicit {@link JsonProperty} alias.
+   */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawPropertyEmissionRule(
+      @JsonProperty("on") String on,
+      @JsonProperty("camunda:property") String camundaProperty,
+      RawEmits emits) {}
+
+  /** {@code emits: { type, scope }} block inside a property emission rule. */
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record RawEmits(String type, String scope) {}
 }
