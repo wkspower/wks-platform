@@ -81,7 +81,8 @@ public class AdminController {
     // Story 3.2: zero-process case types deploy YAML-only — no BPMN part means no engine deploy.
     // An attached but empty `bpmn` part is treated the same as absent.
     if (bpmnPart == null || bpmnPart.isEmpty()) {
-      ValidationResult yamlResult = configService.validateAndRegister("api-deploy.yaml", yaml);
+      ValidationResult yamlResult =
+          configService.validateAndRegister("api-deploy.yaml", yaml, actorEmail);
       if (yamlResult.isInvalid()) {
         throw new WksConfigException(yamlResult.errors());
       }

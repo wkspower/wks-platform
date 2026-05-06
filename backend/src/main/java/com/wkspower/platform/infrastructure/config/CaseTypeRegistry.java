@@ -2,11 +2,13 @@ package com.wkspower.platform.infrastructure.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wkspower.platform.domain.config.RegistrationResult;
+import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRegistrar;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +35,22 @@ import org.springframework.stereotype.Component;
 public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
 
   private final ConcurrentMap<String, Registered> byId = new ConcurrentHashMap<>();
+  private final ConcurrentMap<VersionKey, CaseTypeConfig> byVersion = new ConcurrentHashMap<>();
   private final JsonSchemaGenerator schemaGenerator;
+
+  // Story 3.4 — version-pinned hydration deps. Optional so unit tests that only exercise the
+  // in-memory current-version surface can construct the registry without wiring the JPA-backed
+  // registry. Field-injected with @Lazy to break the bean-creation cycle: the JPA adapter is in
+  // a different package and depends on infrastructure beans, while CaseTypeRegistry is itself
+  // wired into ConfigService construction.
+  @Autowired(required = false)
+  private @Lazy CaseTypeVersionRegistry versionRegistry;
+
+  @Autowired(required = false)
+  private @Lazy CaseTypeYamlLoader yamlLoader;
+
+  @Autowired(required = false)
+  private @Lazy ConfigValidator configValidator;
 
   public CaseTypeRegistry(JsonSchemaGenerator schemaGenerator) {
     this.schemaGenerator = schemaGenerator;
@@ -66,6 +85,25 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
   @Override
   public RegistrationResult register(CaseTypeConfig config) {
     Objects.requireNonNull(config, "config");
+    // Story 3.4 — when no version row exists yet for this id, materialise a synthetic row at the
+    // config's declared version via a minimal YAML stub. This keeps direct callers of the
+    // CaseTypeRegistrar (test fixtures that bypass ConfigService) from leaving the version
+    // registry empty — which would surface as WKS-VER-001 on the first CaseService.create. The
+    // production path (ConfigService.applyVersionRegistry) writes the row BEFORE this call, so
+    // the synthetic-stub branch is only exercised by direct-registrar test paths.
+    if (versionRegistry != null) {
+      versionRegistry
+          .currentVersion(config.id())
+          .orElseGet(
+              () -> {
+                String stub = "id: " + config.id() + "\nversion: " + config.version() + "\n";
+                versionRegistry.register(
+                    config.id(),
+                    stub.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    "test:in-memory-bypass");
+                return config.version();
+              });
+    }
     Registered incoming = new Registered(config, schemaGenerator.generate(config));
     AtomicReference<RegistrationResult> outcome = new AtomicReference<>();
 
@@ -116,5 +154,54 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
     byId.remove(id);
   }
 
+  /**
+   * Story 3.4 / Decision 20 — exact-version lookup. Hydrates the {@link CaseTypeConfig} from the
+   * version registry's stored YAML by re-running the loader + validator pipeline (parse-validate-
+   * build, never a serialised blob — the registry persists author YAML, not internal
+   * representation). Cached by {@code (id, version)} so re-parse cost is paid once per pinned
+   * version.
+   *
+   * <p>Returns empty when:
+   *
+   * <ul>
+   *   <li>the version dependencies are unavailable (test wiring without the JPA registry);
+   *   <li>{@code (id, version)} has no row in {@code case_type_versions} — including the gap window
+   *       before Story 3.5's bootstrap migration backfills v1 rows;
+   *   <li>the stored YAML fails to re-validate (defensive — should not happen since each row was
+   *       written by a successful deploy, but covers schema drift).
+   * </ul>
+   */
+  @Override
+  public Optional<CaseTypeConfig> findVersion(String id, int version) {
+    if (versionRegistry == null || yamlLoader == null || configValidator == null) {
+      return Optional.empty();
+    }
+    VersionKey key = new VersionKey(id, version);
+    CaseTypeConfig cached = byVersion.get(key);
+    if (cached != null) {
+      return Optional.of(cached);
+    }
+    return versionRegistry
+        .findVersion(id, version)
+        .flatMap(
+            row -> {
+              CaseTypeYamlLoader.RawReadResult read =
+                  yamlLoader.readBytes(id + ":v" + version, row.rawYaml());
+              if (!read.isParsed()) {
+                return Optional.empty();
+              }
+              ValidationResult vr =
+                  configValidator.validate(read.raw(), read.lines(), java.util.Map.of());
+              if (vr.isInvalid() || vr.config().isEmpty()) {
+                return Optional.empty();
+              }
+              CaseTypeConfig hydrated = vr.config().get().withVersion(version);
+              byVersion.putIfAbsent(key, hydrated);
+              return Optional.of(hydrated);
+            });
+  }
+
   private record Registered(CaseTypeConfig config, JsonNode schema) {}
+
+  private record VersionKey(String id, int version) {}
 }

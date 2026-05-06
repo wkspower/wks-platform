@@ -6,6 +6,7 @@ import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRegistrar;
 import com.wkspower.platform.domain.port.CaseTypeSource;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
@@ -32,9 +33,19 @@ public class ConfigServiceConfig {
       CaseTypeReader reader,
       BpmnValidationService bpmnValidator,
       WorkflowEngine workflowEngine,
-      EventPublisher eventPublisher) {
+      EventPublisher eventPublisher,
+      CaseTypeVersionRegistry versionRegistry) {
     return new ConfigService(
-        source, registrar, reader, bpmnValidator, workflowEngine, eventPublisher);
+        source, registrar, reader, bpmnValidator, workflowEngine, eventPublisher, versionRegistry);
+  }
+
+  /**
+   * Story 3.4 — expose {@link CaseTypeContentHasher} as a bean so the JPA-backed registry adapter
+   * can constructor-inject it.
+   */
+  @Bean
+  public CaseTypeContentHasher caseTypeContentHasher() {
+    return new CaseTypeContentHasher();
   }
 
   @Bean
@@ -51,7 +62,8 @@ public class ConfigServiceConfig {
       ProcessDefinitionKeyResolver processKeyResolver,
       EventPublisher eventPublisher,
       Clock clock,
-      WksStageAdvancer stageAdvancer) {
+      WksStageAdvancer stageAdvancer,
+      CaseTypeVersionRegistry versionRegistry) {
     return new CaseService(
         caseRepository,
         caseTypeReader,
@@ -60,7 +72,8 @@ public class ConfigServiceConfig {
         processKeyResolver,
         eventPublisher,
         clock,
-        stageAdvancer);
+        stageAdvancer,
+        versionRegistry);
   }
 
   /**

@@ -51,6 +51,29 @@ class ConfigServiceDeployTest {
   private static final byte[] YAML_BYTES = "id: application".getBytes();
   private static final byte[] BPMN_BYTES = "<bpmn/>".getBytes();
 
+  /**
+   * Story 3.4 — every {@link ConfigService} construction in this test feeds a fresh fake version
+   * registry so the registry-write side-effect is exercised but the existing assertions (which
+   * check pre-registry behaviour like StubRegistrar.registered) keep working unchanged. The fake
+   * starts empty; the first deploy() call writes v1.
+   */
+  private static ConfigService newCfg(
+      CaseTypeSource source,
+      CaseTypeRegistrar registrar,
+      CaseTypeReader reader,
+      BpmnValidationService bpmn,
+      WorkflowEngine engine,
+      EventPublisher publisher) {
+    return new ConfigService(
+        source,
+        registrar,
+        reader,
+        bpmn,
+        engine,
+        publisher,
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry());
+  }
+
   // ---- four-cases enumeration --------------------------------------------
 
   @Test
@@ -61,7 +84,7 @@ class ConfigServiceDeployTest {
     StubReader reader = new StubReader();
     StubEngine engine = new StubEngine();
     RecordingPublisher publisher = new RecordingPublisher();
-    ConfigService svc = new ConfigService(source, registrar, reader, bpmn, engine, publisher);
+    ConfigService svc = newCfg(source, registrar, reader, bpmn, engine, publisher);
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, "ops@x");
 
@@ -82,7 +105,7 @@ class ConfigServiceDeployTest {
         new StubBpmn(BpmnValidationResult.invalid(List.of(err("WKS-CFG-020", "archetype"))));
     StubRegistrar registrar = new StubRegistrar();
     ConfigService svc =
-        new ConfigService(
+        newCfg(
             source, registrar, new StubReader(), bpmn, new StubEngine(), new RecordingPublisher());
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null);
@@ -101,7 +124,7 @@ class ConfigServiceDeployTest {
         new StubBpmn(BpmnValidationResult.invalid(List.of(err("WKS-CFG-010", "bpmn parse"))));
     StubRegistrar registrar = new StubRegistrar();
     ConfigService svc =
-        new ConfigService(
+        newCfg(
             source, registrar, new StubReader(), bpmn, new StubEngine(), new RecordingPublisher());
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null);
@@ -118,8 +141,7 @@ class ConfigServiceDeployTest {
     StubRegistrar registrar = new StubRegistrar();
     StubEngine engine = new StubEngine();
     ConfigService svc =
-        new ConfigService(
-            source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
+        newCfg(source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null);
 
@@ -138,8 +160,7 @@ class ConfigServiceDeployTest {
     StubRegistrar registrar = new StubRegistrar();
     StubEngine engine = new StubEngine();
     RecordingPublisher publisher = new RecordingPublisher();
-    ConfigService svc =
-        new ConfigService(source, registrar, new StubReader(), bpmn, engine, publisher);
+    ConfigService svc = newCfg(source, registrar, new StubReader(), bpmn, engine, publisher);
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, "ops@x");
 
@@ -181,8 +202,7 @@ class ConfigServiceDeployTest {
     StubEngine engine = new StubEngine();
     engine.failNext = new WksWorkflowEngineException("engine down", new RuntimeException());
 
-    ConfigService svc =
-        new ConfigService(source, registrar, reader, bpmn, engine, new RecordingPublisher());
+    ConfigService svc = newCfg(source, registrar, reader, bpmn, engine, new RecordingPublisher());
 
     assertThatThrownBy(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, null))
         .isInstanceOf(WksWorkflowEngineException.class);
@@ -200,8 +220,7 @@ class ConfigServiceDeployTest {
     StubEngine engine = new StubEngine();
     engine.failNext = new WksWorkflowEngineException("engine down", new RuntimeException());
 
-    ConfigService svc =
-        new ConfigService(source, registrar, reader, bpmn, engine, new RecordingPublisher());
+    ConfigService svc = newCfg(source, registrar, reader, bpmn, engine, new RecordingPublisher());
 
     assertThatThrownBy(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, null))
         .isInstanceOf(WksWorkflowEngineException.class);
@@ -287,8 +306,7 @@ class ConfigServiceDeployTest {
         };
 
     ConfigService svc =
-        new ConfigService(
-            source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
+        newCfg(source, registrar, new StubReader(), bpmn, engine, new RecordingPublisher());
 
     ExecutorService pool = Executors.newFixedThreadPool(2);
     try {
@@ -421,6 +439,11 @@ class ConfigServiceDeployTest {
     @Override
     public Collection<CaseTypeConfig> all() {
       return preset.values();
+    }
+
+    @Override
+    public Optional<CaseTypeConfig> findVersion(String id, int version) {
+      return Optional.ofNullable(preset.get(id));
     }
   }
 

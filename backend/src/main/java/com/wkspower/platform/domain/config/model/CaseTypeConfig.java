@@ -79,4 +79,28 @@ public record CaseTypeConfig(
   public Optional<WorkflowRef> workflowOpt() {
     return Optional.ofNullable(workflow);
   }
+
+  /**
+   * Story 3.4 / Decision 20 — return a copy of this config with the {@code version} component
+   * replaced. Used by {@code ConfigService} after the version registry assigns the
+   * registry-authoritative version, overriding any author-supplied {@code version:} key from the
+   * YAML (Q1 LOCKED). All other components are copied unchanged.
+   *
+   * <p>If {@code newVersion} equals the current {@link #version()}, an equivalent copy is still
+   * returned (records do not detect identity here — the canonical-constructor invariant defensively
+   * copies collections regardless).
+   */
+  public CaseTypeConfig withVersion(int newVersion) {
+    return new CaseTypeConfig(
+        id,
+        displayName,
+        newVersion,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages);
+  }
 }

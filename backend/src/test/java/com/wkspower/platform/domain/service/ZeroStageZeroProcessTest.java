@@ -62,8 +62,22 @@ class ZeroStageZeroProcessTest {
   private CaseService svc(CaseTypeConfig config) {
     WksStageAdvancer advancer =
         new WksStageAdvancer(new NoopStageRepository(), publisher, () -> FIXED);
+    com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry registry =
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry();
+    registry.seed(
+        config.id(),
+        config.version() == 0 ? 1 : config.version(),
+        ("id: " + config.id()).getBytes());
     return new CaseService(
-        repo, reader(config), validator, engine, resolver, publisher, () -> FIXED, advancer);
+        repo,
+        reader(config),
+        validator,
+        engine,
+        resolver,
+        publisher,
+        () -> FIXED,
+        advancer,
+        registry);
   }
 
   // ---- AC11 §4 — create on zero-zero CaseType ----
@@ -189,6 +203,11 @@ class ZeroStageZeroProcessTest {
       @Override
       public Collection<CaseTypeConfig> all() {
         return List.of(config);
+      }
+
+      @Override
+      public Optional<CaseTypeConfig> findVersion(String id, int version) {
+        return id.equals(config.id()) ? Optional.of(config) : Optional.empty();
       }
     };
   }
