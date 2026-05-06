@@ -18,12 +18,6 @@ data/
 .env
 .env.local
 .env.*.local
-# Story 14.1.1 AC1: docker/.env is tracked because it carries the COMPOSE_PROFILES=dev
-# default that preserves the zero-config dev quick-start (`docker compose up` with no
-# flags must still start the dev service after the dev wks-platform service was scoped
-# to `profiles: [dev]`). The tracked file MUST NOT contain secrets — operators replace
-# its contents (or `cp docker/.env.production.example docker/.env`) for production runs.
-!docker/.env
 
 # Logs
 *.log

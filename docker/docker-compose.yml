@@ -1,40 +1,24 @@
-# WKS Platform — single-tenant compose surface.
+# WKS Platform — DEV compose surface (zero-config quick-start).
 #
-# Two operator paths share this file:
+# Operator path:
+#   docker compose -f docker/docker-compose.yml up
+#   (or: cd docker && docker compose up)
 #
-#   1. Dev (zero-config, default profile, NO env vars required):
-#        cd docker && docker compose up --build
-#      H2 file-mode datasource, local storage, console logging.
-#      Story 1.1 zero-config dev contract.
+# H2 file-mode datasource at ./data/, local storage, console logging.
+# Story 1.1 zero-config dev contract — boots without any operator-supplied
+# secrets and without any env file. NO `profiles:` field on the service:
+# the file-split in Story 14.1.1 fix-up removed the production stack from
+# this file entirely, so port-8080 collision is structurally impossible.
 #
-#   2. Production (single-tenant, env-driven, Postgres + MinIO + optional Keycloak):
-#        cp docker/.env.production.example docker/.env  # then fill in values
-#        cd docker && docker compose --profile production up
-#      Architecture Decision 8 (§388–443) — single-image multi-stage build, env-only config.
-#      Decision 25 (§932–958) — ZERO tenant_id in any compose value or env file.
-#      Story 14.1 — discharges Story 14.7 §8 / WKS-API-053 H2/Postgres bug.
+# The PRODUCTION single-tenant stack (Postgres + MinIO + WKS app) lives at
+# docker/docker-compose.prod.yml. The optional SSO seam (Keycloak) lives at
+# docker/docker-compose.sso.yml. See docker/README.md for operator commands.
 #
-# This file is the SINGLE-TENANT production reference. The PER-CLIENT shape lives at
-# deploy/templates/docker-compose.client.yml.template (Story 14.7) — sibling, not derivation.
-# Both surfaces share the env-var contract; the template suffixes service/volume/network names.
-#
-# Optional SSO seam: `docker compose --profile production --profile production-sso up`
-# also brings up a Keycloak container. Auth-provider integration is gated on Story 10.4
-# (Epic 7) — until then the WKS app emits WKS-AUTH-001 at WARN and built-in cookie-JWT
-# auth (Story 1.2) remains active.
+# Architecture reference: Decision 8 (§388–443) — single-image multi-stage
+# build, env-only config. Decision 25 (§932–958) — ZERO tenant_id invariant.
 
 services:
-  # ---------------------------------------------------------------------------
-  # WKS Platform application — dev profile (default)
-  # ---------------------------------------------------------------------------
   wks-platform:
-    # Story 14.1.1 AC1 (finding C5): scope the dev service to the `dev` profile.
-    # Without this, a service has no `profiles:` field and Compose runs it for
-    # EVERY profile selection — `--profile production` would start both this
-    # service and `wks-platform-prod`, both binding host :8080 → instant crash.
-    # The zero-config dev path is preserved by defaulting `COMPOSE_PROFILES=dev`
-    # in `docker/.env` (operator-editable; see README dev quick-start).
-    profiles: [dev]
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -55,119 +39,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # ---------------------------------------------------------------------------
-  # Production profile — single-tenant Postgres + MinIO + optional Keycloak.
-  # All values are ${VAR} interpolations from docker/.env (operator-supplied,
-  # gitignored). Template at docker/.env.production.example.
-  # ---------------------------------------------------------------------------
-  wks-platform-prod:
-    profiles: [production]
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    image: wkspower/wks-platform:2.0.0-prod
-    container_name: wks-platform-prod
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    ports:
-      - "${WKS_HOST_PORT:-8080}:8080"
-    environment:
-      TZ: UTC
-      SPRING_PROFILES_ACTIVE: production
-      WKS_DB_URL: ${WKS_DB_URL}
-      WKS_DB_USER: ${WKS_DB_USER}
-      WKS_DB_PASSWORD: ${WKS_DB_PASSWORD}
-      WKS_STORAGE_ENDPOINT: ${WKS_STORAGE_ENDPOINT}
-      WKS_STORAGE_KEY: ${WKS_STORAGE_KEY}
-      WKS_ADMIN_EMAIL: ${WKS_ADMIN_EMAIL}
-      WKS_ADMIN_PASSWORD: ${WKS_ADMIN_PASSWORD}
-      WKS_LOCALE: ${WKS_LOCALE:-en-IN}
-      WKS_CORS_ORIGINS: ${WKS_CORS_ORIGINS:-}
-      WKS_JWT_SECRET: ${WKS_JWT_SECRET}
-      WKS_OPENAPI_ENABLED: ${WKS_OPENAPI_ENABLED:-false}
-      WKS_KEYCLOAK_ENABLED: ${WKS_KEYCLOAK_ENABLED:-false}
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 5
-      start_period: 30s
-
-  # Pinned: postgres:16-alpine — current Hetzner/AWS managed-Postgres LTS-class
-  # baseline (PG16 LTS through 2028), matches deploy/templates/docker-compose.client.yml.template
-  # line 48 (14.7 single-tenant template).
-  postgres:
-    profiles: [production]
-    image: postgres:16-alpine
-    container_name: wks-postgres
-    environment:
-      POSTGRES_DB: wks
-      POSTGRES_USER: ${WKS_DB_USER}
-      POSTGRES_PASSWORD: ${WKS_DB_PASSWORD}
-    volumes:
-      - wks-pgdata:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${WKS_DB_USER} -d wks"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
-      start_period: 10s
-
-  # Pinned: minio/minio:RELEASE.2025-09-07T16-13-09Z — current stable as of
-  # 2026-05 pickup; do NOT use :latest (per "Verify Library Claims Against BOM" rigor).
-  minio:
-    profiles: [production]
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
-    container_name: wks-minio
-    command: server /data
-    environment:
-      MINIO_ROOT_USER: ${WKS_MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${WKS_MINIO_ROOT_PASSWORD}
-    volumes:
-      - wks-miniodata:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/ready || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
-      start_period: 10s
-
-  # ---------------------------------------------------------------------------
-  # Optional SSO seam (Story 14.1 AC5) — gated behind the SECOND profile
-  # `production-sso`. `--profile production` alone does NOT start it. Operators
-  # who want SSO run `--profile production --profile production-sso`.
-  #
-  # Realms / clients are intentionally NOT pre-configured here — that is Story
-  # 10.4's territory. Until 10.4 lands the WKS app emits WKS-AUTH-001 at WARN
-  # and built-in cookie-JWT auth remains active.
-  # ---------------------------------------------------------------------------
-  keycloak:
-    profiles: [production-sso]
-    image: quay.io/keycloak/keycloak:26.0.5
-    container_name: wks-keycloak
-    command: start-dev
-    environment:
-      KEYCLOAK_ADMIN: ${WKS_KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${WKS_KEYCLOAK_ADMIN_PASSWORD:-admin}
-      KC_HOSTNAME_STRICT: "false"
-    ports:
-      - "${WKS_KEYCLOAK_PORT:-8081}:8080"
-    volumes:
-      - wks-keycloakdata:/opt/keycloak/data
-    restart: unless-stopped
-
 volumes:
   wks-data:
-    driver: local
-  wks-pgdata:
-    driver: local
-  wks-miniodata:
-    driver: local
-  wks-keycloakdata:
     driver: local
