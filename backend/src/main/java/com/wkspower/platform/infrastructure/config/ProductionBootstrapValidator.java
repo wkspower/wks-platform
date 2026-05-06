@@ -8,6 +8,7 @@ import java.util.function.Function;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
@@ -77,6 +78,7 @@ public class ProductionBootstrapValidator {
   private final Environment env;
   private final Function<String, String> envReader;
 
+  @Autowired
   public ProductionBootstrapValidator(DataSource dataSource, Environment env) {
     this(dataSource, env, System::getenv);
   }
