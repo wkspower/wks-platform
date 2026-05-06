@@ -2,13 +2,30 @@
 #
 # Activate with SPRING_PROFILES_ACTIVE=production. All secrets/config come
 # from env vars; the image itself has no production defaults baked in.
+#
+# Production profile is hermetic — no H2 inheritance from base profile. Story 14.1
+# (discharges Story 14.7 §8 / WKS-API-053): the base profile's `driver-class-name:
+# org.h2.Driver` is the documented bug surface; `WKS_DB_URL` must not be combined
+# with the base profile's H2 driver. This file hard-overrides driver-class-name to
+# org.postgresql.Driver and excludes H2 autoconfig under the production profile.
+# `${WKS_DB_URL}` carries no default — Spring fails fast at startup if unset.
 
 spring:
+  # Defence-in-depth: even with H2 on the runtime classpath (kept for the dev
+  # zero-config path), prevent any H2-related autoconfig from activating under
+  # the production profile. Story 14.1 AC2 (Strategy B).
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration
+
   datasource:
     url: ${WKS_DB_URL}
     username: ${WKS_DB_USER}
     password: ${WKS_DB_PASSWORD}
-    # Driver inferred from URL (postgresql://). Override only if needed.
+    # Story 14.1 — explicit override kills inheritance from application.yml line 25
+    # (`driver-class-name: org.h2.Driver`). Spring's profile YAML merge keeps the base
+    # value when the override key is absent, which is the 14.7 §8 / WKS-API-053 bug.
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -17,6 +34,8 @@ spring:
   flyway:
     # Dialect-specific layout (Story 1.4): `common/` runs on every profile; `postgresql/` is the
     # Postgres-specific slot. Keeps H2-only scripts out of the production container entirely.
+    # Verified by the production-profile-smoke CI job (Story 14.1 AC6) — this list MUST NOT
+    # contain `classpath:db/migration/h2`.
     locations: classpath:db/migration/common,classpath:db/migration/postgresql
 
 # Engine activation mirrors application.yml; production flips metrics on.
@@ -42,6 +61,15 @@ wks:
   storage:
     endpoint: ${WKS_STORAGE_ENDPOINT:}
     key: ${WKS_STORAGE_KEY:}
+  # Keycloak/SSO is a forward-compatible seam (Story 14.1 AC5). The compose
+  # `production-sso` profile provisions the container; this property gates the
+  # log surface that announces the seam. Auth-provider integration is gated on
+  # Story 10.4 (SSO/SAML via Keycloak) and Story 7.3 (Feature Flag Registry,
+  # which will subsume this property under feature.sso with license-tier
+  # gating). Until then the operator's direct toggle is `WKS_KEYCLOAK_ENABLED`.
+  # NOTE: this code path MUST NOT depend on LicenseService — Epic 7 has not shipped.
+  keycloak:
+    enabled: ${WKS_KEYCLOAK_ENABLED:false}
   case-types:
     # Operators typically set WKS_CASE_TYPES_DIR to a mounted path in container.
     dir: ${WKS_CASE_TYPES_DIR:./case-types/}
