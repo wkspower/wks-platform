@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.type.LogicalType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -41,7 +42,14 @@ public class CaseTypeYamlLoader {
         YAMLMapper.builder()
             .addModule(new JavaTimeModule())
             .addModule(new ParameterNamesModule())
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            // Story 4.3.1 AC8 — enable strict unknown-property failure at the mapper level. The
+            // top-level transport record ({@link RawCaseTypeConfig}) keeps {@code
+            // @JsonIgnoreProperties(ignoreUnknown = true)} so future case-type-level keys ship
+            // forward-compat; mapping subtree records (RawAttachment, RawAttachmentMap,
+            // RawUserTaskMapping, RawEventMappings, RawEndEventMapping, RawSignalMapping,
+            // RawPropertyEmissionRule, RawEmits) drop the annotation so unknown keys surface as
+            // {@code WKS-MAP-008}. Scoped — does NOT flip the global Jackson ObjectMapper.
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
             .build();
@@ -123,10 +131,42 @@ public class CaseTypeYamlLoader {
                 ErrorCode.WKS_CFG_099.wire(),
                 "case-type files must contain exactly one YAML document"));
       }
-    } catch (IOException e) {
+    } catch (UnrecognizedPropertyException upe) {
+      // Story 4.3.1 AC8 — unknown YAML key (typo). Surface with a Mapping-namespaced wire code so
+      // operators can grep WKS-MAP-008 and locate the offending key + JSON pointer.
+      String pointer = jsonPointerOf(upe);
+      String key = upe.getPropertyName() == null ? "<unknown>" : upe.getPropertyName();
       return RawReadResult.error(
           source,
-          ErrorDetail.of(ErrorCode.WKS_CFG_099.wire(), "YAML parse error: " + e.getMessage()));
+          ErrorDetail.ofField(
+              ErrorCode.WKS_MAP_008.wire(),
+              "Unknown YAML key '" + key + "' in " + source,
+              pointer));
+    } catch (IOException e) {
+      // Story 4.3.1 AC9 — STRICT_DUPLICATE_DETECTION raises a JsonMappingException whose message
+      // contains "Duplicate field". Surface as WKS-MAP-009 ONLY when the duplicate falls inside
+      // the mapping subtree (attachments[]) — top-level duplicates remain WKS-CFG-099 to preserve
+      // the wire contract pinned by ConfigValidatorTest.wksCfg099_duplicateTopLevelKey.
+      String msg = e.getMessage();
+      if (msg != null && msg.contains("Duplicate field")) {
+        boolean inMappingSubtree = false;
+        if (e instanceof com.fasterxml.jackson.databind.JsonMappingException jme) {
+          for (var ref : jme.getPath()) {
+            if (ref.getFieldName() != null && ref.getFieldName().equals("attachments")) {
+              inMappingSubtree = true;
+              break;
+            }
+          }
+        }
+        if (inMappingSubtree) {
+          return RawReadResult.error(
+              source,
+              ErrorDetail.of(
+                  ErrorCode.WKS_MAP_009.wire(), "Duplicate YAML key in " + source + ": " + msg));
+        }
+      }
+      return RawReadResult.error(
+          source, ErrorDetail.of(ErrorCode.WKS_CFG_099.wire(), "YAML parse error: " + msg));
     }
     if (raw == null) {
       return RawReadResult.error(
@@ -140,6 +180,28 @@ public class CaseTypeYamlLoader {
       index = YamlLineIndex.empty();
     }
     return RawReadResult.ok(source, raw, index);
+  }
+
+  /**
+   * Build a JSON-pointer-style locator from a Jackson {@link UnrecognizedPropertyException}'s
+   * property path. {@code "/attachments/0/map/events/signl"} when the path traverses {@code
+   * attachments[0].map.events.signl}.
+   */
+  private static String jsonPointerOf(UnrecognizedPropertyException upe) {
+    StringBuilder sb = new StringBuilder();
+    if (upe.getPath() != null) {
+      for (var ref : upe.getPath()) {
+        if (ref.getFieldName() != null) {
+          sb.append('/').append(ref.getFieldName());
+        } else if (ref.getIndex() >= 0) {
+          sb.append('/').append(ref.getIndex());
+        }
+      }
+    }
+    if (upe.getPropertyName() != null) {
+      sb.append('/').append(upe.getPropertyName());
+    }
+    return sb.length() == 0 ? "/" : sb.toString();
   }
 
   /**

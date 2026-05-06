@@ -160,7 +160,8 @@ public abstract class BackendAdapterComplianceTest {
         EnumSet.of(
             BackendSignalKind.END_EVENT,
             BackendSignalKind.NAMED_SIGNAL,
-            BackendSignalKind.USER_TASK_PROPERTY,
+            BackendSignalKind.USER_TASK_STATUS,
+            BackendSignalKind.USER_TASK_COMPLETE,
             BackendSignalKind.OUTCOME);
     assertThat(kinds).allMatch(declared::contains);
   }

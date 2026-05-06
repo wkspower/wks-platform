@@ -367,6 +367,12 @@ public class MappingValidator {
         }
       }
 
+      // Story 4.3.1 AC3 — WKS-MAP-002 precedence-collision detection. Two rules from DIFFERENT
+      // BackendSignalKinds that target the same `(stage, status)` (modelled via the stageTransition
+      // tuple `<from> -> <to>`) without explicit precedence are disallowed at deploy time. Phase-0
+      // has no precedence vocabulary; Phase-1 may introduce one. The runtime contract documented at
+      // BackendSignalRouter.java:38-41 advertises this code; here is its emission site.
+      detectPrecedenceCollisions(endEventOut, signalsOut, errors, base);
       // Build the AttachmentDefinition only when type/file/scope are non-blank — otherwise the
       // record's invariants would throw NPE. We still keep collecting errors for fields that did
       // pass.
@@ -383,6 +389,54 @@ public class MappingValidator {
     }
 
     return new Result(new MappingDefinition(definitions), List.copyOf(errors));
+  }
+
+  /**
+   * Story 4.3.1 AC3 — emit {@code WKS-MAP-002} when an endEvent rule and a signal rule target the
+   * same stage transition (same {@code from -> to} tuple). These represent two rules from different
+   * {@link BackendSignalKind}s ({@link BackendSignalKind#END_EVENT} vs {@link
+   * BackendSignalKind#NAMED_SIGNAL}) competing for the same effect; Phase-0 disallows the ambiguity
+   * outright (no precedence vocabulary). Last-wins on rule ordering would be a worst-class silent
+   * bug.
+   */
+  private void detectPrecedenceCollisions(
+      Optional<EndEventMapping> endEventOut,
+      Map<String, SignalMapping> signalsOut,
+      List<ErrorDetail> errors,
+      String base) {
+    if (endEventOut.isEmpty() || signalsOut.isEmpty()) {
+      return;
+    }
+    String endTransition = normaliseTransition(endEventOut.get().stageTransition());
+    if (endTransition == null) {
+      return;
+    }
+    for (var sig : signalsOut.entrySet()) {
+      String sigTransition = normaliseTransition(sig.getValue().stageTransition());
+      if (sigTransition != null && sigTransition.equals(endTransition)) {
+        errors.add(
+            ErrorDetail.ofField(
+                ErrorCode.WKS_MAP_002.wire(),
+                "endEvent and signal '"
+                    + sig.getKey()
+                    + "' both target stageTransition '"
+                    + endEventOut.get().stageTransition()
+                    + "' — Phase-0 disallows two BackendSignalKind rules targeting the"
+                    + " same (stage, status) without explicit precedence",
+                base + "/map/events/signal/" + sig.getKey() + "/stageTransition"));
+      }
+    }
+  }
+
+  private static String normaliseTransition(String spec) {
+    if (spec == null || spec.isBlank()) {
+      return null;
+    }
+    var m = STAGE_TRANSITION.matcher(spec);
+    if (!m.matches()) {
+      return null;
+    }
+    return m.group(1) + "->" + m.group(2);
   }
 
   private boolean checkStageTransition(
@@ -426,10 +480,10 @@ public class MappingValidator {
       return null;
     }
     return switch (wire) {
-      case "status" -> BackendSignalKind.USER_TASK_PROPERTY;
+      case "status" -> BackendSignalKind.USER_TASK_STATUS;
       case "named-signal" -> BackendSignalKind.NAMED_SIGNAL;
       case "outcome" -> BackendSignalKind.OUTCOME;
-      case "task-complete" -> BackendSignalKind.USER_TASK_PROPERTY;
+      case "task-complete" -> BackendSignalKind.USER_TASK_COMPLETE;
       default -> {
         errors.add(
             ErrorDetail.ofField(

@@ -60,7 +60,7 @@ class MappingDiffTest {
   void appendClass_newPropertyRuleAdded() {
     PropertyEmissionRule rule =
         new PropertyEmissionRule(
-            "userTask:t1", "status", BackendSignalKind.USER_TASK_PROPERTY, "case");
+            "userTask:t1", "status", BackendSignalKind.USER_TASK_STATUS, "case");
     AttachmentDefinition before = baseAttachment(Map.of(), List.of());
     AttachmentDefinition after = baseAttachment(Map.of(), List.of(rule));
     assertThat(

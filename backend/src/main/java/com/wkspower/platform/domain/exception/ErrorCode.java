@@ -200,6 +200,20 @@ public enum ErrorCode {
    */
   WKS_MAP_007("WKS-MAP-007"),
   /**
+   * Story 4.3.1 AC8 — mapping YAML carries an unknown key (typo; e.g. {@code events.signl:}, {@code
+   * emits: { typ: status }}). Emitted at deploy time by {@link
+   * com.wkspower.platform.infrastructure.config.MappingValidator} (and the YAML loader when the
+   * unknown property surfaces during Jackson deserialization). Carries the file path + JSON pointer
+   * + offending key name so the operator can locate the typo without re-reading the YAML.
+   */
+  WKS_MAP_008("WKS-MAP-008"),
+  /**
+   * Story 4.3.1 AC9 — duplicate map key in mapping YAML (e.g. {@code userTasks.review-claim:}
+   * appearing twice). Default Jackson behavior is silent last-wins; this code surfaces the
+   * duplicate via {@code STRICT_DUPLICATE_DETECTION} so an operator never silently loses a rule.
+   */
+  WKS_MAP_009("WKS-MAP-009"),
+  /**
    * Runtime — emitted by {@link com.wkspower.platform.domain.service.BackendSignalRouter} when an
    * incoming {@link com.wkspower.platform.domain.port.BackendSignal} does not match any rule in the
    * active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the
@@ -212,6 +226,15 @@ public enum ErrorCode {
    * other meaning.
    */
   WKS_MAP_404("WKS-MAP-404"),
+  /**
+   * Story 4.3.1 AC5 — runtime: {@link com.wkspower.platform.domain.service.BackendSignalRouter}
+   * received a {@link com.wkspower.platform.domain.port.BackendSignal} for a {@code caseId} that is
+   * no longer present in the case repository (purged, hot-reload race, adapter sending after case
+   * deletion). Distinct from {@code WKS-MAP-404} (rule miss); {@code -405} mirrors the HTTP "method
+   * not allowed / case-not-found" suffix convention. Audited via {@code BackendSignalRouted} with
+   * {@code source = backend(<adapter>)}; never silently dropped.
+   */
+  WKS_MAP_405("WKS-MAP-405"),
 
   // 409 / 422 / 404 — Stage lifecycle runtime errors (Story 3.1 AC9). Band: WKS-STG-001..099.
   /**

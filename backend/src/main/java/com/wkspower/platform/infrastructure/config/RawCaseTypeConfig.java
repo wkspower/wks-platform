@@ -150,45 +150,43 @@ public record RawCaseTypeConfig(
   // Story 4.2 — attachments + mapping (architecture §790–809)
   // ---------------------------------------------------------------------------------------------
 
+  // Story 4.3.1 AC8 — mapping subtree records intentionally OMIT
+  // @JsonIgnoreProperties(ignoreUnknown = true) so unknown YAML keys (typos like
+  // events.signl: or emits: { typ: status }) surface as WKS-MAP-008 instead of being silently
+  // dropped. The top-level RawCaseTypeConfig keeps the annotation for forward-compat with future
+  // case-type-level keys; only the mapping block enforces strict schema.
+
   /** One {@code attachments[]} entry. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawAttachment(String type, String file, String scope, RawAttachmentMap map) {}
 
   /** {@code map: { userTasks, events, properties }} block inside an attachment. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawAttachmentMap(
       Map<String, RawUserTaskMapping> userTasks,
       RawEventMappings events,
       List<RawPropertyEmissionRule> properties) {}
 
   /** {@code map.userTasks.<id>} entry. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawUserTaskMapping(String wksTask, String form) {}
 
   /** {@code map.events: { endEvent, signal }} block. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawEventMappings(
       RawEndEventMapping endEvent, Map<String, RawSignalMapping> signal) {}
 
   /** {@code map.events.endEvent} entry. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawEndEventMapping(String stageTransition) {}
 
   /** {@code map.events.signal.<id>} entry. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawSignalMapping(String stageTransition) {}
 
   /**
    * {@code map.properties[]} entry. The YAML key {@code camunda:property} is colon-bearing; Jackson
    * needs an explicit {@link JsonProperty} alias.
    */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawPropertyEmissionRule(
       @JsonProperty("on") String on,
       @JsonProperty("camunda:property") String camundaProperty,
       RawEmits emits) {}
 
   /** {@code emits: { type, scope }} block inside a property emission rule. */
-  @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawEmits(String type, String scope) {}
 }
