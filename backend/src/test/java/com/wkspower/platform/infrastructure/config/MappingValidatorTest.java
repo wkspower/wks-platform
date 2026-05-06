@@ -344,6 +344,98 @@ class MappingValidatorTest {
     assertThat(attachment.propertyEmissionRules()).hasSize(1);
   }
 
+  // ---- Story 4.3.1 AC3 — WKS-MAP-002 precedence-collision detection ----
+
+  @Test
+  void wksMap002_endEventAndSignalTargetingSameStageTransitionCollide() {
+    // endEvent and a signal both produce the SAME stageTransition tuple — Phase-0 disallows.
+    String yaml =
+        GREEN_HEAD
+            + "\nattachments:\n"
+            + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
+            + "    map:\n      events:\n"
+            + "        endEvent: { stageTransition: \"intake -> completed\" }\n"
+            + "        signal:\n"
+            + "          claim-escalated: { stageTransition: \"intake -> completed\" }\n";
+    var raw = parseYaml(yaml);
+    var result =
+        validator.validate(
+            raw, Set.of("intake"), Map.of("x.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes()));
+    assertCodes(result.errors()).contains("WKS-MAP-002");
+  }
+
+  @Test
+  void wksMap002_endEventAndSignalTargetingDifferentStageTransitionsAreLegal() {
+    String yaml =
+        GREEN_HEAD
+            + "\nattachments:\n"
+            + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
+            + "    map:\n      events:\n"
+            + "        endEvent: { stageTransition: \"intake -> completed\" }\n"
+            + "        signal:\n"
+            + "          claim-escalated: { stageTransition: \"intake -> skipped\" }\n";
+    var raw = parseYaml(yaml);
+    var result =
+        validator.validate(
+            raw, Set.of("intake"), Map.of("x.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes()));
+    assertCodes(result.errors()).doesNotContain("WKS-MAP-002");
+  }
+
+  // ---- Story 4.3.1 AC8 — WKS-MAP-008 unknown YAML key ----
+
+  @Test
+  void wksMap008_unknownKeyInMappingSubtreeIsRejected() {
+    // Typo: "signl" instead of "signal" inside events block.
+    String yaml =
+        GREEN_HEAD
+            + "\nattachments:\n"
+            + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
+            + "    map:\n      events:\n"
+            + "        signl:\n"
+            + "          claim-escalated: { stageTransition: \"intake -> completed\" }\n";
+    var loader = new CaseTypeYamlLoader();
+    var read = loader.readBytes("test", yaml.getBytes(StandardCharsets.UTF_8));
+    assertThat(read.isParsed()).as("loader must REJECT unknown mapping key").isFalse();
+    assertThat(read.errors())
+        .as("AC8: unknown mapping subtree key surfaces as WKS-MAP-008")
+        .anyMatch(e -> "WKS-MAP-008".equals(e.code()));
+  }
+
+  @Test
+  void wksMap008_unknownKeyInEmitsBlockIsRejected() {
+    // Typo: "typ" instead of "type" inside emits block.
+    String yaml =
+        GREEN_HEAD
+            + "\nattachments:\n"
+            + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
+            + "    map:\n      properties:\n"
+            + "        - on: userTask:review-claim\n"
+            + "          camunda:property: status\n"
+            + "          emits: { typ: status, scope: case }\n";
+    var loader = new CaseTypeYamlLoader();
+    var read = loader.readBytes("test", yaml.getBytes(StandardCharsets.UTF_8));
+    assertThat(read.isParsed()).isFalse();
+    assertThat(read.errors()).anyMatch(e -> "WKS-MAP-008".equals(e.code()));
+  }
+
+  // ---- Story 4.3.1 AC9 — WKS-MAP-009 duplicate YAML key ----
+
+  @Test
+  void wksMap009_duplicateMapKeyIsRejected() {
+    // userTasks declares the same key twice — silent last-wins is forbidden.
+    String yaml =
+        GREEN_HEAD
+            + "\nattachments:\n"
+            + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
+            + "    map:\n      userTasks:\n"
+            + "        review-claim: { wksTask: \"First\" }\n"
+            + "        review-claim: { wksTask: \"Second\" }\n";
+    var loader = new CaseTypeYamlLoader();
+    var read = loader.readBytes("test", yaml.getBytes(StandardCharsets.UTF_8));
+    assertThat(read.isParsed()).as("loader must REJECT duplicate keys").isFalse();
+    assertThat(read.errors()).anyMatch(e -> "WKS-MAP-009".equals(e.code()));
+  }
+
   // ---- helpers ----
 
   private static org.assertj.core.api.AbstractListAssert<?, List<? extends String>, String, ?>

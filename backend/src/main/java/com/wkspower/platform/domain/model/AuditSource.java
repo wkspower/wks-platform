@@ -32,7 +32,10 @@ import java.util.UUID;
  * feedback_error_codes_are_wire_contract.md} for load-bearing wire shapes.
  */
 public sealed interface AuditSource
-    permits AuditSource.User, AuditSource.AutoRule, AuditSource.Backend {
+    permits AuditSource.User,
+        AuditSource.AutoRule,
+        AuditSource.Backend,
+        AuditSource.BackendUnmapped {
 
   /** Manual user action — wire string {@code "manual"}. */
   record User(UUID actorId) implements AuditSource {
@@ -67,6 +70,27 @@ public sealed interface AuditSource
     @Override
     public String toString() {
       return "backend(" + adapterName + ")";
+    }
+  }
+
+  /**
+   * Story 4.3.1 AC6 — un-spoofable miss-sentinel for {@link
+   * com.wkspower.platform.domain.service.BackendSignalRouter} {@code WKS-MAP-404} audit rows. The
+   * legacy single-{@link Backend}-record design rendered miss audits as {@code "backend(unmapped)"}
+   * by passing the literal string {@code "unmapped"} as the adapter name — which collides with any
+   * real adapter that happens to be named {@code "unmapped"}. This sealed sub-record carries the
+   * originating adapter name as a separate slot and renders as {@code
+   * "backend(unmapped:<originAdapter>)"} so the operator-facing audit string is always
+   * distinguishable from a regular {@link Backend} row.
+   */
+  record BackendUnmapped(String originAdapter) implements AuditSource {
+    public BackendUnmapped {
+      Objects.requireNonNull(originAdapter, "originAdapter");
+    }
+
+    @Override
+    public String toString() {
+      return "backend(unmapped:" + originAdapter + ")";
     }
   }
 }

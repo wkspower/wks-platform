@@ -115,7 +115,17 @@ public class ConfigService {
     if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
       return ValidationResult.invalid(reg.errors());
     }
-    ValidationResult versionedResult = ValidationResult.ok(versioned, result.warnings());
+    // Story 4.3.1 AC1 — preserve the original ValidationResult's MappingDefinition through the
+    // registry-binding rebuild. The 2-arg ValidationResult.ok(versioned, warnings) overload
+    // hardcodes Optional.empty() for mappingDefinition, so publishMappingToRegistry would
+    // register MappingDefinition.empty() under (caseTypeId, registryVersion) — every backend
+    // signal would then hit WKS-MAP-404 in production despite tests passing. Use the 3-arg
+    // overload that threads result.mappingDefinition() forward.
+    ValidationResult versionedResult =
+        ValidationResult.ok(
+            versioned,
+            result.warnings(),
+            result.mappingDefinition().orElse(MappingDefinition.empty()));
     publishMappingToRegistry(versionedResult);
     return versionedResult;
   }
@@ -145,8 +155,14 @@ public class ConfigService {
     // ConfigDeployed event and any post-validate logging see the registry-authoritative version.
     // Story 4.3 — publishMappingToRegistry runs against the same versioned result so the
     // (caseTypeId, version) key in MappingRegistry matches what the in-memory CaseTypeRegistry
-    // advertises.
-    ValidationResult versionedResult = ValidationResult.ok(versioned, result.warnings());
+    // advertises. Story 4.3.1 AC1 — thread result.mappingDefinition() through the rebuild so the
+    // validated MappingDefinition reaches MappingRegistry.register; the 2-arg ok() overload would
+    // silently downgrade to MappingDefinition.empty().
+    ValidationResult versionedResult =
+        ValidationResult.ok(
+            versioned,
+            result.warnings(),
+            result.mappingDefinition().orElse(MappingDefinition.empty()));
     publishMappingToRegistry(versionedResult);
     return versionedResult;
   }
@@ -210,7 +226,19 @@ public class ConfigService {
       if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
         return DeployResult.invalid(reg.errors());
       }
-      publishMappingToRegistry(yamlResult);
+      // Story 4.3.1 AC2 — register MappingRegistry under the registry-assigned version, NOT the
+      // author-supplied version carried by yamlResult.config(). When the version registry assigns
+      // version=1 (idempotent first-deploy or hash-mismatch override) but the YAML declared
+      // version=5, the original yamlResult would key the mapping under version "5" while the
+      // CaseTypeRegistry advertises "1" to CaseService.create — every signal would WKS-MAP-404.
+      // Rebuild the ValidationResult around the version-overridden caseType, preserving
+      // mappingDefinition + warnings.
+      ValidationResult versionedYamlResult =
+          ValidationResult.ok(
+              caseType,
+              yamlResult.warnings(),
+              yamlResult.mappingDefinition().orElse(MappingDefinition.empty()));
+      publishMappingToRegistry(versionedYamlResult);
 
       try {
         deployment =

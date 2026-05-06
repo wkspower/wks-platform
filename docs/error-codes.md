@@ -30,7 +30,7 @@ The enum currently uses seven prefixes:
 | --- | --- | --- |
 | `WKS-API` | 001–005, 401, 403, 404, 413, plus security 050–054 (literals) | Transport / request-shape / auth |
 | `WKS-CFG` | 000–099 | CaseType + BPMN deploy-time validation aggregate |
-| `WKS-MAP` | 001–007, 404 | Mapping Layer validation (Story 4.2) + runtime miss (Story 4.3) |
+| `WKS-MAP` | 001–009, 404, 405 | Mapping Layer validation (Story 4.2 + 4.3.1) + runtime miss (Story 4.3 + 4.3.1) |
 | `WKS-STG` | 001–011, 099 | Stage lifecycle runtime + stage-scoped status sets |
 | `WKS-VER` | 001–099 | CaseType Version Registry (Story 3.4 / Decision 20) |
 | `WKS-RTM` | 409, 500 | Runtime conflict / last-resort |
@@ -122,20 +122,23 @@ Reserved gap at 014–019 — do not renumber. 011 is reserved for the registry 
 
 ---
 
-## WKS-MAP — Mapping Layer (Stories 4.2 AC2 + 4.3 runtime)
+## WKS-MAP — Mapping Layer (Stories 4.2 AC2 + 4.3 runtime + 4.3.1 hotfix)
 
-Epic-namespaced sibling band. Codes 001–006 are emitted by `MappingValidator` at deploy time; 007 is reserved-and-not-emitted as an alias of `WKS-CFG-028` so Story 4.6's Admin UI Mapping Inspector can surface a Mapping-namespaced label without changing the wire string. `WKS-MAP-404` is runtime-only (Story 4.3) and does not appear at deploy time.
+Epic-namespaced sibling band. Codes 001–006 are emitted by `MappingValidator` at deploy time; 007 is reserved-and-not-emitted as an alias of `WKS-CFG-028` so Story 4.6's Admin UI Mapping Inspector can surface a Mapping-namespaced label without changing the wire string. `WKS-MAP-008` and `-009` are deploy-time strict-schema codes added by Story 4.3.1. `WKS-MAP-404` and `WKS-MAP-405` are runtime-only.
 
 | Code | Meaning | Thrower(s) |
 | --- | --- | --- |
 | `WKS-MAP-001` | Mapping references a BPMN element id (non-userTask) that does not exist in the attached BPMN. | `infrastructure/config/MappingValidator.java` |
-| `WKS-MAP-002` | Two mappings target the same `(stage, status)` from different BPMN events without an explicit precedence declaration. | `infrastructure/config/MappingValidator.java` (path exists; emit site referenced in Javadoc) |
+| `WKS-MAP-002` | Two rules from different `BackendSignalKind`s target the same `(stage, status)` (i.e. the same stage-transition tuple) without an explicit precedence declaration. Story 4.3.1 AC3 — Phase-0 disallows last-wins ambiguity. | `infrastructure/config/MappingValidator.java` |
 | `WKS-MAP-003` | Mapping `scope: stage:<id>` (or `emits.scope: stage:<id>`) references a stage absent from the CaseType. | `infrastructure/config/MappingValidator.java` |
 | `WKS-MAP-004` | `attachments[].type` is not a known adapter kind (Phase-0 allows only `bpmn`). | `infrastructure/config/MappingValidator.java` |
 | `WKS-MAP-005` | `attachments[].file` is missing, unreadable, or fails BPMN 2.0 sniff when `type: bpmn`. | `infrastructure/config/MappingValidator.java` |
 | `WKS-MAP-006` | Two `attachments` declare the same `scope`. | `infrastructure/config/MappingValidator.java` |
 | `WKS-MAP-007` | RESERVED-AND-NOT-EMITTED. Functional alias of `WKS-CFG-028`; reserved for the Admin UI label. Per `feedback_error_codes_are_wire_contract.md`, may never be reused for a different meaning. | (reserved — no thrower) |
+| `WKS-MAP-008` | Story 4.3.1 AC8 — mapping YAML carries an unknown key (typo). Surfaces with file path + JSON pointer + offending key. Mapping subtree records (`RawAttachment`, `RawAttachmentMap`, `RawUserTaskMapping`, etc.) drop `@JsonIgnoreProperties(ignoreUnknown = true)` and the YAMLMapper enables `FAIL_ON_UNKNOWN_PROPERTIES`. | `infrastructure/config/CaseTypeYamlLoader.java` |
+| `WKS-MAP-009` | Story 4.3.1 AC9 — duplicate map key inside the mapping subtree (e.g. `userTasks.<id>` declared twice). Default Jackson last-wins is silent and catastrophic; `STRICT_DUPLICATE_DETECTION` raises this code instead. Top-level duplicates remain `WKS-CFG-099` to preserve that wire contract. | `infrastructure/config/CaseTypeYamlLoader.java` |
 | `WKS-MAP-404` | Runtime — `BackendSignalRouter` could not match an incoming `BackendSignal` to a rule in the active `MappingDefinition`, OR the CaseInstance's pinned `(caseTypeId, version)` is missing from `MappingRegistry`, OR a property emission attempted to drive a stage transition (Story 4.3 AC2 / AC4 / AC9). The `404` number intentionally mirrors HTTP not-found semantics for "rule not found." Distinct from deploy-time `WKS-MAP-001..006`. | `domain/service/BackendSignalRouter.java`, `domain/exception/WksMappingMissException.java` |
+| `WKS-MAP-405` | Story 4.3.1 AC5 — runtime: `BackendSignalRouter.onSignal` received a signal for a `caseId` no longer present in the case repository (purged, hot-reload, race). Distinct from `-404` (rule miss); audited via `BackendSignalRouted` with `source = backend(<adapter>)` rather than silently dropped. | `domain/service/BackendSignalRouter.java` |
 
 ---
 

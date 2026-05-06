@@ -213,12 +213,12 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "status",
-                        BackendSignalKind.USER_TASK_PROPERTY,
+                        BackendSignalKind.USER_TASK_STATUS,
                         "stage:stage1")))));
 
     fake.emit(
         new BackendSignal(
-            BackendSignalKind.USER_TASK_PROPERTY,
+            BackendSignalKind.USER_TASK_STATUS,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -232,7 +232,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.source().toString()).isEqualTo("backend(fake)");
-              assertThat(e.kind()).isEqualTo(BackendSignalKind.USER_TASK_PROPERTY);
+              assertThat(e.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
             });
   }
 
@@ -265,7 +265,7 @@ class BackendSignalRouterIT {
 
     fake.emit(
         new BackendSignal(
-            BackendSignalKind.USER_TASK_PROPERTY,
+            BackendSignalKind.USER_TASK_STATUS,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -280,7 +280,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped)");
+              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -322,7 +322,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped)");
+              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -375,13 +375,13 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "status",
-                        BackendSignalKind.USER_TASK_PROPERTY,
+                        BackendSignalKind.USER_TASK_STATUS,
                         "stage:stage1")))));
 
     // First: status change. Second: stage advance.
     fake.emit(
         new BackendSignal(
-            BackendSignalKind.USER_TASK_PROPERTY,
+            BackendSignalKind.USER_TASK_STATUS,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -399,7 +399,7 @@ class BackendSignalRouterIT {
     assertThat(after.status()).isEqualTo("approved");
     assertThat(after.currentStageId()).isEqualTo("stage2");
     assertThat(events.routed()).hasSize(2);
-    assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.USER_TASK_PROPERTY);
+    assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
     assertThat(events.routed().get(1).kind()).isEqualTo(BackendSignalKind.END_EVENT);
   }
 
@@ -495,10 +495,51 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage1");
-    // No success audit; only failure audit if propagated, but per AC8 only WksMappingMiss is
-    // caught. The router does not emit BackendSignalRouted on uncaught exceptions — that's the
-    // engine's territory. Assert no success-audit was published.
-    assertThat(events.routed()).noneMatch(e -> e.errorCode() == null);
+    // Story 4.3.1 AC4 — the router now emits a synchronous failure-audit BEFORE the rollback
+    // rethrow. Operators must see a BackendSignalRouted event with errorCode set (the WKS code
+    // from the underlying domain exception, or WKS-RTM-500 fallback) and source =
+    // backend(<adapter>).
+    assertThat(events.routed())
+        .singleElement()
+        .satisfies(
+            e -> {
+              assertThat(e.errorCode()).isNotNull();
+              assertThat(e.errorCode()).isNotEqualTo("WKS-MAP-404");
+              assertThat(e.source().toString()).isEqualTo("backend(fake)");
+              assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
+              assertThat(e.detail()).containsKey("reason");
+            });
+  }
+
+  // ---------- Story 4.3.1 AC5 — case-not-found emits WKS-MAP-405 audit row -----
+
+  @Test
+  void caseNotFoundEmitsMap405AuditRow() {
+    // No case is created — caseRepository.findById returns empty. The router must publish a
+    // BackendSignalRouted with errorCode = WKS-MAP-405 and source = backend(<adapter>).
+    UUID phantomCaseId = UUID.randomUUID();
+    CaseTypeRef caseType = new CaseTypeRef("phantom-ct", "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+
+    fake.emit(
+        new BackendSignal(
+            BackendSignalKind.END_EVENT,
+            ADAPTER_NAME,
+            new CaseInstanceRef(phantomCaseId, caseType),
+            "end_1",
+            Map.of()));
+    flushClear();
+
+    assertThat(events.routed())
+        .singleElement()
+        .satisfies(
+            e -> {
+              assertThat(e.errorCode()).isEqualTo("WKS-MAP-405");
+              assertThat(e.caseId()).isEqualTo(phantomCaseId);
+              assertThat(e.source().toString()).isEqualTo("backend(fake)");
+              assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
+              assertThat(e.detail()).containsKey("reason");
+            });
   }
 
   // ---------- helpers ----------------------------------------------------

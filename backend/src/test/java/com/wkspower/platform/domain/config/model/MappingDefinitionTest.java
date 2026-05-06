@@ -53,8 +53,8 @@ class MappingDefinitionTest {
   void backendSignalKindIsReusedForPropertyEmission() {
     PropertyEmissionRule rule =
         new PropertyEmissionRule(
-            "userTask:t1", "status", BackendSignalKind.USER_TASK_PROPERTY, "stage:underwriting");
-    assertThat(rule.emits()).isEqualTo(BackendSignalKind.USER_TASK_PROPERTY);
+            "userTask:t1", "status", BackendSignalKind.USER_TASK_STATUS, "stage:underwriting");
+    assertThat(rule.emits()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
     assertThat(rule.emitScope()).isEqualTo("stage:underwriting");
   }
 

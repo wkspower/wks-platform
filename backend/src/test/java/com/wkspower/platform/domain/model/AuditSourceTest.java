@@ -37,11 +37,23 @@ class AuditSourceTest {
   }
 
   @Test
-  void backendUnmappedAdapterRendersExactly() {
-    // The router uses adapterName "unmapped" when no rule matches — pin that exact wire string.
-    AuditSource source = new AuditSource.Backend("unmapped");
+  void backendUnmappedSentinelRendersUnspoofably() {
+    // Story 4.3.1 AC6 — miss-sentinel uses the BackendUnmapped sub-record. Real adapters with
+    // adapterName="unmapped" render as backend(unmapped); the miss sentinel renders distinguishably
+    // as backend(unmapped:<originAdapter>) so the audit string is never collidable.
+    AuditSource collidingRealAdapter = new AuditSource.Backend("unmapped");
+    AuditSource missSentinel = new AuditSource.BackendUnmapped("unmapped");
 
-    assertThat(source.toString()).isEqualTo("backend(unmapped)");
+    assertThat(collidingRealAdapter.toString()).isEqualTo("backend(unmapped)");
+    assertThat(missSentinel.toString()).isEqualTo("backend(unmapped:unmapped)");
+    assertThat(missSentinel.toString()).isNotEqualTo(collidingRealAdapter.toString());
+  }
+
+  @Test
+  void backendUnmappedCarriesOriginAdapter() {
+    AuditSource missSentinel = new AuditSource.BackendUnmapped("bpmn");
+
+    assertThat(missSentinel.toString()).isEqualTo("backend(unmapped:bpmn)");
   }
 
   @Test
@@ -50,6 +62,8 @@ class AuditSourceTest {
     assertThatThrownBy(() -> new AuditSource.AutoRule(null))
         .isInstanceOf(NullPointerException.class);
     assertThatThrownBy(() -> new AuditSource.Backend(null))
+        .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> new AuditSource.BackendUnmapped(null))
         .isInstanceOf(NullPointerException.class);
   }
 }

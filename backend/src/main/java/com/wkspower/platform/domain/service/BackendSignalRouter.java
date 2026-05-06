@@ -6,6 +6,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEm
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.event.BackendSignalRouted;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
 import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.Case;
@@ -96,15 +97,37 @@ public class BackendSignalRouter implements BackendSignalHandler {
     Objects.requireNonNull(signal, "signal");
     Optional<Case> caseOpt = caseRepository.findById(signal.caseInstance().id());
     if (caseOpt.isEmpty()) {
-      // No case row to audit against — log structured warning only; the audit-row event requires
-      // a caseTypeId/version we do not have. This branch is defensive: the adapter should never
-      // emit a signal for a non-existent case in production, since the case lifecycle is the
-      // adapter's parent.
+      // Story 4.3.1 AC5 — case-not-found is now an audit-emitting branch (WKS-MAP-405). The
+      // CaseInstanceRef carries caseTypeId + version, so we can synthesise a BackendSignalRouted
+      // event for operator observability rather than silently dropping. Distinct from WKS-MAP-404
+      // (rule miss): the case row itself is gone, so the rule lookup never ran.
+      String caseTypeVersion =
+          signal.caseInstance().caseType() == null
+              ? "?"
+              : signal.caseInstance().caseType().version();
+      String caseTypeId =
+          signal.caseInstance().caseType() == null
+              ? "?"
+              : signal.caseInstance().caseType().caseTypeId();
       log.atWarn()
-          .addKeyValue("wksErrorCode", "WKS-MAP-404")
+          .addKeyValue("wksErrorCode", ErrorCode.WKS_MAP_405.wire())
           .addKeyValue("originAdapter", signal.adapterName())
           .addKeyValue("caseId", signal.caseInstance().id().toString())
-          .log("backend signal targets unknown caseId — dropped");
+          .log("backend signal targets unknown caseId — case not found");
+      Map<String, String> detail = new HashMap<>();
+      detail.put("originAdapter", signal.adapterName());
+      detail.put("reason", "case not found in repository");
+      eventPublisher.publishAfterCommit(
+          new BackendSignalRouted(
+              signal.caseInstance().id(),
+              caseTypeId,
+              caseTypeVersion,
+              signal.kind(),
+              signal.source(),
+              new AuditSource.Backend(signal.adapterName()),
+              ErrorCode.WKS_MAP_405.wire(),
+              detail,
+              clock.now()));
       return;
     }
     Case caseRow = caseOpt.get();
@@ -123,7 +146,12 @@ public class BackendSignalRouter implements BackendSignalHandler {
       switch (signal.kind()) {
         case END_EVENT -> dispatchEndEvent(signal, caseRow, mappingOpt.get());
         case NAMED_SIGNAL -> dispatchNamedSignal(signal, caseRow, mappingOpt.get());
-        case USER_TASK_PROPERTY -> dispatchUserTaskProperty(signal, caseRow, mappingOpt.get());
+          // Story 4.3.1 AC10 — split USER_TASK_PROPERTY into USER_TASK_STATUS + USER_TASK_COMPLETE.
+          // Both inbound kinds dispatch through the same property-emission lookup; the rule's emits
+          // value distinguishes "drives status transition" (USER_TASK_STATUS) from
+          // "drives stage advance" (USER_TASK_COMPLETE).
+        case USER_TASK_STATUS, USER_TASK_COMPLETE ->
+            dispatchUserTaskProperty(signal, caseRow, mappingOpt.get());
         case OUTCOME ->
             // Phase-1 reservation per AC2.
             throw new WksMappingMissException(
@@ -133,7 +161,59 @@ public class BackendSignalRouter implements BackendSignalHandler {
     } catch (WksMappingMissException miss) {
       auditMiss(signal, caseRow, miss.getMessage());
       // AC4: caught at router boundary; do NOT propagate to the adapter.
+    } catch (RuntimeException other) {
+      // Story 4.3.1 AC4 — synchronous failure-audit emit BEFORE the rollback rethrow. Operator
+      // observability of failed dispatches (transaction rollback path) is the load-bearing
+      // contract advertised by Story 4.3 AC8. publishAfterCommit would never land if the outer
+      // transaction rolls back; we publish synchronously via {@code publish} so the audit row is
+      // visible irrespective of the engine's outcome. The exception is rethrown so the engine
+      // sees the failure and rolls its own state back.
+      Map<String, String> detail = new HashMap<>();
+      detail.put("originAdapter", signal.adapterName());
+      detail.put("reason", "dispatch failed: " + other.getClass().getSimpleName());
+      String exceptionCode = extractWksErrorCode(other);
+      log.atWarn()
+          .addKeyValue("wksErrorCode", exceptionCode == null ? "WKS-RTM-500" : exceptionCode)
+          .addKeyValue("originAdapter", signal.adapterName())
+          .addKeyValue("caseId", caseRow.id().toString())
+          .addKeyValue("kind", signal.kind().name())
+          .addKeyValue("signalSource", signal.source())
+          .log("backend signal dispatch failed — rolling back: {}", other.getMessage());
+      eventPublisher.publish(
+          new BackendSignalRouted(
+              caseRow.id(),
+              caseRow.caseTypeId(),
+              caseTypeVersion,
+              signal.kind(),
+              signal.source(),
+              new AuditSource.Backend(signal.adapterName()),
+              exceptionCode == null ? "WKS-RTM-500" : exceptionCode,
+              detail,
+              clock.now()));
+      throw other;
     }
+  }
+
+  /**
+   * Best-effort extraction of a WKS error code from a domain exception. Domain exceptions in the
+   * stage band ({@code WksStageException}) and friends carry a wire-string code field; we look it
+   * up reflectively via a no-arg {@code wksErrorCode()} or {@code errorCode()} accessor so the
+   * router stays decoupled from each domain exception class. Returns {@code null} when no code
+   * surface is available — the caller defaults to {@code WKS-RTM-500}.
+   */
+  private static String extractWksErrorCode(RuntimeException ex) {
+    for (String name : new String[] {"errorCode", "wksErrorCode", "code"}) {
+      try {
+        var m = ex.getClass().getMethod(name);
+        Object v = m.invoke(ex);
+        if (v != null) {
+          return v.toString();
+        }
+      } catch (ReflectiveOperationException ignored) {
+        // try next accessor name
+      }
+    }
+    return null;
   }
 
   // ---- per-kind dispatch -------------------------------------------------
@@ -186,10 +266,11 @@ public class BackendSignalRouter implements BackendSignalHandler {
                         "no property rule for on='" + onKey + "'"));
 
     // D22 clarification of Story 2.9 ambiguity — userTask property emission is restricted to
-    // status transitions within a stage. Only USER_TASK_PROPERTY emissions drive status writes;
-    // any rule whose emits is not USER_TASK_PROPERTY is treated as a stage transition attempt and
-    // rejected.
-    if (rule.emits() != BackendSignalKind.USER_TASK_PROPERTY) {
+    // status transitions within a stage. Only USER_TASK_STATUS / USER_TASK_COMPLETE emissions are
+    // valid (Story 4.3.1 AC10 split); any rule whose emits is a stage-transition kind (END_EVENT,
+    // NAMED_SIGNAL, OUTCOME) is treated as a stage transition attempt and rejected.
+    if (rule.emits() != BackendSignalKind.USER_TASK_STATUS
+        && rule.emits() != BackendSignalKind.USER_TASK_COMPLETE) {
       throw new WksMappingMissException(
           signal.adapterName(),
           signal.caseInstance().id(),
@@ -249,13 +330,21 @@ public class BackendSignalRouter implements BackendSignalHandler {
       detail.put("reason", reason);
     }
     log.atWarn()
-        .addKeyValue("wksErrorCode", "WKS-MAP-404")
+        .addKeyValue("wksErrorCode", ErrorCode.WKS_MAP_404.wire())
         .addKeyValue("originAdapter", signal.adapterName())
         .addKeyValue("caseId", signal.caseInstance().id().toString())
         .addKeyValue("kind", signal.kind().name())
         .addKeyValue("signalSource", signal.source())
         .log("backend signal unmapped: {}", reason);
-    publish(signal, caseRow, new AuditSource.Backend("unmapped"), "WKS-MAP-404", detail);
+    // Story 4.3.1 AC6 — un-spoofable miss-sentinel via AuditSource.BackendUnmapped. An adapter
+    // named "unmapped" cannot collide with the miss audit string because the sub-record renders
+    // distinctly as backend(unmapped:<originAdapter>).
+    publish(
+        signal,
+        caseRow,
+        new AuditSource.BackendUnmapped(signal.adapterName()),
+        ErrorCode.WKS_MAP_404.wire(),
+        detail);
   }
 
   private void publish(

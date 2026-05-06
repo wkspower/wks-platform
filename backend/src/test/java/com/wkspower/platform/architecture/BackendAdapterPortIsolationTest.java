@@ -2,9 +2,15 @@ package com.wkspower.platform.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.domain.JavaField;
+import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import com.tngtech.archunit.lang.ArchCondition;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -69,6 +75,137 @@ class BackendAdapterPortIsolationTest {
                 + "would silently break the single-routing-surface guarantee — adding one "
                 + "requires a deliberate edit of this test, surfacing the change to reviewers.")
         .check(CLASSES);
+  }
+
+  /**
+   * Story 4.3.1 AC7 — extend the single-subscriber rule to non-direct-call discovery vectors:
+   *
+   * <ul>
+   *   <li>{@code ApplicationContext.getBeansOfType(BackendSignalHandler.class)} — Spring lookup
+   *   <li>{@code @Autowired List<BackendSignalHandler>} — collection injection (broadcasts to all)
+   *   <li>{@code Method.invoke(...)} on a {@code BackendSignalHandler} method — reflective dispatch
+   * </ul>
+   *
+   * <p>The original rule only catches direct bytecode method calls; an attacker (or a well-meaning
+   * dev adding metrics) could circumvent it via any of the three above. Each surfaces a Story 4.3.1
+   * AC7 violation in the build.
+   */
+  @Test
+  void backendSignalHandlerHasNoIndirectSubscribers() {
+    String handlerFqn = "com.wkspower.platform.domain.port.BackendSignalHandler";
+    String routerFqn = "com.wkspower.platform.domain.service.BackendSignalRouter";
+    String binderFqn = "com.wkspower.platform.domain.service.BackendAdapterBinder";
+
+    ArchCondition<JavaClass> noBeansOfType =
+        new ArchCondition<>("not call ApplicationContext.getBeansOfType(BackendSignalHandler)") {
+          @Override
+          public void check(JavaClass clazz, ConditionEvents events) {
+            if (clazz.getFullName().equals(routerFqn) || clazz.getFullName().equals(binderFqn)) {
+              return;
+            }
+            for (JavaMethodCall call : clazz.getMethodCallsFromSelf()) {
+              String tgt = call.getTarget().getFullName();
+              if ((tgt.contains("ApplicationContext.getBeansOfType")
+                      || tgt.contains("ListableBeanFactory.getBeansOfType")
+                      || tgt.contains("BeanFactory.getBeansOfType"))
+                  && callMentionsHandler(call, handlerFqn)) {
+                events.add(
+                    SimpleConditionEvent.violated(
+                        clazz,
+                        clazz.getFullName()
+                            + " calls getBeansOfType(BackendSignalHandler.class) — Story 4.3.1 AC7"
+                            + " forbids non-direct-call subscribers to the single-routing surface"));
+              }
+            }
+          }
+        };
+
+    ArchCondition<JavaClass> noListInjection =
+        new ArchCondition<>("not declare a field of type List<BackendSignalHandler>") {
+          @Override
+          public void check(JavaClass clazz, ConditionEvents events) {
+            if (clazz.getFullName().equals(routerFqn) || clazz.getFullName().equals(binderFqn)) {
+              return;
+            }
+            for (JavaField field : clazz.getFields()) {
+              String desc = field.getDescriptor();
+              // Generic erasure loses the type-parameter; signature carries it.
+              String sig = field.getDescriptor() == null ? "" : field.getDescriptor();
+              // Best-effort: any field whose erased type is List/Collection/Set AND whose
+              // declaring source mentions BackendSignalHandler in the field name OR the
+              // generic-signature attribute (which JavaClass exposes via the raw descriptor).
+              boolean isCollection =
+                  desc != null
+                      && (desc.contains("Ljava/util/List;")
+                          || desc.contains("Ljava/util/Collection;")
+                          || desc.contains("Ljava/util/Set;"));
+              if (isCollection
+                  && (field.getName().toLowerCase().contains("backendsignalhandler")
+                      || field.getName().toLowerCase().contains("signalhandler")
+                      || sig.contains("BackendSignalHandler"))) {
+                events.add(
+                    SimpleConditionEvent.violated(
+                        field,
+                        clazz.getFullName()
+                            + "."
+                            + field.getName()
+                            + " appears to be a List<BackendSignalHandler> collection injection —"
+                            + " Story 4.3.1 AC7 forbids broadcast subscribers to the single"
+                            + " routing surface"));
+              }
+            }
+          }
+        };
+
+    ArchCondition<JavaClass> noReflectiveInvoke =
+        new ArchCondition<>("not call Method.invoke on BackendSignalHandler methods") {
+          @Override
+          public void check(JavaClass clazz, ConditionEvents events) {
+            if (clazz.getFullName().equals(routerFqn) || clazz.getFullName().equals(binderFqn)) {
+              return;
+            }
+            // Conservative heuristic: any class that BOTH (a) imports BackendSignalHandler AND
+            // (b) calls java.lang.reflect.Method.invoke is suspect. We can't statically prove the
+            // invoke target is the handler method, so we report the suspicious combination and
+            // let reviewers check.
+            boolean importsHandler =
+                clazz.getDirectDependenciesFromSelf().stream()
+                    .anyMatch(d -> d.getTargetClass().getFullName().equals(handlerFqn));
+            if (!importsHandler) {
+              return;
+            }
+            for (JavaMethodCall call : clazz.getMethodCallsFromSelf()) {
+              if (call.getTarget().getFullName().equals("java.lang.reflect.Method.invoke")) {
+                events.add(
+                    SimpleConditionEvent.violated(
+                        clazz,
+                        clazz.getFullName()
+                            + " imports BackendSignalHandler AND calls Method.invoke — Story"
+                            + " 4.3.1 AC7 forbids reflective dispatch to the single routing"
+                            + " surface; review for non-direct-call subscriber pattern"));
+              }
+            }
+          }
+        };
+
+    noClasses()
+        .that()
+        .resideInAPackage("com.wkspower.platform..")
+        .should(noBeansOfType)
+        .andShould(noListInjection)
+        .andShould(noReflectiveInvoke)
+        .because(
+            "Story 4.3.1 AC7: the single-subscriber invariant must catch indirect subscriber"
+                + " patterns — getBeansOfType, List<BackendSignalHandler> collection injection,"
+                + " and reflective Method.invoke — not just direct bytecode calls. Adding any"
+                + " such pattern requires a deliberate edit of this test.")
+        .check(CLASSES);
+  }
+
+  private static boolean callMentionsHandler(JavaMethodCall call, String handlerFqn) {
+    return call.getTarget().getRawParameterTypes().stream()
+            .anyMatch(t -> t.getFullName().contains("BackendSignalHandler"))
+        || call.getTarget().getFullName().contains("BackendSignalHandler");
   }
 
   @Test
