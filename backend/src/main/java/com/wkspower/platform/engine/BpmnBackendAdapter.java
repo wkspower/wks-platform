@@ -71,12 +71,14 @@ public class BpmnBackendAdapter implements BackendAdapter {
   public BackendSignalSubscription onBackendSignal(BackendSignalHandler handler) {
     Objects.requireNonNull(handler, "handler");
     // Single-subscriber invariant — Story 4.3 AC1 / AC6 enforced by ArchUnit
-    // (BackendAdapterPortIsolationTest). Production wiring registers the BackendSignalRouter
-    // exactly once at boot via BackendAdapterConfig.
-    if (!handlerRef.compareAndSet(null, handler)) {
+    // (BackendAdapterPortIsolationTest). Idempotent for the SAME handler instance so that the
+    // eager boot-time registration (BpmnBackendAdapterRegistrar ApplicationReadyEvent) and the
+    // BackendAdapterBinder.computeIfAbsent path can both succeed without racing.
+    handlerRef.compareAndSet(null, handler);
+    if (handlerRef.get() != handler) {
       throw new IllegalStateException(
-          "BpmnBackendAdapter already has a registered handler — single-subscriber invariant"
-              + " (Story 4.3 AC6)");
+          "BpmnBackendAdapter already has a different registered handler — single-subscriber"
+              + " invariant (Story 4.3 AC6)");
     }
     return () -> handlerRef.compareAndSet(handler, null);
   }

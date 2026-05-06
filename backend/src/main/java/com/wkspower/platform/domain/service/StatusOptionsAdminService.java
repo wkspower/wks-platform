@@ -66,10 +66,14 @@ public class StatusOptionsAdminService {
       String color,
       boolean terminal) {
     Lookup lk = lookup(caseTypeId, stageId);
-    // Pre-check: reject if the id exists in the YAML base or in the existing overlay. The
-    // composite-PK in the adapter is defence-in-depth for races; this pre-check produces the
-    // friendly WKS-STG-007 path for the common (sequential) case.
-    if (resolver.resolveOne(lk.caseType, stageId, statusId).isPresent()) {
+    // Pre-check: reject if the id exists in the YAML base or in the existing overlay.
+    // Read both the YAML base and the store overlay at lk.version (the registry-bound version),
+    // NOT via resolver.resolveOne which uses caseType.version() and diverges post-3.4.1.
+    boolean inYamlBase =
+        lk.caseType.statusesFor(stageId).stream().anyMatch(s -> s.id().equals(statusId));
+    boolean inOverlay =
+        store.findOne(caseTypeId, lk.version, sentinel(stageId), statusId).isPresent();
+    if (inYamlBase || inOverlay) {
       throw new StatusOptionsStore.DuplicateStatusException(
           "status '" + statusId + "' already exists on " + caseTypeId + " stage=" + stageId);
     }

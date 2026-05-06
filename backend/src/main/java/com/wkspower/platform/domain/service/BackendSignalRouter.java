@@ -207,7 +207,13 @@ public class BackendSignalRouter implements BackendSignalHandler {
         var m = ex.getClass().getMethod(name);
         Object v = m.invoke(ex);
         if (v != null) {
-          return v.toString();
+          String s = v.toString();
+          // Only accept values that conform to the WKS wire-code shape so that unrelated
+          // accessors (e.g. HttpStatusCode.code(), TransactionSystemException.toString()) are
+          // never published as audit wire codes.
+          if (s.startsWith("WKS-")) {
+            return s;
+          }
         }
       } catch (ReflectiveOperationException ignored) {
         // try next accessor name
@@ -265,12 +271,16 @@ public class BackendSignalRouter implements BackendSignalHandler {
                         signal.caseInstance().id(),
                         "no property rule for on='" + onKey + "'"));
 
-    // D22 clarification of Story 2.9 ambiguity — userTask property emission is restricted to
-    // status transitions within a stage. Only USER_TASK_STATUS / USER_TASK_COMPLETE emissions are
-    // valid (Story 4.3.1 AC10 split); any rule whose emits is a stage-transition kind (END_EVENT,
-    // NAMED_SIGNAL, OUTCOME) is treated as a stage transition attempt and rejected.
-    if (rule.emits() != BackendSignalKind.USER_TASK_STATUS
-        && rule.emits() != BackendSignalKind.USER_TASK_COMPLETE) {
+    if (rule.emits() == BackendSignalKind.USER_TASK_COMPLETE) {
+      // Story 4.3.1 AC10 — task-complete kind carries no status value; advance the stage forward
+      // so the BPMN end-of-task drives case progression without requiring an explicit status
+      // property on the userTask.
+      String sourceRef = signal.adapterName() + ":" + signal.source();
+      stageAdvancer.advance(caseRow.id(), LEGACY_BACKEND_SOURCE, sourceRef);
+      return;
+    }
+
+    if (rule.emits() != BackendSignalKind.USER_TASK_STATUS) {
       throw new WksMappingMissException(
           signal.adapterName(),
           signal.caseInstance().id(),

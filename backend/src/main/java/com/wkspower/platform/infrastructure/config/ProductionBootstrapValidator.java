@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +75,18 @@ public class ProductionBootstrapValidator {
 
   private final DataSource dataSource;
   private final Environment env;
+  private final Function<String, String> envReader;
 
   public ProductionBootstrapValidator(DataSource dataSource, Environment env) {
+    this(dataSource, env, System::getenv);
+  }
+
+  /** Package-private — allows tests to inject a controlled env-var source. */
+  ProductionBootstrapValidator(
+      DataSource dataSource, Environment env, Function<String, String> envReader) {
     this.dataSource = dataSource;
     this.env = env;
+    this.envReader = envReader;
   }
 
   @EventListener(ApplicationReadyEvent.class)
@@ -111,7 +120,10 @@ public class ProductionBootstrapValidator {
   private void assertSecretsRotated() {
     Map<String, String> offences = new LinkedHashMap<>();
     for (String key : REQUIRED_ENV_KEYS) {
-      String value = env.getProperty(key);
+      // Read from the OS environment directly — Spring's Environment resolves any property source
+      // (YAML defaults, -D flags) which would allow a default in application-production.yml to
+      // bypass this guard. AC7 says "operator-supplied env var"; only System.getenv enforces that.
+      String value = envReader.apply(key);
       if (value == null || value.isBlank()) {
         offences.put(key, "unset");
       } else if (ROTATION_SENTINEL.equals(value.strip())) {

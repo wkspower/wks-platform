@@ -2,10 +2,12 @@ package com.wkspower.platform.engine;
 
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.port.AttachmentScope;
+import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.service.BackendAdapterBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +33,24 @@ public class BpmnBackendAdapterRegistrar {
 
   private final BpmnBackendAdapter adapter;
   private final BackendAdapterBinder binder;
+  private final BackendSignalHandler handler;
 
-  public BpmnBackendAdapterRegistrar(BpmnBackendAdapter adapter, BackendAdapterBinder binder) {
+  public BpmnBackendAdapterRegistrar(
+      BpmnBackendAdapter adapter, BackendAdapterBinder binder, BackendSignalHandler handler) {
     this.adapter = adapter;
     this.binder = binder;
+    this.handler = handler;
+  }
+
+  /**
+   * Eagerly subscribe the adapter to the signal handler at boot so that BPMN execution-listener
+   * callbacks from pre-deploy process instances (i.e. surviving a JVM restart before any
+   * {@link ConfigDeployed} fires) are not silently dropped.
+   */
+  @EventListener(ApplicationReadyEvent.class)
+  public void onApplicationReady() {
+    adapter.onBackendSignal(handler);
+    log.debug("BpmnBackendAdapter handler eagerly registered at application ready");
   }
 
   @EventListener

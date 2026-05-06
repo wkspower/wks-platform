@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.Map;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -27,12 +29,17 @@ import org.springframework.mock.env.MockEnvironment;
  */
 class ProductionBootstrapValidatorTest {
 
-  private static MockEnvironment rotatedEnv() {
-    MockEnvironment env = new MockEnvironment();
+  private static Map<String, String> rotatedEnvMap() {
+    Map<String, String> map = new HashMap<>();
     for (String key : ProductionBootstrapValidator.REQUIRED_ENV_KEYS) {
-      env.setProperty(key, "rotated-" + key.toLowerCase());
+      map.put(key, "rotated-" + key.toLowerCase());
     }
-    return env;
+    return map;
+  }
+
+  private static ProductionBootstrapValidator validatorWith(
+      DataSource ds, Map<String, String> envMap) {
+    return new ProductionBootstrapValidator(ds, new MockEnvironment(), envMap::get);
   }
 
   private static DataSource datasourceWithProductName(String productName) {
@@ -52,13 +59,13 @@ class ProductionBootstrapValidatorTest {
   @Test
   void happyPath_postgresDatasourceAndRotatedSecrets_passes() {
     DataSource ds = datasourceWithProductName("PostgreSQL");
-    new ProductionBootstrapValidator(ds, rotatedEnv()).validate();
+    validatorWith(ds, rotatedEnvMap()).validate();
   }
 
   @Test
   void h2Datasource_failsFastWithApi053() {
     DataSource ds = datasourceWithProductName("H2");
-    assertThatThrownBy(() -> new ProductionBootstrapValidator(ds, rotatedEnv()).validate())
+    assertThatThrownBy(() -> validatorWith(ds, rotatedEnvMap()).validate())
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("WKS-API-053")
         .hasMessageContaining("H2");
@@ -67,9 +74,9 @@ class ProductionBootstrapValidatorTest {
   @Test
   void unsetSecret_failsFastWithApi055NamingTheVar() {
     DataSource ds = datasourceWithProductName("PostgreSQL");
-    MockEnvironment env = rotatedEnv();
-    env.setProperty("WKS_JWT_SECRET", "");
-    assertThatThrownBy(() -> new ProductionBootstrapValidator(ds, env).validate())
+    Map<String, String> envMap = rotatedEnvMap();
+    envMap.put("WKS_JWT_SECRET", "");
+    assertThatThrownBy(() -> validatorWith(ds, envMap).validate())
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("WKS-API-055")
         .hasMessageContaining("WKS_JWT_SECRET")
@@ -79,9 +86,9 @@ class ProductionBootstrapValidatorTest {
   @Test
   void sentinelSecret_failsFastWithApi055NamingTheVar() {
     DataSource ds = datasourceWithProductName("PostgreSQL");
-    MockEnvironment env = rotatedEnv();
-    env.setProperty("WKS_MINIO_ROOT_PASSWORD", "<MUST-BE-ROTATED>");
-    assertThatThrownBy(() -> new ProductionBootstrapValidator(ds, env).validate())
+    Map<String, String> envMap = rotatedEnvMap();
+    envMap.put("WKS_MINIO_ROOT_PASSWORD", "<MUST-BE-ROTATED>");
+    assertThatThrownBy(() -> validatorWith(ds, envMap).validate())
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("WKS-API-055")
         .hasMessageContaining("WKS_MINIO_ROOT_PASSWORD")
@@ -91,10 +98,10 @@ class ProductionBootstrapValidatorTest {
   @Test
   void multipleOffences_listedTogether() {
     DataSource ds = datasourceWithProductName("PostgreSQL");
-    MockEnvironment env = rotatedEnv();
-    env.setProperty("WKS_DB_PASSWORD", "<MUST-BE-ROTATED>");
-    env.setProperty("WKS_ADMIN_EMAIL", "");
-    assertThatThrownBy(() -> new ProductionBootstrapValidator(ds, env).validate())
+    Map<String, String> envMap = rotatedEnvMap();
+    envMap.put("WKS_DB_PASSWORD", "<MUST-BE-ROTATED>");
+    envMap.put("WKS_ADMIN_EMAIL", "");
+    assertThatThrownBy(() -> validatorWith(ds, envMap).validate())
         .isInstanceOf(IllegalStateException.class)
         .satisfies(
             ex ->

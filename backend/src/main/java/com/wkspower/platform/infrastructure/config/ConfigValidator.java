@@ -14,6 +14,7 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
+import com.wkspower.platform.domain.port.StatusOptionsStore;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -63,7 +64,8 @@ public class ConfigValidator {
    * Lives here as a private constant so the validator owns the rule; if a future story needs to
    * extend, the touch-point is one place.
    */
-  private static final Set<String> RESERVED_STAGE_IDS = Set.of("case", "stage", "none", "all");
+  private static final Set<String> RESERVED_STAGE_IDS =
+      Set.of("case", "stage", "none", "all", StatusOptionsStore.FLAT_SENTINEL);
 
   /**
    * Stage id pattern (Story 3.1 AC1) — same kebab-case shape as status / role ids, but allows a
