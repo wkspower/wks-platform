@@ -1,0 +1,5 @@
+/* Test theme override — Story 14.5 ThemeControllerTest fixture.
+   Overrides --primary to red so the test can assert CSS content is served correctly. */
+:root {
+  --primary: #ff0000;
+}

@@ -1,3 +1,28 @@
+/*
+ * SI Override Surface — Story 14.5
+ * =================================
+ * The variables below are the primary brand surface. An SI developer can override
+ * any of them by mounting a CSS file at the path set by WKS_THEME_CSS_PATH. The
+ * file is served at GET /api/theme.css and loaded after these defaults, so the
+ * cascade applies automatically — no image rebuild or frontend recompile required.
+ *
+ * Minimum override set (declare as :root overrides in your theme file):
+ *   --primary        Primary brand color            default indigo  (#3b5bdb)
+ *   --secondary      Secondary accent               default cyan    (#22d3ee)
+ *   --brand-navy     Dark sidebar/header background default navy    (#0b1437)
+ *   --font-heading   Heading font-family            default Poppins
+ *   --font-body      Body font-family               default Rubik
+ *   --logo-url       Optional CSS background-image URL for a custom logo;
+ *                    not used by default components but available for
+ *                    white-label CSS rules.
+ *
+ * All variables bridged via the @theme inline block in index.css cascade
+ * automatically into Tailwind v4 utility classes (bg-primary, text-secondary,
+ * etc.) without any additional configuration.
+ *
+ * White-label deepening (logo swap, per-field overrides, label customization)
+ * is deferred to Story 15.6.
+ */
 :root {
   /* Brand + semantic colors */
   --primary: #3b5bdb;
