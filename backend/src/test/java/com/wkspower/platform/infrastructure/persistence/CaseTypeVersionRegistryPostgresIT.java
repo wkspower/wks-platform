@@ -37,7 +37,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <p>Skipped automatically when Docker is unavailable.
  */
-@SpringBootTest
+// Story 14.1.1: ProductionBootstrapValidator runs on ApplicationReadyEvent under
+// activeProfiles=["production"] and enforces WKS-API-055 (every secret rotated +
+// non-empty). This test only sets the DB-shape properties Testcontainers needs;
+// disable the validator here so we exercise the registry surface, not the boot
+// invariant. Boot-invariant coverage lives in production-profile-smoke (CI) +
+// the validator's own unit tests.
+@SpringBootTest(properties = "wks.bootstrap.production-validation.enabled=false")
 @ActiveProfiles("production")
 @Testcontainers(disabledWithoutDocker = true)
 class CaseTypeVersionRegistryPostgresIT {
