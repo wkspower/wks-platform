@@ -164,7 +164,7 @@ Band: `WKS-VER-001..099` reserved for version-registry-related errors. Future st
 
 | Code | HTTP | Meaning | Thrower(s) |
 | --- | --- | --- | --- |
-| `WKS-VER-001` | 409 | `CaseService.create` called for a CaseType that is registry-visible (in-memory) but has no row in `case_type_versions` yet — partial-failure recovery state. Story 3.5's bootstrap migration closes the gap for pre-3.4 CaseTypes by materialising v1 rows. | `domain/service/CaseService.java` |
+| `WKS-VER-001` | 503 (Retry-After: 5) | `CaseService.create` called for a CaseType that is registry-visible (in-memory) but has no row in `case_type_versions` yet — partial-failure recovery state, registry-not-yet-primed, or startup race. The 503 + Retry-After signal is "transient, retry safe" — the most actionable contract for SI operators (Story 3.4.1 AC4 flipped this from 409, which misleads as "client conflict"). Story 3.5's bootstrap migration closes the gap for pre-3.4 CaseTypes by materialising v1 rows. | `domain/service/CaseService.java`, `api/GlobalExceptionHandler.java` |
 
 ---
 

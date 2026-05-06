@@ -12,13 +12,16 @@ import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +38,24 @@ import org.springframework.stereotype.Component;
 public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
 
   private final ConcurrentMap<String, Registered> byId = new ConcurrentHashMap<>();
-  private final ConcurrentMap<VersionKey, CaseTypeConfig> byVersion = new ConcurrentHashMap<>();
+
+  /**
+   * Story 3.4.1 AC5 (finding I7) — bounded LRU cache of historical (caseTypeId, version) ->
+   * CaseTypeConfig hydrations. Replaces the unbounded {@code ConcurrentHashMap} that grew without
+   * eviction over the application lifetime. Append-only registry semantics make eviction safe: the
+   * worst case on a miss is a re-parse via the YAML loader + validator, never stale data.
+   *
+   * <p>Default capacity 4096 — generous headroom (typical SI carries ~1000 entries lifetime),
+   * bounded against pathological hot-reload growth. Override via {@code
+   * wks.registry.cache.max-size}.
+   *
+   * <p>Wrapped in {@link Collections#synchronizedMap}: {@link LinkedHashMap}'s access-order
+   * eviction is not thread-safe by itself. The map is on the read-heavy side of {@code findVersion}
+   * but write contention is bounded by {@link CaseTypeYamlLoader} parse cost; a single mutex keeps
+   * the implementation auditable.
+   */
+  private final Map<VersionKey, CaseTypeConfig> byVersion;
+
   private final JsonSchemaGenerator schemaGenerator;
 
   // Story 3.4 — version-pinned hydration deps. Optional so unit tests that only exercise the
@@ -52,8 +72,20 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
   @Autowired(required = false)
   private @Lazy ConfigValidator configValidator;
 
-  public CaseTypeRegistry(JsonSchemaGenerator schemaGenerator) {
+  public CaseTypeRegistry(
+      JsonSchemaGenerator schemaGenerator,
+      @Value("${wks.registry.cache.max-size:4096}") int byVersionMaxSize) {
     this.schemaGenerator = schemaGenerator;
+    final int capacity = byVersionMaxSize > 0 ? byVersionMaxSize : 4096;
+    // access-order LRU; removeEldestEntry kicks in once size > capacity.
+    this.byVersion =
+        Collections.synchronizedMap(
+            new LinkedHashMap<VersionKey, CaseTypeConfig>(16, 0.75f, true) {
+              @Override
+              protected boolean removeEldestEntry(Map.Entry<VersionKey, CaseTypeConfig> eldest) {
+                return size() > capacity;
+              }
+            });
   }
 
   @Override
