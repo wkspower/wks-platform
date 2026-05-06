@@ -299,7 +299,13 @@ public class ConfigService {
     CaseTypeVersionRegistration result =
         versionRegistry.register(caseType.id(), rawYamlBytes, publishedBy);
     int registryVersion = result.version();
-    if (authorVersion != registryVersion) {
+    // Story 3.4.1 AC6 (finding I8) — gate the author-version-mismatch WARN on actual registration
+    // (REGISTERED outcome). Idempotent re-deploys (file-watcher hot-reload, polling redeploy)
+    // produce CaseTypeVersionRegistration.Outcome.IDEMPOTENT and previously emitted this WARN on
+    // every poll, drowning the log buffer in production hot-reload scenarios. Emit once per
+    // outcome that actually changed registry state.
+    if (authorVersion != registryVersion
+        && result.outcome() == CaseTypeVersionRegistration.Outcome.REGISTERED) {
       log.warn(
           "author-supplied version {} for {} differs from registry-assigned version {};"
               + " registry is authoritative (Decision 20)",

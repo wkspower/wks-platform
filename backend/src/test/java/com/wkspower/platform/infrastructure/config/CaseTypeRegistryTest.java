@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 class CaseTypeRegistryTest {
 
   private final JsonSchemaGenerator schemas = new JsonSchemaGenerator();
-  private final CaseTypeRegistry registry = new CaseTypeRegistry(schemas);
+  private final CaseTypeRegistry registry = new CaseTypeRegistry(schemas, 4096);
 
   @Test
   void registerThenFind() {

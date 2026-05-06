@@ -95,6 +95,22 @@ public class CaseService {
     UUID caseId = UUID.randomUUID();
     String initialStatus = initialStatus(caseType);
 
+    // Story 3.4.1 AC3 (finding I5) — bind the registry version BEFORE starting any engine
+    // process instance. If the registry has no current version (deploy-ordering bug, partial
+    // state, registry-not-yet-primed), failing fast here avoids a dangling process instance in
+    // the engine. Story 3.4 originally read after the engine call; that left a leaked PI on the
+    // WKS-VER-001 path.
+    int boundVersion =
+        versionRegistry
+            .currentVersion(caseType.id())
+            .orElseThrow(
+                () ->
+                    new WksVersionException(
+                        ErrorCode.WKS_VER_001,
+                        "CaseType "
+                            + caseType.id()
+                            + " has no published version yet — deploy completed?"));
+
     // Story 3.2 AC2 — engine call is OPTIONAL. Process-less CaseTypes (workflow: omitted) skip the
     // resolver + start call entirely. Decision 19 / 3.2 unbranched-paths invariant: do not branch
     // on caseType.hasWorkflow() — iterate via Optional.ifPresent and let absence be the no-op.
@@ -118,21 +134,6 @@ public class CaseService {
                       Map.of("caseId", caseId.toString(), "caseTypeId", caseType.id()));
             });
     String processInstanceId = processInstanceIdHolder[0];
-
-    // Story 3.4 / Decision 20 — bind to the registry's current version, not the in-memory
-    // CaseTypeConfig.version() (which IS the registry value post-Story-3.4 wiring, but the
-    // explicit registry read makes the binding contract grep-able and keeps cases stable when
-    // the in-memory registry briefly carries a not-yet-flushed value during deploy windows).
-    int boundVersion =
-        versionRegistry
-            .currentVersion(caseType.id())
-            .orElseThrow(
-                () ->
-                    new WksVersionException(
-                        ErrorCode.WKS_VER_001,
-                        "CaseType "
-                            + caseType.id()
-                            + " has no published version yet — deploy completed?"));
 
     Instant now = clock.now();
     Case toPersist =

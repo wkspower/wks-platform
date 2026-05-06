@@ -3,9 +3,11 @@ package com.wkspower.platform.api;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.api.dto.ApiResponse;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
+import com.wkspower.platform.domain.exception.WksVersionException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -78,6 +80,22 @@ class GlobalExceptionHandlerTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().error().code()).isEqualTo("WKS-API-001");
     assertThat(response.getBody().error().field()).isEqualTo("email");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void wksVersionExceptionMapsTo503WithRetryAfter5() {
+    // Story 3.4.1 AC4 (finding I6) — WKS-VER-001 must surface as 503 + Retry-After: 5, NOT 409.
+    ResponseEntity<ApiResponse<Void>> response =
+        handler.handleVersion(
+            new WksVersionException(
+                ErrorCode.WKS_VER_001,
+                "CaseType j9 has no published version yet — deploy completed?"));
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+    assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("5");
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().error().code()).isEqualTo("WKS-VER-001");
   }
 
   @Test

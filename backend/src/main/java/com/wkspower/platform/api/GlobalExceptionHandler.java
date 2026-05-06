@@ -16,6 +16,7 @@ import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -204,8 +205,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   /**
-   * Story 3.4 / Decision 20 — CaseType version-registry exceptions. {@code WKS-VER-001} (no
-   * published version yet) → 409 Conflict.
+   * Story 3.4 / Decision 20 — CaseType version-registry exceptions. Story 3.4.1 AC4 (finding I6)
+   * flips the HTTP semantic from {@code 409 Conflict} (misleading — it is not a client conflict) to
+   * {@code 503 Service Unavailable} with a {@code Retry-After: 5} header: the registry-not- primed
+   * condition is recoverable (startup race, polling redeploy window) and "transient, retry safe" is
+   * the most actionable signal for SI operators.
    */
   @ExceptionHandler(com.wkspower.platform.domain.exception.WksVersionException.class)
   public ResponseEntity<ApiResponse<Void>> handleVersion(
@@ -213,7 +217,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     MDC.put(MDC_KEY, ex.getCode());
     try {
       log.warn("CaseType version-registry error: {}", ex.getCode());
-      return ResponseEntity.status(HttpStatus.CONFLICT)
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+          .header(HttpHeaders.RETRY_AFTER, "5")
           .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
     } finally {
       MDC.remove(MDC_KEY);
