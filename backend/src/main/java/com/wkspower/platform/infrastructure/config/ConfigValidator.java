@@ -126,6 +126,8 @@ public class ConfigValidator {
     // Story 4.2 AC5 — Mapping Layer validation runs after stage validation, with the stage id set
     // already known. The validator is collect-all; its findings merge into {@code errors} so a
     // single ValidationResult surfaces both stage and mapping failures (no parallel call site).
+    com.wkspower.platform.domain.config.model.MappingDefinition mappingDefinition =
+        com.wkspower.platform.domain.config.model.MappingDefinition.empty();
     if (mappingValidator != null) {
       Set<String> stageIds = new HashSet<>();
       for (StageDefinition sd : stages) {
@@ -133,6 +135,7 @@ public class ConfigValidator {
       }
       MappingValidator.Result mappingResult = mappingValidator.validate(raw, stageIds, bpmnFiles);
       errors.addAll(mappingResult.errors());
+      mappingDefinition = mappingResult.definition();
     }
 
     if (!errors.isEmpty()) {
@@ -151,7 +154,11 @@ public class ConfigValidator {
             listColumns,
             roles,
             stages);
-    return ValidationResult.ok(config, warnings);
+    // Story 4.3 — surface the validated MappingDefinition through ValidationResult so
+    // ConfigService can populate MappingRegistry on registration. Empty MappingDefinition is the
+    // first-class zero-attachment value (D22 — Story 4.2's MappingValidator returns empty()
+    // unconditionally when no attachments block is present).
+    return ValidationResult.ok(config, warnings, mappingDefinition);
   }
 
   /**

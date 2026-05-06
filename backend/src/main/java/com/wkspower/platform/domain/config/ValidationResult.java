@@ -1,6 +1,7 @@
 package com.wkspower.platform.domain.config;
 
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +15,24 @@ import java.util.Optional;
  * level but do not prevent the case-type from loading. Today only {@code WKS-CFG-013} (file field
  * marked {@code requiredOnCreate}) populates this list. Existing callers that read {@link
  * #errors()} see no behavior change.
+ *
+ * <p>Story 4.3 introduces {@link #mappingDefinition()} — the validated {@link MappingDefinition}
+ * produced by Story 4.2's {@code MappingValidator} when the YAML carries an {@code attachments:}
+ * block (or {@link MappingDefinition#empty()} when it does not). {@code ConfigService} threads this
+ * value into {@code MappingRegistry} after a successful registry write so the runtime router (Story
+ * 4.3) can resolve the active mapping by {@code (caseTypeId, version)}. The slot is optional —
+ * older callers and validation-failure paths continue to construct without it.
  */
 public record ValidationResult(
-    List<ErrorDetail> errors, List<ErrorDetail> warnings, Optional<CaseTypeConfig> config) {
+    List<ErrorDetail> errors,
+    List<ErrorDetail> warnings,
+    Optional<CaseTypeConfig> config,
+    Optional<MappingDefinition> mappingDefinition) {
 
   public ValidationResult {
     errors = List.copyOf(errors);
     warnings = warnings == null ? List.of() : List.copyOf(warnings);
+    mappingDefinition = mappingDefinition == null ? Optional.empty() : mappingDefinition;
     if (errors.isEmpty() == config.isEmpty()) {
       throw new IllegalStateException(
           "ValidationResult invariant: exactly one of errors-empty and config-present must hold "
@@ -32,16 +44,31 @@ public record ValidationResult(
     }
   }
 
+  /** Backward-compat 3-arg constructor — defaults {@link #mappingDefinition()} to empty. */
+  public ValidationResult(
+      List<ErrorDetail> errors, List<ErrorDetail> warnings, Optional<CaseTypeConfig> config) {
+    this(errors, warnings, config, Optional.empty());
+  }
+
   public static ValidationResult ok(CaseTypeConfig config) {
-    return new ValidationResult(List.of(), List.of(), Optional.of(config));
+    return new ValidationResult(List.of(), List.of(), Optional.of(config), Optional.empty());
   }
 
   public static ValidationResult ok(CaseTypeConfig config, List<ErrorDetail> warnings) {
-    return new ValidationResult(List.of(), warnings, Optional.of(config));
+    return new ValidationResult(List.of(), warnings, Optional.of(config), Optional.empty());
+  }
+
+  /**
+   * Story 4.3 — variant carrying the validated {@link MappingDefinition} for registry threading.
+   */
+  public static ValidationResult ok(
+      CaseTypeConfig config, List<ErrorDetail> warnings, MappingDefinition mappingDefinition) {
+    return new ValidationResult(
+        List.of(), warnings, Optional.of(config), Optional.ofNullable(mappingDefinition));
   }
 
   public static ValidationResult invalid(List<ErrorDetail> errors) {
-    return new ValidationResult(errors, List.of(), Optional.empty());
+    return new ValidationResult(errors, List.of(), Optional.empty(), Optional.empty());
   }
 
   public boolean isInvalid() {
