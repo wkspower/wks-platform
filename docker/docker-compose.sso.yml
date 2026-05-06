@@ -1,0 +1,31 @@
+# WKS Platform — OPTIONAL SSO seam (Keycloak).
+#
+# Stack on TOP of docker-compose.prod.yml; this file does NOT stand alone.
+#
+# Operator path:
+#   docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.sso.yml up
+#
+# Story 14.1 AC5 / 14.1.1 AC4: this is a forward-compat seam for Story 10.4
+# (Epic 7). Realms / clients are intentionally NOT pre-configured. Until 10.4
+# wires the SAML adapter, the WKS app emits WKS-AUTH-001 at WARN and built-in
+# cookie-JWT auth (Story 1.2) remains the sole auth gate — even when this file
+# is stacked and Keycloak is reachable.
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.5
+    container_name: wks-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: ${WKS_KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${WKS_KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME_STRICT: "false"
+    ports:
+      - "${WKS_KEYCLOAK_PORT:-8081}:8080"
+    volumes:
+      - wks-keycloakdata:/opt/keycloak/data
+    restart: unless-stopped
+
+volumes:
+  wks-keycloakdata:
+    driver: local

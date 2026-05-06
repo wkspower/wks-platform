@@ -38,10 +38,16 @@ public class KeycloakSeamAnnouncer {
   public void announce() {
     boolean enabled = env.getProperty("wks.keycloak.enabled", Boolean.class, Boolean.FALSE);
     if (enabled) {
+      // Story 14.1.1 AC3 (finding C4): the WARN message MUST be explicit that the
+      // seam is INERT today and that flipping the flag changes NOTHING about auth
+      // enforcement. The previous message said "auth-provider integration is gated
+      // on Epic 7" — too soft; operators were inferring "this WILL enforce SSO once
+      // I set the second flag" and shipping production with built-in cookie-JWT
+      // believing the SSO posture was active.
       LOG.warn(
-          "WKS-AUTH-001: Keycloak container provisioned but auth-provider integration is gated on"
-              + " Epic 7 (Story 10.4 — SSO/SAML via Keycloak, license-gated). Built-in auth"
-              + " remains active.");
+          "WKS-AUTH-001: Keycloak seam is currently INERT — built-in cookie-JWT remains the sole"
+              + " auth gate. SSO enforcement requires Story 10.4 (SAML via Keycloak realm) to"
+              + " land. To enforce auth posture, do NOT rely on this flag.");
     } else {
       LOG.info(
           "WKS auth: built-in (Keycloak/SSO disabled — set WKS_KEYCLOAK_ENABLED=true and run"

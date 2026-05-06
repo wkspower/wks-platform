@@ -115,9 +115,9 @@ jobs:
         # rationale (deploy scripts + templates + runbook intentionally
         # reference the forbidden tokens to ENFORCE the invariant).
         #
-        # Story 14.1 extends the scan paths to cover the new single-tenant
-        # production surface: docker/.env.production.example,
-        # docker/docker-compose.yml, docker/README.md, and
+        # Story 14.1 extends the scan paths to cover the single-tenant
+        # production surface: docker/.env.production.example, the dev/prod/sso
+        # compose files, docker/README.md, and
         # backend/src/main/resources/application-production.yml.
         run: |
           if grep -RIE '(tenant_id|tenantId|@TenantId)' \
@@ -131,6 +131,8 @@ jobs:
           # ENFORCE the invariant; we scan VALUE-bearing lines only.
           for f in docker/.env.production.example \
                    docker/docker-compose.yml \
+                   docker/docker-compose.prod.yml \
+                   docker/docker-compose.sso.yml \
                    backend/src/main/resources/application-production.yml; do
             if grep -nE '^[[:space:]]*[^#[:space:]].*(tenant_id|tenantId|@TenantId)' "$f" 2>/dev/null; then
               echo "Tenant invariant (D25) FAILED in $f (non-comment line). See docs/zero-tenant-id.md." >&2
@@ -163,11 +165,12 @@ jobs:
           cache-to: type=gha,mode=max
 
   production-profile-smoke:
-    # Story 14.1 AC6 — boot the production profile against real Postgres + MinIO
-    # via `docker compose --profile production up`, poll /api/health, and assert
-    # ZERO H2-driver loading in the container logs (the regression guard for
-    # Story 14.7 §8 / WKS-API-053). Re-uses Story 14.7's runtime tenant-id probe.
-    # Local replication required per "Match CI Locally" memory before PR.
+    # Story 14.1 AC6 — boot the production stack against real Postgres + MinIO
+    # via `docker compose -f docker/docker-compose.prod.yml up`, poll /api/health,
+    # and assert ZERO H2-driver loading in the container logs (the regression
+    # guard for Story 14.7 §8 / WKS-API-053). Re-uses Story 14.7's runtime
+    # tenant-id probe. Local replication required per "Match CI Locally" memory
+    # before PR.
     name: Production profile smoke (Story 14.1)
     runs-on: ubuntu-latest
     needs: [backend, frontend]
@@ -193,6 +196,16 @@ jobs:
         # decoding) that satisfies JwtTokenProvider's WKS-API-053 production
         # validation without exposing a real key. Operators MUST generate their
         # own with `openssl rand -base64 48`.
+        #
+        # Story 14.1.1 AC7: every required env var is set to a real (non-sentinel)
+        # value so the new ProductionBootstrapValidator's WKS-API-055 secret-rotation
+        # check passes. NO value below may equal `<MUST-BE-ROTATED>` — that is the
+        # exact literal the validator rejects.
+        #
+        # Story 14.1.1 fix-up: docker/.env is no longer tracked. Compose still
+        # interpolates `${...}` from this file when found alongside the compose
+        # YAML; we keep writing it here as the CI fixture mechanism. No
+        # COMPOSE_PROFILES is needed — the file-split makes profiles obsolete.
         run: |
           JWT_FIXTURE=$(printf 'wks-ci-fixture-jwt-secret-bytes-padding-padding-padding' | base64)
           cat > docker/.env <<EOF
@@ -200,7 +213,7 @@ jobs:
           WKS_DB_USER=wks
           WKS_DB_PASSWORD=ci-fixture-db-password
           WKS_STORAGE_ENDPOINT=http://minio:9000
-          WKS_STORAGE_KEY=minioadmin
+          WKS_STORAGE_KEY=ci-fixture-storage-key
           WKS_ADMIN_EMAIL=admin@ci.invalid
           WKS_ADMIN_PASSWORD=ci-fixture-admin-password
           WKS_LOCALE=en-IN
@@ -208,18 +221,18 @@ jobs:
           WKS_JWT_SECRET=${JWT_FIXTURE}
           WKS_OPENAPI_ENABLED=false
           WKS_KEYCLOAK_ENABLED=false
-          WKS_MINIO_ROOT_USER=minioadmin
+          WKS_MINIO_ROOT_USER=ci-fixture-minio-user
           WKS_MINIO_ROOT_PASSWORD=ci-fixture-minio-password
           WKS_HOST_PORT=8080
           EOF
 
-      - name: Bring up production profile stack
-        # Explicit service list excludes the no-profile dev `wks-platform`
-        # service. Per docker compose semantics, services without `profiles:`
-        # always run alongside profile-selected services — both bind :8080
-        # and collide. Listing services explicitly is the documented escape.
-        working-directory: docker
-        run: docker compose --profile production up -d postgres minio wks-platform-prod
+      - name: Bring up production stack
+        # Story 14.1.1 fix-up: the dev/prod stacks now live in separate compose
+        # files. `-f docker/docker-compose.prod.yml` selects the production stack
+        # directly — no profiles, no explicit service list needed. Port-8080
+        # collision is structurally impossible because the dev wks-platform
+        # service is no longer in this file.
+        run: docker compose -f docker/docker-compose.prod.yml up -d
 
       - name: Poll /api/health (90s deadline)
         run: |
@@ -234,10 +247,10 @@ jobs:
           done
           if [[ $healthy -ne 1 ]]; then
             echo "::error::/api/health did not become healthy within 90s"
-            docker compose -f docker/docker-compose.yml --profile production logs
+            docker compose -f docker/docker-compose.prod.yml logs
             exit 1
           fi
-          echo "Health OK"
+          echo "Health OK (liveness — see schema-readiness assertions below for readiness)"
 
       - name: Assert ZERO H2 driver in container logs (regression guard)
         # Story 14.7 §8 / WKS-API-053 — `Driver org.h2.Driver claims to not accept
@@ -250,6 +263,55 @@ jobs:
           fi
           echo "H2-driver invariant OK: no org.h2.Driver / jdbc:h2: references in production logs"
 
+      - name: Assert schema readiness (Story 14.1.1 AC6)
+        # Liveness (curl /api/health) ≠ readiness. Three positive structural
+        # assertions covering finding I19:
+        #   (a) Flyway applied N>=7 migrations (parsed from container logs).
+        #   (b) ProductionBootstrapValidator emitted RUNTIME INVARIANT OK
+        #       (proves WKS-API-053 datasource + WKS-API-055 secret checks both
+        #       passed during boot).
+        #   (c) The `cases` table is queryable via psql exec (returns a
+        #       structurally-valid result, even with zero rows).
+        run: |
+          logs=$(docker logs wks-platform-prod 2>&1)
+
+          # (a) Flyway migrations applied. Spring Boot's Flyway integration logs
+          # `Successfully applied N migrations to schema` when at least one ran;
+          # idempotent boots with no pending migrations log `Schema "public" is
+          # up to date. No migration necessary.` Either is acceptable; a missing
+          # Flyway log line is the failure mode this guards against.
+          flyway_applied=$(printf '%s' "$logs" | grep -Eo 'Successfully applied [0-9]+ migrations?' | grep -Eo '[0-9]+' | tail -n1 || true)
+          flyway_uptodate=$(printf '%s' "$logs" | grep -E 'Schema .* is up to date|No migration necessary' || true)
+          if [[ -z "$flyway_applied" && -z "$flyway_uptodate" ]]; then
+            echo "::error::Flyway migration log line missing — schema readiness cannot be confirmed."
+            exit 1
+          fi
+          if [[ -n "$flyway_applied" ]]; then
+            echo "Flyway applied $flyway_applied migrations."
+            if (( flyway_applied < 7 )); then
+              echo "::error::Expected >=7 Flyway migrations on a fresh production boot, got $flyway_applied."
+              exit 1
+            fi
+          else
+            echo "Flyway: $flyway_uptodate (idempotent boot)."
+          fi
+
+          # (b) RUNTIME INVARIANT OK — ProductionBootstrapValidator success line.
+          if ! printf '%s' "$logs" | grep -qE 'RUNTIME INVARIANT OK'; then
+            echo "::error::ProductionBootstrapValidator did not emit RUNTIME INVARIANT OK — WKS-API-053 / WKS-API-055 may have failed silently."
+            exit 1
+          fi
+          echo "RUNTIME INVARIANT OK present in logs."
+
+          # (c) Schema-readiness query against the cases table — a structurally
+          # valid SELECT proves Flyway DDL ran AND the JDBC pool reaches Postgres.
+          if ! docker compose -f docker/docker-compose.prod.yml exec -T postgres \
+                 psql -U wks -d wks -tAc 'SELECT 1 FROM cases LIMIT 1' >/dev/null; then
+            echo "::error::SELECT 1 FROM cases LIMIT 1 failed — cases table absent or pool unreachable."
+            exit 1
+          fi
+          echo "Schema-readiness query OK (cases table queryable)."
+
       - name: Run runtime ZERO-tenant_id invariant probe
         # Re-uses Story 14.7's already-shipped probe. AC6.6 + AC8 — extends the
         # runtime check to the production-profile container without re-implementation.
@@ -257,5 +319,4 @@ jobs:
 
       - name: Tear down (purge volumes)
         if: always()
-        working-directory: docker
-        run: docker compose --profile production down -v
+        run: docker compose -f docker/docker-compose.prod.yml down -v
