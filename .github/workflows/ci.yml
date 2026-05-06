@@ -106,13 +106,19 @@ jobs:
             > /tmp/wks-fixture/docker-compose.yml
           docker compose -f /tmp/wks-fixture/docker-compose.yml config -q
 
-      - name: Tenant invariant scan — operator surfaces (deploy/clients/)
-        # Story 14.7 AC9.3: dedicated scan of operator-supplied env files where
+      - name: Tenant invariant scan — operator surfaces (deploy/clients/, docker/.env*, application-production.yml)
+        # Story 14.7 AC9.3 (extended by Story 14.1 AC8): dedicated scan of
+        # operator-supplied env files + the production-profile YAML where
         # tenant_id leakage would be a real bug. Story 3.0's narrow Java/SQL
         # lint is intentionally left untouched — see docs/ops/per-client-deploy-runbook.md
         # and the Dev Notes block of 14-7-per-client-deploy-runbook.md for the
         # rationale (deploy scripts + templates + runbook intentionally
         # reference the forbidden tokens to ENFORCE the invariant).
+        #
+        # Story 14.1 extends the scan paths to cover the new single-tenant
+        # production surface: docker/.env.production.example,
+        # docker/docker-compose.yml, docker/README.md, and
+        # backend/src/main/resources/application-production.yml.
         run: |
           if grep -RIE '(tenant_id|tenantId|@TenantId)' \
                --exclude-dir=_fixture \
@@ -120,6 +126,17 @@ jobs:
             echo "Tenant invariant (D25) FAILED in deploy/clients/. See docs/zero-tenant-id.md." >&2
             exit 1
           fi
+          # Strip comment lines (env / YAML use `#`) — the AC4/AC8 mandatory
+          # header sentence intentionally references the forbidden tokens to
+          # ENFORCE the invariant; we scan VALUE-bearing lines only.
+          for f in docker/.env.production.example \
+                   docker/docker-compose.yml \
+                   backend/src/main/resources/application-production.yml; do
+            if grep -nE '^[[:space:]]*[^#[:space:]].*(tenant_id|tenantId|@TenantId)' "$f" 2>/dev/null; then
+              echo "Tenant invariant (D25) FAILED in $f (non-comment line). See docs/zero-tenant-id.md." >&2
+              exit 1
+            fi
+          done
           echo "Operator-surface tenant invariant (D25) OK"
 
       - name: Re-run Story 3.0 static lint
@@ -144,3 +161,101 @@ jobs:
           tags: wkspower/wks-platform:ci-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  production-profile-smoke:
+    # Story 14.1 AC6 — boot the production profile against real Postgres + MinIO
+    # via `docker compose --profile production up`, poll /api/health, and assert
+    # ZERO H2-driver loading in the container logs (the regression guard for
+    # Story 14.7 §8 / WKS-API-053). Re-uses Story 14.7's runtime tenant-id probe.
+    # Local replication required per "Match CI Locally" memory before PR.
+    name: Production profile smoke (Story 14.1)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build production image (load into local daemon)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: true
+          tags: wkspower/wks-platform:2.0.0-prod
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Write fixture .env (synthetic secrets — CI only)
+        # JWT secret is a CI-only deterministic Base64 string (≥32 bytes after
+        # decoding) that satisfies JwtTokenProvider's WKS-API-053 production
+        # validation without exposing a real key. Operators MUST generate their
+        # own with `openssl rand -base64 48`.
+        run: |
+          JWT_FIXTURE=$(printf 'wks-ci-fixture-jwt-secret-bytes-padding-padding-padding' | base64)
+          cat > docker/.env <<EOF
+          WKS_DB_URL=jdbc:postgresql://postgres:5432/wks
+          WKS_DB_USER=wks
+          WKS_DB_PASSWORD=ci-fixture-db-password
+          WKS_STORAGE_ENDPOINT=http://minio:9000
+          WKS_STORAGE_KEY=minioadmin
+          WKS_ADMIN_EMAIL=admin@ci.invalid
+          WKS_ADMIN_PASSWORD=ci-fixture-admin-password
+          WKS_LOCALE=en-IN
+          WKS_CORS_ORIGINS=http://localhost:8080
+          WKS_JWT_SECRET=${JWT_FIXTURE}
+          WKS_OPENAPI_ENABLED=false
+          WKS_KEYCLOAK_ENABLED=false
+          WKS_MINIO_ROOT_USER=minioadmin
+          WKS_MINIO_ROOT_PASSWORD=ci-fixture-minio-password
+          WKS_HOST_PORT=8080
+          EOF
+
+      - name: Bring up production profile stack
+        # Explicit service list excludes the no-profile dev `wks-platform`
+        # service. Per docker compose semantics, services without `profiles:`
+        # always run alongside profile-selected services — both bind :8080
+        # and collide. Listing services explicitly is the documented escape.
+        working-directory: docker
+        run: docker compose --profile production up -d postgres minio wks-platform-prod
+
+      - name: Poll /api/health (90s deadline)
+        run: |
+          deadline=$((SECONDS + 90))
+          healthy=0
+          while [[ $SECONDS -lt $deadline ]]; do
+            if curl -fsS http://localhost:8080/api/health >/dev/null 2>&1; then
+              healthy=1
+              break
+            fi
+            sleep 3
+          done
+          if [[ $healthy -ne 1 ]]; then
+            echo "::error::/api/health did not become healthy within 90s"
+            docker compose -f docker/docker-compose.yml --profile production logs
+            exit 1
+          fi
+          echo "Health OK"
+
+      - name: Assert ZERO H2 driver in container logs (regression guard)
+        # Story 14.7 §8 / WKS-API-053 — `Driver org.h2.Driver claims to not accept
+        # jdbcUrl, jdbc:postgresql://...`. THIS is the assertion that catches it.
+        run: |
+          logs=$(docker logs wks-platform-prod 2>&1)
+          if printf '%s' "$logs" | grep -E 'org\.h2\.Driver|jdbc:h2:'; then
+            echo "::error::H2 driver loaded under production profile (regression — Story 14.7 §8)"
+            exit 1
+          fi
+          echo "H2-driver invariant OK: no org.h2.Driver / jdbc:h2: references in production logs"
+
+      - name: Run runtime ZERO-tenant_id invariant probe
+        # Re-uses Story 14.7's already-shipped probe. AC6.6 + AC8 — extends the
+        # runtime check to the production-profile container without re-implementation.
+        run: ./deploy/probes/check-runtime-no-tenant-id.sh http://localhost:8080
+
+      - name: Tear down (purge volumes)
+        if: always()
+        working-directory: docker
+        run: docker compose --profile production down -v
