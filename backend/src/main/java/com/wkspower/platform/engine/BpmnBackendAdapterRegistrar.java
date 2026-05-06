@@ -44,8 +44,8 @@ public class BpmnBackendAdapterRegistrar {
 
   /**
    * Eagerly subscribe the adapter to the signal handler at boot so that BPMN execution-listener
-   * callbacks from pre-deploy process instances (i.e. surviving a JVM restart before any
-   * {@link ConfigDeployed} fires) are not silently dropped.
+   * callbacks from pre-deploy process instances (i.e. surviving a JVM restart before any {@link
+   * ConfigDeployed} fires) are not silently dropped.
    */
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
