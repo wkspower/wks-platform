@@ -214,8 +214,12 @@ jobs:
           EOF
 
       - name: Bring up production profile stack
+        # Explicit service list excludes the no-profile dev `wks-platform`
+        # service. Per docker compose semantics, services without `profiles:`
+        # always run alongside profile-selected services — both bind :8080
+        # and collide. Listing services explicitly is the documented escape.
         working-directory: docker
-        run: docker compose --profile production up -d
+        run: docker compose --profile production up -d postgres minio wks-platform-prod
 
       - name: Poll /api/health (90s deadline)
         run: |
