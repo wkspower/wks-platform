@@ -157,6 +157,7 @@ class CaseTypeStartupLoaderTest {
           }
         },
         event -> {},
-        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry());
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry(),
+        new com.wkspower.platform.domain.service.MappingRegistry());
   }
 }

@@ -71,7 +71,8 @@ class ConfigServiceDeployTest {
         bpmn,
         engine,
         publisher,
-        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry());
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry(),
+        new MappingRegistry());
   }
 
   // ---- four-cases enumeration --------------------------------------------
