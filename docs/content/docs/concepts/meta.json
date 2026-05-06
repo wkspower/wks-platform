@@ -1,0 +1,15 @@
+{
+  "title": "Concepts",
+  "pages": [
+    "cases-first-processes-optional",
+    "case-types",
+    "cases",
+    "stages",
+    "statuses",
+    "archetypes",
+    "ad-hoc-tasks",
+    "attached-processes",
+    "coming-from-camunda",
+    "forms"
+  ]
+}
