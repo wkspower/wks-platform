@@ -1,6 +1,8 @@
 package com.wkspower.platform.domain.service;
 
 import com.wkspower.platform.domain.port.BackendAdapter;
+import com.wkspower.platform.domain.port.BackendSignalHandler;
+import com.wkspower.platform.domain.port.BackendSignalSubscription;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,10 +32,24 @@ import java.util.concurrent.ConcurrentMap;
 public class BackendAdapterBinder {
 
   private final ConcurrentMap<CaseTypeRef, BackendAdapter> registry = new ConcurrentHashMap<>();
+  private final ConcurrentMap<BackendAdapter, BackendSignalSubscription> subscriptions =
+      new ConcurrentHashMap<>();
   private final NullAdapter nullAdapter;
+  private final BackendSignalHandler handler;
 
   public BackendAdapterBinder(NullAdapter nullAdapter) {
+    this(nullAdapter, null);
+  }
+
+  /**
+   * Story 4.4a constructor — wired with the production {@link BackendSignalHandler} (the {@code
+   * BackendSignalRouter}). When provided, every {@link #register(CaseTypeRef, BackendAdapter)} call
+   * ensures the adapter is subscribed to the router exactly once (single-subscriber invariant;
+   * ArchUnit restricts {@link BackendAdapter#onBackendSignal} callers to router + binder).
+   */
+  public BackendAdapterBinder(NullAdapter nullAdapter, BackendSignalHandler handler) {
     this.nullAdapter = Objects.requireNonNull(nullAdapter, "nullAdapter");
+    this.handler = handler;
   }
 
   /**
@@ -60,6 +76,12 @@ public class BackendAdapterBinder {
     Objects.requireNonNull(caseType, "caseType");
     Objects.requireNonNull(adapter, "adapter");
     registry.put(caseType, adapter);
+    if (handler != null) {
+      // Subscribe each distinct adapter exactly once. computeIfAbsent serialises the
+      // onBackendSignal call so the single-subscriber invariant (Story 4.3 AC6) holds even when
+      // multiple CaseTypes share an adapter instance.
+      subscriptions.computeIfAbsent(adapter, a -> a.onBackendSignal(handler));
+    }
   }
 
   /**

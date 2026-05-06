@@ -8,10 +8,10 @@ import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
+import com.wkspower.platform.engine.properties.CamundaPropertyReader;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,10 +29,7 @@ import org.cibseven.bpm.engine.repository.Deployment;
 import org.cibseven.bpm.engine.repository.ProcessDefinition;
 import org.cibseven.bpm.engine.runtime.ProcessInstance;
 import org.cibseven.bpm.model.bpmn.BpmnModelInstance;
-import org.cibseven.bpm.model.bpmn.instance.ExtensionElements;
 import org.cibseven.bpm.model.bpmn.instance.UserTask;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperties;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -475,21 +472,13 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
     return readUserTaskProperty(userTask, "archetype");
   }
 
-  /** Read a single named {@code camunda:property} from a user task's extension elements. */
+  /**
+   * Read a single named {@code camunda:property} from a user task's extension elements. Story 4.4a
+   * — delegates to {@link CamundaPropertyReader} (consolidation per {@code
+   * feedback_consolidate_property_readers.md}).
+   */
   private static String readUserTaskProperty(UserTask userTask, String name) {
-    ExtensionElements ext = userTask.getExtensionElements();
-    if (ext == null) {
-      return null;
-    }
-    Collection<CamundaProperties> blocks = ext.getChildElementsByType(CamundaProperties.class);
-    for (CamundaProperties block : blocks) {
-      for (CamundaProperty p : block.getCamundaProperties()) {
-        if (name.equals(p.getCamundaName())) {
-          return p.getCamundaValue();
-        }
-      }
-    }
-    return null;
+    return CamundaPropertyReader.read(userTask, name);
   }
 
   private static UUID parseCaseId(Object raw, String taskId) {

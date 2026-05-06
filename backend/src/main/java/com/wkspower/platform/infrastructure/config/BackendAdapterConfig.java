@@ -14,14 +14,18 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Story 4.1 — wires the pure-Java {@link NullAdapter} and {@link BackendAdapterBinder} (both in
- * {@code domain/service}, framework-free per NFR36) as Spring singletons so future call sites
- * (Story 4.4 / 4.5) can inject {@code BackendAdapterBinder}.
+ * {@code domain/service}, framework-free per NFR36) as Spring singletons so call sites (Stories 4.4
+ * / 4.5) can inject {@code BackendAdapterBinder}.
  *
- * <p>Story 4.3 — extends with two new beans: {@link MappingRegistry} (runtime index from {@code
- * (caseTypeId, version)} → {@code MappingDefinition}, populated at deploy time by {@code
- * ConfigService}) and {@link BackendSignalRouter} (single subscriber for every {@code
- * BackendAdapter.onBackendSignal} surface). Both stay framework-free; this config is the only
- * Spring boundary.
+ * <p>Story 4.3 — extends with two new beans: {@link MappingRegistry} (runtime index) and {@link
+ * BackendSignalRouter} (single subscriber for every {@code BackendAdapter.onBackendSignal}
+ * surface).
+ *
+ * <p>Story 4.4a — wires the binder with the production {@link BackendSignalRouter} as its
+ * single-subscriber handler so every adapter registered through {@link
+ * BackendAdapterBinder#register(com.wkspower.platform.domain.port.CaseTypeRef,
+ * com.wkspower.platform.domain.port.BackendAdapter)} is automatically subscribed to the router.
+ * Routes {@code BpmnBackendAdapter}'s emissions through the Mapping Layer (Decision 22).
  */
 @Configuration
 public class BackendAdapterConfig {
@@ -32,8 +36,9 @@ public class BackendAdapterConfig {
   }
 
   @Bean
-  public BackendAdapterBinder backendAdapterBinder(NullAdapter nullAdapter) {
-    return new BackendAdapterBinder(nullAdapter);
+  public BackendAdapterBinder backendAdapterBinder(
+      NullAdapter nullAdapter, BackendSignalRouter backendSignalRouter) {
+    return new BackendAdapterBinder(nullAdapter, backendSignalRouter);
   }
 
   /**
