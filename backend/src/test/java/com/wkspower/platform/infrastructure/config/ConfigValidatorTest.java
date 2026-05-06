@@ -605,7 +605,202 @@ class ConfigValidatorTest {
     var statuses = result.config().get().statuses();
     assertThat(statuses).hasSize(2);
     assertThat(statuses.get(0).id()).isEqualTo("open");
+    assertThat(statuses.get(0).terminal()).isFalse();
     assertThat(statuses.get(1).id()).isEqualTo("closed");
+    // Story 3.6 AC1 — closed defaults to terminal:true (deferred from Story 3.2).
+    assertThat(statuses.get(1).terminal()).isTrue();
+  }
+
+  // ---- Story 3.6 — stage-scoped status sets (AC2, AC3, AC1) ----
+
+  @Test
+  void story36_stageScopedStatuses_parsesAndExposesTerminal() {
+    String yaml =
+        """
+        id: ct-stage-status
+        displayName: CT Stage Status
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view, create]
+        stages:
+          - id: underwriting
+            displayName: Underwriting
+            statuses:
+              - { id: pending-docs, displayName: Pending, color: amber }
+              - { id: in-review, displayName: In Review, color: blue }
+              - { id: ready-for-decision, displayName: Ready, color: emerald, terminal: true }
+            initialStatus: pending-docs
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("got %s", result.errors()).isFalse();
+    var stage = result.config().get().stage("underwriting").orElseThrow();
+    assertThat(stage.statusesOpt()).isPresent();
+    assertThat(stage.statusesOpt().get()).hasSize(3);
+    assertThat(stage.statusesOpt().get().get(2).terminal()).isTrue();
+    assertThat(stage.initialStatus()).contains("pending-docs");
+  }
+
+  @Test
+  void story36_stageScopedStatuses_initialStatusDefaultsToFirstDeclared() {
+    String yaml =
+        """
+        id: ct-init-default
+        displayName: CT Init
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view, create]
+        stages:
+          - id: intake
+            displayName: Intake
+            statuses:
+              - { id: collecting, displayName: Collecting, color: blue }
+              - { id: ready, displayName: Ready, color: emerald, terminal: true }
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("got %s", result.errors()).isFalse();
+    var stage = result.config().get().stage("intake").orElseThrow();
+    assertThat(stage.initialStatus()).contains("collecting");
+  }
+
+  @Test
+  void story36_stageOmittingStatuses_fallsBackToFlatSet() {
+    String yaml =
+        """
+        id: ct-flat-fallback
+        displayName: Flat
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: only-stage
+            displayName: Only
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("got %s", result.errors()).isFalse();
+    var ct = result.config().get();
+    var stage = ct.stage("only-stage").orElseThrow();
+    assertThat(stage.statusesOpt()).isEmpty();
+    // Resolver returns flat fallback.
+    assertThat(ct.statusesFor("only-stage")).hasSize(2);
+    assertThat(ct.statusesFor("only-stage").get(0).id()).isEqualTo("open");
+  }
+
+  @Test
+  void story36_duplicateStatusIdInStage_emitsWksStg005() {
+    String yaml =
+        """
+        id: ct-dup
+        displayName: Dup
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: stage-a
+            displayName: A
+            statuses:
+              - { id: dup, displayName: One, color: blue }
+              - { id: dup, displayName: Two, color: amber }
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors().stream().anyMatch(e -> e.code().equals("WKS-STG-005"))).isTrue();
+  }
+
+  @Test
+  void story36_initialStatusMissingTarget_emitsWksStg006() {
+    String yaml =
+        """
+        id: ct-missing-init
+        displayName: Mi
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: stage-a
+            displayName: A
+            statuses:
+              - { id: real, displayName: Real, color: blue }
+            initialStatus: ghost
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors().stream().anyMatch(e -> e.code().equals("WKS-STG-006"))).isTrue();
+  }
+
+  @Test
+  void story36_emptyStageStatusesList_emitsWksStg008() {
+    String yaml =
+        """
+        id: ct-empty
+        displayName: E
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: stage-a
+            displayName: A
+            statuses: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors().stream().anyMatch(e -> e.code().equals("WKS-STG-008"))).isTrue();
+  }
+
+  @Test
+  void story36_stageScopedStatusIdPatternViolation_emitsWksCfg032Reused() {
+    // Q2 LOCKED — stage-scoped status id pattern violation reuses WKS-CFG-032; message
+    // disambiguates ("Stage-scoped status id"). WKS-STG-007 is NOT introduced.
+    String yaml =
+        """
+        id: ct-bad-id
+        displayName: Bad
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: stage-a
+            displayName: A
+            statuses:
+              - { id: BAD_ID, displayName: Bad, color: blue }
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors().stream().anyMatch(e -> e.code().equals("WKS-CFG-032"))).isTrue();
   }
 
   // ---- helpers ----

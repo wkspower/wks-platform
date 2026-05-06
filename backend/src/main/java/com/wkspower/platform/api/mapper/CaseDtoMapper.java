@@ -7,9 +7,11 @@ import com.wkspower.platform.api.dto.response.CaseTypeViewDto.FieldView;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.OptionView;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.StageDefinitionView;
 import com.wkspower.platform.api.dto.response.StageView;
+import com.wkspower.platform.api.dto.response.StatusView;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
+import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.model.Stage;
@@ -78,7 +80,34 @@ public final class CaseDtoMapper {
         domain.currentStageId(),
         domain.currentStageOrdinal(),
         // Story 3.3 — full stage history projection (empty list for zero-stage CaseTypes).
-        stageViews);
+        stageViews,
+        // Story 3.6 AC8 — resolved status set for the active stage (stage-scoped if declared, flat
+        // fallback otherwise). Empty only when both stage-scoped and flat sets are empty — should
+        // be impossible after Story 3.2's default. Decision 19's unbranched-paths invariant: this
+        // call site does not branch on stage presence; statusesFor() handles the absence in one
+        // place.
+        toAvailableStatuses(caseType, domain.currentStageId()));
+  }
+
+  /**
+   * Story 3.6 AC8 — resolve the available status list for the case's current stage. Pure read; no
+   * I/O. The {@code currentStageId} can be {@code null} (zero-stage CaseType, or all stages
+   * completed) — in that case {@code statusesFor(null)} returns the flat set.
+   */
+  static List<StatusView> toAvailableStatuses(CaseTypeConfig caseType, String currentStageId) {
+    List<StatusDefinition> resolved = caseType.statusesFor(currentStageId);
+    List<StatusView> out = new java.util.ArrayList<>(resolved.size());
+    for (int i = 0; i < resolved.size(); i++) {
+      StatusDefinition s = resolved.get(i);
+      out.add(
+          new StatusView(
+              s.id(),
+              s.displayName(),
+              s.color() == null ? null : s.color().wire(),
+              s.terminal(),
+              i));
+    }
+    return out;
   }
 
   static StageView toStageView(Stage stage, StageDefinition def) {

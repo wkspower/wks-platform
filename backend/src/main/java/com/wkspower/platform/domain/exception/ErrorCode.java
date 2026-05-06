@@ -216,6 +216,41 @@ public enum ErrorCode {
   /** advance / skipTo references an unknown caseId. HTTP 404. */
   WKS_STG_004("WKS-STG-004"),
 
+  // Story 3.6 — stage-scoped status set deploy-time + transition-time codes.
+  // Band: WKS-STG-005..011 consumed; -009 reserved for Story 3.7 / 3.8 mutate-class CRUD.
+  /** Duplicate status id within a stage's status set (Story 3.6 AC3). HTTP 422. */
+  WKS_STG_005("WKS-STG-005"),
+  /**
+   * Stage's {@code initialStatus:} references an id not present in the stage's status set (Story
+   * 3.6 AC3). HTTP 422.
+   */
+  WKS_STG_006("WKS-STG-006"),
+  /**
+   * Stage's {@code statuses: []} is empty (key declared but empty list — must be {@code >= 1} or
+   * omit the key entirely to fall back to the flat set per Story 3.6 AC2). HTTP 422.
+   */
+  WKS_STG_008("WKS-STG-008"),
+  /**
+   * RESERVED for Story 3.7 (live append) / Story 3.8 (mutate-class version-bump enforcement). Story
+   * 3.6 reserves the slot in the band; not emitted by any path in this story.
+   */
+  WKS_STG_009("WKS-STG-009"),
+  /**
+   * Story 3.6 AC6 — transition request targets a status id that is not declared on the case's
+   * current stage's status set. The Story 3.6 dev story originally suggested reusing {@code
+   * WKS-STG-002}; that code is wire-locked by Story 3.1 ("backward skip"), so a fresh code lands
+   * here per {@code feedback_error_codes_are_wire_contract.md}. HTTP 422.
+   */
+  WKS_STG_010("WKS-STG-010"),
+  /**
+   * Story 3.6 AC6 — transition rejected because the case's current status declares {@code terminal:
+   * true} on the active stage. Same-stage transitions are blocked; advance the stage to continue.
+   * The Story 3.6 dev story originally suggested reusing {@code WKS-STG-001}; that code is
+   * wire-locked by Story 3.1 ("advance/skip on completed/zero-stage case"). Fresh code per {@code
+   * feedback_error_codes_are_wire_contract.md}. HTTP 422.
+   */
+  WKS_STG_011("WKS-STG-011"),
+
   // 409 / 422 — CaseType Version Registry (Story 3.4 / Decision 20).
   // Band: WKS-VER-001..099 RESERVED for version-registry-related errors. Future stories (3.5
   // bootstrap, 3.8 blast-radius validator, 3.9 rebase tooling) draw from this band per

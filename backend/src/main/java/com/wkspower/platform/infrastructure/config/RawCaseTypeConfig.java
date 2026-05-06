@@ -85,8 +85,22 @@ public record RawCaseTypeConfig(
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawOption(String label, String value) {}
 
+  /**
+   * One {@code statuses[]} entry. Story 3.6 AC1 — adds {@code terminal} (boxed {@link Boolean};
+   * {@code null} means "key omitted in YAML" and is treated as {@code false} downstream).
+   */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public record RawStatus(String id, String displayName, String color) {}
+  public record RawStatus(String id, String displayName, String color, Boolean terminal) {
+
+    /**
+     * Backward-compat constructor — pre-Story 3.6 callers that didn't know about the {@code
+     * terminal} slot. Defaults {@code terminal} to {@code null} (loader treats absence as {@code
+     * false}).
+     */
+    public RawStatus(String id, String displayName, String color) {
+      this(id, displayName, color, null);
+    }
+  }
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawRole(String name, List<String> permissions) {}
@@ -105,17 +119,30 @@ public record RawCaseTypeConfig(
    * form lands via {@link #fromObject} (PROPERTIES creator). Both produce the same record shape so
    * the validator can iterate uniformly.
    */
-  public record RawStage(String id, String displayName) {
+  public record RawStage(
+      String id, String displayName, List<RawStatus> statuses, String initialStatus) {
+
+    /**
+     * Backward-compat constructor — pre-Story 3.6 callers that didn't know about stage-scoped
+     * statuses. Defaults both new slots to {@code null} ("not declared in YAML"; resolver falls
+     * back to the flat case-type-level status set per Story 3.6 AC2).
+     */
+    public RawStage(String id, String displayName) {
+      this(id, displayName, null, null);
+    }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static RawStage fromString(String id) {
-      return new RawStage(id, null);
+      return new RawStage(id, null, null, null);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static RawStage fromObject(
-        @JsonProperty("id") String id, @JsonProperty("displayName") String displayName) {
-      return new RawStage(id, displayName);
+        @JsonProperty("id") String id,
+        @JsonProperty("displayName") String displayName,
+        @JsonProperty("statuses") List<RawStatus> statuses,
+        @JsonProperty("initialStatus") String initialStatus) {
+      return new RawStage(id, displayName, statuses, initialStatus);
     }
   }
 
