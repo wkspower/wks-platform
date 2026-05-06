@@ -114,7 +114,9 @@ public class LicenseServiceImpl implements LicenseService {
    * Polls every {@code wks.license.poll-interval-seconds} seconds (default 30). The fixed-delay
    * expression binds at context refresh time.
    */
-  @Scheduled(fixedDelayString = "${wks.license.poll-interval-seconds:30}000")
+  @Scheduled(
+      fixedDelayString = "${wks.license.poll-interval-seconds:30}000",
+      initialDelayString = "${wks.license.poll-interval-seconds:30}000")
   public void poll() {
     if (licenseFilePath == null || licenseFilePath.isBlank()) {
       return; // OSS mode — nothing to poll
