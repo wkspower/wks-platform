@@ -1,5 +1,6 @@
 package com.wkspower.platform.infrastructure.license;
 
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.service.LicenseService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -146,14 +147,18 @@ public class LicenseServiceImpl implements LicenseService {
   public void load() {
     if (licenseFilePath == null || licenseFilePath.isBlank()) {
       state.set(LicenseState.oss());
-      LOG.info("[LicenseService] No license file found — operating in OSS mode");
+      LOG.info(
+          "{} No license file configured — operating in OSS mode", ErrorCode.WKS_LIC_001.wire());
       return;
     }
 
     Path path = Path.of(licenseFilePath);
     if (!Files.exists(path)) {
       state.set(LicenseState.oss());
-      LOG.info("[LicenseService] No license file found — operating in OSS mode");
+      LOG.info(
+          "{} License file not found at '{}' — operating in OSS mode",
+          ErrorCode.WKS_LIC_001.wire(),
+          licenseFilePath);
       return;
     }
 
@@ -163,7 +168,9 @@ public class LicenseServiceImpl implements LicenseService {
     } catch (IOException e) {
       state.set(LicenseState.degraded());
       LOG.warn(
-          "[LicenseService] License load failed: {} — operating in degraded state", e.getMessage());
+          "{} License file unreadable: {} — operating in degraded state",
+          ErrorCode.WKS_LIC_001.wire(),
+          e.getMessage());
       return;
     }
 
@@ -187,7 +194,7 @@ public class LicenseServiceImpl implements LicenseService {
       LicenseState loaded = LicenseState.loaded(tier, holder, expiry, features);
       state.set(loaded);
       LOG.info(
-          "[LicenseService] License loaded — tier={}, holder={}, expires={}",
+          "[LicenseService] License active — tier={}, holder={}, expires={}",
           tier,
           holder,
           expiry != null ? expiry.toString() : "never");
@@ -195,7 +202,9 @@ public class LicenseServiceImpl implements LicenseService {
     } catch (JwtException | IllegalArgumentException e) {
       state.set(LicenseState.degraded());
       LOG.warn(
-          "[LicenseService] License load failed: {} — operating in degraded state", e.getMessage());
+          "{} License JWT invalid or expired: {} — operating in degraded state",
+          ErrorCode.WKS_LIC_002.wire(),
+          e.getMessage());
     }
   }
 

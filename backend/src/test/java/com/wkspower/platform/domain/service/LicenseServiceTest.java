@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.infrastructure.license.LicenseServiceImpl;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -167,20 +169,79 @@ class LicenseServiceTest {
     assertThat(svc.getTier()).isEqualTo("team");
     assertThat(svc.isFeatureEnabled("reports")).isTrue();
 
-    // Step 2 — delete the file (simulates license removal)
+    // Step 2 — delete the file (simulates license removal).
+    // Use poll() so the lastModified-comparison gate is exercised (AC5). poll() detects
+    // the missing file because lastModifiedSeen differs from its initial value (0 sentinel).
     Files.delete(licenseFile);
-    svc.load(); // trigger manual reload (poll() calls load() internally)
+    svc.poll();
 
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("reports")).isFalse();
 
-    // Step 3 — write a new (different tier) valid JWT
+    // Step 3 — write a new (different tier) valid JWT.
+    // Sleep 10 ms to ensure the OS-level lastModified timestamp advances so poll()'s
+    // lastModified comparison detects the change.
+    Thread.sleep(10);
     String jwt2 = buildValidJwt("enterprise", "HotReload Inc", List.of("reports", "sso"), expiry);
     Files.writeString(licenseFile, jwt2, StandardCharsets.UTF_8);
-    svc.load(); // trigger manual reload
+    svc.poll();
 
     assertThat(svc.getTier()).isEqualTo("enterprise");
     assertThat(svc.isFeatureEnabled("reports")).isTrue();
     assertThat(svc.isFeatureEnabled("sso")).isTrue();
+  }
+
+  // -------------------------------------------------------------------------
+  // Fix 3 — Expired JWT: falls back to degraded state, no exception thrown
+  // -------------------------------------------------------------------------
+
+  @Test
+  void expiredJwt_degradedState_noException() throws IOException {
+    // Build a JWT whose expiry is 60 seconds in the past.
+    String jwt =
+        Jwts.builder()
+            .subject("Expired Corp")
+            .expiration(Date.from(Instant.now().minusSeconds(60)))
+            .claim("tier", "enterprise")
+            .claim("features", List.of("advanced-reporting"))
+            .signWith(testKeyPair.getPrivate())
+            .compact();
+    Path licenseFile = writeLicenseFile(jwt);
+
+    LicenseServiceImpl svc = serviceFor(licenseFile.toString());
+
+    // JJWT rejects expired tokens with JwtException → service falls to degraded/oss state
+    assertThat(svc.getTier()).isEqualTo("oss");
+    assertThat(svc.isFeatureEnabled("advanced-reporting")).isFalse();
+    assertThat(svc.getLicenseHolder()).isNull();
+    assertThat(svc.getExpiry()).isNull();
+  }
+
+  // -------------------------------------------------------------------------
+  // Fix 5 — Algorithm-pinning: HS256 token rejected, no exception thrown
+  // -------------------------------------------------------------------------
+
+  @Test
+  void hs256SignedJwt_rejected_degradedState_noException() throws IOException {
+    // Build a JWT signed with HMAC-SHA256 (wrong algorithm — service expects Ed25519).
+    // JJWT 0.12.x's verifyWith(Ed25519PublicKey) rejects non-EdDSA tokens because the
+    // public key type mismatches the HMAC algorithm, so no explicit algorithm pin is needed.
+    SecretKey hmacKey = Keys.hmacShaKeyFor(new byte[32]);
+    String jwt =
+        Jwts.builder()
+            .subject("Attacker Corp")
+            .expiration(Date.from(Instant.now().plus(365, ChronoUnit.DAYS)))
+            .claim("tier", "enterprise")
+            .claim("features", List.of("everything"))
+            .signWith(hmacKey, Jwts.SIG.HS256)
+            .compact();
+    Path licenseFile = writeLicenseFile(jwt);
+
+    LicenseServiceImpl svc = serviceFor(licenseFile.toString());
+
+    // Algorithm mismatch → JwtException → degraded/oss state; no exception escapes
+    assertThat(svc.getTier()).isEqualTo("oss");
+    assertThat(svc.isFeatureEnabled("everything")).isFalse();
+    assertThat(svc.getLicenseHolder()).isNull();
   }
 }

@@ -1,5 +1,6 @@
 package com.wkspower.platform.infrastructure.config;
 
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.service.LicenseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +37,12 @@ public class LicenseSeamAnnouncer {
     String tier = licenseService.getTier();
     if ("oss".equals(tier)) {
       LOG.info(
-          "WKS license: no valid license loaded — operating in OSS mode."
-              + " Set WKS_LICENSE_FILE to the path of a signed license JWT to enable EE features.");
+          "{} WKS license: no valid license loaded — operating in OSS mode."
+              + " Set WKS_LICENSE_FILE to the path of a signed license JWT to enable EE features.",
+          ErrorCode.WKS_LIC_001.wire());
     } else {
       LOG.info(
-          "WKS-LIC-001: License active — tier={}, holder={}, expires={}",
+          "WKS license active — tier={}, holder={}, expires={}",
           tier,
           licenseService.getLicenseHolder(),
           licenseService.getExpiry() != null ? licenseService.getExpiry().toString() : "never");
