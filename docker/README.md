@@ -11,7 +11,9 @@ cd docker
 docker compose up --build
 ```
 
-H2 file-mode datasource at `./data/`, local storage, console logging. Story 1.1 contract — boots without any `.env`.
+H2 file-mode datasource at `./data/`, local storage, console logging. Story 1.1 contract — boots without any operator-supplied secrets.
+
+The dev `wks-platform` service is scoped to Compose profile `dev` (Story 14.1.1 AC1, finding C5 — without this scoping, `--profile production` would also start the dev service and collide on host port 8080). The tracked file `docker/.env` defaults `COMPOSE_PROFILES=dev` so bare `docker compose up` keeps working with no flag and no operator action. To override (e.g. start the production stack), copy `.env.production.example` over `.env` and fill in secrets — the example sets `COMPOSE_PROFILES=production`.
 
 ## Production quick-start (single-tenant, Postgres + MinIO)
 
@@ -38,12 +40,41 @@ The `.env` file is gitignored. `.env.production.example` is the tracked template
 docker compose --profile production --profile production-sso up
 ```
 
-Two switches gate SSO activation:
+`WKS_KEYCLOAK_ENABLED` is **RESERVED — forward-compat seam for Story 10.4. Setting this to `true` today logs a WARN at boot and changes NOTHING about auth enforcement. Built-in cookie-JWT is the sole auth gate until Story 10.4 ships.** (Story 14.1.1 AC4, finding C4.) The compose `production-sso` profile provisions a Keycloak container so realms can be pre-baked ahead of 10.4, but no WKS code path consumes the container until 10.4 wires the SAML adapter. Realms / clients are NOT pre-configured — Story 10.4 owns that.
 
-1. `WKS_KEYCLOAK_ENABLED=true` in `.env`, AND
-2. `--profile production-sso` on the compose command.
+When `WKS_KEYCLOAK_ENABLED=true` the application emits `WKS-AUTH-001` at WARN explicitly stating the seam is INERT.
 
-The Keycloak container is provisioned but auth-provider integration is gated on Story 10.4 / Epic 7 (license-tier SSO). Until then the application emits `WKS-AUTH-001` at WARN and built-in cookie-JWT auth (Story 1.2) remains active. Realms / clients are NOT pre-configured — Story 10.4 owns that.
+## Production rotation guidance (Story 14.1.1 AC7)
+
+Every value marked `<MUST-BE-ROTATED>` in `docker/.env.production.example` is a sentinel. The backend boot validator (`ProductionBootstrapValidator`) rejects unrotated values under `--profile production` and fails closed with `WKS-API-055` — the application refuses to start until each is replaced with a real secret. Rotate in `docker/.env` **before** `docker compose up`:
+
+| Env var | Generate with | Notes |
+| --- | --- | --- |
+| `WKS_DB_PASSWORD` | `openssl rand -base64 32` | Postgres role password; matches `POSTGRES_PASSWORD` for the bundled container. |
+| `WKS_STORAGE_KEY` | `openssl rand -base64 32` | MinIO secret key consumed by the WKS app (Decision 8 §437). |
+| `WKS_ADMIN_EMAIL` | operator-chosen address | First-boot admin login. `WKS-API-051` fails closed if empty. |
+| `WKS_ADMIN_PASSWORD` | `openssl rand -base64 24` | First-boot admin password. |
+| `WKS_JWT_SECRET` | `openssl rand -base64 48` | Base64-encoded HMAC key, ≥32 bytes after decode. `WKS-API-053` fails closed if missing / invalid Base64 / too short. |
+| `WKS_MINIO_ROOT_USER` | operator-chosen identifier | MinIO root user; the bundled container's admin login. |
+| `WKS_MINIO_ROOT_PASSWORD` | `openssl rand -base64 32` | MinIO root password. |
+| `WKS_KEYCLOAK_ADMIN` | operator-chosen identifier | Only consumed under `--profile production-sso`; rotate before bringing up SSO. |
+| `WKS_KEYCLOAK_ADMIN_PASSWORD` | `openssl rand -base64 24` | Only consumed under `--profile production-sso`. |
+
+Failed validation aborts startup with a multi-line `WKS-API-055` log entry naming every offending var. Rotate, restart, repeat.
+
+## Multi-tenant on same host (Story 14.1.1 AC8)
+
+Operators running multiple single-tenant 14.1 instances on one host MUST set `COMPOSE_PROJECT_NAME` per deploy. Compose scopes named volumes and container names by project; without distinct project names, two deploys share the `wks-pgdata` / `wks-miniodata` volumes and clobber each other.
+
+```bash
+# First deploy.
+COMPOSE_PROJECT_NAME=wks-clientA docker compose --profile production up -d
+
+# Second deploy on the same host — distinct volumes + container names.
+COMPOSE_PROJECT_NAME=wks-clientB docker compose --profile production up -d
+```
+
+The volume names declared at the bottom of `docker-compose.yml` (`wks-pgdata`, `wks-miniodata`, `wks-keycloakdata`) intentionally have NO `name:` override; they inherit Compose's project-scoping. Setting an explicit `name:` would defeat that and force ALL deploys to share volumes — the opposite of what we want here. For per-client production deploys with hardened name suffixes, use `deploy/` (Story 14.7) instead — that surface uses slug-suffixed names to make collision impossible by construction.
 
 ## Rollback
 

@@ -28,6 +28,13 @@ services:
   # WKS Platform application — dev profile (default)
   # ---------------------------------------------------------------------------
   wks-platform:
+    # Story 14.1.1 AC1 (finding C5): scope the dev service to the `dev` profile.
+    # Without this, a service has no `profiles:` field and Compose runs it for
+    # EVERY profile selection — `--profile production` would start both this
+    # service and `wks-platform-prod`, both binding host :8080 → instant crash.
+    # The zero-config dev path is preserved by defaulting `COMPOSE_PROFILES=dev`
+    # in `docker/.env` (operator-editable; see README dev quick-start).
+    profiles: [dev]
     build:
       context: ..
       dockerfile: docker/Dockerfile

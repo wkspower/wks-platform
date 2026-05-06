@@ -46,6 +46,9 @@ class CaseStatusIndexIT {
     registry.add("WKS_ADMIN_PASSWORD", () -> "admin");
     registry.add("wks.jwt.secret", () -> "dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=");
     registry.add("WKS_CORS_ORIGINS", () -> "http://localhost:5173");
+    // Story 14.1.1: opt out of ProductionBootstrapValidator's WKS-API-055 secret
+    // rotation check (fixture does not populate WKS_STORAGE_KEY / WKS_MINIO_*).
+    registry.add("wks.bootstrap.production-validation.enabled", () -> "false");
   }
 
   @Autowired private DataSource dataSource;

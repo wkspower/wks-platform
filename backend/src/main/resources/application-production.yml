@@ -55,6 +55,14 @@ camunda:
       schema-update: true
 
 wks:
+  # Story 14.1.1 — production bootstrap fail-closed validators.
+  # Default true: enable both WKS-API-053 (datasource is not H2) and WKS-API-055
+  # (required env vars rotated, no `<MUST-BE-ROTATED>` sentinels) at boot.
+  # Tests that activate the production profile against H2 datasources or with
+  # incomplete env-var fixtures opt out by setting this property false.
+  bootstrap:
+    production-validation:
+      enabled: ${WKS_BOOTSTRAP_PRODUCTION_VALIDATION_ENABLED:true}
   locale: ${WKS_LOCALE:en-IN}
   cors:
     origins: ${WKS_CORS_ORIGINS:}

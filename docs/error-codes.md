@@ -28,7 +28,7 @@ The enum currently uses seven prefixes:
 
 | Prefix | Band | Domain |
 | --- | --- | --- |
-| `WKS-API` | 001–005, 401, 403, 404, 413, plus security 050–054 (literals) | Transport / request-shape / auth |
+| `WKS-API` | 001–005, 401, 403, 404, 413, plus security/bootstrap 050–055 (literals) | Transport / request-shape / auth + production-bootstrap fail-closed |
 | `WKS-CFG` | 000–099 | CaseType + BPMN deploy-time validation aggregate |
 | `WKS-MAP` | 001–009, 404, 405 | Mapping Layer validation (Story 4.2 + 4.3.1) + runtime miss (Story 4.3 + 4.3.1) |
 | `WKS-STG` | 001–011, 099 | Stage lifecycle runtime + stage-scoped status sets |
@@ -51,17 +51,18 @@ The enum currently uses seven prefixes:
 | `WKS-API-404` | Resource not found. | `domain/exception/WksNotFoundException.java` |
 | `WKS-API-413` | Multipart part exceeded the configured cap (1 MB / 2 MB total). | `api/GlobalExceptionHandler.java` |
 
-### WKS-API-050..054 — security/startup band (string literals, NOT in enum)
+### WKS-API-050..055 — security/bootstrap band (string literals, NOT in enum)
 
-These are emitted as raw string literals from security wiring. They never reach the `ApiResponse.error.code` envelope (they are startup logs / `IllegalStateException` messages), which is why they live outside the enum today. Flagged in **Known gaps** below.
+These are emitted as raw string literals from security wiring and the production bootstrap validator. They never reach the `ApiResponse.error.code` envelope (they are startup logs / `IllegalStateException` messages), which is why they live outside the enum today. Flagged in **Known gaps** below.
 
 | Code | Meaning | Site |
 | --- | --- | --- |
 | `WKS-API-050` | Dev profile fell back to default `admin@wkspower.local / admin` credentials — WARN log only. | `security/AdminUserSeeder.java` |
 | `WKS-API-051` | `production` profile without `WKS_ADMIN_EMAIL` + `WKS_ADMIN_PASSWORD` — startup fails. | `security/AdminUserSeeder.java` |
 | `WKS-API-052` | Dev profile generated an ephemeral JWT signing key (tokens die at JVM exit). | `security/JwtTokenProvider.java` |
-| `WKS-API-053` | Production JWT secret missing / invalid Base64 / too short, or `wks.jwt.ttl-hours` non-positive. | `security/JwtTokenProvider.java` |
+| `WKS-API-053` | Production fail-closed envelope: (a) JWT signing secret missing / invalid Base64 / too short, or `wks.jwt.ttl-hours` non-positive (`security/JwtTokenProvider.java`); (b) production datasource resolves to H2 — finding I18 / Story 14.1.1 AC5 (`infrastructure/config/ProductionBootstrapValidator.java`). Both share the same band, fail-closed semantic, and operator runbook entry point; the message text disambiguates the specific cause. | `security/JwtTokenProvider.java`, `infrastructure/config/ProductionBootstrapValidator.java` |
 | `WKS-API-054` | `wks.cors.origins` empty or contains an invalid origin. | `security/SecurityConfig.java` |
+| `WKS-API-055` | Production env var unset or equals the `<MUST-BE-ROTATED>` sentinel from `docker/.env.production.example`. Story 14.1.1 AC7 / finding I20 — fails closed at boot, naming every offending var. | `infrastructure/config/ProductionBootstrapValidator.java` |
 
 ---
 

@@ -52,6 +52,11 @@ class CaseRepositoryPostgresIT {
     registry.add("WKS_ADMIN_PASSWORD", () -> "admin");
     registry.add("wks.jwt.secret", () -> "dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=");
     registry.add("WKS_CORS_ORIGINS", () -> "http://localhost:5173");
+    // Story 14.1.1: opt out of ProductionBootstrapValidator's WKS-API-055 secret
+    // rotation check. The Testcontainers fixture sets enough env vars for the JDBC
+    // round-trip but does not populate WKS_STORAGE_KEY / WKS_MINIO_* (out of scope
+    // for repository-layer ITs).
+    registry.add("wks.bootstrap.production-validation.enabled", () -> "false");
   }
 
   @Autowired private CaseRepository cases;

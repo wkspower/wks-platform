@@ -36,7 +36,12 @@ import org.springframework.test.context.TestPropertySource;
       "WKS_CORS_ORIGINS=http://localhost:5173",
       "WKS_ADMIN_EMAIL=admin@wkspower.local",
       "WKS_ADMIN_PASSWORD=admin-test-only",
-      "wks.jwt.secret=dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ="
+      "wks.jwt.secret=dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=",
+      // Story 14.1.1: opt out of ProductionBootstrapValidator for this springdoc-only
+      // test. The validator's WKS-API-053 H2-datasource assertion would otherwise abort
+      // context load (this test deliberately boots the production profile against H2 to
+      // verify springdoc disablement, not storage shape).
+      "wks.bootstrap.production-validation.enabled=false"
     })
 class OpenApiDisabledInProductionIT {
 
