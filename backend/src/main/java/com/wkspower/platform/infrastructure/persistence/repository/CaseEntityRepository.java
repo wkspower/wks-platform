@@ -50,4 +50,23 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
       @Param("caseId") UUID caseId,
       @Param("stageId") String stageId,
       @Param("ordinal") Integer ordinal);
+
+  /**
+   * Story 4.4b AC1 / AC3 — targeted {@code status + updatedAt} update. Used by {@link
+   * com.wkspower.platform.infrastructure.persistence.CaseStatusAdapter} as a JPQL bypass so that a
+   * concurrent {@link #updateStageCache} write (e.g., from stage-advance within the same
+   * transaction) is not overwritten when Hibernate flushes the entity's first-level-cache state.
+   * Bypasses {@code @Version} by design — status transitions own their own concurrency surface
+   * through the domain service layer.
+   */
+  @Modifying
+  @Query(
+      "UPDATE CaseEntity c "
+          + "   SET c.status = :status, "
+          + "       c.updatedAt = :updatedAt "
+          + " WHERE c.id = :caseId")
+  int updateStatusOnly(
+      @Param("caseId") UUID caseId,
+      @Param("status") String status,
+      @Param("updatedAt") java.time.Instant updatedAt);
 }

@@ -6,8 +6,13 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
+import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
+import com.wkspower.platform.domain.config.model.Permission;
+import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
+import com.wkspower.platform.domain.config.model.StatusColor;
+import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.AttachmentScope;
@@ -17,11 +22,13 @@ import com.wkspower.platform.domain.port.BackendSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.FakeRecordingAdapter;
 import com.wkspower.platform.domain.port.StageRepository;
+import java.util.Collection;
 import com.wkspower.platform.infrastructure.persistence.RouterItPersistenceImports;
 import com.wkspower.platform.infrastructure.persistence.entity.RoleEntity;
 import com.wkspower.platform.infrastructure.persistence.entity.UserEntity;
@@ -143,14 +150,13 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    assertThat(events.routed())
-        .singleElement()
-        .satisfies(
-            e -> {
-              assertThat(e.kind()).isEqualTo(BackendSignalKind.END_EVENT);
-              assertThat(e.source().toString()).isEqualTo("backend(fake)");
-              assertThat(e.errorCode()).isNull();
-            });
+    // Story 4.4b AC3 — END_EVENT stage-advance now emits TWO events (stage-advance + status-reset).
+    assertThat(events.routed()).hasSize(2);
+    assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.END_EVENT);
+    assertThat(events.routed().get(0).source().toString()).isEqualTo("backend(fake)");
+    assertThat(events.routed().get(0).errorCode()).isNull();
+    assertThat(events.routed().get(0).detail()).containsEntry("effect", "stage-advance");
+    assertThat(events.routed().get(1).detail()).containsEntry("effect", "status-reset");
   }
 
   // ---------- AC7 §2 — NAMED_SIGNAL skip-class --------------------------
@@ -185,9 +191,11 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage3");
-    assertThat(events.routed())
-        .singleElement()
-        .satisfies(e -> assertThat(e.source().toString()).isEqualTo("backend(fake)"));
+    // Story 4.4b AC3 — NAMED_SIGNAL stage-advance now emits TWO events.
+    assertThat(events.routed()).hasSize(2);
+    assertThat(events.routed().get(0).source().toString()).isEqualTo("backend(fake)");
+    assertThat(events.routed().get(0).detail()).containsEntry("effect", "stage-advance");
+    assertThat(events.routed().get(1).detail()).containsEntry("effect", "status-reset");
   }
 
   // ---------- AC7 §3 — USER_TASK_PROPERTY status change -----------------
@@ -396,11 +404,17 @@ class BackendSignalRouterIT {
     flushClear();
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
-    assertThat(after.status()).isEqualTo("approved");
+    // After END_EVENT stage-advance the status was reset to next stage's initialStatus ("open"),
+    // but the earlier USER_TASK_STATUS had set it to "approved" — the stage-advance status-reset
+    // (AC3) then overwrites with "open". This is by design: stage-advance trumps prior same-stage
+    // status.
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    assertThat(events.routed()).hasSize(2);
+    // Story 4.4b AC3 — END_EVENT emits 2 events; total = USER_TASK_STATUS (1) + END_EVENT (2) = 3.
+    assertThat(events.routed()).hasSize(3);
     assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
     assertThat(events.routed().get(1).kind()).isEqualTo(BackendSignalKind.END_EVENT);
+    assertThat(events.routed().get(1).detail()).containsEntry("effect", "stage-advance");
+    assertThat(events.routed().get(2).detail()).containsEntry("effect", "status-reset");
   }
 
   // ---------- AC7 §8 — frozen-on-version pin ---------------------------
@@ -542,6 +556,159 @@ class BackendSignalRouterIT {
             });
   }
 
+  // ---------- Story 4.4b AC7 — golden-master extension: manual transition + stage-advance + userTask
+
+  @Test
+  void ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent() {
+    // AC7: manual CaseService.transition path emitted via USER_TASK_STATUS signal.
+    // The router receives USER_TASK_STATUS, dispatches to dispatchUserTaskProperty → statusUpdater.
+    Case caseRow = newBootstrappedCase("manual-transition", 1);
+    CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+    mappingRegistry.register(
+        caseType,
+        "1",
+        defWith(
+            new AttachmentDefinition(
+                "bpmn",
+                "loan.bpmn",
+                "case",
+                Optional.empty(),
+                Map.of(),
+                Optional.empty(),
+                Map.of(),
+                List.of(
+                    new PropertyEmissionRule(
+                        "userTask:manual",
+                        "status",
+                        BackendSignalKind.USER_TASK_STATUS,
+                        "stage:stage1")))));
+
+    fake.emit(
+        new BackendSignal(
+            BackendSignalKind.USER_TASK_STATUS,
+            ADAPTER_NAME,
+            new CaseInstanceRef(caseRow.id(), caseType),
+            "manual",
+            Map.of("value", "in-review")));
+    flushClear();
+
+    Case after = caseRepository.findById(caseRow.id()).orElseThrow();
+    assertThat(after.status()).isEqualTo("in-review");
+    // manual USER_TASK_STATUS path → exactly 1 BackendSignalRouted event (no stage-advance).
+    assertThat(events.routed())
+        .singleElement()
+        .satisfies(
+            e -> {
+              assertThat(e.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+              assertThat(e.source().toString()).isEqualTo("backend(fake)");
+              assertThat(e.errorCode()).isNull();
+            });
+  }
+
+  @Test
+  void ac7_stageAdvance_emitsTwoEventsWithSharedCorrelationId_andResetsStatus() {
+    // AC7 + AC3: stage-advance success-path emits TWO BackendSignalRouted events with shared
+    // correlationId (one effect=stage-advance, one effect=status-reset). This is an intentional
+    // divergence from the pre-4.4b one-event shape — rationale: Q3 lock from original Story 4.4.
+    Case caseRow = newBootstrappedCase("stage-advance-ac3", 1);
+    CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+    mappingRegistry.register(
+        caseType,
+        "1",
+        defWith(
+            new AttachmentDefinition(
+                "bpmn",
+                "loan.bpmn",
+                "case",
+                Optional.empty(),
+                Map.of(),
+                Optional.of(new EndEventMapping("stage1 -> stage2")),
+                Map.of(),
+                List.of())));
+
+    fake.emit(
+        new BackendSignal(
+            BackendSignalKind.END_EVENT,
+            ADAPTER_NAME,
+            new CaseInstanceRef(caseRow.id(), caseType),
+            "end_1",
+            Map.of()));
+    flushClear();
+
+    Case after = caseRepository.findById(caseRow.id()).orElseThrow();
+    assertThat(after.currentStageId()).isEqualTo("stage2");
+    // Stage-advance resets status to next stage's initialStatus ("open" for stage2).
+    assertThat(after.status()).isEqualTo("open");
+
+    // TWO events: effect=stage-advance + effect=status-reset.
+    assertThat(events.routed()).hasSize(2);
+    BackendSignalRouted stageAdvanceEvent = events.routed().get(0);
+    BackendSignalRouted statusResetEvent = events.routed().get(1);
+
+    assertThat(stageAdvanceEvent.detail()).containsEntry("effect", "stage-advance");
+    assertThat(statusResetEvent.detail()).containsEntry("effect", "status-reset");
+    assertThat(statusResetEvent.detail()).containsEntry("newStatus", "open");
+    assertThat(statusResetEvent.detail()).containsEntry("nextStageId", "stage2");
+
+    // Shared correlationId.
+    String correlationId = stageAdvanceEvent.detail().get("correlationId");
+    assertThat(correlationId).isNotNull();
+    assertThat(statusResetEvent.detail()).containsEntry("correlationId", correlationId);
+
+    // Both events carry the correct adapter source.
+    assertThat(stageAdvanceEvent.source().toString()).isEqualTo("backend(fake)");
+    assertThat(statusResetEvent.source().toString()).isEqualTo("backend(fake)");
+    assertThat(stageAdvanceEvent.errorCode()).isNull();
+    assertThat(statusResetEvent.errorCode()).isNull();
+  }
+
+  @Test
+  void ac7_userTaskComplete_advancesStageAndEmitsTwoEvents() {
+    // AC7: USER_TASK_COMPLETE path triggers stage advance → two events (AC3 pattern).
+    Case caseRow = newBootstrappedCase("task-complete-ac7", 1);
+    CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+    mappingRegistry.register(
+        caseType,
+        "1",
+        defWith(
+            new AttachmentDefinition(
+                "bpmn",
+                "loan.bpmn",
+                "case",
+                Optional.empty(),
+                Map.of(),
+                Optional.empty(),
+                Map.of(),
+                List.of(
+                    new PropertyEmissionRule(
+                        "userTask:review",
+                        "status",
+                        BackendSignalKind.USER_TASK_COMPLETE,
+                        "stage:stage1")))));
+
+    fake.emit(
+        new BackendSignal(
+            BackendSignalKind.USER_TASK_COMPLETE,
+            ADAPTER_NAME,
+            new CaseInstanceRef(caseRow.id(), caseType),
+            "review",
+            Map.of()));
+    flushClear();
+
+    Case after = caseRepository.findById(caseRow.id()).orElseThrow();
+    assertThat(after.currentStageId()).isEqualTo("stage2");
+    // USER_TASK_COMPLETE → stage-advance → status reset to stage2 initialStatus.
+    assertThat(after.status()).isEqualTo("open");
+
+    // Two events emitted (stage-advance + status-reset) — same AC3 pattern.
+    assertThat(events.routed()).hasSize(2);
+    assertThat(events.routed().get(0).detail()).containsEntry("effect", "stage-advance");
+    assertThat(events.routed().get(1).detail()).containsEntry("effect", "status-reset");
+  }
+
   // ---------- helpers ----------------------------------------------------
 
   private static MappingDefinition defWith(AttachmentDefinition attachment) {
@@ -604,6 +771,75 @@ class BackendSignalRouterIT {
       return new WksStageAdvancer(stageRepository, eventPublisher, clock);
     }
 
+    /**
+     * Story 4.4b AC3 — stub CaseTypeReader that returns a CaseTypeConfig with the STAGES fixture
+     * (stage1, stage2, stage3) for every case type id + version. Each stage has its own status set:
+     * stage1 → [open, in-review], stage2 → [open, approved], stage3 → [open, closed(terminal)].
+     * The router uses this to resolve the next stage's initialStatus after a stage advance.
+     */
+    @Bean
+    CaseTypeReader stubCaseTypeReader() {
+      List<StageDefinition> stagesWithStatuses =
+          List.of(
+              new StageDefinition(
+                  "stage1",
+                  "Stage 1",
+                  0,
+                  List.of(
+                      new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+                      new StatusDefinition("in-review", "In Review", StatusColor.AMBER, false)),
+                  Optional.of("open")),
+              new StageDefinition(
+                  "stage2",
+                  "Stage 2",
+                  1,
+                  List.of(
+                      new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+                      new StatusDefinition("approved", "Approved", StatusColor.EMERALD, false)),
+                  Optional.of("open")),
+              new StageDefinition(
+                  "stage3",
+                  "Stage 3",
+                  2,
+                  List.of(
+                      new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+                      new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)),
+                  Optional.of("open")));
+      // Build a generic CaseTypeConfig that covers any caseTypeId used in the IT.
+      return new CaseTypeReader() {
+        @Override
+        public Optional<CaseTypeConfig> find(String id) {
+          return Optional.of(buildConfig(id, stagesWithStatuses));
+        }
+
+        @Override
+        public Collection<CaseTypeConfig> all() {
+          return List.of();
+        }
+
+        @Override
+        public Optional<CaseTypeConfig> findVersion(String id, int version) {
+          return Optional.of(buildConfig(id, stagesWithStatuses));
+        }
+
+        private CaseTypeConfig buildConfig(String id, List<StageDefinition> stages) {
+          return new CaseTypeConfig(
+              id,
+              id,
+              1,
+              null,
+              null,
+              List.of(),
+              List.of(
+                  new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+                  new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)),
+              List.of(),
+              List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
+              stages);
+        }
+      };
+    }
+
     @Bean
     BackendSignalRouter backendSignalRouter(
         MappingRegistry mappingRegistry,
@@ -611,9 +847,16 @@ class BackendSignalRouterIT {
         CaseStatusUpdater statusUpdater,
         CaseRepository caseRepository,
         EventPublisher eventPublisher,
-        Clock clock) {
+        Clock clock,
+        CaseTypeReader caseTypeReader) {
       return new BackendSignalRouter(
-          mappingRegistry, stageAdvancer, statusUpdater, caseRepository, eventPublisher, clock);
+          mappingRegistry,
+          stageAdvancer,
+          statusUpdater,
+          caseRepository,
+          eventPublisher,
+          clock,
+          caseTypeReader);
     }
   }
 

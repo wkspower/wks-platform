@@ -2,6 +2,7 @@ package com.wkspower.platform.infrastructure.config;
 
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.service.BackendAdapterBinder;
@@ -63,8 +64,15 @@ public class BackendAdapterConfig {
       CaseStatusUpdater statusUpdater,
       CaseRepository caseRepository,
       EventPublisher eventPublisher,
-      Clock clock) {
+      Clock clock,
+      CaseTypeReader caseTypeReader) {
     return new BackendSignalRouter(
-        mappingRegistry, stageAdvancer, statusUpdater, caseRepository, eventPublisher, clock);
+        mappingRegistry,
+        stageAdvancer,
+        statusUpdater,
+        caseRepository,
+        eventPublisher,
+        clock,
+        caseTypeReader);
   }
 }

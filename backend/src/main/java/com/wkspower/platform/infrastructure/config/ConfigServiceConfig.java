@@ -1,8 +1,10 @@
 package com.wkspower.platform.infrastructure.config;
 
+import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.BpmnValidationService;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
+import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRegistrar;
 import com.wkspower.platform.domain.port.CaseTypeSource;
@@ -74,7 +76,9 @@ public class ConfigServiceConfig {
       EventPublisher eventPublisher,
       Clock clock,
       WksStageAdvancer stageAdvancer,
-      CaseTypeVersionRegistry versionRegistry) {
+      CaseTypeVersionRegistry versionRegistry,
+      BackendSignalHandler backendSignalRouter,
+      CaseStatusUpdater caseStatusUpdater) {
     return new CaseService(
         caseRepository,
         caseTypeReader,
@@ -84,7 +88,9 @@ public class ConfigServiceConfig {
         eventPublisher,
         clock,
         stageAdvancer,
-        versionRegistry);
+        versionRegistry,
+        backendSignalRouter,
+        caseStatusUpdater);
   }
 
   /**

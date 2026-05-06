@@ -33,11 +33,13 @@ public class CaseStatusAdapter implements CaseStatusUpdater {
     if (found.isEmpty()) {
       return Optional.empty();
     }
-    CaseEntity entity = found.get();
-    String previous = entity.getStatus();
-    entity.setStatus(newStatus);
-    entity.setUpdatedAt(clock.now());
-    repository.save(entity);
+    // Story 4.4b AC1/AC3 — use targeted JPQL UPDATE (updateStatusOnly) instead of a full entity
+    // save. The full-entity-save path reads the JPA first-level-cache entity which may have a
+    // stale currentStageId (set by updateStageCache's JPQL bypass in the same transaction), then
+    // overwrites it on save. The targeted JPQL UPDATE mutates only status + updatedAt so stage
+    // cache columns are never clobbered by this method.
+    String previous = found.get().getStatus();
+    repository.updateStatusOnly(caseId, newStatus, clock.now());
     return Optional.ofNullable(previous);
   }
 }
