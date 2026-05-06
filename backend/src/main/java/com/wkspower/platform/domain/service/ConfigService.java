@@ -1,5 +1,6 @@
 package com.wkspower.platform.domain.service;
 
+import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
 import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.RegistrationResult;
 import com.wkspower.platform.domain.config.ValidationResult;
@@ -10,11 +11,14 @@ import com.wkspower.platform.domain.port.BpmnValidationService;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRegistrar;
 import com.wkspower.platform.domain.port.CaseTypeSource;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.BpmnValidationResult;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,14 @@ public class ConfigService {
   private final EventPublisher eventPublisher;
 
   /**
+   * Story 3.4 / Decision 20 — every successful YAML validate flows through {@link
+   * #applyVersionRegistry(CaseTypeConfig, byte[], String)} before in-memory {@link
+   * CaseTypeRegistrar#register(CaseTypeConfig)}. Registry assigns the authoritative {@code
+   * version}; the in-memory CaseTypeRegistry holds the registry-overridden value.
+   */
+  private final CaseTypeVersionRegistry versionRegistry;
+
+  /**
    * Per-{@code caseTypeId} mutex (Story 2.4 folded debt #2 — TOCTOU on concurrent deploys of the
    * same case-type id). Two threads racing the {@code reader.find → registrar.register} window
    * could both observe the same prior state, leading to interleaved registry writes. Locking on a
@@ -58,42 +70,73 @@ public class ConfigService {
       CaseTypeReader reader,
       BpmnValidationService bpmnValidator,
       WorkflowEngine workflowEngine,
-      EventPublisher eventPublisher) {
+      EventPublisher eventPublisher,
+      CaseTypeVersionRegistry versionRegistry) {
     this.source = source;
     this.registrar = registrar;
     this.reader = reader;
     this.bpmnValidator = bpmnValidator;
     this.workflowEngine = workflowEngine;
     this.eventPublisher = eventPublisher;
+    this.versionRegistry = versionRegistry;
   }
 
   /**
    * Load {@code file}, validate it, and on success register with the registry. Returns the {@link
    * ValidationResult} so callers can react to errors.
+   *
+   * <p>Story 3.4 — runs the path-based source loader (preserving the existing contract for stubs
+   * that route through {@link CaseTypeSource#load(Path)}), then reads the raw bytes for the
+   * version-registry write.
    */
   public ValidationResult validateAndRegister(Path file) {
     ValidationResult result = source.load(file);
     if (result.isInvalid() || result.config().isEmpty()) {
       return result;
     }
-    RegistrationResult reg = registrar.register(result.config().get());
+    byte[] bytes;
+    try {
+      bytes = Files.readAllBytes(file);
+    } catch (IOException e) {
+      // Cannot reach the registry without the raw bytes — surface as catastrophic.
+      return ValidationResult.invalid(
+          List.of(
+              ErrorDetail.of(
+                  "WKS-CFG-099", "I/O failure reading " + file + ": " + e.getMessage())));
+    }
+    CaseTypeConfig validated = result.config().get();
+    CaseTypeConfig versioned = applyVersionRegistry(validated, bytes, "system:startup");
+    RegistrationResult reg = registrar.register(versioned);
     if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
       return ValidationResult.invalid(reg.errors());
     }
-    return result;
+    return ValidationResult.ok(versioned, result.warnings());
   }
 
   /** Byte-driven YAML-only variant. Retained for the startup loader's BPMN-missing path. */
   public ValidationResult validateAndRegister(String sourceName, byte[] bytes) {
+    return validateAndRegister(sourceName, bytes, "system:startup");
+  }
+
+  /**
+   * Story 3.4 — overload that accepts {@code publishedBy}; threaded from the admin REST surface
+   * with the actor email (Spring Security context) and from the startup loader with {@code
+   * "system:startup"}.
+   */
+  public ValidationResult validateAndRegister(String sourceName, byte[] bytes, String publishedBy) {
     ValidationResult result = this.source.loadBytes(sourceName, bytes);
     if (result.isInvalid() || result.config().isEmpty()) {
       return result;
     }
-    RegistrationResult reg = registrar.register(result.config().get());
+    CaseTypeConfig validated = result.config().get();
+    CaseTypeConfig versioned = applyVersionRegistry(validated, bytes, publishedBy);
+    RegistrationResult reg = registrar.register(versioned);
     if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
       return ValidationResult.invalid(reg.errors());
     }
-    return result;
+    // Carry the version-overridden config back to callers (startup loader, admin endpoint) so the
+    // ConfigDeployed event and any post-validate logging see the registry-authoritative version.
+    return ValidationResult.ok(versioned, result.warnings());
   }
 
   /**
@@ -129,6 +172,11 @@ public class ConfigService {
     DeploymentResult deployment;
     synchronized (lock) {
       priorState = reader.find(caseType.id());
+
+      // Story 3.4 / Decision 20 — registry assigns the authoritative version BEFORE the
+      // in-memory CaseTypeRegistrar swap so caseType.version() carries the registry value
+      // through to the engine deploy + ConfigDeployed event.
+      caseType = applyVersionRegistry(caseType, yamlBytes, actorEmail);
 
       reg = registrar.register(caseType);
       if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
@@ -194,6 +242,43 @@ public class ConfigService {
             actorEmail,
             deployment.deployedAt()));
     return DeployResult.ok(caseType, deployment);
+  }
+
+  /**
+   * Story 3.4 / Decision 20 — write the immutable version row and override the in-memory {@link
+   * CaseTypeConfig#version()} with the registry-assigned value.
+   *
+   * <ol>
+   *   <li>Compute canonical SHA-256 of {@code rawYamlBytes} via the version registry's hasher.
+   *   <li>Look up by hash; on hit return existing version (idempotent).
+   *   <li>Otherwise insert at {@code max(version)+1} and return the new version.
+   *   <li>If the author-supplied YAML carried a {@code version:} that disagrees with the
+   *       registry-assigned value, log a WARN-level structured line. Per Q1 LOCKED the registry is
+   *       authoritative; no error code is emitted.
+   * </ol>
+   *
+   * <p>The registry write and the in-memory {@link CaseTypeRegistrar} register are NOT
+   * transactionally coupled — JPA writes the version row, the in-memory map mutation is a {@link
+   * ConcurrentHashMap} swap. The version row is the durable record; if the in-memory swap fails
+   * after the row is written, the next reload re-reads from the registry — eventual consistency is
+   * acceptable per Decision 20.
+   */
+  private CaseTypeConfig applyVersionRegistry(
+      CaseTypeConfig caseType, byte[] rawYamlBytes, String actor) {
+    String publishedBy = (actor == null || actor.isBlank()) ? "system:startup" : actor;
+    int authorVersion = caseType.version();
+    CaseTypeVersionRegistration result =
+        versionRegistry.register(caseType.id(), rawYamlBytes, publishedBy);
+    int registryVersion = result.version();
+    if (authorVersion != registryVersion) {
+      log.warn(
+          "author-supplied version {} for {} differs from registry-assigned version {};"
+              + " registry is authoritative (Decision 20)",
+          authorVersion,
+          caseType.id(),
+          registryVersion);
+    }
+    return caseType.withVersion(registryVersion);
   }
 
   private void restoreRegistryAfterEngineFailure(String id, Optional<CaseTypeConfig> prior) {

@@ -107,6 +107,11 @@ class CaseTypeStartupLoaderTest {
           public Collection<CaseTypeConfig> all() {
             return List.of();
           }
+
+          @Override
+          public Optional<CaseTypeConfig> findVersion(String id, int version) {
+            return Optional.empty();
+          }
         },
         (BpmnValidationService) (bytes, ct) -> BpmnValidationResult.ok("noop"),
         new WorkflowEngine() {
@@ -151,6 +156,7 @@ class CaseTypeStartupLoaderTest {
             return null;
           }
         },
-        event -> {});
+        event -> {},
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry());
   }
 }

@@ -4,10 +4,12 @@ import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseUpdated;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationAggregateException;
+import com.wkspower.platform.domain.exception.WksVersionException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.model.CaseQuery;
@@ -17,6 +19,7 @@ import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
@@ -48,6 +51,7 @@ public class CaseService {
   private final EventPublisher eventPublisher;
   private final Clock clock;
   private final WksStageAdvancer stageAdvancer;
+  private final CaseTypeVersionRegistry versionRegistry;
 
   public CaseService(
       CaseRepository caseRepository,
@@ -57,7 +61,8 @@ public class CaseService {
       ProcessDefinitionKeyResolver processKeyResolver,
       EventPublisher eventPublisher,
       Clock clock,
-      WksStageAdvancer stageAdvancer) {
+      WksStageAdvancer stageAdvancer,
+      CaseTypeVersionRegistry versionRegistry) {
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
     this.caseDataValidator = Objects.requireNonNull(caseDataValidator, "caseDataValidator");
@@ -66,6 +71,7 @@ public class CaseService {
     this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher");
     this.clock = Objects.requireNonNull(clock, "clock");
     this.stageAdvancer = Objects.requireNonNull(stageAdvancer, "stageAdvancer");
+    this.versionRegistry = Objects.requireNonNull(versionRegistry, "versionRegistry");
   }
 
   /**
@@ -111,12 +117,27 @@ public class CaseService {
             });
     String processInstanceId = processInstanceIdHolder[0];
 
+    // Story 3.4 / Decision 20 — bind to the registry's current version, not the in-memory
+    // CaseTypeConfig.version() (which IS the registry value post-Story-3.4 wiring, but the
+    // explicit registry read makes the binding contract grep-able and keeps cases stable when
+    // the in-memory registry briefly carries a not-yet-flushed value during deploy windows).
+    int boundVersion =
+        versionRegistry
+            .currentVersion(caseType.id())
+            .orElseThrow(
+                () ->
+                    new WksVersionException(
+                        ErrorCode.WKS_VER_001,
+                        "CaseType "
+                            + caseType.id()
+                            + " has no published version yet — deploy completed?"));
+
     Instant now = clock.now();
     Case toPersist =
         new Case(
             caseId,
             caseType.id(),
-            caseType.version(),
+            boundVersion,
             initialStatus,
             assignee,
             safeData,
@@ -133,7 +154,7 @@ public class CaseService {
     stageAdvancer.bootstrap(persisted.id(), caseType.stages(), "wks-auto-rule", "case-create");
 
     eventPublisher.publish(
-        new CaseCreated(persisted.id(), caseType.id(), caseType.version(), actorId, now));
+        new CaseCreated(persisted.id(), caseType.id(), boundVersion, actorId, now));
     return persisted;
   }
 

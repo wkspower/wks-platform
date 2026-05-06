@@ -203,6 +203,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
   }
 
+  /**
+   * Story 3.4 / Decision 20 — CaseType version-registry exceptions. {@code WKS-VER-001} (no
+   * published version yet) → 409 Conflict.
+   */
+  @ExceptionHandler(com.wkspower.platform.domain.exception.WksVersionException.class)
+  public ResponseEntity<ApiResponse<Void>> handleVersion(
+      com.wkspower.platform.domain.exception.WksVersionException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("CaseType version-registry error: {}", ex.getCode());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
   @ExceptionHandler(WksWorkflowEngineException.class)
   public ResponseEntity<ApiResponse<Void>> handleEngineFailure(WksWorkflowEngineException ex) {
     MDC.put(MDC_KEY, ex.getCode());

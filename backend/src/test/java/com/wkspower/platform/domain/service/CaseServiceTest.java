@@ -71,8 +71,23 @@ class CaseServiceTest {
   private CaseService svc(CaseTypeConfig config) {
     WksStageAdvancer advancer =
         new WksStageAdvancer(new NoopStageRepository(), publisher, () -> FIXED);
+    com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry registry =
+        new com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry();
+    // Seed a v1 row so CaseService.create's registry bind succeeds for the fixture id.
+    registry.seed(
+        config.id(),
+        config.version() == 0 ? 1 : config.version(),
+        ("id: " + config.id()).getBytes());
     return new CaseService(
-        repo, reader(config), validator, engine, resolver, publisher, () -> FIXED, advancer);
+        repo,
+        reader(config),
+        validator,
+        engine,
+        resolver,
+        publisher,
+        () -> FIXED,
+        advancer,
+        registry);
   }
 
   @Test
@@ -219,6 +234,11 @@ class CaseServiceTest {
       @Override
       public Collection<CaseTypeConfig> all() {
         return List.of(config);
+      }
+
+      @Override
+      public Optional<CaseTypeConfig> findVersion(String id, int version) {
+        return id.equals(config.id()) ? Optional.of(config) : Optional.empty();
       }
     };
   }

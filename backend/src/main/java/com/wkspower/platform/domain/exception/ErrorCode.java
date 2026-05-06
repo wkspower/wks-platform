@@ -216,6 +216,19 @@ public enum ErrorCode {
   /** advance / skipTo references an unknown caseId. HTTP 404. */
   WKS_STG_004("WKS-STG-004"),
 
+  // 409 / 422 — CaseType Version Registry (Story 3.4 / Decision 20).
+  // Band: WKS-VER-001..099 RESERVED for version-registry-related errors. Future stories (3.5
+  // bootstrap, 3.8 blast-radius validator, 3.9 rebase tooling) draw from this band per
+  // feedback_error_codes_are_wire_contract.md. Never reuse a code in this band for a different
+  // meaning — the wire is a contract.
+  /**
+   * {@code CaseService.create} called for a CaseType that is registry-visible (in-memory) but has
+   * no row in {@code case_type_versions} yet — partial-failure recovery state. HTTP 409. Story 3.4
+   * introduces this code; Story 3.5's bootstrap migration closes the gap for pre-3.4 CaseTypes by
+   * materialising v1 rows.
+   */
+  WKS_VER_001("WKS-VER-001"),
+
   // 409 — runtime conflict.
   /**
    * Optimistic-locking conflict on update — the row was modified by another transaction between

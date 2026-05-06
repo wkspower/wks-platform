@@ -110,6 +110,11 @@ class CaseTypePermissionEvaluatorTest {
       public Collection<CaseTypeConfig> all() {
         return List.of(config);
       }
+
+      @Override
+      public Optional<CaseTypeConfig> findVersion(String id, int version) {
+        return id.equals(config.id()) ? Optional.of(config) : Optional.empty();
+      }
     };
   }
 }

@@ -202,7 +202,7 @@ class AdminControllerTest {
             List.of(),
             List.of(new RoleDefinition("admin", List.of())));
     byte[] yamlBytes = "id: j9-zero-zero".getBytes();
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class)))
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any()))
         .thenReturn(ValidationResult.ok(config));
 
     mockMvc
@@ -217,12 +217,12 @@ class AdminControllerTest {
         .andExpect(jsonPath("$.data.processDefinitionId").doesNotExist())
         .andExpect(jsonPath("$.data.schemaUri").value("/api/admin/case-types/j9-zero-zero/schema"));
 
-    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class));
+    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any());
   }
 
   @Test
   void missingBpmnPartWithInvalidYamlReturns422() throws Exception {
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class)))
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any()))
         .thenReturn(
             ValidationResult.invalid(List.of(ErrorDetail.of("WKS-CFG-099", "YAML parse failed"))));
 
