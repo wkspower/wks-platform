@@ -1,0 +1,64 @@
+{
+  "_meta": {
+    "story": "4.4a",
+    "purpose": "Baseline canonicalised JSON capture of Case state + BackendSignalRouted audit-row sequence for the BPMN-end-event path (AC1 surface). Persisted at branch story/4-4a-bpmn-adapter-architectural-core. Story 4.4b extends this fixture with the manual-path rewrite + full byte-equivalence assertion across all paths.",
+    "auditSourceDivergence": "AC4 — BackendSignalRouted carries a typed AuditSource.Backend(adapterName) that renders to wire string 'backend(bpmn)'. The legacy CaseStatusListener (Story 2.4) used to publish CaseStatusChanged with no source attribution at all; the comparison is therefore over the *new* event surface, not the legacy one. Fixture documents the expected post-4.4a wire shape.",
+    "captureMethod": "manually authored from the routing contract in domain/service/BackendSignalRouter.java — no live engine run was required because the BackendSignalRouted record is deterministic given (caseRow, signal, mappingDefinition).",
+    "fixtureScope": [
+      "BPMN END_EVENT routed through BackendSignalRouter for a stage-aware CaseType with a registered MappingDefinition.",
+      "AC1 coverage — listener emits BackendSignal(kind=END_EVENT) instead of mutating cases.status."
+    ]
+  },
+  "fixtures": {
+    "endEvent_stageTransition_to_completed": {
+      "scenario": "BPMN end event reached on a 3-stage CaseType; mapping declares events.endEvent.stageTransition='stage3 -> completed'.",
+      "input": {
+        "signal": {
+          "kind": "END_EVENT",
+          "adapterName": "bpmn",
+          "source": "<end-event-id>",
+          "payload": {}
+        },
+        "caseRow": {
+          "currentStageId": "stage3",
+          "currentStageOrdinal": 2
+        }
+      },
+      "expectedAuditEvent": {
+        "type": "BackendSignalRouted",
+        "kind": "END_EVENT",
+        "originAdapter": "bpmn",
+        "auditSource": "backend(bpmn)",
+        "errorCode": null,
+        "detail": {}
+      },
+      "expectedSideEffects": [
+        "stageAdvancer.advance(caseId, source='backend-signal', sourceRef='bpmn:<end-event-id>')",
+        "case advances through last stage; lifecycle hits 'completed' marker"
+      ]
+    },
+    "endEvent_unmappedCaseType_emitsWksMap404": {
+      "scenario": "BPMN end event arrives but no MappingDefinition is registered for (caseTypeId, version).",
+      "input": {
+        "signal": {
+          "kind": "END_EVENT",
+          "adapterName": "bpmn",
+          "source": "<end-event-id>",
+          "payload": {}
+        }
+      },
+      "expectedAuditEvent": {
+        "type": "BackendSignalRouted",
+        "kind": "END_EVENT",
+        "originAdapter": "bpmn",
+        "auditSource": "backend(unmapped:bpmn)",
+        "errorCode": "WKS-MAP-404",
+        "detail": {
+          "originAdapter": "bpmn",
+          "reason": "caseTypeVersion not in registry"
+        }
+      },
+      "expectedSideEffects": []
+    }
+  }
+}

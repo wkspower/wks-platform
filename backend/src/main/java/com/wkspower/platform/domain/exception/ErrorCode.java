@@ -105,6 +105,15 @@ public enum ErrorCode {
    */
   WKS_CFG_022("WKS-CFG-022"),
   /**
+   * Story 4.4a AC5 — BPMN userTask sits on a CaseType with stage-scoped statuses but lacks an
+   * explicit {@code <camunda:property name="status">} declaration. The legacy Phase-0 fallback
+   * (pick {@code getActiveActivityIds → first non-self}) is REMOVED in Story 4.4a because it breaks
+   * under parallel gateways — fall-through silence becomes a deploy-time hard failure instead.
+   * Reuse of this code for any other meaning is forbidden per {@code
+   * feedback_error_codes_are_wire_contract.md}.
+   */
+  WKS_CFG_024("WKS-CFG-024"),
+  /**
    * Mapping references a BPMN userTask id that does not exist in the attached BPMN file (Story 4.2
    * AC2 / architecture §828). Canonical wire code for {@code userTasks.<id>} and {@code
    * properties[].on=userTask:<id>} cross-reference failures. Distinguishes from {@code

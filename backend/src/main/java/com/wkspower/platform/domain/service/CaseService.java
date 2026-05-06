@@ -131,7 +131,19 @@ public class CaseService {
               processInstanceIdHolder[0] =
                   workflowEngine.startProcessInstance(
                       processDefinitionKey,
-                      Map.of("caseId", caseId.toString(), "caseTypeId", caseType.id()));
+                      Map.of(
+                          "caseId",
+                          caseId.toString(),
+                          "caseTypeId",
+                          caseType.id(),
+                          // Story 4.4a — pin caseTypeVersion as a process variable so the BPMN
+                          // execution-listener path (CaseStatusListener) can construct a
+                          // CaseInstanceRef without reaching back into CaseRepository inside the
+                          // engine transaction. The Mapping Layer router (Story 4.3) keys by
+                          // (caseTypeId, version); a missing version would force every signal
+                          // through a defensive lookup.
+                          "caseTypeVersion",
+                          String.valueOf(boundVersion)));
             });
     String processInstanceId = processInstanceIdHolder[0];
 

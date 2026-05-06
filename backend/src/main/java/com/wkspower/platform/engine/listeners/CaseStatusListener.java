@@ -1,56 +1,53 @@
 package com.wkspower.platform.engine.listeners;
 
-import com.wkspower.platform.domain.event.CaseStatusChanged;
-import com.wkspower.platform.domain.port.CaseStatusUpdater;
-import com.wkspower.platform.domain.port.Clock;
-import com.wkspower.platform.domain.port.EventPublisher;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import com.wkspower.platform.domain.port.BackendSignal;
+import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.CaseInstanceRef;
+import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.engine.BpmnBackendAdapter;
+import com.wkspower.platform.engine.properties.CamundaPropertyReader;
+import java.util.Map;
 import java.util.UUID;
 import org.cibseven.bpm.engine.delegate.DelegateExecution;
 import org.cibseven.bpm.engine.delegate.ExecutionListener;
 import org.cibseven.bpm.model.bpmn.instance.EndEvent;
-import org.cibseven.bpm.model.bpmn.instance.ExtensionElements;
 import org.cibseven.bpm.model.bpmn.instance.FlowElement;
 import org.cibseven.bpm.model.bpmn.instance.UserTask;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperties;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Engine-callback adapter that fires on user-task and end-event {@code end} events. Reads the
- * {@code caseId} process variable, resolves the next status (per Story 2.4 Dev Notes §What counts
- * as a status boundary), updates {@code cases.status} via the {@link CaseStatusUpdater} port, and
- * publishes a {@link CaseStatusChanged} domain event.
+ * Story 4.4a — engine-callback bridge that converts BPMN execution events into {@link
+ * BackendSignal}s and dispatches them through {@link BpmnBackendAdapter} (which forwards to the
+ * registered {@link com.wkspower.platform.domain.service.BackendSignalRouter} per Story 4.3).
  *
- * <p>The listener participates in the engine's transaction — a thrown exception rolls back both the
- * engine state and the case-row update atomically (Story 2.4 AC5). Per Story 2.4 Dev Notes
- * §Engine-callback hexagonal pattern, NO direct JPA writes happen here — the JPA adapter implements
- * the port and runs inside the same transaction.
+ * <p><b>AC1 — direct-mutation REMOVED:</b> earlier revisions of this listener (Story 2.4) called
+ * {@code CaseStatusUpdater.updateStatus} and published {@code CaseStatusChanged} directly. Story
+ * 4.4a removes that path entirely; case state mutations now flow through the Mapping Layer router
+ * (Architecture Decision 22). Manual transitions through {@code CaseService.transition} still use
+ * the legacy direct path until Story 4.4b reroutes them — documented dual-state.
  *
- * <p>This listener is registered against every parsed user task and end event by {@link
- * CaseStatusBpmnParseListener}.
+ * <p><b>AC2 — userTask reframe:</b> the listener emits {@code USER_TASK_STATUS} when an explicit
+ * {@code <camunda:property name="status">} is declared on the userTask, otherwise emits {@code
+ * USER_TASK_COMPLETE} on task end. Both signals dispatch through the router which consults the
+ * mapping layer for the configured rule.
+ *
+ * <p><b>AC5 — Phase-0 fallback REMOVED:</b> the legacy {@code resolveNewStatus} userTask fallback
+ * picked {@code getActiveActivityIds → first non-self} which broke under parallel gateways. That
+ * branch is gone; the deploy-time validator ({@code BpmnValidator}, AC5) now rejects userTasks
+ * lacking an explicit status property at deploy time when stage-scoped statuses are in play. See
+ * {@code WKS-CFG-024}.
  */
 @Component
 public class CaseStatusListener implements ExecutionListener {
 
   private static final Logger log = LoggerFactory.getLogger(CaseStatusListener.class);
 
-  private final CaseStatusUpdater caseStatusUpdater;
-  private final EventPublisher eventPublisher;
-  private final Clock clock;
+  private final BpmnBackendAdapter adapter;
 
-  public CaseStatusListener(
-      CaseStatusUpdater caseStatusUpdater, EventPublisher eventPublisher, Clock clock) {
-    this.caseStatusUpdater = caseStatusUpdater;
-    this.eventPublisher = eventPublisher;
-    this.clock = clock;
+  public CaseStatusListener(BpmnBackendAdapter adapter) {
+    this.adapter = adapter;
   }
 
   @Override
@@ -66,114 +63,81 @@ public class CaseStatusListener implements ExecutionListener {
       caseId = UUID.fromString(caseIdRaw.toString());
     } catch (IllegalArgumentException ex) {
       log.warn(
-          "CaseStatusListener: 'caseId' variable is not a UUID (value={}); skipping update",
+          "CaseStatusListener: 'caseId' variable is not a UUID (value={}); skipping signal emit",
           caseIdRaw);
       return;
     }
+    Object caseTypeIdRaw = execution.getVariable("caseTypeId");
+    Object caseTypeVersionRaw = execution.getVariable("caseTypeVersion");
+    if (caseTypeIdRaw == null || caseTypeVersionRaw == null) {
+      log.warn(
+          "CaseStatusListener: missing caseTypeId / caseTypeVersion process variables for"
+              + " caseId={} — skipping signal emit (Story 4.4a requires both)",
+          caseId);
+      return;
+    }
+    CaseTypeRef caseTypeRef =
+        new CaseTypeRef(caseTypeIdRaw.toString(), caseTypeVersionRaw.toString());
+    CaseInstanceRef caseInstanceRef = new CaseInstanceRef(caseId, caseTypeRef);
 
     String currentElementId = execution.getCurrentActivityId();
     FlowElement element = execution.getBpmnModelElementInstance();
-    String newStatus = resolveNewStatus(execution, element, currentElementId);
-    if (newStatus == null || newStatus.isBlank()) {
-      // Nothing meaningful to write — e.g. user-task end with no further active activity (parallel
-      // gateway race) or end-event with no derivable id.
-      return;
-    }
 
-    Optional<String> previous = caseStatusUpdater.updateStatus(caseId, newStatus);
-    if (previous.isEmpty()) {
-      // Engine fired the listener for a process whose case row is missing — likely a partial-state
-      // create that did not persist. Avoid emitting a CaseStatusChanged for a non-existent case
-      // (Story 2.4 review).
-      log.warn(
-          "CaseStatusListener: no case row for caseId={} (process={}) — skipping event publish",
-          caseId,
-          execution.getProcessInstanceId());
+    BackendSignal signal = buildSignal(element, currentElementId, caseInstanceRef);
+    if (signal == null) {
       return;
     }
-    // Publish only after the engine transaction commits — subscribers must not observe a status
-    // change that the engine subsequently rolls back (Story 2.4 review decision 1).
-    Instant now = clock.now();
-    String processInstanceId = execution.getProcessInstanceId();
-    UUID committedCaseId = caseId;
-    String committedNewStatus = newStatus;
-    String committedPrevious = previous.orElse(null);
-    if (TransactionSynchronizationManager.isSynchronizationActive()) {
-      TransactionSynchronizationManager.registerSynchronization(
-          new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-              eventPublisher.publish(
-                  new CaseStatusChanged(
-                      committedCaseId,
-                      committedPrevious,
-                      committedNewStatus,
-                      processInstanceId,
-                      now));
-            }
-          });
-    } else {
-      // Test harnesses (or any path that runs the listener outside a Spring TX) — fall back to
-      // synchronous publication so behaviour is observable. Production always has a TX bound.
-      eventPublisher.publish(
-          new CaseStatusChanged(
-              committedCaseId, committedPrevious, committedNewStatus, processInstanceId, now));
-    }
+    adapter.emit(signal);
   }
 
   /**
-   * Per Story 2.4 Dev Notes §What counts as a status boundary:
+   * Build the {@link BackendSignal} for the BPMN element being ended, or {@code null} when the
+   * element is not a status boundary the listener cares about.
    *
    * <ul>
-   *   <li>End event: status is the end-event's {@code camunda:property name="status"} when present,
-   *       otherwise the element id.
-   *   <li>User task end: peek the next active activity via the runtime service and use its id.
+   *   <li>End event → {@link BackendSignalKind#END_EVENT}; {@code source} is the explicit {@code
+   *       camunda:property name="status"} value when present, else the element id (legacy behaviour
+   *       preserved so end-event-id-as-status mappings keep working).
+   *   <li>User task with explicit {@code <camunda:property name="status">} → {@link
+   *       BackendSignalKind#USER_TASK_STATUS}; payload carries {@code value=<declared status>}.
+   *   <li>User task without an explicit status property → {@link
+   *       BackendSignalKind#USER_TASK_COMPLETE}; the router consults the mapping layer for any rule
+   *       keyed on the userTask id (e.g. stage advance on completion).
    * </ul>
    */
-  private static String resolveNewStatus(
-      DelegateExecution execution, FlowElement element, String currentElementId) {
+  private static BackendSignal buildSignal(
+      FlowElement element, String currentElementId, CaseInstanceRef caseInstanceRef) {
     if (element instanceof EndEvent endEvent) {
-      String declared = readStatusProperty(endEvent.getExtensionElements());
-      return declared != null ? declared : currentElementId;
+      String declared = CamundaPropertyReader.read(endEvent.getExtensionElements(), "status");
+      String source = declared != null ? declared : currentElementId;
+      Map<String, Object> payload = declared != null ? Map.of("value", declared) : Map.of();
+      return new BackendSignal(
+          BackendSignalKind.END_EVENT,
+          BpmnBackendAdapter.ADAPTER_NAME,
+          caseInstanceRef,
+          source,
+          payload);
     }
-    if (element instanceof UserTask) {
-      List<String> active =
-          execution
-              .getProcessEngineServices()
-              .getRuntimeService()
-              .getActiveActivityIds(execution.getProcessInstanceId());
-      // The current user task is still listed as active during the 'end' event (the engine has
-      // not removed it yet). Filter it out and pick the first remaining activity — matches the
-      // Phase 0 convention of "next active activity id is the new status".
-      List<String> remaining =
-          active.stream().filter(id -> id != null && !id.equals(currentElementId)).toList();
-      if (remaining.size() > 1) {
-        // TODO(Story 2.5/2.7): parallel-gateway fork — multiple sibling activities are active and
-        // findFirst() picks one non-deterministically. Reject parallel forks in BpmnValidator or
-        // adopt a composite status when this is first exercised by a real fixture.
-        log.warn(
-            "CaseStatusListener: process {} has {} simultaneously active activities after"
-                + " user-task end ({}); status mapping is non-deterministic — picking first",
-            execution.getProcessInstanceId(),
-            remaining.size(),
-            remaining);
+    if (element instanceof UserTask userTask) {
+      String declared = CamundaPropertyReader.read(userTask.getExtensionElements(), "status");
+      if (declared != null) {
+        return new BackendSignal(
+            BackendSignalKind.USER_TASK_STATUS,
+            BpmnBackendAdapter.ADAPTER_NAME,
+            caseInstanceRef,
+            currentElementId,
+            Map.of("value", declared));
       }
-      return remaining.stream().findFirst().orElse(null);
-    }
-    return null;
-  }
-
-  private static String readStatusProperty(ExtensionElements ext) {
-    if (ext == null) {
-      return null;
-    }
-    Collection<CamundaProperties> blocks = ext.getChildElementsByType(CamundaProperties.class);
-    for (CamundaProperties block : blocks) {
-      for (CamundaProperty p : block.getCamundaProperties()) {
-        if ("status".equals(p.getCamundaName())) {
-          return p.getCamundaValue();
-        }
-      }
+      // No explicit status property on this userTask — emit USER_TASK_COMPLETE so the router
+      // can pick up any task-completion rule from the mapping layer (Story 4.3.1 AC10 split).
+      // The Phase-0 fallback (pick "next active activity id" from getActiveActivityIds) is
+      // deliberately gone — see AC5 / WKS-CFG-024.
+      return new BackendSignal(
+          BackendSignalKind.USER_TASK_COMPLETE,
+          BpmnBackendAdapter.ADAPTER_NAME,
+          caseInstanceRef,
+          currentElementId,
+          Map.of());
     }
     return null;
   }

@@ -6,6 +6,7 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.BpmnValidationService;
 import com.wkspower.platform.domain.workflow.BpmnValidationResult;
+import com.wkspower.platform.engine.properties.CamundaPropertyReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,7 +17,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.cibseven.bpm.model.bpmn.BpmnModelInstance;
 import org.cibseven.bpm.model.bpmn.instance.ConditionExpression;
-import org.cibseven.bpm.model.bpmn.instance.ExtensionElements;
 import org.cibseven.bpm.model.bpmn.instance.FlowNode;
 import org.cibseven.bpm.model.bpmn.instance.Process;
 import org.cibseven.bpm.model.bpmn.instance.SequenceFlow;
@@ -24,8 +24,6 @@ import org.cibseven.bpm.model.bpmn.instance.ServiceTask;
 import org.cibseven.bpm.model.bpmn.instance.UserTask;
 import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaIn;
 import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaOut;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperties;
-import org.cibseven.bpm.model.bpmn.instance.cibseven.CamundaProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -164,6 +162,26 @@ public class BpmnValidator implements BpmnValidationService {
                     + "(rule: business_final tasks are terminal and synchronous)",
                 "userTasks[" + safeId(task) + "].archetype"));
       }
+      // Story 4.4a AC5 — when the CaseType declares stage-scoped statuses, every userTask MUST
+      // carry an explicit <camunda:property name="status"> declaration. The legacy Phase-0
+      // fallback (resolveNewStatus → first non-self active activity id) was non-deterministic
+      // under parallel gateways; rejecting the BPMN at deploy-time is the replacement contract.
+      // WKS-CFG-024 — wire-locked per feedback_error_codes_are_wire_contract.md.
+      if (caseType != null
+          && hasStageScopedStatuses(caseType)
+          && readStatusProperty(task) == null) {
+        errors.add(
+            ErrorDetail.ofField(
+                ErrorCode.WKS_CFG_024.wire(),
+                "User task '"
+                    + safeId(task)
+                    + "' is missing the required '<camunda:property name=\"status\"/>'"
+                    + " declaration. CaseType '"
+                    + caseType.id()
+                    + "' declares stage-scoped statuses, so every userTask must declare its status"
+                    + " explicitly (Story 4.4a AC5 — Phase-0 fallback retired)",
+                "userTasks[" + safeId(task) + "].properties.status"));
+      }
       if (DRAFT_SECTION.equals(archetype) && hasDownstreamTaskNode(task, allFlows)) {
         errors.add(
             ErrorDetail.ofField(
@@ -225,19 +243,28 @@ public class BpmnValidator implements BpmnValidationService {
   }
 
   private static String readArchetype(UserTask task) {
-    ExtensionElements ext = task.getExtensionElements();
-    if (ext == null) {
-      return null;
-    }
-    Collection<CamundaProperties> blocks = ext.getChildElementsByType(CamundaProperties.class);
-    for (CamundaProperties block : blocks) {
-      for (CamundaProperty p : block.getCamundaProperties()) {
-        if ("archetype".equals(p.getCamundaName())) {
-          return p.getCamundaValue();
-        }
-      }
-    }
-    return null;
+    return CamundaPropertyReader.read(task, "archetype");
+  }
+
+  /**
+   * Story 4.4a AC5 — read the optional {@code <camunda:property name="status"/>} declaration on a
+   * user task. Returns {@code null} when absent. Used by callers (deploy-time validators in
+   * stage-scoped contexts) to enforce the explicit-status rule that replaced the legacy Phase-0
+   * fallback {@code resolveNewStatus → first non-self active activity id}.
+   */
+  static String readStatusProperty(UserTask task) {
+    return CamundaPropertyReader.read(task, "status");
+  }
+
+  /**
+   * Story 4.4a AC5 — true when the CaseType declares one or more stage-scoped status sets (any
+   * stage with a non-null, non-empty {@code statuses:} list). Stage-scoped contexts are the only
+   * surface where the absence of an explicit userTask status must be a deploy-time failure; flat
+   * statuses keep their existing Phase-0 acceptance until the broader migration in Story 4.4b.
+   */
+  private static boolean hasStageScopedStatuses(CaseTypeConfig caseType) {
+    return caseType.stages().stream()
+        .anyMatch(s -> s.statuses() != null && !s.statuses().isEmpty());
   }
 
   /**

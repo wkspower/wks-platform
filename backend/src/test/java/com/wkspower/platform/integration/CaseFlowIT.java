@@ -245,6 +245,14 @@ class CaseFlowIT {
 
   // ---- Story 2.4 — full create → transition end-to-end ----------------
 
+  @org.junit.jupiter.api.Disabled(
+      "Story 4.4a — listener-side direct-mutation path REMOVED (AC1). The end-event signal now"
+          + " flows BPMN → BpmnBackendAdapter → BackendSignalRouter → mapping rules. This"
+          + " stageless fixture has no MappingDefinition registered, so the router emits a"
+          + " WKS-MAP-404 audit-miss instead of mutating cases.status. Story 4.4b reroutes the"
+          + " manual-path AND folds in a stage-aware fixture / mapping for the BPMN end-event"
+          + " path; this test moves over with that work. New BPMN→signal coverage lives in"
+          + " BpmnBackendAdapterIT (Story 4.4a).")
   @Test
   void createTransitionRoundTripUpdatesStatusAndPublishesEvent() throws Exception {
     registerTransitionCaseType();
@@ -319,6 +327,9 @@ class CaseFlowIT {
    * case-status-property-fixture.bpmn} has end event id={@code "end"} but property value={@code
    * "resolved"} — the test passes only when the listener reads the property.
    */
+  @org.junit.jupiter.api.Disabled(
+      "Story 4.4a — see sibling Disabled annotation. Listener no longer mutates cases.status;"
+          + " this assertion needs the manual-path rewrite (4.4b) plus a stage-mapping fixture.")
   @Test
   void endEventStatusProperty() throws Exception {
     registerStatusPropertyCaseType();
