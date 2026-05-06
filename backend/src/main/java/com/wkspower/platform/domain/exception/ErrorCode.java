@@ -338,6 +338,17 @@ public enum ErrorCode {
    */
   WKS_VER_001("WKS-VER-001"),
 
+  // 422 — Form Definition Schema validation (Story 5.1). Band: WKS-FORM-001..099.
+  // Codes 002+ are RESERVED for Stories 5.2–5.8 — do NOT mint speculatively.
+  /**
+   * Story 5.1 AC1 — {@code topology: parallel} (or any non-{@code single} topology value) is a
+   * Phase-1 capability and is rejected in Phase 0. Error message: {@code "topology: parallel is a
+   * Phase-1 capability — use topology: single"}. The wire string is stable; future stories that
+   * support additional topologies must not reuse this code for a different meaning per {@code
+   * feedback_error_codes_are_wire_contract.md}.
+   */
+  WKS_FORM_001("WKS-FORM-001"),
+
   // 409 — runtime conflict.
   /**
    * Optimistic-locking conflict on update — the row was modified by another transaction between

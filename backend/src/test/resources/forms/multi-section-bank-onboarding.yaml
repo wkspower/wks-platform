@@ -1,0 +1,49 @@
+id: full-bank-onboarding
+topology: single
+dataModel: sectioned
+rendering: multi-section
+sections:
+  - id: personal-details
+    label: "Personal Details"
+    fields:
+      - id: firstName
+        type: text
+        label: "First Name"
+        required: true
+      - id: lastName
+        type: text
+        label: "Last Name"
+        required: true
+      - id: dateOfBirth
+        type: date
+        label: "Date of Birth"
+        required: true
+  - id: address
+    label: "Address"
+    fields:
+      - id: street
+        type: text
+        label: "Street"
+        required: true
+      - id: city
+        type: text
+        label: "City"
+        required: true
+      - id: postalCode
+        type: text
+        label: "Postal Code"
+        required: true
+  - id: account-preferences
+    label: "Account Preferences"
+    fields:
+      - id: accountType
+        type: select
+        label: "Account Type"
+        required: true
+        options:
+          - label: "Current Account"
+            value: current
+          - label: "Savings Account"
+            value: savings
+          - label: "Student Account"
+            value: student

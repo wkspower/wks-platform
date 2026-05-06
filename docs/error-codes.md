@@ -30,6 +30,7 @@ The enum currently uses seven prefixes:
 | --- | --- | --- |
 | `WKS-API` | 001–005, 401, 403, 404, 413, plus security/bootstrap 050–055 (literals) | Transport / request-shape / auth + production-bootstrap fail-closed |
 | `WKS-CFG` | 000–099 | CaseType + BPMN deploy-time validation aggregate |
+| `WKS-FORM` | 001–099 | Form Definition Schema validation (Story 5.1+). First 4-letter prefix band — `ErrorCodeTest` pattern updated to accept `[A-Z]{3,4}` prefixes. |
 | `WKS-MAP` | 001–009, 404, 405 | Mapping Layer validation (Story 4.2 + 4.3.1) + runtime miss (Story 4.3 + 4.3.1) |
 | `WKS-STG` | 001–011, 099 | Stage lifecycle runtime + stage-scoped status sets |
 | `WKS-VER` | 001–099 | CaseType Version Registry (Story 3.4 / Decision 20) |
@@ -141,6 +142,16 @@ Epic-namespaced sibling band. Codes 001–006 are emitted by `MappingValidator` 
 | `WKS-MAP-009` | Story 4.3.1 AC9 — duplicate map key inside the mapping subtree (e.g. `userTasks.<id>` declared twice). Default Jackson last-wins is silent and catastrophic; `STRICT_DUPLICATE_DETECTION` raises this code instead. Top-level duplicates remain `WKS-CFG-099` to preserve that wire contract. | `infrastructure/config/CaseTypeYamlLoader.java` |
 | `WKS-MAP-404` | Runtime — `BackendSignalRouter` could not match an incoming `BackendSignal` to a rule in the active `MappingDefinition`, OR the CaseInstance's pinned `(caseTypeId, version)` is missing from `MappingRegistry`, OR a property emission attempted to drive a stage transition (Story 4.3 AC2 / AC4 / AC9). The `404` number intentionally mirrors HTTP not-found semantics for "rule not found." Distinct from deploy-time `WKS-MAP-001..006`. | `domain/service/BackendSignalRouter.java`, `domain/exception/WksMappingMissException.java` |
 | `WKS-MAP-405` | Story 4.3.1 AC5 — runtime: `BackendSignalRouter.onSignal` received a signal for a `caseId` no longer present in the case repository (purged, hot-reload, race). Distinct from `-404` (rule miss); audited via `BackendSignalRouted` with `source = backend(<adapter>)` rather than silently dropped. | `domain/service/BackendSignalRouter.java` |
+
+---
+
+## WKS-FORM — Form Definition Schema validation (Story 5.1+)
+
+Band: `WKS-FORM-001..099`. Codes 002+ are **reserved** for Stories 5.2–5.8 — do NOT mint speculatively. This is the first 4-letter prefix band; `ErrorCodeTest.wireStringsFollowWksHyphenFormat` was updated to accept `[A-Z]{3,4}` prefixes (Story 5.1 change).
+
+| Code | Meaning | Thrower(s) |
+| --- | --- | --- |
+| `WKS-FORM-001` | `topology: parallel` (or any non-`single` topology value) is a Phase-1 capability — rejected in Phase 0. Message: `"topology: parallel is a Phase-1 capability — use topology: single"`. | `infrastructure/config/FormValidator.java` |
 
 ---
 
