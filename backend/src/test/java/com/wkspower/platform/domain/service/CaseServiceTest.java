@@ -24,7 +24,6 @@ import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
-import com.wkspower.platform.domain.port.BackendSignal;
 import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;

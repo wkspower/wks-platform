@@ -51,13 +51,13 @@ public record Case(
    * Story 3.2 — backward-compat constructor for callers (and tests) that predate the stage-cache
    * fields. Defaults both stage-cache slots to {@code null} (zero-stage shape).
    *
-   * @deprecated Story 4.4b review finding I13: this constructor silently sets both
-   *     {@code currentStageId} and {@code currentStageOrdinal} to {@code null}, which is safe only
-   *     when the caller truly owns a zero-stage case. Any caller that subsequently populates one of
-   *     the two cache fields via a direct field-set (rather than constructing a new {@code Case})
-   *     risks creating a paired-but-mismatched row that the compact-constructor invariant now
-   *     catches. Prefer the 13-arg canonical constructor and pass both cache slots explicitly.
-   *     Story 3.8 (mutate-class) and Epic 5 (forms) will be the first callers to migrate.
+   * @deprecated Story 4.4b review finding I13: this constructor silently sets both {@code
+   *     currentStageId} and {@code currentStageOrdinal} to {@code null}, which is safe only when
+   *     the caller truly owns a zero-stage case. Any caller that subsequently populates one of the
+   *     two cache fields via a direct field-set (rather than constructing a new {@code Case}) risks
+   *     creating a paired-but-mismatched row that the compact-constructor invariant now catches.
+   *     Prefer the 13-arg canonical constructor and pass both cache slots explicitly. Story 3.8
+   *     (mutate-class) and Epic 5 (forms) will be the first callers to migrate.
    */
   @Deprecated
   public Case(

@@ -28,7 +28,6 @@ import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.FakeRecordingAdapter;
 import com.wkspower.platform.domain.port.StageRepository;
-import java.util.Collection;
 import com.wkspower.platform.infrastructure.persistence.RouterItPersistenceImports;
 import com.wkspower.platform.infrastructure.persistence.entity.RoleEntity;
 import com.wkspower.platform.infrastructure.persistence.entity.UserEntity;
@@ -37,6 +36,7 @@ import com.wkspower.platform.infrastructure.persistence.repository.UserEntityRep
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -556,7 +556,8 @@ class BackendSignalRouterIT {
             });
   }
 
-  // ---------- Story 4.4b AC7 — golden-master extension: manual transition + stage-advance + userTask
+  // ---------- Story 4.4b AC7 — golden-master extension: manual transition + stage-advance +
+  // userTask
 
   @Test
   void ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent() {
@@ -774,8 +775,8 @@ class BackendSignalRouterIT {
     /**
      * Story 4.4b AC3 — stub CaseTypeReader that returns a CaseTypeConfig with the STAGES fixture
      * (stage1, stage2, stage3) for every case type id + version. Each stage has its own status set:
-     * stage1 → [open, in-review], stage2 → [open, approved], stage3 → [open, closed(terminal)].
-     * The router uses this to resolve the next stage's initialStatus after a stage advance.
+     * stage1 → [open, in-review], stage2 → [open, approved], stage3 → [open, closed(terminal)]. The
+     * router uses this to resolve the next stage's initialStatus after a stage advance.
      */
     @Bean
     CaseTypeReader stubCaseTypeReader() {

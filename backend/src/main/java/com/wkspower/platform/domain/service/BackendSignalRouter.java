@@ -6,7 +6,6 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEm
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
-import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
@@ -243,9 +242,9 @@ public class BackendSignalRouter implements BackendSignalHandler {
   // ---- per-kind dispatch -------------------------------------------------
 
   /**
-   * Returns {@code true} when a stage transition was applied (audit events emitted inside
-   * {@link #applyStageTransition}); {@code false} if a {@link WksMappingMissException} is thrown
-   * before any transition (never actually returns false — exception propagates instead).
+   * Returns {@code true} when a stage transition was applied (audit events emitted inside {@link
+   * #applyStageTransition}); {@code false} if a {@link WksMappingMissException} is thrown before
+   * any transition (never actually returns false — exception propagates instead).
    */
   private boolean dispatchEndEvent(BackendSignal signal, Case caseRow, MappingDefinition mapping) {
     EndEventMapping rule =
@@ -262,8 +261,8 @@ public class BackendSignalRouter implements BackendSignalHandler {
   }
 
   /**
-   * Returns {@code true} when a stage transition was applied; {@code false} never actually
-   * returned — exception propagates on miss.
+   * Returns {@code true} when a stage transition was applied; {@code false} never actually returned
+   * — exception propagates on miss.
    */
   private boolean dispatchNamedSignal(
       BackendSignal signal, Case caseRow, MappingDefinition mapping) {
@@ -289,8 +288,8 @@ public class BackendSignalRouter implements BackendSignalHandler {
   /**
    * Returns {@code true} when a stage advance was applied (USER_TASK_COMPLETE path); {@code false}
    * when a status-only update was performed (USER_TASK_STATUS path). The caller uses this to decide
-   * whether to emit the standard single-event {@code auditSuccess} or skip it (because
-   * {@link #resetStatusForAdvancedStage} already emitted two events).
+   * whether to emit the standard single-event {@code auditSuccess} or skip it (because {@link
+   * #resetStatusForAdvancedStage} already emitted two events).
    */
   private boolean dispatchUserTaskProperty(
       BackendSignal signal, Case caseRow, MappingDefinition mapping) {
@@ -353,11 +352,11 @@ public class BackendSignalRouter implements BackendSignalHandler {
   /**
    * Story 4.4b AC3 — stage transition with post-advance status-reset. After the stage advance
    * succeeds, resolves the next stage's {@code initialStatus} via {@link CaseTypeReader} and resets
-   * the case status. Emits TWO {@link BackendSignalRouted} events with a shared {@code correlationId}
-   * UUID: one {@code effect=stage-advance}, one {@code effect=status-reset}. This is an intentional
-   * divergence from the pre-4.4b one-event shape — rationale: per Q3 lock, aligns with Epic 9
-   * Activity Feed semantics and {@code EventPublisher.publishAfterCommit} one-event-per-effect
-   * convention.
+   * the case status. Emits TWO {@link BackendSignalRouted} events with a shared {@code
+   * correlationId} UUID: one {@code effect=stage-advance}, one {@code effect=status-reset}. This is
+   * an intentional divergence from the pre-4.4b one-event shape — rationale: per Q3 lock, aligns
+   * with Epic 9 Activity Feed semantics and {@code EventPublisher.publishAfterCommit}
+   * one-event-per-effect convention.
    *
    * <p>The {@code to} target stage is determined from the spec BEFORE calling the advancer, so
    * {@link #resetStatusForAdvancedStage} can use it directly without re-reading from the DB
@@ -400,8 +399,9 @@ public class BackendSignalRouter implements BackendSignalHandler {
    * for the stage-advance effect, one for the status-reset effect.
    *
    * @param nextStageHint the target stage id known before the advance (from the mapping spec), or
-   *     {@code null} when the advance target is determined by the advancer (COMPLETED/SKIPPED paths).
-   *     When non-null this avoids a JPA first-level-cache staleness issue in transactional contexts.
+   *     {@code null} when the advance target is determined by the advancer (COMPLETED/SKIPPED
+   *     paths). When non-null this avoids a JPA first-level-cache staleness issue in transactional
+   *     contexts.
    */
   private void resetStatusForAdvancedStage(
       BackendSignal signal, Case preMutationRow, String nextStageHint) {

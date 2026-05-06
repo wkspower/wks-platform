@@ -59,7 +59,7 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
    * Bypasses {@code @Version} by design — status transitions own their own concurrency surface
    * through the domain service layer.
    */
-  @Modifying
+  @Modifying(clearAutomatically = true)
   @Query(
       "UPDATE CaseEntity c "
           + "   SET c.status = :status, "

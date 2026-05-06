@@ -9,8 +9,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * Story 4.4b AC4 — four-corner invariant test for {@link Case}'s compact constructor
- * {@code currentStageId ⇔ currentStageOrdinal} guard (review finding I11).
+ * Story 4.4b AC4 — four-corner invariant test for {@link Case}'s compact constructor {@code
+ * currentStageId ⇔ currentStageOrdinal} guard (review finding I11).
  *
  * <p>Covers: (1) both null — valid, (2) both non-null — valid, (3) only id set — throws, (4) only
  * ordinal set — throws.
@@ -38,7 +38,7 @@ class CaseInvariantTest {
             ACTOR,
             NOW,
             0L,
-            null,  // currentStageId
+            null, // currentStageId
             null); // currentStageOrdinal
     assertThat(c.currentStageId()).isNull();
     assertThat(c.currentStageOrdinal()).isNull();
@@ -62,7 +62,7 @@ class CaseInvariantTest {
             NOW,
             0L,
             "stage1", // currentStageId
-            0);       // currentStageOrdinal
+            0); // currentStageOrdinal
     assertThat(c.currentStageId()).isEqualTo("stage1");
     assertThat(c.currentStageOrdinal()).isEqualTo(0);
   }
@@ -86,7 +86,7 @@ class CaseInvariantTest {
                     NOW,
                     0L,
                     "stage1", // currentStageId set
-                    null))    // currentStageOrdinal null — invalid
+                    null)) // currentStageOrdinal null — invalid
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("currentStageId")
         .hasMessageContaining("currentStageOrdinal");
@@ -111,7 +111,7 @@ class CaseInvariantTest {
                     NOW,
                     0L,
                     null, // currentStageId null — invalid
-                    0))   // currentStageOrdinal set
+                    0)) // currentStageOrdinal set
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("currentStageId")
         .hasMessageContaining("currentStageOrdinal");

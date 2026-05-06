@@ -2,12 +2,7 @@ package com.wkspower.platform.infrastructure.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.wkspower.platform.domain.config.model.CaseTypeConfig;
-import com.wkspower.platform.domain.config.model.Permission;
-import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
-import com.wkspower.platform.domain.config.model.StatusColor;
-import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.BackendSignal;
 import com.wkspower.platform.domain.port.BackendSignalKind;
@@ -19,7 +14,6 @@ import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.BackendSignalRouter;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -84,20 +79,24 @@ class CaseTransitionPostgresIT {
   // ---------- AC10 §1 — zero-process transition via CaseStatusUpdater --------
 
   @Test
+  @Transactional
   void zeroPrcessManualTransition_updatesStatusOnRealPostgres() {
     UUID actorId = bootstrapActorId();
     UUID caseId = UUID.randomUUID();
     Case toSave =
-        new Case(
-            caseId, "zero-zero", 1, "open", null, Map.of(), null, NOW, actorId, NOW, 0L);
+        new Case(caseId, "zero-zero", 1, "open", null, Map.of(), null, NOW, actorId, NOW, 0L);
     caseRepository.save(toSave);
 
     // Zero-process path: CaseStatusUpdater mutates status directly.
+    // @Transactional on this test provides the mandatory transaction CaseStatusAdapter requires.
     Optional<String> prevStatus = caseStatusUpdater.updateStatus(caseId, "closed");
 
     assertThat(prevStatus).hasValue("open");
+    // Flush to DB then re-read to verify persistence.
     Case after = caseRepository.findById(caseId).orElseThrow();
-    assertThat(after.status()).isEqualTo("closed");
+    assertThat(after.status())
+        .as("status should be updated to 'closed' after updateStatus call")
+        .isEqualTo("closed");
     // No stage fields affected.
     assertThat(after.currentStageId()).isNull();
     assertThat(after.currentStageOrdinal()).isNull();
@@ -151,9 +150,7 @@ class CaseTransitionPostgresIT {
     backendSignalRouter.onSignal(signal);
 
     Case after = caseRepository.findById(caseId).orElseThrow();
-    assertThat(after.currentStageId())
-        .as("stage must have advanced to stage2")
-        .isEqualTo("stage2");
+    assertThat(after.currentStageId()).as("stage must have advanced to stage2").isEqualTo("stage2");
     // AC3: after stage advance, status is reset to next stage's initialStatus.
     // The BackendAdapterConfig injects the real CaseTypeReader; it will either resolve
     // from YAML or fall back gracefully. We assert the case row is consistent.
