@@ -199,6 +199,19 @@ public enum ErrorCode {
    * meaning.
    */
   WKS_MAP_007("WKS-MAP-007"),
+  /**
+   * Runtime — emitted by {@link com.wkspower.platform.domain.service.BackendSignalRouter} when an
+   * incoming {@link com.wkspower.platform.domain.port.BackendSignal} does not match any rule in the
+   * active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the
+   * CaseInstance's pinned {@code (caseTypeId, version)} is missing from {@link
+   * com.wkspower.platform.domain.service.MappingRegistry}, or when a property emission attempts to
+   * drive a stage transition (Story 4.3 AC2 / AC4 / AC9). Distinct from deploy-time {@link
+   * #WKS_MAP_001}..{@link #WKS_MAP_006}; the {@code 404} number intentionally mirrors HTTP
+   * not-found semantics for "rule not found." Per {@code
+   * feedback_error_codes_are_wire_contract.md}: the wire string is stable; never reuse for any
+   * other meaning.
+   */
+  WKS_MAP_404("WKS-MAP-404"),
 
   // 409 / 422 / 404 — Stage lifecycle runtime errors (Story 3.1 AC9). Band: WKS-STG-001..099.
   /**

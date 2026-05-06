@@ -44,6 +44,34 @@ class BackendAdapterPortIsolationTest {
   }
 
   @Test
+  void onBackendSignalIsCalledFromRouterAndBinderOnly() {
+    // Story 4.3 AC6 — single-routing-surface invariant. The router is the only
+    // BackendSignalHandler that may subscribe to BackendAdapter.onBackendSignal in production.
+    // ArchUnit's method-call-level guardrail makes this load-bearing: a future "logging
+    // listener" or "metrics listener" would silently break the single-subscriber guarantee, but
+    // adding the call site without editing this test fails the build.
+    noClasses()
+        .that()
+        .resideInAPackage("com.wkspower.platform..")
+        .and()
+        .doNotHaveFullyQualifiedName("com.wkspower.platform.domain.service.BackendSignalRouter")
+        .and()
+        .doNotHaveFullyQualifiedName("com.wkspower.platform.domain.service.BackendAdapterBinder")
+        .should()
+        .callMethod(
+            com.wkspower.platform.domain.port.BackendAdapter.class,
+            "onBackendSignal",
+            com.wkspower.platform.domain.port.BackendSignalHandler.class)
+        .because(
+            "Story 4.3 AC6: BackendSignalRouter is the only legitimate subscriber to "
+                + "BackendAdapter.onBackendSignal in production wiring. The binder mediates "
+                + "adapter resolution; nothing else may call this method. A second subscriber "
+                + "would silently break the single-routing-surface guarantee — adding one "
+                + "requires a deliberate edit of this test, surfacing the change to reviewers.")
+        .check(CLASSES);
+  }
+
+  @Test
   void nullAdapterAndBinderHaveNoEngineImports() {
     // NullAdapter and BackendAdapterBinder live in domain.service alongside CaseService etc., so
     // we cannot use a package-wide rule. Pin by simple name — these two classes ship with the

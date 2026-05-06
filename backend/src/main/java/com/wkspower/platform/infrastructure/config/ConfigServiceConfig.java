@@ -14,6 +14,7 @@ import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.ConfigService;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
 import org.springframework.context.annotation.Bean;
@@ -34,9 +35,17 @@ public class ConfigServiceConfig {
       BpmnValidationService bpmnValidator,
       WorkflowEngine workflowEngine,
       EventPublisher eventPublisher,
-      CaseTypeVersionRegistry versionRegistry) {
+      CaseTypeVersionRegistry versionRegistry,
+      MappingRegistry mappingRegistry) {
     return new ConfigService(
-        source, registrar, reader, bpmnValidator, workflowEngine, eventPublisher, versionRegistry);
+        source,
+        registrar,
+        reader,
+        bpmnValidator,
+        workflowEngine,
+        eventPublisher,
+        versionRegistry,
+        mappingRegistry);
   }
 
   /**

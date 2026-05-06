@@ -5,10 +5,12 @@ import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.RegistrationResult;
 import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.BpmnValidationService;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeRegistrar;
 import com.wkspower.platform.domain.port.CaseTypeSource;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
@@ -47,6 +49,7 @@ public class ConfigService {
   private final BpmnValidationService bpmnValidator;
   private final WorkflowEngine workflowEngine;
   private final EventPublisher eventPublisher;
+  private final MappingRegistry mappingRegistry;
 
   /**
    * Story 3.4 / Decision 20 — every successful YAML validate flows through {@link
@@ -71,7 +74,8 @@ public class ConfigService {
       BpmnValidationService bpmnValidator,
       WorkflowEngine workflowEngine,
       EventPublisher eventPublisher,
-      CaseTypeVersionRegistry versionRegistry) {
+      CaseTypeVersionRegistry versionRegistry,
+      MappingRegistry mappingRegistry) {
     this.source = source;
     this.registrar = registrar;
     this.reader = reader;
@@ -79,6 +83,7 @@ public class ConfigService {
     this.workflowEngine = workflowEngine;
     this.eventPublisher = eventPublisher;
     this.versionRegistry = versionRegistry;
+    this.mappingRegistry = mappingRegistry;
   }
 
   /**
@@ -110,7 +115,9 @@ public class ConfigService {
     if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
       return ValidationResult.invalid(reg.errors());
     }
-    return ValidationResult.ok(versioned, result.warnings());
+    ValidationResult versionedResult = ValidationResult.ok(versioned, result.warnings());
+    publishMappingToRegistry(versionedResult);
+    return versionedResult;
   }
 
   /** Byte-driven YAML-only variant. Retained for the startup loader's BPMN-missing path. */
@@ -136,7 +143,28 @@ public class ConfigService {
     }
     // Carry the version-overridden config back to callers (startup loader, admin endpoint) so the
     // ConfigDeployed event and any post-validate logging see the registry-authoritative version.
-    return ValidationResult.ok(versioned, result.warnings());
+    // Story 4.3 — publishMappingToRegistry runs against the same versioned result so the
+    // (caseTypeId, version) key in MappingRegistry matches what the in-memory CaseTypeRegistry
+    // advertises.
+    ValidationResult versionedResult = ValidationResult.ok(versioned, result.warnings());
+    publishMappingToRegistry(versionedResult);
+    return versionedResult;
+  }
+
+  /**
+   * Story 4.3 AC9 — populate {@link MappingRegistry} keyed by {@code (caseTypeId, version)} after a
+   * successful CaseType registration. Empty {@link MappingDefinition} is registered for every
+   * zero-attachment CaseType (D22, first-class). When the registry was not provided (legacy
+   * constructor) the call short-circuits — the router's {@code WKS-MAP-404} path covers the case.
+   */
+  private void publishMappingToRegistry(ValidationResult result) {
+    if (mappingRegistry == null || result.config().isEmpty()) {
+      return;
+    }
+    CaseTypeConfig config = result.config().get();
+    MappingDefinition definition = result.mappingDefinition().orElse(MappingDefinition.empty());
+    String version = String.valueOf(config.version());
+    mappingRegistry.register(new CaseTypeRef(config.id(), version), version, definition);
   }
 
   /**
@@ -182,6 +210,7 @@ public class ConfigService {
       if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
         return DeployResult.invalid(reg.errors());
       }
+      publishMappingToRegistry(yamlResult);
 
       try {
         deployment =
