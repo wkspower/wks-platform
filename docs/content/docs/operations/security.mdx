@@ -1,14 +1,103 @@
 ---
 title: Security overview
 description: How WKS handles authentication, authorization, data isolation, and what that means for your deployment.
-gate: "3"
-status: needs-writing
 ---
 
-{/* Gate 3 ★ — must be live before LinkedIn launch announcement */}
-{/* PRD-mandated Convert-stage document */}
-{/* Covers: auth model, RBAC architecture, single-tenant data isolation advantage, */}
-{/* encryption posture, dependency management, responsible disclosure process */}
-{/* Owner: Victor (with Claude) */}
+This page covers the security model for a WKS deployment: how authentication works, how access control is enforced, how client data is isolated, and what you're responsible for as an operator.
 
-TODO: content
+## Authentication
+
+WKS uses JWT-based session authentication. On successful login, the platform issues a signed JWT stored in an `httpOnly` cookie — the token is never accessible to JavaScript running in the browser, which eliminates the XSS token-theft attack class.
+
+| Concern | Behaviour |
+|---------|-----------|
+| Mechanism | JWT in `httpOnly` cookie |
+| Token expiry | 8 hours by default; configurable via `WKS_JWT_EXPIRY` |
+| Password hashing | Argon2id via Spring Security 6 |
+| First-boot credentials | Set via `WKS_ADMIN_EMAIL` and `WKS_ADMIN_PASSWORD` env vars — no hardcoded defaults in production images |
+| Session invalidation | `POST /api/auth/logout` invalidates the server-side session |
+
+The platform ships with no default production credentials. If `WKS_ADMIN_EMAIL` and `WKS_ADMIN_PASSWORD` are not set at first boot, the platform will not start. This is intentional — there is no "change the default password" step to forget.
+
+For SSO / SAML integration (EE tier), see the license-gated feature list in your license file.
+
+## Authorization
+
+Access control runs in three layers, each enforced by the platform — not by application code in your case type YAML:
+
+### Layer 1 — Route-level
+
+Spring Security filter chain. Any request that isn't `POST /api/auth/login` requires a valid session. Unauthenticated requests return HTTP 401. Requests from authenticated users without the required role return HTTP 403.
+
+### Layer 2 — Case-type-level
+
+Every case type declares a `roles` block that names which roles exist and what permissions each role carries:
+
+```yaml
+roles:
+  - name: loan-officer
+    permissions: [view, create, transition, assign, upload-document]
+  - name: auditor
+    permissions: [view]
+```
+
+A request from a user whose role doesn't appear on the case type returns HTTP 403, regardless of what other roles that user holds on other case types. Roles are scoped to the case type — there is no platform-wide "admin" role that bypasses case-type RBAC.
+
+**Available permissions:** `view`, `create`, `edit`, `transition`, `assign`, `escalate`, `upload-document`, `delete`
+
+### Layer 3 — Case-level
+
+Each case is owned and accessed through the role model declared on its case type. A user can only read or modify a case if their role on the case type grants the relevant permission. Documents uploaded to a case inherit the same RBAC as the case — the same filter covers `/api/cases/{id}/documents`.
+
+## Data isolation
+
+WKS is designed for **one isolated environment per client deployment**. Each client gets:
+
+- Their own running instance
+- Their own Postgres database
+- Their own MinIO object storage
+- Their own URL
+- Their own license file
+
+There is no `tenant_id` in the data model, no row-level security, and no shared-database multi-tenancy. This is an architectural invariant — not a configuration option.
+
+The practical consequence for a client evaluation: the data you put into a WKS instance is not shared with any other client's instance. Backup, restore, and data deletion all reduce to operating on a single environment. GDPR deletion for a client is "delete the environment."
+
+Self-hosted deployments follow the same model — one WKS instance per deployment context.
+
+## Encryption
+
+| Layer | Behaviour |
+|-------|-----------|
+| Data in transit | TLS handled by the reverse proxy (nginx, Caddy, or your CDN). WKS itself listens on HTTP internally; TLS termination happens at the proxy layer. |
+| Data at rest | Postgres and MinIO encryption is managed at the infrastructure layer. For Managed Hosting deployments, both are encrypted at rest using the hosting provider's default block-storage encryption. |
+| Passwords | Argon2id hashing — passwords are never stored in recoverable form |
+| JWT signing | Asymmetric signing (RS256). The signing key rotates on service restart. |
+
+For production deployments, always terminate TLS at the reverse proxy or CDN before traffic reaches WKS. The `WKS_CORS_ORIGINS` environment variable controls which origins the API accepts cross-origin requests from — set this to your frontend domain.
+
+## License file security
+
+The license file is a signed JWT (Ed25519). The platform verifies the signature against a public key shipped in the image at boot time. A tampered or expired license falls back to `tier: oss` — the platform keeps running with the OSS feature set, and an admin banner notifies operators. The license file is never transmitted to external systems at runtime.
+
+## Dependency management
+
+- Automated dependency updates via Dependabot on the public repository
+- OWASP ZAP scan in CI (fast-follow; results reviewed before each release)
+- Spring Boot parent BOM keeps the security-relevant Spring and Jackson dependencies on the latest patched versions
+
+The Docker image is built from a minimal JRE base image. The image does not include a shell, curl, or package managers — the attack surface of a compromised container is limited to the JVM and the application.
+
+## What you're responsible for as an operator
+
+WKS handles authentication, authorization, and application-layer security. You're responsible for:
+
+- **TLS termination** at the reverse proxy. Never expose WKS directly on HTTP in production.
+- **Network access control.** The admin endpoints (`/api/admin/*`) should not be publicly accessible. Put them behind a VPN or internal network boundary.
+- **Credential rotation.** Rotate `WKS_ADMIN_PASSWORD` after initial setup. The platform does not enforce a rotation policy.
+- **Infrastructure security.** Postgres, MinIO, and the host OS are your responsibility. Follow your cloud provider's hardening guides.
+- **Backups.** WKS doesn't manage backups. Back up Postgres and MinIO independently.
+
+## Responsible disclosure
+
+Security issues can be reported to [security@wkspower.com](mailto:security@wkspower.com). We aim to acknowledge reports within 48 hours. Please allow 90 days for a fix before public disclosure. We do not operate a public bug bounty program at this time.

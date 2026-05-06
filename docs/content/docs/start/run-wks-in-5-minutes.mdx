@@ -1,13 +1,149 @@
 ---
 title: Run WKS in 5 minutes
 description: Clone, boot, and see a working case management system before your coffee gets cold.
-gate: "3"
-status: stub
-source: docs/quickstart-zero-stage.md
 ---
 
-{/* Gate 3 ★ — must be live before LinkedIn launch announcement */}
-{/* Source: docs/quickstart-zero-stage.md — needs voice-rules pass and removal of internal references */}
-{/* Owner: Victor (with Claude) */}
+You will have a live WKS instance running and a case type deployed before you finish reading this page.
 
-TODO: content
+## What you need
+
+- Docker and Docker Compose
+- `curl`
+- `jq` (optional — makes JSON output readable)
+
+No database setup. No BPMN tooling. No environment configuration beyond what the image ships with.
+
+## Step 1 — Boot the platform
+
+```bash
+git clone https://github.com/wkspower/wks-platform.git
+cd wks-platform
+docker compose up -d
+```
+
+Wait about 20 seconds for the platform to be ready, then verify:
+
+```bash
+curl -fsS http://localhost:8080/api/health
+```
+
+Expected response:
+
+```json
+{ "status": "UP" }
+```
+
+## Step 2 — Authenticate
+
+```bash
+curl -fsS -c /tmp/wks-cookies.txt -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@wkspower.local","password":"admin"}' \
+  -o /dev/null
+```
+
+The session is stored as an httpOnly cookie — subsequent requests use `-b /tmp/wks-cookies.txt`.
+
+## Step 3 — Deploy a case type
+
+The smallest valid WKS case type is a handful of declarative lines. Save this as `my-tracker.yaml`:
+
+```yaml
+id: my-tracker
+displayName: "My tracker"
+version: 1
+description: A minimal case type — no stages, no process required.
+roles:
+  - name: admin
+    permissions: [view, create, edit, transition]
+```
+
+No `stages:` declared. No BPMN file. This is a fully valid case type — WKS runs it on its own primitives.
+
+Deploy it:
+
+```bash
+curl -fsS -b /tmp/wks-cookies.txt -X POST http://localhost:8080/api/admin/deploy \
+  -F "caseType=@my-tracker.yaml;type=application/yaml"
+```
+
+Expected response:
+
+```json
+{ "ok": true, "errors": [] }
+```
+
+If you see errors instead, check [Troubleshoot deployment errors](/guides/troubleshoot-deployment-errors).
+
+## Step 4 — Create a case
+
+```bash
+curl -sS -b /tmp/wks-cookies.txt -X POST http://localhost:8080/api/cases \
+  -H "Content-Type: application/json" \
+  -d '{"caseTypeId":"my-tracker","data":{}}' | jq
+```
+
+Expected response (HTTP 201):
+
+```json
+{
+  "data": {
+    "id": "a1b2c3d4-...",
+    "caseTypeId": "my-tracker",
+    "status": "open",
+    "processInstanceId": null,
+    "currentStageId": null,
+    "currentStageOrdinal": null,
+    "data": {},
+    "version": 0
+  }
+}
+```
+
+The three `null` fields tell you this is a zero-stage, zero-process case — which is exactly what you declared. `processInstanceId` is `null` because no BPMN process is attached. That's not a warning; it's the intended shape.
+
+## Step 5 — Transition it
+
+```bash
+export CASE_ID="a1b2c3d4-..."   # use the id from the previous response
+
+curl -sS -b /tmp/wks-cookies.txt -X POST \
+  http://localhost:8080/api/cases/$CASE_ID/transition \
+  -H "Content-Type: application/json" \
+  -d '{"action":"close"}' | jq
+```
+
+Expected response (HTTP 200):
+
+```json
+{
+  "data": {
+    "id": "a1b2c3d4-...",
+    "status": "closed",
+    ...
+  }
+}
+```
+
+## Step 6 — Inspect the audit trail
+
+```bash
+curl -sS -b /tmp/wks-cookies.txt \
+  http://localhost:8080/api/cases/$CASE_ID/audit | jq
+```
+
+You'll see a `CaseCreated` event followed by a `CaseStatusChanged` event. Every state change is appended immutably — nothing in the audit trail is editable or deletable.
+
+## What you just built
+
+- A case type with an `admin` role that can create, view, edit, and transition cases
+- A live case instance with a full audit trail
+- A working transition from `open` → `closed`
+
+No BPMN. No engine. No stages. Those are things you add when the work warrants them — not prerequisites.
+
+## Next step
+
+The tracker you built has no fields, no stages, and no structure beyond open/closed. Real case types have all three. The next page walks through declaring them, deploying a versioned case type, and seeing it running with structured data.
+
+**[Your first case type →](/start/your-first-case-type)**

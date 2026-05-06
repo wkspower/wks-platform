@@ -1,13 +1,257 @@
 ---
 title: Troubleshoot deployment errors
 description: Fix the most common WKS-CFG errors when deploying a case type or BPMN process.
-gate: "3"
-status: needs-writing
 ---
 
-{/* Gate 3 ★ — must be live before LinkedIn launch announcement */}
-{/* PRD-mandated: Ravi failure mode — structured error codes ship, docs must answer what they mean */}
-{/* Covers WKS-CFG-xxx BPMN deployment errors with resolution guidance */}
-{/* Owner: Victor (with Claude) */}
+When `POST /api/admin/deploy` returns `"ok": false`, the `errors` array contains one or more structured error objects:
 
-TODO: content
+```json
+{
+  "ok": false,
+  "errors": [
+    {
+      "code": "WKS-CFG-003",
+      "message": "Duplicate field id: 'subject'",
+      "field": "fields[2].id"
+    }
+  ]
+}
+```
+
+Each error has a machine-readable `code`, a human-readable `message`, and a `field` pointer to the YAML location. This page covers the errors you're most likely to hit and how to fix them.
+
+## Case type YAML errors (WKS-CFG-001 – 009)
+
+### WKS-CFG-001 — Required fields missing
+
+The YAML is missing one or more top-level required keys.
+
+**Required keys:** `id`, `displayName`, `version`, `roles`
+
+```yaml
+# Missing version and roles — triggers WKS-CFG-001
+id: my-case-type
+displayName: "My case type"
+```
+
+Fix: add the missing keys. `stages`, `fields`, `statuses`, and `workflow` are all optional.
+
+---
+
+### WKS-CFG-002 — Invalid field type
+
+A `fields[]` entry uses a `type` value that isn't in the supported catalog.
+
+**Supported types:** `text`, `textarea`, `number`, `date`, `datetime`, `boolean`, `select`, `multiselect`, `user`, `document`
+
+```yaml
+fields:
+  - id: priority
+    type: dropdown   # invalid — use "select"
+```
+
+---
+
+### WKS-CFG-003 — Duplicate field ID
+
+Two entries in `fields[]` share the same `id`. Field IDs must be unique within the case type.
+
+```yaml
+fields:
+  - id: subject
+    type: text
+  - id: subject    # duplicate — triggers WKS-CFG-003
+    type: textarea
+```
+
+Fix: give the second field a distinct `id`.
+
+---
+
+### WKS-CFG-004–007 — Limit violations
+
+| Code | Limit |
+|------|-------|
+| WKS-CFG-004 | Maximum fields per case type exceeded |
+| WKS-CFG-005 | Maximum visible columns exceeded |
+| WKS-CFG-006 | Maximum statuses per stage exceeded |
+| WKS-CFG-007 | Status label too long |
+
+These limits exist to keep case list performance predictable. If you're hitting them, you likely have a modelling issue — consider splitting the case type or consolidating statuses.
+
+## Stage YAML errors (WKS-CFG-031 – 033)
+
+### WKS-CFG-031 — Duplicate stage ID
+
+Two entries in `stages[]` share the same `id`.
+
+```yaml
+stages:
+  - id: review
+    displayName: "Initial review"
+  - id: review      # duplicate — triggers WKS-CFG-031
+    displayName: "Final review"
+```
+
+Fix: give each stage a distinct `id`. Use the `displayName` field for the human-readable label.
+
+---
+
+### WKS-CFG-032 — Stage ID format violation
+
+Stage IDs must match `[a-z][a-z0-9-]{0,62}`. No uppercase letters, no underscores, no spaces.
+
+```yaml
+stages:
+  - id: Initial_Review   # invalid — triggers WKS-CFG-032
+```
+
+Fix: use `initial-review` or `initial-review-phase`.
+
+---
+
+### WKS-CFG-033 — Reserved stage ID
+
+The IDs `case`, `stage`, `none`, and `all` are reserved and cannot be used as stage IDs.
+
+## BPMN validation errors (WKS-CFG-010 – 025)
+
+These errors fire only when a `workflow:` block is declared in the YAML and a BPMN file is uploaded alongside it.
+
+### WKS-CFG-010 — BPMN file not found
+
+The `file` reference in the `workflow:` block doesn't match the uploaded file name.
+
+```yaml
+workflow:
+  bpmn: my-process.bpmn   # must match the multipart filename exactly
+```
+
+Deploy command:
+
+```bash
+curl -X POST http://localhost:8080/api/admin/deploy \
+  -F "caseType=@my-case-type.yaml;type=application/yaml" \
+  -F "bpmn=@my-process.bpmn;type=application/xml"
+```
+
+The `bpmn` form field name and the filename in `workflow.bpmn` must agree.
+
+---
+
+### WKS-CFG-012 — BPMN variable mismatch
+
+A process variable referenced in the mapping YAML doesn't exist in the BPMN.
+
+Fix: open the BPMN in your modeller and verify the variable names match the `map:` declarations in the case type YAML exactly. Variable names are case-sensitive.
+
+---
+
+### WKS-CFG-020 — Missing archetype on user task
+
+A BPMN `userTask` element has no `archetype` property in the mapping YAML. Every user task that surfaces in the WKS UI must declare an archetype so the platform knows which affordance to render.
+
+```yaml
+# In the map: block of your attachments[] entry
+userTasks:
+  task_review_application:
+    archetype: submit_for_processing   # required
+```
+
+**Valid archetypes:** `submit_for_processing`, `draft_section`, `business_final`, `review_and_approve`, `information_gathering`
+
+---
+
+### WKS-CFG-021 — Archetype contradiction
+
+The declared `archetype` is incompatible with the task's position or properties in the BPMN. For example, `business_final` on a non-terminal task.
+
+---
+
+### WKS-CFG-022 — Status value not in stage status set
+
+A `status` property on a BPMN `userTask` or `endEvent` references a status ID that isn't declared in the active stage's `statuses[]`.
+
+```yaml
+# In your YAML — stage triage
+stages:
+  - id: triage
+    statuses:
+      - id: in-review
+      - id: escalated
+```
+
+If the BPMN sets `status: pending` via a `camunda:property`, that's a WKS-CFG-022 error — `pending` isn't in `triage.statuses`.
+
+Fix: either add the status to the YAML or correct the BPMN property value.
+
+---
+
+### WKS-CFG-024 — Form bind target unknown
+
+A form's `bind` declaration references a case data field that isn't declared in `fields[]`.
+
+---
+
+### WKS-CFG-026 — Mutate-class change without version bump
+
+You've made a structural change (removed a field, reordered stages, changed a status ID) but the `version` in the YAML hasn't been incremented.
+
+```yaml
+version: 1   # was 1, you made a structural change — must be 2
+```
+
+Fix: increment `version` by 1. The platform enforces sequential versions — you cannot skip.
+
+---
+
+### WKS-CFG-027 — User task ID in mapping doesn't exist in BPMN
+
+A `userTasks.<id>` key in your mapping YAML references a task ID that doesn't appear in the BPMN XML.
+
+Fix: copy the BPMN `id` attribute from the `<userTask>` element directly — it's case-sensitive and must be an exact match.
+
+---
+
+### WKS-CFG-028 — Stage transition target not a declared adjacency
+
+The `endEvent.stageTransition` in your mapping YAML references a stage transition that isn't valid given the declared `stages[]` order.
+
+For a case type with stages `triage → review → resolution`, a mapping that declares `stageTransition: triage → resolution` (skipping `review`) would trigger WKS-CFG-028 unless the case type explicitly permits skip transitions.
+
+## Stage runtime errors (WKS-STG-001 – 011)
+
+These errors occur at runtime when advancing or transitioning a case, not at deploy time.
+
+| Code | Meaning | Fix |
+|------|---------|-----|
+| `WKS-STG-001` | Advance called on a case with no stages or all stages completed | Check `currentStageId` before calling advance |
+| `WKS-STG-002` | Skip target is at or before the current stage ordinal | Skips must target a stage ahead of the current one |
+| `WKS-STG-003` | Concurrent stage transition — optimistic lock miss | Reload the case and retry |
+| `WKS-STG-004` | Case ID not found | Verify the case exists before calling stage endpoints |
+| `WKS-STG-005` | Duplicate status ID within a stage | Stage-level status IDs must be unique within that stage |
+| `WKS-STG-006` | `initialStatus` references an ID absent from the stage's status set | The `initialStatus` value must match a declared status `id` |
+| `WKS-STG-008` | `statuses: []` is empty | Declare at least one status, or omit the `statuses` key |
+| `WKS-STG-010` | Transition target status not declared on the current stage | The status you're transitioning to must exist in the current stage's `statuses[]` |
+| `WKS-STG-011` | Case is in a terminal status | Transition from a terminal status requires an explicit unlock or case reopening |
+
+## Checking errors programmatically
+
+Every error response from the deploy endpoint uses the same shape:
+
+```json
+{
+  "ok": false,
+  "errors": [
+    {
+      "code": "WKS-CFG-031",
+      "message": "Duplicate stage id: 'review'",
+      "field": "stages[2].id"
+    }
+  ]
+}
+```
+
+The `code` is stable across releases and safe to match against in CI scripts. The `message` is human-readable and may change. The `field` is a dot-notation pointer to the YAML location.
+
+For the full error code catalog with per-code deep-links, see [Error codes](/reference/error-codes).
