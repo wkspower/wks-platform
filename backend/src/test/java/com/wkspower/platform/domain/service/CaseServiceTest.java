@@ -198,6 +198,162 @@ class CaseServiceTest {
         .isInstanceOf(WksValidationAggregateException.class);
   }
 
+  // ---- Story 3.6 AC6 — transition guards run BEFORE engine call ----
+
+  @Test
+  void transitionRejectsTerminalStatusWithWksStg011() {
+    var stage =
+        new StageDefinition(
+            "underwriting",
+            "Underwriting",
+            0,
+            List.of(
+                new StatusDefinition("pending", "Pending", StatusColor.AMBER, false),
+                new StatusDefinition("ready", "Ready", StatusColor.EMERALD, true)),
+            Optional.of("pending"));
+    var ct =
+        new CaseTypeConfig(
+            "ct-term",
+            "CT",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
+            List.of(),
+            List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
+            List.of(stage));
+    UUID caseId = UUID.randomUUID();
+    Case existing =
+        new Case(
+            caseId,
+            "ct-term",
+            1,
+            "ready", // currently in terminal status
+            null,
+            Map.of(),
+            "pi-1",
+            FIXED,
+            ACTOR,
+            FIXED,
+            0L,
+            "underwriting",
+            0);
+    repo.saved.add(existing);
+    CaseService svc = svc(ct);
+    assertThatThrownBy(() -> svc.transition(caseId, "anything", Map.of(), ACTOR))
+        .isInstanceOf(com.wkspower.platform.domain.exception.WksStageException.class)
+        .matches(
+            t ->
+                ((com.wkspower.platform.domain.exception.WksStageException) t)
+                    .getCode()
+                    .equals("WKS-STG-011"))
+        .hasMessageContaining("terminal");
+  }
+
+  @Test
+  void transitionRejectsForeignStageStatusWithWksStg010() {
+    var stageA =
+        new StageDefinition(
+            "intake",
+            "Intake",
+            0,
+            List.of(new StatusDefinition("collecting", "Collecting", StatusColor.BLUE, false)),
+            Optional.of("collecting"));
+    var stageB =
+        new StageDefinition(
+            "decision",
+            "Decision",
+            1,
+            List.of(new StatusDefinition("approved", "Approved", StatusColor.EMERALD, true)),
+            Optional.of("approved"));
+    var ct =
+        new CaseTypeConfig(
+            "ct-foreign",
+            "CT",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
+            List.of(),
+            List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
+            List.of(stageA, stageB));
+    UUID caseId = UUID.randomUUID();
+    Case existing =
+        new Case(
+            caseId,
+            "ct-foreign",
+            1,
+            "collecting",
+            null,
+            Map.of(),
+            "pi-1",
+            FIXED,
+            ACTOR,
+            FIXED,
+            0L,
+            "intake",
+            0);
+    repo.saved.add(existing);
+    CaseService svc = svc(ct);
+    assertThatThrownBy(() -> svc.transition(caseId, "approved", Map.of(), ACTOR))
+        .isInstanceOf(com.wkspower.platform.domain.exception.WksStageException.class)
+        .matches(
+            t ->
+                ((com.wkspower.platform.domain.exception.WksStageException) t)
+                    .getCode()
+                    .equals("WKS-STG-010"))
+        .hasMessageContaining("foreign-stage");
+  }
+
+  @Test
+  void transitionPassesThroughWhenActionIsNotKnownStatusId() {
+    // Ensures the foreign-stage guard does NOT fire for actions that are pure BPMN message names
+    // (no status id of that name anywhere on the case type). Engine-coupling check trips next
+    // (no processInstanceId on test case) — that's the existing Story 3.2 behaviour, unchanged.
+    var stage =
+        new StageDefinition(
+            "intake",
+            "Intake",
+            0,
+            List.of(new StatusDefinition("collecting", "Collecting", StatusColor.BLUE, false)),
+            Optional.of("collecting"));
+    var ct =
+        new CaseTypeConfig(
+            "ct-pass",
+            "CT",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
+            List.of(),
+            List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
+            List.of(stage));
+    UUID caseId = UUID.randomUUID();
+    Case existing =
+        new Case(
+            caseId,
+            "ct-pass",
+            1,
+            "collecting",
+            null,
+            Map.of(),
+            null, // no engine — engine guard will fire
+            FIXED,
+            ACTOR,
+            FIXED,
+            0L,
+            "intake",
+            0);
+    repo.saved.add(existing);
+    CaseService svc = svc(ct);
+    assertThatThrownBy(() -> svc.transition(caseId, "submit-form", Map.of(), ACTOR))
+        .isInstanceOf(WksWorkflowEngineException.class)
+        .hasMessageContaining("no associated process instance");
+  }
+
   @Test
   void diffFieldIdsHandlesAddedRemovedAndChanged() {
     Map<String, Object> oldMap = Map.of("a", 1, "b", "two");

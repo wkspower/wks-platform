@@ -6,8 +6,10 @@ import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseUpdated;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
+// Story 3.6 — ErrorCode + WksStageException used by transition guards (AC6).
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.exception.WksStageException;
 import com.wkspower.platform.domain.exception.WksValidationAggregateException;
 import com.wkspower.platform.domain.exception.WksVersionException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
@@ -218,6 +220,58 @@ public class CaseService {
         caseRepository
             .findById(caseId)
             .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
+    // Story 3.6 AC6 — stage-scoped status guards run BEFORE the engine-coupling null-check (Q5
+    // carry-forward note in the story file). Pure reads against the in-memory CaseTypeConfig — no
+    // engine call. Decision 19's unbranched-paths invariant: caseType.statusesFor(stageId)
+    // resolves stage-scoped or flat fallback in one place; this site does not branch on stage
+    // presence.
+    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+    String stageId = existing.currentStageId();
+    List<StatusDefinition> stageStatuses = caseType.statusesFor(stageId);
+    // Terminal-status block: if the case's current status is terminal in its stage, reject any
+    // same-stage transition (advance-stage bypasses this guard — it lives on a different
+    // service call). WKS-STG-011 is freshly allocated per Story 3.6 dev-notes anti-pattern #3
+    // (the original story plan's reuse of WKS-STG-001 violates the wire-contract memory).
+    StatusDefinition currentStatus =
+        stageStatuses.stream()
+            .filter(sd -> sd.id().equals(existing.status()))
+            .findFirst()
+            .orElse(null);
+    if (currentStatus != null && currentStatus.terminal()) {
+      throw new WksStageException(
+          ErrorCode.WKS_STG_011,
+          "Case "
+              + caseId
+              + " is in terminal status '"
+              + existing.status()
+              + "' on stage '"
+              + stageId
+              + "' — advance the stage to transition further");
+    }
+    // Foreign-stage status rejection: when the {@code action} names a status id that exists in
+    // the case-type-level set but is not declared on the current stage, reject before any engine
+    // call. Matches today's seed-time wire reality where {@code action} doubles as the target
+    // status id (e.g. j5-status-rainbow). When {@code action} doesn't resolve to any known status
+    // id at all, this guard is a no-op and the engine layer still owns "unknown message name"
+    // semantics. WKS-STG-010 freshly allocated per dev-notes anti-pattern #3.
+    boolean actionIsAStatusIdAnywhere =
+        caseType.statuses().stream().anyMatch(sd -> sd.id().equals(action))
+            || caseType.stages().stream()
+                .anyMatch(
+                    st ->
+                        st.statusesOpt()
+                            .map(list -> list.stream().anyMatch(sd -> sd.id().equals(action)))
+                            .orElse(false));
+    boolean actionIsOnCurrentStage = stageStatuses.stream().anyMatch(sd -> sd.id().equals(action));
+    if (actionIsAStatusIdAnywhere && !actionIsOnCurrentStage) {
+      throw new WksStageException(
+          ErrorCode.WKS_STG_010,
+          "Status '"
+              + action
+              + "' is not declared on stage '"
+              + stageId
+              + "' — foreign-stage status rejected");
+    }
     if (existing.processInstanceId() == null || existing.processInstanceId().isBlank()) {
       throw new WksWorkflowEngineException(
           "Case " + caseId + " has no associated process instance — cannot transition");

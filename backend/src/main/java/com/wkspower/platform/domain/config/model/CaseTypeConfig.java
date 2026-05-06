@@ -72,6 +72,32 @@ public record CaseTypeConfig(
   }
 
   /**
+   * Story 3.6 AC2 / AC8 — locate a declared stage by id.
+   *
+   * <p>Returns {@link Optional#empty()} when the case type has no stages or none match. Read-only
+   * convenience; never throws.
+   */
+  public Optional<StageDefinition> stage(String stageId) {
+    if (stageId == null) {
+      return Optional.empty();
+    }
+    return stages.stream().filter(s -> s.id().equals(stageId)).findFirst();
+  }
+
+  /**
+   * Story 3.6 AC2 / AC8 — resolve the effective status set for a given stage.
+   *
+   * <p>Returns the stage-scoped {@code statuses:} when declared, otherwise falls back to the flat
+   * case-type-level {@link #statuses()} (which itself defaults to {@code [open, closed]} when YAML
+   * omits the slot — Story 3.2 default). Single source of truth for Decision 19's "stage-less paths
+   * must remain unbranched" — callers iterate the returned list without branching on stage
+   * presence.
+   */
+  public List<StatusDefinition> statusesFor(String stageId) {
+    return stage(stageId).flatMap(StageDefinition::statusesOpt).orElse(statuses);
+  }
+
+  /**
    * Story 3.2 — {@link Optional} view of the (now nullable) {@link #workflow()} component. Call
    * sites that need to skip engine work for process-less CaseTypes use {@code
    * workflowOpt().ifPresent(...)} per Decision 19's unbranched-paths invariant.

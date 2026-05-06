@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Component;
 
@@ -209,10 +210,64 @@ public class ConfigValidator {
                   base + ".displayName"));
           continue;
         }
-        out.add(new StageDefinition(id, displayName, i));
+        // Story 3.6 AC2 / AC3 — stage-scoped status set + initialStatus resolution.
+        List<StatusDefinition> stageStatuses = checkStageStatuses(s.statuses(), base, eb, errors);
+        Optional<String> initialStatus =
+            resolveStageInitialStatus(s.initialStatus(), stageStatuses, base, eb, errors);
+        out.add(new StageDefinition(id, displayName, i, stageStatuses, initialStatus));
       }
     }
     return out;
+  }
+
+  /**
+   * Story 3.6 AC2 — resolve a stage's initial status. {@code explicit} non-blank: must match an id
+   * in the stage's {@code statuses:} list ({@code WKS-STG-006} otherwise). {@code explicit} blank
+   * or null: defaults to the first declared status's id. When the stage declares no {@code
+   * statuses:} at all, returns {@link Optional#empty()} — the flat fallback owns initial-status
+   * resolution.
+   */
+  private Optional<String> resolveStageInitialStatus(
+      String explicit,
+      List<StatusDefinition> stageStatuses,
+      String stageBase,
+      ErrorBuilder eb,
+      List<ErrorDetail> errors) {
+    if (stageStatuses == null || stageStatuses.isEmpty()) {
+      // null = key omitted (flat fallback). Empty = WKS-STG-008 already raised by
+      // checkStageStatuses.
+      // Either way no stage-scoped initialStatus to resolve.
+      if (explicit != null && !explicit.isBlank() && stageStatuses == null) {
+        // Edge case: initialStatus declared but statuses omitted — surfacing as WKS-STG-006 keeps
+        // the wire contract honest (the value cannot be checked because there is no list to check
+        // against).
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_STG_006,
+                "Stage 'initialStatus: "
+                    + explicit
+                    + "' declared but stage has no 'statuses:' list to validate against",
+                stageBase + ".initialStatus"));
+      }
+      return Optional.empty();
+    }
+    if (explicit == null || explicit.isBlank()) {
+      // Default to first declared (per AC2: "stage B's `initialStatus` (or first declared if
+      // unspecified)").
+      return Optional.of(stageStatuses.get(0).id());
+    }
+    boolean present = stageStatuses.stream().anyMatch(sd -> sd.id().equals(explicit));
+    if (!present) {
+      errors.add(
+          eb.error(
+              ErrorCode.WKS_STG_006,
+              "Stage 'initialStatus: " + explicit + "' is not declared in this stage's status set",
+              stageBase + ".initialStatus"));
+      // Still return the explicit value — keeps the StageDefinition shape stable for downstream
+      // consumers; the validator already short-circuits the deploy via the accumulated errors.
+      return Optional.of(explicit);
+    }
+    return Optional.of(explicit);
   }
 
   /**
@@ -464,8 +519,11 @@ public class ConfigValidator {
    */
   private static final List<StatusDefinition> DEFAULT_STATUSES =
       List.of(
-          new StatusDefinition("open", "Open", StatusColor.BLUE),
-          new StatusDefinition("closed", "Closed", StatusColor.ZINC));
+          // Story 3.6 AC1 — closed.terminal flips to true (the slot did not exist when Story 3.2
+          // shipped the canonical default; this is the deferred-debt landing per
+          // project_status_definition_terminal_missing memory).
+          new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+          new StatusDefinition("closed", "Closed", StatusColor.ZINC, true));
 
   private List<StatusDefinition> checkStatuses(
       List<RawCaseTypeConfig.RawStatus> raws, ErrorBuilder eb, List<ErrorDetail> errors) {
@@ -525,7 +583,89 @@ public class ConfigValidator {
         }
       }
       if (hasId && hasDn) {
-        out.add(new StatusDefinition(s.id(), s.displayName(), color));
+        // Story 3.6 AC1 — terminal flag carried through; null in YAML = false.
+        boolean terminal = Boolean.TRUE.equals(s.terminal());
+        out.add(new StatusDefinition(s.id(), s.displayName(), color, terminal));
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Story 3.6 AC2 / AC3 — validate one stage's {@code statuses:} sub-block. Returns {@code null}
+   * when the YAML key is omitted (resolver falls back to the flat case-type-level set per AC2).
+   * Empty list ({@code statuses: []}) is rejected with {@code WKS-STG-008}. Per-status checks emit
+   * {@code WKS-STG-005} (duplicate id) and {@code WKS-CFG-032} (id pattern violation — reused per
+   * Q2 default; wire-distinguishability handled by message). Other status-level rules (display name
+   * length, color enum) follow the flat-status path's WKS-CFG codes — not stage-scoped.
+   */
+  private List<StatusDefinition> checkStageStatuses(
+      List<RawCaseTypeConfig.RawStatus> raws,
+      String stageBase,
+      ErrorBuilder eb,
+      List<ErrorDetail> errors) {
+    if (raws == null) {
+      return null; // omitted key — flat fallback per AC2.
+    }
+    if (raws.isEmpty()) {
+      errors.add(
+          eb.error(
+              ErrorCode.WKS_STG_008,
+              "Stage statuses must declare at least 1 entry — omit the 'statuses:' key entirely"
+                  + " to fall back to the case-type-level status set",
+              stageBase + ".statuses"));
+      return List.of();
+    }
+    List<StatusDefinition> out = new ArrayList<>();
+    Set<String> seen = new HashSet<>();
+    for (int i = 0; i < raws.size(); i++) {
+      RawCaseTypeConfig.RawStatus s = raws.get(i);
+      String base = stageBase + ".statuses[" + i + "]";
+      if (s == null) {
+        errors.add(eb.error(ErrorCode.WKS_CFG_001, "Status entry is empty", base));
+        continue;
+      }
+      boolean hasId = checkRequiredString(base + ".id", s.id(), eb, errors);
+      boolean hasDn = checkRequiredString(base + ".displayName", s.displayName(), eb, errors);
+      if (hasId && !CaseTypeLimits.ID_PATTERN.matcher(s.id()).matches()) {
+        // Q2 default LOCKED — reuse WKS-CFG-032 for stage-scoped status id pattern violation;
+        // message disambiguates from the stage-id case. WKS-STG-007 is NOT introduced.
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_CFG_032,
+                "Stage-scoped status id '" + s.id() + "' must match [a-z][a-z0-9-]{1,62}",
+                base + ".id"));
+      }
+      if (hasId && !seen.add(s.id())) {
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_STG_005,
+                "Duplicate status id '" + s.id() + "' within stage status set",
+                base + ".id"));
+      }
+      if (hasDn && s.displayName().length() > CaseTypeLimits.MAX_DISPLAY_NAME_CHARS) {
+        errors.add(
+            eb.error(
+                ErrorCode.WKS_CFG_007,
+                "displayName must be ≤ " + CaseTypeLimits.MAX_DISPLAY_NAME_CHARS + " characters",
+                base + ".displayName"));
+      }
+      StatusColor color = null;
+      if (s.color() != null) {
+        var parsed = StatusColor.fromWire(s.color());
+        if (parsed.isEmpty()) {
+          errors.add(
+              eb.error(
+                  ErrorCode.WKS_CFG_008,
+                  "Unknown status color '" + s.color() + "'",
+                  base + ".color"));
+        } else {
+          color = parsed.get();
+        }
+      }
+      if (hasId && hasDn) {
+        boolean terminal = Boolean.TRUE.equals(s.terminal());
+        out.add(new StatusDefinition(s.id(), s.displayName(), color, terminal));
       }
     }
     return out;
