@@ -316,10 +316,30 @@ public class CaseService {
     // Calling the router for a no-attachment case would throw WksMappingMissException. The bypass
     // MUST happen before any router call — check processInstanceId (null = no BPMN).
     if (existing.processInstanceId() == null || existing.processInstanceId().isBlank()) {
+      // I1 guard: reject unknown action strings on the zero-process path. On the zero-process
+      // path the action IS the new status id. Writing an arbitrary string (e.g. a stale BPMN
+      // message name) into cases.status would corrupt the row and silently pass back HTTP 200.
+      // Clients sending an unknown action on the zero-process path receive HTTP 400 (WKS-API-001).
+      if (!actionIsAStatusIdAnywhere && !actionIsOnCurrentStage) {
+        throw new com.wkspower.platform.domain.exception.WksValidationException(
+            "Action '"
+                + action
+                + "' is not a known status id for case type '"
+                + existing.caseTypeId()
+                + "' — zero-process transitions require a declared status id",
+            "action");
+      }
       // Zero-process path: mutate status directly via CaseStatusUpdater.
       caseStatusUpdater.updateStatus(caseId, action);
     } else {
       // BPMN path: emit USER_TASK_STATUS signal through the router (Mapping Layer).
+      // The signal source is the fixed string "manual" so the router key is always
+      // "userTask:manual" — matching the PropertyEmissionRule that every BPMN-attached
+      // case type must register to handle manual API transitions. The action value (target
+      // status id) is carried in the payload under "value" per router contract.
+      // TODO(4-5): propagate variables + actorId into BPMN signal payload.
+      // The caller-supplied `variables` map and `actorId` are currently discarded here;
+      // they are not forwarded to the BPMN signal. Story 4-5 will propagate them.
       CaseTypeRef caseTypeRef =
           new CaseTypeRef(existing.caseTypeId(), String.valueOf(existing.caseTypeVersion()));
       CaseInstanceRef caseInstance = new CaseInstanceRef(caseId, caseTypeRef);
@@ -328,7 +348,7 @@ public class CaseService {
               BackendSignalKind.USER_TASK_STATUS,
               "manual",
               caseInstance,
-              action,
+              "manual", // fixed source so router key = "userTask:manual" (stable contract)
               Map.of("value", action));
       signalRouter.onSignal(signal);
     }

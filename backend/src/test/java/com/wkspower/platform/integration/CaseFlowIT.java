@@ -5,18 +5,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wkspower.platform.api.dto.request.LoginRequest;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldType;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
+import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.model.User;
+import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseEntityRepository;
 import java.io.InputStream;
@@ -95,6 +102,7 @@ class CaseFlowIT {
   @Autowired private ApplicationEventPublisher events;
   @Autowired private ObjectMapper json;
   @Autowired private StatusEventRecorder recorder;
+  @Autowired private MappingRegistry mappingRegistry;
 
   @BeforeEach
   void setup() {
@@ -245,22 +253,24 @@ class CaseFlowIT {
 
   // ---- Story 2.4 — full create → transition end-to-end ----------------
 
-  @org.junit.jupiter.api.Disabled(
-      "Story 4.4a — listener-side direct-mutation path REMOVED (AC1). The end-event signal now"
-          + " flows BPMN → BpmnBackendAdapter → BackendSignalRouter → mapping rules. This"
-          + " stageless fixture has no MappingDefinition registered, so the router emits a"
-          + " WKS-MAP-404 audit-miss instead of mutating cases.status. Story 4.4b reroutes the"
-          + " manual-path AND folds in a stage-aware fixture / mapping for the BPMN end-event"
-          + " path; this test moves over with that work. New BPMN→signal coverage lives in"
-          + " BpmnBackendAdapterIT (Story 4.4a).")
   @Test
   void createTransitionRoundTripUpdatesStatusAndPublishesEvent() throws Exception {
+    // B1 fix (Story 4.4b) — re-enabled. The BPMN-path manual transition now routes through
+    // BackendSignalRouter via a registered userTask:manual PropertyEmissionRule.
+    // The old test completed a BPMN user task and used message correlation ("submit") to drive
+    // the process to an end event. The new architecture: CaseService.transition() on the BPMN
+    // path emits BackendSignal(USER_TASK_STATUS, source="manual", value=action) to the router.
+    // The router dispatches to the userTask:manual rule and calls statusUpdater.updateStatus.
+    // BPMN engine state is not consulted for manual transitions — the status update is direct.
+    // The test therefore uses action="approved" (a declared status id on the fixture case type).
     registerTransitionCaseType();
     deployTransitionFixture();
     String cookie = login();
     recorder.events.clear();
+    recorder.routedEvents.clear();
 
-    // POST create — engine starts the process; user task `draft` becomes active.
+    // POST create — engine starts the process; BPMN user task `draft` becomes active.
+    // The processInstanceId must be non-null so CaseService.transition() takes the BPMN path.
     ResponseEntity<String> created =
         exchange(
             "/api/cases",
@@ -270,29 +280,21 @@ class CaseFlowIT {
     assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     String caseId = json.readTree(created.getBody()).path("data").path("id").asText();
     UUID caseUuid = UUID.fromString(caseId);
+    // Verify BPMN path: processInstanceId must be set (not blank/null).
+    assertThat(json.readTree(created.getBody()).path("data").path("processInstanceId").asText())
+        .isNotBlank();
 
-    // The current user task is `draft`. Complete it through the public API so the listener fires.
-    String taskId =
-        processEngine
-            .getTaskService()
-            .createTaskQuery()
-            .processInstanceId(caseEntities.findById(caseUuid).orElseThrow().getProcessInstanceId())
-            .singleResult()
-            .getId();
-    ResponseEntity<String> completed =
-        exchange("/api/tasks/" + taskId + "/complete", HttpMethod.POST, cookie, "{}");
-    assertThat(completed.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(completed.getBody()).contains("\"archetype\":\"draft_section\"");
-
-    // POST transition correlates the `submit` message → process advances to the `approved` end
-    // event → CaseStatusListener writes status="approved" and publishes CaseStatusChanged.
+    // POST transition — action="approved" is a declared status id on the case-transition-fixture
+    // case type. CaseService.transition() takes the BPMN path (processInstanceId != null), emits
+    // USER_TASK_STATUS / source="manual" / value="approved" to the router. The userTask:manual
+    // PropertyEmissionRule routes the signal to statusUpdater.updateStatus(caseId, "approved").
     long transitionStartNanos = System.nanoTime();
     ResponseEntity<String> tx =
         exchange(
             "/api/cases/" + caseId + "/transition",
             HttpMethod.POST,
             cookie,
-            "{\"action\":\"submit\"}");
+            "{\"action\":\"approved\"}");
     long transitionElapsedMs = (System.nanoTime() - transitionStartNanos) / 1_000_000L;
     assertThat(tx.getStatusCode()).isEqualTo(HttpStatus.OK);
     // Story 2.4 AC1 — transition wall-clock latency must be < 500 ms for the fixture process.
@@ -300,19 +302,29 @@ class CaseFlowIT {
         .as("Story 2.4 AC1 — POST /transition wall-clock latency must be < 500 ms")
         .isLessThan(500L);
 
+    // AC: status was updated.
     Awaitility.await()
         .atMost(Duration.ofSeconds(5))
         .untilAsserted(
             () ->
                 assertThat(caseEntities.findById(caseUuid).orElseThrow().getStatus())
+                    .as("status must be updated to 'approved' via BPMN-path router dispatch")
                     .isEqualTo("approved"));
 
-    assertThat(recorder.events)
-        .anySatisfy(
-            evt -> {
-              assertThat(evt.caseId()).isEqualTo(caseUuid);
-              assertThat(evt.newStatus()).isEqualTo("approved");
-            });
+    // AC: a BackendSignalRouted event was published (router audit event, no errorCode = success).
+    // Published via publishAfterCommit — available after the HTTP request's transaction commits.
+    Awaitility.await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () ->
+                assertThat(recorder.routedEvents)
+                    .as("router must emit a BackendSignalRouted event with no errorCode")
+                    .anySatisfy(
+                        evt -> {
+                          assertThat(evt.caseId()).isEqualTo(caseUuid);
+                          assertThat(evt.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+                          assertThat(evt.errorCode()).isNull();
+                        }));
   }
 
   // ---- Story 2.5 AC11 #4 — end-event status-property branch -----------
@@ -450,6 +462,31 @@ class CaseFlowIT {
 
   private void registerTransitionCaseType() {
     registry.register(transitionCaseType());
+    // B1 fix: register a MappingDefinition with a userTask:manual rule so the
+    // BackendSignalRouter can route the USER_TASK_STATUS signal emitted by
+    // CaseService.transition() on the BPMN path. Without this registration the router
+    // throws WksMappingMissException (silently audited as WKS-MAP-404) and the case
+    // status is never updated. The inline seed mirrors the pattern used by
+    // BackendSignalRouterIT.ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent.
+    CaseTypeRef caseTypeRef = new CaseTypeRef(TRANSITION_CASE_TYPE_ID, "1");
+    MappingDefinition mappingDef =
+        new MappingDefinition(
+            List.of(
+                new AttachmentDefinition(
+                    "bpmn",
+                    TRANSITION_CASE_TYPE_ID + ".bpmn",
+                    "case",
+                    java.util.Optional.empty(),
+                    java.util.Map.of(),
+                    java.util.Optional.empty(),
+                    java.util.Map.of(),
+                    List.of(
+                        new PropertyEmissionRule(
+                            "userTask:manual",
+                            "status",
+                            BackendSignalKind.USER_TASK_STATUS,
+                            "stage:case")))));
+    mappingRegistry.register(caseTypeRef, "1", mappingDef);
   }
 
   private void deployTransitionFixture() throws java.io.IOException {
@@ -503,13 +540,23 @@ class CaseFlowIT {
                     Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))));
   }
 
-  /** Captures published CaseStatusChanged events so the test can assert listener firing. */
+  /**
+   * Captures published events so tests can assert domain-event firing. Records both {@link
+   * CaseStatusChanged} (legacy path) and {@link BackendSignalRouted} (Story 4.3 router audit path,
+   * published via publishAfterCommit after transaction commits).
+   */
   static class StatusEventRecorder {
     final java.util.List<CaseStatusChanged> events = new CopyOnWriteArrayList<>();
+    final java.util.List<BackendSignalRouted> routedEvents = new CopyOnWriteArrayList<>();
 
     @EventListener
     public void on(CaseStatusChanged e) {
       events.add(e);
+    }
+
+    @EventListener
+    public void onRouted(BackendSignalRouted e) {
+      routedEvents.add(e);
     }
   }
 

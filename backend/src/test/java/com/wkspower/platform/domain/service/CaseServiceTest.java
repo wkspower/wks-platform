@@ -338,11 +338,13 @@ class CaseServiceTest {
   }
 
   @Test
-  void transitionPassesThroughWhenActionIsNotKnownStatusId() {
-    // Ensures the foreign-stage guard does NOT fire for actions that are pure BPMN message names
-    // (no status id of that name anywhere on the case type).
-    // Story 4.4b AC1 — zero-process path: after guards pass, CaseStatusUpdater is called directly
-    // (no WksWorkflowEngineException for missing processInstanceId — that check was removed).
+  void transitionRejectsUnknownActionOnZeroProcessPath() {
+    // I1 guard: zero-process path must reject unknown action strings (not declared status ids).
+    // Writing an arbitrary string (e.g. a stale BPMN message name "submit-form") into
+    // cases.status corrupts the row and was silently returning HTTP 200. The fix: throw
+    // WksValidationException (HTTP 400) when the action is not a known status id.
+    // The foreign-stage guard must NOT fire for "submit-form" (it only fires when the action IS
+    // a known status id but on a different stage). The I1 guard fires next: unknown → rejected.
     var stage =
         new StageDefinition(
             "intake",
@@ -380,10 +382,11 @@ class CaseServiceTest {
             0);
     repo.saved.add(existing);
     CaseService svc = svc(ct);
-    // Foreign-stage guard must NOT fire for "submit-form" (not a known status id).
-    // Zero-process path: CaseStatusUpdater.updateStatus("submit-form") is called directly.
-    Case after = svc.transition(caseId, "submit-form", Map.of(), ACTOR);
-    assertThat(after.status()).isEqualTo("submit-form");
+    // "submit-form" is not a known status id anywhere on ct-pass — zero-process path must reject.
+    assertThatThrownBy(() -> svc.transition(caseId, "submit-form", Map.of(), ACTOR))
+        .isInstanceOf(com.wkspower.platform.domain.exception.WksValidationException.class)
+        .hasMessageContaining("submit-form")
+        .hasMessageContaining("not a known status id");
   }
 
   @Test

@@ -135,11 +135,13 @@ class ZeroStageZeroProcessTest {
         .as("zero-process case must have no processInstanceId")
         .isNull();
 
-    Case afterTransition = svc.transition(created.id(), "close", Map.of(), ACTOR);
+    // Action must be a declared status id on the zero-process path (I1 guard). "closed" is
+    // declared in zeroZeroType() — this is the correct declared status to transition to.
+    Case afterTransition = svc.transition(created.id(), "closed", Map.of(), ACTOR);
 
     assertThat(afterTransition.status())
-        .as("status must be updated to 'close' via pure-domain path")
-        .isEqualTo("close");
+        .as("status must be updated to 'closed' via pure-domain path")
+        .isEqualTo("closed");
     assertThat(engine.startCalls)
         .as("engine must NOT be invoked on zero-process transition")
         .isZero();

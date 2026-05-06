@@ -38,6 +38,14 @@ public class CaseStatusAdapter implements CaseStatusUpdater {
     // stale currentStageId (set by updateStageCache's JPQL bypass in the same transaction), then
     // overwrites it on save. The targeted JPQL UPDATE mutates only status + updatedAt so stage
     // cache columns are never clobbered by this method.
+    //
+    // I3 — @Version bypass by design: status updates intentionally skip the @Version increment.
+    // Status changes are idempotent signals (the router may replay the same status on retry) and
+    // should not block concurrent structural updates made via CaseService.update(expectedVersion).
+    // A full version + 1 bump on every status mutation would cause spurious
+    // OptimisticLockExceptions
+    // for callers updating case data concurrently. Follow-on story (post-4.4b) may revisit if
+    // stronger isolation is needed.
     String previous = found.get().getStatus();
     repository.updateStatusOnly(caseId, newStatus, clock.now());
     return Optional.ofNullable(previous);

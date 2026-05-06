@@ -80,7 +80,7 @@ class CaseTransitionPostgresIT {
 
   @Test
   @Transactional
-  void zeroPrcessManualTransition_updatesStatusOnRealPostgres() {
+  void zeroProcessManualTransition_updatesStatusOnRealPostgres() {
     UUID actorId = bootstrapActorId();
     UUID caseId = UUID.randomUUID();
     Case toSave =
@@ -152,8 +152,16 @@ class CaseTransitionPostgresIT {
     Case after = caseRepository.findById(caseId).orElseThrow();
     assertThat(after.currentStageId()).as("stage must have advanced to stage2").isEqualTo("stage2");
     // AC3: after stage advance, status is reset to next stage's initialStatus.
-    // The BackendAdapterConfig injects the real CaseTypeReader; it will either resolve
-    // from YAML or fall back gracefully. We assert the case row is consistent.
+    // The real CaseTypeReader does not have "loan-pg-ac10" registered (no YAML on classpath),
+    // so BackendSignalRouter.resetStatusForAdvancedStage logs a warning and skips the reset.
+    // The stage advance itself (currentStageId, currentStageOrdinal) is the load-bearing AC3
+    // contract exercised here; the status-reset half is covered by BackendSignalRouterIT
+    // ac7_stageAdvance_emitsTwoEventsWithSharedCorrelationId_andResetsStatus (H2 + stub reader).
+    assertThat(after.status())
+        .as(
+            "AC3: status after stage advance — real CaseTypeReader has no 'loan-pg-ac10' config,"
+                + " so reset falls back gracefully; status remains 'open' (unchanged from seed)")
+        .isEqualTo("open");
     assertThat(after.currentStageOrdinal()).isNotNull();
     assertThat(after.currentStageOrdinal()).isEqualTo(1);
   }
