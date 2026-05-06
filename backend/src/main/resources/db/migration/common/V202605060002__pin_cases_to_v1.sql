@@ -1,0 +1,43 @@
+-- Story 3.5 — Bootstrap: Pin Existing Cases to v1.
+--
+-- Closes the WKS-VER-001 partial-failure gap surfaced by Story 3.4 (CaseType Version Registry,
+-- PR #393) and tightened by Story 3.4.1 (production hardening, PR #395). Pre-3.4 cases populated
+-- `cases.case_type_version` from whatever the author YAML's `version:` field asserted at creation
+-- time. After 3.4 shipped, the `case_type_versions` registry became authoritative for
+-- `currentVersion(caseTypeId)` — but existing case rows still carry the author-YAML-supplied value.
+-- If the registry materialises v=1 (typical Phase-0 boot path) while a pre-existing case row
+-- carries `case_type_version = 5`, the case is bound to a version the registry has no row for
+-- and runtime reads surface WKS-VER-001 (503 + Retry-After:5).
+--
+-- Phase-0 deploy reality (locked 2026-05-06): no production v2-develop deploys exist yet. Every
+-- existing case in dev/test/CI environments was created against the same source YAML now on disk;
+-- treating them all as v=1 is loss-free.
+--
+-- AC1 — every existing case row has `case_type_version = 1` after this runs. The `<> 1` guard
+--       makes the UPDATE self-idempotent: re-runs touch zero rows and audit-trigger-style observers
+--       don't fire on no-op writes.
+--
+-- AC2 — `case_type_versions` registry rows are NOT materialised by this migration. The migration
+--       has no access to YAML content (definition_yaml requires the actual file bytes, only the
+--       startup loader reads the disk). `ConfigService.applyVersionRegistry(...)` (Story 3.4
+--       startup loader, hardened by 3.4.1) materialises a row at version=1 for every CaseType
+--       currently on disk during boot. This split is structural — surfaced here for future readers.
+--
+-- AC3 — idempotent re-run (zero rows affected, zero errors) — the `<> 1` guard delivers this even
+--       if Flyway's schema-history is bypassed.
+--
+-- AC4 — zero-tenant invariant (Decision 25): no per-customer column of any kind. Story 3.0 lint
+--       scans this file in CI; values rather than identifiers are forbidden tokens.
+--
+-- AC5 — pre-existing cases render byte-identically modulo the `case_type_version` field
+--       (which now reads `1`). IT in `CasesPinToV1MigrationPostgresIT` asserts this contract.
+--
+-- AC7 — `case_type_deployments` reconciliation is OUT OF SCOPE here (Story 4.5 territory).
+--
+-- H2 + Postgres compatible — plain ANSI UPDATE + WHERE. No JSONB, no Postgres-specific syntax.
+-- `cases.case_type_version` is INTEGER NOT NULL since Story 2.3 (V202604260001 line 12) — this
+-- migration is UPDATE, not ADD COLUMN.
+
+UPDATE cases
+   SET case_type_version = 1
+ WHERE case_type_version <> 1;
