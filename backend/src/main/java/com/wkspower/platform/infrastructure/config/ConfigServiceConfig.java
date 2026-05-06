@@ -11,10 +11,12 @@ import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.StageRepository;
+import com.wkspower.platform.domain.port.StatusOptionsStore;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.MappingRegistry;
+import com.wkspower.platform.domain.service.StatusOptionsAdminService;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
 import org.springframework.context.annotation.Bean;
@@ -93,6 +95,19 @@ public class ConfigServiceConfig {
    * HTTP endpoints declare {@code @Transactional} on the controller bodies). The domain class
    * itself stays Spring-free per Decision 4 / NFR36.
    */
+  /**
+   * Story 3.7 — admin status CRUD service. Lives in the domain layer so it stays Spring-free;
+   * this @Bean wires the ports from infrastructure (CaseTypeReader, CaseTypeVersionRegistry, the
+   * JPA StatusOptionsStore adapter).
+   */
+  @Bean
+  public StatusOptionsAdminService statusOptionsAdminService(
+      CaseTypeReader caseTypeReader,
+      CaseTypeVersionRegistry versionRegistry,
+      StatusOptionsStore statusOptionsStore) {
+    return new StatusOptionsAdminService(caseTypeReader, versionRegistry, statusOptionsStore);
+  }
+
   @Bean
   public WksStageAdvancer wksStageAdvancer(
       StageRepository stageRepository, EventPublisher eventPublisher, Clock clock) {

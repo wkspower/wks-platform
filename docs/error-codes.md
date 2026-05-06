@@ -145,7 +145,7 @@ Epic-namespaced sibling band. Codes 001–006 are emitted by `MappingValidator` 
 
 ## WKS-STG — Stage lifecycle runtime + stage-scoped status sets
 
-Band: `WKS-STG-001..099`. Codes 001–004 are Story 3.1 lifecycle errors. Codes 005, 006, 008–011 are Story 3.6 stage-scoped status set codes (deploy-time + transition-time). Code 007 is unallocated; 009 is reserved for Stories 3.7 / 3.8.
+Band: `WKS-STG-001..099`. Codes 001–004 are Story 3.1 lifecycle errors. Codes 005, 006, 008–011 are Story 3.6 stage-scoped status set codes (deploy-time + transition-time). Code 007 is Story 3.7 (live append duplicate). Code 009 is Story 3.7 (mutate-class rejection); Story 3.8 will reuse it under its own envelope. Codes 012, 013 are Story 3.7 admin-CRUD lookup misses.
 
 | Code | HTTP | Meaning | Thrower(s) |
 | --- | --- | --- | --- |
@@ -155,10 +155,13 @@ Band: `WKS-STG-001..099`. Codes 001–004 are Story 3.1 lifecycle errors. Codes 
 | `WKS-STG-004` | 404 | `advance` / `skipTo` references an unknown caseId. | `api/controller/CaseController.java` |
 | `WKS-STG-005` | 422 | Duplicate status id within a stage's status set (Story 3.6 AC3, deploy-time). | `infrastructure/config/ConfigValidator.java` |
 | `WKS-STG-006` | 422 | Stage's `initialStatus:` references an id not present in the stage's status set (Story 3.6 AC3, deploy-time). | `infrastructure/config/ConfigValidator.java` |
+| `WKS-STG-007` | 409 | Append-class admin POST rejected — `statusId` already exists on `(caseTypeId, current-version, stageId)`. Distinct from `WKS-STG-005` (deploy-time YAML duplicate). Story 3.7 AC1 + AC3 scenario 7. | `api/controller/CaseTypeStatusAdminController.java`, `domain/service/StatusOptionsAdminService.java` |
 | `WKS-STG-008` | 422 | Stage's `statuses: []` is empty — must be `>= 1` or omit the key entirely to fall back to the flat set (Story 3.6 AC2, deploy-time). | `infrastructure/config/ConfigValidator.java` |
-| `WKS-STG-009` | — | RESERVED for Story 3.7 (live append) / Story 3.8 (mutate-class version-bump enforcement). Slot reserved by Story 3.6; not emitted. | (reserved — no thrower) |
+| `WKS-STG-009` | 405 | Mutate-class rejection: admin DELETE on a status, or PATCH that flips `terminal`, requires Story 3.8's mutate-class envelope. Reserved by Story 3.6; first emitted by Story 3.7. | `api/controller/CaseTypeStatusAdminController.java` |
 | `WKS-STG-010` | 422 | Transition request targets a status id not declared on the case's current stage's status set (Story 3.6 AC6). Distinct from `WKS-STG-002` ("backward skip", wire-locked by Story 3.1). | `domain/service/CaseService.java` |
 | `WKS-STG-011` | 422 | Transition rejected because the case's current status declares `terminal: true` on the active stage (Story 3.6 AC6). Same-stage transitions are blocked; advance the stage to continue. Distinct from `WKS-STG-001` ("advance/skip on completed/zero-stage case", wire-locked by Story 3.1). | `domain/service/CaseService.java` |
+| `WKS-STG-012` | 404 | Admin status-CRUD path resolved an unknown `caseTypeId` or `stageId`. Distinct from `WKS-STG-004` (runtime advance/skipTo on unknown caseId — that is a CASE id, this is a CASETYPE id). Story 3.7 AC1. | `api/controller/CaseTypeStatusAdminController.java` |
+| `WKS-STG-013` | 404 | Admin `PATCH .../statuses/{statusId}` rename targeted an unknown `statusId` (not in YAML base nor `status_options` delta). Story 3.7 AC1. | `api/controller/CaseTypeStatusAdminController.java`, `domain/service/StatusOptionsAdminService.java` |
 
 ---
 
@@ -197,9 +200,9 @@ Surfaced for follow-up. Items 1, 2, 5, 6 have resolutions deferred to the **Regi
 
 6. **`WKS-CFG-029` is reserved by Story 4.2 but emitted by Story 3.8.** Cross-story references like this are easy to lose. → **Resolved by spec AC4**: adopt `// RESERVED-FOR-STORY-X.Y` annotation convention; sweep enum for other implicit reservations; generator renders reserved codes in a separate section.
 
-7. **`WKS-STG-007` is unallocated; `WKS-STG-012..099` are unallocated.** Preserve clustering when allocating: 001–004 are lifecycle, 005–011 are stage-scoped status sets (Story 3.6), 009 reserved for 3.7/3.8.
+7. **`WKS-STG-014..099` are unallocated.** Preserve clustering when allocating: 001–004 are lifecycle, 005–011 are stage-scoped status sets (Story 3.6), 007/009/012/013 are Story 3.7 admin CRUD (live append).
 
-8. **`WKS-STG-009` reserved cross-story (3.7 / 3.8).** Same pattern as `WKS-CFG-029` (item 6) — slot allocated by Story 3.6 but not emitted by it; consumers are the future live-append (3.7) and mutate-class enforcement (3.8) paths. → **Folds into spec AC4**: same `// RESERVED-FOR-STORY-X.Y` annotation sweep.
+8. **`WKS-STG-009` cross-story consumption (3.7 → 3.8).** Reserved by Story 3.6; first emitted by Story 3.7 (admin DELETE / PATCH terminal → 405). Story 3.8's mutate-class envelope will reuse the SAME code under its own request shape — same wire string, same semantic ("mutate-class change requires version-bump envelope").
 
 9. **`WKS-MAP-404` is the first runtime miss code in the enum.** Story 4.3 introduced an HTTP-status-suffixed code (`404`) inside a band that was previously deploy-time-only (`WKS-MAP-001..007`). → **Resolved 2026-05-06**: prefixes are namespace, not phase. The mixed band is accepted; see Categories section. The generator does not need to surface a runtime/deploy-time axis — the per-code Meaning column carries that information.
 
