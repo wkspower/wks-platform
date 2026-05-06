@@ -287,7 +287,8 @@ public class ConfigValidator {
       List<ErrorDetail> errors,
       List<ErrorDetail> warnings) {
     if (raws == null || raws.isEmpty()) {
-      errors.add(eb.error(ErrorCode.WKS_CFG_001, "Required key missing: fields", "fields"));
+      // Story 3.2 follow-up: zero-process / "name + tracker" case types are first-class.
+      // Omitted `fields:` defaults to empty — no error.
       return List.of();
     }
     if (raws.size() > CaseTypeLimits.MAX_FIELDS) {
@@ -620,8 +621,8 @@ public class ConfigValidator {
       ErrorBuilder eb,
       List<ErrorDetail> errors) {
     if (raws == null || raws.isEmpty()) {
-      errors.add(
-          eb.error(ErrorCode.WKS_CFG_001, "Required key missing: listColumns", "listColumns"));
+      // Story 3.2 follow-up: omitted `listColumns:` defaults to empty — no error.
+      // Aligned with the `fields:` relaxation above; the consuming UI tolerates an empty list.
       return List.of();
     }
     if (raws.size() > CaseTypeLimits.MAX_LIST_COLUMNS) {

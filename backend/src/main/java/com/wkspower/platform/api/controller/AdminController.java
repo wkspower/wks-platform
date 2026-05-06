@@ -3,6 +3,7 @@ package com.wkspower.platform.api.controller;
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.response.DeployResponseDto;
 import com.wkspower.platform.domain.config.DeployResult;
+import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
@@ -41,12 +42,14 @@ public class AdminController {
   @PostMapping(path = "/deploy", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('ADMIN')")
   @Operation(
-      summary = "Deploy a case-type + BPMN pair",
+      summary = "Deploy a case-type, optionally with a BPMN",
       description =
-          "Multipart body with two required parts: 'caseType' (YAML, ≤1 MB) and 'bpmn' (BPMN 2.0"
-              + " XML, ≤1 MB). Both validators run before the registry is touched; on success the"
-              + " case type is registered, the BPMN is deployed to the embedded engine, and a"
-              + " ConfigDeployed event is published.")
+          "Multipart body. Required: 'caseType' (YAML, ≤1 MB). Optional: 'bpmn' (BPMN 2.0 XML, ≤1"
+              + " MB) — omit for zero-process case types (Story 3.2). Both validators run before"
+              + " the registry is touched; on success the case type is registered, and when a BPMN"
+              + " is present it is deployed to the embedded engine. A ConfigDeployed event is"
+              + " published when a BPMN deployment occurs; YAML-only registrations skip the engine"
+              + " deploy and return null deployment fields.")
   @ApiResponses(
       value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -68,14 +71,31 @@ public class AdminController {
       })
   public ApiResponse<DeployResponseDto> deploy(
       @RequestPart("caseType") MultipartFile caseTypePart,
-      @RequestPart("bpmn") MultipartFile bpmnPart,
+      @RequestPart(name = "bpmn", required = false) MultipartFile bpmnPart,
       HttpServletRequest request)
       throws Exception {
     rejectDuplicateParts(request);
     byte[] yaml = caseTypePart.getBytes();
-    byte[] bpmn = bpmnPart.getBytes();
-
     String actorEmail = currentActorEmail();
+
+    // Story 3.2: zero-process case types deploy YAML-only — no BPMN part means no engine deploy.
+    // An attached but empty `bpmn` part is treated the same as absent.
+    if (bpmnPart == null || bpmnPart.isEmpty()) {
+      ValidationResult yamlResult = configService.validateAndRegister("api-deploy.yaml", yaml);
+      if (yamlResult.isInvalid()) {
+        throw new WksConfigException(yamlResult.errors());
+      }
+      var caseType = yamlResult.config().orElseThrow();
+      return ApiResponse.success(
+          new DeployResponseDto(
+              caseType.id(),
+              caseType.version(),
+              null,
+              null,
+              "/api/admin/case-types/" + caseType.id() + "/schema"));
+    }
+
+    byte[] bpmn = bpmnPart.getBytes();
     DeployResult result = configService.deploy(yaml, bpmn, actorEmail);
     if (result.isInvalid()) {
       throw new WksConfigException(result.errors());

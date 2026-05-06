@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.wkspower.platform.api.GlobalExceptionHandler;
 import com.wkspower.platform.domain.config.DeployResult;
+import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
@@ -149,7 +150,7 @@ class AdminControllerTest {
             multipart("/api/admin/deploy")
                 .file(
                     new MockMultipartFile("caseType", "ct.yaml", "text/plain", "broken".getBytes()))
-                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "".getBytes()))
+                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<x/>".getBytes()))
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isUnprocessableEntity())
         .andExpect(jsonPath("$.error.code").value("WKS-CFG-000"))
@@ -182,15 +183,67 @@ class AdminControllerTest {
     verify(configService).deploy(any(), any(), any());
   }
 
-  // ---- missing part ------------------------------------------------------
+  // ---- YAML-only deploy (Story 3.2: zero-process case types) -------------
 
   @Test
-  void missingPartReturnsBadRequest() throws Exception {
+  void missingBpmnPartDeploysYamlOnlyAndReturnsOk() throws Exception {
+    // Story 3.2 made zero-process case types first-class. The HTTP endpoint must accept a deploy
+    // with only the `caseType` part: YAML is registered, no engine deploy occurs, and the response
+    // carries null deploymentId / processDefinitionId.
+    CaseTypeConfig config =
+        new CaseTypeConfig(
+            "j9-zero-zero",
+            "Zero",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
+            List.of(),
+            List.of(new RoleDefinition("admin", List.of())));
+    byte[] yamlBytes = "id: j9-zero-zero".getBytes();
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class)))
+        .thenReturn(ValidationResult.ok(config));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", yamlBytes))
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.caseTypeId").value("j9-zero-zero"))
+        .andExpect(jsonPath("$.data.version").value(1))
+        .andExpect(jsonPath("$.data.deploymentId").doesNotExist())
+        .andExpect(jsonPath("$.data.processDefinitionId").doesNotExist())
+        .andExpect(jsonPath("$.data.schemaUri").value("/api/admin/case-types/j9-zero-zero/schema"));
+
+    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class));
+  }
+
+  @Test
+  void missingBpmnPartWithInvalidYamlReturns422() throws Exception {
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class)))
+        .thenReturn(
+            ValidationResult.invalid(List.of(ErrorDetail.of("WKS-CFG-099", "YAML parse failed"))));
+
     mockMvc
         .perform(
             multipart("/api/admin/deploy")
                 .file(
-                    new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: x".getBytes()))
+                    new MockMultipartFile("caseType", "ct.yaml", "text/plain", "broken".getBytes()))
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.error.code").value("WKS-CFG-000"))
+        .andExpect(jsonPath("$.error.errors[0].code").value("WKS-CFG-099"));
+  }
+
+  @Test
+  void missingCaseTypePartReturnsBadRequest() throws Exception {
+    // The `caseType` part remains required — only `bpmn` was relaxed. This pins that contract.
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<x/>".getBytes()))
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isBadRequest());
   }

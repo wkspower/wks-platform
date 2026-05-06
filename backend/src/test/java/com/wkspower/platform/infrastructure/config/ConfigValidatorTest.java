@@ -210,10 +210,13 @@ class ConfigValidatorTest {
     assertErrorOn(result.errors(), "WKS-CFG-001", "version");
   }
 
-  // ---- Patch 17: missing fields key → exactly one WKS-CFG-001 fields, no WKS-CFG-005 cascade ----
+  // ---- Story 3.2 follow-up: omitted `fields` is legal (zero-process case types) ----
 
   @Test
-  void missingFieldsSkipsListColumnsCrossRef() {
+  void missingFieldsIsLegalAndSkipsListColumnsCrossRef() {
+    // Original "Patch 17" test pinned WKS-CFG-001 on missing `fields`. Story 3.2 made
+    // zero-process / "name + tracker" case types first-class, so `fields:` is now optional and
+    // defaults to an empty list. The cross-ref skip when fields is absent is preserved.
     String yaml =
         """
         id: loan-application
@@ -234,9 +237,32 @@ class ConfigValidatorTest {
         result.errors().stream()
             .filter(e -> "WKS-CFG-001".equals(e.code()) && "fields".equals(e.field()))
             .count();
-    assertThat(fieldErr).isEqualTo(1);
+    assertThat(fieldErr).as("`fields` is now optional — no WKS-CFG-001").isZero();
     long unknownRef = result.errors().stream().filter(e -> "WKS-CFG-005".equals(e.code())).count();
     assertThat(unknownRef).as("no unknown-field cascade when fields is absent").isZero();
+  }
+
+  @Test
+  void smallestValidCaseType_noFieldsNoListColumnsNoStatusesNoWorkflow_isValid() {
+    // The Story 3.2 headline shape: id + displayName + version + roles. Defaults applied
+    // everywhere else. Was failing in seed.sh against j9-zero-zero with WKS-CFG-001 on both
+    // `fields` and `listColumns`; this test locks the relaxation.
+    String yaml =
+        """
+        id: j9-zero-zero
+        displayName: "[J9] Zero"
+        version: 1
+        roles:
+          - name: admin
+            permissions: [view, create, edit, transition]
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid())
+        .as("smallest valid case type must validate cleanly: errors = " + result.errors())
+        .isFalse();
+    var ct = result.config().orElseThrow();
+    assertThat(ct.fields()).isEmpty();
+    assertThat(ct.listColumns()).isEmpty();
   }
 
   // ---- Patch 23: description > 400 chars → WKS-CFG-007 ----
