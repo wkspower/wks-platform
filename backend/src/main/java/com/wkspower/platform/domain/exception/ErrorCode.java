@@ -262,13 +262,24 @@ public enum ErrorCode {
    */
   WKS_STG_006("WKS-STG-006"),
   /**
+   * Story 3.7 AC1 — admin append rejected because the requested {@code statusId} already exists on
+   * {@code (case_type_id, current-version, stage_id)}. The stage's existing status set already
+   * declares this id (either from the deploy-time YAML or a previous append). HTTP 409.
+   *
+   * <p>Surfaced by the admin POST {@code .../stages/{stageId}/statuses} path (Story 3.7); never
+   * emitted at deploy-time (deploy duplicates surface as {@code WKS-STG-005}).
+   */
+  WKS_STG_007("WKS-STG-007"),
+  /**
    * Stage's {@code statuses: []} is empty (key declared but empty list — must be {@code >= 1} or
    * omit the key entirely to fall back to the flat set per Story 3.6 AC2). HTTP 422.
    */
   WKS_STG_008("WKS-STG-008"),
   /**
-   * RESERVED for Story 3.7 (live append) / Story 3.8 (mutate-class version-bump enforcement). Story
-   * 3.6 reserves the slot in the band; not emitted by any path in this story.
+   * Story 3.7 AC1 — admin mutate-class rejection: DELETE on a status, or PATCH that flips the
+   * {@code terminal} flag, is rejected because removal / terminal-flag changes require Story 3.8's
+   * mutate-class version-bump envelope. Reserved by Story 3.6; first emitted by Story 3.7's admin
+   * controller. HTTP 405 Method Not Allowed.
    */
   WKS_STG_009("WKS-STG-009"),
   /**
@@ -286,6 +297,22 @@ public enum ErrorCode {
    * feedback_error_codes_are_wire_contract.md}. HTTP 422.
    */
   WKS_STG_011("WKS-STG-011"),
+  /**
+   * Story 3.7 AC1 — admin status CRUD path resolved an unknown {@code caseTypeId} or {@code
+   * stageId}. Distinct from {@code WKS-API-404} (generic resource-not-found): the wire code
+   * disambiguates "the case-type lookup failed" vs "the stage lookup failed" via the message text;
+   * SI runbooks grep on {@code WKS-STG-012} for "admin tried to edit statuses on a non-existent
+   * stage". Distinct from {@code WKS-STG-004} (runtime advance/skipTo on unknown caseId) — that is
+   * a CASE id, this is a CASETYPE id. HTTP 404.
+   */
+  WKS_STG_012("WKS-STG-012"),
+  /**
+   * Story 3.7 AC1 — admin {@code PATCH .../statuses/{statusId}} rename targeted a status id that is
+   * not currently declared on the stage's status set (neither in the frozen-on-version YAML base
+   * nor in the {@code status_options} append-class delta). Distinct from {@code WKS-STG-012} (the
+   * stage itself is unknown). HTTP 404.
+   */
+  WKS_STG_013("WKS-STG-013"),
 
   // 503 — CaseType Version Registry (Story 3.4 / Decision 20; HTTP semantic flipped by Story
   // 3.4.1).

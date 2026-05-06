@@ -193,8 +193,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       log.warn("Stage lifecycle error: {}", ex.getCode());
       HttpStatus status =
           switch (ex.getCode()) {
-            case "WKS-STG-002" -> HttpStatus.UNPROCESSABLE_ENTITY;
-            case "WKS-STG-004" -> HttpStatus.NOT_FOUND;
+            case "WKS-STG-002", "WKS-STG-008", "WKS-STG-010", "WKS-STG-011" ->
+                HttpStatus.UNPROCESSABLE_ENTITY;
+            case "WKS-STG-004", "WKS-STG-012", "WKS-STG-013" -> HttpStatus.NOT_FOUND;
+              // Story 3.7 — WKS-STG-007 = duplicate append (409); WKS-STG-009 = mutate-class (405).
+            case "WKS-STG-007" -> HttpStatus.CONFLICT;
+            case "WKS-STG-009" -> HttpStatus.METHOD_NOT_ALLOWED;
             default -> HttpStatus.CONFLICT; // WKS-STG-001, WKS-STG-003
           };
       return ResponseEntity.status(status)
