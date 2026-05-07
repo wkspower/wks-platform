@@ -169,8 +169,10 @@ describe('buildZodFromFieldDefs — file', () => {
 // ---------------------------------------------------------------------------
 
 describe('buildZodFromFieldDefs — submit mode', () => {
-  it('includes fields where required === true (not filtered by requiredOnCreate)', () => {
-    // required=true, requiredOnCreate=false — 'create' would exclude, 'submit' must include.
+  it('includes ALL fields in submit mode — required fields are mandatory, optional fields have constraints validated', () => {
+    // P1 fix: submit mode includes ALL fields so optional fields with constraints are still
+    // validated. The distinction: required fields must be present; optional fields are wrapped
+    // with .optional() so they may be omitted but if present must satisfy type constraints.
     const schema = buildZodFromFieldDefs(
       [
         field({ id: 'a', required: true, requiredOnCreate: false }),
@@ -179,7 +181,8 @@ describe('buildZodFromFieldDefs — submit mode', () => {
       'submit',
     );
     expect(Object.keys(schema.shape)).toContain('a');
-    expect(Object.keys(schema.shape)).not.toContain('b');
+    // P1: optional field 'b' is now included (as .optional()) so its constraints are validated
+    expect(Object.keys(schema.shape)).toContain('b');
   });
 
   it('validates required text field in submit mode', () => {
@@ -200,12 +203,16 @@ describe('buildZodFromFieldDefs — submit mode', () => {
     expect(schema.safeParse({ a: true }).success).toBe(true);
   });
 
-  it('excludes non-required fields from submit schema', () => {
+  it('includes optional fields in submit schema (as .optional()) so constraints are still enforced', () => {
+    // P1 fix: optional fields are included so type constraints (maxLength, min/max) are validated.
+    // They are wrapped with .optional() so omitting the field entirely is still valid.
     const schema = buildZodFromFieldDefs(
       [field({ id: 'a', required: false, requiredOnCreate: false })],
       'submit',
     );
-    // Non-required field is absent from schema — empty object passes.
-    expect(Object.keys(schema.shape)).toHaveLength(0);
+    // Optional field IS present in the schema shape (as .optional()), not excluded.
+    expect(Object.keys(schema.shape)).toContain('a');
+    // Empty object still passes because the field is optional.
+    expect(schema.safeParse({}).success).toBe(true);
   });
 });

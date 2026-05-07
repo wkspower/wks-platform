@@ -28,6 +28,11 @@ export interface SinglePageFormRendererProps {
   formDefinition: FormDefinitionView;
   /** The case to submit the form for. */
   caseId: string;
+  /**
+   * Existing case data to prefill the form with (P8). When provided, field values from the case
+   * are used as initial values so users see current data when reopening a form.
+   */
+  defaultValues?: Record<string, unknown>;
   /** Called after a successful submit so the parent can react (e.g. show a toast, navigate). */
   onSuccess?: () => void;
 }
@@ -55,6 +60,7 @@ interface ServerErrorBanner {
 export function SinglePageFormRenderer({
   formDefinition,
   caseId,
+  defaultValues: externalDefaultValues,
   onSuccess,
 }: SinglePageFormRendererProps) {
   const [serverError, setServerError] = useState<ServerErrorBanner | null>(null);
@@ -74,11 +80,17 @@ export function SinglePageFormRenderer({
   const schema = useMemo(() => buildZodFromFieldDefs(sortedFields, 'submit'), [sortedFields]);
 
   // Default values keyed by field id so controlled inputs are always controlled.
+  // P8: merge externalDefaultValues (case.data) over the blank-field defaults so users see
+  // existing case data when reopening the form. The blank-field default ensures every field is
+  // controlled even if the case has no stored value for it yet.
   const defaultValues = useMemo<Record<string, unknown>>(() => {
     const dv: Record<string, unknown> = {};
     for (const f of sortedFields) dv[f.id] = f.type === 'checkbox' ? false : '';
+    if (externalDefaultValues) {
+      Object.assign(dv, externalDefaultValues);
+    }
     return dv;
-  }, [sortedFields]);
+  }, [sortedFields, externalDefaultValues]);
 
   const form = useForm<Record<string, unknown>>({
     resolver: zodResolver(schema),
@@ -181,6 +193,12 @@ export function SinglePageFormRenderer({
           aria-busy={isPending ? true : undefined}
           className="flex flex-col gap-[var(--form-field-gap,1rem)]"
         >
+          {form.formState.isSubmitted ? (
+            <FormErrorsBanner
+              errors={collectFormErrors(form, sortedFields)}
+              onAnchorClick={(field) => form.setFocus(field)}
+            />
+          ) : null}
           {sortedFields.length === 0 ? (
             <p className="text-sm text-[var(--muted-foreground)]">
               {t('cases.create.noRequired', { caseTypeName: formDefinition.id })}
@@ -188,12 +206,6 @@ export function SinglePageFormRenderer({
           ) : (
             sortedFields.map((f) => renderField(f, isPending, form))
           )}
-          {form.formState.isSubmitted ? (
-            <FormErrorsBanner
-              errors={collectFormErrors(form, sortedFields)}
-              onAnchorClick={(field) => form.setFocus(field)}
-            />
-          ) : null}
           {serverError ? (
             <Alert
               ref={bannerRef}

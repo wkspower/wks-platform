@@ -53,6 +53,7 @@ export function FormPage() {
       <SinglePageFormRenderer
         formDefinition={formDef}
         caseId={caseId!}
+        defaultValues={caseDto.data}
         onSuccess={() => navigate(`/cases/${caseId}`)}
       />
     </div>

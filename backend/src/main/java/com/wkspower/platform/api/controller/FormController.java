@@ -4,6 +4,8 @@ import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.response.CaseDto;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.exception.ErrorCode;
+import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.CaseService;
@@ -73,6 +75,11 @@ public class FormController {
       @PathVariable String formId,
       @RequestBody(required = false) Map<String, Object> formData,
       @AuthenticationPrincipal WksUserPrincipal actor) {
+
+    if (formData == null || formData.isEmpty()) {
+      throw new WksValidationException(
+          ErrorCode.WKS_FORM_003, "Form submission body is null or empty", null);
+    }
 
     Case updated = caseService.submitForm(caseId, formId, formData, actor.id());
 

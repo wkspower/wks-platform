@@ -61,8 +61,27 @@ public final class FormDefinitionMapper {
       if (displayName == null) displayName = id;
 
       String typeStr = string(m, "type");
-      FieldType type =
-          typeStr != null ? FieldType.fromWire(typeStr).orElse(FieldType.TEXT) : FieldType.TEXT;
+      // P11 — fail-fast on unknown field type: silently defaulting to TEXT accepts typos without
+      // surfacing them, causing the form to render the wrong widget at runtime. Config authoring
+      // errors must surface immediately at deploy time (same posture as WKS-CFG-002 for case-type
+      // fields). FormValidator should have already rejected unknown types; this guard is a
+      // defensive belt-and-suspenders in case the mapper is called outside the validator path.
+      FieldType type;
+      if (typeStr == null || typeStr.isBlank()) {
+        type = FieldType.TEXT; // no type declared — validator catches this; default defensively
+      } else {
+        type =
+            FieldType.fromWire(typeStr)
+                .orElseThrow(
+                    () ->
+                        new IllegalArgumentException(
+                            "Unknown field type '"
+                                + typeStr
+                                + "' on field '"
+                                + id
+                                + "' — check the form YAML (valid types: text, textarea, number,"
+                                + " date, select, checkbox, file)"));
+      }
 
       boolean required = booleanValue(m, "required");
       boolean requiredOnCreate =

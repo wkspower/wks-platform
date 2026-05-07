@@ -38,6 +38,8 @@ import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -410,7 +412,11 @@ public class CaseService {
                             + "'"));
 
     // Validate submitted field values against the form's field definitions.
-    Map<String, Object> safeData = formData == null ? Map.of() : Map.copyOf(formData);
+    // Collections.unmodifiableMap(new HashMap<>(...)) is used instead of Map.copyOf() because
+    // Map.copyOf() throws NullPointerException on null values (e.g. {"field": null} — an explicit
+    // clear-field intent). Null values are preserved so the update() path can handle them.
+    Map<String, Object> safeData =
+        formData == null ? Map.of() : Collections.unmodifiableMap(new HashMap<>(formData));
     List<ErrorDetail> violations = validateFormData(form, safeData);
     if (!violations.isEmpty()) {
       throw new WksValidationAggregateException(
@@ -418,8 +424,13 @@ public class CaseService {
     }
 
     // Persist via the existing update path (validates the merged data against the case-type schema
-    // and emits a CaseUpdated event). The update uses the current case version to detect concurrent
-    // modifications.
+    // and emits a CaseUpdated event).
+    // intentionally last-writer-wins: form submit does not require version-based conflict
+    // detection.
+    // The form submit endpoint is designed for user-facing data entry where the form itself
+    // presents the current state; a concurrent server-side update winning is acceptable. If
+    // version-based conflict detection is required in future, the FormController request body
+    // should accept a client-supplied version and thread it through to update() here.
     Case updated = update(caseId, safeData, existing.version(), actorId);
 
     // Compute which field ids changed between the old and new data for the FormSubmitted event.
@@ -436,33 +447,121 @@ public class CaseService {
    * Validate submitted form data against the form's declared field definitions (Story 5.2
    * WKS-FORM-002). Collect-all: never short-circuits on first error.
    *
-   * <p>Currently validates that required fields are present. Type-specific constraint checking
-   * (min/max, length, date range) is delegated to the existing {@link CaseDataValidator} port which
-   * runs inside {@link #update}. The purpose of this pre-check is to surface form-specific required
-   * field violations with WKS-FORM-002 (so the frontend can distinguish them from generic case-data
-   * validation errors that use WKS-API-002).
+   * <p>Validates:
+   *
+   * <ol>
+   *   <li>Required field presence (all field types).
+   *   <li>Type-specific constraints (P9): {@code TEXT}/{@code TEXTAREA} maxLength; {@code NUMBER}
+   *       min/max; {@code DATE} ISO format ({@code YYYY-MM-DD}). Missing or malformed constraint
+   *       config on the field definition → the check is skipped (don't fail on incomplete field
+   *       defs).
+   * </ol>
+   *
+   * <p>These checks emit WKS-FORM-002 directly so the frontend can distinguish form-field failures
+   * from generic case-data validation errors (WKS-API-002) that run inside {@link #update}.
    */
   private static List<ErrorDetail> validateFormData(FormDefinition form, Map<String, Object> data) {
     List<ErrorDetail> errors = new ArrayList<>();
     for (FieldDefinition f : form.fields()) {
+      Object value = data.get(f.id());
+
+      // --- required check ---
       if (f.required()) {
-        Object value = data.get(f.id());
         if (value == null || (value instanceof String s && s.isBlank())) {
           errors.add(
               ErrorDetail.ofField(
                   ErrorCode.WKS_FORM_002.wire(),
                   "Field '" + f.displayName() + "' is required",
                   f.id()));
+          continue; // no point checking constraints if the value is absent
         } else if (f.type() == FieldType.CHECKBOX && Boolean.FALSE.equals(value)) {
           errors.add(
               ErrorDetail.ofField(
                   ErrorCode.WKS_FORM_002.wire(),
                   "Field '" + f.displayName() + "' must be checked",
                   f.id()));
+          continue;
+        }
+      }
+
+      // Skip constraint checks when value is absent for optional fields.
+      if (value == null) {
+        continue;
+      }
+
+      // P9 — type-specific constraint validation (emits WKS-FORM-002, not WKS-API-002).
+      // Missing or malformed constraint config on the FieldDefinition → skip silently.
+      FieldDefinition.TypeSlots slots = f.slots();
+      switch (f.type()) {
+        case TEXT, TEXTAREA -> {
+          if (value instanceof String strVal && slots != null && slots.maxLength() != null) {
+            if (strVal.length() > slots.maxLength()) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_FORM_002.wire(),
+                      "Field '"
+                          + f.displayName()
+                          + "' exceeds maximum length of "
+                          + slots.maxLength(),
+                      f.id()));
+            }
+          }
+        }
+        case NUMBER -> {
+          if (slots != null) {
+            Double numVal = toDouble(value);
+            if (numVal != null) {
+              if (slots.min() != null && numVal < slots.min()) {
+                errors.add(
+                    ErrorDetail.ofField(
+                        ErrorCode.WKS_FORM_002.wire(),
+                        "Field '" + f.displayName() + "' must be at least " + slots.min(),
+                        f.id()));
+              }
+              if (slots.max() != null && numVal > slots.max()) {
+                errors.add(
+                    ErrorDetail.ofField(
+                        ErrorCode.WKS_FORM_002.wire(),
+                        "Field '" + f.displayName() + "' must be at most " + slots.max(),
+                        f.id()));
+              }
+            }
+          }
+        }
+        case DATE -> {
+          if (value instanceof String dateVal
+              && !dateVal.isBlank()
+              && !dateVal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            errors.add(
+                ErrorDetail.ofField(
+                    ErrorCode.WKS_FORM_002.wire(),
+                    "Field '" + f.displayName() + "' must be a date in YYYY-MM-DD format",
+                    f.id()));
+          }
+        }
+        default -> {
+          // No type-specific constraints for SELECT, CHECKBOX, FILE — skip.
         }
       }
     }
     return errors;
+  }
+
+  /**
+   * Coerce a value to {@link Double} for numeric constraint checks. Returns {@code null} if the
+   * value is not numeric (e.g. a string that isn't a parseable number — the full type check runs
+   * inside {@link CaseDataValidator}).
+   */
+  private static Double toDouble(Object value) {
+    if (value instanceof Number n) return n.doubleValue();
+    if (value instanceof String s) {
+      try {
+        return Double.parseDouble(s);
+      } catch (NumberFormatException ignored) {
+        return null;
+      }
+    }
+    return null;
   }
 
   /** Lookup by id; 404 if not found. */

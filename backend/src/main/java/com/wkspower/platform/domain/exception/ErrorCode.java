@@ -358,6 +358,15 @@ public enum ErrorCode {
    * never be reused for a different meaning.
    */
   WKS_FORM_002("WKS-FORM-002"),
+  /**
+   * Story 5.2 — form submission body is null or empty. Emitted by {@link
+   * com.wkspower.platform.api.controller.FormController} when the {@code @RequestBody} is absent or
+   * resolves to an empty map (blank-case-data attack guard). HTTP 400.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string is stable and must
+   * never be reused for a different meaning.
+   */
+  WKS_FORM_003("WKS-FORM-003"),
 
   // 409 — runtime conflict.
   /**

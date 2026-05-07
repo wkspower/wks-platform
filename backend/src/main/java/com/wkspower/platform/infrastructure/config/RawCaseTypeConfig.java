@@ -32,69 +32,6 @@ public record RawCaseTypeConfig(
     List<RawAttachment> attachments,
     @JsonProperty("forms") @JsonInclude(JsonInclude.Include.NON_NULL) RawFormConfig forms) {
 
-  /**
-   * Backward-compat constructor for callers (and tests) authored before Story 4.2 introduced the
-   * {@code attachments} slot. Treats absent attachments as the empty list — equivalent to a YAML
-   * with no {@code attachments:} key (AC1).
-   */
-  public RawCaseTypeConfig(
-      String id,
-      String displayName,
-      Integer version,
-      String description,
-      RawWorkflow workflow,
-      List<RawField> fields,
-      List<RawStatus> statuses,
-      List<String> listColumns,
-      List<RawRole> roles,
-      List<RawStage> stages) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        stages,
-        null,
-        null);
-  }
-
-  /**
-   * Backward-compat constructor for callers (and tests) authored before Story 5.1 introduced the
-   * {@code forms} slot. Passes {@code null} for forms — equivalent to a YAML with no {@code forms:}
-   * key (AC3).
-   */
-  public RawCaseTypeConfig(
-      String id,
-      String displayName,
-      Integer version,
-      String description,
-      RawWorkflow workflow,
-      List<RawField> fields,
-      List<RawStatus> statuses,
-      List<String> listColumns,
-      List<RawRole> roles,
-      List<RawStage> stages,
-      List<RawAttachment> attachments) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        stages,
-        attachments,
-        null);
-  }
-
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawWorkflow(String bpmn) {}
 
