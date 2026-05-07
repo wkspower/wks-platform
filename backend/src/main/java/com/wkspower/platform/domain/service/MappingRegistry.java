@@ -11,10 +11,10 @@ import java.util.concurrent.ConcurrentMap;
  * Story 4.3 AC3 — runtime-side index from {@code (caseTypeId, version)} to the validated {@link
  * MappingDefinition} produced at deploy time by Story 4.2's {@code MappingValidator}. Pure-Java —
  * no Spring annotations on the class itself; wired as a singleton {@code @Bean} from {@code
- * infrastructure.config.BackendAdapterConfig} (NFR36 — domain has zero framework imports).
+ * infrastructure.config.WorkflowAdapterConfig} (NFR36 — domain has zero framework imports).
  *
  * <p>Backed by a {@link ConcurrentHashMap} for read-heavy concurrent access (mirrors {@link
- * BackendAdapterBinder}'s pattern). Reads never block; the single-writer {@code register} / {@code
+ * WorkflowAdapterBinder}'s pattern). Reads never block; the single-writer {@code register} / {@code
  * unregister} swap is atomic at the key.
  *
  * <p>{@link MappingDefinition#empty()} is a legal value — registered for every CaseType version

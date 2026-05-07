@@ -9,7 +9,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMa
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
-import com.wkspower.platform.domain.service.BackendAdapterBinder;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseTypeVersionJpaRepository;
@@ -33,10 +33,10 @@ import org.springframework.test.context.DynamicPropertySource;
  * <p>Verifies the two core invariants of AC4:
  *
  * <ol>
- *   <li>After {@link BackendAdapterBinder#detach(CaseTypeRef)}, the prior version's mapping remains
+ *   <li>After {@link WorkflowAdapterBinder#detach(CaseTypeRef)}, the prior version's mapping remains
  *       resolvable via {@link MappingRegistry} — in-flight cases frozen on their prior version can
  *       still resolve their mapping.
- *   <li>The detached adapter is no longer reachable via {@link BackendAdapterBinder#resolve}, so
+ *   <li>The detached adapter is no longer reachable via {@link WorkflowAdapterBinder#resolve}, so
  *       new routing calls for the detached case-type scope get the {@code NullAdapter}.
  * </ol>
  *
@@ -74,7 +74,7 @@ class BpmnAttachmentLifecycleIT {
   @Autowired private CaseTypeVersionRegistry versionRegistry;
   @Autowired private CaseTypeVersionJpaRepository repo;
   @Autowired private MappingRegistry mappingRegistry;
-  @Autowired private BackendAdapterBinder adapterBinder;
+  @Autowired private WorkflowAdapterBinder adapterBinder;
   @Autowired private ConfigService configService;
 
   @AfterEach
@@ -90,7 +90,7 @@ class BpmnAttachmentLifecycleIT {
    * <ol>
    *   <li>Register a CaseType version with fingerprint hashes (simulating a BPMN-attached deploy).
    *   <li>Register a MappingDefinition in MappingRegistry for that (caseTypeId, version).
-   *   <li>Detach the adapter for that CaseTypeRef via BackendAdapterBinder.
+   *   <li>Detach the adapter for that CaseTypeRef via WorkflowAdapterBinder.
    *   <li>Assert MappingRegistry still resolves the prior version's mapping.
    *   <li>Assert the fingerprints are persisted in case_type_versions.
    * </ol>
@@ -139,7 +139,7 @@ class BpmnAttachmentLifecycleIT {
         .hasValueSatisfying(m -> assertThat(m.attachments()).hasSize(1));
 
     // Step 3 — Detach the adapter for that CaseTypeRef (AC4)
-    // BackendAdapterBinder.detach removes the adapter's registration for the ref;
+    // WorkflowAdapterBinder.detach removes the adapter's registration for the ref;
     // MappingRegistry is NOT touched.
     adapterBinder.detach(caseTypeRef);
 
@@ -149,11 +149,11 @@ class BpmnAttachmentLifecycleIT {
         .isPresent()
         .hasValueSatisfying(m -> assertThat(m.attachments()).hasSize(1));
 
-    // Step 5 — Verify BackendAdapterBinder.resolve returns NullAdapter for the detached ref
+    // Step 5 — Verify WorkflowAdapterBinder.resolve returns NullAdapter for the detached ref
     // (the adapter registration is removed on detach)
     var resolvedAdapter = adapterBinder.resolve(caseTypeRef);
     assertThat(resolvedAdapter.getClass().getSimpleName())
-        .as("BackendAdapterBinder must return NullAdapter after detach")
+        .as("WorkflowAdapterBinder must return NullAdapter after detach")
         .isEqualTo("NullAdapter");
   }
 
@@ -222,7 +222,7 @@ class BpmnAttachmentLifecycleIT {
                 + "\n"
                 + "displayName: \"Hash Test\"\n"
                 + "version: 1\n"
-                + "workflow:\n"
+                + "workflows:\n"
                 + "  bpmn: "
                 + processId
                 + ".bpmn\n"

@@ -3,7 +3,7 @@ package com.wkspower.platform.domain.port;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.wkspower.platform.domain.service.BackendAdapterBinder;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.domain.service.NullAdapter;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -14,29 +14,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Story 4.1 AC6 — abstract compliance contract. Any {@link BackendAdapter} implementation MUST pass
+ * Story 4.1 AC6 — abstract compliance contract. Any {@link WorkflowAdapter} implementation MUST pass
  * these seven test methods. Story 4.4 (BPMN adapter) and Story 4.9 (in-memory state machine) extend
- * this class by overriding {@link #newAdapterUnderTest(BackendAdapterBinder)}.
+ * this class by overriding {@link #newAdapterUnderTest(WorkflowAdapterBinder)}.
  *
  * <p>Tests 1–4, 7 exercise real behaviour. Tests 5–6 are vacuously satisfied by adapters that emit
- * no signals (e.g. {@link NullAdapter}); the {@link FakeRecordingAdapter} subclass exercises them
+ * no signals (e.g. {@link NullAdapter}); the {@link FakeRecordingWorkflowAdapter} subclass exercises them
  * non-trivially.
  */
-public abstract class BackendAdapterComplianceTest {
+public abstract class WorkflowAdapterComplianceTest {
 
   protected NullAdapter nullAdapter;
-  protected BackendAdapterBinder binder;
-  protected BackendAdapter adapter;
+  protected WorkflowAdapterBinder binder;
+  protected WorkflowAdapter adapter;
 
   /**
    * Subclasses build a fresh adapter under test for each compliance run. The binder is provided so
    * the adapter can self-register from inside {@code attach(...)}.
    */
-  protected abstract BackendAdapter newAdapterUnderTest(BackendAdapterBinder binder);
+  protected abstract WorkflowAdapter newAdapterUnderTest(WorkflowAdapterBinder binder);
 
   /**
    * Whether the adapter under test ever emits signals. {@link NullAdapter} returns {@code false};
-   * {@link FakeRecordingAdapter} returns {@code true}. Tests 5 and 6 are skipped (vacuously
+   * {@link FakeRecordingWorkflowAdapter} returns {@code true}. Tests 5 and 6 are skipped (vacuously
    * passing) when this returns {@code false}, and they receive a non-null fake-emit hook when this
    * returns {@code true}.
    */
@@ -48,7 +48,7 @@ public abstract class BackendAdapterComplianceTest {
    * For signal-emitting adapters: emit a synthetic signal to every subscribed handler. Default
    * throws — adapters that emit signals MUST override.
    */
-  protected void emitSignal(BackendSignal signal) {
+  protected void emitSignal(ExecutionSignal signal) {
     throw new UnsupportedOperationException(
         "Adapter under test does not support test-side signal emission");
   }
@@ -56,7 +56,7 @@ public abstract class BackendAdapterComplianceTest {
   @BeforeEach
   void setUp() {
     nullAdapter = new NullAdapter();
-    binder = new BackendAdapterBinder(nullAdapter);
+    binder = new WorkflowAdapterBinder(nullAdapter);
     adapter = newAdapterUnderTest(binder);
   }
 
@@ -69,7 +69,7 @@ public abstract class BackendAdapterComplianceTest {
 
     // NullAdapter is the binder's fallback; for it, resolve returns nullAdapter (which IS the
     // adapter under test). For other adapters, the adapter's attach must self-register.
-    BackendAdapter resolved = binder.resolve(ref);
+    WorkflowAdapter resolved = binder.resolve(ref);
     if (adapter instanceof NullAdapter) {
       assertThat(resolved).isSameAs(nullAdapter);
     } else {
@@ -116,19 +116,19 @@ public abstract class BackendAdapterComplianceTest {
       // Vacuously satisfied — NullAdapter and other zero-emit adapters declare no obligation here.
       return;
     }
-    List<BackendSignal> received = new CopyOnWriteArrayList<>();
-    BackendSignalSubscription sub = adapter.onBackendSignal(received::add);
+    List<ExecutionSignal> received = new CopyOnWriteArrayList<>();
+    ExecutionSignalSubscription sub = adapter.onExecutionSignal(received::add);
 
     CaseInstanceRef ci = new CaseInstanceRef(UUID.randomUUID(), new CaseTypeRef("ct-1", "1.0.0"));
-    BackendSignal s1 =
-        BackendSignal.of(
-            BackendSignalKind.NAMED_SIGNAL, "fake-recording", ci, "elem-A", java.util.Map.of());
-    BackendSignal s2 =
-        BackendSignal.of(
-            BackendSignalKind.OUTCOME, "fake-recording", ci, "elem-B", java.util.Map.of());
-    BackendSignal s3 =
-        BackendSignal.of(
-            BackendSignalKind.END_EVENT, "fake-recording", ci, "elem-C", java.util.Map.of());
+    ExecutionSignal s1 =
+        ExecutionSignal.of(
+            ExecutionSignalKind.NAMED_SIGNAL, "fake-recording", ci, "elem-A", java.util.Map.of());
+    ExecutionSignal s2 =
+        ExecutionSignal.of(
+            ExecutionSignalKind.OUTCOME, "fake-recording", ci, "elem-B", java.util.Map.of());
+    ExecutionSignal s3 =
+        ExecutionSignal.of(
+            ExecutionSignalKind.STAGE_TRANSITION, "fake-recording", ci, "elem-C", java.util.Map.of());
 
     emitSignal(s1);
     emitSignal(s2);
@@ -147,22 +147,22 @@ public abstract class BackendAdapterComplianceTest {
     if (!adapterEmitsSignals()) {
       return; // vacuous for NullAdapter
     }
-    List<BackendSignalKind> kinds = new ArrayList<>();
-    BackendSignalSubscription sub = adapter.onBackendSignal(s -> kinds.add(s.kind()));
+    List<ExecutionSignalKind> kinds = new ArrayList<>();
+    ExecutionSignalSubscription sub = adapter.onExecutionSignal(s -> kinds.add(s.kind()));
 
     CaseInstanceRef ci = new CaseInstanceRef(UUID.randomUUID(), new CaseTypeRef("ct-1", "1.0.0"));
-    for (BackendSignalKind k : BackendSignalKind.values()) {
-      emitSignal(BackendSignal.of(k, "fake-recording", ci, "elem-" + k.name(), java.util.Map.of()));
+    for (ExecutionSignalKind k : ExecutionSignalKind.values()) {
+      emitSignal(ExecutionSignal.of(k, "fake-recording", ci, "elem-" + k.name(), java.util.Map.of()));
     }
     sub.close();
 
-    EnumSet<BackendSignalKind> declared =
+    EnumSet<ExecutionSignalKind> declared =
         EnumSet.of(
-            BackendSignalKind.END_EVENT,
-            BackendSignalKind.NAMED_SIGNAL,
-            BackendSignalKind.USER_TASK_STATUS,
-            BackendSignalKind.USER_TASK_COMPLETE,
-            BackendSignalKind.OUTCOME);
+            ExecutionSignalKind.STAGE_TRANSITION,
+            ExecutionSignalKind.NAMED_SIGNAL,
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
+            ExecutionSignalKind.TASK_COMPLETED,
+            ExecutionSignalKind.OUTCOME);
     assertThat(kinds).allMatch(declared::contains);
   }
 

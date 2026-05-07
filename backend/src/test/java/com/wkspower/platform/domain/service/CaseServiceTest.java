@@ -24,7 +24,7 @@ import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
@@ -81,7 +81,7 @@ class CaseServiceTest {
         config.version() == 0 ? 1 : config.version(),
         ("id: " + config.id()).getBytes());
     // Story 4.4b AC1 — wire no-op stubs for the new router + status-updater dependencies.
-    BackendSignalHandler noopRouter = signal -> {};
+    ExecutionSignalHandler noopRouter = signal -> {};
     CaseStatusUpdater noopStatusUpdater =
         (id, status) -> {
           // Update in the repo stub so findById returns the new status after transition.

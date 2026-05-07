@@ -10,7 +10,7 @@ import java.util.UUID;
  * com.wkspower.platform.domain.event.StageExited#source()} and friends — strings {@code
  * "wks-auto-rule"}, {@code "manual"}, {@code "backend-signal"}.
  *
- * <p>Story 4.3 introduces this {@code sealed interface} for the new {@code BackendSignalRouter}
+ * <p>Story 4.3 introduces this {@code sealed interface} for the new {@code ExecutionSignalRouter}
  * code path only; the existing string slots stay unchanged. Migration of every call site to {@code
  * AuditSource} is folded into Story 4.4 (the next story to touch the audit surface for backend
  * signals) per {@code feedback_fold_debt_into_stories.md}.
@@ -35,7 +35,7 @@ public sealed interface AuditSource
     permits AuditSource.User,
         AuditSource.AutoRule,
         AuditSource.Backend,
-        AuditSource.BackendUnmapped {
+        AuditSource.ExecutionUnmapped {
 
   /** Manual user action — wire string {@code "manual"}. */
   record User(UUID actorId) implements AuditSource {
@@ -75,22 +75,22 @@ public sealed interface AuditSource
 
   /**
    * Story 4.3.1 AC6 — un-spoofable miss-sentinel for {@link
-   * com.wkspower.platform.domain.service.BackendSignalRouter} {@code WKS-MAP-404} audit rows. The
+   * com.wkspower.platform.domain.service.ExecutionSignalRouter} {@code WKS-MAP-404} audit rows. The
    * legacy single-{@link Backend}-record design rendered miss audits as {@code "backend(unmapped)"}
    * by passing the literal string {@code "unmapped"} as the adapter name — which collides with any
    * real adapter that happens to be named {@code "unmapped"}. This sealed sub-record carries the
    * originating adapter name as a separate slot and renders as {@code
-   * "backend(unmapped:<originAdapter>)"} so the operator-facing audit string is always
+   * "execution(unmapped:<originAdapter>)"} so the operator-facing audit string is always
    * distinguishable from a regular {@link Backend} row.
    */
-  record BackendUnmapped(String originAdapter) implements AuditSource {
-    public BackendUnmapped {
+  record ExecutionUnmapped(String originAdapter) implements AuditSource {
+    public ExecutionUnmapped {
       Objects.requireNonNull(originAdapter, "originAdapter");
     }
 
     @Override
     public String toString() {
-      return "backend(unmapped:" + originAdapter + ")";
+      return "execution(unmapped:" + originAdapter + ")";
     }
   }
 }

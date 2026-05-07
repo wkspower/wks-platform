@@ -347,7 +347,7 @@ public class ConfigValidator {
   }
 
   /**
-   * Story 3.2 AC1 — {@code workflow:} is now an OPTIONAL slot. Omitted or blank ⇒ no error
+   * Story 3.2 AC1 — {@code workflows:} is now an OPTIONAL slot. Omitted or blank ⇒ no error
    * (Decision 19 / 3.2: process-less paths must remain unbranched; zero-process is the trivial
    * shape, not an alarm). The downstream mapper at {@link #toWorkflowRef} returns {@code null} for
    * those cases. WKS-CFG-001 is preserved for the slots that ARE still required (id, displayName,

@@ -4,14 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.model.Case;
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.StageRepository;
-import com.wkspower.platform.domain.service.BackendSignalRouter;
+import com.wkspower.platform.domain.service.ExecutionSignalRouter;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import java.time.Instant;
 import java.util.List;
@@ -34,7 +34,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <ol>
  *   <li>Zero-process manual transition via {@link CaseStatusUpdater} (no engine, no router).
- *   <li>Stage-advance status-reset via {@link BackendSignalRouter} + {@link
+ *   <li>Stage-advance status-reset via {@link ExecutionSignalRouter} + {@link
  *       com.wkspower.platform.domain.port.CaseTypeReader} injection (AC3).
  * </ol>
  *
@@ -71,7 +71,7 @@ class CaseTransitionPostgresIT {
   @Autowired private CaseRepository caseRepository;
   @Autowired private CaseStatusUpdater caseStatusUpdater;
   @Autowired private StageRepository stageRepository;
-  @Autowired private BackendSignalRouter backendSignalRouter;
+  @Autowired private ExecutionSignalRouter backendSignalRouter;
   @Autowired private MappingRegistry mappingRegistry;
 
   private static final Instant NOW = Instant.parse("2026-05-06T12:00:00Z");
@@ -102,7 +102,7 @@ class CaseTransitionPostgresIT {
     assertThat(after.currentStageOrdinal()).isNull();
   }
 
-  // ---------- AC10 §2 — stage-advance status-reset via BackendSignalRouter ----
+  // ---------- AC10 §2 — stage-advance status-reset via ExecutionSignalRouter ----
 
   @Test
   void stageAdvanceStatusReset_resetsStatusOnRealPostgres() {
@@ -140,9 +140,9 @@ class CaseTransitionPostgresIT {
         "1",
         new com.wkspower.platform.domain.config.model.MappingDefinition(List.of(attachment)));
 
-    BackendSignal signal =
-        BackendSignal.of(
-            BackendSignalKind.END_EVENT,
+    ExecutionSignal signal =
+        ExecutionSignal.of(
+            ExecutionSignalKind.STAGE_TRANSITION,
             "bpmn",
             new CaseInstanceRef(caseId, caseTypeRef),
             "process_end",
@@ -153,9 +153,9 @@ class CaseTransitionPostgresIT {
     assertThat(after.currentStageId()).as("stage must have advanced to stage2").isEqualTo("stage2");
     // AC3: after stage advance, status is reset to next stage's initialStatus.
     // The real CaseTypeReader does not have "loan-pg-ac10" registered (no YAML on classpath),
-    // so BackendSignalRouter.resetStatusForAdvancedStage logs a warning and skips the reset.
+    // so ExecutionSignalRouter.resetStatusForAdvancedStage logs a warning and skips the reset.
     // The stage advance itself (currentStageId, currentStageOrdinal) is the load-bearing AC3
-    // contract exercised here; the status-reset half is covered by BackendSignalRouterIT
+    // contract exercised here; the status-reset half is covered by ExecutionSignalRouterIT
     // ac7_stageAdvance_emitsTwoEventsWithSharedCorrelationId_andResetsStatus (H2 + stub reader).
     assertThat(after.status())
         .as(

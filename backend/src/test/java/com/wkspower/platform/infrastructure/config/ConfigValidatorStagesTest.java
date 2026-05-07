@@ -193,7 +193,7 @@ class ConfigValidatorStagesTest {
       id: loan-application
       displayName: Loan Application
       version: 1
-      workflow:
+      workflows:
         bpmn: loan-application.bpmn
       fields:
         - id: applicant_name

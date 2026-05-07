@@ -146,7 +146,7 @@ class CaseTypeStartupLoaderBpmnIT {
         + id
         + "\ndisplayName: "
         + id
-        + "\nversion: 1\nworkflow:\n  bpmn: "
+        + "\nversion: 1\nworkflows:\n  bpmn: "
         + bpmnFile
         + "\nfields:\n"
         + "  - id: applicant_name\n"

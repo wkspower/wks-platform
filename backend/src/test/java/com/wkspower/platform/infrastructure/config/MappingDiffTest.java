@@ -9,7 +9,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapp
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
 import com.wkspower.platform.domain.config.model.MappingChangeClass;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
-import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +60,7 @@ class MappingDiffTest {
   void appendClass_newPropertyRuleAdded() {
     PropertyEmissionRule rule =
         new PropertyEmissionRule(
-            "userTask:t1", "status", BackendSignalKind.USER_TASK_STATUS, "case");
+            "userTask:t1", "status", ExecutionSignalKind.TASK_STATUS_CHANGED, "case");
     AttachmentDefinition before = baseAttachment(Map.of(), List.of());
     AttachmentDefinition after = baseAttachment(Map.of(), List.of(rule));
     assertThat(

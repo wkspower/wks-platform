@@ -45,7 +45,7 @@ public class CaseTypeYamlLoader {
             // Story 4.3.1 AC8 — enable strict unknown-property failure at the mapper level. The
             // top-level transport record ({@link RawCaseTypeConfig}) keeps {@code
             // @JsonIgnoreProperties(ignoreUnknown = true)} so future case-type-level keys ship
-            // forward-compat; mapping subtree records (RawAttachment, RawAttachmentMap,
+            // forward-compat; mapping subtree records (RawAttachment, RawRoutingBlock,
             // RawUserTaskMapping, RawEventMappings, RawEndEventMapping, RawSignalMapping,
             // RawPropertyEmissionRule, RawEmits) drop the annotation so unknown keys surface as
             // {@code WKS-MAP-008}. Scoped — does NOT flip the global Jackson ObjectMapper.

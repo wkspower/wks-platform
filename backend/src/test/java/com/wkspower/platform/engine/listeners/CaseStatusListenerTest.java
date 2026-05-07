@@ -6,9 +6,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalKind;
-import com.wkspower.platform.engine.BpmnBackendAdapter;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
+import com.wkspower.platform.engine.BpmnWorkflowAdapter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * Story 4.4a — listener-side coverage. The listener no longer mutates state; every assertion pins
- * the {@link BackendSignal} it forwards to the {@link BpmnBackendAdapter}.
+ * the {@link ExecutionSignal} it forwards to the {@link BpmnWorkflowAdapter}.
  */
 class CaseStatusListenerTest {
 
@@ -31,20 +31,20 @@ class CaseStatusListenerTest {
   private static final String CASE_TYPE_ID = "ct-x";
   private static final String CASE_TYPE_VERSION = "1";
 
-  private final BpmnBackendAdapter adapter =
-      new BpmnBackendAdapter() {
+  private final BpmnWorkflowAdapter adapter =
+      new BpmnWorkflowAdapter() {
         @Override
-        public void emit(BackendSignal signal) {
+        public void emit(ExecutionSignal signal) {
           captured = signal;
         }
 
         @Override
-        public com.wkspower.platform.domain.port.BackendSignalSubscription onBackendSignal(
-            com.wkspower.platform.domain.port.BackendSignalHandler handler) {
+        public com.wkspower.platform.domain.port.ExecutionSignalSubscription onExecutionSignal(
+            com.wkspower.platform.domain.port.ExecutionSignalHandler handler) {
           return () -> {};
         }
       };
-  private BackendSignal captured;
+  private ExecutionSignal captured;
   private final CaseStatusListener listener = new CaseStatusListener(adapter);
 
   @Test
@@ -89,8 +89,8 @@ class CaseStatusListenerTest {
     listener.notify(exec);
 
     assertThat(captured).isNotNull();
-    assertThat(captured.kind()).isEqualTo(BackendSignalKind.END_EVENT);
-    assertThat(captured.adapterName()).isEqualTo(BpmnBackendAdapter.ADAPTER_NAME);
+    assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
+    assertThat(captured.adapterName()).isEqualTo(BpmnWorkflowAdapter.ADAPTER_NAME);
     assertThat(captured.source()).isEqualTo("approved");
   }
 
@@ -105,7 +105,7 @@ class CaseStatusListenerTest {
 
     listener.notify(exec);
 
-    assertThat(captured.kind()).isEqualTo(BackendSignalKind.END_EVENT);
+    assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
     assertThat(captured.source()).isEqualTo("resolved");
     assertThat(captured.payload()).containsEntry("value", "resolved");
   }
@@ -121,7 +121,7 @@ class CaseStatusListenerTest {
 
     listener.notify(exec);
 
-    assertThat(captured.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+    assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
     assertThat(captured.source()).isEqualTo("review");
     assertThat(captured.payload()).containsEntry("value", "in-review");
   }
@@ -136,7 +136,7 @@ class CaseStatusListenerTest {
 
     listener.notify(exec);
 
-    assertThat(captured.kind()).isEqualTo(BackendSignalKind.USER_TASK_COMPLETE);
+    assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.TASK_COMPLETED);
     assertThat(captured.source()).isEqualTo("draft");
     assertThat(captured.payload()).isEmpty();
   }
@@ -145,7 +145,7 @@ class CaseStatusListenerTest {
   void noFallbackWhenUserTaskHasParallelActiveSiblings() {
     // Story 4.4a AC5 — the legacy fallback (peek getActiveActivityIds → first non-self) is
     // GONE. A userTask without explicit <camunda:property name="status"> simply emits
-    // USER_TASK_COMPLETE; the router is the deciding party (no in-listener mutation, no engine
+    // TASK_COMPLETED; the router is the deciding party (no in-listener mutation, no engine
     // peek). Parallel-gateway non-determinism is rejected at deploy time by BpmnValidator
     // (WKS-CFG-024) on stage-scoped CaseTypes.
     UserTask userTask = mock(UserTask.class);
@@ -156,7 +156,7 @@ class CaseStatusListenerTest {
 
     listener.notify(exec);
 
-    assertThat(captured.kind()).isEqualTo(BackendSignalKind.USER_TASK_COMPLETE);
+    assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.TASK_COMPLETED);
     // The listener never queries getProcessEngineServices — verify by ensuring no interaction
     // (mock returns null which would NPE inside the legacy resolveNewStatus path).
     verify(exec, never()).getProcessEngineServices();

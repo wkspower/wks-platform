@@ -1,64 +1,64 @@
 package com.wkspower.platform.domain.service;
 
-import com.wkspower.platform.domain.port.BackendAdapter;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
-import com.wkspower.platform.domain.port.BackendSignalSubscription;
+import com.wkspower.platform.domain.port.WorkflowAdapter;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Resolves a {@link BackendAdapter} for a {@link CaseTypeRef} via DI. Architecture Decision 22 —
+ * Resolves a {@link WorkflowAdapter} for a {@link CaseTypeRef} via DI. Architecture Decision 22 —
  * Mapping Layer is the only seam between WKS primitives and any backend.
  *
  * <p>Resolution rule (Story 4.1 AC4): if any registered adapter has called {@link
- * #register(CaseTypeRef, BackendAdapter)}, return the most-recently-registered adapter; else return
+ * #register(CaseTypeRef, WorkflowAdapter)}, return the most-recently-registered adapter; else return
  * the singleton {@link NullAdapter}.
  *
- * <p>This binder is the ONLY way domain code obtains a {@link BackendAdapter} instance —
- * {@code @Autowired BackendAdapter} directly anywhere in {@code domain/} would defeat the rule.
+ * <p>This binder is the ONLY way domain code obtains a {@link WorkflowAdapter} instance —
+ * {@code @Autowired WorkflowAdapter} directly anywhere in {@code domain/} would defeat the rule.
  * Story 4.1 has zero call sites for this binder; Story 4.4 / 4.5 wire it up to call sites.
  *
- * <p>{@link #register(CaseTypeRef, BackendAdapter)} and {@link #unregister(CaseTypeRef)} are
+ * <p>{@link #register(CaseTypeRef, WorkflowAdapter)} and {@link #unregister(CaseTypeRef)} are
  * package-private — only an adapter's own {@code attach(...)} / {@code detach(...)} implementation
  * (which lives in {@code domain/service} or in an engine package that depends on this one) reaches
  * into them. Domain services only call {@link #resolve(CaseTypeRef)}.
  *
  * <p>Pure-Java by design — no Spring annotations on the class itself. Wired into the Spring context
- * via {@code infrastructure.config.BackendAdapterConfig} to honour the standing rule that {@code
+ * via {@code infrastructure.config.WorkflowAdapterConfig} to honour the standing rule that {@code
  * domain/} stays framework-free (NFR36).
  */
-public class BackendAdapterBinder {
+public class WorkflowAdapterBinder {
 
-  private final ConcurrentMap<CaseTypeRef, BackendAdapter> registry = new ConcurrentHashMap<>();
-  private final ConcurrentMap<BackendAdapter, BackendSignalSubscription> subscriptions =
+  private final ConcurrentMap<CaseTypeRef, WorkflowAdapter> registry = new ConcurrentHashMap<>();
+  private final ConcurrentMap<WorkflowAdapter, ExecutionSignalSubscription> subscriptions =
       new ConcurrentHashMap<>();
   private final NullAdapter nullAdapter;
-  private final BackendSignalHandler handler;
+  private final ExecutionSignalHandler handler;
 
-  public BackendAdapterBinder(NullAdapter nullAdapter) {
+  public WorkflowAdapterBinder(NullAdapter nullAdapter) {
     this(nullAdapter, null);
   }
 
   /**
-   * Story 4.4a constructor — wired with the production {@link BackendSignalHandler} (the {@code
-   * BackendSignalRouter}). When provided, every {@link #register(CaseTypeRef, BackendAdapter)} call
+   * Story 4.4a constructor — wired with the production {@link ExecutionSignalHandler} (the {@code
+   * ExecutionSignalRouter}). When provided, every {@link #register(CaseTypeRef, WorkflowAdapter)} call
    * ensures the adapter is subscribed to the router exactly once (single-subscriber invariant;
-   * ArchUnit restricts {@link BackendAdapter#onBackendSignal} callers to router + binder).
+   * ArchUnit restricts {@link WorkflowAdapter#onExecutionSignal} callers to router + binder).
    */
-  public BackendAdapterBinder(NullAdapter nullAdapter, BackendSignalHandler handler) {
+  public WorkflowAdapterBinder(NullAdapter nullAdapter, ExecutionSignalHandler handler) {
     this.nullAdapter = Objects.requireNonNull(nullAdapter, "nullAdapter");
     this.handler = handler;
   }
 
   /**
-   * Resolve the {@link BackendAdapter} for {@code caseType}. Returns the registered adapter or
+   * Resolve the {@link WorkflowAdapter} for {@code caseType}. Returns the registered adapter or
    * {@link NullAdapter} if none has been attached.
    */
-  public BackendAdapter resolve(CaseTypeRef caseType) {
+  public WorkflowAdapter resolve(CaseTypeRef caseType) {
     Objects.requireNonNull(caseType, "caseType");
-    BackendAdapter resolved = registry.get(caseType);
+    WorkflowAdapter resolved = registry.get(caseType);
     return resolved == null ? nullAdapter : resolved;
   }
 
@@ -72,15 +72,15 @@ public class BackendAdapterBinder {
    * domain/service/} (notably the Story 4.4 BPMN adapter in {@code engine/}) can self-register; the
    * contract is enforced by convention + code review.
    */
-  public void register(CaseTypeRef caseType, BackendAdapter adapter) {
+  public void register(CaseTypeRef caseType, WorkflowAdapter adapter) {
     Objects.requireNonNull(caseType, "caseType");
     Objects.requireNonNull(adapter, "adapter");
     registry.put(caseType, adapter);
     if (handler != null) {
       // Subscribe each distinct adapter exactly once. computeIfAbsent serialises the
-      // onBackendSignal call so the single-subscriber invariant (Story 4.3 AC6) holds even when
+      // onExecutionSignal call so the single-subscriber invariant (Story 4.3 AC6) holds even when
       // multiple CaseTypes share an adapter instance.
-      subscriptions.computeIfAbsent(adapter, a -> a.onBackendSignal(handler));
+      subscriptions.computeIfAbsent(adapter, a -> a.onExecutionSignal(handler));
     }
   }
 
@@ -98,8 +98,8 @@ public class BackendAdapterBinder {
 
   /**
    * Story 4.5 AC4 — detach the adapter registered for {@code caseType} and delegate to the
-   * adapter's own {@link BackendAdapter#detach(CaseTypeRef)} so it can mark the scope as locally
-   * detached (e.g. {@code BpmnBackendAdapter} adds the {@code caseTypeId} to its {@code
+   * adapter's own {@link WorkflowAdapter#detach(CaseTypeRef)} so it can mark the scope as locally
+   * detached (e.g. {@code BpmnWorkflowAdapter} adds the {@code caseTypeId} to its {@code
    * detachedCaseTypeIds} set so {@code emit()} drops signals for that scope).
    *
    * <p>{@link MappingRegistry} is NOT touched — in-flight cases must retain their frozen-version
@@ -110,7 +110,7 @@ public class BackendAdapterBinder {
    */
   public void detach(CaseTypeRef caseType) {
     Objects.requireNonNull(caseType, "caseType");
-    BackendAdapter adapter = registry.remove(caseType);
+    WorkflowAdapter adapter = registry.remove(caseType);
     if (adapter != null) {
       adapter.detach(caseType);
     }

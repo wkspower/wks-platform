@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Story 4.3 AC4 — runtime miss in {@code BackendSignalRouter}: an incoming {@code BackendSignal}
+ * Story 4.3 AC4 — runtime miss in {@code ExecutionSignalRouter}: an incoming {@code ExecutionSignal}
  * did not resolve to any rule in the active {@code MappingDefinition} (or the CaseInstance's pinned
  * {@code (caseTypeId, version)} is not registered, or a {@code USER_TASK_PROPERTY} signal attempted
  * to drive a stage transition). Carries {@link ErrorCode#WKS_MAP_404}.

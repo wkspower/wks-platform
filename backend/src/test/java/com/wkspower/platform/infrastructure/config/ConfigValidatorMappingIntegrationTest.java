@@ -42,7 +42,7 @@ class ConfigValidatorMappingIntegrationTest {
         id: claim
         displayName: Claim
         version: 1
-        workflow:
+        workflows:
           bpmn: claim.bpmn
         fields:
           - id: applicant
@@ -60,7 +60,7 @@ class ConfigValidatorMappingIntegrationTest {
           - type: bpmn
             file: x.bpmn
             scope: case
-            map:
+            routing:
               userTasks:
                 ghost-task: { wksTask: "Ghost" }
         """;

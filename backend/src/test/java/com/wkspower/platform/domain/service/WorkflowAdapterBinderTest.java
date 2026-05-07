@@ -3,9 +3,9 @@ package com.wkspower.platform.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.BackendAdapter;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
-import com.wkspower.platform.domain.port.BackendSignalSubscription;
+import com.wkspower.platform.domain.port.WorkflowAdapter;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import java.util.concurrent.CountDownLatch;
@@ -14,11 +14,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-/** Story 4.1 Task 5 — direct unit coverage of {@link BackendAdapterBinder} per AC4. */
-class BackendAdapterBinderTest {
+/** Story 4.1 Task 5 — direct unit coverage of {@link WorkflowAdapterBinder} per AC4. */
+class WorkflowAdapterBinderTest {
 
   private final NullAdapter nullAdapter = new NullAdapter();
-  private final BackendAdapterBinder binder = new BackendAdapterBinder(nullAdapter);
+  private final WorkflowAdapterBinder binder = new WorkflowAdapterBinder(nullAdapter);
 
   @Test
   void resolve_returnsNullAdapter_whenNothingRegistered() {
@@ -28,7 +28,7 @@ class BackendAdapterBinderTest {
   @Test
   void resolve_returnsRegisteredAdapter() {
     CaseTypeRef ref = new CaseTypeRef("ct-1", "1.0.0");
-    BackendAdapter custom = new RecordingAdapter();
+    WorkflowAdapter custom = new RecordingAdapter();
 
     binder.register(ref, custom);
 
@@ -38,8 +38,8 @@ class BackendAdapterBinderTest {
   @Test
   void resolve_returnsMostRecentlyRegisteredAdapter() {
     CaseTypeRef ref = new CaseTypeRef("ct-1", "1.0.0");
-    BackendAdapter first = new RecordingAdapter();
-    BackendAdapter second = new RecordingAdapter();
+    WorkflowAdapter first = new RecordingAdapter();
+    WorkflowAdapter second = new RecordingAdapter();
 
     binder.register(ref, first);
     binder.register(ref, second);
@@ -66,8 +66,8 @@ class BackendAdapterBinderTest {
   @Test
   void concurrentRegisterFromTwoThreads_lastWriteWinsAndDoesNotThrow() throws Exception {
     CaseTypeRef ref = new CaseTypeRef("ct-1", "1.0.0");
-    BackendAdapter a = new RecordingAdapter();
-    BackendAdapter b = new RecordingAdapter();
+    WorkflowAdapter a = new RecordingAdapter();
+    WorkflowAdapter b = new RecordingAdapter();
     CountDownLatch start = new CountDownLatch(1);
     ExecutorService es = Executors.newFixedThreadPool(2);
 
@@ -95,12 +95,12 @@ class BackendAdapterBinderTest {
       es.shutdownNow();
     }
 
-    BackendAdapter resolved = binder.resolve(ref);
+    WorkflowAdapter resolved = binder.resolve(ref);
     assertThat(resolved).isIn(a, b);
   }
 
   /** Bare-bones adapter for binder tests — no signal/recording behaviour needed here. */
-  private static final class RecordingAdapter implements BackendAdapter {
+  private static final class RecordingAdapter implements WorkflowAdapter {
     @Override
     public void attach(CaseTypeRef caseType, AttachmentScope scope) {}
 
@@ -108,7 +108,7 @@ class BackendAdapterBinderTest {
     public void detach(CaseTypeRef caseType) {}
 
     @Override
-    public BackendSignalSubscription onBackendSignal(BackendSignalHandler handler) {
+    public ExecutionSignalSubscription onExecutionSignal(ExecutionSignalHandler handler) {
       return () -> {};
     }
 
