@@ -129,4 +129,23 @@ class FeatureFlagRegistryTest {
     Set<String> tiers = WksFeature.AUDIT_CHECKSUMS.defaultTiers();
     assertThat(tiers).containsExactlyInAnyOrder("team", "enterprise", "demo");
   }
+
+  // -------------------------------------------------------------------------
+  // Cross-consistency: WksFeature.defaultTiers() must match TierBundle.includedFeatures()
+  // -------------------------------------------------------------------------
+
+  @Test
+  void wksFeatureDefaultTiers_consistentWithTierBundleIncludedFeatures() {
+    for (WksFeature feature : WksFeature.values()) {
+      for (String tierName : feature.defaultTiers()) {
+        TierBundle bundle = TierBundle.forTier(tierName);
+        assertThat(bundle)
+            .as("tier %s referenced by %s must resolve to a known TierBundle", tierName, feature)
+            .isNotEqualTo(TierBundle.OSS);
+        assertThat(bundle.includedFeatures())
+            .as("TierBundle.%s must include feature %s", tierName, feature.key())
+            .contains(feature.key());
+      }
+    }
+  }
 }

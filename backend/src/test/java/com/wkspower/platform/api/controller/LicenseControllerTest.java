@@ -169,7 +169,10 @@ class LicenseControllerTest {
   @Test
   void featuresEndpoint_returnsAllRegisteredFeatures() throws Exception {
     when(licenseService.getTier()).thenReturn("enterprise");
-    // Stub isFeatureEnabled(WksFeature) — called via default method → isFeatureEnabled(String)
+    // Stub both overloads: the controller calls isFeatureEnabled(WksFeature) which is a default
+    // interface method. Mockito intercepts default methods directly on the mock (it does NOT
+    // delegate to the real implementation), so we must stub the WksFeature overload explicitly.
+    when(licenseService.isFeatureEnabled(any(WksFeature.class))).thenReturn(true);
     when(licenseService.isFeatureEnabled(any(String.class))).thenReturn(true);
 
     mockMvc
@@ -180,7 +183,7 @@ class LicenseControllerTest {
         .andExpect(jsonPath("$.data.features[0].key").isNotEmpty())
         .andExpect(jsonPath("$.data.features[0].description").isNotEmpty())
         .andExpect(jsonPath("$.data.features[0].bundleTiers").isArray())
-        .andExpect(jsonPath("$.data.features[0].enabled").isBoolean());
+        .andExpect(jsonPath("$.data.features[0].enabled").value(true));
   }
 
   @Test
