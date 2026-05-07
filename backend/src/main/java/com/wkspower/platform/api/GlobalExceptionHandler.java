@@ -7,6 +7,7 @@ import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
 import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksConflictException;
+import com.wkspower.platform.domain.exception.WksDocumentException;
 import com.wkspower.platform.domain.exception.WksException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksStageException;
@@ -298,6 +299,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       log.warn("Malformed JSON body: {}", CODE_JSON);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.error(ErrorPayload.of(CODE_JSON, "Malformed JSON body")));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  /**
+   * Story 14.2 — document upload/storage exceptions. Maps WKS-DOC-001..003 → 422, WKS-DOC-004 →
+   * 404, WKS-DOC-005 → 502.
+   */
+  @ExceptionHandler(WksDocumentException.class)
+  public ResponseEntity<ApiResponse<Void>> handleDocument(WksDocumentException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      HttpStatus status =
+          switch (ex.getCode()) {
+            case "WKS-DOC-001", "WKS-DOC-002", "WKS-DOC-003" -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case "WKS-DOC-004" -> HttpStatus.NOT_FOUND;
+            case "WKS-DOC-005" -> HttpStatus.BAD_GATEWAY;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+          };
+      if (status == HttpStatus.BAD_GATEWAY) {
+        log.error("Storage backend error: {}", ex.getCode(), ex);
+      } else {
+        log.warn("Document validation/access error: {}", ex.getCode());
+      }
+      return ResponseEntity.status(status)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
     } finally {
       MDC.remove(MDC_KEY);
     }

@@ -11,7 +11,7 @@ import { t } from '@/i18n';
 import { ActivityTabPlaceholder } from './ActivityTabPlaceholder';
 import { CaseActionBar } from './CaseActionBar';
 import { CaseBreadcrumbs } from './CaseBreadcrumbs';
-import { DocumentsTabPlaceholder } from './DocumentsTabPlaceholder';
+import { DocumentsTab } from './DocumentsTab';
 import { PropertiesTab } from './PropertiesTab';
 import { StageTimeline } from './StageTimeline';
 import { StatusBadge } from './StatusBadge';
@@ -243,7 +243,7 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
             <PropertiesTab caseDto={caseDto} caseTypeView={caseDto.caseType} />
           </TabsContent>
           <TabsContent value="documents">
-            <DocumentsTabPlaceholder />
+            <DocumentsTab caseId={caseId} />
           </TabsContent>
         </div>
       </Tabs>

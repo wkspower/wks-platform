@@ -14,9 +14,10 @@ spring:
   servlet:
     multipart:
       # Story 2.2 admin /api/admin/deploy: 1 MB per part, 2 MB per request (caseType + bpmn).
+      # Story 14.2 document upload raises the limit to 26 MB (25 MB document + headers overhead).
       # Spring throws MaxUploadSizeExceededException → mapped to WKS-API-413 by the handler.
-      max-file-size: 1MB
-      max-request-size: 2MB
+      max-file-size: 26MB
+      max-request-size: 26MB
 
   # H2 FILE mode (never in-memory — data must survive restart).
   # See ./data/ volume declaration in docker-compose.yml.
@@ -92,6 +93,14 @@ wks:
   # this path. Unset (default) → 204 No Content; the browser ignores the empty link gracefully.
   theme:
     css-path: ${WKS_THEME_CSS_PATH:}
+  # Story 14.2 — Document storage configuration.
+  documents:
+    max-size-mb: 25
+    local-store-path: ./data/documents
+    bucket: wks-documents
+  storage:
+    endpoint: ""   # empty → use LocalDocumentStore; set to MinIO URL for production
+    key: ""
 
 logging:
   level:

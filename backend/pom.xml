@@ -159,6 +159,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- MinIO Java SDK — S3-compatible object storage for document upload/download (Story 14.2). -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.9</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

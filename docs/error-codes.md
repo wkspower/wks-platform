@@ -36,6 +36,7 @@ The enum currently uses seven prefixes:
 | `WKS-VER` | 001–099 | CaseType Version Registry (Story 3.4 / Decision 20) |
 | `WKS-RTM` | 409, 500 | Runtime conflict / last-resort |
 | `WKS-LIC` | 001–002 (Story 7.1); 003–099 reserved for Stories 7.2–7.7 | License verification + EE feature gating |
+| `WKS-DOC` | 001–005 (Story 14.2); 006–099 reserved | Document upload validation + storage runtime errors |
 
 ---
 
@@ -212,6 +213,20 @@ hard-fails on license problems per AR-D24 (license problems never block boot).
 | --- | --- | --- | --- |
 | `WKS-LIC-001` | INFO | License file path is configured but the file is missing or unreadable. Platform operates in OSS mode. | `infrastructure/license/LicenseServiceImpl.java` (load), `infrastructure/config/LicenseSeamAnnouncer.java` |
 | `WKS-LIC-002` | WARN | License JWT signature is invalid, JWT is malformed, or required claims (`tier`, `features`) are absent. Platform operates in degraded state (all features disabled). | `infrastructure/license/LicenseServiceImpl.java` (load) |
+
+---
+
+## WKS-DOC — Document upload validation + storage runtime errors (Story 14.2)
+
+Band: `WKS-DOC-001..099`. Codes 001–005 allocated by Story 14.2; 006–099 reserved.
+
+| Code | HTTP | Meaning | Thrower(s) |
+| --- | --- | --- | --- |
+| `WKS-DOC-001` | 422 | File size exceeds the configured maximum (`wks.documents.max-size-mb`, default 25 MB). | `domain/service/DocumentService.java` |
+| `WKS-DOC-002` | 422 | Content type is not in the upload allowlist (PDF, images, Office, CSV, plain text). | `domain/service/DocumentService.java` |
+| `WKS-DOC-003` | 422 | Filename rejected — path traversal characters (`../`, directory separators) or executable extension (`.exe`, `.sh`, `.bat`, `.cmd`, `.ps1`, `.js`, `.py`). | `domain/service/DocumentService.java` |
+| `WKS-DOC-004` | 404 | Document not found — `documentId` references no row in `case_documents`. | `api/controller/DocumentController.java` |
+| `WKS-DOC-005` | 502 | Storage backend error — file store/retrieve/delete failed (MinIO unreachable, file missing from local store). | `infrastructure/storage/LocalDocumentStore.java`, `infrastructure/storage/MinioDocumentStore.java`, `api/controller/DocumentController.java` |
 
 ---
 

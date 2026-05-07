@@ -57,10 +57,13 @@ describe('CaseDetailPanel tabs', () => {
     const properties = await screen.findByRole('tab', { name: 'Properties' });
     await waitFor(() => expect(properties).toHaveAttribute('data-state', 'active'));
 
+    server.use(
+      http.get(`/api/cases/${ID}/documents`, () => HttpResponse.json({ data: [], meta: {} })),
+    );
     await user.click(screen.getByRole('tab', { name: 'Documents' }));
     const documents = screen.getByRole('tab', { name: 'Documents' });
     await waitFor(() => expect(documents).toHaveAttribute('data-state', 'active'));
-    expect(screen.getByTestId('documents-placeholder')).toBeInTheDocument();
+    expect(screen.getByTestId('documents-tab')).toBeInTheDocument();
   });
 
   it('renders the correct panel per tab', async () => {
