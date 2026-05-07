@@ -16,11 +16,24 @@ public interface LicenseService {
 
   /**
    * Returns {@code true} if the verified license JWT declares {@code featureKey} in its {@code
-   * features} claim. Returns {@code false} when no valid license is loaded (fail-closed).
+   * features} claim, or if the active tier bundle includes the key. Returns {@code false} when no
+   * valid license is loaded (fail-closed). Logs WARN and returns {@code false} for keys not
+   * registered in {@link WksFeature}.
    *
-   * @param featureKey the feature identifier, e.g. {@code "advanced-reporting"}
+   * @param featureKey the feature identifier, e.g. {@code "auth.sso"}
    */
   boolean isFeatureEnabled(String featureKey);
+
+  /**
+   * Type-safe overload of {@link #isFeatureEnabled(String)}. Preferred for all in-codebase callers
+   * — ensures gating decisions reference a registered feature key (compile-time safety via the
+   * {@link WksFeature} enum).
+   *
+   * @param feature the registered feature to check
+   */
+  default boolean isFeatureEnabled(WksFeature feature) {
+    return isFeatureEnabled(feature.key());
+  }
 
   /**
    * Returns the tier declared in the JWT {@code tier} claim (e.g. {@code "enterprise"}, {@code
