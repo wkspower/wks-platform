@@ -171,14 +171,14 @@ curl -sS -b /tmp/wks-cookies.txt -X POST \
 
 The case is now in the `resolved` terminal status. Attempting another transition returns a `WKS-STG-011` error — terminal status reached.
 
-## Verify the audit trail
+## Verify the case state
 
 ```bash
 curl -sS -b /tmp/wks-cookies.txt \
-  http://localhost:8080/api/cases/$CASE_ID/audit | jq
+  http://localhost:8080/api/cases/$CASE_ID | jq
 ```
 
-You'll see the full event sequence: `CaseCreated` → `StageAdvanced` (triage → resolution) → `CaseStatusChanged` (in-progress → resolved). Every state change records who triggered it and when.
+You'll see the current status, active stage, and available transitions. The response reflects every state change that has been applied — status, current stage, and stage progression are all first-class fields on the case.
 
 ## Iterate on the YAML
 

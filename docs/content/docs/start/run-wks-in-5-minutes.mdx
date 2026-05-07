@@ -125,14 +125,14 @@ Expected response (HTTP 200):
 }
 ```
 
-## Step 6 — Inspect the audit trail
+## Step 6 — Inspect the case state
 
 ```bash
 curl -sS -b /tmp/wks-cookies.txt \
-  http://localhost:8080/api/cases/$CASE_ID/audit | jq
+  http://localhost:8080/api/cases/$CASE_ID | jq
 ```
 
-You'll see a `CaseCreated` event followed by a `CaseStatusChanged` event. Every state change is appended immutably — nothing in the audit trail is editable or deletable.
+You'll see the current status, active stage, and available transitions — all first-class fields on the case response.
 
 ## What you just built
 
