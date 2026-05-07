@@ -75,10 +75,22 @@ export interface StageDefinitionView {
 }
 
 /**
+ * Story 5.3 — one section in a {@code dataModel: sectioned} form definition. Groups a set of
+ * fields under a labelled expandable panel rendered by {@code MultiSectionFormRenderer}.
+ */
+export interface FormSectionView {
+  id: string;
+  label: string;
+  fields: FieldDefinition[];
+}
+
+/**
  * Story 5.2 — wire-shape projection of one form definition from the case-type YAML {@code forms[]}
  * block. Carries the three-axis vocabulary and the form's field list so the frontend renderer has
  * everything it needs from the {@code GET /api/case-types/{id}} response without a second
  * round-trip.
+ *
+ * Story 5.3 — adds {@code sections?} for {@code dataModel: sectioned} forms.
  */
 export interface FormDefinitionView {
   id: string;
@@ -86,6 +98,8 @@ export interface FormDefinitionView {
   dataModel: string;
   rendering: string;
   fields: FieldDefinition[];
+  /** Story 5.3 — sections declared for {@code dataModel: sectioned} forms. */
+  sections?: FormSectionView[];
 }
 
 export interface CaseTypeView {

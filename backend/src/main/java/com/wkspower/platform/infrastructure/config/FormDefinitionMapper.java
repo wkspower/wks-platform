@@ -4,6 +4,7 @@ import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldOption;
 import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.config.model.FormDefinition;
+import com.wkspower.platform.domain.config.model.FormSection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,25 @@ public final class FormDefinitionMapper {
    */
   public static FormDefinition toDomain(RawFormDefinition raw) {
     List<FieldDefinition> fields = mapFields(raw.fields());
-    return new FormDefinition(raw.id(), raw.topology(), raw.dataModel(), raw.rendering(), fields);
+    List<FormSection> sections = mapSections(raw.sections());
+    return new FormDefinition(
+        raw.id(), raw.topology(), raw.dataModel(), raw.rendering(), fields, sections);
+  }
+
+  /**
+   * Story 5.3 — map raw section entries to domain {@link FormSection} records. Delegates to the
+   * existing {@link #mapFields} helper for each section's field list.
+   */
+  private static List<FormSection> mapSections(List<RawFormSection> rawSections) {
+    if (rawSections == null || rawSections.isEmpty()) return List.of();
+    List<FormSection> out = new ArrayList<>(rawSections.size());
+    for (RawFormSection s : rawSections) {
+      if (s == null || s.id() == null || s.id().isBlank()) continue;
+      String label = s.label() != null ? s.label() : s.id();
+      List<FieldDefinition> sectionFields = mapFields(s.fields());
+      out.add(new FormSection(s.id(), label, sectionFields));
+    }
+    return List.copyOf(out);
   }
 
   // ---- private helpers -----------------------------------------------------------------

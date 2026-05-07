@@ -26,4 +26,24 @@ public record RawFormDefinition(
     @JsonProperty("topology") String topology,
     @JsonProperty("dataModel") String dataModel,
     @JsonProperty("rendering") String rendering,
-    @JsonProperty("fields") List<Map<String, Object>> fields) {}
+    @JsonProperty("fields") List<Map<String, Object>> fields,
+    /**
+     * Story 5.3 — sections declared for {@code dataModel: sectioned} forms. Absent (null) for
+     * monolithic forms; validated by {@link FormValidator} when {@code dataModel} is {@code
+     * sectioned}.
+     */
+    @JsonProperty("sections") List<RawFormSection> sections) {
+
+  /**
+   * Backward-compat constructor for callers (mostly tests) that pre-date Story 5.3's {@code
+   * sections} slot. Defaults {@code sections} to {@code null} — monolithic forms have no sections.
+   */
+  public RawFormDefinition(
+      String id,
+      String topology,
+      String dataModel,
+      String rendering,
+      List<Map<String, Object>> fields) {
+    this(id, topology, dataModel, rendering, fields, null);
+  }
+}

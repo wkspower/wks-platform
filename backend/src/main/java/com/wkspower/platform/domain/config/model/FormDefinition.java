@@ -31,9 +31,29 @@ public record FormDefinition(
      * Fields rendered by this form. May be a subset of the case-type's overall fields when the form
      * targets specific field ids.
      */
-    List<FieldDefinition> fields) {
+    List<FieldDefinition> fields,
+    /**
+     * Story 5.3 — sections declared for {@code dataModel: sectioned} forms. Empty for monolithic
+     * forms.
+     */
+    List<FormSection> sections) {
 
   public FormDefinition {
     fields = fields == null ? List.of() : List.copyOf(fields);
+    sections = sections == null ? List.of() : List.copyOf(sections);
+  }
+
+  /**
+   * Backward-compat constructor for callers that pre-date Story 5.3's {@code sections} slot.
+   * Defaults {@code sections} to {@link List#of()}, preserving the contract that monolithic forms
+   * never have sections.
+   */
+  public FormDefinition(
+      String id,
+      String topology,
+      String dataModel,
+      String rendering,
+      List<FieldDefinition> fields) {
+    this(id, topology, dataModel, rendering, fields, List.of());
   }
 }

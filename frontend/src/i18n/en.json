@@ -202,5 +202,10 @@
   "form.loading": "Loading form…",
   "form.error.caseLoad": "Could not load case.",
   "form.error.notFound": "Form not found on this case type.",
+  "form.error.backToCase": "Back to case",
+  "form.sections.progress": "{complete} of {total} sections complete",
+  "form.sections.status.complete": "✓",
+  "form.sections.status.error": "✗",
+  "form.sections.status.incomplete": "⚠",
   "form.submit": "Submit"
 }
