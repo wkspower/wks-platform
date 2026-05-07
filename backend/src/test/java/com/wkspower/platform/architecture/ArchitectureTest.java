@@ -123,16 +123,21 @@ class ArchitectureTest {
   }
 
   @Test
-  void onlySecurityImportsJjwt() {
+  void onlySecurityAndLicenseImportJjwt() {
+    // Story 7.1 extends the allowed set to include ..license.. — LicenseServiceImpl verifies
+    // Ed25519-signed license JWTs using the same JJWT library. The license subsystem is the
+    // only other consumer; all future JWT work must land in security/ or license/ only.
     noClasses()
         .that()
         .resideOutsideOfPackage("..security..")
+        .and()
+        .resideOutsideOfPackage("..license..")
         .should()
         .dependOnClassesThat()
         .resideInAPackage("io.jsonwebtoken..")
         .because(
-            "JJWT is a security-package implementation detail. Limiting imports to security/ "
-                + "makes future JWT library upgrades a local change.")
+            "JJWT is a security/license infrastructure detail. Limiting imports to security/ and "
+                + "license/ makes future JWT library upgrades a local change.")
         .check(CLASSES);
   }
 

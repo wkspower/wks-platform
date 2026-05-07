@@ -30,10 +30,12 @@ The enum currently uses seven prefixes:
 | --- | --- | --- |
 | `WKS-API` | 001–005, 401, 403, 404, 413, plus security/bootstrap 050–055 (literals) | Transport / request-shape / auth + production-bootstrap fail-closed |
 | `WKS-CFG` | 000–099 | CaseType + BPMN deploy-time validation aggregate |
+| `WKS-FORM` | 001–099 | Form Definition Schema validation (Story 5.1+). First 4-letter prefix band — `ErrorCodeTest` pattern updated to accept `[A-Z]{3,4}` prefixes. |
 | `WKS-MAP` | 001–009, 404, 405 | Mapping Layer validation (Story 4.2 + 4.3.1) + runtime miss (Story 4.3 + 4.3.1) |
 | `WKS-STG` | 001–011, 099 | Stage lifecycle runtime + stage-scoped status sets |
 | `WKS-VER` | 001–099 | CaseType Version Registry (Story 3.4 / Decision 20) |
 | `WKS-RTM` | 409, 500 | Runtime conflict / last-resort |
+| `WKS-LIC` | 001–002 (Story 7.1); 003–099 reserved for Stories 7.2–7.7 | License verification + EE feature gating |
 
 ---
 
@@ -144,6 +146,16 @@ Epic-namespaced sibling band. Codes 001–006 are emitted by `MappingValidator` 
 
 ---
 
+## WKS-FORM — Form Definition Schema validation (Story 5.1+)
+
+Band: `WKS-FORM-001..099`. Codes 002+ are **reserved** for Stories 5.2–5.8 — do NOT mint speculatively. This is the first 4-letter prefix band; `ErrorCodeTest.wireStringsFollowWksHyphenFormat` was updated to accept `[A-Z]{3,4}` prefixes (Story 5.1 change).
+
+| Code | Meaning | Thrower(s) |
+| --- | --- | --- |
+| `WKS-FORM-001` | `topology: parallel` (or any non-`single` topology value) is a Phase-1 capability — rejected in Phase 0. Message: `"topology: parallel is a Phase-1 capability — use topology: single"`. | `infrastructure/config/FormValidator.java` |
+
+---
+
 ## WKS-STG — Stage lifecycle runtime + stage-scoped status sets
 
 Band: `WKS-STG-001..099`. Codes 001–004 are Story 3.1 lifecycle errors. Codes 005, 006, 008–011 are Story 3.6 stage-scoped status set codes (deploy-time + transition-time). Code 007 is Story 3.7 (live append duplicate). Code 009 is Story 3.7 (mutate-class rejection); Story 3.8 will reuse it under its own envelope. Codes 012, 013 are Story 3.7 admin-CRUD lookup misses.
@@ -182,6 +194,21 @@ Band: `WKS-VER-001..099` reserved for version-registry-related errors. Future st
 | --- | --- | --- |
 | `WKS-RTM-409` | Optimistic-locking conflict — row was modified between read and write. | `api/GlobalExceptionHandler.java`, `domain/exception/WksConflictException.java` |
 | `WKS-RTM-500` | Uncaught exception — last resort. | `api/GlobalExceptionHandler.java`, `domain/exception/WksWorkflowEngineException.java` |
+
+---
+
+---
+
+## WKS-LIC — License verification + EE feature gating (Story 7.1)
+
+Band: `WKS-LIC-001..099`. Codes 001–002 are allocated by Story 7.1; 003–099 reserved for Stories
+7.2–7.7. These codes describe operational state, not HTTP errors to callers — the platform never
+hard-fails on license problems per AR-D24 (license problems never block boot).
+
+| Code | Level | Meaning | Thrower(s) |
+| --- | --- | --- | --- |
+| `WKS-LIC-001` | INFO | License file path is configured but the file is missing or unreadable. Platform operates in OSS mode. | `infrastructure/license/LicenseServiceImpl.java` (load), `infrastructure/config/LicenseSeamAnnouncer.java` |
+| `WKS-LIC-002` | WARN | License JWT signature is invalid, JWT is malformed, or required claims (`tier`, `features`) are absent. Platform operates in degraded state (all features disabled). | `infrastructure/license/LicenseServiceImpl.java` (load) |
 
 ---
 

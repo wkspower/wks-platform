@@ -338,6 +338,17 @@ public enum ErrorCode {
    */
   WKS_VER_001("WKS-VER-001"),
 
+  // 422 — Form Definition Schema validation (Story 5.1). Band: WKS-FORM-001..099.
+  // Codes 002+ are RESERVED for Stories 5.2–5.8 — do NOT mint speculatively.
+  /**
+   * Story 5.1 AC1 — {@code topology: parallel} (or any non-{@code single} topology value) is a
+   * Phase-1 capability and is rejected in Phase 0. Error message: {@code "topology: parallel is a
+   * Phase-1 capability — use topology: single"}. The wire string is stable; future stories that
+   * support additional topologies must not reuse this code for a different meaning per {@code
+   * feedback_error_codes_are_wire_contract.md}.
+   */
+  WKS_FORM_001("WKS-FORM-001"),
+
   // 409 — runtime conflict.
   /**
    * Optimistic-locking conflict on update — the row was modified by another transaction between
@@ -348,7 +359,23 @@ public enum ErrorCode {
 
   // 500.
   /** Uncaught exception — last resort. */
-  WKS_RTM_500("WKS-RTM-500");
+  WKS_RTM_500("WKS-RTM-500"),
+
+  // License band (Story 7.1). WKS-LIC-NNN is a new prefix. Codes are INFO/WARN-level
+  // operational states, not HTTP errors to callers — the platform never hard-fails on license
+  // problems (AR-D24). Band: WKS-LIC-001..099 (only 001 and 002 allocated in 7.1; future stories
+  // 7.2..7.7 draw from this band). Per feedback_error_codes_are_wire_contract.md: never reuse.
+  /**
+   * License file path is configured but the file is missing or unreadable. Platform boots in OSS
+   * mode (INFO-level; not an exception to callers). Story 7.1 AC4.
+   */
+  WKS_LIC_001("WKS-LIC-001"),
+  /**
+   * License JWT signature is invalid, JWT is malformed, or the {@code tier} / {@code features}
+   * claims are absent. Platform boots in degraded state (WARN-level; not an exception to callers).
+   * Story 7.1 AC3.
+   */
+  WKS_LIC_002("WKS-LIC-002");
 
   private final String wire;
 

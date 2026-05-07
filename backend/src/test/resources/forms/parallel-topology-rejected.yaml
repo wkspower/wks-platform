@@ -1,0 +1,9 @@
+id: parallel-form-rejected
+topology: parallel
+dataModel: sectioned
+rendering: multi-section
+fields:
+  - id: taskAssignee
+    type: text
+    label: "Task Assignee"
+    required: true
