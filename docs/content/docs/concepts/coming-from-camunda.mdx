@@ -24,10 +24,10 @@ This is the inversion that changes how you structure your solutions.
 | BPMN lane | _Nothing directly_ | WKS uses **roles** (declared on the case type) and **stage-scoped ownership** instead. |
 | BPMN sub-process | **Stage** (partial) | WKS stages are first-class domain entities with their own lifecycle, status sets, and attached processes. Not a BPMN construct. |
 | Task / UserTask | **AdHocTask** (partial) | WKS ad-hoc tasks are engine-independent. They exist whether a BPMN is attached or not. Tasks backed by BPMN userTasks surface through the Mapping Layer. |
-| Execution listener | **BackendSignal** | BPMN execution listeners emit signals that route through the Mapping Layer to drive WKS stage and status transitions. |
-| Task listener (`complete`) | **BackendSignal (status)** | A `camunda:property name="status"` on a userTask emits a status transition signal on task completion. Restricted to in-stage status changes. |
-| `endEvent` | **BackendSignal (stage transition)** | A terminal `endEvent` or named `signal` event emits a stage transition signal. Takes precedence over userTask status properties. |
-| `sequenceFlow` condition | **Mapping Layer rule** | Routing logic lives in the `map:` block of the attachment YAML, not as ad-hoc Groovy on the flow. |
+| Execution listener | **ExecutionSignal** | BPMN execution listeners emit signals that route through the Mapping Layer to drive WKS stage and status transitions. |
+| Task listener (`complete`) | **ExecutionSignal (status)** | A `camunda:property name="status"` on a userTask emits a status transition signal on task completion. Restricted to in-stage status changes. |
+| `endEvent` | **ExecutionSignal (stage transition)** | A terminal `endEvent` or named `signal` event emits a stage transition signal. Takes precedence over userTask status properties. |
+| `sequenceFlow` condition | **Mapping Layer rule** | Routing logic lives in the `routing:` block of the attachment YAML, not as ad-hoc Groovy on the flow. |
 | External task | **AttachedProcess** (via Mapping Layer) | WKS routes signals from execution backends through the Mapping Layer. The backend type is replaceable without changing the case type. |
 | Incident | runtime error (WKS-RTM-xxx) | Runtime errors surface as structured error codes in the audit trail. |
 
@@ -106,7 +106,7 @@ The mapping is similar for Bonita and ProcessMaker users:
 
 - Bonita **Case** → WKS **Case** (direct noun mapping)
 - Bonita **Human task** → WKS **AdHocTask** (but engine-independent in WKS)
-- Bonita **Connector** → WKS **BackendSignal** via Mapping Layer
+- Bonita **Connector** → WKS **ExecutionSignal** via Mapping Layer
 - ProcessMaker **Request** → WKS **Case**
 - ProcessMaker **Process** → WKS **CaseType** (with optional attached process)
 - ProcessMaker **Status** → WKS **Status** (scoped to the current stage in WKS, not case-global)

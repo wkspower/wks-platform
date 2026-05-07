@@ -27,7 +27,7 @@ import java.util.UUID;
  * {@link com.wkspower.platform.domain.service.WksStageAdvancer#advance} so existing call sites do
  * not break — that migration is part of 4.4.
  *
- * <p>The interface is {@code sealed} with three permitted records — adding a fourth source kind
+ * <p>The interface is {@code sealed} with four permitted records — adding a fifth source kind
  * requires editing this file (reviewer-visible surface change), matching the rigour of {@code
  * feedback_error_codes_are_wire_contract.md} for load-bearing wire shapes.
  */

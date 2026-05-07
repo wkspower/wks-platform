@@ -507,7 +507,7 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
         .log("backend signal unmapped: {}", reason);
     // Story 4.3.1 AC6 — un-spoofable miss-sentinel via AuditSource.ExecutionUnmapped. An adapter
     // named "unmapped" cannot collide with the miss audit string because the sub-record renders
-    // distinctly as backend(unmapped:<originAdapter>).
+    // distinctly as execution(unmapped:<originAdapter>).
     publish(
         signal,
         caseRow,

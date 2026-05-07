@@ -10,8 +10,8 @@ import java.util.UUID;
 /**
  * Story 4.3 AC5 / AC7 — domain event emitted by {@code ExecutionSignalRouter} for every {@code
  * ExecutionSignal} it processes (success and miss alike). Carries the typed {@link AuditSource} —
- * {@code source.toString()} renders to {@code "backend(<adapterName>)"} on success and {@code
- * "backend(unmapped)"} on a {@code WKS-MAP-404} miss (FR8 source attribution).
+ * {@code source.toString()} renders to {@code "execution(<adapterName>)"} on success and {@code
+ * "execution(unmapped:<adapterName>)"} on a {@code WKS-MAP-404} miss (FR8 source attribution).
  *
  * <p>Publication discipline: published via {@code EventPublisher.publishAfterCommit(...)} so audit
  * observers see the post-commit state and never observe a phantom row. This is the audit-row seam
