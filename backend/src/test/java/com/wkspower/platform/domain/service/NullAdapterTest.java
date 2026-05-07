@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.BackendSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
@@ -51,11 +51,11 @@ class NullAdapterTest {
   }
 
   @Test
-  void onBackendSignal_neverInvokesHandler() {
+  void onExecutionSignal_neverInvokesHandler() {
     AtomicInteger invocations = new AtomicInteger(0);
 
-    BackendSignalSubscription sub =
-        adapter.onBackendSignal(signal -> invocations.incrementAndGet());
+    ExecutionSignalSubscription sub =
+        adapter.onExecutionSignal(signal -> invocations.incrementAndGet());
 
     // No way to push a signal through NullAdapter — verify the handler was registered without
     // invocation, then close. The adapter emits no signals, ever.
@@ -66,7 +66,7 @@ class NullAdapterTest {
 
   @Test
   void closingSubscription_isIdempotent() {
-    BackendSignalSubscription sub = adapter.onBackendSignal(s -> {});
+    ExecutionSignalSubscription sub = adapter.onExecutionSignal(s -> {});
     sub.close();
     assertThatCode(sub::close).doesNotThrowAnyException();
   }

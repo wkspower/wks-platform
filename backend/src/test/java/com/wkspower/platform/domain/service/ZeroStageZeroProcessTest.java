@@ -18,13 +18,13 @@ import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.model.Stage;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.WorkflowEngine;
@@ -392,11 +392,11 @@ class ZeroStageZeroProcessTest {
    * Story 4.4b AC1/AC2 — NoopSignalHandler: records signal calls so assertions can verify the
    * router is NOT invoked for zero-process transitions.
    */
-  private static final class NoopSignalHandler implements BackendSignalHandler {
-    final List<BackendSignal> signals = new ArrayList<>();
+  private static final class NoopSignalHandler implements ExecutionSignalHandler {
+    final List<ExecutionSignal> signals = new ArrayList<>();
 
     @Override
-    public void onSignal(BackendSignal signal) {
+    public void onSignal(ExecutionSignal signal) {
       signals.add(signal);
     }
   }

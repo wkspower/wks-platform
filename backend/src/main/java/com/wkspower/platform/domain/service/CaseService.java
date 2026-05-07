@@ -22,9 +22,6 @@ import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
-import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
@@ -34,6 +31,9 @@ import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import java.time.Instant;
@@ -71,7 +71,7 @@ public class CaseService {
   private final WksStageAdvancer stageAdvancer;
   private final CaseTypeVersionRegistry versionRegistry;
   // Story 4.4b AC1 — router for BPMN-attached manual transitions.
-  private final BackendSignalHandler signalRouter;
+  private final ExecutionSignalHandler signalRouter;
   // Story 4.4b AC1 — direct status updater for zero-process (no-BPMN) transitions.
   private final CaseStatusUpdater caseStatusUpdater;
 
@@ -85,7 +85,7 @@ public class CaseService {
       Clock clock,
       WksStageAdvancer stageAdvancer,
       CaseTypeVersionRegistry versionRegistry,
-      BackendSignalHandler signalRouter,
+      ExecutionSignalHandler signalRouter,
       CaseStatusUpdater caseStatusUpdater) {
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
@@ -253,8 +253,8 @@ public class CaseService {
    *       {@code null}). {@link CaseStatusUpdater} mutates status directly — no engine, no router
    *       mapping lookup.
    *   <li><b>BPMN path</b>: case has a {@code processInstanceId}. Emits a {@link
-   *       BackendSignal}(kind={@code USER_TASK_STATUS}, statusId={@code action}) to {@link
-   *       BackendSignalHandler#onSignal} for routing through the Mapping Layer.
+   *       ExecutionSignal}(kind={@code TASK_STATUS_CHANGED}, statusId={@code action}) to {@link
+   *       ExecutionSignalHandler#onSignal} for routing through the Mapping Layer.
    * </ul>
    *
    * <p>The existing stage-scoped guards (WKS-STG-011 terminal-status block, WKS-STG-010
@@ -321,7 +321,7 @@ public class CaseService {
     }
 
     // Story 4.4b AC1 — routing decision: bypass router for zero-process cases.
-    // CRITICAL: BackendSignalRouter.onSignal() resolves a MappingDefinition from the registry.
+    // CRITICAL: ExecutionSignalRouter.onSignal() resolves a MappingDefinition from the registry.
     // Zero-process CaseTypes have no BPMN attachment and therefore no mapping registration.
     // Calling the router for a no-attachment case would throw WksMappingMissException. The bypass
     // MUST happen before any router call — check processInstanceId (null = no BPMN).
@@ -342,7 +342,7 @@ public class CaseService {
       // Zero-process path: mutate status directly via CaseStatusUpdater.
       caseStatusUpdater.updateStatus(caseId, action);
     } else {
-      // BPMN path: emit USER_TASK_STATUS signal through the router (Mapping Layer).
+      // BPMN path: emit TASK_STATUS_CHANGED signal through the router (Mapping Layer).
       // The signal source is the fixed string "manual" so the router key is always
       // "userTask:manual" — matching the PropertyEmissionRule that every BPMN-attached
       // case type must register to handle manual API transitions. The action value (target
@@ -353,9 +353,9 @@ public class CaseService {
       CaseTypeRef caseTypeRef =
           new CaseTypeRef(existing.caseTypeId(), String.valueOf(existing.caseTypeVersion()));
       CaseInstanceRef caseInstance = new CaseInstanceRef(caseId, caseTypeRef);
-      BackendSignal signal =
-          BackendSignal.of(
-              BackendSignalKind.USER_TASK_STATUS,
+      ExecutionSignal signal =
+          ExecutionSignal.of(
+              ExecutionSignalKind.TASK_STATUS_CHANGED,
               "manual",
               caseInstance,
               "manual", // fixed source so router key = "userTask:manual" (stable contract)
@@ -437,7 +437,7 @@ public class CaseService {
     // should accept a client-supplied version and thread it through to update() here.
     Case updated = update(caseId, safeData, existing.version(), actorId);
 
-    // Emit USER_TASK_COMPLETE signal to advance the BPMN process token if a backend adapter is
+    // Emit TASK_COMPLETED signal to advance the BPMN process token if a backend adapter is
     // registered for this case type. This is best-effort: a missing adapter registration (OSS
     // zero-attachment deploy) results in WksMappingMissException from the router, which is logged
     // at WARN but does NOT fail the form submission — the data was already persisted.
@@ -450,9 +450,9 @@ public class CaseService {
         CaseTypeRef caseTypeRef =
             new CaseTypeRef(updated.caseTypeId(), String.valueOf(updated.caseTypeVersion()));
         CaseInstanceRef caseInstance = new CaseInstanceRef(updated.id(), caseTypeRef);
-        BackendSignal formSignal =
-            BackendSignal.of(
-                BackendSignalKind.USER_TASK_COMPLETE,
+        ExecutionSignal formSignal =
+            ExecutionSignal.of(
+                ExecutionSignalKind.TASK_COMPLETED,
                 "form",
                 caseInstance,
                 formId, // adapter resolves formId → BPMN userTask element id via userTaskMappings

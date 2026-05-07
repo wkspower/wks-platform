@@ -1,6 +1,6 @@
 package com.wkspower.platform.domain.config.model;
 
-import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Optional;
  * Validated, immutable description of one {@code attachments[]} entry inside a CaseType YAML (Story
  * 4.2 AC1 / AC4). Pure Java — no Spring, no Jackson, no JPA.
  *
- * <p>The single {@code domain/port/} import allowed in this package is {@link BackendSignalKind}
+ * <p>The single {@code domain/port/} import allowed in this package is {@link ExecutionSignalKind}
  * (Story 4.1) — reused by {@link PropertyEmissionRule#emits()} so the property-emission vocabulary
  * stays unified across the Mapping Layer (validator output) and the Backend Adapter port (router
  * input).
@@ -75,11 +75,11 @@ public record AttachmentDefinition(
   }
 
   /**
-   * YAML {@code map.properties[]} entry. {@link #emits()} is a {@link BackendSignalKind} — the sole
-   * {@code domain/port/} import allowed in this package.
+   * YAML {@code map.properties[]} entry. {@link #emits()} is a {@link ExecutionSignalKind} — the
+   * sole {@code domain/port/} import allowed in this package.
    */
   public record PropertyEmissionRule(
-      String on, String camundaProperty, BackendSignalKind emits, String emitScope) {
+      String on, String camundaProperty, ExecutionSignalKind emits, String emitScope) {
     public PropertyEmissionRule {
       Objects.requireNonNull(on, "on");
       Objects.requireNonNull(camundaProperty, "camundaProperty");

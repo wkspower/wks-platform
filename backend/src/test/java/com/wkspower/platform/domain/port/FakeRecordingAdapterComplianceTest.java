@@ -1,19 +1,19 @@
 package com.wkspower.platform.domain.port;
 
-import com.wkspower.platform.domain.service.BackendAdapterBinder;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 
 /**
- * Story 4.1 AC6 — proves {@link FakeRecordingAdapter} passes the compliance contract. Exercises
- * tests 5 and 6 non-trivially (signal emission + kind validation) so the harness itself is proven
- * against a non-NullAdapter implementation.
+ * Story 4.1 AC6 — proves {@link FakeRecordingWorkflowAdapter} passes the compliance contract.
+ * Exercises tests 5 and 6 non-trivially (signal emission + kind validation) so the harness itself
+ * is proven against a non-NullAdapter implementation.
  */
-class FakeRecordingAdapterComplianceTest extends BackendAdapterComplianceTest {
+class FakeRecordingWorkflowAdapterComplianceTest_KEEP extends WorkflowAdapterComplianceTest {
 
-  private FakeRecordingAdapter fake;
+  private FakeRecordingWorkflowAdapter fake;
 
   @Override
-  protected BackendAdapter newAdapterUnderTest(BackendAdapterBinder binder) {
-    this.fake = new FakeRecordingAdapter(binder);
+  protected WorkflowAdapter newAdapterUnderTest(WorkflowAdapterBinder binder) {
+    this.fake = new FakeRecordingWorkflowAdapter(binder);
     return fake;
   }
 
@@ -23,7 +23,7 @@ class FakeRecordingAdapterComplianceTest extends BackendAdapterComplianceTest {
   }
 
   @Override
-  protected void emitSignal(BackendSignal signal) {
+  protected void emitSignal(ExecutionSignal signal) {
     fake.emit(signal);
   }
 }

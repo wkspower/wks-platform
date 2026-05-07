@@ -16,12 +16,12 @@ import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
-import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.event.ConfigDeployed;
+import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.model.User;
-import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
@@ -256,10 +256,10 @@ class CaseFlowIT {
   @Test
   void createTransitionRoundTripUpdatesStatusAndPublishesEvent() throws Exception {
     // B1 fix (Story 4.4b) — re-enabled. The BPMN-path manual transition now routes through
-    // BackendSignalRouter via a registered userTask:manual PropertyEmissionRule.
+    // ExecutionSignalRouter via a registered userTask:manual PropertyEmissionRule.
     // The old test completed a BPMN user task and used message correlation ("submit") to drive
     // the process to an end event. The new architecture: CaseService.transition() on the BPMN
-    // path emits BackendSignal(USER_TASK_STATUS, source="manual", value=action) to the router.
+    // path emits ExecutionSignal(TASK_STATUS_CHANGED, source="manual", value=action) to the router.
     // The router dispatches to the userTask:manual rule and calls statusUpdater.updateStatus.
     // BPMN engine state is not consulted for manual transitions — the status update is direct.
     // The test therefore uses action="approved" (a declared status id on the fixture case type).
@@ -286,7 +286,7 @@ class CaseFlowIT {
 
     // POST transition — action="approved" is a declared status id on the case-transition-fixture
     // case type. CaseService.transition() takes the BPMN path (processInstanceId != null), emits
-    // USER_TASK_STATUS / source="manual" / value="approved" to the router. The userTask:manual
+    // TASK_STATUS_CHANGED / source="manual" / value="approved" to the router. The userTask:manual
     // PropertyEmissionRule routes the signal to statusUpdater.updateStatus(caseId, "approved").
     long transitionStartNanos = System.nanoTime();
     ResponseEntity<String> tx =
@@ -311,18 +311,18 @@ class CaseFlowIT {
                     .as("status must be updated to 'approved' via BPMN-path router dispatch")
                     .isEqualTo("approved"));
 
-    // AC: a BackendSignalRouted event was published (router audit event, no errorCode = success).
+    // AC: a ExecutionSignalRouted event was published (router audit event, no errorCode = success).
     // Published via publishAfterCommit — available after the HTTP request's transaction commits.
     Awaitility.await()
         .atMost(Duration.ofSeconds(5))
         .untilAsserted(
             () ->
                 assertThat(recorder.routedEvents)
-                    .as("router must emit a BackendSignalRouted event with no errorCode")
+                    .as("router must emit a ExecutionSignalRouted event with no errorCode")
                     .anySatisfy(
                         evt -> {
                           assertThat(evt.caseId()).isEqualTo(caseUuid);
-                          assertThat(evt.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+                          assertThat(evt.kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
                           assertThat(evt.errorCode()).isNull();
                         }));
   }
@@ -463,11 +463,11 @@ class CaseFlowIT {
   private void registerTransitionCaseType() {
     registry.register(transitionCaseType());
     // B1 fix: register a MappingDefinition with a userTask:manual rule so the
-    // BackendSignalRouter can route the USER_TASK_STATUS signal emitted by
+    // ExecutionSignalRouter can route the TASK_STATUS_CHANGED signal emitted by
     // CaseService.transition() on the BPMN path. Without this registration the router
     // throws WksMappingMissException (silently audited as WKS-MAP-404) and the case
     // status is never updated. The inline seed mirrors the pattern used by
-    // BackendSignalRouterIT.ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent.
+    // ExecutionSignalRouterIT.ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent.
     CaseTypeRef caseTypeRef = new CaseTypeRef(TRANSITION_CASE_TYPE_ID, "1");
     MappingDefinition mappingDef =
         new MappingDefinition(
@@ -484,7 +484,7 @@ class CaseFlowIT {
                         new PropertyEmissionRule(
                             "userTask:manual",
                             "status",
-                            BackendSignalKind.USER_TASK_STATUS,
+                            ExecutionSignalKind.TASK_STATUS_CHANGED,
                             "stage:case")))));
     mappingRegistry.register(caseTypeRef, "1", mappingDef);
   }
@@ -542,12 +542,12 @@ class CaseFlowIT {
 
   /**
    * Captures published events so tests can assert domain-event firing. Records both {@link
-   * CaseStatusChanged} (legacy path) and {@link BackendSignalRouted} (Story 4.3 router audit path,
-   * published via publishAfterCommit after transaction commits).
+   * CaseStatusChanged} (legacy path) and {@link ExecutionSignalRouted} (Story 4.3 router audit
+   * path, published via publishAfterCommit after transaction commits).
    */
   static class StatusEventRecorder {
     final java.util.List<CaseStatusChanged> events = new CopyOnWriteArrayList<>();
-    final java.util.List<BackendSignalRouted> routedEvents = new CopyOnWriteArrayList<>();
+    final java.util.List<ExecutionSignalRouted> routedEvents = new CopyOnWriteArrayList<>();
 
     @EventListener
     public void on(CaseStatusChanged e) {
@@ -555,7 +555,7 @@ class CaseFlowIT {
     }
 
     @EventListener
-    public void onRouted(BackendSignalRouted e) {
+    public void onRouted(ExecutionSignalRouted e) {
       routedEvents.add(e);
     }
   }

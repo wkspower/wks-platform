@@ -100,7 +100,7 @@ class BpmnAttachmentLifecyclePostgresIT {
               + "\n"
               + "displayName: \"BPMN Lifecycle PG Test\"\n"
               + "version: 1\n"
-              + "workflow:\n"
+              + "workflows:\n"
               + "  bpmn: "
               + PROCESS_ID
               + ".bpmn\n"

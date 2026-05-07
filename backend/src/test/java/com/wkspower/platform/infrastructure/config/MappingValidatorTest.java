@@ -135,7 +135,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      userTasks:\n        ghost-task: { wksTask: \"Ghost\" }\n";
+            + "    routing:\n      userTasks:\n        ghost-task: { wksTask: \"Ghost\" }\n";
     var raw = parseYaml(yaml);
     var result =
         validator.validate(
@@ -149,7 +149,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      properties:\n"
+            + "    routing:\n      properties:\n"
             + "        - on: userTask:ghost-task\n"
             + "          camunda:property: status\n"
             + "          emits: { type: status, scope: case }\n";
@@ -168,7 +168,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        signal:\n"
             + "          ghost-signal: { stageTransition: \"intake -> completed\" }\n";
     var raw = parseYaml(yaml);
@@ -184,7 +184,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        endEvent: { stageTransition: \"intake -> completed\" }\n";
     var raw = parseYaml(yaml);
     var result =
@@ -200,7 +200,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        endEvent: { stageTransition: \"intake -> nonexistent\" }\n";
     var raw = parseYaml(yaml);
     var result =
@@ -217,13 +217,13 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      userTasks:\n        ghost: { wksTask: \"G\" }\n";
+            + "    routing:\n      userTasks:\n        ghost: { wksTask: \"G\" }\n";
     var raw = parseYaml(yaml);
     var result =
         validator.validate(
             raw, Set.of("intake"), Map.of("x.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes()));
     assertThat(result.errors())
-        .anySatisfy(e -> assertThat(e.field()).isEqualTo("/attachments/0/map/userTasks/ghost"));
+        .anySatisfy(e -> assertThat(e.field()).isEqualTo("/attachments/0/routing/userTasks/ghost"));
   }
 
   // ---- AC2 — collect-all (multiple errors of different kinds in one pass) ----
@@ -234,7 +234,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: stage:nonexistent\n" // WKS-MAP-003
-            + "    map:\n      userTasks:\n        ghost: { wksTask: \"G\" }\n" // WKS-CFG-027
+            + "    routing:\n      userTasks:\n        ghost: { wksTask: \"G\" }\n" // WKS-CFG-027
             + "      events:\n"
             + "        endEvent: { stageTransition: \"intake -> nonexistent\" }\n"; // WKS-CFG-028
     var raw = parseYaml(yaml);
@@ -253,7 +253,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        signal:\n"
             + "          claim-escalated: { stageTransition: \"intake -> ghost\" }\n";
     var raw = parseYaml(yaml);
@@ -271,7 +271,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      properties:\n"
+            + "    routing:\n      properties:\n"
             + "        - on: userTask:review-claim\n"
             + "          camunda:property: status\n"
             + "          emits: { type: status, scope: stage:nonexistent }\n";
@@ -290,7 +290,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      properties:\n"
+            + "    routing:\n      properties:\n"
             + "        - on: userTask:review-claim\n"
             + "          camunda:property: status\n"
             + "          emits: { type: bogus, scope: case }\n";
@@ -322,7 +322,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      userTasks:\n"
+            + "    routing:\n      userTasks:\n"
             + "        review-claim: { wksTask: \"Underwriting Review\" }\n"
             + "      events:\n"
             + "        endEvent: { stageTransition: \"intake -> completed\" }\n"
@@ -353,7 +353,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        endEvent: { stageTransition: \"intake -> completed\" }\n"
             + "        signal:\n"
             + "          claim-escalated: { stageTransition: \"intake -> completed\" }\n";
@@ -370,7 +370,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        endEvent: { stageTransition: \"intake -> completed\" }\n"
             + "        signal:\n"
             + "          claim-escalated: { stageTransition: \"intake -> skipped\" }\n";
@@ -390,7 +390,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      events:\n"
+            + "    routing:\n      events:\n"
             + "        signl:\n"
             + "          claim-escalated: { stageTransition: \"intake -> completed\" }\n";
     var loader = new CaseTypeYamlLoader();
@@ -408,7 +408,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      properties:\n"
+            + "    routing:\n      properties:\n"
             + "        - on: userTask:review-claim\n"
             + "          camunda:property: status\n"
             + "          emits: { typ: status, scope: case }\n";
@@ -427,7 +427,7 @@ class MappingValidatorTest {
         GREEN_HEAD
             + "\nattachments:\n"
             + "  - type: bpmn\n    file: x.bpmn\n    scope: case\n"
-            + "    map:\n      userTasks:\n"
+            + "    routing:\n      userTasks:\n"
             + "        review-claim: { wksTask: \"First\" }\n"
             + "        review-claim: { wksTask: \"Second\" }\n";
     var loader = new CaseTypeYamlLoader();
@@ -468,7 +468,7 @@ class MappingValidatorTest {
       id: claim
       displayName: Claim
       version: 1
-      workflow:
+      workflows:
         bpmn: claim.bpmn
       fields:
         - id: applicant

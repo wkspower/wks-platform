@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 /**
  * Test-only helper config that re-exposes the package-private persistence adapters ({@code
  * CaseRepositoryAdapter}, {@code StageRepositoryAdapter}, {@code CaseStatusAdapter}) as top-level
- * beans for slice ITs that live outside this package (Story 4.3's {@code BackendSignalRouterIT}).
+ * beans for slice ITs that live outside this package (Story 4.3's {@code ExecutionSignalRouterIT}).
  * The adapters stay package-private in production; this file is the only test-side bridge.
  */
 @TestConfiguration

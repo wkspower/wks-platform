@@ -3,7 +3,7 @@ package com.wkspower.platform.domain.port;
 import java.util.Objects;
 
 /**
- * Immutable value reference to a CaseType plus its pinned version. Used by {@link BackendAdapter}
+ * Immutable value reference to a CaseType plus its pinned version. Used by {@link WorkflowAdapter}
  * to identify which CaseType (and version) an attachment, signal, or instance belongs to without
  * pulling the {@code CaseType} domain aggregate into the port surface.
  *

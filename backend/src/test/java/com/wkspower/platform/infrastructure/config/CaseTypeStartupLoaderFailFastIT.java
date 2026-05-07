@@ -33,7 +33,7 @@ class CaseTypeStartupLoaderFailFastIT {
         id: loan-application
         displayName: Loan
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: x

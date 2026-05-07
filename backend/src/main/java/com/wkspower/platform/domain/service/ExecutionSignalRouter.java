@@ -6,20 +6,20 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEm
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
-import com.wkspower.platform.domain.event.BackendSignalRouted;
+import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
 import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.Case;
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalHandler;
-import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,17 +30,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Story 4.3 — single routing surface for every {@link BackendSignal} emitted by any {@code
- * BackendAdapter} (Story 4.1). Architecture Decision 22 — the Mapping Layer is the only seam
+ * Story 4.3 — single routing surface for every {@link ExecutionSignal} emitted by any {@code
+ * WorkflowAdapter} (Story 4.1). Architecture Decision 22 — the Mapping Layer is the only seam
  * between WKS primitives and any execution backend; this router is the runtime half (Story 4.2's
  * {@code MappingDefinition} is the deploy-time half).
  *
  * <p><b>Single-subscriber invariant (AC1, AC6):</b> production wiring registers exactly one {@link
- * BackendSignalHandler} per adapter — this class. ArchUnit guardrail {@code
- * BackendAdapterPortIsolationTest} enforces the rule at build time. Adding a second subscriber is a
- * deliberate, reviewer-visible surface change.
+ * ExecutionSignalHandler} per adapter — this class. ArchUnit guardrail {@code
+ * WorkflowAdapterPortIsolationTest} enforces the rule at build time. Adding a second subscriber is
+ * a deliberate, reviewer-visible surface change.
  *
- * <p><b>No router-side reordering (AC2):</b> {@link BackendSignalKind}'s precedence ordering is a
+ * <p><b>No router-side reordering (AC2):</b> {@link ExecutionSignalKind}'s precedence ordering is a
  * <b>mapping-author</b> guarantee — Story 4.2's validator emits {@code WKS-MAP-002} when two rules
  * from different kinds target the same {@code (stage, status)} without explicit precedence. The
  * router processes signals in the order the adapter emits them. Do <b>not</b> add a priority queue
@@ -53,18 +53,18 @@ import org.slf4j.LoggerFactory;
  * audit-only event — every other exception is rethrown.
  *
  * <p><b>Audit attribution (AC5 / FR8):</b> every routed signal — success or miss — emits a {@link
- * BackendSignalRouted} event via {@link EventPublisher#publishAfterCommit} carrying a typed {@link
- * AuditSource.Backend} whose {@code toString()} renders to {@code "backend(<adapterName>)"}.
+ * ExecutionSignalRouted} event via {@link EventPublisher#publishAfterCommit} carrying a typed
+ * {@link AuditSource.Backend} whose {@code toString()} renders to {@code "backend(<adapterName>)"}.
  * Existing string-based {@code source} columns (Stage.source, StageEntered.source, etc.) keep their
  * bare {@code "backend-signal"} value — migration is folded into Story 4.4 per {@code
  * feedback_fold_debt_into_stories.md}.
  *
  * <p>Pure-Java, framework-free (NFR36) — wired as a {@code @Bean} from {@code
- * infrastructure.config.BackendAdapterConfig}.
+ * infrastructure.config.WorkflowAdapterConfig}.
  */
-public class BackendSignalRouter implements BackendSignalHandler {
+public class ExecutionSignalRouter implements ExecutionSignalHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(BackendSignalRouter.class);
+  private static final Logger log = LoggerFactory.getLogger(ExecutionSignalRouter.class);
 
   /** Terminal stage markers per AC2 — invoke case-level lifecycle (advance through last stage). */
   private static final String COMPLETED = "completed";
@@ -84,7 +84,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
   // initialStatus. Injected across the hexagonal boundary (Story 3-6 §AC6 deferred-work landing).
   private final CaseTypeReader caseTypeReader;
 
-  public BackendSignalRouter(
+  public ExecutionSignalRouter(
       MappingRegistry mappingRegistry,
       WksStageAdvancer stageAdvancer,
       CaseStatusUpdater statusUpdater,
@@ -102,12 +102,12 @@ public class BackendSignalRouter implements BackendSignalHandler {
   }
 
   @Override
-  public void onSignal(BackendSignal signal) {
+  public void onSignal(ExecutionSignal signal) {
     Objects.requireNonNull(signal, "signal");
     Optional<Case> caseOpt = caseRepository.findById(signal.caseInstance().id());
     if (caseOpt.isEmpty()) {
       // Story 4.3.1 AC5 — case-not-found is now an audit-emitting branch (WKS-MAP-405). The
-      // CaseInstanceRef carries caseTypeId + version, so we can synthesise a BackendSignalRouted
+      // CaseInstanceRef carries caseTypeId + version, so we can synthesise a ExecutionSignalRouted
       // event for operator observability rather than silently dropping. Distinct from WKS-MAP-404
       // (rule miss): the case row itself is gone, so the rule lookup never ran.
       String caseTypeVersion =
@@ -127,7 +127,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
       detail.put("originAdapter", signal.adapterName());
       detail.put("reason", "case not found in repository");
       eventPublisher.publishAfterCommit(
-          new BackendSignalRouted(
+          new ExecutionSignalRouted(
               signal.caseInstance().id(),
               caseTypeId,
               caseTypeVersion,
@@ -153,19 +153,20 @@ public class BackendSignalRouter implements BackendSignalHandler {
 
     try {
       // Story 4.4b AC3 — stageAdvance dispatch methods return true when a stage-transition was
-      // applied. In that case resetStatusForAdvancedStage already emits two BackendSignalRouted
+      // applied. In that case resetStatusForAdvancedStage already emits two ExecutionSignalRouted
       // events (effect=stage-advance + effect=status-reset) with a shared correlationId; the
       // standard auditSuccess call must be skipped to avoid emitting a third redundant event.
       boolean stageAdvanceHandled = false;
       switch (signal.kind()) {
-        case END_EVENT -> stageAdvanceHandled = dispatchEndEvent(signal, caseRow, mappingOpt.get());
+        case STAGE_TRANSITION ->
+            stageAdvanceHandled = dispatchEndEvent(signal, caseRow, mappingOpt.get());
         case NAMED_SIGNAL ->
             stageAdvanceHandled = dispatchNamedSignal(signal, caseRow, mappingOpt.get());
-          // Story 4.3.1 AC10 — split USER_TASK_PROPERTY into USER_TASK_STATUS + USER_TASK_COMPLETE.
+          // Story 4.3.1 AC10 — split USER_TASK_PROPERTY into TASK_STATUS_CHANGED + TASK_COMPLETED.
           // Both inbound kinds dispatch through the same property-emission lookup; the rule's emits
-          // value distinguishes "drives status transition" (USER_TASK_STATUS) from
-          // "drives stage advance" (USER_TASK_COMPLETE).
-        case USER_TASK_STATUS, USER_TASK_COMPLETE ->
+          // value distinguishes "drives status transition" (TASK_STATUS_CHANGED) from
+          // "drives stage advance" (TASK_COMPLETED).
+        case TASK_STATUS_CHANGED, TASK_COMPLETED ->
             stageAdvanceHandled = dispatchUserTaskProperty(signal, caseRow, mappingOpt.get());
         case OUTCOME ->
             // Phase-1 reservation per AC2.
@@ -197,7 +198,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
           .addKeyValue("signalSource", signal.source())
           .log("backend signal dispatch failed — rolling back: {}", other.getMessage());
       eventPublisher.publish(
-          new BackendSignalRouted(
+          new ExecutionSignalRouted(
               caseRow.id(),
               caseRow.caseTypeId(),
               caseTypeVersion,
@@ -246,7 +247,8 @@ public class BackendSignalRouter implements BackendSignalHandler {
    * #applyStageTransition}); {@code false} if a {@link WksMappingMissException} is thrown before
    * any transition (never actually returns false — exception propagates instead).
    */
-  private boolean dispatchEndEvent(BackendSignal signal, Case caseRow, MappingDefinition mapping) {
+  private boolean dispatchEndEvent(
+      ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
     EndEventMapping rule =
         firstAttachment(mapping)
             .flatMap(AttachmentDefinition::endEventMapping)
@@ -265,7 +267,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
    * — exception propagates on miss.
    */
   private boolean dispatchNamedSignal(
-      BackendSignal signal, Case caseRow, MappingDefinition mapping) {
+      ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
     SignalMapping rule =
         firstAttachment(mapping)
             .map(a -> a.signalMappings().get(signal.source()))
@@ -286,13 +288,13 @@ public class BackendSignalRouter implements BackendSignalHandler {
   }
 
   /**
-   * Returns {@code true} when a stage advance was applied (USER_TASK_COMPLETE path); {@code false}
-   * when a status-only update was performed (USER_TASK_STATUS path). The caller uses this to decide
+   * Returns {@code true} when a stage advance was applied (TASK_COMPLETED path); {@code false} when
+   * a status-only update was performed (TASK_STATUS_CHANGED path). The caller uses this to decide
    * whether to emit the standard single-event {@code auditSuccess} or skip it (because {@link
    * #resetStatusForAdvancedStage} already emitted two events).
    */
   private boolean dispatchUserTaskProperty(
-      BackendSignal signal, Case caseRow, MappingDefinition mapping) {
+      ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
     String onKey = "userTask:" + signal.source();
     PropertyEmissionRule rule =
         firstAttachment(mapping).stream()
@@ -306,7 +308,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
                         signal.caseInstance().id(),
                         "no property rule for on='" + onKey + "'"));
 
-    if (rule.emits() == BackendSignalKind.USER_TASK_COMPLETE) {
+    if (rule.emits() == ExecutionSignalKind.TASK_COMPLETED) {
       // Story 4.3.1 AC10 — task-complete kind carries no status value; advance the stage forward
       // so the BPMN end-of-task drives case progression without requiring an explicit status
       // property on the userTask.
@@ -318,7 +320,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
       return true; // stage advance handled — caller must NOT call auditSuccess.
     }
 
-    if (rule.emits() != BackendSignalKind.USER_TASK_STATUS) {
+    if (rule.emits() != ExecutionSignalKind.TASK_STATUS_CHANGED) {
       throw new WksMappingMissException(
           signal.adapterName(),
           signal.caseInstance().id(),
@@ -352,7 +354,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
   /**
    * Story 4.4b AC3 — stage transition with post-advance status-reset. After the stage advance
    * succeeds, resolves the next stage's {@code initialStatus} via {@link CaseTypeReader} and resets
-   * the case status. Emits TWO {@link BackendSignalRouted} events with a shared {@code
+   * the case status. Emits TWO {@link ExecutionSignalRouted} events with a shared {@code
    * correlationId} UUID: one {@code effect=stage-advance}, one {@code effect=status-reset}. This is
    * an intentional divergence from the pre-4.4b one-event shape — rationale: per Q3 lock, aligns
    * with Epic 9 Activity Feed semantics and {@code EventPublisher.publishAfterCommit}
@@ -362,7 +364,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
    * {@link #resetStatusForAdvancedStage} can use it directly without re-reading from the DB
    * (avoiding JPA first-level-cache staleness issues in transactional test contexts).
    */
-  private void applyStageTransition(BackendSignal signal, Case caseRow, String spec) {
+  private void applyStageTransition(ExecutionSignal signal, Case caseRow, String spec) {
     String[] parts = spec.split("\\s*->\\s*");
     if (parts.length != 2 || parts[1].isBlank()) {
       throw new WksMappingMissException(
@@ -395,8 +397,8 @@ public class BackendSignalRouter implements BackendSignalHandler {
 
   /**
    * Story 4.4b AC3 — resets the case status to the next stage's {@code initialStatus} after a stage
-   * advance. Emits two {@link BackendSignalRouted} events with a shared {@code correlationId}: one
-   * for the stage-advance effect, one for the status-reset effect.
+   * advance. Emits two {@link ExecutionSignalRouted} events with a shared {@code correlationId}:
+   * one for the stage-advance effect, one for the status-reset effect.
    *
    * @param nextStageHint the target stage id known before the advance (from the mapping spec), or
    *     {@code null} when the advance target is determined by the advancer (COMPLETED/SKIPPED
@@ -404,7 +406,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
    *     contexts.
    */
   private void resetStatusForAdvancedStage(
-      BackendSignal signal, Case preMutationRow, String nextStageHint) {
+      ExecutionSignal signal, Case preMutationRow, String nextStageHint) {
     UUID correlationId = UUID.randomUUID();
     AuditSource auditSource = new AuditSource.Backend(signal.adapterName());
     String caseTypeVersion = String.valueOf(preMutationRow.caseTypeVersion());
@@ -414,7 +416,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
     stageAdvanceDetail.put("effect", "stage-advance");
     stageAdvanceDetail.put("correlationId", correlationId.toString());
     eventPublisher.publishAfterCommit(
-        new BackendSignalRouted(
+        new ExecutionSignalRouted(
             preMutationRow.id(),
             preMutationRow.caseTypeId(),
             caseTypeVersion,
@@ -474,7 +476,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
     statusResetDetail.put("newStatus", initialStatus);
     statusResetDetail.put("nextStageId", nextStageId);
     eventPublisher.publishAfterCommit(
-        new BackendSignalRouted(
+        new ExecutionSignalRouted(
             preMutationRow.id(),
             preMutationRow.caseTypeId(),
             caseTypeVersion,
@@ -486,11 +488,11 @@ public class BackendSignalRouter implements BackendSignalHandler {
             clock.now()));
   }
 
-  private void auditSuccess(BackendSignal signal, Case caseRow) {
+  private void auditSuccess(ExecutionSignal signal, Case caseRow) {
     publish(signal, caseRow, new AuditSource.Backend(signal.adapterName()), null, Map.of());
   }
 
-  private void auditMiss(BackendSignal signal, Case caseRow, String reason) {
+  private void auditMiss(ExecutionSignal signal, Case caseRow, String reason) {
     Map<String, String> detail = new HashMap<>();
     detail.put("originAdapter", signal.adapterName());
     if (reason != null) {
@@ -503,26 +505,26 @@ public class BackendSignalRouter implements BackendSignalHandler {
         .addKeyValue("kind", signal.kind().name())
         .addKeyValue("signalSource", signal.source())
         .log("backend signal unmapped: {}", reason);
-    // Story 4.3.1 AC6 — un-spoofable miss-sentinel via AuditSource.BackendUnmapped. An adapter
+    // Story 4.3.1 AC6 — un-spoofable miss-sentinel via AuditSource.ExecutionUnmapped. An adapter
     // named "unmapped" cannot collide with the miss audit string because the sub-record renders
-    // distinctly as backend(unmapped:<originAdapter>).
+    // distinctly as execution(unmapped:<originAdapter>).
     publish(
         signal,
         caseRow,
-        new AuditSource.BackendUnmapped(signal.adapterName()),
+        new AuditSource.ExecutionUnmapped(signal.adapterName()),
         ErrorCode.WKS_MAP_404.wire(),
         detail);
   }
 
   private void publish(
-      BackendSignal signal,
+      ExecutionSignal signal,
       Case caseRow,
       AuditSource source,
       String errorCode,
       Map<String, String> detail) {
     String caseTypeVersion = String.valueOf(caseRow.caseTypeVersion());
     eventPublisher.publishAfterCommit(
-        new BackendSignalRouted(
+        new ExecutionSignalRouted(
             caseRow.id(),
             caseRow.caseTypeId(),
             caseTypeVersion,

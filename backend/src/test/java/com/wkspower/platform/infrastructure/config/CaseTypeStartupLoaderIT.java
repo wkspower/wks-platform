@@ -66,7 +66,7 @@ class CaseTypeStartupLoaderIT {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: loan-application.bpmn
         fields:
           - id: applicant_name
@@ -87,7 +87,7 @@ class CaseTypeStartupLoaderIT {
         id: BROKEN_ID
         displayName: Broken
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: x

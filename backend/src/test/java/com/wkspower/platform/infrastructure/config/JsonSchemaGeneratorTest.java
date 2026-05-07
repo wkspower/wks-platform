@@ -28,7 +28,7 @@ class JsonSchemaGeneratorTest {
       id: everything
       displayName: Everything
       version: 1
-      workflow:
+      workflows:
         bpmn: x.bpmn
       fields:
         - id: applicant_name

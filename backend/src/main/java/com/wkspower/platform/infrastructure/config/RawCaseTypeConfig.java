@@ -23,7 +23,7 @@ public record RawCaseTypeConfig(
     String displayName,
     Integer version,
     String description,
-    RawWorkflow workflow,
+    @JsonProperty("workflows") RawWorkflow workflow,
     List<RawField> fields,
     List<RawStatus> statuses,
     List<String> listColumns,
@@ -129,30 +129,30 @@ public record RawCaseTypeConfig(
   // case-type-level keys; only the mapping block enforces strict schema.
 
   /** One {@code attachments[]} entry. */
-  public record RawAttachment(String type, String file, String scope, RawAttachmentMap map) {}
+  public record RawAttachment(String type, String file, String scope, RawRoutingBlock routing) {}
 
-  /** {@code map: { userTasks, events, properties }} block inside an attachment. */
-  public record RawAttachmentMap(
+  /** {@code routing: { userTasks, events, properties }} block inside an attachment. */
+  public record RawRoutingBlock(
       Map<String, RawUserTaskMapping> userTasks,
       RawEventMappings events,
       List<RawPropertyEmissionRule> properties) {}
 
-  /** {@code map.userTasks.<id>} entry. */
+  /** {@code routing.userTasks.<id>} entry. */
   public record RawUserTaskMapping(String wksTask, String form) {}
 
-  /** {@code map.events: { endEvent, signal }} block. */
+  /** {@code routing.events: { endEvent, signal }} block. */
   public record RawEventMappings(
       RawEndEventMapping endEvent, Map<String, RawSignalMapping> signal) {}
 
-  /** {@code map.events.endEvent} entry. */
+  /** {@code routing.events.endEvent} entry. */
   public record RawEndEventMapping(String stageTransition) {}
 
-  /** {@code map.events.signal.<id>} entry. */
+  /** {@code routing.events.signal.<id>} entry. */
   public record RawSignalMapping(String stageTransition) {}
 
   /**
-   * {@code map.properties[]} entry. The YAML key {@code camunda:property} is colon-bearing; Jackson
-   * needs an explicit {@link JsonProperty} alias.
+   * {@code routing.properties[]} entry. The YAML key {@code camunda:property} is colon-bearing;
+   * Jackson needs an explicit {@link JsonProperty} alias.
    */
   public record RawPropertyEmissionRule(
       @JsonProperty("on") String on,

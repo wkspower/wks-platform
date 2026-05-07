@@ -173,7 +173,7 @@ public class CaseTypeStartupLoader {
 
     if (!bpmnPresent) {
       // Two sub-cases:
-      //  (a) bpmnFilename == null  → YAML legitimately has no `workflow:` block. This is a
+      //  (a) bpmnFilename == null  → YAML legitimately has no `workflows:` block. This is a
       //      YAML-only deploy, NOT a failure — counters must not flag bpmnRejected.
       //  (b) bpmnFilename != null  → BPMN was declared but the file is missing. WKS-CFG-010 WARN,
       //      YAML still registers, bpmnRejected counted (fail-on-invalid trips).
@@ -349,7 +349,7 @@ public class CaseTypeStartupLoader {
     if (root == null || !root.isObject()) {
       return null;
     }
-    JsonNode workflow = root.get("workflow");
+    JsonNode workflow = root.get("workflows");
     if (workflow == null || !workflow.isObject()) {
       return null;
     }

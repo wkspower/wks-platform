@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * Request body for {@code POST /api/cases/{id}/transition} (Story 2.4 AC1). {@code action} is the
- * target status id; on the BPMN path it is the value forwarded as the {@code USER_TASK_STATUS}
+ * target status id; on the BPMN path it is the value forwarded as the {@code TASK_STATUS_CHANGED}
  * signal payload (see {@code CaseService.transition} BPMN routing decision). On the zero-process
  * path {@code action} must be a declared status id for the case type.
  *

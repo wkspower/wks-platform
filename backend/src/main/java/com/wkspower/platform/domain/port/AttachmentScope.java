@@ -3,7 +3,7 @@ package com.wkspower.platform.domain.port;
 import java.util.Objects;
 
 /**
- * Scope of a {@link BackendAdapter} attachment to a CaseType, per architecture §786 (Decision 22):
+ * Scope of a {@link WorkflowAdapter} attachment to a CaseType, per architecture §786 (Decision 22):
  * an adapter is attached either at the case scope (lifecycle of the entire case) or at a stage
  * scope (lifecycle of a single stage within the case).
  *

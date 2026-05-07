@@ -320,7 +320,7 @@ class ArchitectureTest {
   @Test
   void mappingDomainModelHasNoFrameworkImports() {
     // Story 4.2 AC10 task 5 / AC4 — the new mapping value-object types (MappingDefinition,
-    // AttachmentDefinition, MappingChangeClass) stay framework-free. Reuse BackendSignalKind
+    // AttachmentDefinition, MappingChangeClass) stay framework-free. Reuse ExecutionSignalKind
     // from domain/port; never duplicate the enum.
     //
     // Scope is pinned by simple-name on purpose: FieldType / StatusColor (Story 2.1) carry
@@ -342,7 +342,7 @@ class ArchitectureTest {
             "org.cibseven..")
         .because(
             "MappingDefinition / AttachmentDefinition / MappingChangeClass stay pure Java —"
-                + " Story 4.2 AC4 / NFR36. Reuse BackendSignalKind from domain/port; never"
+                + " Story 4.2 AC4 / NFR36. Reuse ExecutionSignalKind from domain/port; never"
                 + " duplicate the enum.")
         .check(CLASSES);
   }

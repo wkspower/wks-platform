@@ -13,12 +13,9 @@ import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
-import com.wkspower.platform.domain.event.BackendSignalRouted;
+import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.BackendSignal;
-import com.wkspower.platform.domain.port.BackendSignalKind;
-import com.wkspower.platform.domain.port.BackendSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
@@ -26,7 +23,10 @@ import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
-import com.wkspower.platform.domain.port.FakeRecordingAdapter;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
+import com.wkspower.platform.domain.port.FakeRecordingWorkflowAdapter;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.infrastructure.persistence.RouterItPersistenceImports;
 import com.wkspower.platform.infrastructure.persistence.entity.RoleEntity;
@@ -54,20 +54,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Story 4.3 AC7 / AC8 — end-to-end IT for {@link BackendSignalRouter} using {@link
- * FakeRecordingAdapter} (Story 4.1 fixture). Boots a Spring slice with the real router, registry,
- * advancer, status updater, and case repository — no CIB seven dependency. Covers the headline
- * routing matrix plus transaction-rollback semantics.
+ * Story 4.3 AC7 / AC8 — end-to-end IT for {@link ExecutionSignalRouter} using {@link
+ * FakeRecordingWorkflowAdapter} (Story 4.1 fixture). Boots a Spring slice with the real router,
+ * registry, advancer, status updater, and case repository — no CIB seven dependency. Covers the
+ * headline routing matrix plus transaction-rollback semantics.
  *
  * <p>Postgres-IT parity is deferred per {@code project_postgres_it_parity_gap.md} — H2-only here
  * matches Stories 3.1 / 3.2 precedent.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({BackendSignalRouterIT.RouterTestConfig.class, RouterItPersistenceImports.class})
+@Import({ExecutionSignalRouterIT.RouterTestConfig.class, RouterItPersistenceImports.class})
 @ActiveProfiles("dev")
 @Transactional
-class BackendSignalRouterIT {
+class ExecutionSignalRouterIT {
 
   private static final Instant NOW = Instant.parse("2026-05-05T12:00:00Z");
   private static final List<StageDefinition> STAGES =
@@ -77,9 +77,9 @@ class BackendSignalRouterIT {
           new StageDefinition("stage3", "Stage 3", 2));
   private static final String ADAPTER_NAME = "fake";
 
-  @Autowired BackendSignalRouter router;
+  @Autowired ExecutionSignalRouter router;
   @Autowired MappingRegistry mappingRegistry;
-  @Autowired BackendAdapterBinder binder;
+  @Autowired WorkflowAdapterBinder binder;
   @Autowired CaseRepository caseRepository;
   @Autowired StageRepository stageRepository;
   @Autowired CaseStatusUpdater statusUpdater;
@@ -89,8 +89,8 @@ class BackendSignalRouterIT {
   @Autowired EntityManager em;
 
   private UUID actorId;
-  private FakeRecordingAdapter fake;
-  private BackendSignalSubscription subscription;
+  private FakeRecordingWorkflowAdapter fake;
+  private ExecutionSignalSubscription subscription;
 
   @BeforeEach
   void seedActorAndAdapter() {
@@ -113,12 +113,12 @@ class BackendSignalRouterIT {
                 new HashSet<>(List.of(role))));
     actorId = u.getId();
 
-    fake = new FakeRecordingAdapter(binder);
-    subscription = fake.onBackendSignal(router::onSignal);
+    fake = new FakeRecordingWorkflowAdapter(binder);
+    subscription = fake.onExecutionSignal(router::onSignal);
     events.clear();
   }
 
-  // ---------- AC7 §1 — END_EVENT happy path ------------------------------
+  // ---------- AC7 §1 — STAGE_TRANSITION happy path ------------------------------
 
   @Test
   void endEventAdvancesActiveStage() {
@@ -140,8 +140,8 @@ class BackendSignalRouterIT {
                 List.of())));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "end_1",
@@ -150,9 +150,10 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    // Story 4.4b AC3 — END_EVENT stage-advance now emits TWO events (stage-advance + status-reset).
+    // Story 4.4b AC3 — STAGE_TRANSITION stage-advance now emits TWO events (stage-advance +
+    // status-reset).
     assertThat(events.routed()).hasSize(2);
-    assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.END_EVENT);
+    assertThat(events.routed().get(0).kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
     assertThat(events.routed().get(0).source().toString()).isEqualTo("backend(fake)");
     assertThat(events.routed().get(0).errorCode()).isNull();
     assertThat(events.routed().get(0).detail()).containsEntry("effect", "stage-advance");
@@ -181,8 +182,8 @@ class BackendSignalRouterIT {
                 List.of())));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.NAMED_SIGNAL,
+        new ExecutionSignal(
+            ExecutionSignalKind.NAMED_SIGNAL,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "escalate",
@@ -221,12 +222,12 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "status",
-                        BackendSignalKind.USER_TASK_STATUS,
+                        ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")))));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.USER_TASK_STATUS,
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -240,7 +241,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.source().toString()).isEqualTo("backend(fake)");
-              assertThat(e.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+              assertThat(e.kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
             });
   }
 
@@ -251,7 +252,7 @@ class BackendSignalRouterIT {
     Case caseRow = newBootstrappedCase("loan-stage-rej", 1);
     CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
     fake.attach(caseType, AttachmentScope.ofCase());
-    // Rule whose emits is END_EVENT (a stage-transition kind) — router rejects.
+    // Rule whose emits is STAGE_TRANSITION (a stage-transition kind) — router rejects.
     mappingRegistry.register(
         caseType,
         "1",
@@ -268,12 +269,12 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "stage",
-                        BackendSignalKind.END_EVENT,
+                        ExecutionSignalKind.STAGE_TRANSITION,
                         "stage:stage1")))));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.USER_TASK_STATUS,
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -288,7 +289,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
+              assertThat(e.source().toString()).isEqualTo("execution(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -315,8 +316,8 @@ class BackendSignalRouterIT {
                 List.of())));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.NAMED_SIGNAL,
+        new ExecutionSignal(
+            ExecutionSignalKind.NAMED_SIGNAL,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "undeclared",
@@ -330,7 +331,7 @@ class BackendSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
+              assertThat(e.source().toString()).isEqualTo("execution(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -345,8 +346,8 @@ class BackendSignalRouterIT {
     mappingRegistry.register(caseType, "1", MappingDefinition.empty());
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "end_1",
@@ -383,20 +384,20 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "status",
-                        BackendSignalKind.USER_TASK_STATUS,
+                        ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")))));
 
     // First: status change. Second: stage advance.
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.USER_TASK_STATUS,
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
             Map.of("camunda:property", "status", "value", "approved")));
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "end_1",
@@ -404,15 +405,17 @@ class BackendSignalRouterIT {
     flushClear();
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
-    // After END_EVENT stage-advance the status was reset to next stage's initialStatus ("open"),
-    // but the earlier USER_TASK_STATUS had set it to "approved" — the stage-advance status-reset
+    // After STAGE_TRANSITION stage-advance the status was reset to next stage's initialStatus
+    // ("open"),
+    // but the earlier TASK_STATUS_CHANGED had set it to "approved" — the stage-advance status-reset
     // (AC3) then overwrites with "open". This is by design: stage-advance trumps prior same-stage
     // status.
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    // Story 4.4b AC3 — END_EVENT emits 2 events; total = USER_TASK_STATUS (1) + END_EVENT (2) = 3.
+    // Story 4.4b AC3 — STAGE_TRANSITION emits 2 events; total = TASK_STATUS_CHANGED (1) +
+    // STAGE_TRANSITION (2) = 3.
     assertThat(events.routed()).hasSize(3);
-    assertThat(events.routed().get(0).kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
-    assertThat(events.routed().get(1).kind()).isEqualTo(BackendSignalKind.END_EVENT);
+    assertThat(events.routed().get(0).kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
+    assertThat(events.routed().get(1).kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
     assertThat(events.routed().get(1).detail()).containsEntry("effect", "stage-advance");
     assertThat(events.routed().get(2).detail()).containsEntry("effect", "status-reset");
   }
@@ -456,8 +459,8 @@ class BackendSignalRouterIT {
                 List.of())));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseTypeV1),
             "end_1",
@@ -496,8 +499,8 @@ class BackendSignalRouterIT {
 
     try {
       fake.emit(
-          new BackendSignal(
-              BackendSignalKind.END_EVENT,
+          new ExecutionSignal(
+              ExecutionSignalKind.STAGE_TRANSITION,
               ADAPTER_NAME,
               new CaseInstanceRef(caseRow.id(), caseType),
               "end_1",
@@ -510,7 +513,7 @@ class BackendSignalRouterIT {
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage1");
     // Story 4.3.1 AC4 — the router now emits a synchronous failure-audit BEFORE the rollback
-    // rethrow. Operators must see a BackendSignalRouted event with errorCode set (the WKS code
+    // rethrow. Operators must see a ExecutionSignalRouted event with errorCode set (the WKS code
     // from the underlying domain exception, or WKS-RTM-500 fallback) and source =
     // backend(<adapter>).
     assertThat(events.routed())
@@ -530,14 +533,14 @@ class BackendSignalRouterIT {
   @Test
   void caseNotFoundEmitsMap405AuditRow() {
     // No case is created — caseRepository.findById returns empty. The router must publish a
-    // BackendSignalRouted with errorCode = WKS-MAP-405 and source = backend(<adapter>).
+    // ExecutionSignalRouted with errorCode = WKS-MAP-405 and source = backend(<adapter>).
     UUID phantomCaseId = UUID.randomUUID();
     CaseTypeRef caseType = new CaseTypeRef("phantom-ct", "1");
     fake.attach(caseType, AttachmentScope.ofCase());
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(phantomCaseId, caseType),
             "end_1",
@@ -561,8 +564,9 @@ class BackendSignalRouterIT {
 
   @Test
   void ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent() {
-    // AC7: manual CaseService.transition path emitted via USER_TASK_STATUS signal.
-    // The router receives USER_TASK_STATUS, dispatches to dispatchUserTaskProperty → statusUpdater.
+    // AC7: manual CaseService.transition path emitted via TASK_STATUS_CHANGED signal.
+    // The router receives TASK_STATUS_CHANGED, dispatches to dispatchUserTaskProperty →
+    // statusUpdater.
     Case caseRow = newBootstrappedCase("manual-transition", 1);
     CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
     fake.attach(caseType, AttachmentScope.ofCase());
@@ -582,12 +586,12 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:manual",
                         "status",
-                        BackendSignalKind.USER_TASK_STATUS,
+                        ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")))));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.USER_TASK_STATUS,
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "manual",
@@ -596,12 +600,12 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.status()).isEqualTo("in-review");
-    // manual USER_TASK_STATUS path → exactly 1 BackendSignalRouted event (no stage-advance).
+    // manual TASK_STATUS_CHANGED path → exactly 1 ExecutionSignalRouted event (no stage-advance).
     assertThat(events.routed())
         .singleElement()
         .satisfies(
             e -> {
-              assertThat(e.kind()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+              assertThat(e.kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
               assertThat(e.source().toString()).isEqualTo("backend(fake)");
               assertThat(e.errorCode()).isNull();
             });
@@ -609,7 +613,7 @@ class BackendSignalRouterIT {
 
   @Test
   void ac7_stageAdvance_emitsTwoEventsWithSharedCorrelationId_andResetsStatus() {
-    // AC7 + AC3: stage-advance success-path emits TWO BackendSignalRouted events with shared
+    // AC7 + AC3: stage-advance success-path emits TWO ExecutionSignalRouted events with shared
     // correlationId (one effect=stage-advance, one effect=status-reset). This is an intentional
     // divergence from the pre-4.4b one-event shape — rationale: Q3 lock from original Story 4.4.
     Case caseRow = newBootstrappedCase("stage-advance-ac3", 1);
@@ -630,8 +634,8 @@ class BackendSignalRouterIT {
                 List.of())));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.END_EVENT,
+        new ExecutionSignal(
+            ExecutionSignalKind.STAGE_TRANSITION,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "end_1",
@@ -645,8 +649,8 @@ class BackendSignalRouterIT {
 
     // TWO events: effect=stage-advance + effect=status-reset.
     assertThat(events.routed()).hasSize(2);
-    BackendSignalRouted stageAdvanceEvent = events.routed().get(0);
-    BackendSignalRouted statusResetEvent = events.routed().get(1);
+    ExecutionSignalRouted stageAdvanceEvent = events.routed().get(0);
+    ExecutionSignalRouted statusResetEvent = events.routed().get(1);
 
     assertThat(stageAdvanceEvent.detail()).containsEntry("effect", "stage-advance");
     assertThat(statusResetEvent.detail()).containsEntry("effect", "status-reset");
@@ -667,7 +671,7 @@ class BackendSignalRouterIT {
 
   @Test
   void ac7_userTaskComplete_advancesStageAndEmitsTwoEvents() {
-    // AC7: USER_TASK_COMPLETE path triggers stage advance → two events (AC3 pattern).
+    // AC7: TASK_COMPLETED path triggers stage advance → two events (AC3 pattern).
     Case caseRow = newBootstrappedCase("task-complete-ac7", 1);
     CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
     fake.attach(caseType, AttachmentScope.ofCase());
@@ -687,12 +691,12 @@ class BackendSignalRouterIT {
                     new PropertyEmissionRule(
                         "userTask:review",
                         "status",
-                        BackendSignalKind.USER_TASK_COMPLETE,
+                        ExecutionSignalKind.TASK_COMPLETED,
                         "stage:stage1")))));
 
     fake.emit(
-        new BackendSignal(
-            BackendSignalKind.USER_TASK_COMPLETE,
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_COMPLETED,
             ADAPTER_NAME,
             new CaseInstanceRef(caseRow.id(), caseType),
             "review",
@@ -701,7 +705,7 @@ class BackendSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    // USER_TASK_COMPLETE → stage-advance → status reset to stage2 initialStatus.
+    // TASK_COMPLETED → stage-advance → status reset to stage2 initialStatus.
     assertThat(after.status()).isEqualTo("open");
 
     // Two events emitted (stage-advance + status-reset) — same AC3 pattern.
@@ -746,8 +750,8 @@ class BackendSignalRouterIT {
     }
 
     @Bean
-    BackendAdapterBinder binder(NullAdapter nullAdapter) {
-      return new BackendAdapterBinder(nullAdapter);
+    WorkflowAdapterBinder binder(NullAdapter nullAdapter) {
+      return new WorkflowAdapterBinder(nullAdapter);
     }
 
     @Bean
@@ -842,7 +846,7 @@ class BackendSignalRouterIT {
     }
 
     @Bean
-    BackendSignalRouter backendSignalRouter(
+    ExecutionSignalRouter backendSignalRouter(
         MappingRegistry mappingRegistry,
         WksStageAdvancer stageAdvancer,
         CaseStatusUpdater statusUpdater,
@@ -850,7 +854,7 @@ class BackendSignalRouterIT {
         EventPublisher eventPublisher,
         Clock clock,
         CaseTypeReader caseTypeReader) {
-      return new BackendSignalRouter(
+      return new ExecutionSignalRouter(
           mappingRegistry,
           stageAdvancer,
           statusUpdater,
@@ -870,10 +874,10 @@ class BackendSignalRouterIT {
       events.add(event);
     }
 
-    synchronized List<BackendSignalRouted> routed() {
-      List<BackendSignalRouted> out = new ArrayList<>();
+    synchronized List<ExecutionSignalRouted> routed() {
+      List<ExecutionSignalRouted> out = new ArrayList<>();
       for (Object e : events) {
-        if (e instanceof BackendSignalRouted r) {
+        if (e instanceof ExecutionSignalRouted r) {
           out.add(r);
         }
       }

@@ -8,8 +8,8 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMa
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
-import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.BpmnElementInspector;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.workflow.BpmnElementSummary;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -193,20 +193,20 @@ public class MappingValidator {
         }
       }
 
-      // --- map.* cross-refs (WKS-CFG-027 / WKS-MAP-001 / WKS-CFG-028 / WKS-MAP-003) ---
+      // --- routing.* cross-refs (WKS-CFG-027 / WKS-MAP-001 / WKS-CFG-028 / WKS-MAP-003) ---
       Map<String, UserTaskMapping> userTasksOut = new LinkedHashMap<>();
       Optional<EndEventMapping> endEventOut = Optional.empty();
       Map<String, SignalMapping> signalsOut = new LinkedHashMap<>();
       List<PropertyEmissionRule> propsOut = new ArrayList<>();
 
-      RawCaseTypeConfig.RawAttachmentMap map = a.map();
-      if (map != null) {
+      RawCaseTypeConfig.RawRoutingBlock routing = a.routing();
+      if (routing != null) {
         // userTasks — emit WKS-CFG-027 when bpmn summary present and id not in BPMN
-        if (map.userTasks() != null) {
-          for (var entry : map.userTasks().entrySet()) {
+        if (routing.userTasks() != null) {
+          for (var entry : routing.userTasks().entrySet()) {
             String taskId = entry.getKey();
             RawCaseTypeConfig.RawUserTaskMapping rut = entry.getValue();
-            String fieldPath = base + "/map/userTasks/" + taskId;
+            String fieldPath = base + "/routing/userTasks/" + taskId;
             if (rut == null || rut.wksTask() == null || rut.wksTask().isBlank()) {
               errors.add(
                   ErrorDetail.ofField(
@@ -230,18 +230,18 @@ public class MappingValidator {
         }
 
         // events.endEvent + events.signal
-        if (map.events() != null) {
+        if (routing.events() != null) {
           // endEvent
-          RawCaseTypeConfig.RawEndEventMapping ree = map.events().endEvent();
+          RawCaseTypeConfig.RawEndEventMapping ree = routing.events().endEvent();
           if (ree != null) {
-            String fieldPath = base + "/map/events/endEvent/stageTransition";
+            String fieldPath = base + "/routing/events/endEvent/stageTransition";
             // AC3 rule 5: BPMN must declare at least one endEvent if any endEvent rule exists
             if (summary != null && summary.endEventIds().isEmpty()) {
               errors.add(
                   ErrorDetail.ofField(
                       ErrorCode.WKS_MAP_001.wire(),
                       "endEvent rule declared but BPMN has no endEvents",
-                      base + "/map/events/endEvent"));
+                      base + "/routing/events/endEvent"));
             }
             String transition = ree.stageTransition();
             if (transition == null || transition.isBlank()) {
@@ -259,11 +259,11 @@ public class MappingValidator {
           }
 
           // signal mappings
-          if (map.events().signal() != null) {
-            for (var entry : map.events().signal().entrySet()) {
+          if (routing.events().signal() != null) {
+            for (var entry : routing.events().signal().entrySet()) {
               String signalId = entry.getKey();
               RawCaseTypeConfig.RawSignalMapping rsm = entry.getValue();
-              String sigField = base + "/map/events/signal/" + signalId;
+              String sigField = base + "/routing/events/signal/" + signalId;
               if (summary != null && !summary.signalIds().contains(signalId)) {
                 errors.add(
                     ErrorDetail.ofField(
@@ -290,10 +290,10 @@ public class MappingValidator {
         }
 
         // properties[]
-        if (map.properties() != null) {
-          for (int j = 0; j < map.properties().size(); j++) {
-            RawCaseTypeConfig.RawPropertyEmissionRule rpr = map.properties().get(j);
-            String pBase = base + "/map/properties/" + j;
+        if (routing.properties() != null) {
+          for (int j = 0; j < routing.properties().size(); j++) {
+            RawCaseTypeConfig.RawPropertyEmissionRule rpr = routing.properties().get(j);
+            String pBase = base + "/routing/properties/" + j;
             if (rpr == null) {
               errors.add(
                   ErrorDetail.ofField(
@@ -331,7 +331,7 @@ public class MappingValidator {
                       "property rule requires 'camunda:property'",
                       pBase + "/camunda:property"));
             }
-            BackendSignalKind emitsKind = null;
+            ExecutionSignalKind emitsKind = null;
             String emitScope = null;
             RawCaseTypeConfig.RawEmits remits = rpr.emits();
             if (remits == null) {
@@ -368,10 +368,11 @@ public class MappingValidator {
       }
 
       // Story 4.3.1 AC3 — WKS-MAP-002 precedence-collision detection. Two rules from DIFFERENT
-      // BackendSignalKinds that target the same `(stage, status)` (modelled via the stageTransition
+      // ExecutionSignalKinds that target the same `(stage, status)` (modelled via the
+      // stageTransition
       // tuple `<from> -> <to>`) without explicit precedence are disallowed at deploy time. Phase-0
       // has no precedence vocabulary; Phase-1 may introduce one. The runtime contract documented at
-      // BackendSignalRouter.java:38-41 advertises this code; here is its emission site.
+      // ExecutionSignalRouter.java:38-41 advertises this code; here is its emission site.
       detectPrecedenceCollisions(endEventOut, signalsOut, errors, base);
       // Build the AttachmentDefinition only when type/file/scope are non-blank — otherwise the
       // record's invariants would throw NPE. We still keep collecting errors for fields that did
@@ -394,10 +395,10 @@ public class MappingValidator {
   /**
    * Story 4.3.1 AC3 — emit {@code WKS-MAP-002} when an endEvent rule and a signal rule target the
    * same stage transition (same {@code from -> to} tuple). These represent two rules from different
-   * {@link BackendSignalKind}s ({@link BackendSignalKind#END_EVENT} vs {@link
-   * BackendSignalKind#NAMED_SIGNAL}) competing for the same effect; Phase-0 disallows the ambiguity
-   * outright (no precedence vocabulary). Last-wins on rule ordering would be a worst-class silent
-   * bug.
+   * {@link ExecutionSignalKind}s ({@link ExecutionSignalKind#STAGE_TRANSITION} vs {@link
+   * ExecutionSignalKind#NAMED_SIGNAL}) competing for the same effect; Phase-0 disallows the
+   * ambiguity outright (no precedence vocabulary). Last-wins on rule ordering would be a
+   * worst-class silent bug.
    */
   private void detectPrecedenceCollisions(
       Optional<EndEventMapping> endEventOut,
@@ -421,9 +422,9 @@ public class MappingValidator {
                     + sig.getKey()
                     + "' both target stageTransition '"
                     + endEventOut.get().stageTransition()
-                    + "' — Phase-0 disallows two BackendSignalKind rules targeting the"
+                    + "' — Phase-0 disallows two ExecutionSignalKind rules targeting the"
                     + " same (stage, status) without explicit precedence",
-                base + "/map/events/signal/" + sig.getKey() + "/stageTransition"));
+                base + "/routing/events/signal/" + sig.getKey() + "/stageTransition"));
       }
     }
   }
@@ -472,7 +473,7 @@ public class MappingValidator {
     return ok;
   }
 
-  private BackendSignalKind parseEmitsKind(
+  private ExecutionSignalKind parseEmitsKind(
       String wire, List<ErrorDetail> errors, String fieldPath) {
     if (wire == null || wire.isBlank()) {
       errors.add(
@@ -480,10 +481,10 @@ public class MappingValidator {
       return null;
     }
     return switch (wire) {
-      case "status" -> BackendSignalKind.USER_TASK_STATUS;
-      case "named-signal" -> BackendSignalKind.NAMED_SIGNAL;
-      case "outcome" -> BackendSignalKind.OUTCOME;
-      case "task-complete" -> BackendSignalKind.USER_TASK_COMPLETE;
+      case "status" -> ExecutionSignalKind.TASK_STATUS_CHANGED;
+      case "named-signal" -> ExecutionSignalKind.NAMED_SIGNAL;
+      case "outcome" -> ExecutionSignalKind.OUTCOME;
+      case "task-complete" -> ExecutionSignalKind.TASK_COMPLETED;
       default -> {
         errors.add(
             ErrorDetail.ofField(

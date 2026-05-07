@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
-import com.wkspower.platform.domain.port.BackendSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,8 +53,8 @@ class MappingDefinitionTest {
   void backendSignalKindIsReusedForPropertyEmission() {
     PropertyEmissionRule rule =
         new PropertyEmissionRule(
-            "userTask:t1", "status", BackendSignalKind.USER_TASK_STATUS, "stage:underwriting");
-    assertThat(rule.emits()).isEqualTo(BackendSignalKind.USER_TASK_STATUS);
+            "userTask:t1", "status", ExecutionSignalKind.TASK_STATUS_CHANGED, "stage:underwriting");
+    assertThat(rule.emits()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
     assertThat(rule.emitScope()).isEqualTo("stage:underwriting");
   }
 

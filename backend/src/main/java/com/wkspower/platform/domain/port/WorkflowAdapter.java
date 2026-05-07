@@ -15,7 +15,7 @@ package com.wkspower.platform.domain.port;
  * com.wkspower.platform.domain.exception.WksWorkflowEngineException} per the existing engine port
  * contract.
  */
-public interface BackendAdapter {
+public interface WorkflowAdapter {
 
   /**
    * Register the adapter for a CaseType at the given scope (case or stage — see {@link
@@ -34,14 +34,14 @@ public interface BackendAdapter {
   void detach(CaseTypeRef caseType);
 
   /**
-   * Register a handler that receives {@link BackendSignal}s emitted by the adapter. Returns an
+   * Register a handler that receives {@link ExecutionSignal}s emitted by the adapter. Returns an
    * {@link AutoCloseable} subscription handle — closing it MUST stop further deliveries to the
    * handler.
    *
    * <p>Per-instance ordering is preserved (compliance test 5). Cross-instance ordering is
    * adapter-defined.
    */
-  BackendSignalSubscription onBackendSignal(BackendSignalHandler handler);
+  ExecutionSignalSubscription onExecutionSignal(ExecutionSignalHandler handler);
 
   /**
    * Start backend execution for {@code caseInstance}. Returns an opaque adapter-specific instance

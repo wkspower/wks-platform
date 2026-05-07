@@ -44,7 +44,7 @@ class ConfigValidatorTest {
             id: loan-application
             displayName: Loan Application
             version: 1
-            workflow:
+            workflows:
               bpmn: x.bpmn
             fields:
               - id: applicant_name
@@ -96,7 +96,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
         """
@@ -137,7 +137,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: a
@@ -222,7 +222,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         statuses:
           - id: open
@@ -284,7 +284,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: tier
@@ -316,7 +316,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: tier
@@ -405,7 +405,7 @@ class ConfigValidatorTest {
         id: loan-application
         displayName: Loan Application
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: tier
@@ -447,7 +447,7 @@ class ConfigValidatorTest {
         id: loan-application
         <<: *defaults
         version: 1
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: a
@@ -485,7 +485,7 @@ class ConfigValidatorTest {
         id: BadId
         displayName: ThisIsDefinitelyWayTooLongForAFortyCharDisplayNameYes
         version: 0
-        workflow:
+        workflows:
           bpmn: x.bpmn
         fields:
           - id: a
@@ -551,7 +551,7 @@ class ConfigValidatorTest {
         id: zero-zero
         displayName: Zero Zero
         version: 1
-        workflow:
+        workflows:
           bpmn: ""
         fields:
           - id: subject
@@ -876,7 +876,7 @@ class ConfigValidatorTest {
       displayName: Loan Application
       version: 1
       description: Retail consumer loans
-      workflow:
+      workflows:
         bpmn: loan-application.bpmn
       fields:
         - id: applicant_name

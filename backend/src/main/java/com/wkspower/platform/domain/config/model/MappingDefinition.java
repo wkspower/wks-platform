@@ -12,12 +12,12 @@ import java.util.TreeMap;
  * representation of a CaseType YAML's {@code attachments: [...]} block (Story 4.2 AC1 / AC4 /
  * architecture §786–842, Decision 22). Pure Java — no Spring, no Jackson, no JPA. The only {@code
  * domain/port/} import in this package is {@link
- * com.wkspower.platform.domain.port.BackendSignalKind} (used by {@link
+ * com.wkspower.platform.domain.port.ExecutionSignalKind} (used by {@link
  * AttachmentDefinition.PropertyEmissionRule}).
  *
- * <p>Story 4.2 produces this value object; Story 4.3's {@code BackendSignalRouter} consumes it. 4.2
- * has zero coupling to {@code BackendAdapter} / {@code BackendSignalRouter} (the runtime port from
- * Story 4.1) — the wire shape lives here.
+ * <p>Story 4.2 produces this value object; Story 4.3's {@code ExecutionSignalRouter} consumes it.
+ * 4.2 has zero coupling to {@code WorkflowAdapter} / {@code ExecutionSignalRouter} (the runtime
+ * port from Story 4.1) — the wire shape lives here.
  *
  * <p><b>Zero-attachment case types are first-class</b> (D19 stage-less analogue per architecture
  * §816): every downstream service treats {@link #empty()} identically to a CaseType with no {@code

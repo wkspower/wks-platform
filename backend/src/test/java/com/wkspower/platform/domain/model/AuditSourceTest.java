@@ -38,22 +38,25 @@ class AuditSourceTest {
 
   @Test
   void backendUnmappedSentinelRendersUnspoofably() {
-    // Story 4.3.1 AC6 — miss-sentinel uses the BackendUnmapped sub-record. Real adapters with
-    // adapterName="unmapped" render as backend(unmapped); the miss sentinel renders distinguishably
-    // as backend(unmapped:<originAdapter>) so the audit string is never collidable.
+    // Story 4.3.1 AC6 / Story 4-8 — miss-sentinel uses the ExecutionUnmapped sub-record. Real
+    // adapters with adapterName="unmapped" render as backend(unmapped); the miss sentinel renders
+    // distinguishably as execution(unmapped:<originAdapter>) so the audit string is never
+    // collidable. Story 4-8 re-anchored the sentinel prefix from "backend(" to "execution(" to
+    // align with the ExecutionSignal vocabulary; the V202605070006 Flyway migration rewrites any
+    // pre-existing backend(unmapped:*) wire strings in case_audit.
     AuditSource collidingRealAdapter = new AuditSource.Backend("unmapped");
-    AuditSource missSentinel = new AuditSource.BackendUnmapped("unmapped");
+    AuditSource missSentinel = new AuditSource.ExecutionUnmapped("unmapped");
 
     assertThat(collidingRealAdapter.toString()).isEqualTo("backend(unmapped)");
-    assertThat(missSentinel.toString()).isEqualTo("backend(unmapped:unmapped)");
+    assertThat(missSentinel.toString()).isEqualTo("execution(unmapped:unmapped)");
     assertThat(missSentinel.toString()).isNotEqualTo(collidingRealAdapter.toString());
   }
 
   @Test
   void backendUnmappedCarriesOriginAdapter() {
-    AuditSource missSentinel = new AuditSource.BackendUnmapped("bpmn");
+    AuditSource missSentinel = new AuditSource.ExecutionUnmapped("bpmn");
 
-    assertThat(missSentinel.toString()).isEqualTo("backend(unmapped:bpmn)");
+    assertThat(missSentinel.toString()).isEqualTo("execution(unmapped:bpmn)");
   }
 
   @Test
@@ -63,7 +66,7 @@ class AuditSourceTest {
         .isInstanceOf(NullPointerException.class);
     assertThatThrownBy(() -> new AuditSource.Backend(null))
         .isInstanceOf(NullPointerException.class);
-    assertThatThrownBy(() -> new AuditSource.BackendUnmapped(null))
+    assertThatThrownBy(() -> new AuditSource.ExecutionUnmapped(null))
         .isInstanceOf(NullPointerException.class);
   }
 }

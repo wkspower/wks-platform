@@ -5,15 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wkspower.platform.api.dto.request.LoginRequest;
-import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.event.CaseStatusChanged;
+import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.model.User;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.UserRepository;
-import com.wkspower.platform.domain.service.BackendAdapterBinder;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.NullAdapter;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
@@ -44,11 +44,11 @@ import org.springframework.test.context.TestPropertySource;
  *
  * <ol>
  *   <li>({@code processInstanceId} is {@code null} on a created Case.
- *   <li>Status transition succeeds on the zero-process path; no {@link BackendSignalRouted} event
+ *   <li>Status transition succeeds on the zero-process path; no {@link ExecutionSignalRouted} event
  *       is published (confirming the Mapping Layer router was bypassed entirely).
  *   <li>{@code bpmn_content_hash} and {@code mapping_hash} are {@code null} in the {@code
  *       case_type_versions} row (fingerprint null-safety per Story 4.5).
- *   <li>{@link BackendAdapterBinder#resolve(CaseTypeRef)} returns the Spring-wired {@link
+ *   <li>{@link WorkflowAdapterBinder#resolve(CaseTypeRef)} returns the Spring-wired {@link
  *       NullAdapter} singleton for a zero-attachment CaseType.
  * </ol>
  *
@@ -103,7 +103,7 @@ class ZeroAttachmentCaseTypeIT {
   @Autowired private PasswordEncoder encoder;
   @Autowired private ConfigService configService;
   @Autowired private CaseTypeVersionRegistry versionRegistry;
-  @Autowired private BackendAdapterBinder binder;
+  @Autowired private WorkflowAdapterBinder binder;
   @Autowired private ObjectMapper json;
   @Autowired private RecorderConfig recorder;
 
@@ -155,22 +155,22 @@ class ZeroAttachmentCaseTypeIT {
     assertThat(body.path("data").path("id").asText()).isNotBlank();
   }
 
-  // ---- AC2 — transition succeeds; no BackendSignalRouted event (router bypassed) ----
+  // ---- AC2 — transition succeeds; no ExecutionSignalRouted event (router bypassed) ----
 
   /**
    * AC2 — POST /api/cases/{id}/transition on a zero-attachment Case must:
    *
    * <ol>
    *   <li>Return HTTP 200 with {@code data.status == "closed"}.
-   *   <li>NOT publish any {@link BackendSignalRouted} event — the Mapping Layer router is bypassed
-   *       entirely on the zero-process path ({@code CaseService.transition} calls {@code
+   *   <li>NOT publish any {@link ExecutionSignalRouted} event — the Mapping Layer router is
+   *       bypassed entirely on the zero-process path ({@code CaseService.transition} calls {@code
    *       CaseStatusUpdater} directly).
    * </ol>
    *
-   * <p>The absence of any {@link BackendSignalRouted} event confirms that the Mapping Layer router
-   * was bypassed (those events carry {@code AuditSource.Backend}; no routed event = router not
-   * entered). A direct positive assertion that the audit row carries {@code source = "manual"} is
-   * deferred to a future test once the audit-row read API is available.
+   * <p>The absence of any {@link ExecutionSignalRouted} event confirms that the Mapping Layer
+   * router was bypassed (those events carry {@code AuditSource.Backend}; no routed event = router
+   * not entered). A direct positive assertion that the audit row carries {@code source = "manual"}
+   * is deferred to a future test once the audit-row read API is available.
    */
   @Test
   void transitionStatus_onZeroAttachmentCase_succeedsWithManualAuditSource() throws Exception {
@@ -205,12 +205,12 @@ class ZeroAttachmentCaseTypeIT {
         .as("status must be updated to 'closed' after zero-process transition")
         .isEqualTo("closed");
 
-    // AC2 audit-source proof: no BackendSignalRouted events were published.
-    // BackendSignalRouted carries AuditSource.Backend (wire: "backend(...)").
+    // AC2 audit-source proof: no ExecutionSignalRouted events were published.
+    // ExecutionSignalRouted carries AuditSource.Backend (wire: "backend(...)").
     // Zero-process path bypasses the router → no such event.
     assertThat(recorder.routedSignals)
         .as(
-            "BackendSignalRouted must NOT be published for zero-attachment transition (router bypassed)")
+            "ExecutionSignalRouted must NOT be published for zero-attachment transition (router bypassed)")
         .isEmpty();
     // CaseStatusChanged is only published by the BPMN engine listener (CaseStatusListener).
     // Zero-process transitions call CaseStatusAdapter directly — no CaseStatusChanged published.
@@ -260,10 +260,10 @@ class ZeroAttachmentCaseTypeIT {
         .isNull();
   }
 
-  // ---- AC4 — BackendAdapterBinder.resolve() returns NullAdapter ----
+  // ---- AC4 — WorkflowAdapterBinder.resolve() returns NullAdapter ----
 
   /**
-   * AC4 — {@link BackendAdapterBinder#resolve(CaseTypeRef)} for a zero-attachment CaseType must
+   * AC4 — {@link WorkflowAdapterBinder#resolve(CaseTypeRef)} for a zero-attachment CaseType must
    * return the Spring-context-wired {@link NullAdapter} singleton. No BPMN adapter attachment
    * occurs for zero-attachment types.
    */
@@ -281,7 +281,7 @@ class ZeroAttachmentCaseTypeIT {
     var resolved = binder.resolve(ref);
 
     assertThat(resolved)
-        .as("BackendAdapterBinder.resolve must return NullAdapter for zero-attachment CaseType")
+        .as("WorkflowAdapterBinder.resolve must return NullAdapter for zero-attachment CaseType")
         .isInstanceOf(NullAdapter.class);
   }
 
@@ -307,15 +307,15 @@ class ZeroAttachmentCaseTypeIT {
 
   /**
    * Captures domain events so tests can assert their presence or absence. Records both {@link
-   * CaseStatusChanged} (BPMN-engine path) and {@link BackendSignalRouted} (router audit path). For
-   * zero-attachment transitions, both lists must remain empty — confirming neither the BPMN
+   * CaseStatusChanged} (BPMN-engine path) and {@link ExecutionSignalRouted} (router audit path).
+   * For zero-attachment transitions, both lists must remain empty — confirming neither the BPMN
    * listener nor the Mapping Layer router was invoked.
    */
   @TestConfiguration
   static class RecorderConfig {
 
     final List<CaseStatusChanged> statusChanges = new CopyOnWriteArrayList<>();
-    final List<BackendSignalRouted> routedSignals = new CopyOnWriteArrayList<>();
+    final List<ExecutionSignalRouted> routedSignals = new CopyOnWriteArrayList<>();
 
     @EventListener
     void onStatusChanged(CaseStatusChanged e) {
@@ -323,7 +323,7 @@ class ZeroAttachmentCaseTypeIT {
     }
 
     @EventListener
-    void onRouted(BackendSignalRouted e) {
+    void onRouted(ExecutionSignalRouted e) {
       routedSignals.add(e);
     }
   }
