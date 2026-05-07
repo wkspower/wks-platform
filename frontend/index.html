@@ -10,6 +10,14 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B1437'/%3E%3Ctext x='16' y='22' font-family='system-ui,sans-serif' font-size='14' font-weight='700' fill='%2322D3EE' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E"
     />
     <title>WKS Platform v2</title>
+    <!-- Story 14.5: runtime CSS theme override. The browser fetches /api/theme.css at startup;
+         a 204 (no file configured) is handled silently — no JS required. SI developers can
+         override :root variables (--primary, --secondary, --brand-navy, --font-heading,
+         --font-body) in the file served at WKS_THEME_CSS_PATH to brand the platform without
+         rebuilding the image.
+         NOTE: the Vite plugin 'theme-link-last' (vite.config.ts) moves this link to just before
+         </head> in the production build, so it loads AFTER bundled CSS and wins the :root cascade. -->
+    <link rel="stylesheet" href="/api/theme.css" />
   </head>
   <body>
     <div id="root"></div>
