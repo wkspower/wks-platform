@@ -51,12 +51,24 @@ public class ConfigValidator {
    */
   private final MappingValidator mappingValidator;
 
+  /**
+   * Story 5.1 — Form Definition Schema validator. Constructor-injected; {@code null} is accepted
+   * for tests that do not exercise the forms surface (same pattern as {@link #mappingValidator}).
+   */
+  private final FormValidator formValidator;
+
   public ConfigValidator() {
-    this(null);
+    this(null, null);
   }
 
   public ConfigValidator(MappingValidator mappingValidator) {
+    this(mappingValidator, null);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public ConfigValidator(MappingValidator mappingValidator, FormValidator formValidator) {
     this.mappingValidator = mappingValidator;
+    this.formValidator = formValidator;
   }
 
   /**
@@ -139,6 +151,12 @@ public class ConfigValidator {
       MappingValidator.Result mappingResult = mappingValidator.validate(raw, stageIds, bpmnFiles);
       errors.addAll(mappingResult.errors());
       mappingDefinition = mappingResult.definition();
+    }
+
+    // Story 5.1 AC2 — Form Definition Schema validation runs after mapping validation and merges
+    // its findings into the same error list. FormValidator is collect-all and never short-circuits.
+    if (formValidator != null && raw.forms() != null && !raw.forms().definitions().isEmpty()) {
+      formValidator.validate(raw.forms(), errors);
     }
 
     if (!errors.isEmpty()) {

@@ -1,0 +1,13 @@
+id: applicant-intake
+topology: single
+dataModel: monolithic
+rendering: single-page
+fields:
+  - id: applicantName
+    type: text
+    label: "Applicant Name"
+    required: true
+  - id: applicationDate
+    type: date
+    label: "Application Date"
+    required: false

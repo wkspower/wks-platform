@@ -1,0 +1,22 @@
+id: bank-account-opening
+topology: single
+dataModel: sectioned
+rendering: multi-section
+fields:
+  - id: accountHolderName
+    type: text
+    label: "Account Holder Name"
+    required: true
+  - id: accountType
+    type: select
+    label: "Account Type"
+    required: true
+    options:
+      - label: "Current"
+        value: current
+      - label: "Savings"
+        value: savings
+  - id: initialDeposit
+    type: number
+    label: "Initial Deposit (EUR)"
+    required: true

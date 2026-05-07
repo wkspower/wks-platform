@@ -2,6 +2,7 @@ package com.wkspower.platform.infrastructure.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,8 @@ public record RawCaseTypeConfig(
     List<String> listColumns,
     List<RawRole> roles,
     List<RawStage> stages,
-    List<RawAttachment> attachments) {
+    List<RawAttachment> attachments,
+    @JsonProperty("forms") @JsonInclude(JsonInclude.Include.NON_NULL) RawFormConfig forms) {
 
   /**
    * Backward-compat constructor for callers (and tests) authored before Story 4.2 introduced the
@@ -57,6 +59,39 @@ public record RawCaseTypeConfig(
         listColumns,
         roles,
         stages,
+        null,
+        null);
+  }
+
+  /**
+   * Backward-compat constructor for callers (and tests) authored before Story 5.1 introduced the
+   * {@code forms} slot. Passes {@code null} for forms — equivalent to a YAML with no {@code forms:}
+   * key (AC3).
+   */
+  public RawCaseTypeConfig(
+      String id,
+      String displayName,
+      Integer version,
+      String description,
+      RawWorkflow workflow,
+      List<RawField> fields,
+      List<RawStatus> statuses,
+      List<String> listColumns,
+      List<RawRole> roles,
+      List<RawStage> stages,
+      List<RawAttachment> attachments) {
+    this(
+        id,
+        displayName,
+        version,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages,
+        attachments,
         null);
   }
 
