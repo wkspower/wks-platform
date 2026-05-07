@@ -123,6 +123,38 @@ public class FormValidator {
                 "Invalid rendering '" + rendering + "' — allowed: " + ALLOWED_RENDERINGS,
                 base + "/rendering"));
       }
+
+      // --- sections (required when dataModel is "sectioned") ---
+      // Story 5.3: validate section structure when dataModel declares sectioned layout.
+      if ("sectioned".equals(dataModel)) {
+        List<RawFormSection> sections = def.sections();
+        if (sections == null || sections.isEmpty()) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_CFG_001.wire(),
+                  "Form with dataModel: sectioned must declare at least one section in 'sections[]'",
+                  base + "/sections"));
+        } else {
+          for (int j = 0; j < sections.size(); j++) {
+            RawFormSection sec = sections.get(j);
+            String secBase = base + "/sections/" + j;
+            if (sec == null || sec.id() == null || sec.id().isBlank()) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_CFG_001.wire(),
+                      "Section entry at index " + j + " is missing required 'id'",
+                      secBase + "/id"));
+            }
+            if (sec != null && (sec.label() == null || sec.label().isBlank())) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_CFG_001.wire(),
+                      "Section '" + sec.id() + "' is missing required 'label'",
+                      secBase + "/label"));
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { MultiSectionFormRenderer } from '@/components/forms/MultiSectionFormRenderer';
 import { SinglePageFormRenderer } from '@/components/forms/SinglePageFormRenderer';
+import { Button } from '@/components/ui/Button';
 import { useCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
 
@@ -39,23 +41,40 @@ export function FormPage() {
   const caseDto = caseQuery.data;
   const formDef = (caseDto.caseType.forms ?? []).find((f) => f.id === formId);
 
+  // CF2 fix — invalid formId shows an error state with navigation link, not floating text
   if (!formDef) {
     return (
-      <div className="flex items-center justify-center p-8 text-sm text-[var(--destructive)]">
-        {t('form.error.notFound')}
+      <div className="mx-auto max-w-2xl p-6">
+        <p className="mb-4 text-sm text-[var(--destructive)]">{t('form.error.notFound')}</p>
+        <Button variant="ghost" onClick={() => navigate(`/cases/${caseId}`)}>
+          {t('form.error.backToCase')}
+        </Button>
       </div>
     );
   }
 
-  return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-xl font-semibold">{formDef.id}</h1>
+  // Renderer dispatch — route to MultiSectionFormRenderer for multi-section rendering
+  const renderer =
+    formDef.rendering === 'multi-section' ? (
+      <MultiSectionFormRenderer
+        formDefinition={formDef}
+        caseId={caseId!}
+        defaultValues={caseDto.data}
+        onSuccess={() => navigate(`/cases/${caseId}`)}
+      />
+    ) : (
       <SinglePageFormRenderer
         formDefinition={formDef}
         caseId={caseId!}
         defaultValues={caseDto.data}
         onSuccess={() => navigate(`/cases/${caseId}`)}
       />
+    );
+
+  return (
+    <div className="mx-auto max-w-2xl p-6">
+      <h1 className="mb-6 text-xl font-semibold">{formDef.id}</h1>
+      {renderer}
     </div>
   );
 }

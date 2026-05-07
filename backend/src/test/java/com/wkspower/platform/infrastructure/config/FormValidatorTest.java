@@ -47,7 +47,11 @@ class FormValidatorTest {
   @Test
   void validTriplet_singleSectionedMultiSection_noErrors() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("onboarding", "single", "sectioned", "multi-section", null);
+    // Story 5.3: sectioned forms require at least one section with id + label
+    var section = new RawFormSection("personal", "Personal Information", List.of());
+    var def =
+        new RawFormDefinition(
+            "onboarding", "single", "sectioned", "multi-section", null, List.of(section));
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
     assertThat(errors).isEmpty();
   }
@@ -194,5 +198,95 @@ class FormValidatorTest {
     // Only the second definition should produce errors
     assertThat(errors).isNotEmpty();
     assertThat(errors).allSatisfy(e -> assertThat(e.field()).contains("/forms/1"));
+  }
+
+  // ---- Story 5.3: section validation for dataModel: sectioned ----
+
+  @Test
+  void sectioned_withoutSections_emitsWksCfg001() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    // No sections provided — should require at least one
+    var def =
+        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, null);
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors)
+        .anySatisfy(
+            e -> {
+              assertThat(e.code()).isEqualTo("WKS-CFG-001");
+              assertThat(e.field()).contains("/sections");
+              assertThat(e.message()).contains("sectioned");
+            });
+  }
+
+  @Test
+  void sectioned_withEmptySectionsList_emitsWksCfg001() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    var def =
+        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, List.of());
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors)
+        .anySatisfy(
+            e -> {
+              assertThat(e.code()).isEqualTo("WKS-CFG-001");
+              assertThat(e.field()).contains("/sections");
+            });
+  }
+
+  @Test
+  void sectioned_withValidSections_passes() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    var section = new RawFormSection("personal", "Personal Information", List.of());
+    var def =
+        new RawFormDefinition(
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors).isEmpty();
+  }
+
+  @Test
+  void sectioned_sectionMissingLabel_emitsWksCfg001() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    var section = new RawFormSection("personal", null, List.of());
+    var def =
+        new RawFormDefinition(
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors)
+        .anySatisfy(
+            e -> {
+              assertThat(e.code()).isEqualTo("WKS-CFG-001");
+              assertThat(e.field()).contains("/sections/0/label");
+            });
+  }
+
+  @Test
+  void sectioned_sectionMissingId_emitsWksCfg001() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    var section = new RawFormSection(null, "Personal Information", List.of());
+    var def =
+        new RawFormDefinition(
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors)
+        .anySatisfy(
+            e -> {
+              assertThat(e.code()).isEqualTo("WKS-CFG-001");
+              assertThat(e.field()).contains("/sections/0/id");
+            });
+  }
+
+  @Test
+  void monolithic_withoutSections_noSectionErrors() {
+    List<ErrorDetail> errors = new ArrayList<>();
+    // monolithic forms do not need sections — no section errors expected
+    var def = new RawFormDefinition("intake", "single", "monolithic", "single-page", null, null);
+    validator.validate(RawFormConfig.fromList(List.of(def)), errors);
+
+    assertThat(errors).isEmpty();
   }
 }

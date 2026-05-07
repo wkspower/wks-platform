@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // ResizeObserver is not implemented in jsdom but is referenced by Radix UI's Select + Tooltip
 // internals. Stub it so tests can render components that include Select (e.g. select-typed fields).
@@ -172,13 +172,14 @@ describe('SinglePageFormRenderer — AC2: empty submit shows FormErrorsBanner', 
 });
 
 // ---------------------------------------------------------------------------
-// AC3 — Successful submit calls onSuccess
+// AC3 — Successful submit calls onSuccess (after CF1 delay)
 // ---------------------------------------------------------------------------
 
 describe('SinglePageFormRenderer — AC3: successful submit', () => {
-  it('calls onSuccess after a valid submission', async () => {
+  it('calls onSuccess after a valid submission (after 1200ms CF1 delay)', async () => {
     const user = userEvent.setup();
     let successCalled = false;
+    vi.useFakeTimers({ shouldAdvanceTime: true });
 
     server.use(
       http.post('/api/cases/:caseId/forms/:formId/submit', () =>
@@ -233,6 +234,14 @@ describe('SinglePageFormRenderer — AC3: successful submit', () => {
 
     // MutationButton transitions to 'confirmed' state — check the button role
     await screen.findByRole('button', { name: /confirmed/i });
+
+    // CF1: onSuccess is NOT called immediately — user sees confirmed state first
+    expect(successCalled).toBe(false);
+
+    // Advance fake timers past the 1200ms delay
+    vi.advanceTimersByTime(1300);
     expect(successCalled).toBe(true);
+
+    vi.useRealTimers();
   });
 });

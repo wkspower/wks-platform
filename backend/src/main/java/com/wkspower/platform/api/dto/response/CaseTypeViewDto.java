@@ -96,11 +96,30 @@ public record CaseTypeViewDto(
    * com.wkspower.platform.domain.config.model.FormDefinition} for the case-type view endpoint.
    * Carries the three-axis vocabulary and the form's field list so the frontend renderer has
    * everything it needs in the {@code GET /api/case-types/{id}} response.
+   *
+   * <p>Story 5.3 — adds {@code sections[]} for {@code dataModel: sectioned} forms.
    */
   public record FormDefinitionView(
-      String id, String topology, String dataModel, String rendering, List<FieldView> fields) {
+      String id,
+      String topology,
+      String dataModel,
+      String rendering,
+      List<FieldView> fields,
+      List<FormSectionView> sections) {
 
     public FormDefinitionView {
+      fields = fields == null ? List.of() : List.copyOf(fields);
+      sections = sections == null ? List.of() : List.copyOf(sections);
+    }
+  }
+
+  /**
+   * Story 5.3 — wire-shape for one section in a {@code dataModel: sectioned} form. Groups a set of
+   * fields under a labelled expandable panel on the frontend.
+   */
+  public record FormSectionView(String id, String label, List<FieldView> fields) {
+
+    public FormSectionView {
       fields = fields == null ? List.of() : List.copyOf(fields);
     }
   }

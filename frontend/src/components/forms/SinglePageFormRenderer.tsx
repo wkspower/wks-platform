@@ -116,7 +116,8 @@ export function SinglePageFormRenderer({
     try {
       await submitForm(caseId, formDefinition.id, values);
       setIsSuccess(true);
-      onSuccess?.();
+      // CF1 fix — delay onSuccess by 1200ms so user sees the MutationButton "confirmed" state
+      if (onSuccess) setTimeout(onSuccess, 1200);
     } catch (err) {
       handleSubmitError(err);
     } finally {
