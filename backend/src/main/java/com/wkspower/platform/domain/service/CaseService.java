@@ -18,9 +18,15 @@ import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
+import com.wkspower.platform.domain.port.BackendSignal;
+import com.wkspower.platform.domain.port.BackendSignalHandler;
+import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.CaseDataValidator;
+import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
+import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
@@ -54,6 +60,10 @@ public class CaseService {
   private final Clock clock;
   private final WksStageAdvancer stageAdvancer;
   private final CaseTypeVersionRegistry versionRegistry;
+  // Story 4.4b AC1 — router for BPMN-attached manual transitions.
+  private final BackendSignalHandler signalRouter;
+  // Story 4.4b AC1 — direct status updater for zero-process (no-BPMN) transitions.
+  private final CaseStatusUpdater caseStatusUpdater;
 
   public CaseService(
       CaseRepository caseRepository,
@@ -64,7 +74,9 @@ public class CaseService {
       EventPublisher eventPublisher,
       Clock clock,
       WksStageAdvancer stageAdvancer,
-      CaseTypeVersionRegistry versionRegistry) {
+      CaseTypeVersionRegistry versionRegistry,
+      BackendSignalHandler signalRouter,
+      CaseStatusUpdater caseStatusUpdater) {
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
     this.caseDataValidator = Objects.requireNonNull(caseDataValidator, "caseDataValidator");
@@ -74,6 +86,8 @@ public class CaseService {
     this.clock = Objects.requireNonNull(clock, "clock");
     this.stageAdvancer = Objects.requireNonNull(stageAdvancer, "stageAdvancer");
     this.versionRegistry = Objects.requireNonNull(versionRegistry, "versionRegistry");
+    this.signalRouter = Objects.requireNonNull(signalRouter, "signalRouter");
+    this.caseStatusUpdater = Objects.requireNonNull(caseStatusUpdater, "caseStatusUpdater");
   }
 
   /**
@@ -220,10 +234,21 @@ public class CaseService {
   }
 
   /**
-   * Advance a case through its BPMN process via message correlation (Story 2.4 AC1). The {@code
-   * action} string is the BPMN message name. The transactional {@code CaseStatusListener} fires
-   * inside {@code workflowEngine.signalTransition} and updates {@code cases.status}; this method
-   * re-loads the row so callers receive the post-transition state.
+   * Advance a case's status via the appropriate routing path (Story 4.4b AC1).
+   *
+   * <p>The {@code action} string is the target status id. Routing:
+   *
+   * <ul>
+   *   <li><b>Zero-process path</b>: case has no BPMN attachment ({@code processInstanceId} is
+   *       {@code null}). {@link CaseStatusUpdater} mutates status directly — no engine, no router
+   *       mapping lookup.
+   *   <li><b>BPMN path</b>: case has a {@code processInstanceId}. Emits a {@link
+   *       BackendSignal}(kind={@code USER_TASK_STATUS}, statusId={@code action}) to {@link
+   *       BackendSignalHandler#onSignal} for routing through the Mapping Layer.
+   * </ul>
+   *
+   * <p>The existing stage-scoped guards (WKS-STG-011 terminal-status block, WKS-STG-010
+   * foreign-stage rejection) run BEFORE the routing decision on both paths.
    */
   public Case transition(UUID caseId, String action, Map<String, Object> variables, UUID actorId) {
     Objects.requireNonNull(caseId, "caseId");
@@ -233,11 +258,10 @@ public class CaseService {
         caseRepository
             .findById(caseId)
             .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
-    // Story 3.6 AC6 — stage-scoped status guards run BEFORE the engine-coupling null-check (Q5
-    // carry-forward note in the story file). Pure reads against the in-memory CaseTypeConfig — no
-    // engine call. Decision 19's unbranched-paths invariant: caseType.statusesFor(stageId)
-    // resolves stage-scoped or flat fallback in one place; this site does not branch on stage
-    // presence.
+    // Story 3.6 AC6 — stage-scoped status guards run BEFORE any routing decision. Pure reads
+    // against the in-memory CaseTypeConfig — no engine call. Decision 19's unbranched-paths
+    // invariant: caseType.statusesFor(stageId) resolves stage-scoped or flat fallback in one
+    // place; this site does not branch on stage presence.
     CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
     String stageId = existing.currentStageId();
     List<StatusDefinition> stageStatuses = caseType.statusesFor(stageId);
@@ -285,12 +309,50 @@ public class CaseService {
               + stageId
               + "' — foreign-stage status rejected");
     }
+
+    // Story 4.4b AC1 — routing decision: bypass router for zero-process cases.
+    // CRITICAL: BackendSignalRouter.onSignal() resolves a MappingDefinition from the registry.
+    // Zero-process CaseTypes have no BPMN attachment and therefore no mapping registration.
+    // Calling the router for a no-attachment case would throw WksMappingMissException. The bypass
+    // MUST happen before any router call — check processInstanceId (null = no BPMN).
     if (existing.processInstanceId() == null || existing.processInstanceId().isBlank()) {
-      throw new WksWorkflowEngineException(
-          "Case " + caseId + " has no associated process instance — cannot transition");
+      // I1 guard: reject unknown action strings on the zero-process path. On the zero-process
+      // path the action IS the new status id. Writing an arbitrary string (e.g. a stale BPMN
+      // message name) into cases.status would corrupt the row and silently pass back HTTP 200.
+      // Clients sending an unknown action on the zero-process path receive HTTP 400 (WKS-API-001).
+      if (!actionIsAStatusIdAnywhere && !actionIsOnCurrentStage) {
+        throw new com.wkspower.platform.domain.exception.WksValidationException(
+            "Action '"
+                + action
+                + "' is not a known status id for case type '"
+                + existing.caseTypeId()
+                + "' — zero-process transitions require a declared status id",
+            "action");
+      }
+      // Zero-process path: mutate status directly via CaseStatusUpdater.
+      caseStatusUpdater.updateStatus(caseId, action);
+    } else {
+      // BPMN path: emit USER_TASK_STATUS signal through the router (Mapping Layer).
+      // The signal source is the fixed string "manual" so the router key is always
+      // "userTask:manual" — matching the PropertyEmissionRule that every BPMN-attached
+      // case type must register to handle manual API transitions. The action value (target
+      // status id) is carried in the payload under "value" per router contract.
+      // TODO(4-5): propagate variables + actorId into BPMN signal payload.
+      // The caller-supplied `variables` map and `actorId` are currently discarded here;
+      // they are not forwarded to the BPMN signal. Story 4-5 will propagate them.
+      CaseTypeRef caseTypeRef =
+          new CaseTypeRef(existing.caseTypeId(), String.valueOf(existing.caseTypeVersion()));
+      CaseInstanceRef caseInstance = new CaseInstanceRef(caseId, caseTypeRef);
+      BackendSignal signal =
+          BackendSignal.of(
+              BackendSignalKind.USER_TASK_STATUS,
+              "manual",
+              caseInstance,
+              "manual", // fixed source so router key = "userTask:manual" (stable contract)
+              Map.of("value", action));
+      signalRouter.onSignal(signal);
     }
-    Map<String, Object> safeVars = TaskService.sanitiseVariables(variables);
-    workflowEngine.signalTransition(existing.processInstanceId(), action, safeVars);
+
     return caseRepository
         .findById(caseId)
         .orElseThrow(

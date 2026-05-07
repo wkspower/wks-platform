@@ -94,6 +94,12 @@ class CaseRepositoryAdapter implements CaseRepository {
     // the service's read and this adapter's write when no enclosing transaction binds them.
     existing.setExpectedVersion(domain.version());
     // createdBy / createdAt are immutable post-create; never overwritten on update.
+    // Story 4.4b AC6 (review I13) — LOAD-BEARING SKIP: currentStageId and currentStageOrdinal are
+    // intentionally NOT updated here. These two cache fields are maintained exclusively by
+    // WksStageAdvancer via a dedicated JPQL UPDATE in CaseEntityRepository (see
+    // CaseEntityRepository:46). Any attempt to drive them through applyUpdate would collide with
+    // WksStageAdvancer's write path and risk wiping the post-advance values on the next
+    // CaseService.update call. Safe-by-design, not safe-by-coincidence.
     return existing;
   }
 

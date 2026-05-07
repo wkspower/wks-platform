@@ -1,7 +1,6 @@
 package com.wkspower.platform.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
@@ -13,15 +12,17 @@ import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.exception.ErrorDetail;
-import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.model.Stage;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
+import com.wkspower.platform.domain.port.BackendSignal;
+import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
+import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
@@ -58,6 +59,9 @@ class ZeroStageZeroProcessTest {
   private final TrackingEngine engine = new TrackingEngine();
   private final TrackingResolver resolver = new TrackingResolver();
   private final RecordingPublisher publisher = new RecordingPublisher();
+  // Story 4.4b AC1 / AC2 — zero-process path uses direct status updater, not router.
+  private final RecordingStatusUpdater statusUpdater = new RecordingStatusUpdater(repo);
+  private final NoopSignalHandler signalHandler = new NoopSignalHandler();
 
   private CaseService svc(CaseTypeConfig config) {
     WksStageAdvancer advancer =
@@ -77,7 +81,9 @@ class ZeroStageZeroProcessTest {
         publisher,
         () -> FIXED,
         advancer,
-        registry);
+        registry,
+        signalHandler,
+        statusUpdater);
   }
 
   // ---- AC11 §4 — create on zero-zero CaseType ----
@@ -115,20 +121,33 @@ class ZeroStageZeroProcessTest {
     assertThat(resolver.calls).isEqualTo(1);
   }
 
-  // ---- AC11 §5 — DOWNSHIFTED status transition surface ----
+  // ---- AC11 §5 — FLIPPED (Story 4.4b AC2): zero-process transition succeeds via pure-domain path
 
   @Test
-  void story32_transitionOnZeroProcessCase_raisesEngineCouplingError() {
-    // Per Q5 spike (2026-05-05): CaseService.transition() is engine-coupled — requires non-null
-    // processInstanceId. AC4/AC11§5 are downshifted to surface-only; full transition behaviour
-    // is folded into Story 4.4 (BackendSignalRouter / Mapping Layer).
+  void story32_transitionOnZeroProcessCase_succeedsViaPureDomainPath() {
+    // Story 4.4b AC2 — replaces the engine-coupling error expectation locked in Story 3.2 Q5.
+    // CaseService.transition() now bypasses the router for zero-process cases and calls
+    // CaseStatusUpdater directly. The case must reflect the new status after transition.
     CaseService svc = svc(zeroZeroType());
     Case created = svc.create("zero-zero", Map.of(), null, ACTOR);
+    assertThat(created.status()).isEqualTo("open");
+    assertThat(created.processInstanceId())
+        .as("zero-process case must have no processInstanceId")
+        .isNull();
 
-    assertThatThrownBy(() -> svc.transition(created.id(), "close", Map.of(), ACTOR))
-        .isInstanceOf(WksWorkflowEngineException.class)
-        .hasMessageContaining("no associated process instance")
-        .hasMessageContaining("cannot transition");
+    // Action must be a declared status id on the zero-process path (I1 guard). "closed" is
+    // declared in zeroZeroType() — this is the correct declared status to transition to.
+    Case afterTransition = svc.transition(created.id(), "closed", Map.of(), ACTOR);
+
+    assertThat(afterTransition.status())
+        .as("status must be updated to 'closed' via pure-domain path")
+        .isEqualTo("closed");
+    assertThat(engine.startCalls)
+        .as("engine must NOT be invoked on zero-process transition")
+        .isZero();
+    assertThat(signalHandler.signals)
+        .as("router must NOT be called on zero-process transition")
+        .isEmpty();
   }
 
   // ---- AC11 §1 — repeated parse-time confirmation: workflowOpt empty ----
@@ -165,6 +184,7 @@ class ZeroStageZeroProcessTest {
 
   private static CaseTypeConfig zeroZeroType() {
     // Story 3.2 — smallest valid CaseType: no stages, no workflow, default statuses.
+    // Story 4.4b AC5 — closed.terminal flips to true to match DEFAULT_STATUSES contract.
     return new CaseTypeConfig(
         "zero-zero",
         "Zero Zero",
@@ -173,8 +193,8 @@ class ZeroStageZeroProcessTest {
         null, // workflow omitted
         List.of(), // fields empty (legal additive default)
         List.of(
-            new StatusDefinition("open", "Open", StatusColor.BLUE),
-            new StatusDefinition("closed", "Closed", StatusColor.ZINC)),
+            new StatusDefinition("open", "Open", StatusColor.BLUE, false),
+            new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)),
         List.of(),
         List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
         List.of()); // stages empty
@@ -330,5 +350,54 @@ class ZeroStageZeroProcessTest {
 
     @Override
     public void appendTransition(Transition transition) {}
+  }
+
+  /**
+   * Story 4.4b AC1/AC2 — RecordingStatusUpdater: applies status update directly to the in-memory
+   * RecordingRepo so CaseService.findById returns the updated status after transition.
+   */
+  private static final class RecordingStatusUpdater implements CaseStatusUpdater {
+    private final RecordingRepo repo;
+
+    RecordingStatusUpdater(RecordingRepo repo) {
+      this.repo = repo;
+    }
+
+    @Override
+    public Optional<String> updateStatus(UUID caseId, String newStatus) {
+      return repo.findById(caseId)
+          .map(
+              existing -> {
+                String prev = existing.status();
+                Case updated =
+                    new Case(
+                        existing.id(),
+                        existing.caseTypeId(),
+                        existing.caseTypeVersion(),
+                        newStatus,
+                        existing.assignee(),
+                        existing.data(),
+                        existing.processInstanceId(),
+                        existing.createdAt(),
+                        existing.createdBy(),
+                        existing.updatedAt(),
+                        existing.version());
+                repo.save(updated);
+                return prev;
+              });
+    }
+  }
+
+  /**
+   * Story 4.4b AC1/AC2 — NoopSignalHandler: records signal calls so assertions can verify the
+   * router is NOT invoked for zero-process transitions.
+   */
+  private static final class NoopSignalHandler implements BackendSignalHandler {
+    final List<BackendSignal> signals = new ArrayList<>();
+
+    @Override
+    public void onSignal(BackendSignal signal) {
+      signals.add(signal);
+    }
   }
 }

@@ -24,8 +24,10 @@ import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
+import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
+import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
@@ -78,6 +80,32 @@ class CaseServiceTest {
         config.id(),
         config.version() == 0 ? 1 : config.version(),
         ("id: " + config.id()).getBytes());
+    // Story 4.4b AC1 — wire no-op stubs for the new router + status-updater dependencies.
+    BackendSignalHandler noopRouter = signal -> {};
+    CaseStatusUpdater noopStatusUpdater =
+        (id, status) -> {
+          // Update in the repo stub so findById returns the new status after transition.
+          return repo.findById(id)
+              .map(
+                  existing -> {
+                    String prev = existing.status();
+                    Case updated =
+                        new Case(
+                            existing.id(),
+                            existing.caseTypeId(),
+                            existing.caseTypeVersion(),
+                            status,
+                            existing.assignee(),
+                            existing.data(),
+                            existing.processInstanceId(),
+                            existing.createdAt(),
+                            existing.createdBy(),
+                            existing.updatedAt(),
+                            existing.version());
+                    repo.save(updated);
+                    return prev;
+                  });
+        };
     return new CaseService(
         repo,
         reader(config),
@@ -87,7 +115,9 @@ class CaseServiceTest {
         publisher,
         () -> FIXED,
         advancer,
-        registry);
+        registry,
+        noopRouter,
+        noopStatusUpdater);
   }
 
   @Test
@@ -308,10 +338,13 @@ class CaseServiceTest {
   }
 
   @Test
-  void transitionPassesThroughWhenActionIsNotKnownStatusId() {
-    // Ensures the foreign-stage guard does NOT fire for actions that are pure BPMN message names
-    // (no status id of that name anywhere on the case type). Engine-coupling check trips next
-    // (no processInstanceId on test case) — that's the existing Story 3.2 behaviour, unchanged.
+  void transitionRejectsUnknownActionOnZeroProcessPath() {
+    // I1 guard: zero-process path must reject unknown action strings (not declared status ids).
+    // Writing an arbitrary string (e.g. a stale BPMN message name "submit-form") into
+    // cases.status corrupts the row and was silently returning HTTP 200. The fix: throw
+    // WksValidationException (HTTP 400) when the action is not a known status id.
+    // The foreign-stage guard must NOT fire for "submit-form" (it only fires when the action IS
+    // a known status id but on a different stage). The I1 guard fires next: unknown → rejected.
     var stage =
         new StageDefinition(
             "intake",
@@ -340,7 +373,7 @@ class CaseServiceTest {
             "collecting",
             null,
             Map.of(),
-            null, // no engine — engine guard will fire
+            null, // no processInstanceId → zero-process path
             FIXED,
             ACTOR,
             FIXED,
@@ -349,9 +382,11 @@ class CaseServiceTest {
             0);
     repo.saved.add(existing);
     CaseService svc = svc(ct);
+    // "submit-form" is not a known status id anywhere on ct-pass — zero-process path must reject.
     assertThatThrownBy(() -> svc.transition(caseId, "submit-form", Map.of(), ACTOR))
-        .isInstanceOf(WksWorkflowEngineException.class)
-        .hasMessageContaining("no associated process instance");
+        .isInstanceOf(com.wkspower.platform.domain.exception.WksValidationException.class)
+        .hasMessageContaining("submit-form")
+        .hasMessageContaining("not a known status id");
   }
 
   @Test

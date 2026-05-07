@@ -205,7 +205,14 @@ public class CaseController {
    * Engine-side conflicts (no enabled receiver, optimistic lock) are translated to {@code
    * WKS-RTM-409} inside {@code CibSevenWorkflowEngine}; missing process instance surfaces {@code
    * WKS-RTM-500}.
+   *
+   * <p>Story 4.4b — {@code @Transactional} added to provide the transaction context that {@link
+   * com.wkspower.platform.infrastructure.persistence.CaseStatusAdapter} requires ({@code
+   * Propagation.MANDATORY}). On the BPMN path the signal router calls the status adapter inside the
+   * engine transaction; on the manual zero-process and BPMN-manual paths the controller transaction
+   * boundary is the outermost transactional context.
    */
+  @Transactional
   @PostMapping("/{id}/transition")
   public ApiResponse<CaseDto> transition(
       @PathVariable("id") UUID id,

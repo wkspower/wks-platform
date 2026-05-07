@@ -50,7 +50,16 @@ public record Case(
   /**
    * Story 3.2 — backward-compat constructor for callers (and tests) that predate the stage-cache
    * fields. Defaults both stage-cache slots to {@code null} (zero-stage shape).
+   *
+   * @deprecated Story 4.4b review finding I13: this constructor silently sets both {@code
+   *     currentStageId} and {@code currentStageOrdinal} to {@code null}, which is safe only when
+   *     the caller truly owns a zero-stage case. Any caller that subsequently populates one of the
+   *     two cache fields via a direct field-set (rather than constructing a new {@code Case}) risks
+   *     creating a paired-but-mismatched row that the compact-constructor invariant now catches.
+   *     Prefer the 13-arg canonical constructor and pass both cache slots explicitly. Story 3.8
+   *     (mutate-class) and Epic 5 (forms) will be the first callers to migrate.
    */
+  @Deprecated
   public Case(
       UUID id,
       String caseTypeId,
@@ -86,6 +95,18 @@ public record Case(
     Objects.requireNonNull(createdAt, "createdAt");
     Objects.requireNonNull(createdBy, "createdBy");
     Objects.requireNonNull(updatedAt, "updatedAt");
+    // Story 4.4b AC4 — enforce currentStageId ⇔ currentStageOrdinal invariant (review I11).
+    // One null without the other creates a paired-but-mismatched cache row. Frontends
+    // dereferencing currentStageOrdinal! per the documented contract will NPE on such a row.
+    if ((currentStageId == null) != (currentStageOrdinal == null)) {
+      throw new IllegalArgumentException(
+          "currentStageId and currentStageOrdinal must both be null or both be non-null"
+              + " (currentStageId="
+              + currentStageId
+              + ", currentStageOrdinal="
+              + currentStageOrdinal
+              + ")");
+    }
     Map<String, Object> source = data == null ? Map.of() : data;
     data = Collections.unmodifiableMap(new HashMap<>(source));
   }

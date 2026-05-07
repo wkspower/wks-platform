@@ -4,6 +4,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
+import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.event.BackendSignalRouted;
 import com.wkspower.platform.domain.exception.ErrorCode;
@@ -15,13 +16,16 @@ import com.wkspower.platform.domain.port.BackendSignalHandler;
 import com.wkspower.platform.domain.port.BackendSignalKind;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +80,9 @@ public class BackendSignalRouter implements BackendSignalHandler {
   private final CaseRepository caseRepository;
   private final EventPublisher eventPublisher;
   private final Clock clock;
+  // Story 4.4b AC3 — CaseTypeReader for post-stage-advance status-reset to next stage's
+  // initialStatus. Injected across the hexagonal boundary (Story 3-6 §AC6 deferred-work landing).
+  private final CaseTypeReader caseTypeReader;
 
   public BackendSignalRouter(
       MappingRegistry mappingRegistry,
@@ -83,13 +90,15 @@ public class BackendSignalRouter implements BackendSignalHandler {
       CaseStatusUpdater statusUpdater,
       CaseRepository caseRepository,
       EventPublisher eventPublisher,
-      Clock clock) {
+      Clock clock,
+      CaseTypeReader caseTypeReader) {
     this.mappingRegistry = Objects.requireNonNull(mappingRegistry, "mappingRegistry");
     this.stageAdvancer = Objects.requireNonNull(stageAdvancer, "stageAdvancer");
     this.statusUpdater = Objects.requireNonNull(statusUpdater, "statusUpdater");
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher");
     this.clock = Objects.requireNonNull(clock, "clock");
+    this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
   }
 
   @Override
@@ -143,21 +152,29 @@ public class BackendSignalRouter implements BackendSignalHandler {
     }
 
     try {
+      // Story 4.4b AC3 — stageAdvance dispatch methods return true when a stage-transition was
+      // applied. In that case resetStatusForAdvancedStage already emits two BackendSignalRouted
+      // events (effect=stage-advance + effect=status-reset) with a shared correlationId; the
+      // standard auditSuccess call must be skipped to avoid emitting a third redundant event.
+      boolean stageAdvanceHandled = false;
       switch (signal.kind()) {
-        case END_EVENT -> dispatchEndEvent(signal, caseRow, mappingOpt.get());
-        case NAMED_SIGNAL -> dispatchNamedSignal(signal, caseRow, mappingOpt.get());
+        case END_EVENT -> stageAdvanceHandled = dispatchEndEvent(signal, caseRow, mappingOpt.get());
+        case NAMED_SIGNAL ->
+            stageAdvanceHandled = dispatchNamedSignal(signal, caseRow, mappingOpt.get());
           // Story 4.3.1 AC10 — split USER_TASK_PROPERTY into USER_TASK_STATUS + USER_TASK_COMPLETE.
           // Both inbound kinds dispatch through the same property-emission lookup; the rule's emits
           // value distinguishes "drives status transition" (USER_TASK_STATUS) from
           // "drives stage advance" (USER_TASK_COMPLETE).
         case USER_TASK_STATUS, USER_TASK_COMPLETE ->
-            dispatchUserTaskProperty(signal, caseRow, mappingOpt.get());
+            stageAdvanceHandled = dispatchUserTaskProperty(signal, caseRow, mappingOpt.get());
         case OUTCOME ->
             // Phase-1 reservation per AC2.
             throw new WksMappingMissException(
                 signal.adapterName(), signal.caseInstance().id(), "outcome routing is Phase-1");
       }
-      auditSuccess(signal, caseRow);
+      if (!stageAdvanceHandled) {
+        auditSuccess(signal, caseRow);
+      }
     } catch (WksMappingMissException miss) {
       auditMiss(signal, caseRow, miss.getMessage());
       // AC4: caught at router boundary; do NOT propagate to the adapter.
@@ -224,7 +241,12 @@ public class BackendSignalRouter implements BackendSignalHandler {
 
   // ---- per-kind dispatch -------------------------------------------------
 
-  private void dispatchEndEvent(BackendSignal signal, Case caseRow, MappingDefinition mapping) {
+  /**
+   * Returns {@code true} when a stage transition was applied (audit events emitted inside {@link
+   * #applyStageTransition}); {@code false} if a {@link WksMappingMissException} is thrown before
+   * any transition (never actually returns false — exception propagates instead).
+   */
+  private boolean dispatchEndEvent(BackendSignal signal, Case caseRow, MappingDefinition mapping) {
     EndEventMapping rule =
         firstAttachment(mapping)
             .flatMap(AttachmentDefinition::endEventMapping)
@@ -235,9 +257,15 @@ public class BackendSignalRouter implements BackendSignalHandler {
                         signal.caseInstance().id(),
                         "no endEvent rule in mapping"));
     applyStageTransition(signal, caseRow, rule.stageTransition());
+    return true;
   }
 
-  private void dispatchNamedSignal(BackendSignal signal, Case caseRow, MappingDefinition mapping) {
+  /**
+   * Returns {@code true} when a stage transition was applied; {@code false} never actually returned
+   * — exception propagates on miss.
+   */
+  private boolean dispatchNamedSignal(
+      BackendSignal signal, Case caseRow, MappingDefinition mapping) {
     SignalMapping rule =
         firstAttachment(mapping)
             .map(a -> a.signalMappings().get(signal.source()))
@@ -254,9 +282,16 @@ public class BackendSignalRouter implements BackendSignalHandler {
           "no signal rule for source '" + signal.source() + "'");
     }
     applyStageTransition(signal, caseRow, rule.stageTransition());
+    return true;
   }
 
-  private void dispatchUserTaskProperty(
+  /**
+   * Returns {@code true} when a stage advance was applied (USER_TASK_COMPLETE path); {@code false}
+   * when a status-only update was performed (USER_TASK_STATUS path). The caller uses this to decide
+   * whether to emit the standard single-event {@code auditSuccess} or skip it (because {@link
+   * #resetStatusForAdvancedStage} already emitted two events).
+   */
+  private boolean dispatchUserTaskProperty(
       BackendSignal signal, Case caseRow, MappingDefinition mapping) {
     String onKey = "userTask:" + signal.source();
     PropertyEmissionRule rule =
@@ -275,9 +310,12 @@ public class BackendSignalRouter implements BackendSignalHandler {
       // Story 4.3.1 AC10 — task-complete kind carries no status value; advance the stage forward
       // so the BPMN end-of-task drives case progression without requiring an explicit status
       // property on the userTask.
+      // Story 4.4b AC3 — also resets status to next stage's initialStatus and emits two events.
       String sourceRef = signal.adapterName() + ":" + signal.source();
       stageAdvancer.advance(caseRow.id(), LEGACY_BACKEND_SOURCE, sourceRef);
-      return;
+      // nextStageHint is null for advance() — next stage determined by ordinal+1 inside advancer.
+      resetStatusForAdvancedStage(signal, caseRow, null);
+      return true; // stage advance handled — caller must NOT call auditSuccess.
     }
 
     if (rule.emits() != BackendSignalKind.USER_TASK_STATUS) {
@@ -295,6 +333,7 @@ public class BackendSignalRouter implements BackendSignalHandler {
           "userTask property emission missing scalar 'value' in payload");
     }
     statusUpdater.updateStatus(caseRow.id(), newStatus);
+    return false; // status-only update — caller emits standard auditSuccess.
   }
 
   // ---- helpers -----------------------------------------------------------
@@ -310,6 +349,19 @@ public class BackendSignalRouter implements BackendSignalHandler {
         : Optional.of(mapping.attachments().get(0));
   }
 
+  /**
+   * Story 4.4b AC3 — stage transition with post-advance status-reset. After the stage advance
+   * succeeds, resolves the next stage's {@code initialStatus} via {@link CaseTypeReader} and resets
+   * the case status. Emits TWO {@link BackendSignalRouted} events with a shared {@code
+   * correlationId} UUID: one {@code effect=stage-advance}, one {@code effect=status-reset}. This is
+   * an intentional divergence from the pre-4.4b one-event shape — rationale: per Q3 lock, aligns
+   * with Epic 9 Activity Feed semantics and {@code EventPublisher.publishAfterCommit}
+   * one-event-per-effect convention.
+   *
+   * <p>The {@code to} target stage is determined from the spec BEFORE calling the advancer, so
+   * {@link #resetStatusForAdvancedStage} can use it directly without re-reading from the DB
+   * (avoiding JPA first-level-cache staleness issues in transactional test contexts).
+   */
   private void applyStageTransition(BackendSignal signal, Case caseRow, String spec) {
     String[] parts = spec.split("\\s*->\\s*");
     if (parts.length != 2 || parts[1].isBlank()) {
@@ -320,13 +372,118 @@ public class BackendSignalRouter implements BackendSignalHandler {
     }
     String to = parts[1].trim();
     String sourceRef = signal.adapterName() + ":" + signal.source();
+    // The advancer determines the actual next stage (null = last stage completed on advance()).
+    // For skipTo, the target is explicit. For COMPLETED/SKIPPED, advance() moves to ordinal+1.
+    // We pre-capture nextStageId for the status-reset: for skipTo it's `to`; for advance it's
+    // resolved by the advancer. We pass the spec's `to` as a hint — null means "completed".
+    String nextStageHint;
     if (COMPLETED.equals(to) || SKIPPED.equals(to)) {
       // AC2 — case-level lifecycle: advance through last stage.
       stageAdvancer.advance(caseRow.id(), LEGACY_BACKEND_SOURCE, sourceRef);
+      // nextStage hint: the advancer knows ordinal+1 but we don't without a separate query.
+      // Use null to trigger a DB re-read path; for non-H2 callers this is consistent.
+      nextStageHint = null;
+    } else {
+      // skipTo handles forward-by-one as equivalent to advance (Story 3.1 AC6).
+      stageAdvancer.skipTo(caseRow.id(), to, LEGACY_BACKEND_SOURCE, sourceRef);
+      nextStageHint = to; // explicit target — no re-read needed.
+    }
+    // Story 4.4b AC3 — after stage advance, reset currentStatusId to the next stage's
+    // initialStatus. Pass the pre-determined nextStageHint to avoid stale first-level-cache reads.
+    resetStatusForAdvancedStage(signal, caseRow, nextStageHint);
+  }
+
+  /**
+   * Story 4.4b AC3 — resets the case status to the next stage's {@code initialStatus} after a stage
+   * advance. Emits two {@link BackendSignalRouted} events with a shared {@code correlationId}: one
+   * for the stage-advance effect, one for the status-reset effect.
+   *
+   * @param nextStageHint the target stage id known before the advance (from the mapping spec), or
+   *     {@code null} when the advance target is determined by the advancer (COMPLETED/SKIPPED
+   *     paths). When non-null this avoids a JPA first-level-cache staleness issue in transactional
+   *     contexts.
+   */
+  private void resetStatusForAdvancedStage(
+      BackendSignal signal, Case preMutationRow, String nextStageHint) {
+    UUID correlationId = UUID.randomUUID();
+    AuditSource auditSource = new AuditSource.Backend(signal.adapterName());
+    String caseTypeVersion = String.valueOf(preMutationRow.caseTypeVersion());
+
+    // Emit stage-advance audit (effect = stage-advance).
+    Map<String, String> stageAdvanceDetail = new HashMap<>();
+    stageAdvanceDetail.put("effect", "stage-advance");
+    stageAdvanceDetail.put("correlationId", correlationId.toString());
+    eventPublisher.publishAfterCommit(
+        new BackendSignalRouted(
+            preMutationRow.id(),
+            preMutationRow.caseTypeId(),
+            caseTypeVersion,
+            signal.kind(),
+            signal.source(),
+            auditSource,
+            null,
+            stageAdvanceDetail,
+            clock.now()));
+
+    // Determine the next stage id: use the hint when available (avoids DB re-read), otherwise
+    // fall back to reading the post-advance case row from the repository.
+    final String nextStageId;
+    if (nextStageHint != null) {
+      nextStageId = nextStageHint;
+    } else {
+      // COMPLETED/SKIPPED path: re-read from repo (advance() determined the next ordinal).
+      Optional<Case> postAdvanceOpt = caseRepository.findById(preMutationRow.id());
+      if (postAdvanceOpt.isEmpty()) {
+        return;
+      }
+      nextStageId = postAdvanceOpt.get().currentStageId();
+    }
+
+    if (nextStageId == null) {
+      // Reached the end (last stage completed) — no status reset needed.
       return;
     }
-    // skipTo handles forward-by-one as equivalent to advance (Story 3.1 AC6).
-    stageAdvancer.skipTo(caseRow.id(), to, LEGACY_BACKEND_SOURCE, sourceRef);
+
+    // Resolve the CaseTypeConfig for this pinned version to get the next stage's status set.
+    Optional<CaseTypeConfig> caseTypeOpt =
+        caseTypeReader.findVersion(preMutationRow.caseTypeId(), preMutationRow.caseTypeVersion());
+    if (caseTypeOpt.isEmpty()) {
+      log.atWarn()
+          .addKeyValue("caseTypeId", preMutationRow.caseTypeId())
+          .addKeyValue("caseTypeVersion", preMutationRow.caseTypeVersion())
+          .log(
+              "4.4b AC3: could not resolve CaseTypeConfig for status-reset after stage advance"
+                  + " — status not reset");
+      return;
+    }
+    CaseTypeConfig caseType = caseTypeOpt.get();
+    List<? extends com.wkspower.platform.domain.config.model.StatusDefinition> nextStageStatuses =
+        caseType.statusesFor(nextStageId);
+    if (nextStageStatuses.isEmpty()) {
+      return;
+    }
+    String initialStatus = nextStageStatuses.get(0).id();
+
+    // Apply the status reset.
+    statusUpdater.updateStatus(preMutationRow.id(), initialStatus);
+
+    // Emit status-reset audit (effect = status-reset).
+    Map<String, String> statusResetDetail = new HashMap<>();
+    statusResetDetail.put("effect", "status-reset");
+    statusResetDetail.put("correlationId", correlationId.toString());
+    statusResetDetail.put("newStatus", initialStatus);
+    statusResetDetail.put("nextStageId", nextStageId);
+    eventPublisher.publishAfterCommit(
+        new BackendSignalRouted(
+            preMutationRow.id(),
+            preMutationRow.caseTypeId(),
+            caseTypeVersion,
+            signal.kind(),
+            signal.source(),
+            auditSource,
+            null,
+            statusResetDetail,
+            clock.now()));
   }
 
   private void auditSuccess(BackendSignal signal, Case caseRow) {
