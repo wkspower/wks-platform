@@ -35,6 +35,7 @@ The enum currently uses seven prefixes:
 | `WKS-STG` | 001–011, 099 | Stage lifecycle runtime + stage-scoped status sets |
 | `WKS-VER` | 001–099 | CaseType Version Registry (Story 3.4 / Decision 20) |
 | `WKS-RTM` | 409, 500 | Runtime conflict / last-resort |
+| `WKS-LIC` | 001–002 (Story 7.1); 003–099 reserved for Stories 7.2–7.7 | License verification + EE feature gating |
 
 ---
 
@@ -193,6 +194,21 @@ Band: `WKS-VER-001..099` reserved for version-registry-related errors. Future st
 | --- | --- | --- |
 | `WKS-RTM-409` | Optimistic-locking conflict — row was modified between read and write. | `api/GlobalExceptionHandler.java`, `domain/exception/WksConflictException.java` |
 | `WKS-RTM-500` | Uncaught exception — last resort. | `api/GlobalExceptionHandler.java`, `domain/exception/WksWorkflowEngineException.java` |
+
+---
+
+---
+
+## WKS-LIC — License verification + EE feature gating (Story 7.1)
+
+Band: `WKS-LIC-001..099`. Codes 001–002 are allocated by Story 7.1; 003–099 reserved for Stories
+7.2–7.7. These codes describe operational state, not HTTP errors to callers — the platform never
+hard-fails on license problems per AR-D24 (license problems never block boot).
+
+| Code | Level | Meaning | Thrower(s) |
+| --- | --- | --- | --- |
+| `WKS-LIC-001` | INFO | License file path is configured but the file is missing or unreadable. Platform operates in OSS mode. | `infrastructure/license/LicenseServiceImpl.java` (load), `infrastructure/config/LicenseSeamAnnouncer.java` |
+| `WKS-LIC-002` | WARN | License JWT signature is invalid, JWT is malformed, or required claims (`tier`, `features`) are absent. Platform operates in degraded state (all features disabled). | `infrastructure/license/LicenseServiceImpl.java` (load) |
 
 ---
 

@@ -33,7 +33,9 @@ import org.springframework.stereotype.Component;
  *   <li>{@code production} with missing secret → application fails to start (WKS-API-053)
  * </ul>
  *
- * <p>This is the <b>only</b> class allowed to import {@code io.jsonwebtoken.*}. ArchUnit enforces.
+ * <p>{@code JwtTokenProvider} and the {@code infrastructure.license} package are the only classes
+ * allowed to import {@code io.jsonwebtoken.*} — enforced by ArchUnit (Story 7.1 relaxed the rule to
+ * also cover {@code ..license..}).
  */
 @Component
 public class JwtTokenProvider {

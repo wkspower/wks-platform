@@ -83,6 +83,11 @@ wks:
     # Default: boot with the registered subset. Set to true for fail-fast in CI or strict
     # production rollouts.
     fail-on-invalid: ${WKS_CASE_TYPES_FAIL_ON_INVALID:false}
+  license:
+    # Path to the Ed25519-signed license JWT file. Empty = OSS mode (no EE features enabled).
+    file: ${WKS_LICENSE_FILE:}
+    # Hot-reload polling interval in seconds (default 30). File is reloaded when lastModified changes.
+    poll-interval-seconds: ${WKS_LICENSE_POLL_INTERVAL:30}
 
 logging:
   level:

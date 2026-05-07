@@ -299,6 +299,9 @@ jobs:
           # (b) RUNTIME INVARIANT OK — ProductionBootstrapValidator success line.
           if ! printf '%s' "$logs" | grep -qE 'RUNTIME INVARIANT OK'; then
             echo "::error::ProductionBootstrapValidator did not emit RUNTIME INVARIANT OK — WKS-API-053 / WKS-API-055 may have failed silently."
+            echo "--- Container logs for diagnosis ---"
+            printf '%s\n' "$logs"
+            echo "--- End container logs ---"
             exit 1
           fi
           echo "RUNTIME INVARIANT OK present in logs."
