@@ -1,0 +1,202 @@
+---
+title: Your first case type
+description: Declare a case type in YAML, deploy it, and see it running — in under 60 minutes.
+---
+
+This guide takes you from a blank YAML file to a structured, multi-stage case type with fields, status sets, and a working demo. By the end you'll have a pattern you can adapt for any client project.
+
+If you haven't booted the platform yet, start with [Run WKS in 5 minutes](/start/run-wks-in-5-minutes) first.
+
+## What you're building
+
+A `support-ticket` case type with:
+
+- A `data` field (subject and priority)
+- Two stages: `triage` → `resolution`
+- Stage-scoped status sets (different statuses per phase)
+- An `agent` role with appropriate permissions
+
+## The full YAML
+
+Save this as `support-ticket.yaml`:
+
+```yaml
+id: support-ticket
+displayName: "Support ticket"
+version: 1
+description: Customer-reported issues from intake through resolution.
+
+fields:
+  - id: subject
+    type: text
+    label: "Subject"
+    required: true
+  - id: priority
+    type: select
+    label: "Priority"
+    options: [low, medium, high, critical]
+    required: true
+
+stages:
+  - id: triage
+    displayName: "Triage"
+    statuses:
+      - id: new
+        label: "New"
+      - id: in-review
+        label: "In review"
+      - id: escalated
+        label: "Escalated"
+
+  - id: resolution
+    displayName: "Resolution"
+    statuses:
+      - id: in-progress
+        label: "In progress"
+      - id: waiting-on-customer
+        label: "Waiting on customer"
+      - id: resolved
+        label: "Resolved"
+        terminal: true
+
+roles:
+  - name: agent
+    permissions: [view, create, edit, transition, assign]
+  - name: admin
+    permissions: [view, create, edit, transition, assign, delete]
+```
+
+A few things to notice:
+
+- `statuses` are scoped to the stage they live in — `triage` and `resolution` have completely independent status sets. A status id like `in-progress` only means something inside `resolution`.
+- `terminal: true` on `resolved` means a case in that status cannot transition further without an explicit override.
+- No `workflow:` declared — no BPMN engine is involved. Stage transitions happen when a user with transition permission advances the case.
+
+## Deploy it
+
+Authenticate first if your session has expired:
+
+```bash
+curl -fsS -c /tmp/wks-cookies.txt -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@wkspower.local","password":"admin"}' \
+  -o /dev/null
+```
+
+Deploy the case type:
+
+```bash
+curl -fsS -b /tmp/wks-cookies.txt -X POST http://localhost:8080/api/admin/deploy \
+  -F "caseType=@support-ticket.yaml;type=application/yaml"
+```
+
+Expected response:
+
+```json
+{ "ok": true, "errors": [] }
+```
+
+If you see a non-empty `errors` array, the error codes tell you exactly what to fix. See [Troubleshoot deployment errors](/guides/troubleshoot-deployment-errors).
+
+## Create a case with data
+
+```bash
+curl -sS -b /tmp/wks-cookies.txt -X POST http://localhost:8080/api/cases \
+  -H "Content-Type: application/json" \
+  -d '{
+    "caseTypeId": "support-ticket",
+    "data": {
+      "subject": "Login fails on mobile Safari",
+      "priority": "high"
+    }
+  }' | jq
+```
+
+Expected response (HTTP 201):
+
+```json
+{
+  "data": {
+    "id": "e5f6a7b8-...",
+    "caseTypeId": "support-ticket",
+    "currentStageId": "triage",
+    "currentStageOrdinal": 0,
+    "status": "new",
+    "data": {
+      "subject": "Login fails on mobile Safari",
+      "priority": "high"
+    },
+    "version": 0
+  }
+}
+```
+
+The case starts in `triage` (the first declared stage) with status `new` (the first declared status in that stage). Neither required configuration — that's the default behaviour.
+
+## Advance through stages
+
+```bash
+export CASE_ID="e5f6a7b8-..."
+
+# Move from triage → resolution
+curl -sS -b /tmp/wks-cookies.txt -X POST \
+  http://localhost:8080/api/cases/$CASE_ID/stages/advance \
+  -H "Content-Type: application/json" \
+  -d '{}' | jq
+```
+
+Expected response (HTTP 200):
+
+```json
+{
+  "data": {
+    "currentStageId": "resolution",
+    "currentStageOrdinal": 1,
+    "status": "in-progress",
+    ...
+  }
+}
+```
+
+The case is now in `resolution` with the first status of that stage — `in-progress`. The `triage` status set is no longer relevant.
+
+## Close the case
+
+```bash
+curl -sS -b /tmp/wks-cookies.txt -X POST \
+  http://localhost:8080/api/cases/$CASE_ID/transition \
+  -H "Content-Type: application/json" \
+  -d '{"action":"resolved"}' | jq
+```
+
+The case is now in the `resolved` terminal status. Attempting another transition returns a `WKS-STG-011` error — terminal status reached.
+
+## Verify the case state
+
+```bash
+curl -sS -b /tmp/wks-cookies.txt \
+  http://localhost:8080/api/cases/$CASE_ID | jq
+```
+
+You'll see the current status, active stage, and available transitions. The response reflects every state change that has been applied — status, current stage, and stage progression are all first-class fields on the case.
+
+## Iterate on the YAML
+
+You don't need to stop the platform to change a case type. Edit the YAML and redeploy:
+
+```bash
+curl -fsS -b /tmp/wks-cookies.txt -X POST http://localhost:8080/api/admin/deploy \
+  -F "caseType=@support-ticket.yaml;type=application/yaml"
+```
+
+Additive changes — adding a new status, adding a new optional field, renaming a label — take effect immediately without a version bump. In-flight cases pick them up on their next read.
+
+Structural changes — removing a field, reordering stages, changing a status `id` — require bumping `version` in the YAML. The deploy endpoint enforces this with `WKS-CFG-026`. In-flight cases stay on the version they were created against until you run an explicit migration.
+
+## What's next
+
+You have a structured, multi-stage case type with role-based access and a full audit trail. This is the pattern for every case type you'll build — fields, stages, status sets, and roles, all in YAML.
+
+The next step is presenting this to a client: showing the live system, walking through the business flow, and explaining how to extend it for their domain.
+
+**[Demo to a client →](/start/demo-to-a-client)**

@@ -1,0 +1,114 @@
+---
+title: Coming from Camunda
+description: How WKS concepts map to what you already know from Camunda 7, Bonita, and ProcessMaker.
+---
+
+If you've spent years building on Camunda 7, you know the mental model: a BPMN process definition is the source of truth for a business process, and every case, task, and state change is anchored to it. WKS starts from a different premise. This page explains what transfers directly, what needs reframing, and what has no equivalent in the BPMN world.
+
+## The core difference
+
+In Camunda 7, the process definition drives everything. Case state lives in process variables. The lifecycle of a "case" is the lifecycle of the process instance.
+
+In WKS, the **case type** drives everything. The case type declares its own fields, stages, and status sets in YAML. BPMN is one execution backend you can attach to a stage when you need it — but a case type with no BPMN attached at all is fully valid and runs on WKS primitives alone. The process serves the case; the case doesn't serve the process.
+
+This is the inversion that changes how you structure your solutions.
+
+## Concept mapping
+
+| Camunda 7 | WKS | Notes |
+|-----------|-----|-------|
+| Process definition | **CaseType** | WKS pairs a versioned multi-stage contract with optional attached processes. A CaseType is not a BPMN file. |
+| Process definition version | **CaseType version** | Same semantics — publish a new version; in-flight instances stay on the version they started. |
+| Process instance | **Case** | 1:1 noun. Camunda variables ≈ WKS `case.data` (the persistent fields subset). |
+| Process variable | **Case field** | WKS fields are declared in YAML with types and validation. Not a free-form variable bag. |
+| BPMN lane | _Nothing directly_ | WKS uses **roles** (declared on the case type) and **stage-scoped ownership** instead. |
+| BPMN sub-process | **Stage** (partial) | WKS stages are first-class domain entities with their own lifecycle, status sets, and attached processes. Not a BPMN construct. |
+| Task / UserTask | **AdHocTask** (partial) | WKS ad-hoc tasks are engine-independent. They exist whether a BPMN is attached or not. Tasks backed by BPMN userTasks surface through the Mapping Layer. |
+| Execution listener | **BackendSignal** | BPMN execution listeners emit signals that route through the Mapping Layer to drive WKS stage and status transitions. |
+| Task listener (`complete`) | **BackendSignal (status)** | A `camunda:property name="status"` on a userTask emits a status transition signal on task completion. Restricted to in-stage status changes. |
+| `endEvent` | **BackendSignal (stage transition)** | A terminal `endEvent` or named `signal` event emits a stage transition signal. Takes precedence over userTask status properties. |
+| `sequenceFlow` condition | **Mapping Layer rule** | Routing logic lives in the `map:` block of the attachment YAML, not as ad-hoc Groovy on the flow. |
+| External task | **AttachedProcess** (via Mapping Layer) | WKS routes signals from execution backends through the Mapping Layer. The backend type is replaceable without changing the case type. |
+| Incident | runtime error (WKS-RTM-xxx) | Runtime errors surface as structured error codes in the audit trail. |
+
+## What transfers directly
+
+**Versioning discipline.** You already know that changing a deployed process definition creates a new version and that in-flight instances stay on the old version. WKS works the same way for CaseTypes — mutate-class changes require a version bump, and in-flight cases stay on the version they were created against.
+
+**BPMN modelling.** The BPMN files you write for WKS are standard BPMN 2.0. If you model in Camunda Modeler today, you can keep using it. The WKS-specific semantics (stage transitions, status emissions) are expressed as `camunda:property` extensions on userTasks and as named signal events — both are valid in the existing tooling.
+
+**Role-based access.** You're used to task assignment via candidate groups. WKS uses a YAML-declared role model with explicit permissions per role per case type — more structured, but the concept of "which role can do what" maps directly.
+
+**Audit trail.** WKS maintains an append-only audit log per case. Same principle as Camunda's history service — immutable event record of every state change.
+
+## What needs reframing
+
+**BPMN is optional.** This is the hardest mental shift. In Camunda 7, you need a BPMN process for anything to happen. In WKS, the case type runs on its own — stages advance via user actions or backend signals, statuses flip via transitions, tasks complete, forms submit — all without a BPMN engine if you don't declare one. You add a BPMN attachment when the orchestration complexity justifies it; you don't start with one.
+
+**Stages are not sub-processes.** A WKS stage owns its status set, its ad-hoc tasks, its attached processes, and its forms independently. You can have a three-stage case type where stage 1 and stage 2 run on WKS primitives alone and stage 3 has a BPMN process attached. Each stage's attached process is independent.
+
+**Status is not a process variable.** In Camunda, case status is typically a `String` variable you set and read in BPMN expressions. In WKS, status is a first-class domain value declared in YAML for each stage, with terminal and non-terminal semantics enforced by the platform. `WKS-STG-010` rejects transitions to statuses not declared on the current stage.
+
+**The Mapping Layer, not listeners.** In Camunda 7, you wire case state to process variables via execution listeners and task listeners. In WKS, you declare a `map:` block in the attachment YAML — the Mapping Layer translates BPMN events into WKS domain events. The BPMN file stays free of case state management; the mapping is a separate, auditable artefact.
+
+## WKS and Camunda: who owns what
+
+WKS and Camunda have a clear division of responsibility:
+
+- **WKS owns the case** — the CaseType definition, stages, statuses, tasks, forms, and audit trail. WKS is authoritative for "where is this case and what happened to it." Tasks can be orchestrated by Camunda when a process is attached.
+- **Camunda owns the execution** — the BPMN process runs inside the engine, managing task assignment, gateways, timers, and service calls. Camunda is authoritative for "what is the process doing right now."
+- **The Mapping Layer is the seam** — a YAML declaration that translates Camunda events into WKS domain events. Neither side knows the other's internals.
+
+### Following one event
+
+Take a claim case with an `underwriting` stage. The stage has a BPMN process attached that routes the adjuster's review through two possible outcomes:
+
+```yaml
+attachments:
+  - type: bpmn
+    file: claim-underwriting.bpmn
+    scope: stage:underwriting
+    map:
+      userTasks:
+        review-claim: { wksTask: "Underwriting Review" }
+      events:
+        endEvent: { stageTransition: "underwriting -> decision" }
+        signal:
+          claim-escalated: { stageTransition: "underwriting -> escalation" }
+      properties:
+        - on: userTask:review-claim
+          camunda:property: status
+          emits: { type: status, scope: stage:underwriting }
+```
+
+When the adjuster completes the review and the BPMN reaches its `endEvent`:
+
+1. The `BpmnEngineAdapter` receives the process-ended event from Camunda.
+2. It looks up the mapping rule: `endEvent → stageTransition: "underwriting -> decision"`.
+3. It emits an `ExecutionSignal { type: stageTransition, target: "decision" }` into WKS.
+4. WKS advances the case to the `decision` stage and records the transition in the audit trail.
+
+The BPMN file never set a variable, never called a WKS API, never knew what stage it was in. It ran its process, reached an end, and the Mapping Layer did the rest.
+
+### The same logic applies to status
+
+When the adjuster saves intermediate work, a `camunda:property name="status"` on the userTask emits a status signal. Same flow: adapter receives → mapping rule resolves → `ExecutionSignal { type: status, value: "in-review" }` → WKS updates stage status → audit trail entry recorded.
+
+This is why the BPMN file stays free of case state management. All the translation lives in the mapping declaration, not in listeners embedded in the process.
+
+## Camunda 8 / Cloud
+
+If you're on Camunda 8, the fundamentals are the same but the execution is Zeebe-based. WKS's `BpmnEngineAdapter` targets Camunda 7 / Flowable in the current release. A Zeebe adapter is on the roadmap. The case type YAML and the Mapping Layer YAML are engine-agnostic — when the Zeebe adapter ships, the case type doesn't change.
+
+## Bonita and ProcessMaker
+
+The mapping is similar for Bonita and ProcessMaker users:
+
+- Bonita **Case** → WKS **Case** (direct noun mapping)
+- Bonita **Human task** → WKS **AdHocTask** (but engine-independent in WKS)
+- Bonita **Connector** → WKS **BackendSignal** via Mapping Layer
+- ProcessMaker **Request** → WKS **Case**
+- ProcessMaker **Process** → WKS **CaseType** (with optional attached process)
+- ProcessMaker **Status** → WKS **Status** (scoped to the current stage in WKS, not case-global)
+
+The key difference in both cases is the same as Camunda: WKS owns the case management layer; the process engine is optional and replaceable.

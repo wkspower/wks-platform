@@ -11,6 +11,7 @@ jobs:
   backend:
     name: Backend (Temurin 21)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: backend

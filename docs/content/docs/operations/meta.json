@@ -1,0 +1,9 @@
+{
+  "title": "Operations",
+  "pages": [
+    "deploy-to-production",
+    "security",
+    "upgrading",
+    "health-and-monitoring"
+  ]
+}

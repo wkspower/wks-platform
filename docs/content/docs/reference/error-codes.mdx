@@ -1,0 +1,27 @@
+---
+title: Error codes
+description: All WKS error codes by band — config, mapping, API, runtime, stage, version, and auth.
+gate: "3"
+status: auto-generated
+---
+
+{/* Index page listing all bands. Per-code pages are auto-generated from ErrorCode.java at build time. */}
+{/* URL pattern: /reference/error-codes/{lowercase-code-id} e.g. /reference/error-codes/wks-cfg-003 */}
+{/* This pattern is a wire contract once the first error message ships with a docs URL embedded. Do not change. */}
+{/* Implementation: wire ErrorCode.java codegen script in Story 12b.2 */}
+
+## Error code bands
+
+| Band | Range | Domain |
+|------|-------|--------|
+| WKS-CFG | 001–099 | Case type configuration |
+| WKS-CFG | 100–199 | BPMN configuration |
+| WKS-CFG | 200–299 | Template configuration |
+| WKS-MAP | 001–999 | Mapping layer |
+| WKS-API | 001–099 | API input validation |
+| WKS-RTM | 001–099 | Runtime |
+| WKS-STG | 001–099 | Stage operations |
+| WKS-VER | 001–099 | Version registry |
+| WKS-AUTH | 001–099 | Authentication |
+
+TODO: per-code pages auto-generated — implement codegen pipeline in Story 12b.2
