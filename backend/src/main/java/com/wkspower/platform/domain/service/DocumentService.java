@@ -5,7 +5,10 @@ import com.wkspower.platform.domain.exception.WksDocumentException;
 import com.wkspower.platform.domain.model.CaseDocument;
 import com.wkspower.platform.domain.port.DocumentRepository;
 import com.wkspower.platform.domain.port.DocumentStore;
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -58,33 +61,74 @@ public class DocumentService {
     // 1–3. Validation (throws WKS-DOC-001/002/003 on failure).
     DocumentValidator.validateSize(sizeBytes, maxSizeMb);
     DocumentValidator.validateContentType(contentType);
-    DocumentValidator.sanitizeFileName(fileName);
+    String sanitizedName = DocumentValidator.sanitizeFileName(fileName);
 
-    // 4–5. Compute SHA-256 checksum while streaming to store.
+    // 4. P1 — Magic-byte verification: peek first 16 bytes, then push them back.
     UUID documentId = UUID.randomUUID();
     try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      InputStream digestedStream = new DigestInputStream(stream, digest);
+      PushbackInputStream pbStream = new PushbackInputStream(stream, 16);
+      byte[] header = DocumentValidator.readHeaderBytes(pbStream);
+      pbStream.unread(header);
+      DocumentValidator.validateMagicBytesWithZipFamily(header, contentType);
 
-      // 6. Store via DocumentStore port.
+      // 5. P13 — CountingInputStream: enforce actual size limit on streamed bytes.
+      long maxBytes = maxSizeMb * 1024L * 1024L;
+      long[] bytesRead = {0L};
+      InputStream counted =
+          new FilterInputStream(pbStream) {
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+              int n = super.read(b, off, len);
+              if (n > 0) {
+                bytesRead[0] += n;
+                if (bytesRead[0] > maxBytes) {
+                  throw new WksDocumentException(
+                      ErrorCode.WKS_DOC_001,
+                      "Actual streamed size exceeds the "
+                          + maxSizeMb
+                          + " MB limit (declared: "
+                          + sizeBytes
+                          + " bytes)");
+                }
+              }
+              return n;
+            }
+          };
+
+      // 6. Compute SHA-256 while streaming to store.
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      InputStream digestedStream = new DigestInputStream(counted, digest);
+
+      // 7. Store via DocumentStore port (P4: wrap DB save in try/catch for compensating delete).
       String storageKey =
-          documentStore.store(caseId, documentId, fileName, digestedStream, contentType, sizeBytes);
+          documentStore.store(
+              caseId, documentId, sanitizedName, digestedStream, contentType, sizeBytes);
       String checksum = HexFormat.of().formatHex(digest.digest());
 
-      // 7. Persist metadata via DocumentRepository port.
+      // 8. Persist metadata — compensate on failure (P4).
       Instant now = Instant.now();
       CaseDocument doc =
           new CaseDocument(
               documentId,
               caseId,
-              fileName,
+              sanitizedName,
               contentType,
               sizeBytes,
               storageKey,
               checksum,
               actorId,
               now);
-      return documentRepository.save(doc);
+      try {
+        return documentRepository.save(doc);
+      } catch (Exception saveEx) {
+        // Compensating delete: remove the already-stored object to avoid orphaned storage.
+        try {
+          documentStore.delete(storageKey);
+        } catch (Exception deleteEx) {
+          // Log but don't suppress the original save failure.
+        }
+        throw saveEx;
+      }
     } catch (WksDocumentException e) {
       throw e;
     } catch (Exception e) {

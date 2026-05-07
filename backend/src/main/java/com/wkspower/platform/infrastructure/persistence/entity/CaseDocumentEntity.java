@@ -2,6 +2,7 @@ package com.wkspower.platform.infrastructure.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -12,9 +13,13 @@ import java.util.UUID;
  * the table has no optimistic-lock {@code version} column — documents are immutable after upload.
  * The {@code uploaded_at} column is set once at insert time (DEFAULT now() in DDL; also set
  * explicitly here for testability).
+ *
+ * <p>P5 — {@link CaseDocumentEntityListener} removes the backing storage object before the row is
+ * deleted, covering cascade-delete via {@code ON DELETE CASCADE} on {@code case_id}.
  */
 @Entity
 @Table(name = "case_documents")
+@EntityListeners(CaseDocumentEntityListener.class)
 public class CaseDocumentEntity {
 
   @Id
@@ -39,7 +44,8 @@ public class CaseDocumentEntity {
   @Column(name = "checksum", nullable = false, length = 64)
   private String checksum;
 
-  @Column(name = "uploaded_by", nullable = false)
+  // P6: nullable so user offboarding (ON DELETE SET NULL) does not block deletion.
+  @Column(name = "uploaded_by", nullable = true)
   private UUID uploadedBy;
 
   @Column(name = "uploaded_at", nullable = false)

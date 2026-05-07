@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
 public class MinioDocumentStore implements DocumentStore {
 
   private static final Logger log = LoggerFactory.getLogger(MinioDocumentStore.class);
-  private static final int PRESIGNED_URL_EXPIRY_MINUTES = 5;
+  // P7: reduced from 5 minutes to 60 seconds to limit RBAC bypass window.
+  private static final int PRESIGNED_URL_EXPIRY_SECONDS = 60;
 
   private final MinioClient minioClient;
   private final String bucket;
@@ -82,9 +83,12 @@ public class MinioDocumentStore implements DocumentStore {
   }
 
   /**
-   * Returns a presigned GET URL valid for {@value #PRESIGNED_URL_EXPIRY_MINUTES} minutes. Used by
-   * the preview endpoint (AC3). Overrides the default no-op on {@link
-   * com.wkspower.platform.domain.port.DocumentStore}.
+   * Returns a presigned GET URL valid for {@value #PRESIGNED_URL_EXPIRY_SECONDS} seconds. Used by
+   * the preview endpoint (AC3). P7: TTL reduced from 5 minutes to 60 seconds to shrink the window
+   * during which the URL can be used without platform RBAC. The URL grants unauthenticated access
+   * for the TTL duration and must not be cached or forwarded by the caller.
+   *
+   * <p>Overrides the default no-op on {@link com.wkspower.platform.domain.port.DocumentStore}.
    */
   @Override
   public String presignedUrl(String storageKey) {
@@ -94,7 +98,7 @@ public class MinioDocumentStore implements DocumentStore {
               .method(Method.GET)
               .bucket(bucket)
               .object(storageKey)
-              .expiry(PRESIGNED_URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
+              .expiry(PRESIGNED_URL_EXPIRY_SECONDS, TimeUnit.SECONDS)
               .build());
     } catch (Exception e) {
       throw new WksDocumentException(

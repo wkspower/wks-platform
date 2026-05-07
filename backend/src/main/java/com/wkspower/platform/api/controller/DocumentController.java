@@ -115,12 +115,16 @@ public class DocumentController {
   // --- AC2: Download ---
 
   /**
-   * {@code GET /api/documents/{documentId}/download} — streams the file with {@code
-   * Content-Disposition: attachment}.
+   * {@code GET /api/documents/{documentId}/download} — streams the file. Default disposition is
+   * {@code attachment}. Pass {@code ?inline=true} to serve with {@code Content-Disposition: inline}
+   * so browsers can render PDF/images inside an {@code <iframe>} or {@code <img>} (P8 — local-store
+   * preview path). The download endpoint always uses {@code attachment}; the preview endpoint URLs
+   * use {@code ?inline=true} for previewable types in local-store mode.
    */
   @GetMapping("/api/documents/{documentId}/download")
   public void download(
       @PathVariable UUID documentId,
+      @RequestParam(name = "inline", required = false, defaultValue = "false") boolean inline,
       @AuthenticationPrincipal WksUserPrincipal actor,
       HttpServletResponse response)
       throws Exception {
@@ -129,10 +133,11 @@ public class DocumentController {
     requireDocumentAccess(actor, doc);
 
     response.setContentType(doc.contentType());
+    // P2: RFC 5987 encoding — eliminates injection via quotes/CRLF in filenames.
     String encoded = URLEncoder.encode(doc.fileName(), StandardCharsets.UTF_8).replace("+", "%20");
-    response.setHeader(
-        "Content-Disposition",
-        "attachment; filename=\"" + doc.fileName() + "\"; filename*=UTF-8''" + encoded);
+    // P8: inline disposition for preview path, attachment for direct downloads.
+    String disposition = inline ? "inline" : "attachment";
+    response.setHeader("Content-Disposition", disposition + "; filename*=UTF-8''" + encoded);
     response.setHeader("Content-Length", String.valueOf(doc.sizeBytes()));
 
     try (InputStream stream = documentService.openStream(doc);
@@ -167,7 +172,15 @@ public class DocumentController {
 
     if (previewable) {
       String presigned = documentService.getPresignedUrl(doc);
-      url = presigned != null ? presigned : "/api/documents/" + documentId + "/download";
+      if (presigned != null) {
+        // P7: log audit line when presigned URL is generated.
+        log.info(
+            "Presigned preview URL generated: documentId={} actorId={}", documentId, actor.id());
+        url = presigned;
+      } else {
+        // P8: local-store preview — use inline disposition so browsers render in-frame.
+        url = "/api/documents/" + documentId + "/download?inline=true";
+      }
     } else {
       url = "/api/documents/" + documentId + "/download";
     }

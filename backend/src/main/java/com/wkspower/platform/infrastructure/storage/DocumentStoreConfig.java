@@ -5,9 +5,11 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * Selects the active {@link com.wkspower.platform.domain.port.DocumentStore} implementation (Story
@@ -40,6 +42,8 @@ public class DocumentStoreConfig {
   @Value("${wks.documents.bucket:wks-documents}")
   private String bucket;
 
+  @Autowired private Environment env;
+
   @Bean
   public com.wkspower.platform.domain.port.DocumentStore documentStore() {
     if (storageEndpoint == null || storageEndpoint.isBlank()) {
@@ -52,8 +56,17 @@ public class DocumentStoreConfig {
         storageEndpoint,
         bucket);
 
-    String minioUser = System.getenv().getOrDefault("WKS_MINIO_ROOT_USER", "minioadmin");
-    String minioPassword = System.getenv().getOrDefault("WKS_MINIO_ROOT_PASSWORD", "minioadmin");
+    // P9: Hard-fail if default or blank MinIO credentials are in use.
+    String minioUser = env.getProperty("WKS_MINIO_ROOT_USER", "");
+    String minioPassword = env.getProperty("WKS_MINIO_ROOT_PASSWORD", "");
+    if ("minioadmin".equals(minioUser)
+        || "minioadmin".equals(minioPassword)
+        || minioUser.isBlank()
+        || minioPassword.isBlank()) {
+      throw new IllegalStateException(
+          "WKS_MINIO_ROOT_USER and WKS_MINIO_ROOT_PASSWORD must be set to non-default values"
+              + " when MinIO storage is enabled (wks.storage.endpoint is non-blank)");
+    }
 
     MinioClient minioClient =
         MinioClient.builder()

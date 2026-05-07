@@ -40,7 +40,11 @@ public class LocalDocumentStore implements DocumentStore {
     Path dir = basePath.resolve(caseId.toString()).resolve(documentId.toString());
     try {
       Files.createDirectories(dir);
-      Path target = dir.resolve(fileName);
+      // P12: boundary check — catches unicode/encoded traversal that survives the sanitizer.
+      Path target = dir.resolve(fileName).normalize();
+      if (!target.startsWith(basePath)) {
+        throw new IllegalArgumentException("Path traversal detected in filename: " + fileName);
+      }
       try (OutputStream out = Files.newOutputStream(target)) {
         stream.transferTo(out);
       }

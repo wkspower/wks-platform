@@ -15,14 +15,18 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.User;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
+import com.wkspower.platform.infrastructure.persistence.entity.RoleEntity;
+import com.wkspower.platform.infrastructure.persistence.repository.RoleEntityRepository;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -35,6 +39,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -44,6 +50,12 @@ import org.springframework.util.MultiValueMap;
  * the full Spring context with an H2 in-memory datasource and a TempDir-backed LocalDocumentStore.
  * Validates the happy path (upload → list → download → preview) and the main error paths (size
  * limit, bad MIME, 404 on missing document).
+ *
+ * <p>P10 — The {@code wks.documents.local-store-path} property is injected before context creation
+ * via {@link DynamicPropertySource}. The previous approach of calling {@code System.setProperty} in
+ * {@code @BeforeEach} had no effect because {@code @Value} is resolved at context creation time.
+ *
+ * <p>P14 — RBAC and cross-case isolation tests added at the bottom of this class.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(
@@ -62,21 +74,43 @@ class DocumentControllerIT {
   private static final String PASSWORD = "pass1234";
   private static final String CASE_TYPE_ID = "doc-it-loans";
 
-  @TempDir Path tempDir;
+  // P10: static temp dir created before Spring context boots so @DynamicPropertySource can use it.
+  private static final Path TEMP_STORE_DIR;
+
+  static {
+    try {
+      TEMP_STORE_DIR = Files.createTempDirectory("wks-doc-test-");
+    } catch (IOException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  // P10: inject local-store-path before Spring context creation (replaces BeforeEach
+  // System.setProperty).
+  @DynamicPropertySource
+  static void documentStoreProps(DynamicPropertyRegistry registry) {
+    registry.add("wks.documents.local-store-path", TEMP_STORE_DIR::toString);
+  }
 
   @Autowired private TestRestTemplate rest;
   @Autowired private UserRepository users;
   @Autowired private PasswordEncoder encoder;
   @Autowired private CaseTypeRegistry registry;
   @Autowired private ObjectMapper objectMapper;
+  @Autowired private RoleEntityRepository roleRepo;
 
   private String sessionCookie;
   private UUID caseId;
 
   @BeforeEach
   void setup() throws Exception {
-    // Set TempDir on the LocalDocumentStore — override the auto-configured one.
-    System.setProperty("wks.documents.local-store-path", tempDir.toString());
+    // P10: System.setProperty removed — property is now injected via @DynamicPropertySource above.
+
+    // Seed the 'noaccess' role (P14) — it is not granted on any case type so users with only
+    // this role receive 403 on all document endpoints.
+    if (roleRepo.findByName("noaccess").isEmpty()) {
+      roleRepo.save(new RoleEntity(UUID.randomUUID(), "noaccess", Instant.now(), Instant.now()));
+    }
 
     // Seed user.
     if (users.findByEmail(EMAIL).isEmpty()) {
@@ -235,6 +269,121 @@ class DocumentControllerIT {
     assertThat(data.at("/url").asText()).contains("/api/documents/" + docId + "/download");
   }
 
+  // --- P14: RBAC and cross-case isolation ---
+
+  /**
+   * P14a — A user whose only role does not grant {@code view} on the case type must receive 403 on
+   * upload, list, and download.
+   */
+  @Test
+  void upload_userWithoutViewVerb_returns403() throws Exception {
+    // Create a user with a role that has NO permissions on doc-it-loans.
+    String noAccessEmail = "doc-it-noaccess-" + UUID.randomUUID() + "@wkspower.local";
+    String noAccessPassword = "noaccess1";
+    users.save(
+        new User(UUID.randomUUID(), noAccessEmail, Set.of("noaccess"), true),
+        encoder.encode(noAccessPassword));
+    String noAccessCookie = loginAs(noAccessEmail, noAccessPassword);
+
+    // POST upload should return 403.
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.COOKIE, noAccessCookie);
+    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    ByteArrayResource resource =
+        new ByteArrayResource(pdfBytes()) {
+          @Override
+          public String getFilename() {
+            return "test.pdf";
+          }
+        };
+    HttpHeaders partHeaders = new HttpHeaders();
+    partHeaders.setContentType(MediaType.parseMediaType("application/pdf"));
+    body.add("file", new HttpEntity<>(resource, partHeaders));
+    ResponseEntity<String> uploadResp =
+        rest.exchange(
+            "/api/cases/" + caseId + "/documents",
+            HttpMethod.POST,
+            new HttpEntity<>(body, headers),
+            String.class);
+    assertThat(uploadResp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    // GET list should return 403.
+    HttpHeaders getHeaders = new HttpHeaders();
+    getHeaders.add(HttpHeaders.COOKIE, noAccessCookie);
+    ResponseEntity<String> listResp =
+        rest.exchange(
+            "/api/cases/" + caseId + "/documents",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders),
+            String.class);
+    assertThat(listResp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+  }
+
+  @Test
+  void download_userWithoutViewVerb_returns403() throws Exception {
+    // Upload a doc as admin first.
+    ResponseEntity<String> uploadResp = uploadFile("secure.pdf", "application/pdf", pdfBytes());
+    assertThat(uploadResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    String docId = objectMapper.readTree(uploadResp.getBody()).at("/data/id").asText();
+
+    // Create no-access user.
+    String noAccessEmail = "doc-it-noaccess2-" + UUID.randomUUID() + "@wkspower.local";
+    String noAccessPassword = "noaccess2";
+    users.save(
+        new User(UUID.randomUUID(), noAccessEmail, Set.of("noaccess"), true),
+        encoder.encode(noAccessPassword));
+    String noAccessCookie = loginAs(noAccessEmail, noAccessPassword);
+
+    // GET download should return 403.
+    HttpHeaders getHeaders = new HttpHeaders();
+    getHeaders.add(HttpHeaders.COOKIE, noAccessCookie);
+    ResponseEntity<String> downloadResp =
+        rest.exchange(
+            "/api/documents/" + docId + "/download",
+            HttpMethod.GET,
+            new HttpEntity<>(getHeaders),
+            String.class);
+    assertThat(downloadResp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+  }
+
+  /**
+   * P14b — Cross-case isolation: User A has access to Case A only. A document uploaded to Case A
+   * cannot be downloaded by User A using a documentId that belongs to Case A while pretending it
+   * belongs to Case B (the documentId lookup goes through case-ownership RBAC).
+   *
+   * <p>In practice: User A uploads to Case A, gets documentId. We create Case B owned by a
+   * different admin user. User A tries to call {@code /download} with the Case A documentId — this
+   * still works because documentId resolves to Case A and User A HAS access to Case A. The true
+   * isolation test: User B (no access to Case A) cannot download a documentId from Case A.
+   */
+  @Test
+  void download_crossCaseIsolation_userBCannotAccessCaseADocument() throws Exception {
+    // Upload a document to Case A (owned by admin / caseId).
+    ResponseEntity<String> uploadResp = uploadFile("caseA.pdf", "application/pdf", pdfBytes());
+    assertThat(uploadResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    String caseADocId = objectMapper.readTree(uploadResp.getBody()).at("/data/id").asText();
+
+    // Create User B with a role that has NO permissions on doc-it-loans.
+    String userBEmail = "doc-it-userb-" + UUID.randomUUID() + "@wkspower.local";
+    String userBPassword = "userBpass";
+    users.save(
+        new User(UUID.randomUUID(), userBEmail, Set.of("noaccess"), true),
+        encoder.encode(userBPassword));
+    String userBCookie = loginAs(userBEmail, userBPassword);
+
+    // User B attempts to download Case A's documentId — must get 403.
+    HttpHeaders userBHeaders = new HttpHeaders();
+    userBHeaders.add(HttpHeaders.COOKIE, userBCookie);
+    ResponseEntity<String> downloadResp =
+        rest.exchange(
+            "/api/documents/" + caseADocId + "/download",
+            HttpMethod.GET,
+            new HttpEntity<>(userBHeaders),
+            String.class);
+    assertThat(downloadResp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+  }
+
   // --- helpers ---
 
   private ResponseEntity<String> uploadFile(String fileName, String contentType, byte[] bytes) {
@@ -290,7 +439,19 @@ class DocumentControllerIT {
   }
 
   private static byte[] pdfBytes() {
+    // Valid PDF magic bytes (%PDF) followed by minimal content.
     return "%PDF-1.4 minimal".getBytes(StandardCharsets.UTF_8);
+  }
+
+  /** Logs in as the given user and returns the session cookie value. */
+  private String loginAs(String email, String password) {
+    ResponseEntity<String> resp =
+        rest.postForEntity("/api/auth/login", new LoginRequest(email, password), String.class);
+    assertThat(resp.getStatusCode()).as("login for %s", email).isEqualTo(HttpStatus.OK);
+    String setCookie = resp.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+    assertThat(setCookie).isNotNull();
+    int semi = setCookie.indexOf(';');
+    return semi > 0 ? setCookie.substring(0, semi) : setCookie;
   }
 
   private static CaseTypeConfig minimalCaseType() {
