@@ -107,6 +107,7 @@ Reserved gap at 014–019 — do not renumber. 011 is reserved for the registry 
 | `WKS-CFG-021` | BPMN archetype contradiction (e.g. `business_final` with `asyncAfter=true`, `draft_section` with downstream tasks). | `engine/BpmnValidator.java` |
 | `WKS-CFG-022` | BPMN file declares more than one executable `<bpmn:process>`. Collaboration diagrams allowed; exactly one must be `isExecutable=true`. | `engine/BpmnValidator.java` |
 | `WKS-CFG-024` | Story 4.4a AC5 — BPMN userTask sits on a CaseType with stage-scoped statuses but lacks `<camunda:property name="status"/>`. Replaces the legacy non-deterministic `resolveNewStatus` Phase-0 fallback (parallel-gateway ambiguity). Reuse forbidden per `feedback_error_codes_are_wire_contract.md`. | `engine/BpmnValidator.java` |
+| `WKS-CFG-025` | Story 4.5 AC1 — BPMN engine deployment failure during atomic deploy. Returned by `ConfigService.deploy()` when the engine deploy step fails AFTER validation succeeded. Registry is NOT written — no orphan row. HTTP 502 / 500 depending on caller context. Reuse forbidden per `feedback_error_codes_are_wire_contract.md`. | `domain/service/ConfigService.java` |
 
 ### Mapping cross-reference / deploy (Stories 3.8, 4.2)
 
@@ -222,7 +223,7 @@ Surfaced for follow-up. Items 1, 2, 5, 6 have resolutions deferred to the **Regi
 
 3. **`WKS-CFG-014..019` are reserved gaps.** Documented in the enum Javadoc as "reserved for Story 2.2 (BPMN validation) — leave gaps, do not renumber." Listed here so the registry generator does not later misread them as missing.
 
-4. **`WKS-CFG-023, 025, 026, 030, 034..098` are unallocated.** Available for future stories. The 020-band is BPMN, 030-band is stages — preserve clustering when allocating. (Story 4.4a allocated `WKS-CFG-024` from this band.)
+4. **`WKS-CFG-023, 026, 030, 034..098` are unallocated.** Available for future stories. The 020-band is BPMN, 030-band is stages — preserve clustering when allocating. (Story 4.4a allocated `WKS-CFG-024`; Story 4.5 allocated `WKS-CFG-025` from this band.)
 
 5. **`WKS-MAP-002` emit site.** The enum Javadoc names this code, but a direct grep over `MappingValidator` did not show a literal `WKS_MAP_002` reference. → **Resolved by spec AC3**: mark RESERVED with `// TODO: emit site` comment; reclaim slot at Phase-0 if still unused.
 

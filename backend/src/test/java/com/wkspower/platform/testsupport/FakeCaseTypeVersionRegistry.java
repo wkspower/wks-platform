@@ -26,6 +26,16 @@ public final class FakeCaseTypeVersionRegistry implements CaseTypeVersionRegistr
   @Override
   public synchronized CaseTypeVersionRegistration register(
       String caseTypeId, byte[] rawYamlBytes, String publishedBy) {
+    return register(caseTypeId, rawYamlBytes, publishedBy, null, null);
+  }
+
+  @Override
+  public synchronized CaseTypeVersionRegistration register(
+      String caseTypeId,
+      byte[] rawYamlBytes,
+      String publishedBy,
+      String bpmnContentHash,
+      String mappingHash) {
     String hash = sha256(rawYamlBytes);
     List<CaseTypeVersionRecord> list = rows.computeIfAbsent(caseTypeId, k -> new ArrayList<>());
     for (CaseTypeVersionRecord r : list) {
@@ -36,7 +46,14 @@ public final class FakeCaseTypeVersionRegistry implements CaseTypeVersionRegistr
     int next = list.size() + 1;
     list.add(
         new CaseTypeVersionRecord(
-            caseTypeId, next, hash, rawYamlBytes.clone(), Instant.now(), publishedBy));
+            caseTypeId,
+            next,
+            hash,
+            rawYamlBytes.clone(),
+            Instant.now(),
+            publishedBy,
+            bpmnContentHash,
+            mappingHash));
     return CaseTypeVersionRegistration.registered(next, hash);
   }
 
@@ -68,7 +85,14 @@ public final class FakeCaseTypeVersionRegistry implements CaseTypeVersionRegistr
     rows.computeIfAbsent(caseTypeId, k -> new ArrayList<>())
         .add(
             new CaseTypeVersionRecord(
-                caseTypeId, version, sha256(yaml), yaml.clone(), Instant.now(), "test:seed"));
+                caseTypeId,
+                version,
+                sha256(yaml),
+                yaml.clone(),
+                Instant.now(),
+                "test:seed",
+                null,
+                null));
   }
 
   private static String sha256(byte[] bytes) {

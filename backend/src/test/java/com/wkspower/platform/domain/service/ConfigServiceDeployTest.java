@@ -1,7 +1,6 @@
 package com.wkspower.platform.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.RegistrationResult;
@@ -178,10 +177,18 @@ class ConfigServiceDeployTest {
     assertThat(event.actorEmail()).isEqualTo("ops@x");
   }
 
-  // ---- engine failure rollback ------------------------------------------
+  // ---- engine failure atomicity (Story 4.5 AC1 / AC2) -----------------------
+  //
+  // Under the AC1 reordering, the engine deploy is step 5 and registry writes (version +
+  // mapping) are steps 6-7. Engine failure now returns DeployResult.invalid(WKS-CFG-025)
+  // WITHOUT writing to case_type_versions or MappingRegistry — no rollback needed.
 
   @Test
-  void engineFailureRollsBackToPriorState() {
+  void engineFailureBeforeRegistryWriteReturnsWksCfg025() {
+    // Story 4.5 AC1/AC2 — engine deploy is the gate before any registry write.
+    // A pre-existing registration exists for the same case type (v1), but the incoming
+    // deploy (v2 YAML) fails at the engine step. The registrar should NOT have written
+    // the new version — the AC1 reorder guarantees no partial state.
     CaseTypeConfig prior = caseType();
     CaseTypeConfig incoming =
         new CaseTypeConfig(
@@ -205,27 +212,35 @@ class ConfigServiceDeployTest {
 
     ConfigService svc = newCfg(source, registrar, reader, bpmn, engine, new RecordingPublisher());
 
-    assertThatThrownBy(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, null))
-        .isInstanceOf(WksWorkflowEngineException.class);
-    // Prior registration restored — last register() call put `prior` back after the failure.
-    assertThat(registrar.lastRegistered()).isEqualTo(prior);
+    DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null);
+
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors()).extracting(ErrorDetail::code).containsExactly("WKS-CFG-025");
+    // AC2 — no new registration written (engine deploy gated registry writes)
+    assertThat(registrar.registered).containsExactly(prior.id()); // only the pre-seed
+    assertThat(registrar.removed).isEmpty(); // no rollback needed — nothing was written
   }
 
   @Test
-  void engineFailureWithoutPriorStateRemovesRegistration() {
+  void engineFailureFirstDeployReturnsWksCfg025WithoutRegistration() {
+    // Story 4.5 AC1/AC2 — no prior state; first deploy fails at engine step.
+    // Registry must remain empty.
     CaseTypeConfig incoming = caseType();
     StubSource source = new StubSource(ValidationResult.ok(incoming));
     StubBpmn bpmn = new StubBpmn(BpmnValidationResult.ok("applicationProcess"));
     StubRegistrar registrar = new StubRegistrar();
-    StubReader reader = new StubReader(); // no prior — find returns empty
+    StubReader reader = new StubReader(); // no prior
     StubEngine engine = new StubEngine();
     engine.failNext = new WksWorkflowEngineException("engine down", new RuntimeException());
 
     ConfigService svc = newCfg(source, registrar, reader, bpmn, engine, new RecordingPublisher());
 
-    assertThatThrownBy(() -> svc.deploy(YAML_BYTES, BPMN_BYTES, null))
-        .isInstanceOf(WksWorkflowEngineException.class);
-    assertThat(registrar.removed).contains(incoming.id());
+    DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null);
+
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors()).extracting(ErrorDetail::code).containsExactly("WKS-CFG-025");
+    assertThat(registrar.registered).isEmpty();
+    assertThat(registrar.removed).isEmpty();
   }
 
   // ---- folded debt #2: per-caseTypeId deploy serialization (Story 2.4 Task 7.2) ----------

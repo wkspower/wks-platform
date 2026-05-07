@@ -95,4 +95,24 @@ public class BackendAdapterBinder {
     Objects.requireNonNull(caseType, "caseType");
     registry.remove(caseType);
   }
+
+  /**
+   * Story 4.5 AC4 — detach the adapter registered for {@code caseType} and delegate to the
+   * adapter's own {@link BackendAdapter#detach(CaseTypeRef)} so it can mark the scope as locally
+   * detached (e.g. {@code BpmnBackendAdapter} adds the {@code caseTypeId} to its {@code
+   * detachedCaseTypeIds} set so {@code emit()} drops signals for that scope).
+   *
+   * <p>{@link MappingRegistry} is NOT touched — in-flight cases must retain their frozen-version
+   * mapping (AC4 invariant: "MappingRegistry MUST NOT remove old (caseTypeId, version) entries on
+   * detach").
+   *
+   * <p>Idempotent — calling detach on an already-detached or unknown {@code caseType} is safe.
+   */
+  public void detach(CaseTypeRef caseType) {
+    Objects.requireNonNull(caseType, "caseType");
+    BackendAdapter adapter = registry.remove(caseType);
+    if (adapter != null) {
+      adapter.detach(caseType);
+    }
+  }
 }

@@ -275,6 +275,106 @@ class ConfigServiceMappingRegistryTest {
     }
   }
 
+  // ---------- AC1/AC2 — atomic failure on engine error (Story 4.5) ----------
+
+  @Test
+  void deployFailsAtomicallyOnEngineError() {
+    // Story 4.5 AC1/AC2 — engine deploy is step 5 (BEFORE registry writes at steps 6-7).
+    // When the engine throws, deploy() must return DeployResult.invalid(WKS-CFG-025)
+    // without writing any version row or MappingRegistry entry.
+    CaseTypeConfig cfg = caseType(1);
+    MappingDefinition mapping =
+        new MappingDefinition(
+            List.of(
+                new AttachmentDefinition(
+                    "bpmn",
+                    "x.bpmn",
+                    "case",
+                    Optional.empty(),
+                    Map.of(),
+                    Optional.of(new EndEventMapping("stage1 -> stage2")),
+                    Map.of(),
+                    List.of())));
+    ValidationResult validatorOutput = ValidationResult.ok(cfg, List.of(), mapping);
+    StubSource source = new StubSource(validatorOutput);
+    StubRegistrar registrar = new StubRegistrar();
+    MappingRegistry mappingRegistry = new MappingRegistry();
+    FakeCaseTypeVersionRegistry versionRegistry = new FakeCaseTypeVersionRegistry();
+
+    // Engine throws on deploy — inline WorkflowEngine that always fails
+    WorkflowEngine failingEngine =
+        new WorkflowEngine() {
+          @Override
+          public DeploymentResult deploy(DeploymentRequest req) {
+            throw new RuntimeException("engine-down");
+          }
+
+          @Override
+          public Optional<DeploymentInfo> latestDeployment(String key) {
+            return Optional.empty();
+          }
+
+          @Override
+          public String startProcessInstance(String key, Map<String, Object> vars) {
+            throw new UnsupportedOperationException();
+          }
+
+          @Override
+          public Optional<com.wkspower.platform.domain.model.Task> findTask(String taskId) {
+            return Optional.empty();
+          }
+
+          @Override
+          public void completeTask(String taskId, Map<String, Object> variables) {}
+
+          @Override
+          public void claimTask(String taskId, java.util.UUID userId) {}
+
+          @Override
+          public void signalTransition(String pid, String action, Map<String, Object> vars) {}
+
+          @Override
+          public List<com.wkspower.platform.domain.model.Task> findTasksByCase(
+              java.util.UUID caseId) {
+            return List.of();
+          }
+
+          @Override
+          public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
+            return null;
+          }
+        };
+
+    ConfigService svc =
+        new ConfigService(
+            source,
+            registrar,
+            new StubReader(),
+            new StubBpmn(BpmnValidationResult.ok("noop")),
+            failingEngine,
+            new RecordingPublisher(),
+            versionRegistry,
+            mappingRegistry);
+
+    DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, "ops@x");
+
+    assertThat(result.isInvalid()).isTrue();
+    assertThat(result.errors())
+        .extracting(com.wkspower.platform.domain.exception.ErrorDetail::code)
+        .containsExactly("WKS-CFG-025");
+
+    // AC2 — no version row written
+    assertThat(versionRegistry.currentVersion(cfg.id())).isEmpty();
+
+    // AC2 — no MappingRegistry entry written
+    assertThat(mappingRegistry.resolve(new CaseTypeRef(cfg.id(), "1"), "1"))
+        .as("MappingRegistry must be empty after engine failure")
+        .isEmpty();
+
+    // AC2 — in-memory registrar not written
+    assertThat(registrar.byId).doesNotContainKey(cfg.id());
+  }
+
   private static ErrorDetail err(String code, String msg) {
     return ErrorDetail.of(code, msg);
   }

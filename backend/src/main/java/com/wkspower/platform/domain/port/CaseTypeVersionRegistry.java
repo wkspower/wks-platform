@@ -47,6 +47,27 @@ public interface CaseTypeVersionRegistry {
   CaseTypeVersionRegistration register(String caseTypeId, byte[] rawYamlBytes, String publishedBy);
 
   /**
+   * Story 4.5 AC3 — register with deployment fingerprints. Extends the 3-arg overload with BPMN
+   * content hash and mapping hash stored in the {@code case_type_versions} row for forensic /
+   * integrity purposes (Decision 22). Both may be {@code null} for zero-attachment deploys (D22
+   * first-class).
+   *
+   * @param bpmnContentHash SHA-256 hex of raw BPMN bytes, or {@code null}
+   * @param mappingHash SHA-256 hex of canonical {@code MappingDefinition.toString()}, or {@code
+   *     null}
+   */
+  default CaseTypeVersionRegistration register(
+      String caseTypeId,
+      byte[] rawYamlBytes,
+      String publishedBy,
+      String bpmnContentHash,
+      String mappingHash) {
+    // Default delegates to the 3-arg overload for adapters that have not yet been updated.
+    // Production adapter (CaseTypeVersionRegistryAdapter) overrides this to persist the hashes.
+    return register(caseTypeId, rawYamlBytes, publishedBy);
+  }
+
+  /**
    * Highest assigned version for {@code caseTypeId}, empty when no row exists. Used by {@link
    * com.wkspower.platform.domain.service.CaseService#create} to bind a new case to the registry's
    * current version.
