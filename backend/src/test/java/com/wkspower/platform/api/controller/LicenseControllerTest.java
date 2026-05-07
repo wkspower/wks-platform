@@ -1,5 +1,7 @@
 package com.wkspower.platform.api.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +13,7 @@ import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.LicenseSnapshot;
 import com.wkspower.platform.domain.service.LicenseState;
+import com.wkspower.platform.domain.service.WksFeature;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
@@ -141,5 +144,58 @@ class LicenseControllerTest {
   @Test
   void unauthenticated_returns401() throws Exception {
     mockMvc.perform(get("/api/license/status")).andExpect(status().isUnauthorized());
+  }
+
+  // -------------------------------------------------------------------------
+  // CF2 — expiredAt must be ISO_INSTANT formatted
+  // -------------------------------------------------------------------------
+
+  @Test
+  void statusEndpoint_expiredAt_usesIsoInstantFormat() throws Exception {
+    Instant expiredAt = Instant.parse("2025-12-31T23:59:59Z");
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.EXPIRED, "oss", expiredAt));
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.expiredAt").value("2025-12-31T23:59:59Z"));
+  }
+
+  // -------------------------------------------------------------------------
+  // Story 7-3: GET /api/license/features — all registered features returned
+  // -------------------------------------------------------------------------
+
+  @Test
+  void featuresEndpoint_returnsAllRegisteredFeatures() throws Exception {
+    when(licenseService.getTier()).thenReturn("enterprise");
+    // Stub isFeatureEnabled(WksFeature) — called via default method → isFeatureEnabled(String)
+    when(licenseService.isFeatureEnabled(any(String.class))).thenReturn(true);
+
+    mockMvc
+        .perform(get("/api/license/features").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.tier").value("enterprise"))
+        .andExpect(jsonPath("$.data.features", hasSize(WksFeature.values().length)))
+        .andExpect(jsonPath("$.data.features[0].key").isNotEmpty())
+        .andExpect(jsonPath("$.data.features[0].description").isNotEmpty())
+        .andExpect(jsonPath("$.data.features[0].bundleTiers").isArray())
+        .andExpect(jsonPath("$.data.features[0].enabled").isBoolean());
+  }
+
+  @Test
+  void featuresEndpoint_setsNoCacheHeader() throws Exception {
+    when(licenseService.getTier()).thenReturn("oss");
+    when(licenseService.isFeatureEnabled(any(String.class))).thenReturn(false);
+
+    mockMvc
+        .perform(get("/api/license/features").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"));
+  }
+
+  @Test
+  void featuresEndpoint_unauthenticated_returns401() throws Exception {
+    mockMvc.perform(get("/api/license/features")).andExpect(status().isUnauthorized());
   }
 }

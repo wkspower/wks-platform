@@ -4,6 +4,8 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.LicenseSnapshot;
 import com.wkspower.platform.domain.service.LicenseState;
+import com.wkspower.platform.domain.service.TierBundle;
+import com.wkspower.platform.domain.service.WksFeature;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -105,8 +107,23 @@ public class LicenseServiceImpl implements LicenseService {
 
   @Override
   public boolean isFeatureEnabled(String featureKey) {
+    // AC3/AC4: fail-closed for unregistered keys
+    if (WksFeature.fromKey(featureKey).isEmpty()) {
+      LOG.warn(
+          "[LicenseService] isFeatureEnabled called with unknown key '{}' — returning false",
+          featureKey);
+      return false;
+    }
+
     InternalSnapshot s = state.get();
-    return s.valid() && s.features().contains(featureKey);
+    if (!s.valid()) return false;
+
+    // AC2: tier-bundle check first — grants all features included in the active bundle
+    TierBundle bundle = TierBundle.forTier(s.tier());
+    if (bundle.includedFeatures().contains(featureKey)) return true;
+
+    // AC2: explicit JWT features[] override (additive — grants features beyond the bundle)
+    return s.features().contains(featureKey);
   }
 
   @Override
@@ -244,7 +261,11 @@ public class LicenseServiceImpl implements LicenseService {
         return;
       }
       Instant expiry = e.getClaims().getExpiration().toInstant();
-      state.set(InternalSnapshot.expired(expiry));
+      // CF1: preserve holder from JWT sub claim even when the license has expired
+      String holder = e.getClaims().getSubject(); // may be null — preserved for display
+      state.set(
+          new InternalSnapshot(
+              LicenseState.EXPIRED, OSS_TIER, holder, expiry, Collections.emptyList()));
       LOG.warn(
           "{} License JWT expired (exp={}) — operating in OSS fallback mode",
           ErrorCode.WKS_LIC_002.wire(),
