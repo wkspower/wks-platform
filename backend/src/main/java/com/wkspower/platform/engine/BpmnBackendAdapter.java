@@ -9,6 +9,8 @@ import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,18 @@ public class BpmnBackendAdapter implements BackendAdapter {
 
   private final AtomicReference<BackendSignalHandler> handlerRef = new AtomicReference<>();
 
+  /**
+   * Story 4.5 AC4 P5 — set of detached {@code (caseTypeId, version)} scopes tracked as {@link
+   * CaseTypeRef} value objects. Using the full {@code (caseTypeId, version)} key means only the
+   * specific version that was detached is muted — other versions of the same case type continue to
+   * route normally. Tracking caseTypeId-only would mute ALL versions of the case type, which
+   * violates AC4's per-version semantics.
+   *
+   * <p>Thread-safe via {@link ConcurrentHashMap#newKeySet()} — concurrent {@link #detach} and
+   * {@link #emit} calls are safe. {@link CaseTypeRef} is a record with proper equals/hashCode.
+   */
+  private final Set<CaseTypeRef> detachedCaseTypeRefs = ConcurrentHashMap.newKeySet();
+
   public BpmnBackendAdapter() {
     // Phase-0 — the adapter does not own the WorkflowEngine reference. CaseService.create still
     // calls WorkflowEngine.startProcessInstance directly (4.4b reroutes through start(...)). Not
@@ -58,13 +72,30 @@ public class BpmnBackendAdapter implements BackendAdapter {
     // Idempotent on (caseType, scope). The actual BPMN deployment happens through
     // ConfigService.deploy → WorkflowEngine.deploy; attach() here is a registration ping —
     // BackendAdapterBinder.register is the single source of truth for routing resolution.
+    //
+    // Story 4.5 AC4 P4 — re-attach after a prior detach: remove the (caseTypeId, version) key
+    // from detachedCaseTypeRefs so emit() no longer mutes signals for this scope. Without this,
+    // detach + redeploy permanently breaks routing for the re-attached version.
+    detachedCaseTypeRefs.remove(caseType);
     log.debug("BpmnBackendAdapter attached for caseType={} scope={}", caseType, scope);
   }
 
   @Override
   public void detach(CaseTypeRef caseType) {
     Objects.requireNonNull(caseType, "caseType");
-    log.debug("BpmnBackendAdapter detached for caseType={}", caseType);
+    // Story 4.5 AC4 P5 — track detached scopes by full (caseTypeId, version) CaseTypeRef, not
+    // just caseTypeId. This ensures only the specific version is muted; other versions of the same
+    // case type continue to route normally. Phase-0 has one global BackendSignalHandler shared by
+    // all case types; unregistering it would block signals for all types, not just this version.
+    //
+    // MappingRegistry is NOT touched — in-flight cases must still resolve their frozen version's
+    // mapping via MappingRegistry.resolve(caseTypeId, frozenVersion) (AC4 invariant).
+    detachedCaseTypeRefs.add(caseType);
+    log.info(
+        "BpmnBackendAdapter: caseTypeId={} version={} marked as detached — emit() will skip"
+            + " signal routing for this (caseTypeId, version) scope",
+        caseType.caseTypeId(),
+        caseType.version());
   }
 
   @Override
@@ -107,6 +138,22 @@ public class BpmnBackendAdapter implements BackendAdapter {
    */
   public void emit(BackendSignal signal) {
     Objects.requireNonNull(signal, "signal");
+    // Story 4.5 AC4 P5 — skip routing for detached (caseTypeId, version) scopes. In-flight cases
+    // on the detached (caseTypeId, version) have their mapping frozen at their bound version; new
+    // signals from those cases are dropped here (the BPMN process continues running in the engine
+    // but WKS no longer routes its signals for this version). Other versions of the same case type
+    // are NOT affected. MappingRegistry.resolve() is NOT affected — it retains prior entries.
+    CaseTypeRef emitRef = signal.caseInstance().caseType();
+    if (detachedCaseTypeRefs.contains(emitRef)) {
+      log.debug(
+          "BpmnBackendAdapter.emit: signal dropped for detached caseTypeId={} version={} kind={}"
+              + " caseId={}",
+          emitRef.caseTypeId(),
+          emitRef.version(),
+          signal.kind(),
+          signal.caseInstance().id());
+      return;
+    }
     BackendSignalHandler handler = handlerRef.get();
     if (handler == null) {
       log.warn(

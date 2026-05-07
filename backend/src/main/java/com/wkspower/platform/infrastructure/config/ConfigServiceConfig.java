@@ -40,7 +40,8 @@ public class ConfigServiceConfig {
       WorkflowEngine workflowEngine,
       EventPublisher eventPublisher,
       CaseTypeVersionRegistry versionRegistry,
-      MappingRegistry mappingRegistry) {
+      MappingRegistry mappingRegistry,
+      CaseTypeContentHasher caseTypeContentHasher) {
     return new ConfigService(
         source,
         registrar,
@@ -49,7 +50,8 @@ public class ConfigServiceConfig {
         workflowEngine,
         eventPublisher,
         versionRegistry,
-        mappingRegistry);
+        mappingRegistry,
+        CaseTypeContentHasher::hashBytes);
   }
 
   /**

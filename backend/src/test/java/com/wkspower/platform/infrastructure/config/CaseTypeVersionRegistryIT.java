@@ -270,6 +270,47 @@ class CaseTypeVersionRegistryIT {
     assertThat(reader.find("j9-zero-zero").get().version()).isEqualTo(2);
   }
 
+  // ---- Story 4.5 AC3 — fingerprint columns -----------------------------------
+
+  @Test
+  void registersFingerprints() {
+    // The 5-arg overload stores bpmnContentHash and mappingHash alongside the YAML hash.
+    // Both must be exactly 64 lowercase hex chars (SHA-256 output format, VARCHAR(64) column).
+    String fakeBpmnHash = "c".repeat(64);
+    String fakeMappingHash = "d".repeat(64);
+    CaseTypeVersionRegistration r =
+        registry.register(
+            "j9-zero-zero", J9_BASE.getBytes(), "system:startup", fakeBpmnHash, fakeMappingHash);
+    assertThat(r.outcome()).isEqualTo(CaseTypeVersionRegistration.Outcome.REGISTERED);
+    assertThat(r.version()).isEqualTo(1);
+
+    var record = registry.findVersion("j9-zero-zero", 1);
+    assertThat(record).isPresent();
+    assertThat(record.get().bpmnContentHash())
+        .as("bpmn_content_hash must be persisted")
+        .isEqualTo(fakeBpmnHash);
+    assertThat(record.get().mappingHash())
+        .as("mapping_hash must be persisted")
+        .isEqualTo(fakeMappingHash);
+  }
+
+  @Test
+  void storesNullFingerprintsForZeroAttachment() {
+    // Zero-attachment deploys pass null for both fingerprint hashes.
+    CaseTypeVersionRegistration r =
+        registry.register("j9-zero-zero", J9_BASE.getBytes(), "system:startup", null, null);
+    assertThat(r.outcome()).isEqualTo(CaseTypeVersionRegistration.Outcome.REGISTERED);
+
+    var record = registry.findVersion("j9-zero-zero", 1);
+    assertThat(record).isPresent();
+    assertThat(record.get().bpmnContentHash())
+        .as("bpmn_content_hash must be NULL for zero-attachment deploy")
+        .isNull();
+    assertThat(record.get().mappingHash())
+        .as("mapping_hash must be NULL for zero-attachment deploy")
+        .isNull();
+  }
+
   // ---- WKS-VER-001 defensive guard ----
   @Test
   void caseCreateWithoutRegistryRowRaisesWksVer001() {

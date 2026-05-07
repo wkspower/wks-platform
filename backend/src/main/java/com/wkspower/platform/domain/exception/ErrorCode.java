@@ -114,6 +114,15 @@ public enum ErrorCode {
    */
   WKS_CFG_024("WKS-CFG-024"),
   /**
+   * Story 4.5 AC1 — BPMN engine deployment failure during atomic deploy. Emitted by {@link
+   * com.wkspower.platform.domain.service.ConfigService#deploy} when the engine deploy step (step 5
+   * of the AC1 ordered sequence) throws an exception AFTER validation succeeded. The registry is
+   * NOT written when this code is returned — no orphan row in {@code case_type_versions}. HTTP 502
+   * / 500 depending on caller context. Reuse for any other meaning is forbidden per {@code
+   * feedback_error_codes_are_wire_contract.md}.
+   */
+  WKS_CFG_025("WKS-CFG-025"),
+  /**
    * Mapping references a BPMN userTask id that does not exist in the attached BPMN file (Story 4.2
    * AC2 / architecture §828). Canonical wire code for {@code userTasks.<id>} and {@code
    * properties[].on=userTask:<id>} cross-reference failures. Distinguishes from {@code

@@ -74,6 +74,22 @@ public class CaseTypeVersionRegistryAdapter implements CaseTypeVersionRegistry {
   @Override
   public CaseTypeVersionRegistration register(
       String caseTypeId, byte[] rawYamlBytes, String publishedBy) {
+    return register(caseTypeId, rawYamlBytes, publishedBy, null, null);
+  }
+
+  /**
+   * Story 4.5 AC3 — overload that persists deployment fingerprints alongside the version row.
+   * {@code bpmnContentHash} and {@code mappingHash} may be {@code null} for zero-attachment deploys
+   * (D22 first-class). Idempotent on byte-canonical re-deploys — the existing row is returned
+   * without re-inserting (fingerprints are not updated on idempotent paths).
+   */
+  @Override
+  public CaseTypeVersionRegistration register(
+      String caseTypeId,
+      byte[] rawYamlBytes,
+      String publishedBy,
+      String bpmnContentHash,
+      String mappingHash) {
     if (caseTypeId == null || caseTypeId.isBlank()) {
       throw new IllegalArgumentException("caseTypeId must be non-blank");
     }
@@ -92,7 +108,9 @@ public class CaseTypeVersionRegistryAdapter implements CaseTypeVersionRegistry {
     }
 
     try {
-      Integer assignedVersion = attemptInsert(caseTypeId, hash, rawYamlBytes, resolvedPublishedBy);
+      Integer assignedVersion =
+          attemptInsert(
+              caseTypeId, hash, rawYamlBytes, resolvedPublishedBy, bpmnContentHash, mappingHash);
       return CaseTypeVersionRegistration.registered(assignedVersion, hash);
     } catch (DataIntegrityViolationException | ConcurrencyFailureException race) {
       // Concurrent first-deploy: another thread won the (case_type_id, version) PK or the
@@ -114,7 +132,12 @@ public class CaseTypeVersionRegistryAdapter implements CaseTypeVersionRegistry {
    * on race. The caller MUST treat both exception types identically.
    */
   private int attemptInsert(
-      String caseTypeId, String hash, byte[] rawYamlBytes, String publishedBy) {
+      String caseTypeId,
+      String hash,
+      byte[] rawYamlBytes,
+      String publishedBy,
+      String bpmnContentHash,
+      String mappingHash) {
     Integer assigned =
         insertTx.execute(
             status -> {
@@ -126,7 +149,14 @@ public class CaseTypeVersionRegistryAdapter implements CaseTypeVersionRegistry {
               String yamlAsText = new String(rawYamlBytes, StandardCharsets.UTF_8);
               CaseTypeVersionEntity entity =
                   new CaseTypeVersionEntity(
-                      caseTypeId, nextVersion, hash, yamlAsText, Instant.now(), publishedBy);
+                      caseTypeId,
+                      nextVersion,
+                      hash,
+                      yamlAsText,
+                      Instant.now(),
+                      publishedBy,
+                      bpmnContentHash,
+                      mappingHash);
               repository.saveAndFlush(entity);
               return nextVersion;
             });
@@ -161,6 +191,8 @@ public class CaseTypeVersionRegistryAdapter implements CaseTypeVersionRegistry {
         e.getDefinitionHash(),
         e.getDefinitionYaml().getBytes(StandardCharsets.UTF_8),
         e.getPublishedAt(),
-        e.getPublishedBy());
+        e.getPublishedBy(),
+        e.getBpmnContentHash(),
+        e.getMappingHash());
   }
 }
