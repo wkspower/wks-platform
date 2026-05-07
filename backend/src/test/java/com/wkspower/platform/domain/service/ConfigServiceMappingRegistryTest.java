@@ -26,6 +26,7 @@ import com.wkspower.platform.domain.workflow.BpmnValidationResult;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
+import com.wkspower.platform.infrastructure.config.CaseTypeContentHasher;
 import com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -119,6 +120,10 @@ class ConfigServiceMappingRegistryTest {
     StubSource source = new StubSource(validatorOutput);
     StubRegistrar registrar = new StubRegistrar();
     MappingRegistry mappingRegistry = new MappingRegistry();
+    FakeCaseTypeVersionRegistry versionRegistry = new FakeCaseTypeVersionRegistry();
+    // P11 — use the real CaseTypeContentHasher::hashBytes so the BPMN hash is computed for real;
+    // this validates that a non-null 64-char SHA-256 hex string lands in the registry row after
+    // a successful deploy.
     ConfigService svc =
         new ConfigService(
             source,
@@ -127,8 +132,9 @@ class ConfigServiceMappingRegistryTest {
             new StubBpmn(BpmnValidationResult.ok("appProc")),
             new StubEngine(),
             new RecordingPublisher(),
-            new FakeCaseTypeVersionRegistry(),
-            mappingRegistry);
+            versionRegistry,
+            mappingRegistry,
+            CaseTypeContentHasher::hashBytes);
 
     DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, "ops@x");
 
@@ -144,6 +150,15 @@ class ConfigServiceMappingRegistryTest {
     assertThat(mappingRegistry.resolve(new CaseTypeRef(authorCfg.id(), "5"), "5"))
         .as("AC2: must NOT be registered under the author-supplied version 5")
         .isEmpty();
+
+    // P11 — assert the version row carries a real non-null 64-char SHA-256 hex bpmnContentHash.
+    var record = versionRegistry.findVersion(authorCfg.id(), 1);
+    assertThat(record).as("version row must exist after deploy").isPresent();
+    assertThat(record.get().bpmnContentHash())
+        .as("P11: bpmnContentHash must be a non-null 64-char SHA-256 hex string")
+        .isNotNull()
+        .hasSize(64)
+        .matches("[0-9a-f]{64}");
   }
 
   // ---------- helpers ----------

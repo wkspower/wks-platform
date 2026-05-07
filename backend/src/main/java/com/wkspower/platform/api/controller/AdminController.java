@@ -7,6 +7,7 @@ import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
+import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
 import com.wkspower.platform.domain.service.ConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -99,6 +100,17 @@ public class AdminController {
     byte[] bpmn = bpmnPart.getBytes();
     DeployResult result = configService.deploy(yaml, bpmn, actorEmail);
     if (result.isInvalid()) {
+      // P10 — WKS-CFG-025 is an engine-side runtime failure (the input was valid; the engine
+      // itself failed), not a client-input quality problem. Map it to HTTP 502 Bad Gateway via
+      // WksWorkflowEngineException so the caller understands this is transient and retryable.
+      // All other invalid results (YAML/BPMN validation errors) remain HTTP 422 via
+      // WksConfigException (unprocessable entity — client must fix the input).
+      boolean isEngineFailure =
+          result.errors().stream().anyMatch(e -> ErrorCode.WKS_CFG_025.wire().equals(e.code()));
+      if (isEngineFailure) {
+        throw new WksWorkflowEngineException(
+            "BPMN engine deployment failed (WKS-CFG-025) — retry or check engine health");
+      }
       throw new WksConfigException(result.errors());
     }
 

@@ -41,12 +41,12 @@ public final class CaseTypeContentHasher {
   /**
    * Story 4.5 AC3 — Compute the SHA-256 hex hash of raw bytes directly (no YAML canonicalization).
    * Used for BPMN content hashing where the raw byte identity is the fingerprint — the BPMN file is
-   * stored verbatim and there is no canonical normalisation step. Package-private: only {@code
-   * MappingDefinition.computeHash()} and {@code ConfigService.deploy()} call this.
+   * stored verbatim and there is no canonical normalisation step. Public to allow test wiring via
+   * method reference ({@code CaseTypeContentHasher::hashBytes}) in domain-layer unit tests.
    *
    * @throws IllegalArgumentException if {@code rawBytes} is null or empty
    */
-  static String hashBytes(byte[] rawBytes) {
+  public static String hashBytes(byte[] rawBytes) {
     if (rawBytes == null || rawBytes.length == 0) {
       throw new IllegalArgumentException(
           "CaseTypeContentHasher.hashBytes: rawBytes must be non-null and non-empty");

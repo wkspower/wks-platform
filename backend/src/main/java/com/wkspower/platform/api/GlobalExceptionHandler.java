@@ -229,13 +229,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
   }
 
+  /**
+   * P10 — WksWorkflowEngineException maps to HTTP 502 Bad Gateway. Engine-side deploy failures
+   * (WKS-CFG-025) are surfaced through this exception via AdminController; the 502 signals to
+   * callers that the upstream engine is unhealthy and the request is safely retryable once the
+   * engine recovers. Note: the wire code is WKS-RTM-500 (carried by WksWorkflowEngineException) not
+   * WKS-CFG-025 — the CFG-025 code is visible in the ConfigService log at ERROR level.
+   */
   @ExceptionHandler(WksWorkflowEngineException.class)
   public ResponseEntity<ApiResponse<Void>> handleEngineFailure(WksWorkflowEngineException ex) {
     MDC.put(MDC_KEY, ex.getCode());
     try {
       log.error("Workflow engine failure: {}", ex.getCode(), ex);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), "Internal error")));
+      return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), "Workflow engine unavailable")));
     } finally {
       MDC.remove(MDC_KEY);
     }

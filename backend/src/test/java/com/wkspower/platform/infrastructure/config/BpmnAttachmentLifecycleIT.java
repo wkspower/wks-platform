@@ -3,14 +3,17 @@ package com.wkspower.platform.infrastructure.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
+import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.service.BackendAdapterBinder;
+import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseTypeVersionJpaRepository;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +75,7 @@ class BpmnAttachmentLifecycleIT {
   @Autowired private CaseTypeVersionJpaRepository repo;
   @Autowired private MappingRegistry mappingRegistry;
   @Autowired private BackendAdapterBinder adapterBinder;
+  @Autowired private ConfigService configService;
 
   @AfterEach
   void wipe() {
@@ -167,6 +171,86 @@ class BpmnAttachmentLifecycleIT {
         .isNull();
     assertThat(record.get().mappingHash())
         .as("mapping_hash must be NULL for zero-attachment deploy")
+        .isNull();
+  }
+
+  /**
+   * P6 — Story 4.5 AC3 E2E path: calls {@link ConfigService#deploy} with real BPMN bytes and
+   * asserts the resulting {@code CaseTypeVersion} row carries a non-null 64-char SHA-256 hex {@code
+   * bpmnContentHash}. This test exercises the real hash path through the service stack (not
+   * fabricated hash strings directly) and validates that the BPMN fingerprint column is populated
+   * by {@link com.wkspower.platform.infrastructure.config.CaseTypeContentHasher#hashBytes}.
+   *
+   * <p>Architecture note: {@code mappingHash} is null here because the {@link
+   * com.wkspower.platform.domain.port.CaseTypeSource#loadBytes} path does not currently thread BPMN
+   * bytes into the mapping validator (the YAML-only parse path and the BPMN bytes path are separate
+   * phases in {@code ConfigService.deploy}). Mapping-hash coverage via {@code deploy} is deferred
+   * to Story 4.6 when the multipart byte map is plumbed into {@code loadBytes}.
+   *
+   * <p>Uses a minimal valid BPMN (start → end event, no user tasks) so the BPMN validator passes
+   * without archetype declarations.
+   */
+  @Test
+  void deployViaConfigServicePersistsRealBpmnFingerprint() {
+    // Minimal BPMN with one executable process and a start + end event — no user tasks so the
+    // BPMN validator passes without archetype declarations.
+    String processId = "lifecycle-hash-proc";
+    byte[] bpmnBytes =
+        ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<bpmn:definitions xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\"\n"
+                + "                  xmlns:camunda=\"http://camunda.org/schema/1.0/bpmn\"\n"
+                + "                  targetNamespace=\"http://wkspower.com/bpmn/test\"\n"
+                + "                  id=\"Definitions_lifecycle_hash_proc\">\n"
+                + "  <bpmn:process id=\""
+                + processId
+                + "\" isExecutable=\"true\""
+                + " camunda:historyTimeToLive=\"30\">\n"
+                + "    <bpmn:startEvent id=\"start\"/>\n"
+                + "    <bpmn:endEvent id=\"end\"/>\n"
+                + "    <bpmn:sequenceFlow id=\"f1\" sourceRef=\"start\" targetRef=\"end\"/>\n"
+                + "  </bpmn:process>\n"
+                + "</bpmn:definitions>\n")
+            .getBytes(StandardCharsets.UTF_8);
+
+    // YAML without attachments — uses workflow ref for engine deploy but no mapping validator
+    // invocation, which is consistent with the current ConfigService.deploy separation between
+    // the YAML-parse phase and the BPMN-bytes phase.
+    String hashCaseTypeId = "lifecycle-hash-ct";
+    byte[] yamlBytes =
+        ("id: "
+                + hashCaseTypeId
+                + "\n"
+                + "displayName: \"Hash Test\"\n"
+                + "version: 1\n"
+                + "workflow:\n"
+                + "  bpmn: "
+                + processId
+                + ".bpmn\n"
+                + "statuses:\n"
+                + "  - id: open\n"
+                + "    displayName: Open\n"
+                + "roles:\n"
+                + "  - name: admin\n"
+                + "    permissions: [view, create, edit, transition]\n")
+            .getBytes(StandardCharsets.UTF_8);
+
+    DeployResult result = configService.deploy(yamlBytes, bpmnBytes, "test:p6");
+
+    assertThat(result.isInvalid()).as("deploy must succeed; errors=" + result.errors()).isFalse();
+    assertThat(result.caseType()).isPresent();
+    int version = result.caseType().get().version();
+
+    // Assert the version row has a real 64-char SHA-256 hex bpmnContentHash (AC3).
+    var record = versionRegistry.findVersion(hashCaseTypeId, version);
+    assertThat(record).as("version row must exist after deploy").isPresent();
+    assertThat(record.get().bpmnContentHash())
+        .as("bpmnContentHash must be a non-null 64-char SHA-256 hex (real hash, not fabricated)")
+        .isNotNull()
+        .hasSize(64)
+        .matches("[0-9a-f]{64}");
+    // mappingHash is null because YAML declares no attachments (zero-attachment deploy — D22).
+    assertThat(record.get().mappingHash())
+        .as("mappingHash is null for zero-attachment YAML (D22 first-class)")
         .isNull();
   }
 }

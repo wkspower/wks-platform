@@ -1,5 +1,6 @@
 package com.wkspower.platform.domain.service;
 
+import com.wkspower.platform.domain.config.CaseTypeVersionRecord;
 import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
 import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.RegistrationResult;
@@ -23,9 +24,11 @@ import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -270,7 +273,10 @@ public class ConfigService {
 
     // Story 4.5 AC3 — compute fingerprints BEFORE entering the lock; pure computation, no I/O.
     // bpmnBytes is non-null at this point (BPMN validation succeeded above).
-    final String bpmnHash = bpmnBytes != null ? bpmnHasher.apply(bpmnBytes) : null;
+    // P12 — treat empty byte array the same as null (zero-attachment) to guard against
+    // CaseTypeContentHasher.hashBytes throwing IllegalArgumentException on empty input.
+    final String bpmnHash =
+        (bpmnBytes != null && bpmnBytes.length > 0) ? bpmnHasher.apply(bpmnBytes) : null;
     final MappingDefinition mapping =
         yamlResult.mappingDefinition().orElse(MappingDefinition.empty());
     final String mappingHash = mapping.attachments().isEmpty() ? null : mapping.computeHash();
@@ -278,6 +284,36 @@ public class ConfigService {
     Object lock = deployLocks.computeIfAbsent(caseType.id(), k -> new Object());
     DeploymentResult deployment;
     synchronized (lock) {
+      // Story 4.5 AC3 P2 — idempotent re-deploy short-circuit: if the current version's
+      // bpmnContentHash already matches the incoming hash, skip the engine deploy entirely and
+      // return the existing version. This prevents an unconditional engine deploy on every hot-
+      // reload or polling redeploy that produces identical BPMN bytes.
+      if (bpmnHash != null) {
+        Optional<Integer> existingVersion = versionRegistry.currentVersion(caseType.id());
+        if (existingVersion.isPresent()) {
+          Optional<CaseTypeVersionRecord> existingRecord =
+              versionRegistry.findVersion(caseType.id(), existingVersion.get());
+          if (existingRecord.isPresent()
+              && bpmnHash.equals(existingRecord.get().bpmnContentHash())) {
+            log.debug(
+                "ConfigService.deploy: bpmn hash match for caseTypeId={} version={} — skipping"
+                    + " engine deploy (idempotent re-deploy)",
+                caseType.id(),
+                existingVersion.get());
+            CaseTypeConfig versionedCaseType =
+                applyVersionRegistry(caseType, yamlBytes, actorEmail, bpmnHash, mappingHash);
+            return DeployResult.ok(
+                versionedCaseType,
+                new DeploymentResult(
+                    "idempotent-skip",
+                    bpmnResult.processDefinitionKey().orElseThrow(),
+                    "idempotent-skip",
+                    existingVersion.get(),
+                    Instant.now()));
+          }
+        }
+      }
+
       // Story 4.5 AC1 — step 5: deploy engine BEFORE any registry write.
       // On engine failure return WKS-CFG-025 without writing to case_type_versions or
       // MappingRegistry.
@@ -297,10 +333,7 @@ public class ConfigService {
             caseType.id(),
             ex);
         return DeployResult.invalid(
-            List.of(
-                ErrorDetail.of(
-                    ErrorCode.WKS_CFG_025.wire(),
-                    "BPMN engine deployment failure: " + ex.getMessage())));
+            List.of(ErrorDetail.of(ErrorCode.WKS_CFG_025.wire(), "BPMN engine deployment failed")));
       }
 
       // Story 4.5 AC1 — step 6: register version with fingerprints (engine deploy succeeded).
@@ -344,20 +377,38 @@ public class ConfigService {
    * Deploy ONLY the BPMN side for an already-registered case type. Used by the startup loader,
    * where the YAML is registered up-front via {@link #validateAndRegister(String, byte[])} and the
    * BPMN may fail independently without losing the YAML config.
+   *
+   * <p>Story 4.5 AC1 P3 — follows the same atomicity ordering as {@link #deploy}: engine deploy is
+   * the gate before any event publication. On engine failure, returns {@code
+   * DeployResult.invalid(WKS-CFG-025)} without publishing a {@link ConfigDeployed} event — no
+   * orphan version row can exist here because the YAML version row was written prior to this call,
+   * but the event invariant is preserved (no event without a successful deployment).
    */
   public DeployResult deployBpmnFor(CaseTypeConfig caseType, byte[] bpmnBytes, String actorEmail) {
     BpmnValidationResult bpmnResult = bpmnValidator.validate(bpmnBytes, caseType);
     if (bpmnResult.isInvalid()) {
       return DeployResult.invalid(bpmnResult.errors());
     }
-    DeploymentResult deployment =
-        workflowEngine.deploy(
-            new DeploymentRequest(
-                caseType.id() + " v" + caseType.version(),
-                bpmnResult.processDefinitionKey().orElseThrow(),
-                bpmnBytes,
-                caseType.id(),
-                caseType.version()));
+    // AC1 ordering: engine deploy FIRST. On failure → WKS-CFG-025, no event published.
+    DeploymentResult deployment;
+    try {
+      deployment =
+          workflowEngine.deploy(
+              new DeploymentRequest(
+                  caseType.id() + " v" + caseType.version(),
+                  bpmnResult.processDefinitionKey().orElseThrow(),
+                  bpmnBytes,
+                  caseType.id(),
+                  caseType.version()));
+    } catch (RuntimeException ex) {
+      log.error(
+          "ConfigService.deployBpmnFor: engine deploy failed for caseTypeId={} — returning"
+              + " WKS-CFG-025; no event published",
+          caseType.id(),
+          ex);
+      return DeployResult.invalid(
+          List.of(ErrorDetail.of(ErrorCode.WKS_CFG_025.wire(), "BPMN engine deployment failed")));
+    }
     eventPublisher.publish(
         new ConfigDeployed(
             caseType.id(),

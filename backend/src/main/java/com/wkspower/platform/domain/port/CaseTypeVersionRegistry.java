@@ -3,6 +3,8 @@ package com.wkspower.platform.domain.port;
 import com.wkspower.platform.domain.config.CaseTypeVersionRecord;
 import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Domain-side port for the immutable, append-only CaseType version registry (Story 3.4 / Decision
@@ -29,6 +31,9 @@ import java.util.Optional;
  * that read path delegates here for the raw YAML, then re-runs the loader pipeline.
  */
 public interface CaseTypeVersionRegistry {
+
+  /** Interface-level logger for default-method warnings (SLF4J allows this pattern). */
+  Logger log = LoggerFactory.getLogger(CaseTypeVersionRegistry.class);
 
   /**
    * Register or short-circuit a CaseType deployment. The canonical hash of {@code rawYamlBytes}
@@ -64,6 +69,15 @@ public interface CaseTypeVersionRegistry {
       String mappingHash) {
     // Default delegates to the 3-arg overload for adapters that have not yet been updated.
     // Production adapter (CaseTypeVersionRegistryAdapter) overrides this to persist the hashes.
+    //
+    // P9 — warn when the default is invoked so that implementors that haven't overridden the
+    // full 5-arg signature are visible in the logs. This avoids silent fingerprint loss.
+    // TODO(Story 4.6): remove this default and force all implementors to implement the full
+    //   signature; the default is kept here to avoid breaking test fakes in the short term.
+    log.warn(
+        "CaseTypeVersionRegistry.register 5-arg default called — fingerprints discarded;"
+            + " override the full signature (caseTypeId={})",
+        caseTypeId);
     return register(caseTypeId, rawYamlBytes, publishedBy);
   }
 
