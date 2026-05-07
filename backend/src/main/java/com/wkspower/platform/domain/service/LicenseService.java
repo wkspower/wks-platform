@@ -51,4 +51,11 @@ public interface LicenseService {
    * </ul>
    */
   LicenseState getLicenseState();
+
+  /**
+   * Returns a consistent point-in-time snapshot of the license state, tier, and expiry. Use this
+   * instead of calling {@link #getLicenseState()}, {@link #getTier()}, and {@link #getExpiry()}
+   * separately to avoid torn reads across concurrent state updates.
+   */
+  LicenseSnapshot getLicenseSnapshot();
 }

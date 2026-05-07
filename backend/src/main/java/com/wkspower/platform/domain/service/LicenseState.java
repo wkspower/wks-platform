@@ -30,5 +30,18 @@ public enum LicenseState {
   /**
    * License file present but unverifiable (bad signature, malformed JWT, I/O error). OSS fallback.
    */
-  DEGRADED
+  DEGRADED;
+
+  /**
+   * Returns the stable wire string for this state as sent to frontend clients. Explicit mapping
+   * ensures that renaming an enum variant never silently breaks the API contract.
+   */
+  public String toWireString() {
+    return switch (this) {
+      case VALID -> "valid";
+      case OSS -> "oss";
+      case EXPIRED -> "expired";
+      case DEGRADED -> "degraded";
+    };
+  }
 }

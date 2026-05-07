@@ -42,6 +42,7 @@ describe('LicenseBanner', () => {
     const alert = await findByRole('alert');
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent(/operating in OSS mode/i);
+    expect(alert).toHaveTextContent('Dec 31, 2025');
   });
 
   it('renders banner without date when state is "degraded"', async () => {

@@ -16,7 +16,7 @@ export interface LicenseStatus {
  *  - {@code "expired"}  — valid signature but past expiry; banner with date shown.
  *  - {@code "degraded"} — file present but unverifiable; banner without date shown.
  */
-export async function getLicenseStatus(): Promise<LicenseStatus> {
-  const result = await apiFetch<LicenseStatus>('/api/license/status');
+export async function getLicenseStatus(signal?: AbortSignal): Promise<LicenseStatus> {
+  const result = await apiFetch<LicenseStatus>('/api/license/status', { signal });
   return result.data;
 }

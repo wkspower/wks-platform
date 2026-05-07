@@ -2,9 +2,10 @@ package com.wkspower.platform.api.controller;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.domain.service.LicenseService;
+import com.wkspower.platform.domain.service.LicenseSnapshot;
 import com.wkspower.platform.domain.service.LicenseState;
 import io.swagger.v3.oas.annotations.Operation;
-import java.time.Instant;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,15 +46,16 @@ public class LicenseController {
       description =
           "Returns the current license state, tier, and expiry (if expired). Accessible to all"
               + " authenticated users. No banner is shown by the frontend for the 'oss' state.")
-  public ApiResponse<LicenseStatusDto> status() {
-    LicenseState licenseState = licenseService.getLicenseState();
-    String tier = licenseService.getTier();
-    Instant expiry = licenseService.getExpiry();
+  public ApiResponse<LicenseStatusDto> status(HttpServletResponse response) {
+    response.setHeader("Cache-Control", "no-store");
 
-    String stateStr = licenseState.name().toLowerCase();
+    LicenseSnapshot snap = licenseService.getLicenseSnapshot();
+    String stateStr = snap.licenseState().toWireString();
     String expiredAt =
-        (licenseState == LicenseState.EXPIRED && expiry != null) ? expiry.toString() : null;
+        (snap.licenseState() == LicenseState.EXPIRED && snap.expiry() != null)
+            ? snap.expiry().toString()
+            : null;
 
-    return ApiResponse.success(new LicenseStatusDto(stateStr, tier, expiredAt));
+    return ApiResponse.success(new LicenseStatusDto(stateStr, snap.tier(), expiredAt));
   }
 }

@@ -3,11 +3,13 @@ package com.wkspower.platform.api.controller;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.LicenseService;
+import com.wkspower.platform.domain.service.LicenseSnapshot;
 import com.wkspower.platform.domain.service.LicenseState;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -59,13 +61,15 @@ class LicenseControllerTest {
 
   @Test
   void validState_returnsValidDtoWithTierAndNoExpiredAt() throws Exception {
-    when(licenseService.getLicenseState()).thenReturn(LicenseState.VALID);
-    when(licenseService.getTier()).thenReturn("enterprise");
-    when(licenseService.getExpiry()).thenReturn(Instant.parse("2027-01-01T00:00:00Z"));
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(
+            new LicenseSnapshot(
+                LicenseState.VALID, "enterprise", Instant.parse("2027-01-01T00:00:00Z")));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
         .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.data.state").value("valid"))
         .andExpect(jsonPath("$.data.tier").value("enterprise"))
         .andExpect(jsonPath("$.data.expiredAt").doesNotExist())
@@ -78,13 +82,13 @@ class LicenseControllerTest {
 
   @Test
   void ossState_returnsOssTierAndNoExpiredAt() throws Exception {
-    when(licenseService.getLicenseState()).thenReturn(LicenseState.OSS);
-    when(licenseService.getTier()).thenReturn("oss");
-    when(licenseService.getExpiry()).thenReturn(null);
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.OSS, "oss", null));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
         .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.data.state").value("oss"))
         .andExpect(jsonPath("$.data.tier").value("oss"))
         .andExpect(jsonPath("$.data.expiredAt").doesNotExist())
@@ -98,13 +102,13 @@ class LicenseControllerTest {
   @Test
   void expiredState_returnsExpiredTierOssAndIsoExpiredAt() throws Exception {
     Instant expiredAt = Instant.parse("2025-12-31T23:59:59Z");
-    when(licenseService.getLicenseState()).thenReturn(LicenseState.EXPIRED);
-    when(licenseService.getTier()).thenReturn("oss");
-    when(licenseService.getExpiry()).thenReturn(expiredAt);
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.EXPIRED, "oss", expiredAt));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
         .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.data.state").value("expired"))
         .andExpect(jsonPath("$.data.tier").value("oss"))
         .andExpect(jsonPath("$.data.expiredAt").value("2025-12-31T23:59:59Z"))
@@ -117,13 +121,13 @@ class LicenseControllerTest {
 
   @Test
   void degradedState_returnsOssTierAndNoExpiredAt() throws Exception {
-    when(licenseService.getLicenseState()).thenReturn(LicenseState.DEGRADED);
-    when(licenseService.getTier()).thenReturn("oss");
-    when(licenseService.getExpiry()).thenReturn(null);
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.DEGRADED, "oss", null));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
         .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
         .andExpect(jsonPath("$.data.state").value("degraded"))
         .andExpect(jsonPath("$.data.tier").value("oss"))
         .andExpect(jsonPath("$.data.expiredAt").doesNotExist())
