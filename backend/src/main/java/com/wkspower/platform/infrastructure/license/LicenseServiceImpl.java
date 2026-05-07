@@ -2,7 +2,9 @@ package com.wkspower.platform.infrastructure.license;
 
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.service.LicenseService;
+import com.wkspower.platform.domain.service.LicenseState;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
@@ -47,19 +49,34 @@ public class LicenseServiceImpl implements LicenseService {
   private static final String OSS_TIER = "oss";
 
   /** Immutable snapshot of parsed license state. */
-  private record LicenseState(
-      boolean valid, String tier, String holder, Instant expiry, List<String> features) {
+  private record LicenseSnapshot(
+      LicenseState licenseState,
+      String tier,
+      String holder,
+      Instant expiry,
+      List<String> features) {
 
-    static LicenseState oss() {
-      return new LicenseState(false, OSS_TIER, null, null, Collections.emptyList());
+    static LicenseSnapshot oss() {
+      return new LicenseSnapshot(LicenseState.OSS, OSS_TIER, null, null, Collections.emptyList());
     }
 
-    static LicenseState degraded() {
-      return new LicenseState(false, OSS_TIER, null, null, Collections.emptyList());
+    static LicenseSnapshot degraded() {
+      return new LicenseSnapshot(
+          LicenseState.DEGRADED, OSS_TIER, null, null, Collections.emptyList());
     }
 
-    static LicenseState loaded(String tier, String holder, Instant expiry, List<String> features) {
-      return new LicenseState(true, tier, holder, expiry, features);
+    static LicenseSnapshot expired(Instant expiry) {
+      return new LicenseSnapshot(
+          LicenseState.EXPIRED, OSS_TIER, null, expiry, Collections.emptyList());
+    }
+
+    static LicenseSnapshot loaded(
+        String tier, String holder, Instant expiry, List<String> features) {
+      return new LicenseSnapshot(LicenseState.VALID, tier, holder, expiry, features);
+    }
+
+    boolean valid() {
+      return licenseState == LicenseState.VALID;
     }
   }
 
@@ -69,7 +86,8 @@ public class LicenseServiceImpl implements LicenseService {
   /** Tracks the last-seen {@code lastModified} for hot-reload. */
   private volatile long lastModifiedSeen = -1L;
 
-  private final AtomicReference<LicenseState> state = new AtomicReference<>(LicenseState.oss());
+  private final AtomicReference<LicenseSnapshot> state =
+      new AtomicReference<>(LicenseSnapshot.oss());
 
   /**
    * @param licenseFilePath path to the license JWT file (may be empty/null for OSS mode)
@@ -87,7 +105,7 @@ public class LicenseServiceImpl implements LicenseService {
 
   @Override
   public boolean isFeatureEnabled(String featureKey) {
-    LicenseState s = state.get();
+    LicenseSnapshot s = state.get();
     return s.valid() && s.features().contains(featureKey);
   }
 
@@ -104,6 +122,11 @@ public class LicenseServiceImpl implements LicenseService {
   @Override
   public String getLicenseHolder() {
     return state.get().holder();
+  }
+
+  @Override
+  public LicenseState getLicenseState() {
+    return state.get().licenseState();
   }
 
   // -------------------------------------------------------------------------
@@ -134,7 +157,10 @@ public class LicenseServiceImpl implements LicenseService {
       if (current != lastModifiedSeen) {
         lastModifiedSeen = current;
         load();
-        LOG.info("[LicenseService] License reloaded — tier={}", state.get().tier());
+        LOG.info(
+            "[LicenseService] License reloaded — tier={}, state={}",
+            state.get().tier(),
+            state.get().licenseState());
       }
     } catch (IOException e) {
       LOG.warn("[LicenseService] License poll failed reading lastModified: {}", e.getMessage());
@@ -148,7 +174,7 @@ public class LicenseServiceImpl implements LicenseService {
   /** Reads, verifies, and atomically updates in-memory state. Never throws. */
   public void load() {
     if (licenseFilePath == null || licenseFilePath.isBlank()) {
-      state.set(LicenseState.oss());
+      state.set(LicenseSnapshot.oss());
       LOG.info(
           "{} No license file configured — operating in OSS mode", ErrorCode.WKS_LIC_001.wire());
       return;
@@ -156,7 +182,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     Path path = Path.of(licenseFilePath);
     if (!Files.exists(path)) {
-      state.set(LicenseState.oss());
+      state.set(LicenseSnapshot.oss());
       LOG.info(
           "{} License file not found at '{}' — operating in OSS mode",
           ErrorCode.WKS_LIC_001.wire(),
@@ -168,7 +194,7 @@ public class LicenseServiceImpl implements LicenseService {
     try {
       jwt = Files.readString(path, StandardCharsets.UTF_8).strip();
     } catch (IOException e) {
-      state.set(LicenseState.degraded());
+      state.set(LicenseSnapshot.degraded());
       LOG.warn(
           "{} License file unreadable: {} — operating in degraded state",
           ErrorCode.WKS_LIC_001.wire(),
@@ -193,7 +219,7 @@ public class LicenseServiceImpl implements LicenseService {
         features = Collections.emptyList();
       }
 
-      LicenseState loaded = LicenseState.loaded(tier, holder, expiry, features);
+      LicenseSnapshot loaded = LicenseSnapshot.loaded(tier, holder, expiry, features);
       state.set(loaded);
       LOG.info(
           "[LicenseService] License active — tier={}, holder={}, expires={}",
@@ -201,10 +227,22 @@ public class LicenseServiceImpl implements LicenseService {
           holder,
           expiry != null ? expiry.toString() : "never");
 
-    } catch (JwtException | IllegalArgumentException e) {
-      state.set(LicenseState.degraded());
+    } catch (ExpiredJwtException e) {
+      // Catch ExpiredJwtException before the general JwtException so we can extract
+      // the expiry timestamp from the still-accessible claims.
+      Instant expiry =
+          e.getClaims() != null && e.getClaims().getExpiration() != null
+              ? e.getClaims().getExpiration().toInstant()
+              : null;
+      state.set(LicenseSnapshot.expired(expiry));
       LOG.warn(
-          "{} License JWT invalid or expired: {} — operating in degraded state",
+          "{} License JWT expired (exp={}) — operating in OSS fallback mode",
+          ErrorCode.WKS_LIC_002.wire(),
+          expiry != null ? expiry.toString() : "unknown");
+    } catch (JwtException | IllegalArgumentException e) {
+      state.set(LicenseSnapshot.degraded());
+      LOG.warn(
+          "{} License JWT invalid: {} — operating in degraded state",
           ErrorCode.WKS_LIC_002.wire(),
           e.getMessage());
     }

@@ -75,6 +75,7 @@ class LicenseServiceTest {
 
     LicenseServiceImpl svc = serviceFor(licenseFile.toString());
 
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.VALID);
     assertThat(svc.getTier()).isEqualTo("enterprise");
     assertThat(svc.getLicenseHolder()).isEqualTo("Acme Corp");
     assertThat(svc.getExpiry()).isEqualTo(expiry);
@@ -103,6 +104,7 @@ class LicenseServiceTest {
 
     LicenseServiceImpl svc = serviceFor(licenseFile.toString());
 
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.DEGRADED);
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("everything")).isFalse();
     assertThat(svc.getLicenseHolder()).isNull();
@@ -119,6 +121,7 @@ class LicenseServiceTest {
 
     LicenseServiceImpl svc = serviceFor(licenseFile.toString());
 
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.DEGRADED);
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("any-feature")).isFalse();
   }
@@ -132,6 +135,7 @@ class LicenseServiceTest {
     // Path that does not exist.
     LicenseServiceImpl svc = serviceFor(tempDir.resolve("nonexistent.jwt").toString());
 
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.OSS);
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("advanced-reporting")).isFalse();
     assertThat(svc.getLicenseHolder()).isNull();
@@ -146,6 +150,7 @@ class LicenseServiceTest {
   void blankFilePath_ossMode() {
     LicenseServiceImpl svc = serviceFor("");
 
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.OSS);
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("any")).isFalse();
   }
@@ -192,16 +197,20 @@ class LicenseServiceTest {
   }
 
   // -------------------------------------------------------------------------
-  // Fix 3 — Expired JWT: falls back to degraded state, no exception thrown
+  // AC2 / Story 7-2 — Expired JWT: EXPIRED state with expiry populated
   // -------------------------------------------------------------------------
 
   @Test
-  void expiredJwt_degradedState_noException() throws IOException {
-    // Build a JWT whose expiry is 60 seconds in the past.
+  void expiredJwt_expiredState_expiryPopulated_noException() throws IOException {
+    // Build a JWT whose expiry is 1 day in the past (signed with the test key — valid signature).
+    Instant pastExpiry =
+        Instant.now()
+            .minus(1, java.time.temporal.ChronoUnit.DAYS)
+            .truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
     String jwt =
         Jwts.builder()
             .subject("Expired Corp")
-            .expiration(Date.from(Instant.now().minusSeconds(60)))
+            .expiration(Date.from(pastExpiry))
             .claim("tier", "enterprise")
             .claim("features", List.of("advanced-reporting"))
             .signWith(testKeyPair.getPrivate())
@@ -210,11 +219,13 @@ class LicenseServiceTest {
 
     LicenseServiceImpl svc = serviceFor(licenseFile.toString());
 
-    // JJWT rejects expired tokens with JwtException → service falls to degraded/oss state
-    assertThat(svc.getTier()).isEqualTo("oss");
+    // ExpiredJwtException is caught separately — state is EXPIRED, expiry is readable
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.EXPIRED);
+    assertThat(svc.getTier()).isEqualTo("oss"); // EE features disabled on expiry
     assertThat(svc.isFeatureEnabled("advanced-reporting")).isFalse();
-    assertThat(svc.getLicenseHolder()).isNull();
-    assertThat(svc.getExpiry()).isNull();
+    assertThat(svc.getExpiry()).isNotNull();
+    assertThat(svc.getExpiry()).isEqualTo(pastExpiry);
+    assertThat(svc.getLicenseHolder()).isNull(); // holder not preserved on expiry
   }
 
   // -------------------------------------------------------------------------
@@ -240,6 +251,7 @@ class LicenseServiceTest {
     LicenseServiceImpl svc = serviceFor(licenseFile.toString());
 
     // Algorithm mismatch → JwtException → degraded/oss state; no exception escapes
+    assertThat(svc.getLicenseState()).isEqualTo(LicenseState.DEGRADED);
     assertThat(svc.getTier()).isEqualTo("oss");
     assertThat(svc.isFeatureEnabled("everything")).isFalse();
     assertThat(svc.getLicenseHolder()).isNull();

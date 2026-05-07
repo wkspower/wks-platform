@@ -37,6 +37,10 @@
   "session.reauth": "Log in again",
   "session.dismiss": "Dismiss",
 
+  "license.expired.banner": "License expired on {date} — operating in OSS mode.",
+  "license.degraded.banner": "License could not be verified — operating in OSS mode.",
+  "license.dismiss": "Dismiss",
+
   "error.title": "Something unexpected happened",
   "error.savedServerSide": "Your work is saved on the server.",
   "error.reload": "Reload",
