@@ -1,9 +1,9 @@
 package com.wkspower.platform.domain.service;
 
-import com.wkspower.platform.domain.port.WorkflowAdapter;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
-import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.WorkflowAdapter;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentMap;
  * Mapping Layer is the only seam between WKS primitives and any backend.
  *
  * <p>Resolution rule (Story 4.1 AC4): if any registered adapter has called {@link
- * #register(CaseTypeRef, WorkflowAdapter)}, return the most-recently-registered adapter; else return
- * the singleton {@link NullAdapter}.
+ * #register(CaseTypeRef, WorkflowAdapter)}, return the most-recently-registered adapter; else
+ * return the singleton {@link NullAdapter}.
  *
  * <p>This binder is the ONLY way domain code obtains a {@link WorkflowAdapter} instance —
  * {@code @Autowired WorkflowAdapter} directly anywhere in {@code domain/} would defeat the rule.
@@ -43,8 +43,8 @@ public class WorkflowAdapterBinder {
 
   /**
    * Story 4.4a constructor — wired with the production {@link ExecutionSignalHandler} (the {@code
-   * ExecutionSignalRouter}). When provided, every {@link #register(CaseTypeRef, WorkflowAdapter)} call
-   * ensures the adapter is subscribed to the router exactly once (single-subscriber invariant;
+   * ExecutionSignalRouter}). When provided, every {@link #register(CaseTypeRef, WorkflowAdapter)}
+   * call ensures the adapter is subscribed to the router exactly once (single-subscriber invariant;
    * ArchUnit restricts {@link WorkflowAdapter#onExecutionSignal} callers to router + binder).
    */
   public WorkflowAdapterBinder(NullAdapter nullAdapter, ExecutionSignalHandler handler) {

@@ -1,12 +1,12 @@
 package com.wkspower.platform.engine;
 
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.WorkflowAdapter;
+import com.wkspower.platform.domain.port.CaseInstanceRef;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.ExecutionSignal;
 import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
-import com.wkspower.platform.domain.port.CaseInstanceRef;
-import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.WorkflowAdapter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Story 4.4a — BPMN execution backend wrapped as a {@link WorkflowAdapter}. Architecture Decision 22
- * / §786: the existing CIB seven engine ({@link
+ * Story 4.4a — BPMN execution backend wrapped as a {@link WorkflowAdapter}. Architecture Decision
+ * 22 / §786: the existing CIB seven engine ({@link
  * com.wkspower.platform.engine.CibSevenWorkflowEngine}) becomes the first production adapter; the
  * Mapping Layer is the single seam between WKS primitives and any execution backend.
  *
@@ -29,11 +29,11 @@ import org.springframework.stereotype.Component;
  * com.wkspower.platform.engine.listeners.CaseStatusListener}.
  *
  * <p><b>AC1 — direct-mutation removed:</b> the listener no longer writes case state directly. It
- * builds a {@link ExecutionSignal} and calls {@link #emit(ExecutionSignal)}; the registered handler (in
- * production: Story 4.3's {@code ExecutionSignalRouter}) consults the mapping layer and applies the
- * configured stage / status transition. Manual transitions through {@code CaseService.transition}
- * continue to call the legacy direct path until Story 4.4b reroutes them (documented in PR body as
- * the post-4.4a dual-state).
+ * builds a {@link ExecutionSignal} and calls {@link #emit(ExecutionSignal)}; the registered handler
+ * (in production: Story 4.3's {@code ExecutionSignalRouter}) consults the mapping layer and applies
+ * the configured stage / status transition. Manual transitions through {@code
+ * CaseService.transition} continue to call the legacy direct path until Story 4.4b reroutes them
+ * (documented in PR body as the post-4.4a dual-state).
  */
 @Component
 public class BpmnWorkflowAdapter implements WorkflowAdapter {
@@ -133,8 +133,8 @@ public class BpmnWorkflowAdapter implements WorkflowAdapter {
    * Engine-callback dispatch surface. Invoked by {@link
    * com.wkspower.platform.engine.listeners.CaseStatusListener} after extracting the {@link
    * ExecutionSignal} from a BPMN execution event. The signal is forwarded to the registered handler
-   * ({@code ExecutionSignalRouter} in production wiring); when no handler is registered yet the call
-   * is silently dropped at warn-log level — should not happen post-boot.
+   * ({@code ExecutionSignalRouter} in production wiring); when no handler is registered yet the
+   * call is silently dropped at warn-log level — should not happen post-boot.
    */
   public void emit(ExecutionSignal signal) {
     Objects.requireNonNull(signal, "signal");

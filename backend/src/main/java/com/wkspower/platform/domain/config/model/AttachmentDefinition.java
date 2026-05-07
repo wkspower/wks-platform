@@ -75,8 +75,8 @@ public record AttachmentDefinition(
   }
 
   /**
-   * YAML {@code map.properties[]} entry. {@link #emits()} is a {@link ExecutionSignalKind} — the sole
-   * {@code domain/port/} import allowed in this package.
+   * YAML {@code map.properties[]} entry. {@link #emits()} is a {@link ExecutionSignalKind} — the
+   * sole {@code domain/port/} import allowed in this package.
    */
   public record PropertyEmissionRule(
       String on, String camundaProperty, ExecutionSignalKind emits, String emitScope) {

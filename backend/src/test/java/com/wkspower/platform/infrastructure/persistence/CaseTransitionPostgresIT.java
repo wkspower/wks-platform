@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.model.Case;
-import com.wkspower.platform.domain.port.ExecutionSignal;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.ExecutionSignalRouter;
 import com.wkspower.platform.domain.service.MappingRegistry;

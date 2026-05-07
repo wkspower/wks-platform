@@ -16,9 +16,6 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.ExecutionSignal;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
-import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
@@ -26,6 +23,9 @@ import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import com.wkspower.platform.domain.port.FakeRecordingWorkflowAdapter;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.infrastructure.persistence.RouterItPersistenceImports;
@@ -55,9 +55,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Story 4.3 AC7 / AC8 — end-to-end IT for {@link ExecutionSignalRouter} using {@link
- * FakeRecordingWorkflowAdapter} (Story 4.1 fixture). Boots a Spring slice with the real router, registry,
- * advancer, status updater, and case repository — no CIB seven dependency. Covers the headline
- * routing matrix plus transaction-rollback semantics.
+ * FakeRecordingWorkflowAdapter} (Story 4.1 fixture). Boots a Spring slice with the real router,
+ * registry, advancer, status updater, and case repository — no CIB seven dependency. Covers the
+ * headline routing matrix plus transaction-rollback semantics.
  *
  * <p>Postgres-IT parity is deferred per {@code project_postgres_it_parity_gap.md} — H2-only here
  * matches Stories 3.1 / 3.2 precedent.
@@ -150,7 +150,8 @@ class ExecutionSignalRouterIT {
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    // Story 4.4b AC3 — STAGE_TRANSITION stage-advance now emits TWO events (stage-advance + status-reset).
+    // Story 4.4b AC3 — STAGE_TRANSITION stage-advance now emits TWO events (stage-advance +
+    // status-reset).
     assertThat(events.routed()).hasSize(2);
     assertThat(events.routed().get(0).kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
     assertThat(events.routed().get(0).source().toString()).isEqualTo("backend(fake)");
@@ -288,7 +289,7 @@ class ExecutionSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
+              assertThat(e.source().toString()).isEqualTo("execution(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -330,7 +331,7 @@ class ExecutionSignalRouterIT {
         .satisfies(
             e -> {
               assertThat(e.errorCode()).isEqualTo("WKS-MAP-404");
-              assertThat(e.source().toString()).isEqualTo("backend(unmapped:fake)");
+              assertThat(e.source().toString()).isEqualTo("execution(unmapped:fake)");
               assertThat(e.detail()).containsEntry("originAdapter", ADAPTER_NAME);
             });
   }
@@ -404,12 +405,14 @@ class ExecutionSignalRouterIT {
     flushClear();
 
     Case after = caseRepository.findById(caseRow.id()).orElseThrow();
-    // After STAGE_TRANSITION stage-advance the status was reset to next stage's initialStatus ("open"),
+    // After STAGE_TRANSITION stage-advance the status was reset to next stage's initialStatus
+    // ("open"),
     // but the earlier TASK_STATUS_CHANGED had set it to "approved" — the stage-advance status-reset
     // (AC3) then overwrites with "open". This is by design: stage-advance trumps prior same-stage
     // status.
     assertThat(after.currentStageId()).isEqualTo("stage2");
-    // Story 4.4b AC3 — STAGE_TRANSITION emits 2 events; total = TASK_STATUS_CHANGED (1) + STAGE_TRANSITION (2) = 3.
+    // Story 4.4b AC3 — STAGE_TRANSITION emits 2 events; total = TASK_STATUS_CHANGED (1) +
+    // STAGE_TRANSITION (2) = 3.
     assertThat(events.routed()).hasSize(3);
     assertThat(events.routed().get(0).kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
     assertThat(events.routed().get(1).kind()).isEqualTo(ExecutionSignalKind.STAGE_TRANSITION);
@@ -562,7 +565,8 @@ class ExecutionSignalRouterIT {
   @Test
   void ac7_manualUserTaskStatusTransition_updatesStatusAndEmitsOneEvent() {
     // AC7: manual CaseService.transition path emitted via TASK_STATUS_CHANGED signal.
-    // The router receives TASK_STATUS_CHANGED, dispatches to dispatchUserTaskProperty → statusUpdater.
+    // The router receives TASK_STATUS_CHANGED, dispatches to dispatchUserTaskProperty →
+    // statusUpdater.
     Case caseRow = newBootstrappedCase("manual-transition", 1);
     CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
     fake.attach(caseType, AttachmentScope.ofCase());

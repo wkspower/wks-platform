@@ -1,9 +1,9 @@
 package com.wkspower.platform.engine.listeners;
 
-import com.wkspower.platform.domain.port.ExecutionSignal;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.engine.BpmnWorkflowAdapter;
 import com.wkspower.platform.engine.properties.CamundaPropertyReader;
 import java.util.Map;
@@ -30,8 +30,8 @@ import org.springframework.stereotype.Component;
  *
  * <p><b>AC2 — userTask reframe:</b> the listener emits {@code TASK_STATUS_CHANGED} when an explicit
  * {@code <camunda:property name="status">} is declared on the userTask, otherwise emits {@code
- * TASK_COMPLETED} on task end. Both signals dispatch through the router which consults the
- * mapping layer for the configured rule.
+ * TASK_COMPLETED} on task end. Both signals dispatch through the router which consults the mapping
+ * layer for the configured rule.
  *
  * <p><b>AC5 — Phase-0 fallback REMOVED:</b> the legacy {@code resolveNewStatus} userTask fallback
  * picked {@code getActiveActivityIds → first non-self} which broke under parallel gateways. That
@@ -95,11 +95,12 @@ public class CaseStatusListener implements ExecutionListener {
    * element is not a status boundary the listener cares about.
    *
    * <ul>
-   *   <li>End event → {@link ExecutionSignalKind#STAGE_TRANSITION}; {@code source} is the explicit {@code
-   *       camunda:property name="status"} value when present, else the element id (legacy behaviour
-   *       preserved so end-event-id-as-status mappings keep working).
+   *   <li>End event → {@link ExecutionSignalKind#STAGE_TRANSITION}; {@code source} is the explicit
+   *       {@code camunda:property name="status"} value when present, else the element id (legacy
+   *       behaviour preserved so end-event-id-as-status mappings keep working).
    *   <li>User task with explicit {@code <camunda:property name="status">} → {@link
-   *       ExecutionSignalKind#TASK_STATUS_CHANGED}; payload carries {@code value=<declared status>}.
+   *       ExecutionSignalKind#TASK_STATUS_CHANGED}; payload carries {@code value=<declared
+   *       status>}.
    *   <li>User task without an explicit status property → {@link
    *       ExecutionSignalKind#TASK_COMPLETED}; the router consults the mapping layer for any rule
    *       keyed on the userTask id (e.g. stage advance on completion).

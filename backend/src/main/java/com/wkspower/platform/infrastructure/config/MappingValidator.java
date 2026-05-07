@@ -8,8 +8,8 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMa
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.BpmnElementInspector;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.workflow.BpmnElementSummary;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -368,7 +368,8 @@ public class MappingValidator {
       }
 
       // Story 4.3.1 AC3 — WKS-MAP-002 precedence-collision detection. Two rules from DIFFERENT
-      // ExecutionSignalKinds that target the same `(stage, status)` (modelled via the stageTransition
+      // ExecutionSignalKinds that target the same `(stage, status)` (modelled via the
+      // stageTransition
       // tuple `<from> -> <to>`) without explicit precedence are disallowed at deploy time. Phase-0
       // has no precedence vocabulary; Phase-1 may introduce one. The runtime contract documented at
       // ExecutionSignalRouter.java:38-41 advertises this code; here is its emission site.
@@ -395,9 +396,9 @@ public class MappingValidator {
    * Story 4.3.1 AC3 — emit {@code WKS-MAP-002} when an endEvent rule and a signal rule target the
    * same stage transition (same {@code from -> to} tuple). These represent two rules from different
    * {@link ExecutionSignalKind}s ({@link ExecutionSignalKind#STAGE_TRANSITION} vs {@link
-   * ExecutionSignalKind#NAMED_SIGNAL}) competing for the same effect; Phase-0 disallows the ambiguity
-   * outright (no precedence vocabulary). Last-wins on rule ordering would be a worst-class silent
-   * bug.
+   * ExecutionSignalKind#NAMED_SIGNAL}) competing for the same effect; Phase-0 disallows the
+   * ambiguity outright (no precedence vocabulary). Last-wins on rule ordering would be a
+   * worst-class silent bug.
    */
   private void detectPrecedenceCollisions(
       Optional<EndEventMapping> endEventOut,

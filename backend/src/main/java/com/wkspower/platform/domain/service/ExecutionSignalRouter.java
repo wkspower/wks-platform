@@ -11,15 +11,15 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
 import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.Case;
-import com.wkspower.platform.domain.port.ExecutionSignal;
-import com.wkspower.platform.domain.port.ExecutionSignalHandler;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p><b>Single-subscriber invariant (AC1, AC6):</b> production wiring registers exactly one {@link
  * ExecutionSignalHandler} per adapter — this class. ArchUnit guardrail {@code
- * WorkflowAdapterPortIsolationTest} enforces the rule at build time. Adding a second subscriber is a
- * deliberate, reviewer-visible surface change.
+ * WorkflowAdapterPortIsolationTest} enforces the rule at build time. Adding a second subscriber is
+ * a deliberate, reviewer-visible surface change.
  *
  * <p><b>No router-side reordering (AC2):</b> {@link ExecutionSignalKind}'s precedence ordering is a
  * <b>mapping-author</b> guarantee — Story 4.2's validator emits {@code WKS-MAP-002} when two rules
@@ -53,8 +53,8 @@ import org.slf4j.LoggerFactory;
  * audit-only event — every other exception is rethrown.
  *
  * <p><b>Audit attribution (AC5 / FR8):</b> every routed signal — success or miss — emits a {@link
- * ExecutionSignalRouted} event via {@link EventPublisher#publishAfterCommit} carrying a typed {@link
- * AuditSource.Backend} whose {@code toString()} renders to {@code "backend(<adapterName>)"}.
+ * ExecutionSignalRouted} event via {@link EventPublisher#publishAfterCommit} carrying a typed
+ * {@link AuditSource.Backend} whose {@code toString()} renders to {@code "backend(<adapterName>)"}.
  * Existing string-based {@code source} columns (Stage.source, StageEntered.source, etc.) keep their
  * bare {@code "backend-signal"} value — migration is folded into Story 4.4 per {@code
  * feedback_fold_debt_into_stories.md}.
@@ -158,7 +158,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
       // standard auditSuccess call must be skipped to avoid emitting a third redundant event.
       boolean stageAdvanceHandled = false;
       switch (signal.kind()) {
-        case STAGE_TRANSITION -> stageAdvanceHandled = dispatchEndEvent(signal, caseRow, mappingOpt.get());
+        case STAGE_TRANSITION ->
+            stageAdvanceHandled = dispatchEndEvent(signal, caseRow, mappingOpt.get());
         case NAMED_SIGNAL ->
             stageAdvanceHandled = dispatchNamedSignal(signal, caseRow, mappingOpt.get());
           // Story 4.3.1 AC10 — split USER_TASK_PROPERTY into TASK_STATUS_CHANGED + TASK_COMPLETED.
@@ -246,7 +247,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
    * #applyStageTransition}); {@code false} if a {@link WksMappingMissException} is thrown before
    * any transition (never actually returns false — exception propagates instead).
    */
-  private boolean dispatchEndEvent(ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
+  private boolean dispatchEndEvent(
+      ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
     EndEventMapping rule =
         firstAttachment(mapping)
             .flatMap(AttachmentDefinition::endEventMapping)
@@ -286,8 +288,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
   }
 
   /**
-   * Returns {@code true} when a stage advance was applied (TASK_COMPLETED path); {@code false}
-   * when a status-only update was performed (TASK_STATUS_CHANGED path). The caller uses this to decide
+   * Returns {@code true} when a stage advance was applied (TASK_COMPLETED path); {@code false} when
+   * a status-only update was performed (TASK_STATUS_CHANGED path). The caller uses this to decide
    * whether to emit the standard single-event {@code auditSuccess} or skip it (because {@link
    * #resetStatusForAdvancedStage} already emitted two events).
    */
@@ -395,8 +397,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
 
   /**
    * Story 4.4b AC3 — resets the case status to the next stage's {@code initialStatus} after a stage
-   * advance. Emits two {@link ExecutionSignalRouted} events with a shared {@code correlationId}: one
-   * for the stage-advance effect, one for the status-reset effect.
+   * advance. Emits two {@link ExecutionSignalRouted} events with a shared {@code correlationId}:
+   * one for the stage-advance effect, one for the status-reset effect.
    *
    * @param nextStageHint the target stage id known before the advance (from the mapping spec), or
    *     {@code null} when the advance target is determined by the advancer (COMPLETED/SKIPPED

@@ -3,8 +3,8 @@ package com.wkspower.platform.domain.port;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.domain.service.NullAdapter;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -14,13 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Story 4.1 AC6 — abstract compliance contract. Any {@link WorkflowAdapter} implementation MUST pass
- * these seven test methods. Story 4.4 (BPMN adapter) and Story 4.9 (in-memory state machine) extend
- * this class by overriding {@link #newAdapterUnderTest(WorkflowAdapterBinder)}.
+ * Story 4.1 AC6 — abstract compliance contract. Any {@link WorkflowAdapter} implementation MUST
+ * pass these seven test methods. Story 4.4 (BPMN adapter) and Story 4.9 (in-memory state machine)
+ * extend this class by overriding {@link #newAdapterUnderTest(WorkflowAdapterBinder)}.
  *
  * <p>Tests 1–4, 7 exercise real behaviour. Tests 5–6 are vacuously satisfied by adapters that emit
- * no signals (e.g. {@link NullAdapter}); the {@link FakeRecordingWorkflowAdapter} subclass exercises them
- * non-trivially.
+ * no signals (e.g. {@link NullAdapter}); the {@link FakeRecordingWorkflowAdapter} subclass
+ * exercises them non-trivially.
  */
 public abstract class WorkflowAdapterComplianceTest {
 
@@ -128,7 +128,11 @@ public abstract class WorkflowAdapterComplianceTest {
             ExecutionSignalKind.OUTCOME, "fake-recording", ci, "elem-B", java.util.Map.of());
     ExecutionSignal s3 =
         ExecutionSignal.of(
-            ExecutionSignalKind.STAGE_TRANSITION, "fake-recording", ci, "elem-C", java.util.Map.of());
+            ExecutionSignalKind.STAGE_TRANSITION,
+            "fake-recording",
+            ci,
+            "elem-C",
+            java.util.Map.of());
 
     emitSignal(s1);
     emitSignal(s2);
@@ -152,7 +156,8 @@ public abstract class WorkflowAdapterComplianceTest {
 
     CaseInstanceRef ci = new CaseInstanceRef(UUID.randomUUID(), new CaseTypeRef("ct-1", "1.0.0"));
     for (ExecutionSignalKind k : ExecutionSignalKind.values()) {
-      emitSignal(ExecutionSignal.of(k, "fake-recording", ci, "elem-" + k.name(), java.util.Map.of()));
+      emitSignal(
+          ExecutionSignal.of(k, "fake-recording", ci, "elem-" + k.name(), java.util.Map.of()));
     }
     sub.close();
 

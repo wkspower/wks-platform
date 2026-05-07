@@ -233,8 +233,8 @@ public enum ErrorCode {
   WKS_MAP_009("WKS-MAP-009"),
   /**
    * Runtime — emitted by {@link com.wkspower.platform.domain.service.ExecutionSignalRouter} when an
-   * incoming {@link com.wkspower.platform.domain.port.ExecutionSignal} does not match any rule in the
-   * active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the
+   * incoming {@link com.wkspower.platform.domain.port.ExecutionSignal} does not match any rule in
+   * the active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the
    * CaseInstance's pinned {@code (caseTypeId, version)} is missing from {@link
    * com.wkspower.platform.domain.service.MappingRegistry}, or when a property emission attempts to
    * drive a stage transition (Story 4.3 AC2 / AC4 / AC9). Distinct from deploy-time {@link
@@ -246,11 +246,11 @@ public enum ErrorCode {
   WKS_MAP_404("WKS-MAP-404"),
   /**
    * Story 4.3.1 AC5 — runtime: {@link com.wkspower.platform.domain.service.ExecutionSignalRouter}
-   * received a {@link com.wkspower.platform.domain.port.ExecutionSignal} for a {@code caseId} that is
-   * no longer present in the case repository (purged, hot-reload race, adapter sending after case
-   * deletion). Distinct from {@code WKS-MAP-404} (rule miss); {@code -405} mirrors the HTTP "method
-   * not allowed / case-not-found" suffix convention. Audited via {@code ExecutionSignalRouted} with
-   * {@code source = backend(<adapter>)}; never silently dropped.
+   * received a {@link com.wkspower.platform.domain.port.ExecutionSignal} for a {@code caseId} that
+   * is no longer present in the case repository (purged, hot-reload race, adapter sending after
+   * case deletion). Distinct from {@code WKS-MAP-404} (rule miss); {@code -405} mirrors the HTTP
+   * "method not allowed / case-not-found" suffix convention. Audited via {@code
+   * ExecutionSignalRouted} with {@code source = backend(<adapter>)}; never silently dropped.
    */
   WKS_MAP_405("WKS-MAP-405"),
 

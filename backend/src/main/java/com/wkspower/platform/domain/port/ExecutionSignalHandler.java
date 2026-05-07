@@ -1,8 +1,8 @@
 package com.wkspower.platform.domain.port;
 
 /**
- * Handler invoked by a {@link WorkflowAdapter} when a {@link ExecutionSignal} is emitted. Registered
- * via {@link WorkflowAdapter#onExecutionSignal(ExecutionSignalHandler)}.
+ * Handler invoked by a {@link WorkflowAdapter} when a {@link ExecutionSignal} is emitted.
+ * Registered via {@link WorkflowAdapter#onExecutionSignal(ExecutionSignalHandler)}.
  *
  * <p>Per-instance ordering is preserved by the adapter (compliance test 5). Ordering across
  * instances is adapter-defined.

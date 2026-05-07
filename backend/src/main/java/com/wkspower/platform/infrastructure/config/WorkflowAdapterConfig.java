@@ -5,11 +5,11 @@ import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
-import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.domain.service.ExecutionSignalRouter;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.NullAdapter;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,9 +52,9 @@ public class WorkflowAdapterConfig {
   }
 
   /**
-   * Story 4.3 AC1 — single routing surface for every {@code ExecutionSignal}. Domain-side dependency
-   * on {@link WksStageAdvancer} (Story 3.1), {@link CaseStatusUpdater} (Story 2.4), {@link
-   * CaseRepository}, {@link EventPublisher}, and {@link Clock} — all already wired by other
+   * Story 4.3 AC1 — single routing surface for every {@code ExecutionSignal}. Domain-side
+   * dependency on {@link WksStageAdvancer} (Story 3.1), {@link CaseStatusUpdater} (Story 2.4),
+   * {@link CaseRepository}, {@link EventPublisher}, and {@link Clock} — all already wired by other
    * infrastructure configs.
    */
   @Bean

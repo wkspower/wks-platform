@@ -223,7 +223,7 @@ class MappingValidatorTest {
         validator.validate(
             raw, Set.of("intake"), Map.of("x.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes()));
     assertThat(result.errors())
-        .anySatisfy(e -> assertThat(e.field()).isEqualTo("/attachments/0/map/userTasks/ghost"));
+        .anySatisfy(e -> assertThat(e.field()).isEqualTo("/attachments/0/routing/userTasks/ghost"));
   }
 
   // ---- AC2 — collect-all (multiple errors of different kinds in one pass) ----

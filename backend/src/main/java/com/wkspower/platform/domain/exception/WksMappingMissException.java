@@ -4,10 +4,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Story 4.3 AC4 — runtime miss in {@code ExecutionSignalRouter}: an incoming {@code ExecutionSignal}
- * did not resolve to any rule in the active {@code MappingDefinition} (or the CaseInstance's pinned
- * {@code (caseTypeId, version)} is not registered, or a {@code USER_TASK_PROPERTY} signal attempted
- * to drive a stage transition). Carries {@link ErrorCode#WKS_MAP_404}.
+ * Story 4.3 AC4 — runtime miss in {@code ExecutionSignalRouter}: an incoming {@code
+ * ExecutionSignal} did not resolve to any rule in the active {@code MappingDefinition} (or the
+ * CaseInstance's pinned {@code (caseTypeId, version)} is not registered, or a {@code
+ * USER_TASK_PROPERTY} signal attempted to drive a stage transition). Carries {@link
+ * ErrorCode#WKS_MAP_404}.
  *
  * <p>Distinct from deploy-time {@code WKS-MAP-001..006} (Story 4.2). The router catches this
  * exception at its boundary, writes an audit row, and does NOT propagate to the adapter — see AC4.

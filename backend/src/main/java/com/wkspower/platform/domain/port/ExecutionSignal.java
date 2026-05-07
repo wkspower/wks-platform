@@ -7,8 +7,9 @@ import java.util.Objects;
  * Immutable signal emitted by a {@link WorkflowAdapter} for downstream routing (Story 4.3) into WKS
  * case-management semantics. Architecture §662 + §810 (Decision 22).
  *
- * <p>{@code payload} is a map of scalar values only — concrete shape per {@link ExecutionSignalKind}
- * is documented per-handler but not enforced at the type level (Story 4.3 router validates).
+ * <p>{@code payload} is a map of scalar values only — concrete shape per {@link
+ * ExecutionSignalKind} is documented per-handler but not enforced at the type level (Story 4.3
+ * router validates).
  *
  * @param kind one of the four declared kinds (precedence: see {@link ExecutionSignalKind} Javadoc)
  * @param adapterName adapter identity for FR8 source attribution (e.g. {@code "bpmn"}, {@code

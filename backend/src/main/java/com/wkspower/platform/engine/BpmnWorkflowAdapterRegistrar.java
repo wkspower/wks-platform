@@ -2,8 +2,8 @@ package com.wkspower.platform.engine;
 
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

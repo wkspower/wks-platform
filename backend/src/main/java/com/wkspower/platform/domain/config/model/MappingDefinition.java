@@ -15,9 +15,9 @@ import java.util.TreeMap;
  * com.wkspower.platform.domain.port.ExecutionSignalKind} (used by {@link
  * AttachmentDefinition.PropertyEmissionRule}).
  *
- * <p>Story 4.2 produces this value object; Story 4.3's {@code ExecutionSignalRouter} consumes it. 4.2
- * has zero coupling to {@code WorkflowAdapter} / {@code ExecutionSignalRouter} (the runtime port from
- * Story 4.1) — the wire shape lives here.
+ * <p>Story 4.2 produces this value object; Story 4.3's {@code ExecutionSignalRouter} consumes it.
+ * 4.2 has zero coupling to {@code WorkflowAdapter} / {@code ExecutionSignalRouter} (the runtime
+ * port from Story 4.1) — the wire shape lives here.
  *
  * <p><b>Zero-attachment case types are first-class</b> (D19 stage-less analogue per architecture
  * §816): every downstream service treats {@link #empty()} identically to a CaseType with no {@code

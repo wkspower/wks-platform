@@ -16,12 +16,12 @@ import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
-import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.event.ConfigDeployed;
+import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.model.User;
-import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
@@ -542,8 +542,8 @@ class CaseFlowIT {
 
   /**
    * Captures published events so tests can assert domain-event firing. Records both {@link
-   * CaseStatusChanged} (legacy path) and {@link ExecutionSignalRouted} (Story 4.3 router audit path,
-   * published via publishAfterCommit after transaction commits).
+   * CaseStatusChanged} (legacy path) and {@link ExecutionSignalRouted} (Story 4.3 router audit
+   * path, published via publishAfterCommit after transaction commits).
    */
   static class StatusEventRecorder {
     final java.util.List<CaseStatusChanged> events = new CopyOnWriteArrayList<>();

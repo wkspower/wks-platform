@@ -82,8 +82,10 @@ class WorkflowAdapterPortIsolationTest {
    *
    * <ul>
    *   <li>{@code ApplicationContext.getBeansOfType(ExecutionSignalHandler.class)} — Spring lookup
-   *   <li>{@code @Autowired List<ExecutionSignalHandler>} — collection injection (broadcasts to all)
-   *   <li>{@code Method.invoke(...)} on a {@code ExecutionSignalHandler} method — reflective dispatch
+   *   <li>{@code @Autowired List<ExecutionSignalHandler>} — collection injection (broadcasts to
+   *       all)
+   *   <li>{@code Method.invoke(...)} on a {@code ExecutionSignalHandler} method — reflective
+   *       dispatch
    * </ul>
    *
    * <p>The original rule only catches direct bytecode method calls; an attacker (or a well-meaning

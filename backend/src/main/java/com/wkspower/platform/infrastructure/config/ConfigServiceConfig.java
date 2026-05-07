@@ -1,6 +1,5 @@
 package com.wkspower.platform.infrastructure.config;
 
-import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.BpmnValidationService;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
@@ -11,6 +10,7 @@ import com.wkspower.platform.domain.port.CaseTypeSource;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.StatusOptionsStore;

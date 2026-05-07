@@ -9,9 +9,9 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMa
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
-import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.MappingRegistry;
+import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseTypeVersionJpaRepository;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -33,9 +33,9 @@ import org.springframework.test.context.DynamicPropertySource;
  * <p>Verifies the two core invariants of AC4:
  *
  * <ol>
- *   <li>After {@link WorkflowAdapterBinder#detach(CaseTypeRef)}, the prior version's mapping remains
- *       resolvable via {@link MappingRegistry} — in-flight cases frozen on their prior version can
- *       still resolve their mapping.
+ *   <li>After {@link WorkflowAdapterBinder#detach(CaseTypeRef)}, the prior version's mapping
+ *       remains resolvable via {@link MappingRegistry} — in-flight cases frozen on their prior
+ *       version can still resolve their mapping.
  *   <li>The detached adapter is no longer reachable via {@link WorkflowAdapterBinder#resolve}, so
  *       new routing calls for the detached case-type scope get the {@code NullAdapter}.
  * </ol>

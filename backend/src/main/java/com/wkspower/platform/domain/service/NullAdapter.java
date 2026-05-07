@@ -1,11 +1,11 @@
 package com.wkspower.platform.domain.service;
 
 import com.wkspower.platform.domain.port.AttachmentScope;
-import com.wkspower.platform.domain.port.WorkflowAdapter;
-import com.wkspower.platform.domain.port.ExecutionSignalHandler;
-import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.ExecutionSignalHandler;
+import com.wkspower.platform.domain.port.ExecutionSignalSubscription;
+import com.wkspower.platform.domain.port.WorkflowAdapter;
 import java.util.Objects;
 
 /**
@@ -17,8 +17,8 @@ import java.util.Objects;
  *
  * <ul>
  *   <li>{@code attach} / {@code detach} — no-ops, return immediately.
- *   <li>{@code onExecutionSignal} — registers the handler but NEVER invokes it (NullAdapter emits no
- *       signals, ever); returns a closeable that is itself a no-op on close.
+ *   <li>{@code onExecutionSignal} — registers the handler but NEVER invokes it (NullAdapter emits
+ *       no signals, ever); returns a closeable that is itself a no-op on close.
  *   <li>{@code start} — returns a deterministic synthetic id of the form {@code
  *       "null:<caseInstance.id()>"} so audit / observability can distinguish a null start from a
  *       real one without special-casing.
@@ -26,10 +26,11 @@ import java.util.Objects;
  * </ul>
  *
  * <p>Zero external dependencies — no engine imports, no repository, no infrastructure types, not
- * even Spring. Wired into the Spring context via {@code infrastructure.config.WorkflowAdapterConfig}
- * to honour the project-wide rule that {@code domain/} stays framework-free (NFR36, enforced by
- * {@link com.wkspower.platform.architecture.ArchitectureTest}). The story spec said
- * {@code @Component}, but the standing architectural rule wins — see Dev Notes.
+ * even Spring. Wired into the Spring context via {@code
+ * infrastructure.config.WorkflowAdapterConfig} to honour the project-wide rule that {@code domain/}
+ * stays framework-free (NFR36, enforced by {@link
+ * com.wkspower.platform.architecture.ArchitectureTest}). The story spec said {@code @Component},
+ * but the standing architectural rule wins — see Dev Notes.
  *
  * <p>Isolation is also enforced by ArchUnit ({@code WorkflowAdapterPortIsolationTest}).
  */
