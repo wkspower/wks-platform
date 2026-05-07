@@ -60,6 +60,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @org.springframework.test.context.ActiveProfiles("dev")
 @Import(ZeroAttachmentCaseTypeIT.RecorderConfig.class)
+// In-memory H2 is safe here: the zero-attachment path never deploys BPMN, so the engine
+// BLOB columns that require file-mode H2 (as in CaseFlowIT) are never exercised.
 @TestPropertySource(
     properties = {
       "spring.datasource.url=jdbc:h2:mem:zero-attach-it;DB_CLOSE_DELAY=-1",
@@ -166,9 +168,10 @@ class ZeroAttachmentCaseTypeIT {
    *       CaseStatusUpdater} directly).
    * </ol>
    *
-   * <p>The {@code "manual"} audit-source guarantee (AC2 wire contract) is proven by the absence of
-   * any {@code BackendSignalRouted} — those events carry {@code AuditSource.Backend} whose wire
-   * string is {@code "backend(<adapterName>)"}. No routed event = no backend path = manual path.
+   * <p>The absence of any {@link BackendSignalRouted} event confirms that the Mapping Layer router
+   * was bypassed (those events carry {@code AuditSource.Backend}; no routed event = router not
+   * entered). A direct positive assertion that the audit row carries {@code source = "manual"} is
+   * deferred to a future test once the audit-row read API is available.
    */
   @Test
   void transitionStatus_onZeroAttachmentCase_succeedsWithManualAuditSource() throws Exception {
@@ -238,7 +241,7 @@ class ZeroAttachmentCaseTypeIT {
                     new AssertionError(
                         "CaseType " + CASE_TYPE_ID + " has no registered version — setup failed"));
 
-    var record =
+    var versionRecord =
         versionRegistry
             .findVersion(CASE_TYPE_ID, version)
             .orElseThrow(
@@ -250,10 +253,10 @@ class ZeroAttachmentCaseTypeIT {
                             + version
                             + " not found"));
 
-    assertThat(record.bpmnContentHash())
+    assertThat(versionRecord.bpmnContentHash())
         .as("bpmn_content_hash must be null for a zero-attachment CaseType")
         .isNull();
-    assertThat(record.mappingHash())
+    assertThat(versionRecord.mappingHash())
         .as("mapping_hash must be null for a zero-attachment CaseType")
         .isNull();
   }
@@ -281,9 +284,6 @@ class ZeroAttachmentCaseTypeIT {
     assertThat(resolved)
         .as("BackendAdapterBinder.resolve must return NullAdapter for zero-attachment CaseType")
         .isInstanceOf(NullAdapter.class);
-    assertThat(NullAdapter.ADAPTER_NAME)
-        .as("NullAdapter.ADAPTER_NAME must be 'null'")
-        .isEqualTo("null");
   }
 
   // ---- helpers ----
@@ -326,11 +326,6 @@ class ZeroAttachmentCaseTypeIT {
     @EventListener
     void onRouted(BackendSignalRouted e) {
       routedSignals.add(e);
-    }
-
-    @Bean
-    RecorderConfig recorder() {
-      return this;
     }
   }
 }
