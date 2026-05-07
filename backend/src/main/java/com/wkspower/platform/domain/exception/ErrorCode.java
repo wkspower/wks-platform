@@ -361,6 +361,31 @@ public enum ErrorCode {
   /** Uncaught exception — last resort. */
   WKS_RTM_500("WKS-RTM-500"),
 
+  // 422 / 404 / 502 — Document upload and storage (Story 14.2). Band: WKS-DOC-001..099.
+  /**
+   * File size exceeds the configured maximum (default 25 MB, property {@code
+   * wks.documents.max-size-mb}). HTTP 422.
+   */
+  WKS_DOC_001("WKS-DOC-001"),
+  /** Content type not in the upload allowlist. HTTP 422. */
+  WKS_DOC_002("WKS-DOC-002"),
+  /**
+   * Filename rejected — path traversal ({@code ../}, directory separators) or executable extension
+   * ({@code .exe}, {@code .sh}, {@code .bat}, {@code .cmd}, {@code .ps1}, {@code .js}, {@code
+   * .py}). HTTP 422.
+   */
+  WKS_DOC_003("WKS-DOC-003"),
+  /**
+   * Document not found — the requested {@code documentId} references no row in {@code
+   * case_documents}. HTTP 404.
+   */
+  WKS_DOC_004("WKS-DOC-004"),
+  /**
+   * Storage backend error — file retrieve or store failed (MinIO unreachable, file missing from
+   * local store). HTTP 502.
+   */
+  WKS_DOC_005("WKS-DOC-005"),
+
   // License band (Story 7.1). WKS-LIC-NNN is a new prefix. Codes are INFO/WARN-level
   // operational states, not HTTP errors to callers — the platform never hard-fails on license
   // problems (AR-D24). Band: WKS-LIC-001..099 (only 001 and 002 allocated in 7.1; future stories

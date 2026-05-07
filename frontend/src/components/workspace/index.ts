@@ -4,5 +4,5 @@ export { CaseDataTable } from './CaseDataTable';
 export { CaseDetailPanel } from './CaseDetailPanel';
 export { CaseFilterBar } from './CaseFilterBar';
 export { CaseWorkspace } from './CaseWorkspace';
-export { DocumentsTabPlaceholder } from './DocumentsTabPlaceholder';
+export { DocumentsTab } from './DocumentsTab';
 export { PropertiesTab } from './PropertiesTab';

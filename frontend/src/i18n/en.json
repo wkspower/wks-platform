@@ -108,6 +108,15 @@
   "documents.placeholder.title": "Documents coming soon",
   "documents.placeholder.body": "Document upload and download arrive in Epic 3.",
 
+  "documents.upload.cta": "Upload file",
+  "documents.upload.dragDrop": "Drop files here or click to upload",
+  "documents.empty.title": "No documents yet",
+  "documents.empty.body": "Drop a file here or click 'Upload' to attach a document.",
+  "documents.preview.download": "Download",
+  "documents.upload.error.size": "File exceeds the {limit} MB size limit.",
+  "documents.upload.error.mime": "File type not allowed.",
+  "documents.upload.error.filename": "Filename contains invalid characters.",
+
   "cases.filter.nFilters": "{count} filters",
   "cases.filter.oneFilter": "1 filter",
   "cases.filter.add": "Add filter",

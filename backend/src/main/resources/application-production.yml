@@ -69,6 +69,10 @@ wks:
   storage:
     endpoint: ${WKS_STORAGE_ENDPOINT:}
     key: ${WKS_STORAGE_KEY:}
+  # Story 14.2 — Document storage for production.
+  documents:
+    max-size-mb: 25
+    bucket: ${WKS_STORAGE_BUCKET:wks-documents}
   # Keycloak/SSO is a forward-compatible seam (Story 14.1 AC5). The compose
   # `production-sso` profile provisions the container; this property gates the
   # log surface that announces the seam. Auth-provider integration is gated on

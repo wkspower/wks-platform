@@ -111,6 +111,9 @@ export default [
         EventListenerOrEventListenerObject: 'readonly',
         AddEventListenerOptions: 'readonly',
         JSX: 'readonly',
+        File: 'readonly',
+        FileList: 'readonly',
+        Blob: 'readonly',
       },
     },
     plugins: {
