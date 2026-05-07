@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Domain service orchestrating case CRUD. Framework-free — no Spring, no JPA, no Jackson on the
@@ -56,6 +58,8 @@ import java.util.UUID;
  * dangling process instance — accepted partial state for Phase 0; Phase 1 wraps in an outbox.
  */
 public class CaseService {
+
+  private static final Logger log = LoggerFactory.getLogger(CaseService.class);
 
   private final CaseRepository caseRepository;
   private final CaseTypeReader caseTypeReader;
@@ -432,6 +436,37 @@ public class CaseService {
     // version-based conflict detection is required in future, the FormController request body
     // should accept a client-supplied version and thread it through to update() here.
     Case updated = update(caseId, safeData, existing.version(), actorId);
+
+    // Emit USER_TASK_COMPLETE signal to advance the BPMN process token if a backend adapter is
+    // registered for this case type. This is best-effort: a missing adapter registration (OSS
+    // zero-attachment deploy) results in WksMappingMissException from the router, which is logged
+    // at WARN but does NOT fail the form submission — the data was already persisted.
+    // The BPMN adapter correlates the formId to a userTask element id via the AttachmentDefinition
+    // userTaskMappings (bpmnTaskId → UserTaskMapping{form}) on its side; we emit formId as the
+    // correlation key so the adapter can do the reverse lookup without another DB call.
+    // Story 4-5 will propagate variables further into the BPMN payload.
+    if (updated.processInstanceId() != null && !updated.processInstanceId().isBlank()) {
+      try {
+        CaseTypeRef caseTypeRef =
+            new CaseTypeRef(updated.caseTypeId(), String.valueOf(updated.caseTypeVersion()));
+        CaseInstanceRef caseInstance = new CaseInstanceRef(updated.id(), caseTypeRef);
+        BackendSignal formSignal =
+            BackendSignal.of(
+                BackendSignalKind.USER_TASK_COMPLETE,
+                "form",
+                caseInstance,
+                formId, // adapter resolves formId → BPMN userTask element id via userTaskMappings
+                Map.of("formId", formId, "actorId", actorId.toString()));
+        signalRouter.onSignal(formSignal);
+      } catch (Exception ex) {
+        log.warn(
+            "submitForm: BPMN signal skipped for case {} form {} — adapter not registered or"
+                + " mapping missing ({})",
+            caseId,
+            formId,
+            ex.getMessage());
+      }
+    }
 
     // Compute which field ids changed between the old and new data for the FormSubmitted event.
     Set<String> updatedFieldIds = diffFieldIds(existing.data(), safeData);
