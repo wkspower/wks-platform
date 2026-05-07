@@ -8,6 +8,7 @@ import { RootRedirect } from '@/components/routing/RootRedirect';
 import { AdminPage } from '@/pages/AdminPage';
 import { CasesPage } from '@/pages/CasesPage';
 import { DevConsolePage } from '@/pages/DevConsolePage';
+import { FormPage } from '@/pages/FormPage';
 import { LoginPage, safeReturnTo } from '@/pages/LoginPage';
 import { TasksPage } from '@/pages/TasksPage';
 import { useAuthStore } from '@/stores/authStore';
@@ -44,6 +45,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '/cases', element: <CasesPage /> },
       { path: '/cases/:caseId', element: <CasesPage /> },
+      // Story 5.2 — single-page form renderer route.
+      { path: '/cases/:caseId/forms/:formId', element: <FormPage /> },
       { path: '/tasks', element: <TasksPage /> },
       {
         path: '/admin',

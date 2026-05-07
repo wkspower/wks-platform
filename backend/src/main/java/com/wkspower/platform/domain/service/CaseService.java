@@ -1,9 +1,13 @@
 package com.wkspower.platform.domain.service;
 
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.FieldDefinition;
+import com.wkspower.platform.domain.config.model.FieldType;
+import com.wkspower.platform.domain.config.model.FormDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseUpdated;
+import com.wkspower.platform.domain.event.FormSubmitted;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 // Story 3.6 — ErrorCode + WksStageException used by transition guards (AC6).
@@ -357,6 +361,108 @@ public class CaseService {
         .findById(caseId)
         .orElseThrow(
             () -> new WksNotFoundException("Case " + caseId + " not found after transition"));
+  }
+
+  /**
+   * Story 5.2 AC3 — submit form data for an existing case. Steps:
+   *
+   * <ol>
+   *   <li>Load case + case type; resolve the named form definition (404 if not found).
+   *   <li>Validate {@code formData} against the form's field definitions (WKS-FORM-002 on failure).
+   *   <li>Call {@link #update} for data persistence (merges submitted fields into case data).
+   *   <li>Publish {@link FormSubmitted} via {@code EventPublisher.publishAfterCommit} (audits the
+   *       form submission separately from the {@link CaseUpdated} event emitted by {@code update}).
+   * </ol>
+   *
+   * <p>Validation intentionally reuses the same field-presence + type logic as {@link #update}: the
+   * backend is the authoritative constraint enforcer, not just a relay for frontend Zod results.
+   * WKS-FORM-002 carries the field-level details so the frontend can surface inline errors on
+   * backend-only constraint violations not captured by the Zod schema.
+   *
+   * @throws WksNotFoundException if the case or case type is not found, or if the form id does not
+   *     exist on the case type.
+   * @throws WksValidationAggregateException (WKS-FORM-002) if any field value fails validation.
+   */
+  public Case submitForm(UUID caseId, String formId, Map<String, Object> formData, UUID actorId) {
+    Objects.requireNonNull(caseId, "caseId");
+    Objects.requireNonNull(formId, "formId");
+    Objects.requireNonNull(actorId, "actorId");
+
+    Case existing =
+        caseRepository
+            .findById(caseId)
+            .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
+
+    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+
+    // Resolve the form definition by id — 404 if not declared on this case type.
+    FormDefinition form =
+        caseType.forms().stream()
+            .filter(f -> f.id().equals(formId))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new WksNotFoundException(
+                        "Form '"
+                            + formId
+                            + "' not found on case type '"
+                            + existing.caseTypeId()
+                            + "'"));
+
+    // Validate submitted field values against the form's field definitions.
+    Map<String, Object> safeData = formData == null ? Map.of() : Map.copyOf(formData);
+    List<ErrorDetail> violations = validateFormData(form, safeData);
+    if (!violations.isEmpty()) {
+      throw new WksValidationAggregateException(
+          "Form submit validation failed (WKS-FORM-002)", violations);
+    }
+
+    // Persist via the existing update path (validates the merged data against the case-type schema
+    // and emits a CaseUpdated event). The update uses the current case version to detect concurrent
+    // modifications.
+    Case updated = update(caseId, safeData, existing.version(), actorId);
+
+    // Compute which field ids changed between the old and new data for the FormSubmitted event.
+    Set<String> updatedFieldIds = diffFieldIds(existing.data(), safeData);
+
+    // Publish FormSubmitted after commit so the audit listener never observes rolled-back state.
+    eventPublisher.publishAfterCommit(
+        new FormSubmitted(caseId, formId, actorId, clock.now(), updatedFieldIds));
+
+    return updated;
+  }
+
+  /**
+   * Validate submitted form data against the form's declared field definitions (Story 5.2
+   * WKS-FORM-002). Collect-all: never short-circuits on first error.
+   *
+   * <p>Currently validates that required fields are present. Type-specific constraint checking
+   * (min/max, length, date range) is delegated to the existing {@link CaseDataValidator} port which
+   * runs inside {@link #update}. The purpose of this pre-check is to surface form-specific required
+   * field violations with WKS-FORM-002 (so the frontend can distinguish them from generic case-data
+   * validation errors that use WKS-API-002).
+   */
+  private static List<ErrorDetail> validateFormData(FormDefinition form, Map<String, Object> data) {
+    List<ErrorDetail> errors = new ArrayList<>();
+    for (FieldDefinition f : form.fields()) {
+      if (f.required()) {
+        Object value = data.get(f.id());
+        if (value == null || (value instanceof String s && s.isBlank())) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_002.wire(),
+                  "Field '" + f.displayName() + "' is required",
+                  f.id()));
+        } else if (f.type() == FieldType.CHECKBOX && Boolean.FALSE.equals(value)) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_002.wire(),
+                  "Field '" + f.displayName() + "' must be checked",
+                  f.id()));
+        }
+      }
+    }
+    return errors;
   }
 
   /** Lookup by id; 404 if not found. */

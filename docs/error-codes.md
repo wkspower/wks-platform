@@ -153,6 +153,7 @@ Band: `WKS-FORM-001..099`. Codes 002+ are **reserved** for Stories 5.2–5.8 —
 | Code | Meaning | Thrower(s) |
 | --- | --- | --- |
 | `WKS-FORM-001` | `topology: parallel` (or any non-`single` topology value) is a Phase-1 capability — rejected in Phase 0. Message: `"topology: parallel is a Phase-1 capability — use topology: single"`. | `infrastructure/config/FormValidator.java` |
+| `WKS-FORM-002` | Form submit field-level validation failure (backend-side). Emitted by `CaseService.submitForm()` when a submitted field value fails a type-specific constraint not caught by the frontend Zod schema. One `ErrorDetail` per offending field; `field` slot carries the field id. HTTP 422. | `domain/service/CaseService.java` |
 
 ---
 

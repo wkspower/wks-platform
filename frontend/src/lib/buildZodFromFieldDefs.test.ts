@@ -163,3 +163,49 @@ describe('buildZodFromFieldDefs — file', () => {
     expect(schema.safeParse({ a: undefined }).success).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Story 5.2 — 'submit' mode
+// ---------------------------------------------------------------------------
+
+describe('buildZodFromFieldDefs — submit mode', () => {
+  it('includes fields where required === true (not filtered by requiredOnCreate)', () => {
+    // required=true, requiredOnCreate=false — 'create' would exclude, 'submit' must include.
+    const schema = buildZodFromFieldDefs(
+      [
+        field({ id: 'a', required: true, requiredOnCreate: false }),
+        field({ id: 'b', required: false, requiredOnCreate: false }),
+      ],
+      'submit',
+    );
+    expect(Object.keys(schema.shape)).toContain('a');
+    expect(Object.keys(schema.shape)).not.toContain('b');
+  });
+
+  it('validates required text field in submit mode', () => {
+    const schema = buildZodFromFieldDefs(
+      [field({ id: 'a', type: 'text', required: true, requiredOnCreate: false })],
+      'submit',
+    );
+    expect(schema.safeParse({ a: '' }).success).toBe(false);
+    expect(schema.safeParse({ a: 'hello' }).success).toBe(true);
+  });
+
+  it('validates required checkbox in submit mode using f.required', () => {
+    const schema = buildZodFromFieldDefs(
+      [field({ id: 'a', type: 'checkbox', required: true, requiredOnCreate: false })],
+      'submit',
+    );
+    expect(schema.safeParse({ a: false }).success).toBe(false);
+    expect(schema.safeParse({ a: true }).success).toBe(true);
+  });
+
+  it('excludes non-required fields from submit schema', () => {
+    const schema = buildZodFromFieldDefs(
+      [field({ id: 'a', required: false, requiredOnCreate: false })],
+      'submit',
+    );
+    // Non-required field is absent from schema — empty object passes.
+    expect(Object.keys(schema.shape)).toHaveLength(0);
+  });
+});

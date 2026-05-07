@@ -25,14 +25,36 @@ public record CaseTypeViewDto(
     List<FieldView> fields,
     List<StatusDefinition> statuses,
     List<String> listColumns,
-    List<StageDefinitionView> stages) {
+    List<StageDefinitionView> stages,
+    /**
+     * Story 5.2 — form definitions declared in the case-type YAML {@code forms[]} block. Empty list
+     * when omitted. Frontend uses this to render {@code SinglePageFormRenderer} without a second
+     * round-trip.
+     */
+    List<FormDefinitionView> forms) {
 
   /**
-   * Compact constructor — defensive-copy {@code stages} so the wire shape is immutable end-to-end.
-   * Story 3.3 — added {@code stages} for the timeline UI; declared in YAML order, never reordered.
+   * Compact constructor — defensive-copy {@code stages} and {@code forms} so the wire shape is
+   * immutable end-to-end. Story 3.3 added {@code stages}; Story 5.2 adds {@code forms}.
    */
   public CaseTypeViewDto {
     stages = stages == null ? List.of() : List.copyOf(stages);
+    forms = forms == null ? List.of() : List.copyOf(forms);
+  }
+
+  /**
+   * Backward-compat constructor for callers (and tests) that predate Story 5.2's {@code forms} slot
+   * — defaults forms to {@link List#of()}.
+   */
+  public CaseTypeViewDto(
+      String id,
+      String displayName,
+      int version,
+      List<FieldView> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<StageDefinitionView> stages) {
+    this(id, displayName, version, fields, statuses, listColumns, stages, List.of());
   }
 
   /**
@@ -68,4 +90,18 @@ public record CaseTypeViewDto(
 
   /** Wire-shape for a single {@code select}-field option. */
   public record OptionView(String label, String value) {}
+
+  /**
+   * Story 5.2 — wire-shape projection of {@link
+   * com.wkspower.platform.domain.config.model.FormDefinition} for the case-type view endpoint.
+   * Carries the three-axis vocabulary and the form's field list so the frontend renderer has
+   * everything it needs in the {@code GET /api/case-types/{id}} response.
+   */
+  public record FormDefinitionView(
+      String id, String topology, String dataModel, String rendering, List<FieldView> fields) {
+
+    public FormDefinitionView {
+      fields = fields == null ? List.of() : List.copyOf(fields);
+    }
+  }
 }

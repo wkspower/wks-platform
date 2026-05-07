@@ -185,5 +185,9 @@
   "stageTimeline.timestamp.exited": "Exited {date}",
   "stageTimeline.timestamp.enteredAndExited": "Entered {entered} · Exited {exited}",
   "stageTimeline.timestamp.skippedOn": "Skipped {date}",
-  "stageTimeline.timestamp.currentSince": "Current since {date}"
+  "stageTimeline.timestamp.currentSince": "Current since {date}",
+  "form.loading": "Loading form…",
+  "form.error.caseLoad": "Could not load case.",
+  "form.error.notFound": "Form not found on this case type.",
+  "form.submit": "Submit"
 }

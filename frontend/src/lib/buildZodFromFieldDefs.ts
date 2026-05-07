@@ -15,14 +15,23 @@ import type { FieldDefinition } from '@/types/caseType';
  * Specific error messages per slot (epic AC4) — no generic "Invalid input". Strings come from
  * `i18n/en.json` keyed by error variant.
  */
-export type BuildMode = 'create' | 'edit';
+export type BuildMode = 'create' | 'edit' | 'submit';
 
 export function buildZodFromFieldDefs(
   fields: FieldDefinition[],
   mode: BuildMode = 'create',
 ): z.ZodObject<z.ZodRawShape> {
   const shape: z.ZodRawShape = {};
-  const filtered = mode === 'create' ? fields.filter((f) => f.requiredOnCreate) : fields;
+  // 'create' — only fields with requiredOnCreate (create-case dialog gate).
+  // 'submit' — only fields with required: true (all required fields, not filtered by
+  //            requiredOnCreate). This is the key distinction for SinglePageFormRenderer.
+  // 'edit'   — all fields (no filter); existing edit-case behaviour is unchanged.
+  const filtered =
+    mode === 'create'
+      ? fields.filter((f) => f.requiredOnCreate)
+      : mode === 'submit'
+        ? fields.filter((f) => f.required)
+        : fields;
   for (const f of filtered) {
     shape[f.id] = schemaForField(f, mode);
   }
