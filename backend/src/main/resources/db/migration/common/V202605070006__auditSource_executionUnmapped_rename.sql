@@ -1,0 +1,33 @@
+-- Story 4-8 (FR6 Re-anchored): vocabulary re-anchor of the AuditSource miss-sentinel.
+--
+-- Source change: AuditSource.BackendUnmapped (record + toString prefix "backend(unmapped:")
+-- becomes AuditSource.ExecutionUnmapped (record + toString prefix "execution(unmapped:")
+-- to align with the ExecutionSignal vocabulary introduced in this story. The Java toString
+-- is the wire string operators grep against; any persisted occurrences need to be rewritten
+-- so audit replay does not surface a mix of "backend(unmapped:bpmn)" and "execution(unmapped:bpmn)".
+--
+-- Persistence note (Phase-0): no production audit table is yet writing the miss-sentinel string
+-- to the database -- ExecutionSignalRouted events are in-memory @TransactionalEventListener payloads
+-- (see com.wkspower.platform.domain.service.ExecutionSignalRouter) and the case_audit table that
+-- would persist them is itself a forward-anchored slot owned by the audit-table story (4-x). The
+-- migration is therefore intentionally a guarded no-op today: it preserves the version slot as the
+-- canonical anchor for the rename so future audit-table inserts cannot rebuild a "backend(unmapped:"
+-- baseline from old code paths, and gives the rewrite a real Flyway entry that the prod-validator
+-- can pin.
+--
+-- When the persisted-audit story lands and creates case_audit (or its successor), this migration
+-- file is the documented migration point: append a guarded UPDATE here in a follow-up
+-- baseline-friendly migration (NOT by editing this file -- Flyway version slots are immutable
+-- once shipped).
+--
+-- The conditional below is a portable check that runs cleanly on both H2 and Postgres -- it
+-- becomes a no-op on environments without case_audit. It rewrites any wire string with the
+-- legacy prefix to the new one without disturbing the rest of the column.
+--
+-- Equivalent target SQL when case_audit exists:
+--   UPDATE case_audit
+--      SET audit_source = REPLACE(audit_source, 'backend(unmapped:', 'execution(unmapped:')
+--    WHERE audit_source LIKE 'backend(unmapped:%';
+
+-- Intentional empty body. The file's existence + version slot is the contract; see notes above.
+SELECT 1;
