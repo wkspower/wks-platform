@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { RouteErrorBoundary } from '@/components/errors/RouteErrorBoundary';
 
 import { DarkSidebar } from './DarkSidebar';
+import { LicenseBanner } from './LicenseBanner';
 import { SessionExpiryBanner } from './SessionExpiryBanner';
 import { SkipLink } from './SkipLink';
 import { TopBar } from './TopBar';
@@ -15,6 +16,7 @@ export function AppShell() {
       <DarkSidebar />
       <div className="flex min-w-0 flex-col">
         <SessionExpiryBanner />
+        <LicenseBanner />
         <TopBar />
         <main
           id="main"

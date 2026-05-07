@@ -39,4 +39,23 @@ public interface LicenseService {
    * when no valid license is loaded.
    */
   String getLicenseHolder();
+
+  /**
+   * Returns the resolved {@link LicenseState} for the current license. Never throws.
+   *
+   * <ul>
+   *   <li>{@link LicenseState#VALID} — non-expired, signature-verified JWT is loaded.
+   *   <li>{@link LicenseState#OSS} — no license file configured or present.
+   *   <li>{@link LicenseState#EXPIRED} — valid signature but {@code exp} is in the past.
+   *   <li>{@link LicenseState#DEGRADED} — file present but unverifiable.
+   * </ul>
+   */
+  LicenseState getLicenseState();
+
+  /**
+   * Returns a consistent point-in-time snapshot of the license state, tier, and expiry. Use this
+   * instead of calling {@link #getLicenseState()}, {@link #getTier()}, and {@link #getExpiry()}
+   * separately to avoid torn reads across concurrent state updates.
+   */
+  LicenseSnapshot getLicenseSnapshot();
 }
