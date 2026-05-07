@@ -29,11 +29,16 @@ public record CaseTypeConfig(
     List<StatusDefinition> statuses,
     List<String> listColumns,
     List<RoleDefinition> roles,
-    List<StageDefinition> stages) {
+    List<StageDefinition> stages,
+    /**
+     * Story 5.2 — form definitions declared in the YAML {@code forms[]} block. Empty list when
+     * omitted (no-forms path is the zero-attachment equivalent for the forms surface).
+     */
+    List<FormDefinition> forms) {
 
   /**
    * Backward-compat constructor for callers (and tests) that predate Story 3.1's {@code stages}
-   * slot — defaults to {@link List#of()}.
+   * slot — defaults stages and forms to {@link List#of()}.
    */
   public CaseTypeConfig(
       String id,
@@ -55,6 +60,36 @@ public record CaseTypeConfig(
         statuses,
         listColumns,
         roles,
+        List.of(),
+        List.of());
+  }
+
+  /**
+   * Backward-compat constructor for callers (and tests) that predate Story 5.2's {@code forms} slot
+   * — defaults forms to {@link List#of()}.
+   */
+  public CaseTypeConfig(
+      String id,
+      String displayName,
+      int version,
+      String description,
+      WorkflowRef workflow,
+      List<FieldDefinition> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<RoleDefinition> roles,
+      List<StageDefinition> stages) {
+    this(
+        id,
+        displayName,
+        version,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages,
         List.of());
   }
 
@@ -64,6 +99,7 @@ public record CaseTypeConfig(
     listColumns = List.copyOf(listColumns);
     roles = List.copyOf(roles);
     stages = stages == null ? List.of() : List.copyOf(stages);
+    forms = forms == null ? List.of() : List.copyOf(forms);
   }
 
   /** Convenience lookup used by the JSON Schema generator and (future) case-data validation. */
@@ -127,6 +163,7 @@ public record CaseTypeConfig(
         statuses,
         listColumns,
         roles,
-        stages);
+        stages,
+        forms);
   }
 }

@@ -74,6 +74,20 @@ export interface StageDefinitionView {
   ordinal: number;
 }
 
+/**
+ * Story 5.2 — wire-shape projection of one form definition from the case-type YAML {@code forms[]}
+ * block. Carries the three-axis vocabulary and the form's field list so the frontend renderer has
+ * everything it needs from the {@code GET /api/case-types/{id}} response without a second
+ * round-trip.
+ */
+export interface FormDefinitionView {
+  id: string;
+  topology: string;
+  dataModel: string;
+  rendering: string;
+  fields: FieldDefinition[];
+}
+
 export interface CaseTypeView {
   id: string;
   displayName: string;
@@ -87,4 +101,10 @@ export interface CaseTypeView {
    * `StageTimeline` component treats `undefined` and `[]` identically (component returns null).
    */
   stages?: StageDefinitionView[];
+  /**
+   * Story 5.2 — form definitions declared in the YAML {@code forms[]} block. Optional for
+   * backward-compat with pre-5.2 fixtures; the wire shape always includes it. Empty array when
+   * no forms block is declared.
+   */
+  forms?: FormDefinitionView[];
 }

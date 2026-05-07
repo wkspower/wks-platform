@@ -163,6 +163,12 @@ public class ConfigValidator {
       return ValidationResult.invalid(errors);
     }
 
+    // Story 5.2 — map validated form definitions to domain records. Empty when no forms block.
+    List<com.wkspower.platform.domain.config.model.FormDefinition> forms =
+        raw.forms() == null
+            ? List.of()
+            : raw.forms().definitions().stream().map(FormDefinitionMapper::toDomain).toList();
+
     CaseTypeConfig config =
         new CaseTypeConfig(
             raw.id(),
@@ -174,7 +180,8 @@ public class ConfigValidator {
             statuses,
             listColumns,
             roles,
-            stages);
+            stages,
+            forms);
     // Story 4.3 — surface the validated MappingDefinition through ValidationResult so
     // ConfigService can populate MappingRegistry on registration. Empty MappingDefinition is the
     // first-class zero-attachment value (D22 — Story 4.2's MappingValidator returns empty()

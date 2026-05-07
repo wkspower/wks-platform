@@ -32,69 +32,6 @@ public record RawCaseTypeConfig(
     List<RawAttachment> attachments,
     @JsonProperty("forms") @JsonInclude(JsonInclude.Include.NON_NULL) RawFormConfig forms) {
 
-  /**
-   * Backward-compat constructor for callers (and tests) authored before Story 4.2 introduced the
-   * {@code attachments} slot. Treats absent attachments as the empty list — equivalent to a YAML
-   * with no {@code attachments:} key (AC1).
-   */
-  public RawCaseTypeConfig(
-      String id,
-      String displayName,
-      Integer version,
-      String description,
-      RawWorkflow workflow,
-      List<RawField> fields,
-      List<RawStatus> statuses,
-      List<String> listColumns,
-      List<RawRole> roles,
-      List<RawStage> stages) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        stages,
-        null,
-        null);
-  }
-
-  /**
-   * Backward-compat constructor for callers (and tests) authored before Story 5.1 introduced the
-   * {@code forms} slot. Passes {@code null} for forms — equivalent to a YAML with no {@code forms:}
-   * key (AC3).
-   */
-  public RawCaseTypeConfig(
-      String id,
-      String displayName,
-      Integer version,
-      String description,
-      RawWorkflow workflow,
-      List<RawField> fields,
-      List<RawStatus> statuses,
-      List<String> listColumns,
-      List<RawRole> roles,
-      List<RawStage> stages,
-      List<RawAttachment> attachments) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        stages,
-        attachments,
-        null);
-  }
-
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawWorkflow(String bpmn) {}
 
@@ -224,4 +161,110 @@ public record RawCaseTypeConfig(
 
   /** {@code emits: { type, scope }} block inside a property emission rule. */
   public record RawEmits(String type, String scope) {}
+
+  // ---------------------------------------------------------------------------
+  // Story 5.2 — Builder: prevents constructor-explosion when new slots are
+  // added. The 12-arg canonical constructor (Jackson @JsonCreator target) is
+  // kept; the Builder delegates to it. Test call-sites can use Builder instead
+  // of the multi-arg constructors.
+  // ---------------------------------------------------------------------------
+
+  /** Returns a fresh {@link Builder} for programmatic construction (primarily in tests). */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Fluent builder that delegates to the canonical 12-arg constructor on {@link #build()}. */
+  public static final class Builder {
+    private String id;
+    private String displayName;
+    private Integer version;
+    private String description;
+    private RawWorkflow workflow;
+    private List<RawField> fields;
+    private List<RawStatus> statuses;
+    private List<String> listColumns;
+    private List<RawRole> roles;
+    private List<RawStage> stages;
+    private List<RawAttachment> attachments;
+    private RawFormConfig forms;
+
+    private Builder() {}
+
+    public Builder id(String id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder displayName(String v) {
+      this.displayName = v;
+      return this;
+    }
+
+    public Builder version(Integer v) {
+      this.version = v;
+      return this;
+    }
+
+    public Builder description(String v) {
+      this.description = v;
+      return this;
+    }
+
+    public Builder workflow(RawWorkflow v) {
+      this.workflow = v;
+      return this;
+    }
+
+    public Builder fields(List<RawField> v) {
+      this.fields = v;
+      return this;
+    }
+
+    public Builder statuses(List<RawStatus> v) {
+      this.statuses = v;
+      return this;
+    }
+
+    public Builder listColumns(List<String> v) {
+      this.listColumns = v;
+      return this;
+    }
+
+    public Builder roles(List<RawRole> v) {
+      this.roles = v;
+      return this;
+    }
+
+    public Builder stages(List<RawStage> v) {
+      this.stages = v;
+      return this;
+    }
+
+    public Builder attachments(List<RawAttachment> v) {
+      this.attachments = v;
+      return this;
+    }
+
+    public Builder forms(RawFormConfig v) {
+      this.forms = v;
+      return this;
+    }
+
+    public RawCaseTypeConfig build() {
+      return new RawCaseTypeConfig(
+          id,
+          displayName,
+          version,
+          description,
+          workflow,
+          fields,
+          statuses,
+          listColumns,
+          roles,
+          stages,
+          attachments,
+          forms);
+    }
+  }
 }

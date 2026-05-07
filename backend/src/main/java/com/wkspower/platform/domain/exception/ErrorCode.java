@@ -357,6 +357,25 @@ public enum ErrorCode {
    * feedback_error_codes_are_wire_contract.md}.
    */
   WKS_FORM_001("WKS-FORM-001"),
+  /**
+   * Story 5.2 AC3 — form submit field-level validation failure (backend-side). Emitted by {@link
+   * com.wkspower.platform.domain.service.CaseService#submitForm} when a submitted field value fails
+   * a type-specific constraint not caught by the frontend Zod schema. One error detail per
+   * offending field; the {@code field} slot in the error detail carries the field id. HTTP 422.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string is stable and must
+   * never be reused for a different meaning.
+   */
+  WKS_FORM_002("WKS-FORM-002"),
+  /**
+   * Story 5.2 — form submission body is null or empty. Emitted by {@link
+   * com.wkspower.platform.api.controller.FormController} when the {@code @RequestBody} is absent or
+   * resolves to an empty map (blank-case-data attack guard). HTTP 400.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string is stable and must
+   * never be reused for a different meaning.
+   */
+  WKS_FORM_003("WKS-FORM-003"),
 
   // 409 — runtime conflict.
   /**

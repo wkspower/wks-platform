@@ -4,12 +4,14 @@ import com.wkspower.platform.api.dto.response.CaseDto;
 import com.wkspower.platform.api.dto.response.CaseSummaryDto;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.FieldView;
+import com.wkspower.platform.api.dto.response.CaseTypeViewDto.FormDefinitionView;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.OptionView;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.StageDefinitionView;
 import com.wkspower.platform.api.dto.response.StageView;
 import com.wkspower.platform.api.dto.response.StatusView;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
+import com.wkspower.platform.domain.config.model.FormDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.Case;
@@ -160,6 +162,9 @@ public final class CaseDtoMapper {
         caseType.stages().stream()
             .map(s -> new StageDefinitionView(s.id(), s.displayName(), s.ordinal()))
             .toList();
+    // Story 5.2 — map form definitions to wire DTOs.
+    List<FormDefinitionView> forms =
+        caseType.forms().stream().map(CaseDtoMapper::toFormDefinitionView).toList();
     return new CaseTypeViewDto(
         caseType.id(),
         caseType.displayName(),
@@ -167,7 +172,18 @@ public final class CaseDtoMapper {
         caseType.fields().stream().map(CaseDtoMapper::toFieldView).toList(),
         caseType.statuses(),
         caseType.listColumns(),
-        stages);
+        stages,
+        forms);
+  }
+
+  /**
+   * Story 5.2 — map one {@link FormDefinition} to its wire DTO. Fields within the form definition
+   * are mapped using the same {@link #toFieldView} helper used for case-type-level fields.
+   */
+  static FormDefinitionView toFormDefinitionView(FormDefinition form) {
+    List<FieldView> fieldViews = form.fields().stream().map(CaseDtoMapper::toFieldView).toList();
+    return new FormDefinitionView(
+        form.id(), form.topology(), form.dataModel(), form.rendering(), fieldViews);
   }
 
   static FieldView toFieldView(FieldDefinition f) {

@@ -1,9 +1,13 @@
 package com.wkspower.platform.domain.service;
 
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.FieldDefinition;
+import com.wkspower.platform.domain.config.model.FieldType;
+import com.wkspower.platform.domain.config.model.FormDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseUpdated;
+import com.wkspower.platform.domain.event.FormSubmitted;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 // Story 3.6 — ErrorCode + WksStageException used by transition guards (AC6).
@@ -34,6 +38,8 @@ import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -357,6 +363,205 @@ public class CaseService {
         .findById(caseId)
         .orElseThrow(
             () -> new WksNotFoundException("Case " + caseId + " not found after transition"));
+  }
+
+  /**
+   * Story 5.2 AC3 — submit form data for an existing case. Steps:
+   *
+   * <ol>
+   *   <li>Load case + case type; resolve the named form definition (404 if not found).
+   *   <li>Validate {@code formData} against the form's field definitions (WKS-FORM-002 on failure).
+   *   <li>Call {@link #update} for data persistence (merges submitted fields into case data).
+   *   <li>Publish {@link FormSubmitted} via {@code EventPublisher.publishAfterCommit} (audits the
+   *       form submission separately from the {@link CaseUpdated} event emitted by {@code update}).
+   * </ol>
+   *
+   * <p>Validation intentionally reuses the same field-presence + type logic as {@link #update}: the
+   * backend is the authoritative constraint enforcer, not just a relay for frontend Zod results.
+   * WKS-FORM-002 carries the field-level details so the frontend can surface inline errors on
+   * backend-only constraint violations not captured by the Zod schema.
+   *
+   * @throws WksNotFoundException if the case or case type is not found, or if the form id does not
+   *     exist on the case type.
+   * @throws WksValidationAggregateException (WKS-FORM-002) if any field value fails validation.
+   */
+  public Case submitForm(UUID caseId, String formId, Map<String, Object> formData, UUID actorId) {
+    Objects.requireNonNull(caseId, "caseId");
+    Objects.requireNonNull(formId, "formId");
+    Objects.requireNonNull(actorId, "actorId");
+
+    Case existing =
+        caseRepository
+            .findById(caseId)
+            .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
+
+    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+
+    // Resolve the form definition by id — 404 if not declared on this case type.
+    FormDefinition form =
+        caseType.forms().stream()
+            .filter(f -> f.id().equals(formId))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new WksNotFoundException(
+                        "Form '"
+                            + formId
+                            + "' not found on case type '"
+                            + existing.caseTypeId()
+                            + "'"));
+
+    // Validate submitted field values against the form's field definitions.
+    // Collections.unmodifiableMap(new HashMap<>(...)) is used instead of Map.copyOf() because
+    // Map.copyOf() throws NullPointerException on null values (e.g. {"field": null} — an explicit
+    // clear-field intent). Null values are preserved so the update() path can handle them.
+    Map<String, Object> safeData =
+        formData == null ? Map.of() : Collections.unmodifiableMap(new HashMap<>(formData));
+    List<ErrorDetail> violations = validateFormData(form, safeData);
+    if (!violations.isEmpty()) {
+      throw new WksValidationAggregateException(
+          "Form submit validation failed (WKS-FORM-002)", violations);
+    }
+
+    // Persist via the existing update path (validates the merged data against the case-type schema
+    // and emits a CaseUpdated event).
+    // intentionally last-writer-wins: form submit does not require version-based conflict
+    // detection.
+    // The form submit endpoint is designed for user-facing data entry where the form itself
+    // presents the current state; a concurrent server-side update winning is acceptable. If
+    // version-based conflict detection is required in future, the FormController request body
+    // should accept a client-supplied version and thread it through to update() here.
+    Case updated = update(caseId, safeData, existing.version(), actorId);
+
+    // Compute which field ids changed between the old and new data for the FormSubmitted event.
+    Set<String> updatedFieldIds = diffFieldIds(existing.data(), safeData);
+
+    // Publish FormSubmitted after commit so the audit listener never observes rolled-back state.
+    eventPublisher.publishAfterCommit(
+        new FormSubmitted(caseId, formId, actorId, clock.now(), updatedFieldIds));
+
+    return updated;
+  }
+
+  /**
+   * Validate submitted form data against the form's declared field definitions (Story 5.2
+   * WKS-FORM-002). Collect-all: never short-circuits on first error.
+   *
+   * <p>Validates:
+   *
+   * <ol>
+   *   <li>Required field presence (all field types).
+   *   <li>Type-specific constraints (P9): {@code TEXT}/{@code TEXTAREA} maxLength; {@code NUMBER}
+   *       min/max; {@code DATE} ISO format ({@code YYYY-MM-DD}). Missing or malformed constraint
+   *       config on the field definition → the check is skipped (don't fail on incomplete field
+   *       defs).
+   * </ol>
+   *
+   * <p>These checks emit WKS-FORM-002 directly so the frontend can distinguish form-field failures
+   * from generic case-data validation errors (WKS-API-002) that run inside {@link #update}.
+   */
+  private static List<ErrorDetail> validateFormData(FormDefinition form, Map<String, Object> data) {
+    List<ErrorDetail> errors = new ArrayList<>();
+    for (FieldDefinition f : form.fields()) {
+      Object value = data.get(f.id());
+
+      // --- required check ---
+      if (f.required()) {
+        if (value == null || (value instanceof String s && s.isBlank())) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_002.wire(),
+                  "Field '" + f.displayName() + "' is required",
+                  f.id()));
+          continue; // no point checking constraints if the value is absent
+        } else if (f.type() == FieldType.CHECKBOX && Boolean.FALSE.equals(value)) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_002.wire(),
+                  "Field '" + f.displayName() + "' must be checked",
+                  f.id()));
+          continue;
+        }
+      }
+
+      // Skip constraint checks when value is absent for optional fields.
+      if (value == null) {
+        continue;
+      }
+
+      // P9 — type-specific constraint validation (emits WKS-FORM-002, not WKS-API-002).
+      // Missing or malformed constraint config on the FieldDefinition → skip silently.
+      FieldDefinition.TypeSlots slots = f.slots();
+      switch (f.type()) {
+        case TEXT, TEXTAREA -> {
+          if (value instanceof String strVal && slots != null && slots.maxLength() != null) {
+            if (strVal.length() > slots.maxLength()) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_FORM_002.wire(),
+                      "Field '"
+                          + f.displayName()
+                          + "' exceeds maximum length of "
+                          + slots.maxLength(),
+                      f.id()));
+            }
+          }
+        }
+        case NUMBER -> {
+          if (slots != null) {
+            Double numVal = toDouble(value);
+            if (numVal != null) {
+              if (slots.min() != null && numVal < slots.min()) {
+                errors.add(
+                    ErrorDetail.ofField(
+                        ErrorCode.WKS_FORM_002.wire(),
+                        "Field '" + f.displayName() + "' must be at least " + slots.min(),
+                        f.id()));
+              }
+              if (slots.max() != null && numVal > slots.max()) {
+                errors.add(
+                    ErrorDetail.ofField(
+                        ErrorCode.WKS_FORM_002.wire(),
+                        "Field '" + f.displayName() + "' must be at most " + slots.max(),
+                        f.id()));
+              }
+            }
+          }
+        }
+        case DATE -> {
+          if (value instanceof String dateVal
+              && !dateVal.isBlank()
+              && !dateVal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            errors.add(
+                ErrorDetail.ofField(
+                    ErrorCode.WKS_FORM_002.wire(),
+                    "Field '" + f.displayName() + "' must be a date in YYYY-MM-DD format",
+                    f.id()));
+          }
+        }
+        default -> {
+          // No type-specific constraints for SELECT, CHECKBOX, FILE — skip.
+        }
+      }
+    }
+    return errors;
+  }
+
+  /**
+   * Coerce a value to {@link Double} for numeric constraint checks. Returns {@code null} if the
+   * value is not numeric (e.g. a string that isn't a parseable number — the full type check runs
+   * inside {@link CaseDataValidator}).
+   */
+  private static Double toDouble(Object value) {
+    if (value instanceof Number n) return n.doubleValue();
+    if (value instanceof String s) {
+      try {
+        return Double.parseDouble(s);
+      } catch (NumberFormatException ignored) {
+        return null;
+      }
+    }
+    return null;
   }
 
   /** Lookup by id; 404 if not found. */

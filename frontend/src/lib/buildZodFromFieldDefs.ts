@@ -15,16 +15,35 @@ import type { FieldDefinition } from '@/types/caseType';
  * Specific error messages per slot (epic AC4) — no generic "Invalid input". Strings come from
  * `i18n/en.json` keyed by error variant.
  */
-export type BuildMode = 'create' | 'edit';
+export type BuildMode = 'create' | 'edit' | 'submit';
 
 export function buildZodFromFieldDefs(
   fields: FieldDefinition[],
   mode: BuildMode = 'create',
 ): z.ZodObject<z.ZodRawShape> {
   const shape: z.ZodRawShape = {};
-  const filtered = mode === 'create' ? fields.filter((f) => f.requiredOnCreate) : fields;
+  // 'create' — only fields with requiredOnCreate (create-case dialog gate).
+  // 'submit' — ALL fields are included so optional fields with constraints (maxLength, min/max,
+  //            pattern) are still validated. The "required" constraint is only enforced for fields
+  //            where required === true; optional fields may be left blank but if filled must satisfy
+  //            type-specific constraints.
+  // 'edit'   — all fields (no filter); existing edit-case behaviour is unchanged.
+  const filtered = mode === 'create' ? fields.filter((f) => f.requiredOnCreate) : fields; // 'submit' and 'edit' both include ALL fields
   for (const f of filtered) {
-    shape[f.id] = schemaForField(f, mode);
+    let fieldSchema = schemaForField(f, mode);
+    // In 'submit' mode, optional fields (required !== true) get their constraints validated but
+    // the field itself is not mandatory. Preprocess empty-string / null / undefined to undefined
+    // so the .optional() wrapper accepts "user left field blank" without triggering min-length
+    // or other constraints (constraints only fire when the user actually provides a value).
+    if (mode === 'submit' && !f.required) {
+      fieldSchema = z
+        .preprocess(
+          (v) => (v === '' || v === null || v === undefined ? undefined : v),
+          fieldSchema.optional(),
+        )
+        .optional();
+    }
+    shape[f.id] = fieldSchema;
   }
   return z.object(shape);
 }
