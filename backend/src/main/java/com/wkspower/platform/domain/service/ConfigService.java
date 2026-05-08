@@ -253,8 +253,29 @@ public class ConfigService {
    * @param actorEmail authenticated principal driving the deploy, or {@code null} for startup
    *     loader emissions
    */
+  /**
+   * Overload that accepts a BPMN filename so the MappingValidator can cross-validate attachment
+   * file references against the supplied BPMN bytes. Called from the admin deploy endpoint which
+   * has the multipart filename available. Callers that lack a filename (startup loader BPMN path,
+   * tests) fall through to the two-arg overload below.
+   */
+  public DeployResult deploy(
+      byte[] yamlBytes, byte[] bpmnBytes, String bpmnFilename, String actorEmail) {
+    Map<String, byte[]> bpmnByName =
+        (bpmnFilename != null && !bpmnFilename.isBlank() && bpmnBytes != null)
+            ? Map.of(bpmnFilename, bpmnBytes)
+            : Map.of();
+    ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes, bpmnByName);
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail);
+  }
+
   public DeployResult deploy(byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
     ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes);
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail);
+  }
+
+  private DeployResult deployWithYamlResult(
+      ValidationResult yamlResult, byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
     CaseTypeConfig caseType = yamlResult.config().orElse(null);
 
     BpmnValidationResult bpmnResult = bpmnValidator.validate(bpmnBytes, caseType);
@@ -302,6 +323,20 @@ public class ConfigService {
                 existingVersion.get());
             CaseTypeConfig versionedCaseType =
                 applyVersionRegistry(caseType, yamlBytes, actorEmail, bpmnHash, mappingHash);
+            // Re-register in the in-memory registry — the case type may be absent after a JVM
+            // restart even though its version row exists in the DB (the startup loader only reads
+            // the case-types directory, not the version table). Skipping engine deploy is correct;
+            // skipping the registry write is not.
+            RegistrationResult idempotentReg = registrar.register(versionedCaseType);
+            if (idempotentReg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
+              return DeployResult.invalid(idempotentReg.errors());
+            }
+            ValidationResult idempotentYamlResult =
+                ValidationResult.ok(
+                    versionedCaseType,
+                    yamlResult.warnings(),
+                    yamlResult.mappingDefinition().orElse(MappingDefinition.empty()));
+            publishMappingToRegistry(idempotentYamlResult);
             return DeployResult.ok(
                 versionedCaseType,
                 new DeploymentResult(

@@ -74,7 +74,7 @@ class AdminControllerTest {
     byte[] bpmnBytes = "<x/>".getBytes();
     ArgumentCaptor<byte[]> yamlCap = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<byte[]> bpmnCap = ArgumentCaptor.forClass(byte[].class);
-    when(configService.deploy(yamlCap.capture(), bpmnCap.capture(), eq("admin")))
+    when(configService.deploy(yamlCap.capture(), bpmnCap.capture(), any(), eq("admin")))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -93,6 +93,7 @@ class AdminControllerTest {
     // Pin argument order: a regression that swaps yaml/bpmn would otherwise pass.
     assertThat(yamlCap.getValue()).isEqualTo(yamlBytes);
     assertThat(bpmnCap.getValue()).isEqualTo(bpmnBytes);
+    // filename argument is third — verify non-null (multipart original filename)
   }
 
   // ---- 401 unauthenticated ----------------------------------------------
@@ -138,7 +139,7 @@ class AdminControllerTest {
 
   @Test
   void validationFailureReturns422Aggregate() throws Exception {
-    when(configService.deploy(any(), any(), any()))
+    when(configService.deploy(any(), any(), any(), any()))
         .thenReturn(
             DeployResult.invalid(
                 List.of(
@@ -166,7 +167,7 @@ class AdminControllerTest {
     // MaxUploadSizeExceededException
     // before reaching the handler chain. We simulate by configuring a tiny part cap via the test
     // and asserting the GlobalExceptionHandler maps the exception to 413 + WKS-API-413.
-    when(configService.deploy(any(), any(), any()))
+    when(configService.deploy(any(), any(), any(), any()))
         .thenThrow(new MaxUploadSizeExceededException(1024L));
 
     mockMvc
@@ -180,7 +181,7 @@ class AdminControllerTest {
         .andExpect(status().isPayloadTooLarge())
         .andExpect(jsonPath("$.error.code").value("WKS-API-413"));
 
-    verify(configService).deploy(any(), any(), any());
+    verify(configService).deploy(any(), any(), any(), any());
   }
 
   // ---- YAML-only deploy (Story 3.2: zero-process case types) -------------

@@ -65,30 +65,30 @@ public class ThemeController {
   @SecurityRequirements // public — no auth required
   public ResponseEntity<Resource> theme() throws IOException {
     if (themeCssPath == null || themeCssPath.isBlank()) {
-      return ResponseEntity.noContent().build();
+      return emptyCss();
     }
 
     // Guard I1a: path must end with .css
     if (!themeCssPath.toLowerCase().endsWith(".css")) {
       log.warn(
-          "ThemeController: WKS_THEME_CSS_PATH='{}' does not end with .css — returning 204",
+          "ThemeController: WKS_THEME_CSS_PATH='{}' does not end with .css — returning empty CSS",
           themeCssPath);
-      return ResponseEntity.noContent().build();
+      return emptyCss();
     }
 
     Path path = Path.of(themeCssPath);
     if (!Files.exists(path) || !Files.isReadable(path)) {
-      return ResponseEntity.noContent().build();
+      return emptyCss();
     }
 
     // Guard I1b: cap at 1 MiB
     long size = Files.size(path);
     if (size > MAX_CSS_BYTES) {
       log.warn(
-          "ThemeController: theme file '{}' is {} bytes (> 1 MiB limit) — returning 204",
+          "ThemeController: theme file '{}' is {} bytes (> 1 MiB limit) — returning empty CSS",
           themeCssPath,
           size);
-      return ResponseEntity.noContent().build();
+      return emptyCss();
     }
 
     byte[] content = Files.readAllBytes(path);
@@ -96,5 +96,11 @@ public class ThemeController {
         .header("Content-Type", "text/css; charset=UTF-8")
         .header("Cache-Control", "public, max-age=300") // I2: 5-min browser cache
         .body(new ByteArrayResource(content));
+  }
+
+  private static ResponseEntity<Resource> emptyCss() {
+    return ResponseEntity.ok()
+        .header("Content-Type", "text/css; charset=UTF-8")
+        .body(new ByteArrayResource(new byte[0]));
   }
 }
