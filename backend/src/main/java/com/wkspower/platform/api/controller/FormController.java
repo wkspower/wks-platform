@@ -9,6 +9,7 @@ import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.domain.service.FormDraftService;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +45,13 @@ public class FormController {
 
   private final CaseService caseService;
   private final StageRepository stageRepository;
+  private final FormDraftService formDraftService;
 
-  public FormController(CaseService caseService, StageRepository stageRepository) {
+  public FormController(
+      CaseService caseService, StageRepository stageRepository, FormDraftService formDraftService) {
     this.caseService = caseService;
     this.stageRepository = stageRepository;
+    this.formDraftService = formDraftService;
   }
 
   /**
@@ -82,6 +86,10 @@ public class FormController {
     }
 
     Case updated = caseService.submitForm(caseId, formId, formData, actor.id());
+
+    // Story 5.4 AC6 — delete-on-submit. Lives inside the controller's @Transactional so a
+    // post-submit failure rolls back the deletion (preserving the draft) per AC6.
+    formDraftService.deleteDraft(caseId, formId, actor.id());
 
     CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
     List<com.wkspower.platform.domain.model.Stage> history = stageRepository.loadHistory(caseId);

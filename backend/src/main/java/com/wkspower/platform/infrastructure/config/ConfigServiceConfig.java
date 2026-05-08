@@ -108,6 +108,22 @@ public class ConfigServiceConfig {
    * this @Bean wires the ports from infrastructure (CaseTypeReader, CaseTypeVersionRegistry, the
    * JPA StatusOptionsStore adapter).
    */
+  /**
+   * Story 5.4 — wires the framework-free {@link
+   * com.wkspower.platform.domain.service.FormDraftService} with its domain ports. The Spring
+   * transaction proxy lives on the {@link
+   * com.wkspower.platform.infrastructure.formdraft.FormDraftRepositoryAdapter} (port
+   * implementation) and on the controller methods that call this service.
+   */
+  @Bean
+  public com.wkspower.platform.domain.service.FormDraftService wksFormDraftService(
+      com.wkspower.platform.domain.port.FormDraftRepository formDraftRepository,
+      Clock clock,
+      EventPublisher eventPublisher) {
+    return new com.wkspower.platform.domain.service.FormDraftService(
+        formDraftRepository, clock, eventPublisher);
+  }
+
   @Bean
   public StatusOptionsAdminService statusOptionsAdminService(
       CaseTypeReader caseTypeReader,
