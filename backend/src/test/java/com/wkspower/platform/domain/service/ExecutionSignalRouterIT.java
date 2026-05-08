@@ -84,6 +84,7 @@ class ExecutionSignalRouterIT {
   @Autowired StageRepository stageRepository;
   @Autowired CaseStatusUpdater statusUpdater;
   @Autowired RecordingEventPublisher events;
+  @Autowired SignalAuditRingBuffer ringBuffer;
   @Autowired UserEntityRepository userRepo;
   @Autowired RoleEntityRepository roleRepo;
   @Autowired EntityManager em;
@@ -714,6 +715,91 @@ class ExecutionSignalRouterIT {
     assertThat(events.routed().get(1).detail()).containsEntry("effect", "status-reset");
   }
 
+  // ---------- Story 4.6 AC5 — ring buffer instrumentation ---------------
+
+  @Test
+  void ringBuffer_recordsMatchedRuleEntryOnTaskStatusChange() {
+    // TASK_STATUS_CHANGED takes the status-only path that goes through auditSuccess —
+    // STAGE_TRANSITION / NAMED_SIGNAL stage-advance paths skip auditSuccess in favour of
+    // resetStatusForAdvancedStage's two-event emit, so they do NOT produce a ring-buffer entry
+    // (documented gap; see story 4-6 AC5 commentary).
+    Case caseRow = newBootstrappedCase("ring-success", 1);
+    CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+    mappingRegistry.register(
+        caseType,
+        "1",
+        defWith(
+            new AttachmentDefinition(
+                "bpmn",
+                "loan.bpmn",
+                "case",
+                Optional.empty(),
+                Map.of(),
+                Optional.empty(),
+                Map.of(),
+                List.of(
+                    new PropertyEmissionRule(
+                        "userTask:review",
+                        "status",
+                        ExecutionSignalKind.TASK_STATUS_CHANGED,
+                        "stage:stage1")))));
+
+    fake.emit(
+        new ExecutionSignal(
+            ExecutionSignalKind.TASK_STATUS_CHANGED,
+            ADAPTER_NAME,
+            new CaseInstanceRef(caseRow.id(), caseType),
+            "review",
+            Map.of("camunda:property", "status", "value", "approved")));
+    flushClear();
+
+    List<com.wkspower.platform.domain.model.RecentSignalEntry> recorded =
+        ringBuffer.recent(caseRow.caseTypeId());
+    assertThat(recorded).hasSize(1);
+    assertThat(recorded.get(0).decision()).isEqualTo("matched-rule");
+    assertThat(recorded.get(0).errorCode()).isNull();
+    assertThat(recorded.get(0).kind()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
+    assertThat(recorded.get(0).caseId()).isEqualTo(caseRow.id());
+  }
+
+  @Test
+  void ringBuffer_recordsUnmappedEntryOnMappingMiss() {
+    Case caseRow = newBootstrappedCase("ring-miss", 1);
+    CaseTypeRef caseType = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseType, AttachmentScope.ofCase());
+    // Register an empty mapping so the NAMED_SIGNAL has no rule to match.
+    mappingRegistry.register(
+        caseType,
+        "1",
+        defWith(
+            new AttachmentDefinition(
+                "bpmn",
+                "loan.bpmn",
+                "case",
+                Optional.empty(),
+                Map.of(),
+                Optional.empty(),
+                Map.of(),
+                List.of())));
+
+    fake.emit(
+        new ExecutionSignal(
+            ExecutionSignalKind.NAMED_SIGNAL,
+            ADAPTER_NAME,
+            new CaseInstanceRef(caseRow.id(), caseType),
+            "undeclared",
+            Map.of()));
+    flushClear();
+
+    List<com.wkspower.platform.domain.model.RecentSignalEntry> recorded =
+        ringBuffer.recent(caseRow.caseTypeId());
+    assertThat(recorded).hasSize(1);
+    assertThat(recorded.get(0).decision()).isEqualTo("unmapped");
+    assertThat(recorded.get(0).errorCode()).isEqualTo("WKS-MAP-404");
+    assertThat(recorded.get(0).caseId()).isEqualTo(caseRow.id());
+  }
+
   // ---------- helpers ----------------------------------------------------
 
   private static MappingDefinition defWith(AttachmentDefinition attachment) {
@@ -847,6 +933,11 @@ class ExecutionSignalRouterIT {
     }
 
     @Bean
+    SignalAuditRingBuffer signalAuditRingBuffer() {
+      return new SignalAuditRingBuffer();
+    }
+
+    @Bean
     ExecutionSignalRouter backendSignalRouter(
         MappingRegistry mappingRegistry,
         WksStageAdvancer stageAdvancer,
@@ -854,7 +945,8 @@ class ExecutionSignalRouterIT {
         CaseRepository caseRepository,
         EventPublisher eventPublisher,
         Clock clock,
-        CaseTypeReader caseTypeReader) {
+        CaseTypeReader caseTypeReader,
+        SignalAuditRingBuffer signalAuditRingBuffer) {
       return new ExecutionSignalRouter(
           mappingRegistry,
           stageAdvancer,
@@ -862,7 +954,8 @@ class ExecutionSignalRouterIT {
           caseRepository,
           eventPublisher,
           clock,
-          caseTypeReader);
+          caseTypeReader,
+          signalAuditRingBuffer);
     }
   }
 

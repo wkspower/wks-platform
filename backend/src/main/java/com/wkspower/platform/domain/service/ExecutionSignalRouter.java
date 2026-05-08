@@ -11,6 +11,7 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
 import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.Case;
+import com.wkspower.platform.domain.model.RecentSignalEntry;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
@@ -83,6 +84,9 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
   // Story 4.4b AC3 — CaseTypeReader for post-stage-advance status-reset to next stage's
   // initialStatus. Injected across the hexagonal boundary (Story 3-6 §AC6 deferred-work landing).
   private final CaseTypeReader caseTypeReader;
+  // Story 4.6 AC5 — best-effort additive instrumentation. Optional so legacy / non-Spring
+  // callers (existing IT fakes) can construct the router without supplying a buffer.
+  private final SignalAuditRingBuffer signalAuditRingBuffer;
 
   public ExecutionSignalRouter(
       MappingRegistry mappingRegistry,
@@ -92,6 +96,31 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
       EventPublisher eventPublisher,
       Clock clock,
       CaseTypeReader caseTypeReader) {
+    this(
+        mappingRegistry,
+        stageAdvancer,
+        statusUpdater,
+        caseRepository,
+        eventPublisher,
+        clock,
+        caseTypeReader,
+        null);
+  }
+
+  /**
+   * Story 4.6 AC5 — overload accepting the {@link SignalAuditRingBuffer}. When non-null, every
+   * audit-emit branch additionally records a {@link RecentSignalEntry} into the buffer. Recording
+   * is best-effort and exception-suppressed: an audit-side failure never aborts canonical routing.
+   */
+  public ExecutionSignalRouter(
+      MappingRegistry mappingRegistry,
+      WksStageAdvancer stageAdvancer,
+      CaseStatusUpdater statusUpdater,
+      CaseRepository caseRepository,
+      EventPublisher eventPublisher,
+      Clock clock,
+      CaseTypeReader caseTypeReader,
+      SignalAuditRingBuffer signalAuditRingBuffer) {
     this.mappingRegistry = Objects.requireNonNull(mappingRegistry, "mappingRegistry");
     this.stageAdvancer = Objects.requireNonNull(stageAdvancer, "stageAdvancer");
     this.statusUpdater = Objects.requireNonNull(statusUpdater, "statusUpdater");
@@ -99,6 +128,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
     this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher");
     this.clock = Objects.requireNonNull(clock, "clock");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
+    // Optional — may be null in legacy callers.
+    this.signalAuditRingBuffer = signalAuditRingBuffer;
   }
 
   @Override
@@ -137,6 +168,18 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
               ErrorCode.WKS_MAP_405.wire(),
               detail,
               clock.now()));
+      // Story 4.6 AC5 — case-not-found audit-emit branch.
+      recordAudit(
+          caseTypeId,
+          new RecentSignalEntry(
+              clock.now(),
+              signal.kind(),
+              signal.source(),
+              "case-not-found",
+              null,
+              null,
+              signal.caseInstance().id(),
+              ErrorCode.WKS_MAP_405.wire()));
       return;
     }
     Case caseRow = caseOpt.get();
@@ -490,6 +533,18 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
 
   private void auditSuccess(ExecutionSignal signal, Case caseRow) {
     publish(signal, caseRow, new AuditSource.Backend(signal.adapterName()), null, Map.of());
+    // Story 4.6 AC5 — matched-rule success audit-emit branch.
+    recordAudit(
+        caseRow.caseTypeId(),
+        new RecentSignalEntry(
+            clock.now(),
+            signal.kind(),
+            signal.source(),
+            "matched-rule",
+            null,
+            describeEffect(signal),
+            caseRow.id(),
+            null));
   }
 
   private void auditMiss(ExecutionSignal signal, Case caseRow, String reason) {
@@ -514,6 +569,47 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
         new AuditSource.ExecutionUnmapped(signal.adapterName()),
         ErrorCode.WKS_MAP_404.wire(),
         detail);
+    // Story 4.6 AC5 — unmapped audit-emit branch (covers both
+    // "caseTypeVersion not in registry" and WksMappingMissException paths).
+    String decision =
+        reason != null && reason.contains("registry") ? "version-not-registered" : "unmapped";
+    recordAudit(
+        caseRow.caseTypeId(),
+        new RecentSignalEntry(
+            clock.now(),
+            signal.kind(),
+            signal.source(),
+            decision,
+            null,
+            null,
+            caseRow.id(),
+            ErrorCode.WKS_MAP_404.wire()));
+  }
+
+  /**
+   * Story 4.6 AC5 — best-effort recording into the in-memory ring buffer. Wrapped in try/catch so
+   * an audit-side failure can never abort canonical routing. The buffer reference may be {@code
+   * null} in legacy / non-Spring callers (existing IT fakes); the method is a no-op in that case.
+   */
+  private void recordAudit(String caseTypeId, RecentSignalEntry entry) {
+    if (signalAuditRingBuffer == null) {
+      return;
+    }
+    try {
+      signalAuditRingBuffer.record(caseTypeId, entry);
+    } catch (RuntimeException e) {
+      log.warn("SignalAuditRingBuffer.record failed — non-fatal", e);
+    }
+  }
+
+  private static String describeEffect(ExecutionSignal signal) {
+    return switch (signal.kind()) {
+      case STAGE_TRANSITION -> "stageTransition";
+      case NAMED_SIGNAL -> "stageTransition";
+      case TASK_STATUS_CHANGED -> "statusChange";
+      case TASK_COMPLETED -> "taskCompleted";
+      case OUTCOME -> "outcome";
+    };
   }
 
   private void publish(
