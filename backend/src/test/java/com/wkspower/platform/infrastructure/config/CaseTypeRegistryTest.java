@@ -192,6 +192,8 @@ class CaseTypeRegistryTest {
                 "a", "A", FieldType.TEXT, false, 0, List.of(), FieldDefinition.TypeSlots.empty())),
         List.of(new StatusDefinition("open", "Open", StatusColor.AMBER)),
         List.of("a"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW))));
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
+        List.of(),
+        List.of());
   }
 }

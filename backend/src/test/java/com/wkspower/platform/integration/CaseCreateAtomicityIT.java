@@ -204,8 +204,8 @@ class CaseCreateAtomicityIT {
                 List.of(
                     Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))),
         List.of(
-            new StageDefinition("intake", "Intake", 0),
-            new StageDefinition("review", "Review", 1)));
+            new StageDefinition("intake", "Intake", 0), new StageDefinition("review", "Review", 1)),
+        List.of());
   }
 
   private static String simpleBpmn() {

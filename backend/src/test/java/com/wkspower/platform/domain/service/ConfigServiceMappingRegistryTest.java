@@ -173,7 +173,9 @@ class ConfigServiceMappingRegistryTest {
         List.<FieldDefinition>of(),
         List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
         List.of(),
-        List.of(new RoleDefinition("admin", List.of())));
+        List.of(new RoleDefinition("admin", List.of())),
+        List.of(),
+        List.of());
   }
 
   private static final class StubSource implements CaseTypeSource {

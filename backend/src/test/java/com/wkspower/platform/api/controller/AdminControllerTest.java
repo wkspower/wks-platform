@@ -67,7 +67,9 @@ class AdminControllerTest {
             List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
             List.of(),
-            List.of(new RoleDefinition("admin", List.of())));
+            List.of(new RoleDefinition("admin", List.of())),
+            List.of(),
+            List.of());
     DeploymentResult deployment =
         new DeploymentResult("dep-1", "applicationProcess", "procDef-1", 1, Instant.now());
     byte[] yamlBytes = "id: x".getBytes();
@@ -201,7 +203,9 @@ class AdminControllerTest {
             List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
             List.of(),
-            List.of(new RoleDefinition("admin", List.of())));
+            List.of(new RoleDefinition("admin", List.of())),
+            List.of(),
+            List.of());
     byte[] yamlBytes = "id: j9-zero-zero".getBytes();
     when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any()))
         .thenReturn(ValidationResult.ok(config));

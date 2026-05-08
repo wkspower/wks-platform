@@ -163,7 +163,9 @@ class CaseTypeControllerTest {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 
   private static CaseTypeConfig hrType() {
@@ -180,7 +182,9 @@ class CaseTypeControllerTest {
             new StatusDefinition("draft", "Draft", StatusColor.ZINC),
             new StatusDefinition("active", "Active", StatusColor.EMERALD)),
         List.of("employee", "startDate"),
-        List.of(new RoleDefinition("hr", List.of(Permission.VIEW))));
+        List.of(new RoleDefinition("hr", List.of(Permission.VIEW))),
+        List.of(),
+        List.of());
   }
 
   private static org.springframework.test.web.servlet.request.RequestPostProcessor officerAuth() {

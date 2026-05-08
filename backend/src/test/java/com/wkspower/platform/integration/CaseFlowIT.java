@@ -248,7 +248,9 @@ class CaseFlowIT {
         List.of("name"),
         List.of(
             new RoleDefinition(
-                "admin", List.of(Permission.VIEW, Permission.CREATE, Permission.EDIT))));
+                "admin", List.of(Permission.VIEW, Permission.CREATE, Permission.EDIT))),
+        List.of(),
+        List.of());
   }
 
   // ---- Story 2.4 — full create → transition end-to-end ----------------
@@ -457,7 +459,9 @@ class CaseFlowIT {
             new RoleDefinition(
                 "admin",
                 List.of(
-                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))));
+                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))),
+        List.of(),
+        List.of());
   }
 
   private void registerTransitionCaseType() {
@@ -537,7 +541,9 @@ class CaseFlowIT {
             new RoleDefinition(
                 "admin",
                 List.of(
-                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))));
+                    Permission.VIEW, Permission.CREATE, Permission.EDIT, Permission.TRANSITION))),
+        List.of(),
+        List.of());
   }
 
   /**

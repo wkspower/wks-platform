@@ -89,6 +89,12 @@ wks:
     file: ${WKS_LICENSE_FILE:}
     # Hot-reload polling interval in seconds (default 30). File is reloaded when lastModified changes.
     poll-interval-seconds: ${WKS_LICENSE_POLL_INTERVAL:30}
+  # Story 5.4 — form draft persistence. Drafts inactive for `ttl-days` are expired by the
+  # FormDraftExpirationJob on the cron schedule below.
+  form:
+    draft:
+      ttl-days: ${WKS_FORM_DRAFT_TTL_DAYS:30}
+      expiration-cron: ${WKS_FORM_DRAFT_EXPIRATION_CRON:0 0 3 * * *}
   # Story 14.5 — runtime CSS theme override. When set, GET /api/theme.css serves the file at
   # this path. Unset (default) → 204 No Content; the browser ignores the empty link gracefully.
   theme:

@@ -339,6 +339,8 @@ class BpmnValidatorTest {
         fields,
         List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
         List.of(),
-        List.of(new RoleDefinition("admin", List.of())));
+        List.of(new RoleDefinition("admin", List.of())),
+        List.of(),
+        List.of());
   }
 }

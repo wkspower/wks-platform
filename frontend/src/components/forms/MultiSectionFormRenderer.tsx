@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronDown } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
 
 import { ApiError } from '@/api/client';
@@ -46,6 +46,16 @@ export interface MultiSectionFormRendererProps {
   defaultValues?: Record<string, unknown>;
   /** Called after a successful submit so the parent can react (e.g. navigate). */
   onSuccess?: () => void;
+  /**
+   * Story 5.4 AC1 — invoked whenever any field value changes; the parent wires this to the
+   * draft auto-save scheduler. Optional for backward compatibility.
+   */
+  onValuesChange?: (values: Record<string, unknown>) => void;
+  /** Story 5.4 AC1 — explicit "Save Draft" action; renders an extra ghost button next to Submit. */
+  saveDraftAction?: {
+    label: string;
+    onClick: (values: Record<string, unknown>) => void;
+  };
 }
 
 type SectionStatus = 'incomplete' | 'complete' | 'error';
@@ -74,6 +84,8 @@ export function MultiSectionFormRenderer({
   caseId,
   defaultValues: externalDefaultValues,
   onSuccess,
+  onValuesChange,
+  saveDraftAction,
 }: MultiSectionFormRendererProps) {
   const sections = useMemo(() => formDefinition.sections ?? [], [formDefinition.sections]);
   const allFields = useMemo(() => sections.flatMap((s) => s.fields), [sections]);
@@ -107,6 +119,15 @@ export function MultiSectionFormRenderer({
     shouldFocusError: false,
     defaultValues,
   });
+
+  // Story 5.4 AC1 — subscribe to value changes for debounced auto-save.
+  useEffect(() => {
+    if (!onValuesChange) return;
+    const subscription = form.watch((values) => {
+      onValuesChange(values as Record<string, unknown>);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onValuesChange]);
 
   const state: MutationButtonState = isPending
     ? 'confirming'
@@ -362,7 +383,16 @@ export function MultiSectionFormRenderer({
             </Alert>
           ) : null}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {saveDraftAction ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => saveDraftAction.onClick(form.getValues())}
+              >
+                {saveDraftAction.label}
+              </Button>
+            ) : null}
             {needsDialog ? (
               // Story 6.1 AC4 — business_final: AlertDialog interposes before submitForm.
               <AlertDialog>

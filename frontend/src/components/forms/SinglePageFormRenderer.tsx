@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
 
 import { ApiError } from '@/api/client';
@@ -45,6 +45,22 @@ export interface SinglePageFormRendererProps {
   defaultValues?: Record<string, unknown>;
   /** Called after a successful submit so the parent can react (e.g. show a toast, navigate). */
   onSuccess?: () => void;
+  /**
+   * Story 5.4 AC1 — invoked whenever any field value changes (subscription via RHF watch). The
+   * parent (typically {@code FormPage}) wires this to {@code useFormDraft.scheduleSave} so the
+   * draft is debounce-PUT to the backend. Optional for backward compatibility with existing
+   * callers; when omitted the renderer behaves exactly as before.
+   */
+  onValuesChange?: (values: Record<string, unknown>) => void;
+  /**
+   * Story 5.4 AC1 — explicit "Save Draft" button label and onClick. When provided, an extra
+   * ghost-variant button is rendered next to Submit; clicking it calls back with the current
+   * RHF values so the parent can issue an immediate save (bypassing the debounce). Optional.
+   */
+  saveDraftAction?: {
+    label: string;
+    onClick: (values: Record<string, unknown>) => void;
+  };
 }
 
 interface ServerErrorBanner {
@@ -72,6 +88,8 @@ export function SinglePageFormRenderer({
   caseId,
   defaultValues: externalDefaultValues,
   onSuccess,
+  onValuesChange,
+  saveDraftAction,
 }: SinglePageFormRendererProps) {
   const [serverError, setServerError] = useState<ServerErrorBanner | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -109,6 +127,15 @@ export function SinglePageFormRenderer({
     shouldFocusError: true,
     defaultValues,
   });
+
+  // Story 5.4 AC1 — subscribe to value changes and forward to the parent for debounced auto-save.
+  useEffect(() => {
+    if (!onValuesChange) return;
+    const subscription = form.watch((values) => {
+      onValuesChange(values as Record<string, unknown>);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onValuesChange]);
 
   const state: MutationButtonState = isPending
     ? 'confirming'
@@ -260,7 +287,16 @@ export function SinglePageFormRenderer({
               <span>{serverError.message}</span>
             </Alert>
           ) : null}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {saveDraftAction ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => saveDraftAction.onClick(form.getValues())}
+              >
+                {saveDraftAction.label}
+              </Button>
+            ) : null}
             {needsDialog ? (
               // Story 6.1 AC4 — business_final: AlertDialog interposes before submitForm.
               <AlertDialog>
