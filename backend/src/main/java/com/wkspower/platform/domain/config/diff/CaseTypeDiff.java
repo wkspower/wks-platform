@@ -19,7 +19,8 @@ import java.util.Set;
 /**
  * Story 3.8 — pure-function blast-radius classifier for the whole-CaseType diff surface. Given a
  * prior and a candidate {@link CaseTypeConfig}, classifies every detected change as either
- * append-class (safe, no version bump required) or mutate-class (requires {@code bumpVersion=true}).
+ * append-class (safe, no version bump required) or mutate-class (requires {@code
+ * bumpVersion=true}).
  *
  * <p><b>Phase-0 scope (Story 3.8):</b> the following change kinds are intentionally out-of-scope
  * and treated as append-class to avoid false-positive mutate classifications:
@@ -127,16 +128,12 @@ public final class CaseTypeDiff {
         // STATUS_REMOVED
         String path = statusPath(statusId, prevEntry.stageId());
         mutateDeltas.add(
-            new Delta(
-                DeltaKind.STATUS_REMOVED,
-                path,
-                "status '" + statusId + "' was removed"));
+            new Delta(DeltaKind.STATUS_REMOVED, path, "status '" + statusId + "' was removed"));
       } else {
         // Check retarget across stages
         boolean prevScoped = prevEntry.stageId() != null;
         boolean nextScoped = nextEntry.stageId() != null;
-        boolean sameScope =
-            Objects.equals(prevEntry.stageId(), nextEntry.stageId());
+        boolean sameScope = Objects.equals(prevEntry.stageId(), nextEntry.stageId());
 
         if (!sameScope) {
           String fromScope = prevScoped ? "stage '" + prevEntry.stageId() + "'" : "case-type level";
@@ -146,12 +143,7 @@ public final class CaseTypeDiff {
               new Delta(
                   DeltaKind.STATUS_RETARGETED,
                   path,
-                  "status '"
-                      + statusId
-                      + "' was retargeted from "
-                      + fromScope
-                      + " to "
-                      + toScope));
+                  "status '" + statusId + "' was retargeted from " + fromScope + " to " + toScope));
         } else if (prevEntry.terminal() != nextEntry.terminal()) {
           // STATUS_TERMINAL_FLIP (same scope)
           String path = statusPath(statusId, prevEntry.stageId()) + "/terminal";
@@ -305,7 +297,8 @@ public final class CaseTypeDiff {
    * DeltaKind#STAGE_APPENDED} (append). Otherwise, emit mutate-class deltas per detected pattern:
    *
    * <ul>
-   *   <li>New stage whose position shifts an existing stage → {@link DeltaKind#STAGE_INSERTED_MIDDLE}
+   *   <li>New stage whose position shifts an existing stage → {@link
+   *       DeltaKind#STAGE_INSERTED_MIDDLE}
    *   <li>Existing stages reordered or removed → {@link DeltaKind#STAGE_REORDERED}
    * </ul>
    *
@@ -387,10 +380,8 @@ public final class CaseTypeDiff {
     }
 
     // Check if existing stages (present in both) were reordered
-    List<String> commonPrevOrder =
-        prevIds.stream().filter(nextIdSet::contains).toList();
-    List<String> commonNextOrder =
-        nextIds.stream().filter(prevIdSet::contains).toList();
+    List<String> commonPrevOrder = prevIds.stream().filter(nextIdSet::contains).toList();
+    List<String> commonNextOrder = nextIds.stream().filter(prevIdSet::contains).toList();
 
     if (!commonPrevOrder.equals(commonNextOrder)) {
       // The relative order of existing stages changed
@@ -402,12 +393,7 @@ public final class CaseTypeDiff {
               new Delta(
                   DeltaKind.STAGE_REORDERED,
                   "/stages/" + id + "/id",
-                  "stage '"
-                      + id
-                      + "' ordinal changed from "
-                      + prevOrd
-                      + " to "
-                      + nextOrd));
+                  "stage '" + id + "' ordinal changed from " + prevOrd + " to " + nextOrd));
         }
       }
     }
@@ -440,8 +426,8 @@ public final class CaseTypeDiff {
    *   <li>New role → ROLE_ADDED (append)
    * </ul>
    *
-   * <p>Phase-0 scope: existing role permission changes and role removal are not classified as mutate
-   * (tracked for Phase-1).
+   * <p>Phase-0 scope: existing role permission changes and role removal are not classified as
+   * mutate (tracked for Phase-1).
    */
   private static void diffRoles(
       CaseTypeConfig prev,

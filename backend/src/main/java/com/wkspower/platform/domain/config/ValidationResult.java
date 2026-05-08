@@ -61,7 +61,9 @@ public record ValidationResult(
     this(errors, warnings, config, mappingDefinition, null);
   }
 
-  /** Backward-compat 3-arg constructor — defaults {@link #mappingDefinition()} and meta to empty. */
+  /**
+   * Backward-compat 3-arg constructor — defaults {@link #mappingDefinition()} and meta to empty.
+   */
   public ValidationResult(
       List<ErrorDetail> errors, List<ErrorDetail> warnings, Optional<CaseTypeConfig> config) {
     this(errors, warnings, config, Optional.empty(), null);
@@ -89,10 +91,10 @@ public record ValidationResult(
   }
 
   /**
-   * Story 3.8 — invalid result that also carries response-level metadata (e.g. {@code
-   * blastRadius} report). The metadata is forwarded by the controller to {@link
-   * com.wkspower.platform.domain.exception.WksConfigException#WksConfigException(List, Map)} so
-   * the {@code GlobalExceptionHandler} can include it in {@code ApiResponse.meta}.
+   * Story 3.8 — invalid result that also carries response-level metadata (e.g. {@code blastRadius}
+   * report). The metadata is forwarded by the controller to {@link
+   * com.wkspower.platform.domain.exception.WksConfigException#WksConfigException(List, Map)} so the
+   * {@code GlobalExceptionHandler} can include it in {@code ApiResponse.meta}.
    */
   public static ValidationResult invalidWithMeta(
       List<ErrorDetail> errors, Map<String, Object> meta) {

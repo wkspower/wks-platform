@@ -1,14 +1,14 @@
 package com.wkspower.platform.domain.config.diff;
 
 /**
- * Discriminant for a single change unit inside a {@link BlastRadiusReport}. Mutate-class kinds
- * (the ones that require a CaseType version bump per Decision 20) are grouped first; append-class
- * kinds follow.
+ * Discriminant for a single change unit inside a {@link BlastRadiusReport}. Mutate-class kinds (the
+ * ones that require a CaseType version bump per Decision 20) are grouped first; append-class kinds
+ * follow.
  *
- * <p><b>Phase-0 scope (Story 3.8):</b> field option-list edits, role-permissions edits,
- * listColumns reordering, and displayName-only changes are intentionally NOT represented here.
- * {@link com.wkspower.platform.domain.config.diff.CaseTypeDiff} classifies these as append-class
- * (no false-positive mutate). Phase-1 may add new kinds to tighten any of these.
+ * <p><b>Phase-0 scope (Story 3.8):</b> field option-list edits, role-permissions edits, listColumns
+ * reordering, and displayName-only changes are intentionally NOT represented here. {@link
+ * com.wkspower.platform.domain.config.diff.CaseTypeDiff} classifies these as append-class (no
+ * false-positive mutate). Phase-1 may add new kinds to tighten any of these.
  *
  * <p><b>Wire contract:</b> these enum names are serialised by Jackson as-is into the {@code
  * meta.blastRadius} payload (see {@link BlastRadiusReport} javadoc). Never rename an existing
@@ -73,8 +73,8 @@ public enum DeltaKind {
   FORM_ADDED,
 
   /**
-   * The mapping layer returned {@code APPEND_CLASS}. Folded into {@code appendDeltas}. Only
-   * emitted when the mapping changed at all (empty-to-empty produces no delta).
+   * The mapping layer returned {@code APPEND_CLASS}. Folded into {@code appendDeltas}. Only emitted
+   * when the mapping changed at all (empty-to-empty produces no delta).
    */
   MAPPING_APPEND
 }

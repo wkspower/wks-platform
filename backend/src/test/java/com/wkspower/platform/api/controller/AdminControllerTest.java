@@ -76,7 +76,8 @@ class AdminControllerTest {
     ArgumentCaptor<byte[]> yamlCap = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<byte[]> bpmnCap = ArgumentCaptor.forClass(byte[].class);
     // Story 3.8 — controller now calls the 5-arg deploy overload (adds bumpVersion boolean)
-    when(configService.deploy(yamlCap.capture(), bpmnCap.capture(), any(), eq("admin"), anyBoolean()))
+    when(configService.deploy(
+            yamlCap.capture(), bpmnCap.capture(), any(), eq("admin"), anyBoolean()))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -206,7 +207,8 @@ class AdminControllerTest {
             List.of(new RoleDefinition("admin", List.of())));
     byte[] yamlBytes = "id: j9-zero-zero".getBytes();
     // Story 3.8 — controller now calls the 4-arg validateAndRegister overload (adds bumpVersion)
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
+    when(configService.validateAndRegister(
+            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
         .thenReturn(ValidationResult.ok(config));
 
     mockMvc
@@ -221,12 +223,14 @@ class AdminControllerTest {
         .andExpect(jsonPath("$.data.processDefinitionId").doesNotExist())
         .andExpect(jsonPath("$.data.schemaUri").value("/api/admin/case-types/j9-zero-zero/schema"));
 
-    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean());
+    verify(configService)
+        .validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean());
   }
 
   @Test
   void missingBpmnPartWithInvalidYamlReturns422() throws Exception {
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
+    when(configService.validateAndRegister(
+            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
         .thenReturn(
             ValidationResult.invalid(List.of(ErrorDetail.of("WKS-CFG-099", "YAML parse failed"))));
 
@@ -256,12 +260,19 @@ class AdminControllerTest {
 
   @Test
   void bumpVersionTrueIsThreadedToDeployService() throws Exception {
-    // Story 3.8 AC3 — ?bumpVersion=true must be forwarded to ConfigService.deploy as bumpRequested=true
+    // Story 3.8 AC3 — ?bumpVersion=true must be forwarded to ConfigService.deploy as
+    // bumpRequested=true
     CaseTypeConfig config =
         new CaseTypeConfig(
-            "loan-ct", "Loan", 2, null, null, List.of(),
+            "loan-ct",
+            "Loan",
+            2,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of());
+            List.of(),
+            List.of());
     DeploymentResult deployment =
         new DeploymentResult("dep-2", "loanProcess", "procDef-2", 2, Instant.now());
     byte[] yamlBytes = "id: loan-ct".getBytes();
@@ -288,9 +299,16 @@ class AdminControllerTest {
   void bumpVersionFalseByDefault() throws Exception {
     // Story 3.8 — bumpVersion defaults to false when not supplied
     CaseTypeConfig config =
-        new CaseTypeConfig("loan-ct", "Loan", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "loan-ct",
+            "Loan",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of());
+            List.of(),
+            List.of());
     DeploymentResult deployment =
         new DeploymentResult("dep-1", "loanProcess", "procDef-1", 1, Instant.now());
 
@@ -301,8 +319,12 @@ class AdminControllerTest {
     mockMvc
         .perform(
             multipart("/api/admin/deploy")
-                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: loan-ct".getBytes()))
-                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<bpmn/>".getBytes()))
+                .file(
+                    new MockMultipartFile(
+                        "caseType", "ct.yaml", "text/plain", "id: loan-ct".getBytes()))
+                .file(
+                    new MockMultipartFile(
+                        "bpmn", "p.bpmn", "application/xml", "<bpmn/>".getBytes()))
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isOk());
 
@@ -313,9 +335,16 @@ class AdminControllerTest {
   void bumpVersionTrueIsThreadedToValidateAndRegister() throws Exception {
     // Story 3.8 — ?bumpVersion=true forwarded on YAML-only (no BPMN) path
     CaseTypeConfig config =
-        new CaseTypeConfig("yaml-only-ct", "YAML Only", 2, null, null, List.of(),
+        new CaseTypeConfig(
+            "yaml-only-ct",
+            "YAML Only",
+            2,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of());
+            List.of(),
+            List.of());
 
     ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
     when(configService.validateAndRegister(any(), any(), any(), bumpCap.capture()))
@@ -324,7 +353,9 @@ class AdminControllerTest {
     mockMvc
         .perform(
             multipart("/api/admin/deploy")
-                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: yaml-only-ct".getBytes()))
+                .file(
+                    new MockMultipartFile(
+                        "caseType", "ct.yaml", "text/plain", "id: yaml-only-ct".getBytes()))
                 .param("bumpVersion", "true")
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isOk());

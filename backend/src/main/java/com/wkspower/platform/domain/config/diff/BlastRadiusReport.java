@@ -4,9 +4,9 @@ import com.wkspower.platform.domain.config.model.MappingChangeClass;
 import java.util.List;
 
 /**
- * Structured output of {@link CaseTypeDiff#classify}. Contains two segregated lists of change
- * units — append-class deltas (safe, no version bump required) and mutate-class deltas (require
- * {@code bumpVersion=true}).
+ * Structured output of {@link CaseTypeDiff#classify}. Contains two segregated lists of change units
+ * — append-class deltas (safe, no version bump required) and mutate-class deltas (require {@code
+ * bumpVersion=true}).
  *
  * <p><b>Wire shape (stable — Admin UI Story 11.X depends on this):</b>
  *
@@ -19,10 +19,10 @@ import java.util.List;
  * </pre>
  *
  * <p>Jackson's default record serialisation is used — no custom serialiser needed. The {@code
- * changeClass} field is derived from the lists and serialised as a computed getter via the
- * {@link #changeClass()} accessor (Jackson includes it automatically for records when there is a
- * public method with a matching name and no-arg signature, but to be safe it is annotated with
- * {@link com.fasterxml.jackson.annotation.JsonProperty}).
+ * changeClass} field is derived from the lists and serialised as a computed getter via the {@link
+ * #changeClass()} accessor (Jackson includes it automatically for records when there is a public
+ * method with a matching name and no-arg signature, but to be safe it is annotated with {@link
+ * com.fasterxml.jackson.annotation.JsonProperty}).
  */
 public record BlastRadiusReport(List<Delta> appendDeltas, List<Delta> mutateDeltas) {
 
@@ -38,7 +38,9 @@ public record BlastRadiusReport(List<Delta> appendDeltas, List<Delta> mutateDelt
    */
   @com.fasterxml.jackson.annotation.JsonProperty("changeClass")
   public MappingChangeClass changeClass() {
-    return mutateDeltas.isEmpty() ? MappingChangeClass.APPEND_CLASS : MappingChangeClass.MUTATE_CLASS;
+    return mutateDeltas.isEmpty()
+        ? MappingChangeClass.APPEND_CLASS
+        : MappingChangeClass.MUTATE_CLASS;
   }
 
   /** Convenience: {@code true} when at least one mutate-class delta is present. */

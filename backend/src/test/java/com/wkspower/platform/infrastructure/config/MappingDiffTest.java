@@ -2,12 +2,12 @@ package com.wkspower.platform.infrastructure.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.wkspower.platform.domain.config.diff.MappingDiff;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
-import com.wkspower.platform.domain.config.diff.MappingDiff;
 import com.wkspower.platform.domain.config.model.MappingChangeClass;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;

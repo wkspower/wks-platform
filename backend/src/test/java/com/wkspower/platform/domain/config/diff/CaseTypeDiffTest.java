@@ -69,11 +69,19 @@ class CaseTypeDiffTest {
     CaseTypeConfig prev = base();
     CaseTypeConfig next =
         new CaseTypeConfig(
-            "test-ct", "Test", 1, null, null, List.of(),
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(
                 new StatusDefinition("open", "Open", StatusColor.BLUE),
                 new StatusDefinition("review", "Review", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -91,23 +99,47 @@ class CaseTypeDiffTest {
   void newStatusAdded_stageScoped_appendClass() {
     StageDefinition stagePrev =
         new StageDefinition(
-            "intake", "Intake", 0,
+            "intake",
+            "Intake",
+            0,
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
             Optional.of("open"));
     StageDefinition stageNext =
         new StageDefinition(
-            "intake", "Intake", 0,
+            "intake",
+            "Intake",
+            0,
             List.of(
                 new StatusDefinition("open", "Open", StatusColor.BLUE),
                 new StatusDefinition("review", "Review", StatusColor.BLUE)),
             Optional.of("open"));
 
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(), List.of(), List.of(),
-            List.of(), List.of(stagePrev), List.of());
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(stagePrev),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(), List.of(), List.of(),
-            List.of(), List.of(stageNext), List.of());
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(stageNext),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -123,11 +155,20 @@ class CaseTypeDiffTest {
   @Test
   void statusRemoved_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(
                 new StatusDefinition("open", "Open", StatusColor.BLUE),
                 new StatusDefinition("rejected", "Rejected", StatusColor.RED)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
     CaseTypeConfig next = base(); // only 'open'
 
     BlastRadiusReport report =
@@ -144,13 +185,31 @@ class CaseTypeDiffTest {
   @Test
   void statusTerminalFlipped_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, true)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -166,39 +225,69 @@ class CaseTypeDiffTest {
   @Test
   void statusRetargetedAcrossStages_mutateClass() {
     StageDefinition stageA =
-        new StageDefinition("intake", "Intake", 0,
+        new StageDefinition(
+            "intake",
+            "Intake",
+            0,
             List.of(new StatusDefinition("pending", "Pending", StatusColor.BLUE)),
             Optional.of("pending"));
     StageDefinition stageB =
-        new StageDefinition("review", "Review", 1,
+        new StageDefinition(
+            "review",
+            "Review",
+            1,
             List.of(new StatusDefinition("approved", "Approved", StatusColor.EMERALD)),
             Optional.of("approved"));
 
     // In next, 'pending' moves from intake to review
     StageDefinition stageANext =
-        new StageDefinition("intake", "Intake", 0,
+        new StageDefinition(
+            "intake",
+            "Intake",
+            0,
             List.of(new StatusDefinition("drafted", "Drafted", StatusColor.BLUE)),
             Optional.of("drafted"));
     StageDefinition stageBNext =
-        new StageDefinition("review", "Review", 1,
+        new StageDefinition(
+            "review",
+            "Review",
+            1,
             List.of(
                 new StatusDefinition("approved", "Approved", StatusColor.EMERALD),
                 new StatusDefinition("pending", "Pending", StatusColor.BLUE)),
             Optional.of("approved"));
 
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(), List.of(), List.of(),
-            List.of(), List.of(stageA, stageB), List.of());
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(stageA, stageB),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(), List.of(), List.of(),
-            List.of(), List.of(stageANext, stageBNext), List.of());
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(stageANext, stageBNext),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
 
-    assertThat(report.mutateDeltas())
-        .extracting(Delta::kind)
-        .contains(DeltaKind.STATUS_RETARGETED);
+    assertThat(report.mutateDeltas()).extracting(Delta::kind).contains(DeltaKind.STATUS_RETARGETED);
   }
 
   // ---- test 7: new field added (required=true) → FIELD_ADDED (append) ---
@@ -207,10 +296,18 @@ class CaseTypeDiffTest {
   void newFieldAdded_requiredTrue_appendClass() {
     CaseTypeConfig prev = base();
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(textField("name", true)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -226,10 +323,18 @@ class CaseTypeDiffTest {
   @Test
   void fieldRemoved_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(textField("name", false)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
     CaseTypeConfig next = base(); // no fields
 
     BlastRadiusReport report =
@@ -246,15 +351,31 @@ class CaseTypeDiffTest {
   @Test
   void fieldTypeChanged_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(typedField("score", FieldType.TEXT, false)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(typedField("score", FieldType.NUMBER, false)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -270,15 +391,31 @@ class CaseTypeDiffTest {
   @Test
   void fieldRequiredFlipped_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(textField("notes", false)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null,
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
             List.of(textField("notes", true)),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(), List.of());
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
@@ -294,15 +431,29 @@ class CaseTypeDiffTest {
   @Test
   void newStageAppendedAtTail_appendClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(),
+            List.of(),
+            List.of(),
             List.of(new StageDefinition("intake", "Intake", 0)),
             List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(),
+            List.of(),
+            List.of(),
             List.of(
                 new StageDefinition("intake", "Intake", 0),
                 new StageDefinition("review", "Review", 1)),
@@ -322,18 +473,32 @@ class CaseTypeDiffTest {
   @Test
   void stageInsertedInMiddle_mutateClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(),
+            List.of(),
+            List.of(),
             List.of(
                 new StageDefinition("intake", "Intake", 0),
                 new StageDefinition("decision", "Decision", 1)),
             List.of());
     // 'review' is inserted between 'intake' and 'decision'
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(),
+            List.of(),
+            List.of(),
             List.of(
                 new StageDefinition("intake", "Intake", 0),
                 new StageDefinition("review", "Review", 1),
@@ -359,18 +524,21 @@ class CaseTypeDiffTest {
     // Simplest way: prev has an attachment, next has none (removal = mutate).
     com.wkspower.platform.domain.config.model.AttachmentDefinition prevAttachment =
         new com.wkspower.platform.domain.config.model.AttachmentDefinition(
-            "bpmn", "loan.bpmn", "case", java.util.Optional.empty(),
-            java.util.Map.of(), java.util.Optional.empty(), java.util.Map.of(), List.of());
+            "bpmn",
+            "loan.bpmn",
+            "case",
+            java.util.Optional.empty(),
+            java.util.Map.of(),
+            java.util.Optional.empty(),
+            java.util.Map.of(),
+            List.of());
     MappingDefinition prevMapping = new MappingDefinition(List.of(prevAttachment));
     MappingDefinition nextMapping = MappingDefinition.empty(); // removed → MUTATE_CLASS
 
     CaseTypeConfig config = base();
-    BlastRadiusReport report =
-        CaseTypeDiff.classify(config, config, prevMapping, nextMapping);
+    BlastRadiusReport report = CaseTypeDiff.classify(config, config, prevMapping, nextMapping);
 
-    assertThat(report.mutateDeltas())
-        .extracting(Delta::kind)
-        .containsExactly(DeltaKind.MAPPING);
+    assertThat(report.mutateDeltas()).extracting(Delta::kind).containsExactly(DeltaKind.MAPPING);
     assertThat(report.changeClass()).isEqualTo(MappingChangeClass.MUTATE_CLASS);
   }
 
@@ -379,26 +547,37 @@ class CaseTypeDiffTest {
   @Test
   void newRoleAdded_appendClass() {
     CaseTypeConfig prev =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
             List.of(),
             List.of(new RoleDefinition("admin", List.of())),
-            List.of(), List.of());
+            List.of(),
+            List.of());
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
             List.of(),
             List.of(
-                new RoleDefinition("admin", List.of()),
-                new RoleDefinition("reviewer", List.of())),
-            List.of(), List.of());
+                new RoleDefinition("admin", List.of()), new RoleDefinition("reviewer", List.of())),
+            List.of(),
+            List.of());
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
 
-    assertThat(report.appendDeltas())
-        .extracting(Delta::kind)
-        .containsExactly(DeltaKind.ROLE_ADDED);
+    assertThat(report.appendDeltas()).extracting(Delta::kind).containsExactly(DeltaKind.ROLE_ADDED);
     assertThat(report.mutateDeltas()).isEmpty();
   }
 
@@ -408,17 +587,25 @@ class CaseTypeDiffTest {
   void newFormAdded_appendClass() {
     CaseTypeConfig prev = base();
     CaseTypeConfig next =
-        new CaseTypeConfig("test-ct", "Test", 1, null, null, List.of(),
+        new CaseTypeConfig(
+            "test-ct",
+            "Test",
+            1,
+            null,
+            null,
+            List.of(),
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(), List.of(), List.of(),
-            List.of(new FormDefinition("intake-form", "single", "monolithic", "single-page", List.of())));
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(
+                new FormDefinition(
+                    "intake-form", "single", "monolithic", "single-page", List.of())));
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());
 
-    assertThat(report.appendDeltas())
-        .extracting(Delta::kind)
-        .containsExactly(DeltaKind.FORM_ADDED);
+    assertThat(report.appendDeltas()).extracting(Delta::kind).containsExactly(DeltaKind.FORM_ADDED);
     assertThat(report.mutateDeltas()).isEmpty();
   }
 
@@ -426,17 +613,17 @@ class CaseTypeDiffTest {
 
   @Test
   void changeClass_appendWhenNoMutateDeltas() {
-    BlastRadiusReport report = new BlastRadiusReport(
-        List.of(new Delta(DeltaKind.STATUS_ADDED, "/statuses/x/id", "added")),
-        List.of());
+    BlastRadiusReport report =
+        new BlastRadiusReport(
+            List.of(new Delta(DeltaKind.STATUS_ADDED, "/statuses/x/id", "added")), List.of());
     assertThat(report.changeClass()).isEqualTo(MappingChangeClass.APPEND_CLASS);
   }
 
   @Test
   void changeClass_mutateWhenMutateDeltasPresent() {
-    BlastRadiusReport report = new BlastRadiusReport(
-        List.of(),
-        List.of(new Delta(DeltaKind.STATUS_REMOVED, "/statuses/x/id", "removed")));
+    BlastRadiusReport report =
+        new BlastRadiusReport(
+            List.of(), List.of(new Delta(DeltaKind.STATUS_REMOVED, "/statuses/x/id", "removed")));
     assertThat(report.changeClass()).isEqualTo(MappingChangeClass.MUTATE_CLASS);
   }
 }

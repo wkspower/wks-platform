@@ -93,9 +93,9 @@ public class AdminController {
       if (yamlResult.isInvalid()) {
         // Story 3.8 — forward blast-radius meta (if any) into the exception so it surfaces in the
         // ApiResponse.meta field (AC2: meta.blastRadius must be present on WKS-CFG-029 rejections).
-        throw new WksConfigException(yamlResult.errors(), yamlResult.responseMeta().isEmpty()
-            ? null
-            : yamlResult.responseMeta());
+        throw new WksConfigException(
+            yamlResult.errors(),
+            yamlResult.responseMeta().isEmpty() ? null : yamlResult.responseMeta());
       }
       var caseType = yamlResult.config().orElseThrow();
       return ApiResponse.success(
@@ -123,9 +123,8 @@ public class AdminController {
             "BPMN engine deployment failed (WKS-CFG-025) — retry or check engine health");
       }
       // Story 3.8 — forward blast-radius meta (if any)
-      throw new WksConfigException(result.errors(), result.responseMeta().isEmpty()
-          ? null
-          : result.responseMeta());
+      throw new WksConfigException(
+          result.errors(), result.responseMeta().isEmpty() ? null : result.responseMeta());
     }
 
     var caseType = result.caseType().orElseThrow();

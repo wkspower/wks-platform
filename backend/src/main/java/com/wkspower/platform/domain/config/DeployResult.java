@@ -55,11 +55,8 @@ public record DeployResult(
     return new DeployResult(errors, Optional.empty(), Optional.empty());
   }
 
-  /**
-   * Story 3.8 — invalid result with response-level metadata (e.g. {@code blastRadius} report).
-   */
-  public static DeployResult invalidWithMeta(
-      List<ErrorDetail> errors, Map<String, Object> meta) {
+  /** Story 3.8 — invalid result with response-level metadata (e.g. {@code blastRadius} report). */
+  public static DeployResult invalidWithMeta(List<ErrorDetail> errors, Map<String, Object> meta) {
     return new DeployResult(errors, Optional.empty(), Optional.empty(), meta);
   }
 

@@ -271,7 +271,8 @@ public class ConfigService {
 
     MappingDefinition prevMapping =
         mappingRegistry
-            .resolve(new CaseTypeRef(validated.id(), String.valueOf(priorVersionNum)),
+            .resolve(
+                new CaseTypeRef(validated.id(), String.valueOf(priorVersionNum)),
                 String.valueOf(priorVersionNum))
             .orElse(MappingDefinition.empty());
     MappingDefinition nextMapping =
@@ -381,9 +382,7 @@ public class ConfigService {
     return deploy(yamlBytes, bpmnBytes, bpmnFilename, actorEmail, false);
   }
 
-  /**
-   * Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate.
-   */
+  /** Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate. */
   public DeployResult deploy(
       byte[] yamlBytes,
       byte[] bpmnBytes,
@@ -403,8 +402,8 @@ public class ConfigService {
   }
 
   /**
-   * Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate (no
-   * BPMN filename variant — used by startup loader and tests).
+   * Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate (no BPMN
+   * filename variant — used by startup loader and tests).
    */
   public DeployResult deploy(
       byte[] yamlBytes, byte[] bpmnBytes, String actorEmail, boolean bumpRequested) {

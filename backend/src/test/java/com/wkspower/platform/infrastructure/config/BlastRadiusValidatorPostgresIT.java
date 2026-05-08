@@ -36,8 +36,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * validator's WKS-API-055 check does not fire on test-only boot config.
  *
  * <p>Memory {@code project_postgres_it_parity_gap.md}: Postgres-IT is mandatory because
- * version-comparison reads via {@code CaseTypeVersionRegistry.loadByVersion} exercise the
- * {@code case_type_versions} table.
+ * version-comparison reads via {@code CaseTypeVersionRegistry.loadByVersion} exercise the {@code
+ * case_type_versions} table.
  */
 @SpringBootTest(properties = "wks.bootstrap.production-validation.enabled=false")
 @ActiveProfiles("production")
@@ -104,7 +104,9 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(caseTypeId)).getBytes(StandardCharsets.UTF_8);
+        """
+            .formatted(caseTypeId))
+        .getBytes(StandardCharsets.UTF_8);
   }
 
   @AfterEach
@@ -118,11 +120,13 @@ class BlastRadiusValidatorPostgresIT {
   void statusRemovalWithoutBump_rejected() {
     String id = CT_PREFIX + "s1";
     // v1: deploy first
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s1", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s1", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
 
     // v2: remove 'pending' status
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -140,9 +144,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s1", false);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s1", false);
 
     assertThat(v2.isInvalid())
         .as("Status removal without bumpVersion=true must be rejected")
@@ -161,11 +168,13 @@ class BlastRadiusValidatorPostgresIT {
   @Test
   void statusTerminalFlagChange_withoutBump_rejected() {
     String id = CT_PREFIX + "s2";
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s2", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s2", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
 
     // v2: flip terminal on 'open'
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -187,9 +196,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s2", false);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s2", false);
 
     assertThat(v2.isInvalid()).isTrue();
     assertThat(v2.errors().get(0).code()).isEqualTo(ErrorCode.WKS_CFG_029.wire());
@@ -201,11 +213,13 @@ class BlastRadiusValidatorPostgresIT {
   @Test
   void fieldTypeChange_withoutBump_rejected() {
     String id = CT_PREFIX + "s3";
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s3", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s3", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
 
     // v2: change 'notes' from text → number
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -227,9 +241,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s3", false);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s3", false);
 
     assertThat(v2.isInvalid()).isTrue();
     assertThat(v2.errors().get(0).code()).isEqualTo(ErrorCode.WKS_CFG_029.wire());
@@ -241,11 +258,13 @@ class BlastRadiusValidatorPostgresIT {
   @Test
   void fieldRequiredChange_withoutBump_rejected() {
     String id = CT_PREFIX + "s4";
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s4", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s4", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
 
     // v2: flip 'notes' required: false → true
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -267,9 +286,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s4", false);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s4", false);
 
     assertThat(v2.isInvalid()).isTrue();
     assertThat(v2.errors().get(0).code()).isEqualTo(ErrorCode.WKS_CFG_029.wire());
@@ -288,12 +310,14 @@ class BlastRadiusValidatorPostgresIT {
   @Test
   void statusRemovalWithBump_succeeds_newVersion() {
     String id = CT_PREFIX + "s6";
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s6", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s6", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
     int v1Version = v1.config().get().version();
 
     // v2: remove 'pending' status WITH bumpVersion=true
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -311,9 +335,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s6", true);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s6", true);
 
     assertThat(v2.isInvalid())
         .as("Status removal with bumpVersion=true must succeed; errors=" + v2.errors())
@@ -329,12 +356,14 @@ class BlastRadiusValidatorPostgresIT {
   @Test
   void appendClassStatusAdd_withoutBump_succeeds_sameVersion() {
     String id = CT_PREFIX + "s7";
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s7", false);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s7", false);
     assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
     int v1Version = v1.config().get().version();
 
     // v2: add a new status 'approved' (append-class)
-    byte[] v2Yaml = ("""
+    byte[] v2Yaml =
+        ("""
         id: %s
         displayName: "Blast Radius Test"
         version: 2
@@ -360,9 +389,12 @@ class BlastRadiusValidatorPostgresIT {
         roles:
           - name: admin
             permissions: [view, create, edit, transition]
-        """.formatted(id)).getBytes(StandardCharsets.UTF_8);
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
 
-    ValidationResult v2 = configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s7", false);
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s7", false);
 
     assertThat(v2.isInvalid())
         .as("Append-class status add without bump must succeed; errors=" + v2.errors())
@@ -380,23 +412,22 @@ class BlastRadiusValidatorPostgresIT {
   void firstDeploy_noPriorVersion_succeeds_version1() {
     String id = CT_PREFIX + "s8";
     // No prior version exists. bumpVersion=true should be ignored with WARN log.
-    ValidationResult v1 = configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s8", true);
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s8", true);
 
     assertThat(v1.isInvalid())
         .as("First deploy with bumpVersion=true must succeed (benign no-op); errors=" + v1.errors())
         .isFalse();
     assertThat(v1.config()).isPresent();
-    assertThat(v1.config().get().version())
-        .as("First deploy must produce version 1")
-        .isEqualTo(1);
+    assertThat(v1.config().get().version()).as("First deploy must produce version 1").isEqualTo(1);
   }
 
   // ---- helper ------------------------------------------------------------
 
   /**
-   * Asserts that {@code result.responseMeta().blastRadius.mutateDeltas[0].kind} matches
-   * {@code expectedKind}. Serialises the {@link BlastRadiusReport} via Jackson to verify the wire
-   * shape that the Admin UI will consume (AC2: meta.blastRadius must be present on WKS-CFG-029
+   * Asserts that {@code result.responseMeta().blastRadius.mutateDeltas[0].kind} matches {@code
+   * expectedKind}. Serialises the {@link BlastRadiusReport} via Jackson to verify the wire shape
+   * that the Admin UI will consume (AC2: meta.blastRadius must be present on WKS-CFG-029
    * rejections).
    */
   private static void assertBlastRadiusInMeta(ValidationResult result, DeltaKind expectedKind) {
@@ -410,9 +441,7 @@ class BlastRadiusValidatorPostgresIT {
         .isInstanceOf(BlastRadiusReport.class);
 
     BlastRadiusReport report = (BlastRadiusReport) raw;
-    assertThat(report.mutateDeltas())
-        .as("mutateDeltas must be non-empty")
-        .isNotEmpty();
+    assertThat(report.mutateDeltas()).as("mutateDeltas must be non-empty").isNotEmpty();
     assertThat(report.mutateDeltas().get(0).kind())
         .as("First mutate delta kind must match expected")
         .isEqualTo(expectedKind);
@@ -422,8 +451,12 @@ class BlastRadiusValidatorPostgresIT {
       String json = MAPPER.writeValueAsString(report);
       JsonNode node = MAPPER.readTree(json);
       assertThat(node.has("changeClass")).as("changeClass field must be present in JSON").isTrue();
-      assertThat(node.has("mutateDeltas")).as("mutateDeltas field must be present in JSON").isTrue();
-      assertThat(node.has("appendDeltas")).as("appendDeltas field must be present in JSON").isTrue();
+      assertThat(node.has("mutateDeltas"))
+          .as("mutateDeltas field must be present in JSON")
+          .isTrue();
+      assertThat(node.has("appendDeltas"))
+          .as("appendDeltas field must be present in JSON")
+          .isTrue();
       assertThat(node.get("changeClass").asText()).isEqualTo("MUTATE_CLASS");
     } catch (Exception e) {
       throw new AssertionError("BlastRadiusReport JSON serialisation failed: " + e.getMessage(), e);

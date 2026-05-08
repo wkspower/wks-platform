@@ -16,8 +16,8 @@ import java.util.Objects;
  * Story 2.2 (YAML case-type validation + BPMN deploy).
  *
  * <p>Story 3.8 — adds an optional {@code meta} map that the {@code GlobalExceptionHandler} includes
- * in the {@link com.wkspower.platform.api.dto.ApiResponse#meta()} field. Used to carry the
- * {@code blastRadius} report in blast-radius rejection responses (AC2).
+ * in the {@link com.wkspower.platform.api.dto.ApiResponse#meta()} field. Used to carry the {@code
+ * blastRadius} report in blast-radius rejection responses (AC2).
  */
 public class WksConfigException extends WksException {
 
