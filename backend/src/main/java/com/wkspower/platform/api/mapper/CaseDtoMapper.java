@@ -162,7 +162,8 @@ public final class CaseDtoMapper {
   public static CaseTypeViewDto toCaseTypeView(CaseTypeConfig caseType) {
     List<StageDefinitionView> stages =
         caseType.stages().stream()
-            .map(s -> new StageDefinitionView(s.id(), s.displayName(), s.ordinal()))
+            // Story 6.1 — thread archetype through to the wire DTO.
+            .map(s -> new StageDefinitionView(s.id(), s.displayName(), s.ordinal(), s.archetype()))
             .toList();
     // Story 5.2 — map form definitions to wire DTOs.
     List<FormDefinitionView> forms =
@@ -188,8 +189,15 @@ public final class CaseDtoMapper {
     List<FieldView> fieldViews = form.fields().stream().map(CaseDtoMapper::toFieldView).toList();
     List<FormSectionView> sectionViews =
         form.sections().stream().map(CaseDtoMapper::toFormSectionView).toList();
+    // Story 6.1 — thread archetype through; null means omitted (default affordance on frontend).
     return new FormDefinitionView(
-        form.id(), form.topology(), form.dataModel(), form.rendering(), fieldViews, sectionViews);
+        form.id(),
+        form.topology(),
+        form.dataModel(),
+        form.rendering(),
+        fieldViews,
+        sectionViews,
+        form.archetype());
   }
 
   /** Story 5.3 — map one {@link FormSection} to its wire DTO. */

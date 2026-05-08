@@ -48,7 +48,9 @@ public record StageDefinition(
     String displayName,
     int ordinal,
     List<StatusDefinition> statuses,
-    Optional<String> initialStatus) {
+    Optional<String> initialStatus,
+    /** Story 6.1 — optional archetype from the closed catalog. {@code null} means omitted. */
+    String archetype) {
 
   public StageDefinition {
     Objects.requireNonNull(id, "id");
@@ -68,7 +70,20 @@ public record StageDefinition(
    * stage with no {@code statuses:} or {@code initialStatus:} keys.
    */
   public StageDefinition(String id, String displayName, int ordinal) {
-    this(id, displayName, ordinal, null, Optional.empty());
+    this(id, displayName, ordinal, null, Optional.empty(), null);
+  }
+
+  /**
+   * Backward-compat constructor for Story 3.6 callers that pre-date Story 6.1's {@code archetype}
+   * slot. Defaults {@code archetype} to {@code null}.
+   */
+  public StageDefinition(
+      String id,
+      String displayName,
+      int ordinal,
+      List<StatusDefinition> statuses,
+      Optional<String> initialStatus) {
+    this(id, displayName, ordinal, statuses, initialStatus, null);
   }
 
   /**

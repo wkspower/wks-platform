@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TooltipProvider } from '@/components/ui/Tooltip';
 import type { StageView } from '@/types/case';
+import type { StageDefinitionView } from '@/types/caseType';
 
 import { StageTimeline } from './StageTimeline';
 
@@ -161,5 +162,100 @@ describe('StageTimeline — render-state matrix (AC1, AC2, AC11.1)', () => {
     const msg = warn.mock.calls[0]?.[0] as string;
     expect(msg).toMatch(/WKS-UI-2001/);
     warn.mockRestore();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Story 6.1 AC5 — archetype terminal-accent on stage nodes
+// ---------------------------------------------------------------------------
+
+describe('StageTimeline — Story 6.1 AC5: archetype terminal-accent', () => {
+  function stageView(stageId: string, displayName: string, ordinal: number): StageView {
+    return {
+      stageId,
+      displayName,
+      ordinal,
+      state: 'COMPLETED',
+      enteredAt: '2026-04-01T09:00:00Z',
+      exitedAt: '2026-04-02T13:00:00Z',
+      source: 'manual',
+      sourceRef: null,
+    };
+  }
+
+  it('sets data-archetype-terminal="true" on a stage node whose def has archetype=business_final', () => {
+    const stages: StageView[] = [stageView('final-approval', 'Final Approval', 0)];
+    const stageDefs: StageDefinitionView[] = [
+      {
+        id: 'final-approval',
+        displayName: 'Final Approval',
+        ordinal: 0,
+        archetype: 'business_final',
+      },
+    ];
+    const { container } = wrap(<StageTimeline stages={stages} caseTypeStageDefs={stageDefs} />);
+    const li = container.querySelector('li[data-stage-id="final-approval"]');
+    expect(li).toBeInTheDocument();
+    expect(li?.getAttribute('data-archetype-terminal')).toBe('true');
+  });
+
+  it('does NOT set data-archetype-terminal on a stage with archetype=draft_section (postActionState=idle)', () => {
+    const stages: StageView[] = [stageView('drafting', 'Drafting', 0)];
+    const stageDefs: StageDefinitionView[] = [
+      {
+        id: 'drafting',
+        displayName: 'Drafting',
+        ordinal: 0,
+        archetype: 'draft_section',
+      },
+    ];
+    const { container } = wrap(<StageTimeline stages={stages} caseTypeStageDefs={stageDefs} />);
+    const li = container.querySelector('li[data-stage-id="drafting"]');
+    expect(li).toBeInTheDocument();
+    expect(li?.getAttribute('data-archetype-terminal')).toBeNull();
+  });
+
+  it('does NOT set data-archetype-terminal on a stage with no archetype (null/undefined)', () => {
+    const stages: StageView[] = [stageView('intake', 'Intake', 0)];
+    const stageDefs: StageDefinitionView[] = [
+      {
+        id: 'intake',
+        displayName: 'Intake',
+        ordinal: 0,
+        archetype: null,
+      },
+    ];
+    const { container } = wrap(<StageTimeline stages={stages} caseTypeStageDefs={stageDefs} />);
+    const li = container.querySelector('li[data-stage-id="intake"]');
+    expect(li).toBeInTheDocument();
+    expect(li?.getAttribute('data-archetype-terminal')).toBeNull();
+  });
+
+  it('appends terminal suffix to aria-label for business_final stage', () => {
+    const stages: StageView[] = [stageView('final-approval', 'Final Approval', 0)];
+    const stageDefs: StageDefinitionView[] = [
+      {
+        id: 'final-approval',
+        displayName: 'Final Approval',
+        ordinal: 0,
+        archetype: 'business_final',
+      },
+    ];
+    const { container } = wrap(<StageTimeline stages={stages} caseTypeStageDefs={stageDefs} />);
+    // The trigger button holds the aria-label
+    const btn = container.querySelector('li[data-stage-id="final-approval"] button');
+    expect(btn).toBeInTheDocument();
+    const ariaLabel = btn?.getAttribute('aria-label') ?? '';
+    // Should include the stage name and the terminal suffix
+    expect(ariaLabel).toMatch(/Final Approval/);
+    expect(ariaLabel).toMatch(/\s—\s/);
+  });
+
+  it('works without caseTypeStageDefs — no terminal marker applied', () => {
+    const stages: StageView[] = [stageView('underwriting', 'Underwriting', 0)];
+    const { container } = wrap(<StageTimeline stages={stages} />);
+    const li = container.querySelector('li[data-stage-id="underwriting"]');
+    expect(li).toBeInTheDocument();
+    expect(li?.getAttribute('data-archetype-terminal')).toBeNull();
   });
 });

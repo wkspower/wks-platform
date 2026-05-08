@@ -96,3 +96,16 @@ h6 {
     --motion-slow: 0.01ms;
   }
 }
+
+/* Story 6.1 — archetype-terminal design token + CSS hook.
+ * --accent-terminal: distinct accent for business_final terminal-state affordances.
+ * Applied via [data-archetype-terminal="true"] on the surrounding container so tests
+ * assert attribute presence and CSS drives the visual — no DOM reads in logic code.
+ */
+:root {
+  --accent-terminal: #dc2626; /* red-600 — signals finality; fallback to primary below */
+}
+
+[data-archetype-terminal='true'] {
+  border-color: var(--accent-terminal, var(--primary));
+}

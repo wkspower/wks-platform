@@ -36,7 +36,13 @@ public record FormDefinition(
      * Story 5.3 — sections declared for {@code dataModel: sectioned} forms. Empty for monolithic
      * forms.
      */
-    List<FormSection> sections) {
+    List<FormSection> sections,
+    /**
+     * Story 6.1 — optional archetype from the closed catalog ({@code draft_section}, {@code
+     * submit_for_processing}, {@code business_final}). {@code null} means omitted — the frontend
+     * falls back to default affordance behavior.
+     */
+    String archetype) {
 
   public FormDefinition {
     fields = fields == null ? List.of() : List.copyOf(fields);
@@ -45,8 +51,7 @@ public record FormDefinition(
 
   /**
    * Backward-compat constructor for callers that pre-date Story 5.3's {@code sections} slot.
-   * Defaults {@code sections} to {@link List#of()}, preserving the contract that monolithic forms
-   * never have sections.
+   * Defaults {@code sections} and {@code archetype} to their null/empty defaults.
    */
   public FormDefinition(
       String id,
@@ -54,6 +59,20 @@ public record FormDefinition(
       String dataModel,
       String rendering,
       List<FieldDefinition> fields) {
-    this(id, topology, dataModel, rendering, fields, List.of());
+    this(id, topology, dataModel, rendering, fields, List.of(), null);
+  }
+
+  /**
+   * Backward-compat constructor for callers that pre-date Story 6.1's {@code archetype} slot.
+   * Defaults {@code archetype} to {@code null}.
+   */
+  public FormDefinition(
+      String id,
+      String topology,
+      String dataModel,
+      String rendering,
+      List<FieldDefinition> fields,
+      List<FormSection> sections) {
+    this(id, topology, dataModel, rendering, fields, sections, null);
   }
 }

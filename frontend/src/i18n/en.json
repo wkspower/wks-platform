@@ -148,6 +148,15 @@
   "task.conflict.completedByUnknown": "This task was already completed. No changes were made.",
   "task.conflict.refreshAnnouncement": "This task was already completed. Press Enter to refresh.",
 
+  "task.cta.complete": "Complete",
+  "task.cta.draft_section.complete": "Save section",
+  "task.cta.submit_for_processing.complete": "Submit for processing",
+  "task.cta.business_final.complete": "Submit for final approval",
+  "task.confirm.title": "Confirm submission",
+  "task.confirm.description": "This is a final action and cannot be undone after the case advances. Continue?",
+
+  "stage.terminal.suffix": "final stage",
+
   "cases.create.button": "New case",
   "cases.create.dialogTitle": "New {caseTypeName}",
   "cases.create.dialogClose": "Close create case dialog",

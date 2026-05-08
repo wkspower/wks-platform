@@ -10,7 +10,7 @@ import {
 
 import { cn } from '@/lib/cn';
 
-import { Button } from './Button';
+import { Button, type ButtonProps } from './Button';
 
 /**
  * Story 2.7 — 4-state slice of the lifecycle. Story 2.8 widened the union to add {@code
@@ -32,6 +32,8 @@ export interface MutationButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'children'
 > {
+  /** Story 6.1 — optional visual variant, forwarded to the inner Button. */
+  variant?: ButtonProps['variant'];
   state: MutationButtonState;
   /** Idle-state children. */
   children: ReactNode;
@@ -66,6 +68,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
       announcement,
       className,
       disabled,
+      variant,
       ...rest
     },
     ref,
@@ -125,6 +128,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
         <Button
           ref={ref}
           type={rest.type ?? 'submit'}
+          variant={variant}
           aria-busy={state === 'confirming' || state === 'processing' ? true : undefined}
           aria-disabled={buttonDisabled || undefined}
           disabled={buttonDisabled}

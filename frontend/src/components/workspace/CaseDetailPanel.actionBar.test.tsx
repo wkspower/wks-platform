@@ -94,7 +94,7 @@ describe('CaseDetailPanel — action bar slot integration (Story 2.8 AC8/AC11)',
     );
     const { container } = render(wrap(<CaseDetailPanel caseId={CASE_ID} onClose={() => {}} />));
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Draft application' })).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: 'Save section' })).toBeInTheDocument(),
     );
     // The panel owns one polite live region (the heading announcement). MutationButton owns its
     // own sr-only polite span (single primary CTA → exactly one). No extra region in the action

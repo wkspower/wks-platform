@@ -5,7 +5,7 @@
  * AC2: empty submit shows FormErrorsBanner with field names.
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import type { ReactElement } from 'react';
@@ -166,6 +166,102 @@ describe('SinglePageFormRenderer — AC2: empty submit shows FormErrorsBanner', 
     );
     await user.click(screen.getByRole('button', { name: /submit/i }));
     // Give any async effects time to flush.
+    await new Promise((r) => setTimeout(r, 50));
+    expect(called).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Story 6.1 AC4 — archetype-driven CTA and confirmation dialog
+// ---------------------------------------------------------------------------
+
+describe('SinglePageFormRenderer — Story 6.1 AC4: archetype affordances', () => {
+  it('renders "Submit for final approval" button for business_final archetype', () => {
+    const form: FormDefinitionView = {
+      ...threeFieldForm(),
+      archetype: 'business_final',
+    };
+    wrap(
+      <SinglePageFormRenderer
+        formDefinition={form}
+        caseId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Submit for final approval' })).toBeInTheDocument();
+  });
+
+  it('renders "Save section" (ghost) button for draft_section archetype', () => {
+    const form: FormDefinitionView = {
+      ...threeFieldForm(),
+      archetype: 'draft_section',
+    };
+    wrap(
+      <SinglePageFormRenderer
+        formDefinition={form}
+        caseId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+    const btn = screen.getByRole('button', { name: 'Save section' });
+    expect(btn).toBeInTheDocument();
+    expect(btn.className).toMatch(/hover:bg-\[var\(--muted\)\]/);
+  });
+
+  it('renders "Submit" button when archetype is null (backward-compat)', () => {
+    const form: FormDefinitionView = {
+      ...threeFieldForm(),
+      archetype: null,
+    };
+    wrap(
+      <SinglePageFormRenderer
+        formDefinition={form}
+        caseId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+    expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+  });
+
+  it('business_final: clicking submit opens AlertDialog', async () => {
+    const user = userEvent.setup();
+    const form: FormDefinitionView = {
+      ...threeFieldForm(),
+      archetype: 'business_final',
+    };
+    wrap(
+      <SinglePageFormRenderer
+        formDefinition={form}
+        caseId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Submit for final approval' }));
+    // AlertDialog should open showing confirmation title
+    await screen.findByText('Confirm submission');
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+  });
+
+  it('business_final: cancel dialog does NOT fire PUT', async () => {
+    const user = userEvent.setup();
+    let called = false;
+    server.use(
+      http.post('/api/cases/:caseId/forms/:formId/submit', () => {
+        called = true;
+        return HttpResponse.json({ data: {} });
+      }),
+    );
+    const form: FormDefinitionView = {
+      ...threeFieldForm(),
+      archetype: 'business_final',
+    };
+    wrap(
+      <SinglePageFormRenderer
+        formDefinition={form}
+        caseId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Submit for final approval' }));
+    await screen.findByText('Confirm submission');
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    // Dialog closes
+    await waitFor(() => expect(screen.queryByText('Confirm submission')).not.toBeInTheDocument());
     await new Promise((r) => setTimeout(r, 50));
     expect(called).toBe(false);
   });
