@@ -65,9 +65,13 @@ public record CaseTypeViewDto(
    * <p>Story 6.1 — adds {@code archetype} for UI specialization (nullable; omitted means default
    * affordance).
    */
-  public record StageDefinitionView(String id, String displayName, int ordinal,
-      @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
-      String archetype) {
+  public record StageDefinitionView(
+      String id,
+      String displayName,
+      int ordinal,
+      @com.fasterxml.jackson.annotation.JsonInclude(
+              com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+          String archetype) {
 
     /** Backward-compat constructor for callers that pre-date Story 6.1's archetype slot. */
     public StageDefinitionView(String id, String displayName, int ordinal) {
@@ -118,8 +122,8 @@ public record CaseTypeViewDto(
       List<FieldView> fields,
       List<FormSectionView> sections,
       /**
-       * Story 6.1 — optional archetype from the closed catalog. {@code null} means omitted;
-       * the frontend falls back to the default affordance. Excluded from JSON when null to avoid
+       * Story 6.1 — optional archetype from the closed catalog. {@code null} means omitted; the
+       * frontend falls back to the default affordance. Excluded from JSON when null to avoid
        * surfacing implementation details to unaware clients.
        */
       @JsonInclude(JsonInclude.Include.NON_NULL) String archetype) {

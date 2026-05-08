@@ -2,10 +2,20 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useReducer, useRef } from 'react';
 
 import { ApiError } from '@/api/client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/AlertDialog';
 import { Button } from '@/components/ui/Button';
 import { MutationButton, type MutationButtonState } from '@/components/ui/MutationButton';
 import { useCompleteTask } from '@/hooks/useTasks';
 import { t } from '@/i18n';
+import { getArchetypeAffordance } from '@/lib/archetypes';
 import { caseQueryKeys, taskQueryKeys } from '@/lib/queryKeys';
 import type { ConflictReason, TaskActionResponse, TaskDto } from '@/types/task';
 
@@ -309,30 +319,75 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
       </Button>
     ) : null;
 
-  const idleLabel = task.actionLabel ?? task.name;
+  // Story 6.1 — archetype-driven affordance. All renderer decisions go through the registry;
+  // no archetype literal strings appear here.
+  const affordance = getArchetypeAffordance(task.archetype);
+  const archetypeLabel = t(affordance.ctaLabelKey);
+  // Map ctaTone to Button variant — secondary tone uses 'ghost' styling for softer visual weight.
+  const archetypeVariant = affordance.ctaTone === 'secondary' ? 'ghost' : 'default';
+  const needsDialog = affordance.confirmationFlow === 'confirmation-dialog';
+  const isTerminal =
+    affordance.postActionState === 'locked' || affordance.postActionState === 'terminal-accent';
+
+  // The idle label comes from the archetype registry when an archetype is declared; falls back to
+  // task.actionLabel → task.name for un-typed tasks (backward-compat).
+  const idleLabel = task.archetype ? archetypeLabel : (task.actionLabel ?? task.name);
+
+  const mutationButton = (
+    <MutationButton
+      state={buttonState}
+      confirmingLabel={t('task.confirming')}
+      processingLabel={t('task.processing')}
+      confirmedLabel={t('task.confirmed')}
+      failedLabel={failedLabel}
+      announcement={announcement}
+      // variant is threaded via ...rest spread in MutationButton → Button
+      variant={archetypeVariant}
+      onClick={() => {
+        // Dialog flow: fire() is triggered by AlertDialogAction instead of the button click.
+        if (needsDialog) return;
+        if (state.kind === 'idle') fire();
+      }}
+      retryAction={
+        <>
+          {retryAction}
+          {refreshAction}
+          {viewUpdatedCaseAction}
+        </>
+      }
+    >
+      {idleLabel}
+    </MutationButton>
+  );
 
   return (
-    <div className="inline-flex items-center gap-2">
-      <MutationButton
-        state={buttonState}
-        confirmingLabel={t('task.confirming')}
-        processingLabel={t('task.processing')}
-        confirmedLabel={t('task.confirmed')}
-        failedLabel={failedLabel}
-        announcement={announcement}
-        onClick={() => {
-          if (state.kind === 'idle') fire();
-        }}
-        retryAction={
-          <>
-            {retryAction}
-            {refreshAction}
-            {viewUpdatedCaseAction}
-          </>
-        }
-      >
-        {idleLabel}
-      </MutationButton>
+    <div
+      className="inline-flex items-center gap-2"
+      data-archetype-terminal={isTerminal && state.kind === 'confirmed' ? 'true' : undefined}
+    >
+      {needsDialog && state.kind === 'idle' ? (
+        // Story 6.1 AC3 — business_final: AlertDialog interposes before fire().
+        // The trigger renders the MutationButton; confirmation fires the mutation.
+        <AlertDialog>
+          <AlertDialogTrigger asChild>{mutationButton}</AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>{t('task.confirm.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('task.confirm.description')}</AlertDialogDescription>
+            <div className="flex justify-end gap-2 pt-2">
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  fire();
+                }}
+              >
+                {archetypeLabel}
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : (
+        mutationButton
+      )}
       {state.kind === 'processing' && takingLonger ? (
         <span className="text-xs text-[var(--muted-foreground)]">
           {t('task.processing.takingLonger')}

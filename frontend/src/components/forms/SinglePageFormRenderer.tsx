@@ -5,6 +5,15 @@ import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
 import { ApiError } from '@/api/client';
 import { submitForm } from '@/api/forms';
 import { Alert } from '@/components/ui/Alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/AlertDialog';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { FormErrorsBanner, type FormErrorEntry } from '@/components/ui/FormErrorsBanner';
@@ -20,6 +29,7 @@ import {
 } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { t } from '@/i18n';
+import { getArchetypeAffordance } from '@/lib/archetypes';
 import { buildZodFromFieldDefs } from '@/lib/buildZodFromFieldDefs';
 import type { FieldDefinition, FormDefinitionView } from '@/types/caseType';
 
@@ -185,8 +195,39 @@ export function SinglePageFormRenderer({
     </Button>
   );
 
+  // Story 6.1 AC4 — archetype-driven submit CTA affordance.
+  // When archetype is absent, falls back to the pre-6.1 'form.submit' label and default variant,
+  // preserving existing behavior exactly (AC4: "for archetype = null, existing behavior preserved").
+  const affordance = getArchetypeAffordance(formDefinition.archetype);
+  const submitLabel = formDefinition.archetype ? t(affordance.ctaLabelKey) : t('form.submit');
+  const submitVariant = formDefinition.archetype
+    ? affordance.ctaTone === 'secondary'
+      ? 'ghost'
+      : 'default'
+    : 'default';
+  const needsDialog = affordance.confirmationFlow === 'confirmation-dialog';
+  const isTerminal =
+    affordance.postActionState === 'locked' || affordance.postActionState === 'terminal-accent';
+
+  const submitButton = (
+    <MutationButton
+      state={state}
+      variant={submitVariant}
+      confirmingLabel={t('common.lifecycle.confirming')}
+      confirmedLabel={t('common.lifecycle.confirmed')}
+      failedLabel={failedLabel}
+      retryAction={retryAction}
+      // Story 6.1 AC4 — when an AlertDialog interposes, the button must NOT be type="submit"
+      // so clicking the trigger opens the dialog rather than running HTML5 form validation.
+      // The dialog's AlertDialogAction fires form.handleSubmit(onSubmit) explicitly.
+      type={needsDialog ? 'button' : 'submit'}
+    >
+      {submitLabel}
+    </MutationButton>
+  );
+
   return (
-    <div>
+    <div data-archetype-terminal={isTerminal && isSuccess ? 'true' : undefined}>
       <FormProvider {...form}>
         <form
           noValidate
@@ -220,15 +261,28 @@ export function SinglePageFormRenderer({
             </Alert>
           ) : null}
           <div className="flex justify-end">
-            <MutationButton
-              state={state}
-              confirmingLabel={t('common.lifecycle.confirming')}
-              confirmedLabel={t('common.lifecycle.confirmed')}
-              failedLabel={failedLabel}
-              retryAction={retryAction}
-            >
-              {t('form.submit')}
-            </MutationButton>
+            {needsDialog ? (
+              // Story 6.1 AC4 — business_final: AlertDialog interposes before submitForm.
+              <AlertDialog>
+                <AlertDialogTrigger asChild>{submitButton}</AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>{t('task.confirm.title')}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('task.confirm.description')}</AlertDialogDescription>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        void form.handleSubmit(onSubmit)();
+                      }}
+                    >
+                      {submitLabel}
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              submitButton
+            )}
           </div>
         </form>
       </FormProvider>

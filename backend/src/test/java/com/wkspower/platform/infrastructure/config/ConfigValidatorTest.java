@@ -1054,7 +1054,9 @@ class ConfigValidatorTest {
             displayName: Final
         """;
     var result = validate(yaml);
-    assertThat(result.isInvalid()).as("omitted stage archetype should not produce errors").isFalse();
+    assertThat(result.isInvalid())
+        .as("omitted stage archetype should not produce errors")
+        .isFalse();
   }
 
   private static final String GREEN_YAML =

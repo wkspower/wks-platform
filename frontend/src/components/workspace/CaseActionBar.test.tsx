@@ -44,7 +44,7 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
     );
     render(wrap(<CaseActionBar caseId={CASE_ID} />));
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Draft application' })).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: 'Save section' })).toBeInTheDocument(),
     );
   });
 

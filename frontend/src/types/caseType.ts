@@ -72,6 +72,8 @@ export interface StageDefinitionView {
   id: string;
   displayName: string;
   ordinal: number;
+  /** Story 6.1 — optional archetype from the closed catalog. */
+  archetype?: string | null;
 }
 
 /**
@@ -100,6 +102,8 @@ export interface FormDefinitionView {
   fields: FieldDefinition[];
   /** Story 5.3 — sections declared for {@code dataModel: sectioned} forms. */
   sections?: FormSectionView[];
+  /** Story 6.1 — optional archetype from the closed catalog. */
+  archetype?: string | null;
 }
 
 export interface CaseTypeView {

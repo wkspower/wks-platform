@@ -11,6 +11,7 @@ import {
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover';
 import { t } from '@/i18n';
+import { getArchetypeAffordance } from '@/lib/archetypes';
 import { cn } from '@/lib/cn';
 import { formatDate, formatDateTime } from '@/lib/formatDate';
 import type { StageState, StageView } from '@/types/case';
@@ -225,6 +226,8 @@ interface StageNodeProps {
   isFocused: boolean;
   layout: LayoutMode;
   onFocus: () => void;
+  /** Story 6.1 AC5 — optional archetype from the YAML stage def. */
+  archetype?: string | null;
 }
 
 /**
@@ -232,7 +235,7 @@ interface StageNodeProps {
  * same popover content. The trigger is a `<button>` for native focus + activation semantics.
  */
 const StageNode = forwardRef<HTMLButtonElement, StageNodeProps>(function StageNode(
-  { stage, isFocused, layout, onFocus },
+  { stage, isFocused, layout, onFocus, archetype },
   ref,
 ) {
   const cls = stateClass(stage.state);
@@ -273,12 +276,19 @@ const StageNode = forwardRef<HTMLButtonElement, StageNodeProps>(function StageNo
     });
   };
 
+  // Story 6.1 AC5 — terminal-accent for terminal-archetype stages.
+  // Uses the registry to avoid archetype literal strings in renderer code (AC2 contract).
+  const isTerminalArchetype =
+    getArchetypeAffordance(archetype).postActionState === 'locked' ||
+    getArchetypeAffordance(archetype).postActionState === 'terminal-accent';
+
   return (
     <li
       role="listitem"
       aria-current={stage.state === 'ACTIVE' ? 'step' : undefined}
       data-stage-state={cls}
       data-stage-id={stage.stageId}
+      data-archetype-terminal={isTerminalArchetype ? 'true' : undefined}
       className={cn(
         'wks-stage-item',
         layout === 'horizontal'
@@ -308,11 +318,21 @@ const StageNode = forwardRef<HTMLButtonElement, StageNodeProps>(function StageNo
               toggleSticky();
             }}
             data-state={cls}
-            aria-label={t('stageTimeline.aria.itemSummary', {
-              ordinal: String(stage.ordinal + 1),
-              name: stage.displayName,
-              state: stateLabel(stage.state),
-            })}
+            aria-label={
+              isTerminalArchetype
+                ? t('stageTimeline.aria.itemSummary', {
+                    ordinal: String(stage.ordinal + 1),
+                    name: stage.displayName,
+                    state: stateLabel(stage.state),
+                  }) +
+                  ' — ' +
+                  t('stage.terminal.suffix')
+                : t('stageTimeline.aria.itemSummary', {
+                    ordinal: String(stage.ordinal + 1),
+                    name: stage.displayName,
+                    state: stateLabel(stage.state),
+                  })
+            }
             className={cn(
               'wks-stage-node relative inline-flex shrink-0 rounded-full border-2 transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-4',
@@ -442,8 +462,18 @@ export function StageTimeline({
   caseTypeStageDefs,
   experimental_animate = false,
 }: StageTimelineProps) {
-  void caseTypeStageDefs; // reserved for fallback; current backend always populates displayName
   void experimental_animate; // wired by Story 4.3 — Phase 0 keeps animation a no-op
+
+  // Story 6.1 AC5 — build a lookup map from stageId → archetype so StageNode can render
+  // terminal-accent affordances without importing archetype literals itself.
+  const archetypeByStageId = useMemo<Map<string, string | null | undefined>>(() => {
+    if (!caseTypeStageDefs || caseTypeStageDefs.length === 0) return new Map();
+    const m = new Map<string, string | null | undefined>();
+    for (const def of caseTypeStageDefs) {
+      m.set(def.id, def.archetype);
+    }
+    return m;
+  }, [caseTypeStageDefs]);
 
   // Defensive observability — emit before any layout work runs.
   warnIfInconsistent(stages);
@@ -553,6 +583,7 @@ export function StageTimeline({
               isFocused={i === focusIdx}
               layout={layout}
               onFocus={() => setFocusIdx(i)}
+              archetype={archetypeByStageId.get(stage.stageId)}
             />
           </Slot>
         ))}

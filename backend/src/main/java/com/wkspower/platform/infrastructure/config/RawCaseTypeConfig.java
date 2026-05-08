@@ -92,7 +92,10 @@ public record RawCaseTypeConfig(
    * the validator can iterate uniformly.
    */
   public record RawStage(
-      String id, String displayName, List<RawStatus> statuses, String initialStatus,
+      String id,
+      String displayName,
+      List<RawStatus> statuses,
+      String initialStatus,
       /** Story 6.1 — optional archetype from the closed catalog. */
       String archetype) {
 

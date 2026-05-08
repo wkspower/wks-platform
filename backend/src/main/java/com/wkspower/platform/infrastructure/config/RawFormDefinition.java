@@ -34,9 +34,9 @@ public record RawFormDefinition(
      */
     @JsonProperty("sections") List<RawFormSection> sections,
     /**
-     * Story 6.1 — optional archetype from the closed catalog ({@code draft_section},
-     * {@code submit_for_processing}, {@code business_final}). Validated by {@link ConfigValidator}
-     * which emits {@code WKS-ARCH-001} for unknown values.
+     * Story 6.1 — optional archetype from the closed catalog ({@code draft_section}, {@code
+     * submit_for_processing}, {@code business_final}). Validated by {@link ConfigValidator} which
+     * emits {@code WKS-ARCH-001} for unknown values.
      */
     @JsonProperty("archetype") String archetype) {
 

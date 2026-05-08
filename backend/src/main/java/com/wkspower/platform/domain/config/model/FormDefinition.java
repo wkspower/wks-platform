@@ -38,9 +38,9 @@ public record FormDefinition(
      */
     List<FormSection> sections,
     /**
-     * Story 6.1 — optional archetype from the closed catalog ({@code draft_section},
-     * {@code submit_for_processing}, {@code business_final}). {@code null} means omitted — the
-     * frontend falls back to default affordance behavior.
+     * Story 6.1 — optional archetype from the closed catalog ({@code draft_section}, {@code
+     * submit_for_processing}, {@code business_final}). {@code null} means omitted — the frontend
+     * falls back to default affordance behavior.
      */
     String archetype) {
 

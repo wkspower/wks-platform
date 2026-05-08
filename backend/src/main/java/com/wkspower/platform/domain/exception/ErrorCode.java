@@ -439,9 +439,9 @@ public enum ErrorCode {
   // ---------------------------------------------------------------------------
   /**
    * Story 6.1 — YAML-declared archetype on a task / form / stage references a value outside the
-   * closed Phase-0 catalog ({@code draft_section}, {@code submit_for_processing},
-   * {@code business_final}). Distinct from BPMN-side {@link #WKS_CFG_020} (missing) and
-   * {@link #WKS_CFG_021} (contradiction); this code is the YAML-surface unknown-value violation.
+   * closed Phase-0 catalog ({@code draft_section}, {@code submit_for_processing}, {@code
+   * business_final}). Distinct from BPMN-side {@link #WKS_CFG_020} (missing) and {@link
+   * #WKS_CFG_021} (contradiction); this code is the YAML-surface unknown-value violation.
    */
   WKS_ARCH_001("WKS-ARCH-001");
 

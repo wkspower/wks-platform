@@ -39,7 +39,12 @@ public final class FormDefinitionMapper {
     List<FormSection> sections = mapSections(raw.sections());
     // Story 6.1 — thread archetype through; null means omitted (default affordance on frontend).
     return new FormDefinition(
-        raw.id(), raw.topology(), raw.dataModel(), raw.rendering(), fields, sections,
+        raw.id(),
+        raw.topology(),
+        raw.dataModel(),
+        raw.rendering(),
+        fields,
+        sections,
         raw.archetype());
   }
 

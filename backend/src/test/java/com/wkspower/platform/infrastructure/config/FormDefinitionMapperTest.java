@@ -158,10 +158,24 @@ class FormDefinitionMapperTest {
   void archetype_presentInRaw_roundTripsToDomainsRecord() {
     var raw =
         new RawFormDefinition(
-            "final-form", "single", "monolithic", "single-page",
-            List.of(Map.of("id", "note", "displayName", "Note", "type", "text",
-                "required", false, "order", 0)),
-            null, "business_final");
+            "final-form",
+            "single",
+            "monolithic",
+            "single-page",
+            List.of(
+                Map.of(
+                    "id",
+                    "note",
+                    "displayName",
+                    "Note",
+                    "type",
+                    "text",
+                    "required",
+                    false,
+                    "order",
+                    0)),
+            null,
+            "business_final");
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
     assertThat(result.archetype()).isEqualTo("business_final");
   }
@@ -170,9 +184,22 @@ class FormDefinitionMapperTest {
   void archetype_null_nullInDomainRecord() {
     var raw =
         new RawFormDefinition(
-            "draft-form", "single", "monolithic", "single-page",
-            List.of(Map.of("id", "note", "displayName", "Note", "type", "text",
-                "required", false, "order", 0)));
+            "draft-form",
+            "single",
+            "monolithic",
+            "single-page",
+            List.of(
+                Map.of(
+                    "id",
+                    "note",
+                    "displayName",
+                    "Note",
+                    "type",
+                    "text",
+                    "required",
+                    false,
+                    "order",
+                    0)));
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
     assertThat(result.archetype()).isNull();
   }

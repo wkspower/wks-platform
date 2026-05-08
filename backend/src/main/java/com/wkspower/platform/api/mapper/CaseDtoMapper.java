@@ -191,7 +191,12 @@ public final class CaseDtoMapper {
         form.sections().stream().map(CaseDtoMapper::toFormSectionView).toList();
     // Story 6.1 — thread archetype through; null means omitted (default affordance on frontend).
     return new FormDefinitionView(
-        form.id(), form.topology(), form.dataModel(), form.rendering(), fieldViews, sectionViews,
+        form.id(),
+        form.topology(),
+        form.dataModel(),
+        form.rendering(),
+        fieldViews,
+        sectionViews,
         form.archetype());
   }
 

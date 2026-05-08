@@ -176,7 +176,9 @@ public class ConfigValidator {
       List<RawFormDefinition> formDefs = raw.forms().definitions();
       for (int fi = 0; fi < formDefs.size(); fi++) {
         RawFormDefinition form = formDefs.get(fi);
-        if (form != null && form.archetype() != null && !VALID_ARCHETYPES.contains(form.archetype())) {
+        if (form != null
+            && form.archetype() != null
+            && !VALID_ARCHETYPES.contains(form.archetype())) {
           errors.add(
               ErrorDetail.ofField(
                   ErrorCode.WKS_ARCH_001.wire(),
@@ -287,8 +289,8 @@ public class ConfigValidator {
                       + "' — must be one of: draft_section, submit_for_processing, business_final",
                   "/stages/" + i + "/archetype"));
         }
-        out.add(new StageDefinition(id, displayName, i, stageStatuses, initialStatus,
-            s.archetype()));
+        out.add(
+            new StageDefinition(id, displayName, i, stageStatuses, initialStatus, s.archetype()));
       }
     }
     return out;
