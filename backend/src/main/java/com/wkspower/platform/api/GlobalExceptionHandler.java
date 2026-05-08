@@ -91,10 +91,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     MDC.put(MDC_KEY, ex.getCode());
     try {
       log.warn("Configuration invalid: {} ({} error(s))", ex.getCode(), ex.getErrors().size());
+      java.util.Map<String, Object> meta =
+          ex.getMeta() != null ? ex.getMeta() : java.util.Map.of();
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
           .body(
-              ApiResponse.error(
-                  ErrorPayload.ofAggregate(ex.getCode(), ex.getMessage(), ex.getErrors())));
+              new ApiResponse<>(
+                  null,
+                  ErrorPayload.ofAggregate(ex.getCode(), ex.getMessage(), ex.getErrors()),
+                  meta));
     } finally {
       MDC.remove(MDC_KEY);
     }
