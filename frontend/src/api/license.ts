@@ -3,7 +3,10 @@ import { apiFetch } from './client';
 export interface LicenseStatus {
   state: 'valid' | 'oss' | 'expired' | 'degraded';
   tier: string;
-  expiredAt: string | null;
+  expiredAt: string | null; // backward-compat — same as before; set only when EXPIRED
+  expiresAt: string | null; // NEW: set for VALID + EXPIRED when expiry is known
+  licenseHolder: string | null; // NEW: JWT sub claim; null in OSS/degraded states
+  publicKeyFingerprint: string; // NEW: SHA-256 hex of bundled verification key; always present
 }
 
 /**

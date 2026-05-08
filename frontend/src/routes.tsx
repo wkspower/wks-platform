@@ -9,6 +9,7 @@ import { AdminPage } from '@/pages/AdminPage';
 import { CasesPage } from '@/pages/CasesPage';
 import { DevConsolePage } from '@/pages/DevConsolePage';
 import { FormPage } from '@/pages/FormPage';
+import { LicenseStatusPage } from '@/pages/LicenseStatusPage';
 import { LoginPage, safeReturnTo } from '@/pages/LoginPage';
 import { TasksPage } from '@/pages/TasksPage';
 import { useAuthStore } from '@/stores/authStore';
@@ -53,6 +54,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth requiredRole="admin">
             <AdminPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/admin/license',
+        element: (
+          <RequireAuth requiredRole="admin">
+            <LicenseStatusPage />
           </RequireAuth>
         ),
       },

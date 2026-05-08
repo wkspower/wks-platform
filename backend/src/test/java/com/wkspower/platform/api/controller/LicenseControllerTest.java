@@ -68,6 +68,8 @@ class LicenseControllerTest {
         .thenReturn(
             new LicenseSnapshot(
                 LicenseState.VALID, "enterprise", Instant.parse("2027-01-01T00:00:00Z")));
+    when(licenseService.getLicenseHolder()).thenReturn("Acme Corp");
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("a".repeat(64));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
@@ -87,6 +89,8 @@ class LicenseControllerTest {
   void ossState_returnsOssTierAndNoExpiredAt() throws Exception {
     when(licenseService.getLicenseSnapshot())
         .thenReturn(new LicenseSnapshot(LicenseState.OSS, "oss", null));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("b".repeat(64));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
@@ -107,6 +111,8 @@ class LicenseControllerTest {
     Instant expiredAt = Instant.parse("2025-12-31T23:59:59Z");
     when(licenseService.getLicenseSnapshot())
         .thenReturn(new LicenseSnapshot(LicenseState.EXPIRED, "oss", expiredAt));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("c".repeat(64));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
@@ -126,6 +132,8 @@ class LicenseControllerTest {
   void degradedState_returnsOssTierAndNoExpiredAt() throws Exception {
     when(licenseService.getLicenseSnapshot())
         .thenReturn(new LicenseSnapshot(LicenseState.DEGRADED, "oss", null));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("d".repeat(64));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
@@ -155,11 +163,89 @@ class LicenseControllerTest {
     Instant expiredAt = Instant.parse("2025-12-31T23:59:59Z");
     when(licenseService.getLicenseSnapshot())
         .thenReturn(new LicenseSnapshot(LicenseState.EXPIRED, "oss", expiredAt));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("e".repeat(64));
 
     mockMvc
         .perform(get("/api/license/status").with(authentication(auth())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.expiredAt").value("2025-12-31T23:59:59Z"));
+  }
+
+  // -------------------------------------------------------------------------
+  // Story 7-4 — new DTO fields: licenseHolder, expiresAt, publicKeyFingerprint
+  // -------------------------------------------------------------------------
+
+  @Test
+  void statusEndpoint_includesLicenseHolder_whenValid() throws Exception {
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(
+            new LicenseSnapshot(
+                LicenseState.VALID, "enterprise", Instant.parse("2027-06-01T00:00:00Z")));
+    when(licenseService.getLicenseHolder()).thenReturn("Acme Corp");
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("f".repeat(64));
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.licenseHolder").value("Acme Corp"));
+  }
+
+  @Test
+  void statusEndpoint_licenseHolder_nullForOss() throws Exception {
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.OSS, "oss", null));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("0".repeat(64));
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.licenseHolder").doesNotExist());
+  }
+
+  @Test
+  void statusEndpoint_expiresAt_populatedForValid() throws Exception {
+    Instant expiry = Instant.parse("2027-03-15T12:00:00Z");
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.VALID, "team", expiry));
+    when(licenseService.getLicenseHolder()).thenReturn("Beta Corp");
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("1".repeat(64));
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.expiresAt").value("2027-03-15T12:00:00Z"));
+  }
+
+  @Test
+  void statusEndpoint_expiresAt_nullForOss() throws Exception {
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.OSS, "oss", null));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    when(licenseService.getPublicKeyFingerprint()).thenReturn("2".repeat(64));
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.expiresAt").doesNotExist());
+  }
+
+  @Test
+  void statusEndpoint_publicKeyFingerprintAlwaysPresent() throws Exception {
+    when(licenseService.getLicenseSnapshot())
+        .thenReturn(new LicenseSnapshot(LicenseState.OSS, "oss", null));
+    when(licenseService.getLicenseHolder()).thenReturn(null);
+    // Simulate a realistic 64-char lowercase hex fingerprint
+    when(licenseService.getPublicKeyFingerprint())
+        .thenReturn("a3b4c5d6e7f801234567890abcdef0123456789abcdef0123456789abcdef01");
+
+    mockMvc
+        .perform(get("/api/license/status").with(authentication(auth())))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.data.publicKeyFingerprint")
+                .value("a3b4c5d6e7f801234567890abcdef0123456789abcdef0123456789abcdef01"));
   }
 
   // -------------------------------------------------------------------------
