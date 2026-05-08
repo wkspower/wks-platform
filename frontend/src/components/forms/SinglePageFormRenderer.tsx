@@ -28,10 +28,13 @@ import {
   SelectValue,
 } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { t } from '@/i18n';
 import { getArchetypeAffordance } from '@/lib/archetypes';
 import { buildZodFromFieldDefs } from '@/lib/buildZodFromFieldDefs';
-import type { FieldDefinition, FormDefinitionView } from '@/types/caseType';
+import type { CaseTypeView, FieldDefinition, FormDefinitionView } from '@/types/caseType';
+
+import { deriveFieldDisabled } from './deriveFieldDisabled';
 
 export interface SinglePageFormRendererProps {
   /** The form definition (id, topology, dataModel, rendering, fields). */
@@ -61,6 +64,14 @@ export interface SinglePageFormRendererProps {
     label: string;
     onClick: (values: Record<string, unknown>) => void;
   };
+  /**
+   * Story 5.6 AC3 / AC4 — Optional case-type view for per-field edit-permission derivation.
+   * Carries {@code defaultFieldEditability} (AC4) and {@code roles} (display-name lookup for the
+   * disabled-field tooltip). When omitted, every field is rendered without the {@code editableBy}
+   * disabled-state derivation — preserves pre-5.6 behavior for callers that do not yet pass the
+   * case-type view.
+   */
+  caseType?: Pick<CaseTypeView, 'defaultFieldEditability' | 'roles'>;
 }
 
 interface ServerErrorBanner {
@@ -90,7 +101,9 @@ export function SinglePageFormRenderer({
   onSuccess,
   onValuesChange,
   saveDraftAction,
+  caseType,
 }: SinglePageFormRendererProps) {
+  const userRoles = useUserRoles();
   const [serverError, setServerError] = useState<ServerErrorBanner | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -273,7 +286,7 @@ export function SinglePageFormRenderer({
               {t('cases.create.noRequired', { caseTypeName: formDefinition.id })}
             </p>
           ) : (
-            sortedFields.map((f) => renderField(f, isPending, form))
+            sortedFields.map((f) => renderField(f, isPending, form, caseType, userRoles))
           )}
           {serverError ? (
             <Alert
@@ -342,8 +355,10 @@ function collectFormErrors(
 
 function renderField(
   f: FieldDefinition,
-  disabled: boolean,
+  pending: boolean,
   form: UseFormReturn<Record<string, unknown>>,
+  caseType: Pick<CaseTypeView, 'defaultFieldEditability' | 'roles'> | undefined,
+  userRoles: ReadonlySet<string>,
 ) {
   if (f.type === 'file') {
     return (
@@ -352,16 +367,18 @@ function renderField(
       </p>
     );
   }
+  // Story 5.6 AC3 / AC4 — per-field edit-permission disabled state. When caseType is omitted
+  // (pre-5.6 callers), the helper falls through with editableBy:[] and default editable behavior.
+  const perm = caseType
+    ? deriveFieldDisabled(f, caseType, userRoles)
+    : { disabled: false, tooltip: null };
+  const disabled = pending || perm.disabled;
   return (
-    <FormField
-      key={f.id}
-      name={f.id}
-      label={f.displayName}
-      required={f.required}
-      disabled={disabled}
-    >
-      {(field) => renderInput(f, field, form)}
-    </FormField>
+    <div key={f.id} title={perm.tooltip ?? undefined}>
+      <FormField name={f.id} label={f.displayName} required={f.required} disabled={disabled}>
+        {(field) => renderInput(f, field, form)}
+      </FormField>
+    </div>
   );
 }
 

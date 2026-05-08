@@ -85,14 +85,15 @@ class ErrorCodeTest {
 
   @Test
   void wireStringsFollowWksHyphenFormat() {
-    // Pattern: WKS-<PREFIX>-<NNN> where prefix is 3–4 uppercase letters and NNN is 3 digits.
+    // Pattern: WKS-<PREFIX>-<NNN> where prefix is 3–5 uppercase letters and NNN is 3 digits.
     // Story 5.1 introduced WKS-FORM-001 — the first 4-letter prefix band. Prior bands (CFG, MAP,
-    // STG, VER, RTM, API) all use 3-letter prefixes; the pattern is relaxed to [A-Z]{3,4} to
-    // accommodate the FORM band while retaining the guardrail against arbitrary-length prefixes.
+    // STG, VER, RTM, API) all use 3-letter prefixes; Story 5.6 introduces WKS-AUTHZ-* — the first
+    // 5-letter prefix band. Pattern relaxed to [A-Z]{3,5} to accommodate AUTHZ while retaining
+    // the guardrail against arbitrary-length prefixes.
     for (ErrorCode code : ErrorCode.values()) {
       assertThat(code.wire())
           .as("ErrorCode.%s wire string must match WKS-<PREFIX>-NNN format", code.name())
-          .matches("^WKS-[A-Z]{3,4}-[0-9]{3}$");
+          .matches("^WKS-[A-Z]{3,5}-[0-9]{3}$");
     }
   }
 }

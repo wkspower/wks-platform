@@ -136,9 +136,30 @@ public final class FormDefinitionMapper {
       // Type-specific slots
       FieldDefinition.TypeSlots slots = mapSlots(m);
 
+      // Story 5.6 AC1 — editableBy on form-level fields. Empty/missing ⇒ List.of().
+      List<String> editableBy = List.of();
+      Object editableByRaw = m.get("editableBy");
+      if (editableByRaw instanceof List<?> ebList) {
+        List<String> tmp = new ArrayList<>();
+        for (Object o : ebList) {
+          if (o instanceof String s && !s.isBlank()) {
+            tmp.add(s);
+          }
+        }
+        editableBy = List.copyOf(tmp);
+      }
+
       out.add(
           new FieldDefinition(
-              id, displayName, type, required, requiredOnCreate, order, options, slots));
+              id,
+              displayName,
+              type,
+              required,
+              requiredOnCreate,
+              order,
+              options,
+              slots,
+              editableBy));
       index++;
     }
     return List.copyOf(out);

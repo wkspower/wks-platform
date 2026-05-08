@@ -1,10 +1,8 @@
 package com.wkspower.platform.api.controller;
 
 import com.wkspower.platform.api.dto.ApiResponse;
-import com.wkspower.platform.domain.exception.WksNotFoundException;
-import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.model.FormDraft;
-import com.wkspower.platform.domain.port.CaseRepository;
+import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.FormDraftService;
 import com.wkspower.platform.security.WksUserPrincipal;
 import jakarta.validation.Valid;
@@ -14,6 +12,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,11 +35,15 @@ import org.springframework.web.bind.annotation.RestController;
  *   DELETE /api/cases/{caseId}/forms/{formId}/draft  -> 204 (idempotent)
  * </pre>
  *
- * <p>RBAC: {@code isAuthenticated()} + the caller must have access to the underlying case (the
- * {@link CaseRepository#findById} call doubles as the access gate — a user without read access on
- * the case has no way to reach this endpoint via the routing layer; in addition, the draft scope
- * already filters by {@code userId} via the {@link WksUserPrincipal}, so cross-user reads are
- * impossible — AC5).
+ * <p>RBAC: {@code isAuthenticated()} + the caller must have access to the underlying case. Story
+ * 5.6 AC-0 — case-level access is gated through {@link CaseService#requireCaseAccess} (the single
+ * source of truth shared with {@link FormController}). The previous inline {@code
+ * requireCaseExists} helper has been removed; per-field permission checks are NOT enforced on the
+ * draft path (drafts are working state — disallowed values are simply ignored on submit per Story
+ * 5.6 AC2).
+ *
+ * <p>The draft scope already filters by {@code userId} via the {@link WksUserPrincipal}, so
+ * cross-user reads are impossible — Story 5.4 AC5.
  *
  * <p>No new {@code WKS-DRAFT-*} error codes — standard 404 (no draft) and 422 (invalid body via
  * {@code @Valid}) suffice. Memory {@code feedback_error_codes_are_wire_contract.md}: codes are
@@ -51,11 +54,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class FormDraftController {
 
   private final FormDraftService draftService;
-  private final CaseRepository caseRepository;
+  private final CaseService caseService;
 
-  public FormDraftController(FormDraftService draftService, CaseRepository caseRepository) {
+  public FormDraftController(FormDraftService draftService, CaseService caseService) {
     this.draftService = draftService;
-    this.caseRepository = caseRepository;
+    this.caseService = caseService;
   }
 
   @GetMapping("/{caseId}/forms/{formId}/draft")
@@ -65,7 +68,7 @@ public class FormDraftController {
       @PathVariable UUID caseId,
       @PathVariable String formId,
       @AuthenticationPrincipal WksUserPrincipal actor) {
-    requireCaseExists(caseId);
+    caseService.requireCaseAccess(caseId, actor.id(), actorRoles(actor));
     Optional<FormDraft> found = draftService.findDraft(caseId, formId, actor.id());
     return found
         .map(d -> ResponseEntity.ok(ApiResponse.success(FormDraftDto.from(d))))
@@ -80,7 +83,7 @@ public class FormDraftController {
       @PathVariable String formId,
       @Valid @RequestBody SaveDraftRequest body,
       @AuthenticationPrincipal WksUserPrincipal actor) {
-    requireCaseExists(caseId);
+    caseService.requireCaseAccess(caseId, actor.id(), actorRoles(actor));
     FormDraft saved =
         draftService.saveDraft(
             caseId,
@@ -100,20 +103,13 @@ public class FormDraftController {
       @PathVariable UUID caseId,
       @PathVariable String formId,
       @AuthenticationPrincipal WksUserPrincipal actor) {
-    requireCaseExists(caseId);
+    caseService.requireCaseAccess(caseId, actor.id(), actorRoles(actor));
     draftService.deleteDraft(caseId, formId, actor.id());
     return ResponseEntity.noContent().build();
   }
 
-  private void requireCaseExists(UUID caseId) {
-    Case existing =
-        caseRepository
-            .findById(caseId)
-            .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
-    // referenced solely to confirm the row exists; assignee/RBAC checks live elsewhere.
-    if (existing == null) {
-      throw new WksNotFoundException("Case " + caseId + " not found");
-    }
+  private static Set<String> actorRoles(WksUserPrincipal actor) {
+    return actor.authenticated() == null ? Set.of() : actor.authenticated().roles();
   }
 
   /** Request body for PUT — auto-validated via {@code @Valid}. */

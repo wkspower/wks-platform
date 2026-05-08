@@ -85,7 +85,16 @@ public class FormController {
           ErrorCode.WKS_FORM_003, "Form submission body is null or empty", null);
     }
 
-    Case updated = caseService.submitForm(caseId, formId, formData, actor.id());
+    // Story 5.6 AC-0 — case-level access gate, single source of truth shared with
+    // FormDraftController.
+    // Throws WksNotFoundException (→ 404) if the case is missing — same wire shape as before.
+    java.util.Set<String> actorRoles =
+        actor.authenticated() == null ? java.util.Set.of() : actor.authenticated().roles();
+    caseService.requireCaseAccess(caseId, actor.id(), actorRoles);
+
+    // Story 5.6 AC2 — principal-aware overload threads the actor's role set through to the
+    // per-field editableBy permission check.
+    Case updated = caseService.submitForm(caseId, formId, formData, actor.id(), actorRoles);
 
     // Story 5.4 AC6 — delete-on-submit. Lives inside the controller's @Transactional so a
     // post-submit failure rolls back the deletion (preserving the draft) per AC6.

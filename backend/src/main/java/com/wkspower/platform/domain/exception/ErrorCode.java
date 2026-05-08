@@ -397,6 +397,31 @@ public enum ErrorCode {
    */
   WKS_FORM_003("WKS-FORM-003"),
 
+  // 422 — Per-field edit permission band (Story 5.6). Band: WKS-AUTHZ-*. First member.
+  /**
+   * Story 5.6 — Form-submit attempted to write a field whose {@code editableBy} declaration
+   * excludes the actor's role set. Emitted by {@link
+   * com.wkspower.platform.domain.service.CaseService#submitForm} when a submitted-and-changed
+   * field's permission check fails. Multi-error envelope: one {@link ErrorDetail} per offending
+   * field.
+   *
+   * <p>Distinct from {@link #WKS_API_403} (caller-level authorization — entire endpoint denied) and
+   * {@link #WKS_FORM_002} (field-value validation — wrong type/range). This code says: the value
+   * itself was valid; the actor was not allowed to change it.
+   *
+   * <p>Wire string is {@code WKS-AUTHZ-001} — stable contract. First member of the new {@code
+   * WKS-AUTHZ-*} band; do not reuse for any other meaning per {@code
+   * feedback_error_codes_are_wire_contract.md}. HTTP 422 — rides the existing {@code
+   * WksValidationAggregateException} carrier so no new mapping is needed in {@code
+   * GlobalExceptionHandler}.
+   *
+   * <p>Note — the Story 5.6 dev notes prescribed the wire literal {@code WKS-AUTHZ-FIELD}, but the
+   * existing {@code WKS-&lt;PREFIX&gt;-NNN} format invariant (enforced by {@code
+   * ErrorCodeTest.wireStringsFollowWksHyphenFormat}) requires a 3-digit numeric suffix. The Java
+   * identifier preserves the {@code WKS_AUTHZ_FIELD} mnemonic; the wire string follows the format.
+   */
+  WKS_AUTHZ_FIELD("WKS-AUTHZ-001"),
+
   // 409 — runtime conflict.
   /**
    * Optimistic-locking conflict on update — the row was modified by another transaction between

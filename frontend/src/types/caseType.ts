@@ -41,6 +41,12 @@ export interface FieldDefinition {
   dateMax?: string | null;
   maxBytes?: number | null;
   allowedMimeTypes?: string[] | null;
+  /**
+   * Story 5.6 AC1 — role-id allow-list for write authorization. Wire entries follow the
+   * {@code role:<id>} format. Empty/undefined means "no editableBy declared" — the case-type's
+   * {@code defaultFieldEditability} (AC4) decides the runtime default.
+   */
+  editableBy?: string[];
 }
 
 export interface StatusDefinition {
@@ -125,4 +131,16 @@ export interface CaseTypeView {
    * no forms block is declared.
    */
   forms?: FormDefinitionView[];
+  /**
+   * Story 5.6 AC4 — top-level case-type setting controlling default field editability. Wire
+   * values: {@code editable-by-default} (default — preserves pre-5.6 behavior) or
+   * {@code locked-by-default}. Optional for backward-compat; absence means default.
+   */
+  defaultFieldEditability?: 'editable-by-default' | 'locked-by-default' | null;
+  /**
+   * Story 5.6 AC3 — declared roles surface (id + displayName) used to translate role ids to
+   * display names in disabled-field tooltips. Server may omit (current backend does not echo
+   * roles); when absent, tooltips fall back to the role id. Optional.
+   */
+  roles?: { id: string; displayName?: string }[];
 }

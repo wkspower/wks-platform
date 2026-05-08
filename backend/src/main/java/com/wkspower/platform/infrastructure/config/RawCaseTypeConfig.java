@@ -30,7 +30,9 @@ public record RawCaseTypeConfig(
     List<RawRole> roles,
     List<RawStage> stages,
     List<RawAttachment> attachments,
-    @JsonProperty("forms") @JsonInclude(JsonInclude.Include.NON_NULL) RawFormConfig forms) {
+    @JsonProperty("forms") @JsonInclude(JsonInclude.Include.NON_NULL) RawFormConfig forms,
+    /** Story 5.6 AC4 — top-level default field editability. Null/blank ⇒ editable-by-default. */
+    @JsonProperty("defaultFieldEditability") String defaultFieldEditability) {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawWorkflow(String bpmn) {}
@@ -52,7 +54,9 @@ public record RawCaseTypeConfig(
       String dateMin,
       String dateMax,
       Long maxBytes,
-      List<String> allowedMimeTypes) {}
+      List<String> allowedMimeTypes,
+      /** Story 5.6 AC1 — role-id allow-list, e.g. {@code [role:underwriter]}. */
+      List<String> editableBy) {}
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RawOption(String label, String value) {}
@@ -194,6 +198,7 @@ public record RawCaseTypeConfig(
     private List<RawStage> stages;
     private List<RawAttachment> attachments;
     private RawFormConfig forms;
+    private String defaultFieldEditability;
 
     private Builder() {}
 
@@ -257,6 +262,11 @@ public record RawCaseTypeConfig(
       return this;
     }
 
+    public Builder defaultFieldEditability(String v) {
+      this.defaultFieldEditability = v;
+      return this;
+    }
+
     public RawCaseTypeConfig build() {
       return new RawCaseTypeConfig(
           id,
@@ -270,7 +280,8 @@ public record RawCaseTypeConfig(
           roles,
           stages,
           attachments,
-          forms);
+          forms,
+          defaultFieldEditability);
     }
   }
 }

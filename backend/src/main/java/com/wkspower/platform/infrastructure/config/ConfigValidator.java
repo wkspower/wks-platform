@@ -3,6 +3,7 @@ package com.wkspower.platform.infrastructure.config;
 import com.wkspower.platform.domain.config.CaseTypeLimits;
 import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.DefaultFieldEditability;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldOption;
 import com.wkspower.platform.domain.config.model.FieldType;
@@ -145,6 +146,15 @@ public class ConfigValidator {
     List<FieldDefinition> fields = checkFields(raw.fields(), eb, errors, warnings);
     List<StatusDefinition> statuses = checkStatuses(raw.statuses(), eb, errors);
     List<RoleDefinition> roles = checkRoles(raw.roles(), eb, errors);
+    // Story 5.6 AC1 — second pass over fields validates `editableBy` entries against the now-known
+    // role-id set. The pass mutates the FieldDefinition list in place by replacing each field with
+    // a
+    // copy that carries the validated editableBy. Validation does not abort on roles==empty (an
+    // earlier WKS-CFG-001 already surfaces missing roles), but cross-reference failures are
+    // suppressed to avoid double-reporting on configs whose roles section is invalid.
+    fields = validateEditableByAndAttach(raw.fields(), fields, roles, errors);
+    DefaultFieldEditability defaultFieldEditability =
+        checkDefaultFieldEditability(raw.defaultFieldEditability(), eb, errors);
     List<String> listColumns =
         checkListColumns(raw.listColumns(), fields, raw.fields() != null, eb, errors);
     List<StageDefinition> stages = checkStages(raw.stages(), eb, errors);
@@ -212,7 +222,8 @@ public class ConfigValidator {
             listColumns,
             roles,
             stages,
-            forms);
+            forms,
+            defaultFieldEditability);
     // Story 4.3 — surface the validated MappingDefinition through ValidationResult so
     // ConfigService can populate MappingRegistry on registration. Empty MappingDefinition is the
     // first-class zero-attachment value (D22 — Story 4.2's MappingValidator returns empty()
@@ -884,5 +895,124 @@ public class ConfigValidator {
       }
     }
     return out;
+  }
+
+  /**
+   * Story 5.6 AC1 — Validate each field's {@code editableBy} list and attach the parsed result back
+   * onto a fresh {@link FieldDefinition} (records are immutable; we rebuild). Each entry must:
+   *
+   * <ul>
+   *   <li>Match the literal {@code role:&lt;roleId&gt;} prefix (Phase-0 — only {@code role:}
+   *       supported). Malformed → {@code WKS-FORM-001}.
+   *   <li>Reference a role id that exists in the case-type's {@code roles[]} declaration. Unknown →
+   *       {@code WKS-FORM-001}.
+   * </ul>
+   *
+   * <p>Empty list ({@code editableBy: []}) is treated as "no editableBy declared" — same default
+   * behavior as omission (AC4 default-field-editability gate decides the runtime semantics).
+   */
+  private List<FieldDefinition> validateEditableByAndAttach(
+      List<RawCaseTypeConfig.RawField> raws,
+      List<FieldDefinition> fields,
+      List<RoleDefinition> roles,
+      List<ErrorDetail> errors) {
+    if (raws == null || raws.isEmpty() || fields == null || fields.isEmpty()) {
+      return fields;
+    }
+    Set<String> declaredRoleIds = new HashSet<>();
+    for (RoleDefinition r : roles) {
+      declaredRoleIds.add(r.name());
+    }
+    // Build an id→raw lookup so we don't depend on list-index alignment (some raws may have been
+    // skipped by checkFields when they were invalid).
+    java.util.Map<String, RawCaseTypeConfig.RawField> rawById = new java.util.HashMap<>();
+    java.util.Map<String, Integer> rawIndexById = new java.util.HashMap<>();
+    for (int i = 0; i < raws.size(); i++) {
+      RawCaseTypeConfig.RawField rf = raws.get(i);
+      if (rf != null && rf.id() != null) {
+        rawById.put(rf.id(), rf);
+        rawIndexById.put(rf.id(), i);
+      }
+    }
+    List<FieldDefinition> rebuilt = new ArrayList<>(fields.size());
+    for (FieldDefinition fd : fields) {
+      RawCaseTypeConfig.RawField rf = rawById.get(fd.id());
+      if (rf == null || rf.editableBy() == null || rf.editableBy().isEmpty()) {
+        rebuilt.add(fd); // already has editableBy = List.of() from checkFields path
+        continue;
+      }
+      int rawIndex = rawIndexById.getOrDefault(fd.id(), 0);
+      List<String> editableBy = rf.editableBy();
+      List<String> validated = new ArrayList<>();
+      for (int j = 0; j < editableBy.size(); j++) {
+        String entry = editableBy.get(j);
+        String fieldPath = "fields[" + rawIndex + "].editableBy[" + j + "]";
+        if (entry == null || entry.isBlank()) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_001.wire(), "editableBy entry must not be blank", fieldPath));
+          continue;
+        }
+        if (!entry.startsWith("role:")) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_001.wire(),
+                  "editableBy entries must use 'role:<id>' format (got '" + entry + "')",
+                  fieldPath));
+          continue;
+        }
+        String roleId = entry.substring("role:".length());
+        if (roleId.isBlank()) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_001.wire(),
+                  "editableBy entry has empty role id after 'role:' prefix",
+                  fieldPath));
+          continue;
+        }
+        // Suppress cross-ref check when roles[] failed validation (declaredRoleIds may be empty
+        // because of an earlier WKS-CFG-001) — avoid double-reporting on configs with broken roles.
+        if (!declaredRoleIds.isEmpty() && !declaredRoleIds.contains(roleId)) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_001.wire(),
+                  "editableBy references unknown role: " + roleId,
+                  fieldPath));
+          continue;
+        }
+        validated.add(entry);
+      }
+      // Rebuild the FieldDefinition with the validated editableBy list (preserves order, drops
+      // malformed entries — collect-all idiom: errors already accumulated).
+      rebuilt.add(
+          new FieldDefinition(
+              fd.id(),
+              fd.displayName(),
+              fd.type(),
+              fd.required(),
+              fd.requiredOnCreate(),
+              fd.order(),
+              fd.options(),
+              fd.slots(),
+              validated));
+    }
+    return rebuilt;
+  }
+
+  /**
+   * Story 5.6 AC4 — Validate the top-level {@code defaultFieldEditability} key. Null/blank ⇒ {@link
+   * DefaultFieldEditability#EDITABLE_BY_DEFAULT}. Unknown literal ⇒ {@code WKS-FORM-001}.
+   */
+  private DefaultFieldEditability checkDefaultFieldEditability(
+      String raw, ErrorBuilder eb, List<ErrorDetail> errors) {
+    if (raw == null || raw.isBlank()) {
+      return DefaultFieldEditability.EDITABLE_BY_DEFAULT;
+    }
+    try {
+      return DefaultFieldEditability.fromYaml(raw);
+    } catch (IllegalArgumentException ex) {
+      errors.add(eb.error(ErrorCode.WKS_FORM_001, ex.getMessage(), "defaultFieldEditability"));
+      return DefaultFieldEditability.EDITABLE_BY_DEFAULT;
+    }
   }
 }
