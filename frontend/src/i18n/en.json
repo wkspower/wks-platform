@@ -245,5 +245,15 @@
   "form.sections.status.complete": "✓",
   "form.sections.status.error": "✗",
   "form.sections.status.incomplete": "⚠",
-  "form.submit": "Submit"
+  "form.submit": "Submit",
+  "form.draft.save": "Save Draft",
+  "form.draft.saving": "Saving draft…",
+  "form.draft.saved": "Draft saved",
+  "form.draft.error": "Couldn't save draft",
+  "form.draft.resumed": "Resumed your saved draft.",
+  "form.draft.discard": "Discard draft",
+  "form.draft.versionChanged.title": "This form has changed since your draft was saved",
+  "form.draft.versionChanged.body": "The case-type version was bumped while you were away. Your draft cannot be applied to the new form. Discard the draft to continue with the current form, or cancel to come back later.",
+  "form.draft.versionChanged.discardAndUseCurrent": "Discard draft and use current form",
+  "form.draft.versionChanged.cancel": "Cancel"
 }
