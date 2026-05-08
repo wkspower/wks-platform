@@ -137,14 +137,34 @@ public enum ErrorCode {
    */
   WKS_CFG_028("WKS-CFG-028"),
   /**
-   * Mapping-class change requires a CaseType version bump (Story 4.2 AC2 / architecture §833 / D20
-   * cross-ref). RESERVED in Story 4.2 — emitted by Story 3.8's blast-radius validator when {@link
-   * com.wkspower.platform.infrastructure.config.MappingDiff#classify} returns {@code
-   * MappingChangeClass.MUTATE_CLASS} and the deployer did not supply {@code --bump}. {@code
-   * MappingValidator} does not emit this code; the constant exists here so 3.8 can reference it
-   * without re-allocating.
+   * Mutate-class CaseType change attempted without supplying {@code bumpVersion=true} (Story 3.8).
+   *
+   * <p>Story 3.8 emission site: {@code ConfigService.validateAndRegister} and {@code
+   * ConfigService.deploy} invoke {@link
+   * com.wkspower.platform.domain.config.diff.CaseTypeDiff#classify}; this code is emitted when
+   * {@code mutateDeltas} is non-empty and {@code bumpVersion=true} was not supplied on the deploy
+   * request. The response envelope's {@code meta.blastRadius} field carries the full {@link
+   * com.wkspower.platform.domain.config.diff.BlastRadiusReport} for Admin UI rendering.
+   *
+   * <p>{@code MappingValidator} does not emit this code — the constant was reserved in Story 4.2 as
+   * a cross-reference anchor; Story 3.8 is the first emission site. Wire string is {@code
+   * WKS-CFG-029} — stable contract.
    */
   WKS_CFG_029("WKS-CFG-029"),
+  /**
+   * Blast-radius gate could not load or re-parse the prior {@code
+   * case_type_versions.definition_yaml} for a CaseType whose {@code currentVersion()} is present
+   * (Story 3.8 PR #417 follow-up).
+   *
+   * <p>Emitted by {@code ConfigService.runBlastRadiusGate} when the prior YAML row is missing, has
+   * null bytes, or fails to re-parse — any state in which the AC2 invariant ("the gate applies on
+   * every deploy that has a prior version") cannot be honored. The deploy is rejected fail-closed
+   * rather than silently bypassing the classifier.
+   *
+   * <p>Wire string is {@code WKS-CFG-030} — stable contract; do not reuse for another meaning per
+   * the {@code feedback_error_codes_are_wire_contract.md} memory.
+   */
+  WKS_CFG_030("WKS-CFG-030"),
   /**
    * Duplicate stage id within a case-type YAML (Story 3.1 AC1). Deploy-time validator code;
    * surfaces with a {@code stages[i].id} field path.

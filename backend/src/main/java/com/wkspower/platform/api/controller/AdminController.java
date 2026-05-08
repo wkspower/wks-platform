@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,12 +68,17 @@ public class AdminController {
             content = @Content),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "422",
-            description = "YAML or BPMN validation failed (multi-error envelope)",
+            description =
+                "YAML or BPMN validation failed (multi-error envelope). When the failure code is"
+                    + " WKS-CFG-029 (mutate-class change without bumpVersion), the response"
+                    + " meta.blastRadius field carries the full BlastRadiusReport.",
             content = @Content)
       })
   public ApiResponse<DeployResponseDto> deploy(
       @RequestPart("caseType") MultipartFile caseTypePart,
       @RequestPart(name = "bpmn", required = false) MultipartFile bpmnPart,
+      @RequestParam(name = "bumpVersion", required = false, defaultValue = "false")
+          boolean bumpVersion,
       HttpServletRequest request)
       throws Exception {
     rejectDuplicateParts(request);
@@ -83,9 +89,13 @@ public class AdminController {
     // An attached but empty `bpmn` part is treated the same as absent.
     if (bpmnPart == null || bpmnPart.isEmpty()) {
       ValidationResult yamlResult =
-          configService.validateAndRegister("api-deploy.yaml", yaml, actorEmail);
+          configService.validateAndRegister("api-deploy.yaml", yaml, actorEmail, bumpVersion);
       if (yamlResult.isInvalid()) {
-        throw new WksConfigException(yamlResult.errors());
+        // Story 3.8 — forward blast-radius meta (if any) into the exception so it surfaces in the
+        // ApiResponse.meta field (AC2: meta.blastRadius must be present on WKS-CFG-029 rejections).
+        throw new WksConfigException(
+            yamlResult.errors(),
+            yamlResult.responseMeta().isEmpty() ? null : yamlResult.responseMeta());
       }
       var caseType = yamlResult.config().orElseThrow();
       return ApiResponse.success(
@@ -99,7 +109,7 @@ public class AdminController {
 
     byte[] bpmn = bpmnPart.getBytes();
     String bpmnFilename = bpmnPart.getOriginalFilename();
-    DeployResult result = configService.deploy(yaml, bpmn, bpmnFilename, actorEmail);
+    DeployResult result = configService.deploy(yaml, bpmn, bpmnFilename, actorEmail, bumpVersion);
     if (result.isInvalid()) {
       // P10 — WKS-CFG-025 is an engine-side runtime failure (the input was valid; the engine
       // itself failed), not a client-input quality problem. Map it to HTTP 502 Bad Gateway via
@@ -112,7 +122,9 @@ public class AdminController {
         throw new WksWorkflowEngineException(
             "BPMN engine deployment failed (WKS-CFG-025) — retry or check engine health");
       }
-      throw new WksConfigException(result.errors());
+      // Story 3.8 — forward blast-radius meta (if any)
+      throw new WksConfigException(
+          result.errors(), result.responseMeta().isEmpty() ? null : result.responseMeta());
     }
 
     var caseType = result.caseType().orElseThrow();

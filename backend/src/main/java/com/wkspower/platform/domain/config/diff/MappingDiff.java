@@ -1,4 +1,4 @@
-package com.wkspower.platform.infrastructure.config;
+package com.wkspower.platform.domain.config.diff;
 
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
@@ -18,10 +18,13 @@ import java.util.Set;
  * version bump) or {@link MappingChangeClass#MUTATE_CLASS} (something existing was modified or
  * removed — version bump required per D20).
  *
- * <p><b>NOT WIRED INTO DEPLOY GATING IN THIS STORY.</b> Story 3.8's blast-radius validator imports
- * this helper and emits {@link com.wkspower.platform.domain.exception.ErrorCode#WKS_CFG_029} when
- * {@link #classify} returns {@code MUTATE_CLASS} and the deployer did not supply {@code --bump}.
- * 4.2 ships unit tests only; 3.8 wires the call site.
+ * <p><b>NOT WIRED INTO DEPLOY GATING IN THIS STORY.</b> Story 3.8's blast-radius validator ({@link
+ * CaseTypeDiff}) imports this helper and emits {@link
+ * com.wkspower.platform.domain.exception.ErrorCode#WKS_CFG_029} when {@link #classify} returns
+ * {@code MUTATE_CLASS} and the deployer did not supply {@code --bump}. 4.2 shipped unit tests only;
+ * 3.8 wired the call site. Moved to {@code domain/config/diff/} in Story 3.8 so that {@link
+ * CaseTypeDiff} (a domain class) can import it without violating the hexagonal layering rule
+ * (domain must not depend on infrastructure).
  *
  * <h2>Classification rules</h2>
  *

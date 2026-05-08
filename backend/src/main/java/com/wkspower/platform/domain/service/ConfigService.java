@@ -5,7 +5,10 @@ import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
 import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.RegistrationResult;
 import com.wkspower.platform.domain.config.ValidationResult;
+import com.wkspower.platform.domain.config.diff.BlastRadiusReport;
+import com.wkspower.platform.domain.config.diff.CaseTypeDiff;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.MappingChangeClass;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.exception.ErrorCode;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,20 +178,52 @@ public class ConfigService {
 
   /** Byte-driven YAML-only variant. Retained for the startup loader's BPMN-missing path. */
   public ValidationResult validateAndRegister(String sourceName, byte[] bytes) {
-    return validateAndRegister(sourceName, bytes, "system:startup");
+    return validateAndRegister(sourceName, bytes, "system:startup", false);
   }
 
   /**
    * Story 3.4 — overload that accepts {@code publishedBy}; threaded from the admin REST surface
    * with the actor email (Spring Security context) and from the startup loader with {@code
-   * "system:startup"}.
+   * "system:startup"}. Defaults {@code bumpRequested=false}.
    */
   public ValidationResult validateAndRegister(String sourceName, byte[] bytes, String publishedBy) {
+    return validateAndRegister(sourceName, bytes, publishedBy, false);
+  }
+
+  /**
+   * Story 3.8 — full overload accepting {@code bumpRequested}. The blast-radius classifier runs
+   * here when a prior version exists; a mutate-class change without {@code bumpRequested=true} is
+   * rejected with {@code WKS-CFG-029}. The existing 2-arg and 3-arg overloads delegate here with
+   * {@code bumpRequested=false}.
+   *
+   * @param bumpRequested {@code true} when the caller explicitly requested a version bump (e.g. via
+   *     {@code ?bumpVersion=true} on the admin deploy endpoint)
+   */
+  public ValidationResult validateAndRegister(
+      String sourceName, byte[] bytes, String publishedBy, boolean bumpRequested) {
     ValidationResult result = this.source.loadBytes(sourceName, bytes);
     if (result.isInvalid() || result.config().isEmpty()) {
       return result;
     }
     CaseTypeConfig validated = result.config().get();
+
+    // Story 3.8 AC2 / AC3 / AC4 — blast-radius gate (runs BEFORE applyVersionRegistry per AC2
+    // ordering invariant: must not touch the engine or any registry before the gate passes).
+    Optional<Integer> priorVersion = versionRegistry.currentVersion(validated.id());
+    if (priorVersion.isPresent()) {
+      ValidationResult gateResult =
+          runBlastRadiusGate(validated, result, priorVersion.get(), bumpRequested);
+      if (gateResult != null) {
+        return gateResult; // Rejected — return the error result
+      }
+    } else if (bumpRequested) {
+      // AC4: first deploy with bumpVersion=true — warn + ignore
+      log.warn(
+          "ConfigService.validateAndRegister: bumpVersion=true ignored for caseTypeId={}"
+              + " — no prior version exists",
+          validated.id());
+    }
+
     CaseTypeConfig versioned = applyVersionRegistry(validated, bytes, publishedBy);
     RegistrationResult reg = registrar.register(versioned);
     if (reg.outcome() == RegistrationResult.Outcome.REJECTED_OLDER_VERSION) {
@@ -207,6 +243,100 @@ public class ConfigService {
             result.mappingDefinition().orElse(MappingDefinition.empty()));
     publishMappingToRegistry(versionedResult);
     return versionedResult;
+  }
+
+  /**
+   * Story 3.8 — run the blast-radius classifier against the prior version. Returns a {@link
+   * ValidationResult#invalid(List) invalid result} when the change is mutate-class and {@code
+   * bumpRequested=false}; returns {@code null} when the gate passes (caller should continue).
+   *
+   * <p>This method does NOT throw — it returns an invalid ValidationResult which the caller must
+   * propagate. This mirrors the existing multi-error pattern in {@code ConfigService}.
+   */
+  private ValidationResult runBlastRadiusGate(
+      CaseTypeConfig validated,
+      ValidationResult yamlResult,
+      int priorVersionNum,
+      boolean bumpRequested) {
+    CaseTypeConfig prev = loadPriorConfig(validated.id(), priorVersionNum);
+    if (prev == null) {
+      // Story 3.8 PR #417 follow-up — fail CLOSED. AC2 requires the gate to apply on every
+      // deploy with a prior version; if we cannot load or re-parse the prior YAML we cannot
+      // classify the change, and silently bypassing the gate would let mutate-class edits ship
+      // unchecked. Reject with WKS-CFG-030 so the operator can investigate (corrupt row,
+      // missing bytes, schema drift).
+      log.error(
+          "ConfigService.deploy: REJECTED — prior YAML for caseTypeId={} v{} could not be loaded"
+              + " or re-parsed; blast-radius gate cannot apply (fail-closed, WKS-CFG-030)",
+          validated.id(),
+          priorVersionNum);
+      return ValidationResult.invalid(
+          List.of(
+              ErrorDetail.of(
+                  ErrorCode.WKS_CFG_030.wire(),
+                  "Blast-radius gate could not apply — prior version v"
+                      + priorVersionNum
+                      + " for caseTypeId="
+                      + validated.id()
+                      + " could not be loaded or re-parsed. Deploy rejected fail-closed.")));
+    }
+
+    MappingDefinition prevMapping =
+        mappingRegistry
+            .resolve(
+                new CaseTypeRef(validated.id(), String.valueOf(priorVersionNum)),
+                String.valueOf(priorVersionNum))
+            .orElse(MappingDefinition.empty());
+    MappingDefinition nextMapping =
+        yamlResult.mappingDefinition().orElse(MappingDefinition.empty());
+
+    BlastRadiusReport report = CaseTypeDiff.classify(prev, validated, prevMapping, nextMapping);
+
+    if (report.changeClass() == MappingChangeClass.MUTATE_CLASS && !bumpRequested) {
+      String paths =
+          report.mutateDeltas().stream()
+              .map(com.wkspower.platform.domain.config.diff.Delta::path)
+              .limit(5)
+              .collect(Collectors.joining(", "));
+      log.info(
+          "ConfigService.deploy: REJECTED mutate-class without bumpVersion for caseTypeId={}"
+              + " — {} delta(s)",
+          validated.id(),
+          report.mutateDeltas().size());
+      return ValidationResult.invalidWithMeta(
+          List.of(
+              ErrorDetail.of(
+                  ErrorCode.WKS_CFG_029.wire(),
+                  "Mutate-class change requires version bump — "
+                      + report.mutateDeltas().size()
+                      + " delta(s): "
+                      + paths)),
+          Map.of("blastRadius", report));
+    }
+
+    if (bumpRequested) {
+      log.info(
+          "ConfigService.deploy: bumpVersion=true with {} change for caseTypeId={}"
+              + " — version bumped per admin opt-in",
+          report.changeClass(),
+          validated.id());
+    }
+
+    return null; // Gate passed
+  }
+
+  /**
+   * Story 3.8 — load the prior {@link CaseTypeConfig} from the version registry's stored YAML.
+   * Returns {@code null} when the YAML cannot be loaded or re-parsed (fail-open).
+   */
+  private CaseTypeConfig loadPriorConfig(String caseTypeId, int version) {
+    Optional<CaseTypeVersionRecord> record = versionRegistry.findVersion(caseTypeId, version);
+    if (record.isEmpty() || record.get().rawYaml() == null) {
+      return null;
+    }
+    ValidationResult prev =
+        source.loadBytes("prior:" + caseTypeId + ":" + version, record.get().rawYaml());
+    return prev.config().orElse(null);
   }
 
   /**
@@ -261,21 +391,49 @@ public class ConfigService {
    */
   public DeployResult deploy(
       byte[] yamlBytes, byte[] bpmnBytes, String bpmnFilename, String actorEmail) {
+    return deploy(yamlBytes, bpmnBytes, bpmnFilename, actorEmail, false);
+  }
+
+  /** Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate. */
+  public DeployResult deploy(
+      byte[] yamlBytes,
+      byte[] bpmnBytes,
+      String bpmnFilename,
+      String actorEmail,
+      boolean bumpRequested) {
     Map<String, byte[]> bpmnByName =
         (bpmnFilename != null && !bpmnFilename.isBlank() && bpmnBytes != null)
             ? Map.of(bpmnFilename, bpmnBytes)
             : Map.of();
     ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes, bpmnByName);
-    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail);
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested);
   }
 
   public DeployResult deploy(byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
+    return deploy(yamlBytes, bpmnBytes, actorEmail, false);
+  }
+
+  /**
+   * Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate (no BPMN
+   * filename variant — used by startup loader and tests).
+   */
+  public DeployResult deploy(
+      byte[] yamlBytes, byte[] bpmnBytes, String actorEmail, boolean bumpRequested) {
     ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes);
-    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail);
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested);
   }
 
   private DeployResult deployWithYamlResult(
       ValidationResult yamlResult, byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, false);
+  }
+
+  private DeployResult deployWithYamlResult(
+      ValidationResult yamlResult,
+      byte[] yamlBytes,
+      byte[] bpmnBytes,
+      String actorEmail,
+      boolean bumpRequested) {
     CaseTypeConfig caseType = yamlResult.config().orElse(null);
 
     BpmnValidationResult bpmnResult = bpmnValidator.validate(bpmnBytes, caseType);
@@ -290,6 +448,24 @@ public class ConfigService {
         aggregate.add(ErrorDetail.of("WKS-CFG-099", "Case type configuration could not be parsed"));
       }
       return DeployResult.invalid(aggregate);
+    }
+
+    // Story 3.8 AC2 — blast-radius gate. Runs BEFORE fingerprint computation and BEFORE engine
+    // deploy (Story 4.5 AC1 ordering invariant: gate before any side-effect).
+    Optional<Integer> priorVersion = versionRegistry.currentVersion(caseType.id());
+    if (priorVersion.isPresent()) {
+      ValidationResult gateResult =
+          runBlastRadiusGate(caseType, yamlResult, priorVersion.get(), bumpRequested);
+      if (gateResult != null) {
+        // Rejected — propagate meta (blastRadius report) in the DeployResult
+        return DeployResult.invalidWithMeta(gateResult.errors(), gateResult.responseMeta());
+      }
+    } else if (bumpRequested) {
+      // AC4: first deploy with bumpVersion=true — warn + ignore
+      log.warn(
+          "ConfigService.deploy: bumpVersion=true ignored for caseTypeId={} — no prior version"
+              + " exists",
+          caseType.id());
     }
 
     // Story 4.5 AC3 — compute fingerprints BEFORE entering the lock; pure computation, no I/O.

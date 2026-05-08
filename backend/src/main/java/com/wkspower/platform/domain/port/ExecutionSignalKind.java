@@ -21,7 +21,7 @@ package com.wkspower.platform.domain.port;
  *
  * <p>Story 4.3.1 AC10 / Option (a) — the legacy {@code USER_TASK_PROPERTY} value collapsed two
  * author-distinguishable shapes ({@code emits.type: status} vs {@code emits.type: task-complete})
- * onto the same enum constant. {@link com.wkspower.platform.infrastructure.config.MappingDiff}
+ * onto the same enum constant. {@link com.wkspower.platform.domain.config.diff.MappingDiff}
  * silently misclassified mutations as APPEND because {@code .equals()} treated them as identical.
  * The split into {@link #TASK_STATUS_CHANGED} and {@link #TASK_COMPLETED} makes the type system the
  * enforcer — every callsite that branches on the user-task family must opt into a single value,
