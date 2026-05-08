@@ -16,7 +16,7 @@
          --font-body) in the file served at WKS_THEME_CSS_PATH to brand the platform without
          rebuilding the image.
          NOTE: the Vite plugin 'theme-link-last' (vite.config.ts) moves this link to just before
-         </head> in the production build, so it loads AFTER bundled CSS and wins the :root cascade. -->
+         the closing head tag in the production build, so it loads AFTER bundled CSS and wins the :root cascade. -->
     <link rel="stylesheet" href="/api/theme.css" />
   </head>
   <body>

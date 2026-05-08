@@ -385,7 +385,8 @@ class ConfigServiceDeployTest {
     }
 
     @Override
-    public ValidationResult loadBytes(String s, byte[] b) {
+    public ValidationResult loadBytes(
+        String s, byte[] b, java.util.Map<String, byte[]> bpmnByName) {
       return bytesResult;
     }
   }

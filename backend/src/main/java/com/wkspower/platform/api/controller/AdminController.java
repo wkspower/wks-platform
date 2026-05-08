@@ -98,7 +98,8 @@ public class AdminController {
     }
 
     byte[] bpmn = bpmnPart.getBytes();
-    DeployResult result = configService.deploy(yaml, bpmn, actorEmail);
+    String bpmnFilename = bpmnPart.getOriginalFilename();
+    DeployResult result = configService.deploy(yaml, bpmn, bpmnFilename, actorEmail);
     if (result.isInvalid()) {
       // P10 — WKS-CFG-025 is an engine-side runtime failure (the input was valid; the engine
       // itself failed), not a client-input quality problem. Map it to HTTP 502 Bad Gateway via

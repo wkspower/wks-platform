@@ -47,15 +47,12 @@ public class CaseTypeSourceAdapter implements CaseTypeSource {
   }
 
   @Override
-  public ValidationResult loadBytes(String source, byte[] bytes) {
+  public ValidationResult loadBytes(String source, byte[] bytes, Map<String, byte[]> bpmnByName) {
     var read = loader.readBytes(source, bytes);
     if (!read.isParsed()) {
       return ValidationResult.invalid(read.errors());
     }
-    // No sibling-file source in the bytes path — Story 4.5 (admin deploy controller) will supply
-    // a multipart byte map and call the overload directly. Today MappingValidator emits
-    // WKS-MAP-005 when files are referenced but not provided.
-    return validator.validate(read.raw(), read.lines(), Map.of());
+    return validator.validate(read.raw(), read.lines(), bpmnByName);
   }
 
   /**
