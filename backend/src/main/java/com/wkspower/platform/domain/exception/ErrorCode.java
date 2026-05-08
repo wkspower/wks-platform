@@ -152,6 +152,20 @@ public enum ErrorCode {
    */
   WKS_CFG_029("WKS-CFG-029"),
   /**
+   * Blast-radius gate could not load or re-parse the prior {@code
+   * case_type_versions.definition_yaml} for a CaseType whose {@code currentVersion()} is present
+   * (Story 3.8 PR #417 follow-up).
+   *
+   * <p>Emitted by {@code ConfigService.runBlastRadiusGate} when the prior YAML row is missing, has
+   * null bytes, or fails to re-parse — any state in which the AC2 invariant ("the gate applies on
+   * every deploy that has a prior version") cannot be honored. The deploy is rejected fail-closed
+   * rather than silently bypassing the classifier.
+   *
+   * <p>Wire string is {@code WKS-CFG-030} — stable contract; do not reuse for another meaning per
+   * the {@code feedback_error_codes_are_wire_contract.md} memory.
+   */
+  WKS_CFG_030("WKS-CFG-030"),
+  /**
    * Duplicate stage id within a case-type YAML (Story 3.1 AC1). Deploy-time validator code;
    * surfaces with a {@code stages[i].id} field path.
    */

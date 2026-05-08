@@ -260,13 +260,25 @@ public class ConfigService {
       boolean bumpRequested) {
     CaseTypeConfig prev = loadPriorConfig(validated.id(), priorVersionNum);
     if (prev == null) {
-      // Cannot load prior — skip gate (fail-open, don't block deploy)
-      log.warn(
-          "ConfigService: could not load prior config for caseTypeId={} v{} — blast-radius gate"
-              + " skipped",
+      // Story 3.8 PR #417 follow-up — fail CLOSED. AC2 requires the gate to apply on every
+      // deploy with a prior version; if we cannot load or re-parse the prior YAML we cannot
+      // classify the change, and silently bypassing the gate would let mutate-class edits ship
+      // unchecked. Reject with WKS-CFG-030 so the operator can investigate (corrupt row,
+      // missing bytes, schema drift).
+      log.error(
+          "ConfigService.deploy: REJECTED — prior YAML for caseTypeId={} v{} could not be loaded"
+              + " or re-parsed; blast-radius gate cannot apply (fail-closed, WKS-CFG-030)",
           validated.id(),
           priorVersionNum);
-      return null;
+      return ValidationResult.invalid(
+          List.of(
+              ErrorDetail.of(
+                  ErrorCode.WKS_CFG_030.wire(),
+                  "Blast-radius gate could not apply — prior version v"
+                      + priorVersionNum
+                      + " for caseTypeId="
+                      + validated.id()
+                      + " could not be loaded or re-parsed. Deploy rejected fail-closed.")));
     }
 
     MappingDefinition prevMapping =

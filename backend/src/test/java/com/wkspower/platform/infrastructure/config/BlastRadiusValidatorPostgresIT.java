@@ -7,11 +7,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.diff.BlastRadiusReport;
 import com.wkspower.platform.domain.config.diff.DeltaKind;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.ErrorCode;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.service.ConfigService;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseTypeVersionJpaRepository;
+import jakarta.persistence.EntityManager;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -69,6 +78,8 @@ class BlastRadiusValidatorPostgresIT {
   @Autowired private ConfigService configService;
   @Autowired private CaseTypeVersionRegistry versionRegistry;
   @Autowired private CaseTypeVersionJpaRepository repo;
+  @Autowired private MappingRegistry mappingRegistry;
+  @Autowired private EntityManager em;
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -298,12 +309,137 @@ class BlastRadiusValidatorPostgresIT {
     assertBlastRadiusInMeta(v2, DeltaKind.FIELD_REQUIRED_FLIPPED);
   }
 
-  // ---- Scenario 5: BPMN mapping mutate-class without bump (IT: no actual BPMN here) ---
-  // Note: the mapping gate exercises MappingDiff via CaseTypeDiff. Since this IT uses
-  // the YAML-only path (no BPMN engine), we test the MAPPING kind indirectly via the unit tests.
-  // The mapping gate is covered by CaseTypeDiffTest.mappingMutateClassDelegate_mutateClass.
-  // For the Postgres IT we skip this scenario and focus on the five schema-change kinds
-  // which are the ones exercised on the DB path.
+  // ---- Scenario 5: BPMN MAPPING mutate-class without bump → 422 + WKS-CFG-029 ----
+
+  /**
+   * Story 3.8 AC5 scenario 5 — BPMN MAPPING mutate-class. Exercises the Spring-wired {@link
+   * MappingRegistry#resolve} path inside {@code ConfigService.runBlastRadiusGate}. The unit suite
+   * covers the pure {@code MappingDiff} delegation; only the IT proves the live registry lookup
+   * returns the prior {@link MappingDefinition} and the classifier folds it into the report under
+   * {@link DeltaKind#MAPPING}.
+   *
+   * <p>Setup: deploy v1 (registry publishes empty mapping under key "1"), then overwrite the
+   * registry with a non-empty {@link MappingDefinition} (one attachment). The v2 deploy carries no
+   * BPMN, so {@code yamlResult.mappingDefinition()} resolves to {@link MappingDefinition#empty()} →
+   * attachment removal → MUTATE_CLASS via {@code MappingDiff}.
+   */
+  @Test
+  void bpmnMappingMutateClass_withoutBump_rejected() {
+    String id = CT_PREFIX + "s5";
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s5", false);
+    assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
+
+    // Seed the prior mapping with one attachment so v2 (empty mapping) becomes a removal →
+    // MappingDiff classifies as MUTATE_CLASS. The runBlastRadiusGate keys lookup off
+    // priorVersionNum=1 (see ConfigService.runBlastRadiusGate), so we register under "1".
+    MappingDefinition priorMapping =
+        new MappingDefinition(
+            List.of(
+                new AttachmentDefinition(
+                    "bpmn",
+                    "deploy.bpmn",
+                    "case",
+                    Optional.empty(),
+                    Map.of(
+                        "Task_Approve",
+                        new AttachmentDefinition.UserTaskMapping("approval", "approval-form")),
+                    Optional.empty(),
+                    Map.of(),
+                    List.of())));
+    mappingRegistry.register(new CaseTypeRef(id, "1"), "1", priorMapping);
+
+    // v2 YAML carries the same shape (no schema deltas) so the only mutate signal is MAPPING.
+    byte[] v2Yaml =
+        ("""
+        id: %s
+        displayName: "Blast Radius Test"
+        version: 2
+        statuses:
+          - id: open
+            displayName: Open
+            color: blue
+            terminal: false
+          - id: pending
+            displayName: Pending
+            color: amber
+            terminal: false
+        fields:
+          - id: notes
+            displayName: Notes
+            type: text
+            required: false
+            order: 1
+        roles:
+          - name: admin
+            permissions: [view, create, edit, transition]
+        """
+                .formatted(id))
+            .getBytes(StandardCharsets.UTF_8);
+
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v2Yaml, "test:s5", false);
+
+    assertThat(v2.isInvalid())
+        .as("BPMN MAPPING mutate-class without bumpVersion must be rejected")
+        .isTrue();
+    assertThat(v2.errors())
+        .extracting(com.wkspower.platform.domain.exception.ErrorDetail::code)
+        .containsExactly(ErrorCode.WKS_CFG_029.wire());
+    assertBlastRadiusInMeta(v2, DeltaKind.MAPPING);
+
+    // AC2 invariant — the version registry write was NOT executed on rejection. After v1 the
+    // table holds exactly one row for this caseTypeId; the rejected v2 must not have added a
+    // second row.
+    long versionRows = repo.findAll().stream().filter(e -> id.equals(e.getCaseTypeId())).count();
+    assertThat(versionRows)
+        .as("Rejected mutate-class deploy must not write a v2 row to case_type_versions")
+        .isEqualTo(1L);
+  }
+
+  // ---- Scenario 5b (Should-Fix #1): unparseable prior YAML → 422 + WKS-CFG-030 (fail-closed) ----
+
+  /**
+   * PR #417 review Should-Fix — the blast-radius gate must fail CLOSED when the prior YAML cannot
+   * be re-parsed. AC2 invariant requires the gate to apply on every deploy with a prior version;
+   * silently bypassing would let mutate-class edits ship unchecked.
+   *
+   * <p>Setup: deploy v1, then corrupt the {@code definition_yaml} column on the v1 row via a native
+   * UPDATE (the column is JPA-immutable; native SQL is the only path). The next deploy attempt
+   * should be rejected with {@code WKS-CFG-030}.
+   */
+  @Test
+  @Transactional
+  void unparseablePriorYaml_failsClosed_wksCfg030() {
+    String id = CT_PREFIX + "s5b";
+    ValidationResult v1 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s5b", false);
+    assertThat(v1.isInvalid()).as("v1 deploy must succeed: " + v1.errors()).isFalse();
+
+    // Corrupt the stored prior YAML so re-parse fails inside runBlastRadiusGate.
+    em.createNativeQuery(
+            "UPDATE case_type_versions SET definition_yaml = :corrupt WHERE case_type_id = :id")
+        .setParameter("corrupt", "::: not valid YAML at all :::\n\t- [unbalanced")
+        .setParameter("id", id)
+        .executeUpdate();
+    em.flush();
+    em.clear();
+
+    // Any v2 attempt must now be rejected fail-closed — even a benign no-op edit cannot pass
+    // because the gate cannot classify the change.
+    ValidationResult v2 =
+        configService.validateAndRegister("api-deploy.yaml", v1Yaml(id), "test:s5b", false);
+
+    assertThat(v2.isInvalid())
+        .as("Deploy must be rejected fail-closed when prior YAML cannot be re-parsed")
+        .isTrue();
+    assertThat(v2.errors())
+        .extracting(com.wkspower.platform.domain.exception.ErrorDetail::code)
+        .containsExactly(ErrorCode.WKS_CFG_030.wire());
+    assertThat(v2.errors().get(0).message())
+        .as("Error message must reference fail-closed semantics")
+        .contains("fail-closed");
+  }
 
   // ---- Scenario 6: status removal WITH bumpVersion=true → 200 + new version ----
 
