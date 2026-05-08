@@ -56,6 +56,35 @@ public class CaseTypeSourceAdapter implements CaseTypeSource {
   }
 
   /**
+   * Story 3.11 AC1 — lenient prior-YAML re-parse for the blast-radius diff. Uses the lenient YAML
+   * mapper (unknown keys tolerated) and a minimal best-effort projection from {@link
+   * RawCaseTypeConfig} to {@code CaseTypeConfig}. {@link ConfigValidator} is NOT re-run — semantic
+   * findings against an obsolete schema would be noise. Diff classifier consumes the projected
+   * config; the mapping side is fed from {@code MappingRegistry} (registry-resolved, not
+   * YAML-projected) so the empty {@code MappingDefinition} returned here is structurally inert.
+   */
+  @Override
+  public ValidationResult loadBytesLenient(String source, byte[] bytes) {
+    var read = loader.readBytesLenient(source, bytes);
+    if (!read.isParsed()) {
+      return ValidationResult.invalid(read.errors());
+    }
+    var projected = CaseTypeConfigProjection.project(read.raw());
+    if (projected.isEmpty()) {
+      return ValidationResult.invalid(
+          java.util.List.of(
+              com.wkspower.platform.domain.exception.ErrorDetail.of(
+                  com.wkspower.platform.domain.exception.ErrorCode.WKS_CFG_099.wire(),
+                  "Lenient projection failed: prior YAML missing required top-level fields (id /"
+                      + " displayName / version)")));
+    }
+    return ValidationResult.ok(
+        projected.get(),
+        java.util.List.of(),
+        com.wkspower.platform.domain.config.model.MappingDefinition.empty());
+  }
+
+  /**
    * Read sibling BPMN files for any {@code attachments[].file} the YAML declared. Returns an empty
    * map when the YAML has no attachments. Files outside the YAML's parent directory or absolute
    * paths are silently dropped — {@link MappingValidator} surfaces them as {@code WKS-MAP-005}.

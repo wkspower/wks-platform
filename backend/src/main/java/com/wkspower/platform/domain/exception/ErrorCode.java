@@ -25,6 +25,16 @@ public enum ErrorCode {
   WKS_API_004("WKS-API-004"),
   /** Sort direction other than {@code asc} or {@code desc}. */
   WKS_API_005("WKS-API-005"),
+  /**
+   * Story 3.11 — admin deploy issued with {@code ?force=true} but the request violates a
+   * force-override precondition: either the active Spring profile is {@code production}
+   * (force-override is policy-forbidden in prod regardless of caller authority) or {@code
+   * bumpVersion=true} was not supplied (force-override requires explicit version bump). Emitted by
+   * {@link com.wkspower.platform.api.controller.AdminController#deploy}. Wire string is {@code
+   * WKS-API-006} — stable contract; do not reuse for another meaning per the {@code
+   * feedback_error_codes_are_wire_contract.md} memory.
+   */
+  WKS_API_006("WKS-API-006"),
 
   // 401 / 403 — auth.
   /** Authentication failed (unknown email, wrong password, or inactive user). */
