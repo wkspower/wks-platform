@@ -870,6 +870,193 @@ class ConfigValidatorTest {
     return match.get();
   }
 
+  // ---- Story 6.1 — YAML archetype validation (AC1) ----
+
+  @Test
+  void story61_formArchetypeUnknown_emitsWksArch001() {
+    String yaml =
+        """
+        id: ct-arch
+        displayName: Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        forms:
+          definitions:
+            - id: intake-form
+              topology: single
+              dataModel: monolithic
+              rendering: single-page
+              archetype: unknown_archetype
+              fields: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    var e = assertErrorOn(result.errors(), "WKS-ARCH-001", "/forms/0/archetype");
+    assertThat(e.message()).contains("unknown_archetype");
+    assertThat(e.message()).contains("draft_section");
+  }
+
+  @Test
+  void story61_formArchetypeDraftSection_passes() {
+    String yaml =
+        """
+        id: ct-arch
+        displayName: Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        forms:
+          definitions:
+            - id: intake-form
+              topology: single
+              dataModel: monolithic
+              rendering: single-page
+              archetype: draft_section
+              fields: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("draft_section is a valid archetype").isFalse();
+  }
+
+  @Test
+  void story61_formArchetypeSubmitForProcessing_passes() {
+    String yaml =
+        """
+        id: ct-arch
+        displayName: Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        forms:
+          definitions:
+            - id: intake-form
+              topology: single
+              dataModel: monolithic
+              rendering: single-page
+              archetype: submit_for_processing
+              fields: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("submit_for_processing is a valid archetype").isFalse();
+  }
+
+  @Test
+  void story61_formArchetypeBusinessFinal_passes() {
+    String yaml =
+        """
+        id: ct-arch
+        displayName: Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        forms:
+          definitions:
+            - id: intake-form
+              topology: single
+              dataModel: monolithic
+              rendering: single-page
+              archetype: business_final
+              fields: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("business_final is a valid archetype").isFalse();
+  }
+
+  @Test
+  void story61_formArchetypeOmitted_passes() {
+    String yaml =
+        """
+        id: ct-arch
+        displayName: Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        forms:
+          definitions:
+            - id: intake-form
+              topology: single
+              dataModel: monolithic
+              rendering: single-page
+              fields: []
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("omitted archetype should not produce errors").isFalse();
+  }
+
+  @Test
+  void story61_stageArchetypeUnknown_emitsWksArch001() {
+    String yaml =
+        """
+        id: ct-stage-arch
+        displayName: Stage Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: intake
+            displayName: Intake
+          - id: review
+            displayName: Review
+          - id: final
+            displayName: Final
+            archetype: not_a_real_archetype
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).isTrue();
+    var e = assertErrorOn(result.errors(), "WKS-ARCH-001", "/stages/2/archetype");
+    assertThat(e.message()).contains("not_a_real_archetype");
+  }
+
+  @Test
+  void story61_stageArchetypeOmitted_passes() {
+    String yaml =
+        """
+        id: ct-stage-arch
+        displayName: Stage Arch Test
+        version: 1
+        statuses:
+          - { id: open, displayName: Open, color: blue }
+          - { id: closed, displayName: Closed, color: zinc }
+        listColumns: []
+        roles:
+          - name: officer
+            permissions: [view]
+        stages:
+          - id: intake
+            displayName: Intake
+          - id: final
+            displayName: Final
+        """;
+    var result = validate(yaml);
+    assertThat(result.isInvalid()).as("omitted stage archetype should not produce errors").isFalse();
+  }
+
   private static final String GREEN_YAML =
       """
       id: loan-application

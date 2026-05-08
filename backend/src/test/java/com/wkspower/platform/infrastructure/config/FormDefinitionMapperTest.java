@@ -151,4 +151,29 @@ class FormDefinitionMapperTest {
     assertThat(result.sections()).hasSize(1);
     assertThat(result.sections().get(0).id()).isEqualTo("employment");
   }
+
+  // ---- Story 6.1 — archetype round-trip ----
+
+  @Test
+  void archetype_presentInRaw_roundTripsToDomainsRecord() {
+    var raw =
+        new RawFormDefinition(
+            "final-form", "single", "monolithic", "single-page",
+            List.of(Map.of("id", "note", "displayName", "Note", "type", "text",
+                "required", false, "order", 0)),
+            null, "business_final");
+    FormDefinition result = FormDefinitionMapper.toDomain(raw);
+    assertThat(result.archetype()).isEqualTo("business_final");
+  }
+
+  @Test
+  void archetype_null_nullInDomainRecord() {
+    var raw =
+        new RawFormDefinition(
+            "draft-form", "single", "monolithic", "single-page",
+            List.of(Map.of("id", "note", "displayName", "Note", "type", "text",
+                "required", false, "order", 0)));
+    FormDefinition result = FormDefinitionMapper.toDomain(raw);
+    assertThat(result.archetype()).isNull();
+  }
 }

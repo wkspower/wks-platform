@@ -61,8 +61,19 @@ public record CaseTypeViewDto(
    * Wire-shape projection of {@code StageDefinition} for the case-type detail endpoint and the
    * embedded {@link CaseDto#caseType()} sub-object. Mirrors the YAML grammar 1:1 so the timeline
    * has the declared display name + ordinal without a second round-trip. Story 3.3.
+   *
+   * <p>Story 6.1 — adds {@code archetype} for UI specialization (nullable; omitted means default
+   * affordance).
    */
-  public record StageDefinitionView(String id, String displayName, int ordinal) {}
+  public record StageDefinitionView(String id, String displayName, int ordinal,
+      @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+      String archetype) {
+
+    /** Backward-compat constructor for callers that pre-date Story 6.1's archetype slot. */
+    public StageDefinitionView(String id, String displayName, int ordinal) {
+      this(id, displayName, ordinal, null);
+    }
+  }
 
   /**
    * Wire-shape projection of {@code FieldDefinition} for the case-type detail endpoint. Every
@@ -105,11 +116,28 @@ public record CaseTypeViewDto(
       String dataModel,
       String rendering,
       List<FieldView> fields,
-      List<FormSectionView> sections) {
+      List<FormSectionView> sections,
+      /**
+       * Story 6.1 — optional archetype from the closed catalog. {@code null} means omitted;
+       * the frontend falls back to the default affordance. Excluded from JSON when null to avoid
+       * surfacing implementation details to unaware clients.
+       */
+      @JsonInclude(JsonInclude.Include.NON_NULL) String archetype) {
 
     public FormDefinitionView {
       fields = fields == null ? List.of() : List.copyOf(fields);
       sections = sections == null ? List.of() : List.copyOf(sections);
+    }
+
+    /** Backward-compat constructor for callers that pre-date Story 6.1's archetype slot. */
+    public FormDefinitionView(
+        String id,
+        String topology,
+        String dataModel,
+        String rendering,
+        List<FieldView> fields,
+        List<FormSectionView> sections) {
+      this(id, topology, dataModel, rendering, fields, sections, null);
     }
   }
 

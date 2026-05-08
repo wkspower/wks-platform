@@ -92,7 +92,9 @@ public record RawCaseTypeConfig(
    * the validator can iterate uniformly.
    */
   public record RawStage(
-      String id, String displayName, List<RawStatus> statuses, String initialStatus) {
+      String id, String displayName, List<RawStatus> statuses, String initialStatus,
+      /** Story 6.1 — optional archetype from the closed catalog. */
+      String archetype) {
 
     /**
      * Backward-compat constructor — pre-Story 3.6 callers that didn't know about stage-scoped
@@ -100,12 +102,12 @@ public record RawCaseTypeConfig(
      * back to the flat case-type-level status set per Story 3.6 AC2).
      */
     public RawStage(String id, String displayName) {
-      this(id, displayName, null, null);
+      this(id, displayName, null, null, null);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static RawStage fromString(String id) {
-      return new RawStage(id, null, null, null);
+      return new RawStage(id, null, null, null, null);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -113,8 +115,9 @@ public record RawCaseTypeConfig(
         @JsonProperty("id") String id,
         @JsonProperty("displayName") String displayName,
         @JsonProperty("statuses") List<RawStatus> statuses,
-        @JsonProperty("initialStatus") String initialStatus) {
-      return new RawStage(id, displayName, statuses, initialStatus);
+        @JsonProperty("initialStatus") String initialStatus,
+        @JsonProperty("archetype") String archetype) {
+      return new RawStage(id, displayName, statuses, initialStatus, archetype);
     }
   }
 

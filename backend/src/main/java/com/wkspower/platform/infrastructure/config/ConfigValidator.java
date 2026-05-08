@@ -72,6 +72,17 @@ public class ConfigValidator {
   }
 
   /**
+   * Story 6.1 AC1 — Closed archetype catalog for YAML-declared tasks / forms / stages.
+   *
+   * <p>Per architecture rules: deliberately duplicated from {@code BpmnValidator.VALID_ARCHETYPES}
+   * (the BPMN surface); the two surfaces have distinct error codes ({@code WKS-CFG-020/021} vs
+   * {@code WKS-ARCH-001}) and extracting a shared constant would couple the engine module to the
+   * config module unnecessarily. When Phase-1 adds a fourth archetype, BOTH sites must be updated.
+   */
+  private static final Set<String> VALID_ARCHETYPES =
+      Set.of("draft_section", "submit_for_processing", "business_final");
+
+  /**
    * Reserved stage ids — Story 3.1 AC1 (Sprint-1 triage Q4: initial set, extend on first conflict).
    * Lives here as a private constant so the validator owns the rule; if a future story needs to
    * extend, the touch-point is one place.
@@ -157,6 +168,24 @@ public class ConfigValidator {
     // its findings into the same error list. FormValidator is collect-all and never short-circuits.
     if (formValidator != null && raw.forms() != null && !raw.forms().definitions().isEmpty()) {
       formValidator.validate(raw.forms(), errors);
+    }
+
+    // Story 6.1 AC1 — Validate form archetypes against the closed catalog.
+    // Runs unconditionally (after FormValidator) so archetype violations are always surfaced.
+    if (raw.forms() != null) {
+      List<RawFormDefinition> formDefs = raw.forms().definitions();
+      for (int fi = 0; fi < formDefs.size(); fi++) {
+        RawFormDefinition form = formDefs.get(fi);
+        if (form != null && form.archetype() != null && !VALID_ARCHETYPES.contains(form.archetype())) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_ARCH_001.wire(),
+                  "Unknown archetype '"
+                      + form.archetype()
+                      + "' — must be one of: draft_section, submit_for_processing, business_final",
+                  "/forms/" + fi + "/archetype"));
+        }
+      }
     }
 
     if (!errors.isEmpty()) {
@@ -248,7 +277,18 @@ public class ConfigValidator {
         List<StatusDefinition> stageStatuses = checkStageStatuses(s.statuses(), base, eb, errors);
         Optional<String> initialStatus =
             resolveStageInitialStatus(s.initialStatus(), stageStatuses, base, eb, errors);
-        out.add(new StageDefinition(id, displayName, i, stageStatuses, initialStatus));
+        // Story 6.1 — validate and thread archetype through.
+        if (s.archetype() != null && !VALID_ARCHETYPES.contains(s.archetype())) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_ARCH_001.wire(),
+                  "Unknown archetype '"
+                      + s.archetype()
+                      + "' — must be one of: draft_section, submit_for_processing, business_final",
+                  "/stages/" + i + "/archetype"));
+        }
+        out.add(new StageDefinition(id, displayName, i, stageStatuses, initialStatus,
+            s.archetype()));
       }
     }
     return out;
