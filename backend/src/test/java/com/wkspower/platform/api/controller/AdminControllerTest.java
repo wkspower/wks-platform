@@ -267,16 +267,12 @@ class AdminControllerTest {
     // Story 3.8 AC3 — ?bumpVersion=true must be forwarded to ConfigService.deploy as
     // bumpRequested=true
     CaseTypeConfig config =
-        new CaseTypeConfig(
-            "loan-ct",
-            "Loan",
-            2,
-            null,
-            null,
-            List.of(),
-            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(),
-            List.of());
+        CaseTypeConfig.builder()
+            .id("loan-ct")
+            .displayName("Loan")
+            .version(2)
+            .statuses(List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)))
+            .build();
     DeploymentResult deployment =
         new DeploymentResult("dep-2", "loanProcess", "procDef-2", 2, Instant.now());
     byte[] yamlBytes = "id: loan-ct".getBytes();
@@ -303,16 +299,12 @@ class AdminControllerTest {
   void bumpVersionFalseByDefault() throws Exception {
     // Story 3.8 — bumpVersion defaults to false when not supplied
     CaseTypeConfig config =
-        new CaseTypeConfig(
-            "loan-ct",
-            "Loan",
-            1,
-            null,
-            null,
-            List.of(),
-            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(),
-            List.of());
+        CaseTypeConfig.builder()
+            .id("loan-ct")
+            .displayName("Loan")
+            .version(1)
+            .statuses(List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)))
+            .build();
     DeploymentResult deployment =
         new DeploymentResult("dep-1", "loanProcess", "procDef-1", 1, Instant.now());
 
@@ -339,16 +331,12 @@ class AdminControllerTest {
   void bumpVersionTrueIsThreadedToValidateAndRegister() throws Exception {
     // Story 3.8 — ?bumpVersion=true forwarded on YAML-only (no BPMN) path
     CaseTypeConfig config =
-        new CaseTypeConfig(
-            "yaml-only-ct",
-            "YAML Only",
-            2,
-            null,
-            null,
-            List.of(),
-            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
-            List.of(),
-            List.of());
+        CaseTypeConfig.builder()
+            .id("yaml-only-ct")
+            .displayName("YAML Only")
+            .version(2)
+            .statuses(List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)))
+            .build();
 
     ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
     when(configService.validateAndRegister(any(), any(), any(), bumpCap.capture()))
