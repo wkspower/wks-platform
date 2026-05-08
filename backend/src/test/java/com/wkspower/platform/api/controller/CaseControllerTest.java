@@ -475,7 +475,9 @@ class CaseControllerTest {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 
   /** Story 3.3 — three-stage CaseType fixture (intake → underwriting → decision). */
@@ -495,7 +497,8 @@ class CaseControllerTest {
             new com.wkspower.platform.domain.config.model.StageDefinition(
                 "underwriting", "Underwriting", 1),
             new com.wkspower.platform.domain.config.model.StageDefinition(
-                "decision", "Decision", 2)));
+                "decision", "Decision", 2)),
+        List.of());
   }
 
   /** Story 3.3 — happy path: stage 0 COMPLETED, stage 1 ACTIVE, stage 2 PENDING. */

@@ -200,7 +200,9 @@ class ConfigServiceDeployTest {
             prior.fields(),
             prior.statuses(),
             prior.listColumns(),
-            prior.roles());
+            prior.roles(),
+            List.of(),
+            List.of());
     StubSource source = new StubSource(ValidationResult.ok(incoming));
     StubBpmn bpmn = new StubBpmn(BpmnValidationResult.ok("applicationProcess"));
     StubRegistrar registrar = new StubRegistrar();
@@ -369,7 +371,9 @@ class ConfigServiceDeployTest {
         List.<FieldDefinition>of(),
         List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
         List.of(),
-        List.of(new RoleDefinition("admin", List.of())));
+        List.of(new RoleDefinition("admin", List.of())),
+        List.of(),
+        List.of());
   }
 
   private static final class StubSource implements CaseTypeSource {

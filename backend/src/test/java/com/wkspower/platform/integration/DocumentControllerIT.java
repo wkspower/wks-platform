@@ -470,6 +470,8 @@ class DocumentControllerIT {
             new RoleDefinition(
                 "admin",
                 List.of(
-                    Permission.CREATE, Permission.VIEW, Permission.EDIT, Permission.TRANSITION))));
+                    Permission.CREATE, Permission.VIEW, Permission.EDIT, Permission.TRANSITION))),
+        List.of(),
+        List.of());
   }
 }

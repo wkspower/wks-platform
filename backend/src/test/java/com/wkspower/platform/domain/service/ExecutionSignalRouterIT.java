@@ -840,7 +840,8 @@ class ExecutionSignalRouterIT {
                   new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)),
               List.of(),
               List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
-              stages);
+              stages,
+              List.of());
         }
       };
     }

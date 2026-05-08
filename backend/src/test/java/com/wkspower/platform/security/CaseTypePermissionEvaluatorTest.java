@@ -96,7 +96,9 @@ class CaseTypePermissionEvaluatorTest {
         List.of("name"),
         List.of(
             new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE)),
-            new RoleDefinition("customer", List.of(Permission.VIEW))));
+            new RoleDefinition("customer", List.of(Permission.VIEW))),
+        List.of(),
+        List.of());
   }
 
   private static CaseTypeReader reader(CaseTypeConfig config) {

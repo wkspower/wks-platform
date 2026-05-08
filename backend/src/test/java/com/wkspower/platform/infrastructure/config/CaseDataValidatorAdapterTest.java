@@ -147,6 +147,8 @@ class CaseDataValidatorAdapterTest {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))));
+        List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 }

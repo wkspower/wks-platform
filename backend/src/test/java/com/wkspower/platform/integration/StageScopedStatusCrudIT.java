@@ -307,6 +307,7 @@ class StageScopedStatusCrudIT {
             new StatusDefinition("closed", "Closed", StatusColor.EMERALD, true)),
         List.of("name"),
         List.of(new RoleDefinition("admin", List.of(Permission.VIEW))),
-        List.of(stage));
+        List.of(stage),
+        List.of());
   }
 }

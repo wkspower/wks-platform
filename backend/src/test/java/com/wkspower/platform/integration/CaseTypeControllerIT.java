@@ -173,7 +173,9 @@ class CaseTypeControllerIT {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("admin", List.of(Permission.VIEW))));
+        List.of(new RoleDefinition("admin", List.of(Permission.VIEW))),
+        List.of(),
+        List.of());
   }
 
   private static CaseTypeConfig hrTypeForHr() {
@@ -187,6 +189,8 @@ class CaseTypeControllerIT {
             new FieldDefinition("employee", "Employee", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("draft", "Draft", StatusColor.ZINC)),
         List.of("employee"),
-        List.of(new RoleDefinition("hr", List.of(Permission.VIEW))));
+        List.of(new RoleDefinition("hr", List.of(Permission.VIEW))),
+        List.of(),
+        List.of());
   }
 }

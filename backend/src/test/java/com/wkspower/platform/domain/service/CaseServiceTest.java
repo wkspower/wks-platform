@@ -252,7 +252,8 @@ class CaseServiceTest {
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
             List.of(),
             List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
-            List.of(stage));
+            List.of(stage),
+            List.of());
     UUID caseId = UUID.randomUUID();
     Case existing =
         new Case(
@@ -308,7 +309,8 @@ class CaseServiceTest {
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
             List.of(),
             List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
-            List.of(stageA, stageB));
+            List.of(stageA, stageB),
+            List.of());
     UUID caseId = UUID.randomUUID();
     Case existing =
         new Case(
@@ -363,7 +365,8 @@ class CaseServiceTest {
             List.of(new StatusDefinition("open", "Open", StatusColor.BLUE, false)),
             List.of(),
             List.of(new RoleDefinition("officer", List.of(Permission.VIEW))),
-            List.of(stage));
+            List.of(stage),
+            List.of());
     UUID caseId = UUID.randomUUID();
     Case existing =
         new Case(
@@ -412,7 +415,9 @@ class CaseServiceTest {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 
   private static CaseTypeReader reader(CaseTypeConfig config) {

@@ -36,63 +36,6 @@ public record CaseTypeConfig(
      */
     List<FormDefinition> forms) {
 
-  /**
-   * Backward-compat constructor for callers (and tests) that predate Story 3.1's {@code stages}
-   * slot — defaults stages and forms to {@link List#of()}.
-   */
-  public CaseTypeConfig(
-      String id,
-      String displayName,
-      int version,
-      String description,
-      WorkflowRef workflow,
-      List<FieldDefinition> fields,
-      List<StatusDefinition> statuses,
-      List<String> listColumns,
-      List<RoleDefinition> roles) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        List.of(),
-        List.of());
-  }
-
-  /**
-   * Backward-compat constructor for callers (and tests) that predate Story 5.2's {@code forms} slot
-   * — defaults forms to {@link List#of()}.
-   */
-  public CaseTypeConfig(
-      String id,
-      String displayName,
-      int version,
-      String description,
-      WorkflowRef workflow,
-      List<FieldDefinition> fields,
-      List<StatusDefinition> statuses,
-      List<String> listColumns,
-      List<RoleDefinition> roles,
-      List<StageDefinition> stages) {
-    this(
-        id,
-        displayName,
-        version,
-        description,
-        workflow,
-        fields,
-        statuses,
-        listColumns,
-        roles,
-        stages,
-        List.of());
-  }
-
   public CaseTypeConfig {
     fields = List.copyOf(fields);
     statuses = List.copyOf(statuses);
@@ -165,5 +108,97 @@ public record CaseTypeConfig(
         roles,
         stages,
         forms);
+  }
+
+  /** Returns a fresh {@link Builder} for programmatic construction (primarily in tests). */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Fluent builder that delegates to the canonical 12-arg constructor on {@link #build()}. */
+  public static final class Builder {
+    private String id;
+    private String displayName;
+    private int version;
+    private String description;
+    private WorkflowRef workflow;
+    private List<FieldDefinition> fields = List.of();
+    private List<StatusDefinition> statuses = List.of();
+    private List<String> listColumns = List.of();
+    private List<RoleDefinition> roles = List.of();
+    private List<StageDefinition> stages = List.of();
+    private List<FormDefinition> forms = List.of();
+
+    private Builder() {}
+
+    public Builder id(String v) {
+      this.id = v;
+      return this;
+    }
+
+    public Builder displayName(String v) {
+      this.displayName = v;
+      return this;
+    }
+
+    public Builder version(int v) {
+      this.version = v;
+      return this;
+    }
+
+    public Builder description(String v) {
+      this.description = v;
+      return this;
+    }
+
+    public Builder workflow(WorkflowRef v) {
+      this.workflow = v;
+      return this;
+    }
+
+    public Builder fields(List<FieldDefinition> v) {
+      this.fields = v;
+      return this;
+    }
+
+    public Builder statuses(List<StatusDefinition> v) {
+      this.statuses = v;
+      return this;
+    }
+
+    public Builder listColumns(List<String> v) {
+      this.listColumns = v;
+      return this;
+    }
+
+    public Builder roles(List<RoleDefinition> v) {
+      this.roles = v;
+      return this;
+    }
+
+    public Builder stages(List<StageDefinition> v) {
+      this.stages = v;
+      return this;
+    }
+
+    public Builder forms(List<FormDefinition> v) {
+      this.forms = v;
+      return this;
+    }
+
+    public CaseTypeConfig build() {
+      return new CaseTypeConfig(
+          id,
+          displayName,
+          version,
+          description,
+          workflow,
+          fields,
+          statuses,
+          listColumns,
+          roles,
+          stages,
+          forms);
+    }
   }
 }

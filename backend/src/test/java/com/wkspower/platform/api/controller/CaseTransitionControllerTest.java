@@ -202,7 +202,9 @@ class CaseTransitionControllerTest {
         List.of("name"),
         List.of(
             new RoleDefinition(
-                "officer", List.of(Permission.VIEW, Permission.CREATE, Permission.TRANSITION))));
+                "officer", List.of(Permission.VIEW, Permission.CREATE, Permission.TRANSITION))),
+        List.of(),
+        List.of());
   }
 
   private static org.springframework.test.web.servlet.request.RequestPostProcessor officerAuth() {

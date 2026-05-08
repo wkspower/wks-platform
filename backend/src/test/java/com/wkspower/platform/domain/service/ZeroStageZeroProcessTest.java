@@ -197,6 +197,7 @@ class ZeroStageZeroProcessTest {
             new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)),
         List.of(),
         List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
         List.of()); // stages empty
   }
 
@@ -210,7 +211,9 @@ class ZeroStageZeroProcessTest {
         List.of(new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
-        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))));
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 
   private static CaseTypeReader reader(CaseTypeConfig config) {

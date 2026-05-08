@@ -23,6 +23,7 @@ class CaseTypeConfigWithVersionTest {
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
         List.of(new RoleDefinition("admin", List.of(Permission.VIEW))),
+        List.of(),
         List.of());
   }
 
