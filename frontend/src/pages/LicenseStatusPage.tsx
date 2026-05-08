@@ -11,7 +11,7 @@ import { formatDate } from '@/lib/formatDate';
 const TIER_STYLES: Record<string, string> = {
   oss: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
   team: 'bg-[var(--secondary)]/15 text-[var(--secondary)]',
-  enterprise: 'bg-[var(--accent)]/15 text-[var(--accent-foreground)]',
+  enterprise: 'bg-[var(--primary)]/15 text-[var(--primary)]',
   demo: 'bg-[var(--warning)]/15 text-[var(--warning)]',
 };
 
@@ -32,7 +32,7 @@ function TierBadge({ tier }: { tier: string }) {
 // ---------------------------------------------------------------------------
 
 const STATE_STYLES: Record<string, string> = {
-  valid: 'bg-green-100 text-green-800',
+  valid: 'bg-[var(--success)]/15 text-[var(--success)]',
   oss: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
   expired: 'bg-[var(--warning)]/15 text-[var(--warning)]',
   degraded: 'bg-[var(--warning)]/15 text-[var(--warning)]',
