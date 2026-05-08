@@ -2,6 +2,7 @@ package com.wkspower.platform.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -74,7 +75,8 @@ class AdminControllerTest {
     byte[] bpmnBytes = "<x/>".getBytes();
     ArgumentCaptor<byte[]> yamlCap = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<byte[]> bpmnCap = ArgumentCaptor.forClass(byte[].class);
-    when(configService.deploy(yamlCap.capture(), bpmnCap.capture(), any(), eq("admin")))
+    // Story 3.8 — controller now calls the 5-arg deploy overload (adds bumpVersion boolean)
+    when(configService.deploy(yamlCap.capture(), bpmnCap.capture(), any(), eq("admin"), anyBoolean()))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -139,7 +141,7 @@ class AdminControllerTest {
 
   @Test
   void validationFailureReturns422Aggregate() throws Exception {
-    when(configService.deploy(any(), any(), any(), any()))
+    when(configService.deploy(any(), any(), any(), any(), anyBoolean()))
         .thenReturn(
             DeployResult.invalid(
                 List.of(
@@ -167,7 +169,7 @@ class AdminControllerTest {
     // MaxUploadSizeExceededException
     // before reaching the handler chain. We simulate by configuring a tiny part cap via the test
     // and asserting the GlobalExceptionHandler maps the exception to 413 + WKS-API-413.
-    when(configService.deploy(any(), any(), any(), any()))
+    when(configService.deploy(any(), any(), any(), any(), anyBoolean()))
         .thenThrow(new MaxUploadSizeExceededException(1024L));
 
     mockMvc
@@ -181,7 +183,7 @@ class AdminControllerTest {
         .andExpect(status().isPayloadTooLarge())
         .andExpect(jsonPath("$.error.code").value("WKS-API-413"));
 
-    verify(configService).deploy(any(), any(), any(), any());
+    verify(configService).deploy(any(), any(), any(), any(), anyBoolean());
   }
 
   // ---- YAML-only deploy (Story 3.2: zero-process case types) -------------
@@ -203,7 +205,8 @@ class AdminControllerTest {
             List.of(),
             List.of(new RoleDefinition("admin", List.of())));
     byte[] yamlBytes = "id: j9-zero-zero".getBytes();
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any()))
+    // Story 3.8 — controller now calls the 4-arg validateAndRegister overload (adds bumpVersion)
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
         .thenReturn(ValidationResult.ok(config));
 
     mockMvc
@@ -218,12 +221,12 @@ class AdminControllerTest {
         .andExpect(jsonPath("$.data.processDefinitionId").doesNotExist())
         .andExpect(jsonPath("$.data.schemaUri").value("/api/admin/case-types/j9-zero-zero/schema"));
 
-    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any());
+    verify(configService).validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean());
   }
 
   @Test
   void missingBpmnPartWithInvalidYamlReturns422() throws Exception {
-    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any()))
+    when(configService.validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
         .thenReturn(
             ValidationResult.invalid(List.of(ErrorDetail.of("WKS-CFG-099", "YAML parse failed"))));
 
@@ -247,5 +250,85 @@ class AdminControllerTest {
                 .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<x/>".getBytes()))
                 .with(user("admin").roles("ADMIN")))
         .andExpect(status().isBadRequest());
+  }
+
+  // ---- Story 3.8: bumpVersion param threading ----------------------------
+
+  @Test
+  void bumpVersionTrueIsThreadedToDeployService() throws Exception {
+    // Story 3.8 AC3 — ?bumpVersion=true must be forwarded to ConfigService.deploy as bumpRequested=true
+    CaseTypeConfig config =
+        new CaseTypeConfig(
+            "loan-ct", "Loan", 2, null, null, List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
+            List.of(), List.of());
+    DeploymentResult deployment =
+        new DeploymentResult("dep-2", "loanProcess", "procDef-2", 2, Instant.now());
+    byte[] yamlBytes = "id: loan-ct".getBytes();
+    byte[] bpmnBytes = "<bpmn/>".getBytes();
+
+    ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
+    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture()))
+        .thenReturn(DeployResult.ok(config, deployment));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", yamlBytes))
+                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", bpmnBytes))
+                .param("bumpVersion", "true")
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.caseTypeId").value("loan-ct"));
+
+    assertThat(bumpCap.getValue()).isTrue();
+  }
+
+  @Test
+  void bumpVersionFalseByDefault() throws Exception {
+    // Story 3.8 — bumpVersion defaults to false when not supplied
+    CaseTypeConfig config =
+        new CaseTypeConfig("loan-ct", "Loan", 1, null, null, List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
+            List.of(), List.of());
+    DeploymentResult deployment =
+        new DeploymentResult("dep-1", "loanProcess", "procDef-1", 1, Instant.now());
+
+    ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
+    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture()))
+        .thenReturn(DeployResult.ok(config, deployment));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: loan-ct".getBytes()))
+                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<bpmn/>".getBytes()))
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
+
+    assertThat(bumpCap.getValue()).isFalse();
+  }
+
+  @Test
+  void bumpVersionTrueIsThreadedToValidateAndRegister() throws Exception {
+    // Story 3.8 — ?bumpVersion=true forwarded on YAML-only (no BPMN) path
+    CaseTypeConfig config =
+        new CaseTypeConfig("yaml-only-ct", "YAML Only", 2, null, null, List.of(),
+            List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)),
+            List.of(), List.of());
+
+    ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
+    when(configService.validateAndRegister(any(), any(), any(), bumpCap.capture()))
+        .thenReturn(ValidationResult.ok(config));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: yaml-only-ct".getBytes()))
+                .param("bumpVersion", "true")
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
+
+    assertThat(bumpCap.getValue()).isTrue();
   }
 }

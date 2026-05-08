@@ -349,6 +349,45 @@ class ConfigServiceDeployTest {
     assertThat(deployCount.get()).isEqualTo(2);
   }
 
+  // ---- Story 3.8: blast-radius gate + first-deploy short-circuit ----------
+
+  @Test
+  void firstDeployNoBlastRadiusGate_classifierSkipped() {
+    // Story 3.8 AC4 — first deploy (no prior version) must skip the classifier.
+    // The deploy should succeed regardless of bumpVersion value.
+    CaseTypeConfig config = caseType();
+    StubSource source = new StubSource(ValidationResult.ok(config));
+    StubBpmn bpmn = new StubBpmn(BpmnValidationResult.ok("applicationProcess"));
+    StubRegistrar registrar = new StubRegistrar();
+    StubEngine engine = new StubEngine();
+    RecordingPublisher publisher = new RecordingPublisher();
+    ConfigService svc = newCfg(source, registrar, new StubReader(), bpmn, engine, publisher);
+
+    // First deploy with bumpVersion=false → should succeed (no prior version, gate skipped)
+    DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null, false);
+    assertThat(result.isInvalid())
+        .as("First deploy (no prior) must succeed even without bumpVersion=true")
+        .isFalse();
+  }
+
+  @Test
+  void firstDeployWithBumpVersionTrue_proceedsWithWarnLog() {
+    // Story 3.8 AC4 — bumpVersion=true on first deploy is a benign no-op (WARN log + proceed).
+    CaseTypeConfig config = caseType();
+    StubSource source = new StubSource(ValidationResult.ok(config));
+    StubBpmn bpmn = new StubBpmn(BpmnValidationResult.ok("applicationProcess"));
+    StubRegistrar registrar = new StubRegistrar();
+    StubEngine engine = new StubEngine();
+    RecordingPublisher publisher = new RecordingPublisher();
+    ConfigService svc = newCfg(source, registrar, new StubReader(), bpmn, engine, publisher);
+
+    // bumpVersion=true with no prior version → WARN log emitted, deploy proceeds normally
+    DeployResult result = svc.deploy(YAML_BYTES, BPMN_BYTES, null, true);
+    assertThat(result.isInvalid())
+        .as("First deploy with bumpVersion=true must succeed (benign no-op)")
+        .isFalse();
+  }
+
   // ---- helpers + stubs ---------------------------------------------------
 
   private static ValidationResult invalidYaml(String code, String msg) {
