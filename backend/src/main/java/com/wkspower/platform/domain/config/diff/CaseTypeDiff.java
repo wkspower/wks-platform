@@ -8,7 +8,6 @@ import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
-import com.wkspower.platform.infrastructure.config.MappingDiff;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

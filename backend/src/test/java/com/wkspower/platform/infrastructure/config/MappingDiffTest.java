@@ -7,6 +7,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMa
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
+import com.wkspower.platform.domain.config.diff.MappingDiff;
 import com.wkspower.platform.domain.config.model.MappingChangeClass;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;

@@ -50,7 +50,7 @@ public enum DeltaKind {
   STAGE_INSERTED_MIDDLE,
 
   /**
-   * The mapping layer ({@link com.wkspower.platform.infrastructure.config.MappingDiff}) returned
+   * The mapping layer ({@link com.wkspower.platform.domain.config.diff.MappingDiff}) returned
    * {@code MUTATE_CLASS}. Folded into this report's {@code mutateDeltas} list.
    */
   MAPPING,
