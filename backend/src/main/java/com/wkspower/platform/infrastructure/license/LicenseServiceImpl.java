@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -84,6 +85,7 @@ public class LicenseServiceImpl implements LicenseService {
 
   private final String licenseFilePath;
   private final PublicKey publicKey;
+  private final String publicKeyFingerprint;
 
   /** Tracks the last-seen {@code lastModified} for hot-reload. */
   private volatile long lastModifiedSeen = -1L;
@@ -98,6 +100,7 @@ public class LicenseServiceImpl implements LicenseService {
   public LicenseServiceImpl(String licenseFilePath, PublicKey publicKey) {
     this.licenseFilePath = licenseFilePath;
     this.publicKey = publicKey;
+    this.publicKeyFingerprint = computeSha256Hex(publicKey.getEncoded());
     load();
   }
 
@@ -150,6 +153,11 @@ public class LicenseServiceImpl implements LicenseService {
   public LicenseSnapshot getLicenseSnapshot() {
     InternalSnapshot s = state.get();
     return new LicenseSnapshot(s.licenseState(), s.tier(), s.expiry());
+  }
+
+  @Override
+  public String getPublicKeyFingerprint() {
+    return publicKeyFingerprint;
   }
 
   // -------------------------------------------------------------------------
@@ -282,6 +290,24 @@ public class LicenseServiceImpl implements LicenseService {
   // -------------------------------------------------------------------------
   // Static helpers (package-visible for tests)
   // -------------------------------------------------------------------------
+
+  /**
+   * Computes the SHA-256 hex fingerprint (64 lowercase hex chars) of the given byte array. Uses
+   * only {@code java.security.MessageDigest} — no new dependency.
+   */
+  private static String computeSha256Hex(byte[] bytes) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-256");
+      byte[] digest = md.digest(bytes);
+      StringBuilder sb = new StringBuilder(64);
+      for (byte b : digest) {
+        sb.append(String.format("%02x", b));
+      }
+      return sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 unavailable", e); // never happens on JVM
+    }
+  }
 
   /**
    * Loads the bundled Ed25519 public key from {@code license-public.pem} on the classpath.

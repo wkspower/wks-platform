@@ -35,9 +35,21 @@ public class LicenseController {
    * @param state one of {@code "valid" | "oss" | "expired" | "degraded"}
    * @param tier the active tier string (e.g. {@code "oss"}, {@code "team"}, {@code "enterprise"})
    * @param expiredAt ISO-8601 instant string when state is {@code "expired"}; {@code null}
-   *     otherwise
+   *     otherwise — kept for backward compat
+   * @param expiresAt ISO-8601 whenever expiry is known (VALID state with set expiry, or EXPIRED);
+   *     {@code null} when no expiry exists (OSS, no-expiry enterprise, degraded)
+   * @param licenseHolder JWT {@code sub} claim (license holder / organisation name); {@code null}
+   *     in OSS/degraded states
+   * @param publicKeyFingerprint SHA-256 hex of the bundled verification key (always non-null, 64
+   *     chars)
    */
-  public record LicenseStatusDto(String state, String tier, String expiredAt) {}
+  public record LicenseStatusDto(
+      String state,
+      String tier,
+      String expiredAt,
+      String expiresAt,
+      String licenseHolder,
+      String publicKeyFingerprint) {}
 
   /**
    * Wire shape for one feature entry in the debug response.
@@ -68,19 +80,32 @@ public class LicenseController {
   @Operation(
       summary = "License status",
       description =
-          "Returns the current license state, tier, and expiry (if expired). Accessible to all"
-              + " authenticated users. No banner is shown by the frontend for the 'oss' state.")
+          "Returns the current license state, tier, expiry, license holder, and public-key"
+              + " fingerprint. Accessible to all authenticated users.")
   public ApiResponse<LicenseStatusDto> status(HttpServletResponse response) {
     response.setHeader("Cache-Control", "no-store");
 
     LicenseSnapshot snap = licenseService.getLicenseSnapshot();
     String stateStr = snap.licenseState().toWireString();
+
+    // expiredAt: backward-compat — only set when state is EXPIRED (unchanged wire semantics)
     String expiredAt =
         (snap.licenseState() == LicenseState.EXPIRED && snap.expiry() != null)
             ? DateTimeFormatter.ISO_INSTANT.format(snap.expiry()) // CF2: ISO_INSTANT format
             : null;
 
-    return ApiResponse.success(new LicenseStatusDto(stateStr, snap.tier(), expiredAt));
+    // expiresAt: additive field — populated for both EXPIRED and VALID when expiry is known
+    String expiresAt =
+        (snap.expiry() != null) ? DateTimeFormatter.ISO_INSTANT.format(snap.expiry()) : null;
+
+    return ApiResponse.success(
+        new LicenseStatusDto(
+            stateStr,
+            snap.tier(),
+            expiredAt,
+            expiresAt,
+            licenseService.getLicenseHolder(),
+            licenseService.getPublicKeyFingerprint()));
   }
 
   /**

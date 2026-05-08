@@ -71,4 +71,10 @@ public interface LicenseService {
    * separately to avoid torn reads across concurrent state updates.
    */
   LicenseSnapshot getLicenseSnapshot();
+
+  /**
+   * Returns the SHA-256 hex fingerprint (64 chars) of the bundled Ed25519 public key. Always
+   * returns a non-null string — computed once at service construction from the classpath key.
+   */
+  String getPublicKeyFingerprint();
 }
