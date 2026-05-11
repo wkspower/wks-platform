@@ -11,6 +11,7 @@ import { DevConsolePage } from '@/pages/DevConsolePage';
 import { FormPage } from '@/pages/FormPage';
 import { LicenseStatusPage } from '@/pages/LicenseStatusPage';
 import { LoginPage, safeReturnTo } from '@/pages/LoginPage';
+import { MappingInspectorPage } from '@/pages/MappingInspectorPage';
 import { TasksPage } from '@/pages/TasksPage';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -62,6 +63,15 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth requiredRole="admin">
             <LicenseStatusPage />
+          </RequireAuth>
+        ),
+      },
+      // Story 4.6 — Admin Mapping Inspector (read-only).
+      {
+        path: '/admin/mapping-inspector/:caseTypeId',
+        element: (
+          <RequireAuth requiredRole="admin">
+            <MappingInspectorPage />
           </RequireAuth>
         ),
       },

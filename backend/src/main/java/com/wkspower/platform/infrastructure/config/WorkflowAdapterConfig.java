@@ -8,6 +8,7 @@ import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.service.ExecutionSignalRouter;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.NullAdapter;
+import com.wkspower.platform.domain.service.SignalAuditRingBuffer;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
 import com.wkspower.platform.domain.service.WorkflowAdapterBinder;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +66,8 @@ public class WorkflowAdapterConfig {
       CaseRepository caseRepository,
       EventPublisher eventPublisher,
       Clock clock,
-      CaseTypeReader caseTypeReader) {
+      CaseTypeReader caseTypeReader,
+      SignalAuditRingBuffer signalAuditRingBuffer) {
     return new ExecutionSignalRouter(
         mappingRegistry,
         stageAdvancer,
@@ -73,6 +75,17 @@ public class WorkflowAdapterConfig {
         caseRepository,
         eventPublisher,
         clock,
-        caseTypeReader);
+        caseTypeReader,
+        signalAuditRingBuffer);
+  }
+
+  /**
+   * Story 4.6 AC3 — singleton in-memory ring buffer of recent routing decisions per CaseType.
+   * Sibling to {@link MappingRegistry} — pure-Java, framework-free per NFR36; Spring wires the
+   * bean. Backs the admin Mapping Inspector's "Recent Signals" panel (Story 4.6 AC2/AC4).
+   */
+  @Bean
+  public SignalAuditRingBuffer signalAuditRingBuffer() {
+    return new SignalAuditRingBuffer();
   }
 }
