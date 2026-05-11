@@ -55,8 +55,15 @@ class FormBindingVersionPinPostgresIT {
 
   private static final String EMAIL = "formbind-pin-pg-it@wkspower.local";
   private static final String PASSWORD = "admin";
-  private static final String CASE_TYPE_ID = "formbind-pin-pg-fixture";
   private static final String FORM_ID = "intake-form";
+
+  /**
+   * Per-test unique case-type id (mirrors {@link FormBindingVersionPinIT}). Assigned in {@link
+   * #setup} so each @Test sees a fresh registry slot — without this, the second test cannot
+   * re-register v1 because v2 from the prior test is still the current version for the shared id
+   * (WKS-CFG-011 older-version guard fires).
+   */
+  private String caseTypeId;
 
   @Container
   @SuppressWarnings("resource")
@@ -86,7 +93,8 @@ class FormBindingVersionPinPostgresIT {
 
   @BeforeEach
   void setup() {
-    registry.register(caseTypeV1());
+    this.caseTypeId = "formbind-pin-pg-" + UUID.randomUUID().toString().substring(0, 8);
+    registry.register(caseTypeV1WithId(caseTypeId));
   }
 
   /**
@@ -99,10 +107,10 @@ class FormBindingVersionPinPostgresIT {
   @Test
   void inFlightCaseSeesV1FormAfterV2DeployOnPostgres() throws Exception {
     String cookie = login();
-    String caseId = createCase(cookie);
+    String caseId = createCaseWithId(cookie, caseTypeId);
 
     // Deploy v2 with extra required field
-    registry.register(caseTypeV2());
+    registry.register(caseTypeV2WithId(caseTypeId));
 
     // GET the case — embedded CaseType must be v1
     ResponseEntity<String> getResp = exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
@@ -138,8 +146,8 @@ class FormBindingVersionPinPostgresIT {
   /**
    * AC-6 (a) Postgres parity — v1-pinned validates against v1 when a field was REMOVED in v2.
    *
-   * <p>Uses a per-test unique id to avoid registry older-version rejection against the {@link
-   * #CASE_TYPE_ID} v1 written by {@link #setup}. JSONB persistence path verified.
+   * <p>Uses a per-test unique id to avoid registry older-version rejection against the v1 fixture
+   * written by {@link #setup}. JSONB persistence path verified.
    */
   @Test
   void v1PinnedValidatesAgainstV1AfterFieldRemovedInV2OnPostgres() throws Exception {
@@ -205,10 +213,6 @@ class FormBindingVersionPinPostgresIT {
     return semi > 0 ? setCookie.substring(0, semi) : setCookie;
   }
 
-  private String createCase(String cookie) throws Exception {
-    return createCaseWithId(cookie, CASE_TYPE_ID);
-  }
-
   private String createCaseWithId(String cookie, String caseTypeId) throws Exception {
     ResponseEntity<String> resp =
         exchange(
@@ -230,7 +234,8 @@ class FormBindingVersionPinPostgresIT {
 
   // ---- CaseType fixtures -----------------------------------------------------
 
-  private static CaseTypeConfig caseTypeV1() {
+  /** v1 with explicit id (per-test fresh id to dodge the older-version guard across tests). */
+  private static CaseTypeConfig caseTypeV1WithId(String caseTypeId) {
     List<FieldDefinition> fields =
         List.of(
             new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
@@ -238,7 +243,7 @@ class FormBindingVersionPinPostgresIT {
     FormDefinition form =
         new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
     return new CaseTypeConfig(
-        CASE_TYPE_ID,
+        caseTypeId,
         "FormBind Pin PG Fixture",
         1,
         null,
@@ -251,18 +256,6 @@ class FormBindingVersionPinPostgresIT {
                 "admin", List.of(Permission.CREATE, Permission.EDIT, Permission.VIEW))),
         List.of(),
         List.of(form));
-  }
-
-  // ---- AC-6 (a)+(b) per-test-id variants ------------------------------------
-
-  /** v1 with explicit id, for AC-6 (b) test (per-test fresh id to dodge older-version guard). */
-  private static CaseTypeConfig caseTypeV1WithId(String caseTypeId) {
-    return rebuildAt(caseTypeV1(), caseTypeId);
-  }
-
-  /** v2 with explicit id, for AC-6 (b) test. */
-  private static CaseTypeConfig caseTypeV2WithId(String caseTypeId) {
-    return rebuildAt(caseTypeV2(), caseTypeId);
   }
 
   /** v1 with explicit id + optional "note" field, for AC-6 (a). */
@@ -314,23 +307,8 @@ class FormBindingVersionPinPostgresIT {
         List.of(form));
   }
 
-  /** Rebuild a fixture with a different id (uses the 11-arg compat constructor). */
-  private static CaseTypeConfig rebuildAt(CaseTypeConfig src, String caseTypeId) {
-    return new CaseTypeConfig(
-        caseTypeId,
-        src.displayName(),
-        src.version(),
-        src.description(),
-        src.workflow(),
-        src.fields(),
-        src.statuses(),
-        src.listColumns(),
-        src.roles(),
-        src.stages(),
-        src.forms());
-  }
-
-  private static CaseTypeConfig caseTypeV2() {
+  /** v2 with explicit id (adds required "email"). */
+  private static CaseTypeConfig caseTypeV2WithId(String caseTypeId) {
     List<FieldDefinition> fields =
         List.of(
             new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
@@ -339,7 +317,7 @@ class FormBindingVersionPinPostgresIT {
     FormDefinition form =
         new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
     return new CaseTypeConfig(
-        CASE_TYPE_ID,
+        caseTypeId,
         "FormBind Pin PG Fixture",
         2,
         null,
