@@ -63,6 +63,12 @@ public class SamlGatingFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
+    // CORS preflights MUST reach SecurityConfig's `OPTIONS /** permitAll` rule untouched —
+    // a 404+JSON here would corrupt the preflight and break browser-side SAML init from the SPA.
+    if ("OPTIONS".equals(request.getMethod())) {
+      chain.doFilter(request, response);
+      return;
+    }
     String path = request.getRequestURI();
     if (!SAML_MATCHER.matches(request)) {
       chain.doFilter(request, response);
