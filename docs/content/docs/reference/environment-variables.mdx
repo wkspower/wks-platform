@@ -2,12 +2,152 @@
 title: Environment variables
 description: All WKS_* environment variables — what they control, their defaults, and whether they are required.
 gate: "3"
-status: needs-writing
-source: architecture AR-18
 ---
 
-{/* AR-18 list: WKS_DB_URL, WKS_DB_USER, WKS_DB_PASSWORD, WKS_STORAGE_ENDPOINT, */}
-{/* WKS_STORAGE_KEY, WKS_CORS_ORIGINS, WKS_LOCALE */}
-{/* Owner: Victor (with Claude) */}
+All configuration in the WKS production profile is delivered through environment variables. No secrets are baked into the image; the image itself has no production defaults. The sections below map each `WKS_*` variable to its Spring property, document its type and default, and cite the source file where the binding is declared.
 
-TODO: content
+Variables marked **required** have no default and cause a hard startup failure if unset. Variables marked **required (rotated)** additionally fail startup if they still equal the `<MUST-BE-ROTATED>` sentinel from `docker/.env.production.example` — enforced by `ProductionBootstrapValidator` (`WKS-API-055`).
+
+---
+
+## Datasource (`spring.datasource`)
+
+Binding: `DataSourceConfig.java` (`@ConfigurationProperties("spring.datasource")`) and `application-production.yml` lines 22–28.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_DB_URL` | String | — | **required** | JDBC connection string. Must be `jdbc:postgresql://host:5432/dbname`. Any `jdbc:h2:` value aborts startup with `WKS-API-053`. |
+| `WKS_DB_USER` | String | — | **required** | Postgres role name used by the connection pool. |
+| `WKS_DB_PASSWORD` | String | — | **required (rotated)** | Postgres role password. `ProductionBootstrapValidator` (`WKS-API-055`) aborts startup if unrotated. |
+
+The production profile hard-overrides `spring.datasource.driver-class-name` to `org.postgresql.Driver` and excludes H2 autoconfig entirely (`spring.autoconfigure.exclude`). These overrides live in `application-production.yml` and are not operator-configurable.
+
+---
+
+## Security / JWT (`wks.admin`, `wks.jwt`)
+
+Binding: `application.yml` lines 72–77.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_ADMIN_EMAIL` | String | — | **required (rotated)** | Email address used to create the first-boot admin account. |
+| `WKS_ADMIN_PASSWORD` | String | — | **required (rotated)** | Password for the first-boot admin account. |
+| `WKS_JWT_SECRET` | String | — | **required (rotated)** | Base64-encoded HMAC key used to sign session JWTs. Must decode to ≥ 32 bytes. Generate with `openssl rand -base64 48`. |
+| `WKS_JWT_TTL_HOURS` | Integer | `8` | optional | Session token lifetime in hours. Default 8 hours. Maps to `wks.jwt.ttl-hours`. |
+
+---
+
+## CORS (`wks.cors`)
+
+Binding: `application.yml` line 79; production override `application-production.yml` line 68.
+
+| Variable | Type | Default (production) | Required | Description |
+|----------|------|----------------------|----------|-------------|
+| `WKS_CORS_ORIGINS` | String (comma-separated) | `""` (empty) | optional | Allowed CORS origins for the REST API. Set to your frontend domain in production (e.g. `https://app.example.com`). Empty string disables cross-origin access. |
+
+---
+
+## Storage / MinIO (`wks.storage`, `wks.documents`)
+
+Binding: `application-production.yml` lines 69–75.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_STORAGE_ENDPOINT` | String | `""` | **required** | MinIO server URL including scheme and port (e.g. `http://minio:9000`). Empty string falls back to `LocalDocumentStore` (dev mode only). |
+| `WKS_STORAGE_KEY` | String | `""` | **required (rotated)** | MinIO secret key for the WKS service account. The matching access key is `WKS_MINIO_ROOT_USER`. |
+| `WKS_STORAGE_BUCKET` | String | `wks-documents` | optional | S3/MinIO bucket name for document storage. Maps to `wks.documents.bucket`. |
+| `WKS_MINIO_ROOT_USER` | String | — | **required (rotated)** | MinIO root user identifier. Used by `ProductionBootstrapValidator` (`WKS-API-055`) to verify rotation; the WKS app does not consume this at runtime — it is the MinIO container's admin login. |
+| `WKS_MINIO_ROOT_PASSWORD` | String | — | **required (rotated)** | MinIO root password. Same rotation requirement as `WKS_MINIO_ROOT_USER`. |
+
+---
+
+## Keycloak / SSO (`wks.keycloak`)
+
+Binding: `application-production.yml` lines 83–84. See also `KeycloakSeamAnnouncer.java`.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_KEYCLOAK_ENABLED` | Boolean | `false` | optional | Forward-compat seam flag. When `true`, the app emits `WKS-AUTH-001 WARN` at boot stating the seam is currently inert. Built-in cookie-JWT remains the sole auth gate until Story 10.4 ships. Does not enforce SSO. |
+
+---
+
+## Bootstrap validation (`wks.bootstrap`)
+
+Binding: `application-production.yml` lines 63–65. Controlled by `ProductionBootstrapValidator.java`.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_BOOTSTRAP_PRODUCTION_VALIDATION_ENABLED` | Boolean | `true` | optional | When `true` (default), activates two fail-closed boot validators: `WKS-API-053` (datasource must be Postgres) and `WKS-API-055` (required env vars must be rotated). Set to `false` only in integration tests that activate the production profile against H2 or with incomplete env-var fixtures. Never disable in a live deployment. |
+
+---
+
+## Case types (`wks.case-types`)
+
+Binding: `application.yml` lines 83–86; production override `application-production.yml` lines 86–88.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_CASE_TYPES_DIR` | String | `./case-types/` | optional | Directory the backend scans at startup for case-type YAML files. In containers, mount your YAML files and point this to the mount path (e.g. `/app/case-types`). |
+| `WKS_CASE_TYPES_FAIL_ON_INVALID` | Boolean | `false` | optional | When `true`, any invalid case-type YAML aborts startup. Default `false` logs a WARN and skips the invalid file. Set to `true` for strict production rollouts. |
+
+---
+
+## License (`wks.license`)
+
+Binding: `application.yml` lines 88–91.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_LICENSE_FILE` | String | `""` | optional | Path to the Ed25519-signed license JWT file. Empty string activates OSS mode (no EE features). |
+| `WKS_LICENSE_POLL_INTERVAL` | Integer | `30` | optional | Hot-reload polling interval in seconds. The license file is reloaded when its `lastModified` timestamp changes. |
+
+---
+
+## Form drafts (`wks.form.draft`)
+
+Binding: `application.yml` lines 95–97.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_FORM_DRAFT_TTL_DAYS` | Integer | `30` | optional | Number of days before an inactive form draft is expired by the scheduled cleanup job. |
+| `WKS_FORM_DRAFT_EXPIRATION_CRON` | String | `0 0 3 * * *` | optional | Spring cron expression for the draft expiration job. Default runs at 03:00 UTC daily. |
+
+---
+
+## Theme (`wks.theme`)
+
+Binding: `application.yml` line 101.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `WKS_THEME_CSS_PATH` | String | `""` | optional | Path to a CSS file served at `GET /api/theme.css`. When empty, the endpoint returns HTTP 204 and the browser ignores the empty link. Used for per-client brand overrides without rebuilding the image. |
+
+---
+
+## OpenAPI / Swagger UI (`springdoc`)
+
+Binding: `application-production.yml` lines 93–97.
+
+| Variable | Type | Default (production) | Required | Description |
+|----------|------|----------------------|----------|-------------|
+| `WKS_OPENAPI_ENABLED` | Boolean | `false` | optional | Enables `GET /v3/api-docs` and the Swagger UI. Disabled by default in production — unauthenticated `/v3/api-docs` is a recurring CVE vector. Enable only for internal tooling deployments. |
+
+---
+
+## Localisation (`wks.locale`)
+
+Binding: `application-production.yml` line 66.
+
+| Variable | Type | Default (production) | Required | Description |
+|----------|------|----------------------|----------|-------------|
+| `WKS_LOCALE` | String | `en-IN` | optional | BCP 47 locale tag used for date formatting and number display in UI-facing fields. |
+
+---
+
+## Host port (compose-level only)
+
+This variable is consumed by `docker-compose.prod.yml` only — not read by the Spring application.
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `WKS_HOST_PORT` | Integer | `8080` | Host port mapped to the WKS container's `8080`. Change to avoid conflicts when running multiple instances on the same host. |

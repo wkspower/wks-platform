@@ -2,11 +2,238 @@
 title: Deploy to production
 description: One-command per-client deployment — from zero to a running WKS instance in under 2 hours.
 gate: "3"
-status: stub
-source: docs/ops/per-client-deploy-runbook.md (Story 14-7)
 ---
 
-{/* Source material is complete. Needs voice-rules pass and removal of internal references. */}
-{/* Owner: Victor (with Claude) */}
+A local demo proves the concept. A production deployment proves it to your client. WKS is designed for isolated per-client instances: one Postgres database, one MinIO object-store, one URL, one license — no shared infrastructure, no `tenant_id`, no row-level gymnastics. Each deployment is a three-container stack you bring up with a single `docker compose` command.
 
-TODO: content — migrate and polish from docs/ops/per-client-deploy-runbook.md
+## Quick start
+
+Copy the example env file, rotate every sentinel, then start the stack:
+
+```bash
+cp docker/.env.production.example docker/.env
+# Generate secrets — examples below.
+# Replace every <MUST-BE-ROTATED> value before the next step.
+docker compose -f docker/docker-compose.prod.yml up -d
+```
+
+Generate secrets with:
+
+```bash
+openssl rand -base64 32   # use for passwords and storage keys
+openssl rand -base64 48   # use for WKS_JWT_SECRET (needs ≥32 bytes after decode)
+```
+
+## docker-compose example
+
+The compose file at `docker/docker-compose.prod.yml` is the authoritative single-tenant production surface. It brings up three services:
+
+```yaml
+services:
+  wks-platform-prod:
+    image: wkspower/wks-platform:2.0.0-prod
+    container_name: wks-platform-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "${WKS_HOST_PORT:-8080}:8080"
+    environment:
+      TZ: UTC
+      SPRING_PROFILES_ACTIVE: production
+      WKS_DB_URL: ${WKS_DB_URL}
+      WKS_DB_USER: ${WKS_DB_USER}
+      WKS_DB_PASSWORD: ${WKS_DB_PASSWORD}
+      WKS_STORAGE_ENDPOINT: ${WKS_STORAGE_ENDPOINT}
+      WKS_STORAGE_KEY: ${WKS_STORAGE_KEY}
+      WKS_ADMIN_EMAIL: ${WKS_ADMIN_EMAIL}
+      WKS_ADMIN_PASSWORD: ${WKS_ADMIN_PASSWORD}
+      WKS_JWT_SECRET: ${WKS_JWT_SECRET}
+      WKS_MINIO_ROOT_USER: ${WKS_MINIO_ROOT_USER}
+      WKS_MINIO_ROOT_PASSWORD: ${WKS_MINIO_ROOT_PASSWORD}
+      WKS_LOCALE: ${WKS_LOCALE:-en-IN}
+      WKS_CORS_ORIGINS: ${WKS_CORS_ORIGINS:-}
+      WKS_KEYCLOAK_ENABLED: ${WKS_KEYCLOAK_ENABLED:-false}
+      WKS_OPENAPI_ENABLED: ${WKS_OPENAPI_ENABLED:-false}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: wks-postgres
+    environment:
+      POSTGRES_DB: wks
+      POSTGRES_USER: ${WKS_DB_USER}
+      POSTGRES_PASSWORD: ${WKS_DB_PASSWORD}
+    volumes:
+      - wks-pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${WKS_DB_USER} -d wks"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: wks-minio
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${WKS_MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${WKS_MINIO_ROOT_PASSWORD}
+    volumes:
+      - wks-miniodata:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/ready || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  wks-pgdata:
+    driver: local
+  wks-miniodata:
+    driver: local
+```
+
+The application waits for Postgres and MinIO healthchecks before starting. Flyway runs its migrations on boot; `ddl-auto: validate` confirms schema parity after each migration run.
+
+**Running multiple instances on the same host:** set `COMPOSE_PROJECT_NAME` per deploy to scope named volumes and container names:
+
+```bash
+COMPOSE_PROJECT_NAME=wks-clientA docker compose -f docker/docker-compose.prod.yml up -d
+COMPOSE_PROJECT_NAME=wks-clientB docker compose -f docker/docker-compose.prod.yml up -d
+```
+
+## Required environment variables
+
+These vars have no defaults and cause a hard startup failure if unset. The bootstrap validator (`WKS-API-055`) enforces rotation — any var still holding its `<MUST-BE-ROTATED>` sentinel from `.env.production.example` aborts startup.
+
+| Variable | Description | Generate with |
+|----------|-------------|---------------|
+| `WKS_DB_URL` | JDBC connection string — must be `jdbc:postgresql://...` | Postgres host + credentials |
+| `WKS_DB_USER` | Postgres role name | operator-chosen |
+| `WKS_DB_PASSWORD` | Postgres role password | `openssl rand -base64 32` |
+| `WKS_STORAGE_ENDPOINT` | MinIO URL (`http://minio:9000`) | MinIO host |
+| `WKS_STORAGE_KEY` | MinIO secret key | `openssl rand -base64 32` |
+| `WKS_ADMIN_EMAIL` | First-boot admin login email | operator-chosen |
+| `WKS_ADMIN_PASSWORD` | First-boot admin login password | `openssl rand -base64 24` |
+| `WKS_JWT_SECRET` | Base64-encoded HMAC key (≥32 bytes after decode) | `openssl rand -base64 48` |
+| `WKS_MINIO_ROOT_USER` | MinIO root user identifier | operator-chosen |
+| `WKS_MINIO_ROOT_PASSWORD` | MinIO root password | `openssl rand -base64 32` |
+
+For the full variable reference — including optional vars, defaults, and which Spring property each maps to — see [Environment variables](/docs/reference/environment-variables).
+
+## Bootstrap validation
+
+WKS runs two fail-closed validators at startup when `SPRING_PROFILES_ACTIVE=production`:
+
+**WKS-API-053 — datasource must be Postgres.** The production profile hard-overrides the datasource driver to `org.postgresql.Driver`. At boot, the validator opens a test connection and reads the database product name; if it resolves to H2, startup is aborted. This catches misconfigured `WKS_DB_URL` values before any traffic is served.
+
+**WKS-API-055 — required env vars must be rotated.** The validator reads every required env var directly from the OS environment (not from Spring's property resolution — YAML defaults cannot satisfy this check). Any var that is unset or still equals `<MUST-BE-ROTATED>` causes a startup failure listing every offending var by name.
+
+Both validators activate by default (`matchIfMissing = true`). The switch to disable them is:
+
+```
+WKS_BOOTSTRAP_PRODUCTION_VALIDATION_ENABLED=false
+```
+
+**When to disable:** only in integration tests that activate the production profile against an H2 datasource or with incomplete env-var fixtures. Never disable in a live deployment.
+
+Source: `backend/src/main/java/com/wkspower/platform/infrastructure/config/ProductionBootstrapValidator.java`
+
+## SSO seam (Keycloak)
+
+WKS has a forward-compatible SSO seam with two independent switches. The switches are orthogonal — enabling one without the other is intentional in certain stages.
+
+**Switch 1 — provision the Keycloak container:**
+
+```bash
+docker compose \
+  -f docker/docker-compose.prod.yml \
+  -f docker/docker-compose.sso.yml \
+  up -d
+```
+
+`docker-compose.sso.yml` adds a `keycloak` service (image `quay.io/keycloak/keycloak:26.0.5`) on port `${WKS_KEYCLOAK_PORT:-8081}`. This allows operators to pre-bake Keycloak realms ahead of the SSO integration landing.
+
+**Switch 2 — tell the WKS app Keycloak is provisioned:**
+
+```bash
+WKS_KEYCLOAK_ENABLED=true
+```
+
+Maps to `wks.keycloak.enabled` in `application-production.yml`. Default: `false`.
+
+**Important:** `WKS_KEYCLOAK_ENABLED=true` is currently a **forward-compat seam only**. It logs a `WKS-AUTH-001 WARN` at boot explicitly stating the seam is inert. Built-in cookie-JWT (`WKS_JWT_SECRET`) remains the sole auth gate until Story 10.4 (SAML via Keycloak) ships. Setting this flag does not enforce SSO; it signals to the `KeycloakSeamAnnouncer` that a Keycloak container is reachable.
+
+Summary:
+
+| State | Effect |
+|-------|--------|
+| Neither switch set | Built-in cookie-JWT auth active; no Keycloak container |
+| `docker-compose.sso.yml` stacked, `WKS_KEYCLOAK_ENABLED=false` | Keycloak container running; WKS logs INFO that SSO is disabled |
+| `docker-compose.sso.yml` stacked, `WKS_KEYCLOAK_ENABLED=true` | Keycloak container running; WKS emits `WKS-AUTH-001 WARN` — seam is inert, cookie-JWT still active |
+| SSO enforcement | Requires Story 10.4 to land (not yet available) |
+
+Source: `backend/src/main/java/com/wkspower/platform/infrastructure/config/KeycloakSeamAnnouncer.java`
+
+## Smoke check
+
+Run these after `docker compose up` reports all containers healthy.
+
+**1. Application health:**
+
+```bash
+curl -s http://localhost:8080/api/health | jq .
+```
+
+Expected response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "version": "2.0.0",
+    "uptime": "PT12.345S"
+  }
+}
+```
+
+HTTP 200 confirms the application started and Flyway migrations completed. A non-200 or connection refused means the `start_period` has not elapsed — wait 30 seconds and retry.
+
+**2. Postgres migration count:**
+
+Connect to the Postgres container and verify Flyway applied its full migration set:
+
+```bash
+docker exec -it wks-postgres \
+  psql -U "${WKS_DB_USER}" -d wks \
+  -c "SELECT count(*) FROM flyway_schema_history WHERE success = true;"
+```
+
+Expected output: a count greater than 10. The exact number grows with each release. A count of 0 means Flyway did not run (check startup logs). A `relation "flyway_schema_history" does not exist` error means the schema was not created — verify `WKS_DB_URL` and that the Postgres container is the one WKS connected to.
+
+**3. Rollback (data-preserving):**
+
+```bash
+docker compose -f docker/docker-compose.prod.yml down
+# Volumes are retained. Restart later with `up`.
+```
+
+**4. Full teardown (irreversible):**
+
+```bash
+docker compose -f docker/docker-compose.prod.yml down -v
+# Removes wks-pgdata and wks-miniodata. This is the GDPR-delete path.
+```
