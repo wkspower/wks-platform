@@ -49,30 +49,4 @@ public record FormDefinition(
     sections = sections == null ? List.of() : List.copyOf(sections);
   }
 
-  /**
-   * Backward-compat constructor for callers that pre-date Story 5.3's {@code sections} slot.
-   * Defaults {@code sections} and {@code archetype} to their null/empty defaults.
-   */
-  public FormDefinition(
-      String id,
-      String topology,
-      String dataModel,
-      String rendering,
-      List<FieldDefinition> fields) {
-    this(id, topology, dataModel, rendering, fields, List.of(), null);
-  }
-
-  /**
-   * Backward-compat constructor for callers that pre-date Story 6.1's {@code archetype} slot.
-   * Defaults {@code archetype} to {@code null}.
-   */
-  public FormDefinition(
-      String id,
-      String topology,
-      String dataModel,
-      String rendering,
-      List<FieldDefinition> fields,
-      List<FormSection> sections) {
-    this(id, topology, dataModel, rendering, fields, sections, null);
-  }
 }

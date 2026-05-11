@@ -239,7 +239,7 @@ class PerFieldEditPermissionIT {
                 null,
                 List.of("role:underwriter")));
     FormDefinition intakeForm =
-        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields);
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
     return new CaseTypeConfig(
         CASE_TYPE_ID,
         "Per-Field Permission Fixture",
@@ -276,7 +276,7 @@ class PerFieldEditPermissionIT {
             new FieldDefinition(
                 "amount", "Amount", FieldType.NUMBER, false, false, 1, List.of(), null, List.of()));
     FormDefinition intakeForm =
-        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields);
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
     return new CaseTypeConfig(
         LOCKED_CASE_TYPE_ID,
         "Locked Default Fixture",

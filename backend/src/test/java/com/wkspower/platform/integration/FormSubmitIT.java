@@ -186,7 +186,7 @@ class FormSubmitIT {
             new FieldDefinition("amount", "Amount", FieldType.NUMBER, false, 1, List.of(), null));
 
     FormDefinition intakeForm =
-        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields);
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
 
     return new CaseTypeConfig(
         CASE_TYPE_ID,

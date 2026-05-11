@@ -600,7 +600,7 @@ class CaseTypeDiffTest {
             List.of(),
             List.of(
                 new FormDefinition(
-                    "intake-form", "single", "monolithic", "single-page", List.of())));
+                    "intake-form", "single", "monolithic", "single-page", List.of(), List.of(), null)));
 
     BlastRadiusReport report =
         CaseTypeDiff.classify(prev, next, MappingDefinition.empty(), MappingDefinition.empty());

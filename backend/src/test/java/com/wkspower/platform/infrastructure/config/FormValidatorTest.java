@@ -39,7 +39,7 @@ class FormValidatorTest {
   @Test
   void validTriplet_singleMonolithicSinglePage_noErrors() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("intake", "single", "monolithic", "single-page", null);
+    var def = new RawFormDefinition("intake", "single", "monolithic", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
     assertThat(errors).isEmpty();
   }
@@ -51,7 +51,7 @@ class FormValidatorTest {
     var section = new RawFormSection("personal", "Personal Information", List.of());
     var def =
         new RawFormDefinition(
-            "onboarding", "single", "sectioned", "multi-section", null, List.of(section));
+            "onboarding", "single", "sectioned", "multi-section", null, List.of(section), null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
     assertThat(errors).isEmpty();
   }
@@ -62,7 +62,7 @@ class FormValidatorTest {
   void parallelTopology_rejected_withWksForm001() {
     List<ErrorDetail> errors = new ArrayList<>();
     var def =
-        new RawFormDefinition("parallel-form", "parallel", "sectioned", "multi-section", null);
+        new RawFormDefinition("parallel-form", "parallel", "sectioned", "multi-section", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors).isNotEmpty();
@@ -78,7 +78,7 @@ class FormValidatorTest {
   @Test
   void parallelTopology_message_containsUseTopologySingle() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "parallel", "monolithic", "single-page", null);
+    var def = new RawFormDefinition("x", "parallel", "monolithic", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors).anySatisfy(e -> assertThat(e.message()).contains("use topology: single"));
@@ -89,7 +89,7 @@ class FormValidatorTest {
   @Test
   void unknownTopology_rejected_withWksForm001() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "distributed", "monolithic", "single-page", null);
+    var def = new RawFormDefinition("x", "distributed", "monolithic", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -103,7 +103,7 @@ class FormValidatorTest {
   @Test
   void invalidDataModel_rejected() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "single", "flat", "single-page", null);
+    var def = new RawFormDefinition("x", "single", "flat", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -118,7 +118,7 @@ class FormValidatorTest {
   @Test
   void invalidRendering_rejected() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "single", "monolithic", "full-page", null);
+    var def = new RawFormDefinition("x", "single", "monolithic", "full-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -135,7 +135,7 @@ class FormValidatorTest {
   @Test
   void missingTopology_reportsWksCfg001() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", null, "monolithic", "single-page", null);
+    var def = new RawFormDefinition("x", null, "monolithic", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -149,7 +149,7 @@ class FormValidatorTest {
   @Test
   void missingDataModel_reportsWksCfg001() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "single", null, "single-page", null);
+    var def = new RawFormDefinition("x", "single", null, "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -163,7 +163,7 @@ class FormValidatorTest {
   @Test
   void missingRendering_reportsWksCfg001() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", "single", "monolithic", null, null);
+    var def = new RawFormDefinition("x", "single", "monolithic", null, null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -179,7 +179,7 @@ class FormValidatorTest {
   @Test
   void allAxesMissing_collectsThreeErrors() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var def = new RawFormDefinition("x", null, null, null, null);
+    var def = new RawFormDefinition("x", null, null, null, null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors).hasSize(3);
@@ -191,8 +191,8 @@ class FormValidatorTest {
   @Test
   void multipleDefinitions_validThenInvalid_errorsOnlyForInvalid() {
     List<ErrorDetail> errors = new ArrayList<>();
-    var valid = new RawFormDefinition("intake", "single", "monolithic", "single-page", null);
-    var invalid = new RawFormDefinition("bad", "parallel", "sectioned", "multi-section", null);
+    var valid = new RawFormDefinition("intake", "single", "monolithic", "single-page", null, null, null);
+    var invalid = new RawFormDefinition("bad", "parallel", "sectioned", "multi-section", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(valid, invalid)), errors);
 
     // Only the second definition should produce errors
@@ -207,7 +207,7 @@ class FormValidatorTest {
     List<ErrorDetail> errors = new ArrayList<>();
     // No sections provided — should require at least one
     var def =
-        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, null);
+        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -223,7 +223,7 @@ class FormValidatorTest {
   void sectioned_withEmptySectionsList_emitsWksCfg001() {
     List<ErrorDetail> errors = new ArrayList<>();
     var def =
-        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, List.of());
+        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, List.of(), null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -240,7 +240,7 @@ class FormValidatorTest {
     var section = new RawFormSection("personal", "Personal Information", List.of());
     var def =
         new RawFormDefinition(
-            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section), null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors).isEmpty();
@@ -252,7 +252,7 @@ class FormValidatorTest {
     var section = new RawFormSection("personal", null, List.of());
     var def =
         new RawFormDefinition(
-            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section), null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -269,7 +269,7 @@ class FormValidatorTest {
     var section = new RawFormSection(null, "Personal Information", List.of());
     var def =
         new RawFormDefinition(
-            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section), null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors)
@@ -284,7 +284,7 @@ class FormValidatorTest {
   void monolithic_withoutSections_noSectionErrors() {
     List<ErrorDetail> errors = new ArrayList<>();
     // monolithic forms do not need sections — no section errors expected
-    var def = new RawFormDefinition("intake", "single", "monolithic", "single-page", null, null);
+    var def = new RawFormDefinition("intake", "single", "monolithic", "single-page", null, null, null);
     validator.validate(RawFormConfig.fromList(List.of(def)), errors);
 
     assertThat(errors).isEmpty();
