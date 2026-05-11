@@ -35,6 +35,15 @@ public enum ErrorCode {
    * feedback_error_codes_are_wire_contract.md} memory.
    */
   WKS_API_006("WKS-API-006"),
+  /**
+   * Story 3.9 — rebase request supplied an invalid {@code toVersion} argument, or the case's bound
+   * {@code caseTypeId} does not match the path parameter. Covers: {@code toVersion} equal to or
+   * less than current version (forward-only constraint), {@code toVersion} not found in {@code
+   * case_type_versions}, non-integer or missing {@code to} param, and caseTypeId mismatch between
+   * path and case row. Wire string is {@code WKS-API-007} — stable contract per {@code
+   * feedback_error_codes_are_wire_contract.md}; never reuse for a different meaning.
+   */
+  WKS_API_007("WKS-API-007"),
 
   // 401 / 403 — auth.
   /** Authentication failed (unknown email, wrong password, or inactive user). */
@@ -191,6 +200,17 @@ public enum ErrorCode {
    * {@code stage}, {@code none}, {@code all}. Extend cautiously — the wire is a contract.
    */
   WKS_CFG_033("WKS-CFG-033"),
+  /**
+   * Story 3.9 — rebase apply aborted because the dry-run report contains one or more irreconcilable
+   * items (e.g. a removed field has non-null data on the case, or the current status has no
+   * equivalent in the target version). The apply is rejected atomically; {@code
+   * cases.case_type_version} is unchanged. The error response body includes the full {@code
+   * irreconcilable} list so the operator can identify items requiring manual decision before
+   * retrying. Wire string is {@code WKS-CFG-034} — next free slot after 031/032/033 already minted
+   * by Sprint 9 stories. Stable contract per {@code feedback_error_codes_are_wire_contract.md};
+   * never reuse for a different meaning.
+   */
+  WKS_CFG_034("WKS-CFG-034"),
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
 

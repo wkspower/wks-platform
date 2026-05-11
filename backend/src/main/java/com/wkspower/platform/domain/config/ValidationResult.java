@@ -28,19 +28,28 @@ import java.util.Optional;
  * response envelope's {@code meta} field. Currently used to carry the {@code blastRadius} report
  * when the blast-radius gate rejects a mutate-class deploy (AC2). Defaults to {@link Map#of()} for
  * all callers that don't supply it.
+ *
+ * <p>Story 3.9 CF#1 — introduces {@link #gateOutcome()} and {@link #priorVersionNum()} to carry the
+ * blast-radius gate result back to the controller layer so the audit log emitter can log the actual
+ * prior version number and the correct reason enum value. Both default to {@code NO_OVERRIDE_USED}
+ * / {@code 0} on all paths that predate CF#1 — backward-compat constructors supply these defaults
+ * automatically.
  */
 public record ValidationResult(
     List<ErrorDetail> errors,
     List<ErrorDetail> warnings,
     Optional<CaseTypeConfig> config,
     Optional<MappingDefinition> mappingDefinition,
-    Map<String, Object> responseMeta) {
+    Map<String, Object> responseMeta,
+    GateOutcome gateOutcome,
+    int priorVersionNum) {
 
   public ValidationResult {
     errors = List.copyOf(errors);
     warnings = warnings == null ? List.of() : List.copyOf(warnings);
     mappingDefinition = mappingDefinition == null ? Optional.empty() : mappingDefinition;
     responseMeta = responseMeta == null ? Map.of() : Map.copyOf(responseMeta);
+    gateOutcome = gateOutcome == null ? GateOutcome.NO_OVERRIDE_USED : gateOutcome;
     if (errors.isEmpty() == config.isEmpty()) {
       throw new IllegalStateException(
           "ValidationResult invariant: exactly one of errors-empty and config-present must hold "
@@ -52,21 +61,36 @@ public record ValidationResult(
     }
   }
 
-  /** Backward-compat 4-arg constructor — defaults {@link #responseMeta()} to empty map. */
+  /** Backward-compat 4-arg constructor — defaults {@link #responseMeta()} and CF#1 fields. */
   public ValidationResult(
       List<ErrorDetail> errors,
       List<ErrorDetail> warnings,
       Optional<CaseTypeConfig> config,
       Optional<MappingDefinition> mappingDefinition) {
-    this(errors, warnings, config, mappingDefinition, null);
+    this(errors, warnings, config, mappingDefinition, null, GateOutcome.NO_OVERRIDE_USED, 0);
   }
 
   /**
-   * Backward-compat 3-arg constructor — defaults {@link #mappingDefinition()} and meta to empty.
+   * Backward-compat 3-arg constructor — defaults {@link #mappingDefinition()}, meta, and CF#1
+   * fields.
    */
   public ValidationResult(
       List<ErrorDetail> errors, List<ErrorDetail> warnings, Optional<CaseTypeConfig> config) {
-    this(errors, warnings, config, Optional.empty(), null);
+    this(errors, warnings, config, Optional.empty(), null, GateOutcome.NO_OVERRIDE_USED, 0);
+  }
+
+  /**
+   * Backward-compat 5-arg constructor — defaults CF#1 fields ({@link #gateOutcome()} + {@link
+   * #priorVersionNum()}).
+   */
+  public ValidationResult(
+      List<ErrorDetail> errors,
+      List<ErrorDetail> warnings,
+      Optional<CaseTypeConfig> config,
+      Optional<MappingDefinition> mappingDefinition,
+      Map<String, Object> responseMeta) {
+    this(
+        errors, warnings, config, mappingDefinition, responseMeta, GateOutcome.NO_OVERRIDE_USED, 0);
   }
 
   public static ValidationResult ok(CaseTypeConfig config) {
@@ -84,6 +108,26 @@ public record ValidationResult(
       CaseTypeConfig config, List<ErrorDetail> warnings, MappingDefinition mappingDefinition) {
     return new ValidationResult(
         List.of(), warnings, Optional.of(config), Optional.ofNullable(mappingDefinition));
+  }
+
+  /**
+   * Story 3.9 CF#1 — variant carrying the validated {@link MappingDefinition} plus {@link
+   * GateOutcome} and {@code priorVersionNum} for audit-log threading.
+   */
+  public static ValidationResult ok(
+      CaseTypeConfig config,
+      List<ErrorDetail> warnings,
+      MappingDefinition mappingDefinition,
+      GateOutcome gateOutcome,
+      int priorVersionNum) {
+    return new ValidationResult(
+        List.of(),
+        warnings,
+        Optional.of(config),
+        Optional.ofNullable(mappingDefinition),
+        null,
+        gateOutcome,
+        priorVersionNum);
   }
 
   public static ValidationResult invalid(List<ErrorDetail> errors) {

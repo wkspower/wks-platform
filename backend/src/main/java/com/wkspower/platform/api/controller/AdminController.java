@@ -3,11 +3,14 @@ package com.wkspower.platform.api.controller;
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.response.DeployResponseDto;
 import com.wkspower.platform.domain.config.DeployResult;
+import com.wkspower.platform.domain.config.GateOutcome;
 import com.wkspower.platform.domain.config.ValidationResult;
+import com.wkspower.platform.domain.config.rebase.CaseRebaseReport;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,12 +18,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +39,13 @@ import org.springframework.web.multipart.MultipartFile;
  * Admin endpoints. Story 2.2 ships {@code POST /api/admin/deploy} — the developer / SI ops shape
  * for joint case-type + BPMN deploy. Thin: extracts multipart parts, calls {@link
  * ConfigService#deploy(byte[], byte[], String)}, maps the result into the wire DTO.
+ *
+ * <p>Story 3.9 — adds two rebase endpoints ({@code GET} dry-run + {@code POST} apply) for
+ * single-case CaseType version migration.
+ *
+ * <p>Story 3.9 CF#1 — rewires {@link #emitAcceptedAuditLog} to accept the actual {@code
+ * priorVersionNum} int and a {@link ForceOverrideReason} enum, replacing the hardcoded {@code
+ * priorVersion=DYNAMIC} / {@code reason=WKS-CFG-030-unparseable} literals.
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -40,10 +54,55 @@ public class AdminController {
   private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
   private final ConfigService configService;
+  private final CaseRebaseService caseRebaseService;
 
-  public AdminController(ConfigService configService) {
+  public AdminController(ConfigService configService, CaseRebaseService caseRebaseService) {
     this.configService = configService;
+    this.caseRebaseService = caseRebaseService;
   }
+
+  // -------------------------------------------------------------------------
+  // Story 3.9 CF#1 — ForceOverrideReason enum (wire strings for audit log)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Story 3.9 CF#1 — reason enum for the {@code admin.deploy.force_override} audit log entry.
+   * Private nested because the values are wire strings consumed only by audit log emission here;
+   * extract to a top-level type if a second consumer materializes (YAGNI for now per story spec).
+   *
+   * <p>Wire strings are the public contract — never change them (memory {@code
+   * feedback_error_codes_are_wire_contract.md} analogy applies here too).
+   */
+  enum ForceOverrideReason {
+    /**
+     * Force-override accepted; prior YAML was re-parsed (strictly or leniently) and classifier ran
+     * normally. No WKS-CFG-030 bypass engaged.
+     */
+    LENIENT_SUCCESS("lenient-success"),
+
+    /**
+     * Force-override engaged the WKS-CFG-030 bypass path: prior YAML was unparseable even with the
+     * lenient loader. Wire string preserved verbatim from Story 3-11 for grep-stability.
+     */
+    UNPARSEABLE_BYPASS("WKS-CFG-030-unparseable"),
+
+    /** Rebase migration path. Distinct event ({@code admin.case.rebase}) uses this reason. */
+    MIGRATION_REBASE("migration-rebase");
+
+    private final String wireString;
+
+    ForceOverrideReason(String wireString) {
+      this.wireString = wireString;
+    }
+
+    String wireString() {
+      return wireString;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Deploy endpoint
+  // -------------------------------------------------------------------------
 
   @PostMapping(path = "/deploy", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('ADMIN')")
@@ -142,12 +201,12 @@ public class AdminController {
             yamlResult.responseMeta().isEmpty() ? null : yamlResult.responseMeta());
       }
       var caseType = yamlResult.config().orElseThrow();
-      // Story 3.11 AC5 — ACCEPTED audit log fires after caseTypeId is known. Whether the
-      // service-side WARN fired depends on whether the gate actually bypassed the classifier
-      // (lenient succeeded → WARN suppressed). The controller log is the audit trail; the
-      // service log is the gate-bypass record. Distinct entries by design.
-      if (force) {
-        emitAcceptedAuditLog(caller, caseType.id());
+      // Story 3.9 CF#1 — emit audit log only when the force path actually engaged and used a
+      // non-NO_OVERRIDE_USED outcome. The reason is derived from the gate outcome threaded back
+      // through ValidationResult.gateOutcome().
+      if (force && yamlResult.gateOutcome() != GateOutcome.NO_OVERRIDE_USED) {
+        ForceOverrideReason reason = toForceOverrideReason(yamlResult.gateOutcome());
+        emitAcceptedAuditLog(caller, caseType.id(), yamlResult.priorVersionNum(), reason);
       }
       return ApiResponse.success(
           new DeployResponseDto(
@@ -181,9 +240,11 @@ public class AdminController {
 
     var caseType = result.caseType().orElseThrow();
     var deployment = result.deployment().orElseThrow();
-    // Story 3.11 AC5 — ACCEPTED audit log on the BPMN-attached deploy path.
-    if (force) {
-      emitAcceptedAuditLog(caller, caseType.id());
+    // Story 3.9 CF#1 — emit audit log only when the force path actually engaged a non-NO_OVERRIDE
+    // outcome.
+    if (force && result.gateOutcome() != GateOutcome.NO_OVERRIDE_USED) {
+      ForceOverrideReason reason = toForceOverrideReason(result.gateOutcome());
+      emitAcceptedAuditLog(caller, caseType.id(), result.priorVersionNum(), reason);
     }
     return ApiResponse.success(
         new DeployResponseDto(
@@ -194,19 +255,164 @@ public class AdminController {
             "/api/admin/case-types/" + caseType.id() + "/schema"));
   }
 
+  // -------------------------------------------------------------------------
+  // Story 3.9 — Rebase endpoints
+  // -------------------------------------------------------------------------
+
   /**
-   * Story 3.11 AC5 — single-line audit entry for an accepted force-override deploy. caseTypeId is
-   * known here (post-parse); priorVersion is left as a dynamic value the service-layer log trail
-   * surfaces. The accepted entry fires whenever {@code force=true} is honored at the controller
-   * layer, even when the service-side WKS-CFG-030 bypass did NOT engage (e.g. lenient parse
-   * succeeded — the controller still saw a force request and audits it).
+   * Story 3.9 AC1 — dry-run rebase: compute the structured field/status mapping report for a single
+   * in-flight Case transitioning from its current CaseType version to {@code toVersion}, without
+   * mutating any DB state.
+   *
+   * <p>The caller must supply {@code ?to=N} where N is the target CaseType version. Any validation
+   * failure (case not found, caseTypeId mismatch, invalid toVersion) returns HTTP 422 with {@code
+   * WKS-API-007}.
    */
-  private static void emitAcceptedAuditLog(String caller, String caseTypeId) {
+  @GetMapping("/case-types/{caseTypeId}/cases/{caseId}/rebase")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(
+      summary = "Dry-run rebase of a Case to a newer CaseType version",
+      description =
+          "Computes the field/status mapping report for rebasing the specified Case from its current"
+              + " caseTypeVersion to the requested ?to=N version. Does NOT mutate DB state."
+              + " Returns HTTP 200 with a CaseRebaseReport (applied=false). Returns HTTP 422"
+              + " (WKS-API-007) for invalid toVersion arguments or caseTypeId mismatch.")
+  @ApiResponses(
+      value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Dry-run report computed successfully",
+            content = @Content(schema = @Schema(implementation = CaseRebaseReport.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "Case not found",
+            content = @Content),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "422",
+            description = "Invalid toVersion argument or caseTypeId mismatch (WKS-API-007)",
+            content = @Content)
+      })
+  public ApiResponse<CaseRebaseReport> rebaseDryRun(
+      @PathVariable String caseTypeId,
+      @PathVariable UUID caseId,
+      @RequestParam(name = "to") int toVersion) {
+    CaseRebaseReport report = caseRebaseService.dryRun(caseTypeId, caseId, toVersion);
+    return ApiResponse.success(report);
+  }
+
+  /**
+   * Story 3.9 AC2 / AC3 — apply rebase: atomically update {@code cases.case_type_version} from the
+   * current version to the requested {@code ?to=N} version, but ONLY when there are no
+   * irreconcilable items. When irreconcilable items exist, the request is rejected with HTTP 422 +
+   * {@code WKS-CFG-034} (no DB mutation, no audit entry).
+   *
+   * <p>When the apply succeeds, an INFO-level audit log entry is emitted with {@code
+   * event=admin.case.rebase} AFTER the transaction commits. The audit entry is NOT emitted on
+   * failure.
+   *
+   * <p><b>Transactional contract:</b> the {@code @Transactional} boundary wraps the {@code
+   * caseRebaseService.apply()} call. The audit log emission MUST be OUTSIDE the transaction
+   * (post-return from this method's transactional boundary) so that a DB exception inside the
+   * transaction does not produce a spurious audit entry. The audit log is emitted after {@code
+   * apply()} returns successfully — see memory {@code
+   * feedback_transactional_db_exception_postgres.md}.
+   */
+  @PostMapping("/case-types/{caseTypeId}/cases/{caseId}/rebase")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Transactional
+  @Operation(
+      summary = "Apply rebase of a Case to a newer CaseType version",
+      description =
+          "Atomically updates cases.case_type_version to the requested ?to=N version. Rejected with"
+              + " HTTP 422 + WKS-CFG-034 when irreconcilable items exist (no DB mutation). Returns"
+              + " HTTP 200 with CaseRebaseReport (applied=true) on success and emits an audit log"
+              + " entry.")
+  @ApiResponses(
+      value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Rebase applied successfully",
+            content = @Content(schema = @Schema(implementation = CaseRebaseReport.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "Case not found",
+            content = @Content),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "422",
+            description =
+                "Invalid toVersion (WKS-API-007) or irreconcilable items present (WKS-CFG-034)",
+            content = @Content)
+      })
+  public ApiResponse<CaseRebaseReport> rebaseApply(
+      @PathVariable String caseTypeId,
+      @PathVariable UUID caseId,
+      @RequestParam(name = "to") int toVersion) {
+    String actorEmail = currentActorEmail();
+    String caller = actorEmail == null ? "ANONYMOUS" : actorEmail;
+
+    CaseRebaseReport report = caseRebaseService.apply(caseTypeId, caseId, toVersion);
+
+    // Audit log is emitted AFTER apply() returns successfully (post-transaction, as required by
+    // memory feedback_transactional_db_exception_postgres.md). If apply() throws, we never reach
+    // this line — no spurious audit entry.
     log.info(
-        "event=admin.deploy.force_override caller={} caseTypeId={} priorVersion=DYNAMIC"
-            + " outcome=ACCEPTED reason=WKS-CFG-030-unparseable",
+        "event=admin.case.rebase caller={} caseTypeId={} caseId={} priorVersionNum={} toVersion={}"
+            + " outcome=ACCEPTED reason={}",
         caller,
-        caseTypeId);
+        caseTypeId,
+        caseId,
+        report.fromVersion(),
+        report.toVersion(),
+        ForceOverrideReason.MIGRATION_REBASE.wireString());
+
+    return ApiResponse.success(report);
+  }
+
+  // -------------------------------------------------------------------------
+  // CF#1 audit log emitter (rewired by Story 3.9)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Story 3.11 AC5 / Story 3.9 CF#1 — single-line audit entry for an accepted force-override
+   * deploy. Emits the actual {@code priorVersionNum} int (not the former {@code DYNAMIC} literal)
+   * and the {@code reason} enum wire string (not the former hardcoded {@code
+   * WKS-CFG-030-unparseable}).
+   *
+   * <p><b>Invocation rule:</b> this method MUST be called OUTSIDE any active {@code @Transactional}
+   * boundary (or in a {@code REQUIRES_NEW} propagation) so that a DB exception inside the prior
+   * transaction does not produce a spurious audit entry. On the deploy path the controller method
+   * is not itself {@code @Transactional}, so this holds by construction.
+   *
+   * @param caller authenticated email or {@code "ANONYMOUS"}
+   * @param caseTypeId the CaseType id from the deployed YAML
+   * @param priorVersionNum the prior version number BEFORE the deploy incremented it (0 when no
+   *     prior version existed — should be filtered by the {@code gateOutcome != NO_OVERRIDE_USED}
+   *     check at each invocation site)
+   * @param reason the reason enum value for the audit log entry
+   */
+  private static void emitAcceptedAuditLog(
+      String caller, String caseTypeId, int priorVersionNum, ForceOverrideReason reason) {
+    log.info(
+        "event=admin.deploy.force_override caller={} caseTypeId={} priorVersion={}"
+            + " outcome=ACCEPTED reason={}",
+        caller,
+        caseTypeId,
+        priorVersionNum,
+        reason.wireString());
+  }
+
+  // -------------------------------------------------------------------------
+  // Helpers
+  // -------------------------------------------------------------------------
+
+  private static ForceOverrideReason toForceOverrideReason(GateOutcome outcome) {
+    return switch (outcome) {
+      case LENIENT_SUCCESS -> ForceOverrideReason.LENIENT_SUCCESS;
+      case UNPARSEABLE_BYPASS -> ForceOverrideReason.UNPARSEABLE_BYPASS;
+      case NO_OVERRIDE_USED ->
+          // Should not be reached — callers guard with gateOutcome != NO_OVERRIDE_USED
+          ForceOverrideReason.LENIENT_SUCCESS;
+    };
   }
 
   /**

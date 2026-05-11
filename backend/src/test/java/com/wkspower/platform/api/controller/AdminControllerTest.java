@@ -22,6 +22,7 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -51,6 +52,7 @@ class AdminControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockitoBean private ConfigService configService;
+  @MockitoBean private CaseRebaseService caseRebaseService;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
 
