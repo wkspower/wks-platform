@@ -115,7 +115,15 @@ export function TaskCompletionDialog({
   const [state, dispatch] = useReducer(reducer, { kind: 'idle' } as State);
   const completeTask = useCompleteTask();
 
-  const outcomeKeys = Object.keys(outcomeMappings);
+  // Story 6.2 — filter out whitespace-only / blank keys so a malformed mapping cannot render
+  // an unlabeled button. Empty (after filtering) → render nothing; the caller should fall back
+  // to the single-CTA TaskLifecycleButton path.
+  const outcomeKeys = Object.keys(outcomeMappings).filter((k) => k.trim().length > 0);
+
+  // Empty-state guard — never render an outcome picker with zero buttons.
+  if (outcomeKeys.length === 0) {
+    return null;
+  }
 
   function fire(outcomeKey: string): void {
     if (state.kind === 'submitting') return;
