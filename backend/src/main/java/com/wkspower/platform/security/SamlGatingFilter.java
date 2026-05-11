@@ -39,12 +39,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * result internally — Story 7.1/7.2 design); no bean-construction-time snapshot is taken,
  * satisfying AC3 (hot-reload without restart).
  *
- * <p><b>Fail-closed policy.</b> If {@code LicenseService.isFeatureEnabled} throws (e.g. the
- * service is mid-reload, dependency-injected stub mis-wired, or any unexpected runtime fault),
- * the filter treats SSO as <em>unavailable</em> and emits 404 + {@code WKS-LIC-004}. This is
- * deliberately the same HTTP shape as the "feature off" response so a degraded license layer
- * cannot accidentally open the SAML surface to an unauthenticated caller. The underlying
- * exception is logged at WARN for operators.
+ * <p><b>Fail-closed policy.</b> If {@code LicenseService.isFeatureEnabled} throws (e.g. the service
+ * is mid-reload, dependency-injected stub mis-wired, or any unexpected runtime fault), the filter
+ * treats SSO as <em>unavailable</em> and emits 404 + {@code WKS-LIC-004}. This is deliberately the
+ * same HTTP shape as the "feature off" response so a degraded license layer cannot accidentally
+ * open the SAML surface to an unauthenticated caller. The underlying exception is logged at WARN
+ * for operators.
  *
  * <p>Story 7.5 AC1 / AC2 / AC3.
  */
