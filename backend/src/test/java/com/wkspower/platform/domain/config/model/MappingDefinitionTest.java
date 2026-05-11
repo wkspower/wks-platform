@@ -2,6 +2,7 @@ package com.wkspower.platform.domain.config.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.wkspower.platform.domain.config.model.AttachmentDefinition.OutcomeMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;
@@ -56,6 +57,64 @@ class MappingDefinitionTest {
             "userTask:t1", "status", ExecutionSignalKind.TASK_STATUS_CHANGED, "stage:underwriting");
     assertThat(rule.emits()).isEqualTo(ExecutionSignalKind.TASK_STATUS_CHANGED);
     assertThat(rule.emitScope()).isEqualTo("stage:underwriting");
+  }
+
+  /** Story 6.2 — outcomeMappings is included in the canonical hash, sorted by key. */
+  @Test
+  void hashIncludesOutcomeMappingsInSortedOrder() {
+    // Build two definitions with the same outcome entries in DIFFERENT insertion order.
+    AttachmentDefinition withOutcomes1 =
+        new AttachmentDefinition(
+            "bpmn",
+            "x.bpmn",
+            "case",
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Map.of(),
+            List.of(),
+            Map.of(
+                "approve", new OutcomeMapping("intake -> decision"),
+                "reject", new OutcomeMapping("intake -> closed")));
+    AttachmentDefinition withOutcomes2 =
+        new AttachmentDefinition(
+            "bpmn",
+            "x.bpmn",
+            "case",
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Map.of(),
+            List.of(),
+            Map.of(
+                "reject", new OutcomeMapping("intake -> closed"),
+                "approve", new OutcomeMapping("intake -> decision")));
+    String hash1 = new MappingDefinition(List.of(withOutcomes1)).computeHash();
+    String hash2 = new MappingDefinition(List.of(withOutcomes2)).computeHash();
+    assertThat(hash1).isEqualTo(hash2);
+  }
+
+  /** Story 6.2 — hash differs when outcomeMappings differ. */
+  @Test
+  void hashDiffersWhenOutcomeMappingsDiffer() {
+    AttachmentDefinition withOutcomes =
+        new AttachmentDefinition(
+            "bpmn",
+            "x.bpmn",
+            "case",
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Map.of(),
+            List.of(),
+            Map.of("approve", new OutcomeMapping("intake -> decision")));
+    AttachmentDefinition withoutOutcomes =
+        new AttachmentDefinition(
+            "bpmn", "x.bpmn", "case", Optional.empty(), Map.of(), Optional.empty(), Map.of(),
+            List.of());
+    String h1 = new MappingDefinition(List.of(withOutcomes)).computeHash();
+    String h2 = new MappingDefinition(List.of(withoutOutcomes)).computeHash();
+    assertThat(h1).isNotEqualTo(h2);
   }
 
   @Test

@@ -392,6 +392,75 @@ class CaseServiceTest {
         .hasMessageContaining("not a known status id");
   }
 
+  // ---- gap-10 fix-a: initialStatus resolution ----------------------------
+
+  /**
+   * Story 6.2 AC6 — when the YAML omits top-level statuses but stages declare
+   * {@code initialStatus}, the first stage's initialStatus is used (gap-10 fix-a).
+   */
+  @Test
+  void initialStatus_stageScopedOnly_usesFirstStageInitialStatus() {
+    // Simulate bpmn-sequential-staged: no top-level statuses (ConfigValidator injects [open,closed])
+    // but stages declare their own statuses and initialStatus.
+    CaseTypeConfig stagedType =
+        CaseTypeConfig.builder()
+            .id("staged")
+            .displayName("Staged")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("open", "Open", StatusColor.ZINC),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .stages(
+                List.of(
+                    new StageDefinition(
+                        "intake",
+                        "Intake",
+                        0,
+                        List.of(new StatusDefinition("drafting", "Drafting", StatusColor.AMBER)),
+                        Optional.of("drafting")),
+                    new StageDefinition(
+                        "review",
+                        "Review",
+                        1,
+                        List.of(new StatusDefinition("in-review", "In Review", StatusColor.BLUE)),
+                        Optional.of("in-review"))))
+            .build();
+
+    assertThat(CaseService.initialStatus(stagedType)).isEqualTo("drafting");
+  }
+
+  /**
+   * Story 6.2 AC6 — when top-level statuses are explicitly declared and NO stage has an
+   * initialStatus, the top-level statuses[0].id is used (legacy / flat case types).
+   */
+  @Test
+  void initialStatus_topLevelStatuses_usesFirstTopLevelStatus() {
+    CaseTypeConfig flatType = loanType(); // has status [open], no stages
+    assertThat(CaseService.initialStatus(flatType)).isEqualTo("open");
+  }
+
+  /**
+   * Story 6.2 AC6 — when stages exist but none declares an initialStatus (bare-string stage form),
+   * falls back to top-level statuses[0].id.
+   */
+  @Test
+  void initialStatus_stagesWithoutInitialStatus_fallsBackToTopLevel() {
+    CaseTypeConfig typeWithBareStagsAndFlatStatuses =
+        CaseTypeConfig.builder()
+            .id("bare-stages")
+            .displayName("Bare")
+            .version(1)
+            .statuses(List.of(new StatusDefinition("pending", "Pending", StatusColor.ZINC)))
+            .stages(
+                List.of(
+                    new StageDefinition("s1", "S1", 0), // no statuses, no initialStatus
+                    new StageDefinition("s2", "S2", 1)))
+            .build();
+
+    assertThat(CaseService.initialStatus(typeWithBareStagsAndFlatStatuses)).isEqualTo("pending");
+  }
+
   @Test
   void diffFieldIdsHandlesAddedRemovedAndChanged() {
     Map<String, Object> oldMap = Map.of("a", 1, "b", "two");
