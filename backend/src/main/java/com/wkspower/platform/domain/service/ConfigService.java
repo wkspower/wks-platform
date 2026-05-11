@@ -3,6 +3,7 @@ package com.wkspower.platform.domain.service;
 import com.wkspower.platform.domain.config.CaseTypeVersionRecord;
 import com.wkspower.platform.domain.config.CaseTypeVersionRegistration;
 import com.wkspower.platform.domain.config.DeployResult;
+import com.wkspower.platform.domain.config.GateOutcome;
 import com.wkspower.platform.domain.config.RegistrationResult;
 import com.wkspower.platform.domain.config.ValidationResult;
 import com.wkspower.platform.domain.config.diff.BlastRadiusReport;
@@ -277,12 +278,17 @@ public class ConfigService {
     // Story 3.8 AC2 / AC3 / AC4 — blast-radius gate (runs BEFORE applyVersionRegistry per AC2
     // ordering invariant: must not touch the engine or any registry before the gate passes).
     Optional<Integer> priorVersion = versionRegistry.currentVersion(validated.id());
+    // Story 3.9 CF#1 — capture gate outcome + priorVersionNum for audit-log threading.
+    GateOutcome gateOutcome = GateOutcome.NO_OVERRIDE_USED;
+    int priorVersionNum = 0;
     if (priorVersion.isPresent()) {
-      ValidationResult gateResult =
-          runBlastRadiusGate(validated, result, priorVersion.get(), bumpRequested, forceRequested);
-      if (gateResult != null) {
-        return gateResult; // Rejected — return the error result
+      priorVersionNum = priorVersion.get();
+      GateResult gateResult =
+          runBlastRadiusGate(validated, result, priorVersionNum, bumpRequested, forceRequested);
+      if (gateResult.rejected()) {
+        return gateResult.error(); // Rejected — return the error result
       }
+      gateOutcome = forceRequested ? gateResult.outcome() : GateOutcome.NO_OVERRIDE_USED;
     } else if (bumpRequested) {
       // AC4: first deploy with bumpVersion=true — warn + ignore
       log.warn(
@@ -303,19 +309,41 @@ public class ConfigService {
     // advertises. Story 4.3.1 AC1 — thread result.mappingDefinition() through the rebuild so the
     // validated MappingDefinition reaches MappingRegistry.register; the 2-arg ok() overload would
     // silently downgrade to MappingDefinition.empty().
+    // Story 3.9 CF#1 — thread gateOutcome + priorVersionNum into the result for the controller.
     ValidationResult versionedResult =
         ValidationResult.ok(
             versioned,
             result.warnings(),
-            result.mappingDefinition().orElse(MappingDefinition.empty()));
+            result.mappingDefinition().orElse(MappingDefinition.empty()),
+            gateOutcome,
+            priorVersionNum);
     publishMappingToRegistry(versionedResult);
     return versionedResult;
   }
 
   /**
+   * Story 3.9 CF#1 — carrier returned by {@link #runBlastRadiusGate}. When {@code error} is
+   * non-null, the gate rejected the deploy. When {@code error} is null, the gate passed with the
+   * given {@code outcome} (used to thread the audit-log reason to the controller).
+   */
+  private record GateResult(ValidationResult error, GateOutcome outcome) {
+    static GateResult pass(GateOutcome outcome) {
+      return new GateResult(null, outcome);
+    }
+
+    static GateResult reject(ValidationResult error) {
+      return new GateResult(error, GateOutcome.NO_OVERRIDE_USED);
+    }
+
+    boolean rejected() {
+      return error != null;
+    }
+  }
+
+  /**
    * Story 3.8 — run the blast-radius classifier against the prior version. Returns a {@link
-   * ValidationResult#invalid(List) invalid result} when the change is mutate-class and {@code
-   * bumpRequested=false}; returns {@code null} when the gate passes (caller should continue).
+   * GateResult} that either carries a rejection {@link ValidationResult} or a pass {@link
+   * GateOutcome} for audit-log threading (Story 3.9 CF#1).
    *
    * <p>Story 3.11 — adds {@code forceRequested}. Force-override ONLY waives the WKS-CFG-030
    * unparseable-prior path (AC4). It does NOT waive WKS-CFG-029 (mutate-class without bump — that
@@ -325,10 +353,10 @@ public class ConfigService {
    * is NOT eligible for force-override — AC1's lenient path handles it cleanly without operator
    * intervention; if lenient parsing succeeds {@code forceRequested} is silently ignored.
    *
-   * <p>This method does NOT throw — it returns an invalid ValidationResult which the caller must
-   * propagate. This mirrors the existing multi-error pattern in {@code ConfigService}.
+   * <p>This method does NOT throw — it returns a {@link GateResult} which the caller must inspect.
+   * This mirrors the existing multi-error pattern in {@code ConfigService}.
    */
-  private ValidationResult runBlastRadiusGate(
+  private GateResult runBlastRadiusGate(
       CaseTypeConfig validated,
       ValidationResult yamlResult,
       int priorVersionNum,
@@ -348,7 +376,7 @@ public class ConfigService {
                 + " classification SKIPPED, deploy proceeding under admin force-override",
             validated.id(),
             priorVersionNum);
-        return null; // Gate bypassed
+        return GateResult.pass(GateOutcome.UNPARSEABLE_BYPASS); // Gate bypassed
       }
       // Story 3.8 PR #417 follow-up — fail CLOSED. AC2 requires the gate to apply on every
       // deploy with a prior version; if we cannot load or re-parse the prior YAML we cannot
@@ -360,15 +388,16 @@ public class ConfigService {
               + " or re-parsed; blast-radius gate cannot apply (fail-closed, WKS-CFG-030)",
           validated.id(),
           priorVersionNum);
-      return ValidationResult.invalid(
-          List.of(
-              ErrorDetail.of(
-                  ErrorCode.WKS_CFG_030.wire(),
-                  "Blast-radius gate could not apply — prior version v"
-                      + priorVersionNum
-                      + " for caseTypeId="
-                      + validated.id()
-                      + " could not be loaded or re-parsed. Deploy rejected fail-closed.")));
+      return GateResult.reject(
+          ValidationResult.invalid(
+              List.of(
+                  ErrorDetail.of(
+                      ErrorCode.WKS_CFG_030.wire(),
+                      "Blast-radius gate could not apply — prior version v"
+                          + priorVersionNum
+                          + " for caseTypeId="
+                          + validated.id()
+                          + " could not be loaded or re-parsed. Deploy rejected fail-closed."))));
     }
 
     MappingDefinition prevMapping =
@@ -393,15 +422,16 @@ public class ConfigService {
               + " — {} delta(s)",
           validated.id(),
           report.mutateDeltas().size());
-      return ValidationResult.invalidWithMeta(
-          List.of(
-              ErrorDetail.of(
-                  ErrorCode.WKS_CFG_029.wire(),
-                  "Mutate-class change requires version bump — "
-                      + report.mutateDeltas().size()
-                      + " delta(s): "
-                      + paths)),
-          Map.of("blastRadius", report));
+      return GateResult.reject(
+          ValidationResult.invalidWithMeta(
+              List.of(
+                  ErrorDetail.of(
+                      ErrorCode.WKS_CFG_029.wire(),
+                      "Mutate-class change requires version bump — "
+                          + report.mutateDeltas().size()
+                          + " delta(s): "
+                          + paths)),
+              Map.of("blastRadius", report)));
     }
 
     if (bumpRequested) {
@@ -412,7 +442,8 @@ public class ConfigService {
           validated.id());
     }
 
-    return null; // Gate passed
+    // Gate passed — lenient-success (prior was loadable, classifier ran normally)
+    return GateResult.pass(GateOutcome.LENIENT_SUCCESS);
   }
 
   /**
@@ -586,14 +617,20 @@ public class ConfigService {
     // Story 3.8 AC2 — blast-radius gate. Runs BEFORE fingerprint computation and BEFORE engine
     // deploy (Story 4.5 AC1 ordering invariant: gate before any side-effect).
     Optional<Integer> priorVersion = versionRegistry.currentVersion(caseType.id());
+    // Story 3.9 CF#1 — capture gate outcome + priorVersionNum for audit-log threading.
+    GateOutcome deployGateOutcome = GateOutcome.NO_OVERRIDE_USED;
+    int deployPriorVersionNum = 0;
     if (priorVersion.isPresent()) {
-      ValidationResult gateResult =
+      deployPriorVersionNum = priorVersion.get();
+      GateResult gateResult =
           runBlastRadiusGate(
-              caseType, yamlResult, priorVersion.get(), bumpRequested, forceRequested);
-      if (gateResult != null) {
+              caseType, yamlResult, deployPriorVersionNum, bumpRequested, forceRequested);
+      if (gateResult.rejected()) {
         // Rejected — propagate meta (blastRadius report) in the DeployResult
-        return DeployResult.invalidWithMeta(gateResult.errors(), gateResult.responseMeta());
+        return DeployResult.invalidWithMeta(
+            gateResult.error().errors(), gateResult.error().responseMeta());
       }
+      deployGateOutcome = forceRequested ? gateResult.outcome() : GateOutcome.NO_OVERRIDE_USED;
     } else if (bumpRequested) {
       // AC4: first deploy with bumpVersion=true — warn + ignore
       log.warn(
@@ -715,7 +752,8 @@ public class ConfigService {
               deployment.deployedAt()));
     }
 
-    return DeployResult.ok(caseType, deployment);
+    // Story 3.9 CF#1 — thread gate outcome + priorVersionNum into the result for the controller.
+    return DeployResult.ok(caseType, deployment, deployGateOutcome, deployPriorVersionNum);
   }
 
   /**

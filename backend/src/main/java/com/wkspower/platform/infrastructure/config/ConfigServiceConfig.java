@@ -15,6 +15,7 @@ import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.port.StatusOptionsStore;
 import com.wkspower.platform.domain.port.WorkflowEngine;
+import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.domain.service.MappingRegistry;
@@ -142,5 +143,19 @@ public class ConfigServiceConfig {
   public WksStageAdvancer wksStageAdvancer(
       StageRepository stageRepository, EventPublisher eventPublisher, Clock clock) {
     return new WksStageAdvancer(stageRepository, eventPublisher, clock);
+  }
+
+  /**
+   * Story 3.9 — wires the framework-free {@link CaseRebaseService} with its domain ports. The
+   * {@code @Transactional} boundary for the apply path lives on the caller ({@link
+   * com.wkspower.platform.api.controller.AdminController}) per the hexagonal-layer rule (domain
+   * stays Spring-free).
+   */
+  @Bean
+  public CaseRebaseService caseRebaseService(
+      CaseRepository caseRepository,
+      CaseTypeVersionRegistry versionRegistry,
+      CaseTypeSource caseTypeSource) {
+    return new CaseRebaseService(caseRepository, versionRegistry, caseTypeSource);
   }
 }
