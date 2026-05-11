@@ -41,12 +41,16 @@ import org.springframework.test.context.TestPropertySource;
  * CaseType v2 (with a different form topology) is deployed. The response DTO embeds the
  * <em>pinned</em> CaseTypeConfig, not the latest registered version.
  *
- * <p>AC-5 scenario: create a case (v1 pinned), register v2 with a renamed field, GET the case
- * and submit the form — both must use v1's field set.
+ * <p>AC-5 scenario: create a case (v1 pinned), register v2 with an extra required field, GET the
+ * case and submit the form — both must use v1's field set.
  *
- * <p>AC-7 scenario: the FormSubmitted event (inspected via the updated CaseDto response) carries the
- * caseTypeVersion at the time of submission — which must be 1, the pinned version, even though v2
- * is live.
+ * <p>AC-7 scenario: the submit response DTO carries {@code caseTypeVersion = 1} (pinned), even
+ * though v2 is live.
+ *
+ * <p>Each test uses a unique case-type ID to avoid cross-test registry pollution: the
+ * {@link CaseTypeRegistry} is a shared singleton (Spring context reuse) and once v2 is registered
+ * for an ID, v1 cannot be re-registered (older-version guard). Per-test IDs isolate the version
+ * lifecycle entirely.
  *
  * <p>Uses H2 in-memory DB; companion Postgres-IT is {@code FormBindingVersionPinPostgresIT}.
  *
@@ -66,7 +70,6 @@ class FormBindingVersionPinIT {
 
   private static final String EMAIL = "formbind-pin-it@wkspower.local";
   private static final String PASSWORD = "admin";
-  private static final String CASE_TYPE_ID = "formbind-pin-fixture";
   private static final String FORM_ID = "intake-form";
 
   @Autowired private TestRestTemplate rest;
@@ -81,29 +84,34 @@ class FormBindingVersionPinIT {
       users.save(
           new User(UUID.randomUUID(), EMAIL, Set.of("admin"), true), encoder.encode(PASSWORD));
     }
-    // Register v1 — two fields: applicant (required) + amount (optional)
-    registry.register(caseTypeV1());
   }
 
   /**
    * AC-5 — In-flight case isolation.
    *
+   * <p>Uses a unique case-type ID ({@code "fvp-t1-" + suffix}) so this test's v1/v2 lifecycle is
+   * independent of other tests sharing the same Spring context.
+   *
    * <p>Steps:
    * <ol>
-   *   <li>Create a case while v1 is the only deployed version → case.caseTypeVersion = 1.
-   *   <li>Register v2 (adds a new required field "email", renames nothing but changes the form).
+   *   <li>Register v1 and create a case → case.caseTypeVersion = 1.
+   *   <li>Register v2 (adds a new required field "email").
    *   <li>GET the case — response DTO must embed v1's form (2 fields, no "email").
    *   <li>Submit the v1 form — must succeed (v1's required fields satisfied).
    * </ol>
    */
   @Test
   void inFlightCaseSeesV1FormAfterV2Deploy() throws Exception {
+    // Per-test unique ID avoids registry older-version rejection across tests
+    String caseTypeId = "fvp-t1-" + UUID.randomUUID().toString().substring(0, 8);
+    registry.register(caseTypeV1(caseTypeId));
+
     String cookie = login();
     // Step 1: create case while v1 is live
-    String caseId = createCase(cookie);
+    String caseId = createCase(cookie, caseTypeId);
 
     // Step 2: register v2 with an extra required field "email"
-    registry.register(caseTypeV2());
+    registry.register(caseTypeV2(caseTypeId));
 
     // Step 3: GET the case — embedded CaseType must be v1 (no "email" field in forms)
     ResponseEntity<String> getResp =
@@ -148,11 +156,14 @@ class FormBindingVersionPinIT {
    */
   @Test
   void submitResponseEmbedsPinnedCaseTypeVersion() throws Exception {
+    String caseTypeId = "fvp-t2-" + UUID.randomUUID().toString().substring(0, 8);
+    registry.register(caseTypeV1(caseTypeId));
+
     String cookie = login();
-    String caseId = createCase(cookie);
+    String caseId = createCase(cookie, caseTypeId);
 
     // Deploy v2 before submit — should have no effect on the pinned case
-    registry.register(caseTypeV2());
+    registry.register(caseTypeV2(caseTypeId));
 
     ResponseEntity<String> resp =
         exchange(
@@ -185,13 +196,13 @@ class FormBindingVersionPinIT {
     return semi > 0 ? setCookie.substring(0, semi) : setCookie;
   }
 
-  private String createCase(String cookie) throws Exception {
+  private String createCase(String cookie, String caseTypeId) throws Exception {
     ResponseEntity<String> resp =
         exchange(
             "/api/cases",
             HttpMethod.POST,
             cookie,
-            "{\"caseTypeId\":\"" + CASE_TYPE_ID + "\",\"data\":{\"applicant\":\"Initial\"}}");
+            "{\"caseTypeId\":\"" + caseTypeId + "\",\"data\":{\"applicant\":\"Initial\"}}");
     assertThat(resp.getStatusCode()).as("create case").isEqualTo(HttpStatus.CREATED);
     return json.readTree(resp.getBody()).path("data").path("id").asText();
   }
@@ -210,7 +221,7 @@ class FormBindingVersionPinIT {
    * v1: "applicant" (required text) + "amount" (optional number).
    * Form has 2 fields. Version = 1.
    */
-  private static CaseTypeConfig caseTypeV1() {
+  private static CaseTypeConfig caseTypeV1(String caseTypeId) {
     List<FieldDefinition> fields =
         List.of(
             new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
@@ -220,7 +231,7 @@ class FormBindingVersionPinIT {
         new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
 
     return new CaseTypeConfig(
-        CASE_TYPE_ID,
+        caseTypeId,
         "FormBind Pin Fixture",
         1,
         null,
@@ -239,7 +250,7 @@ class FormBindingVersionPinIT {
    * v2: adds a third required field "email". A case pinned to v1 must NOT be required to supply
    * "email" when submitting the intake-form.
    */
-  private static CaseTypeConfig caseTypeV2() {
+  private static CaseTypeConfig caseTypeV2(String caseTypeId) {
     List<FieldDefinition> fields =
         List.of(
             new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
@@ -250,7 +261,7 @@ class FormBindingVersionPinIT {
         new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
 
     return new CaseTypeConfig(
-        CASE_TYPE_ID,
+        caseTypeId,
         "FormBind Pin Fixture",
         2,
         null,

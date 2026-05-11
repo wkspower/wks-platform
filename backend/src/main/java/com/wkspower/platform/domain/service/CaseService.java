@@ -216,7 +216,15 @@ public class CaseService {
           "Case " + caseId + " was modified by another transaction; reload and retry");
     }
 
-    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+    // Story 5.5 AC-4 — Decision D20 frozen-on-version: validate updated case data against the
+    // CaseType the case is PINNED to, not the latest deployed version. This ensures a v1-pinned
+    // case can still pass update validation after a v2 (with additional required fields) is
+    // deployed. Falls back to latest if the pinned version is not in the registry (defensive — the
+    // normal path always has the pinned version cached since register() now populates byVersion).
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(existing.caseTypeId(), existing.caseTypeVersion())
+            .orElseGet(() -> requireCaseType(existing.caseTypeId()));
     Map<String, Object> safeData = newData == null ? Map.of() : Map.copyOf(newData);
 
     List<ErrorDetail> violations = caseDataValidator.validate(caseType, safeData);
