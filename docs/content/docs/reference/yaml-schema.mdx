@@ -1,13 +1,577 @@
 ---
 title: Case type YAML schema
-description: Complete reference for the case type YAML configuration format, with all fields and validation rules.
+description: Complete reference for the case type YAML configuration format — every top-level key with type, validation rules, error codes, and a full example.
 gate: "3"
-status: auto-generated
 ---
 
-{/* Auto-generated from JSON Schema produced by config-reload service. */}
-{/* Stable anchors required: #stages #statuses #attachments #fields #roles #versions */}
-{/* Error messages in production embed URLs pointing to these anchors — do not rename them */}
-{/* Implementation: wire JSON Schema output here in Story 12b.2 */}
+Every WKS case type is defined by a single YAML file. The file is loaded and validated at startup (and on hot-reload). Validation is collect-all: every error in the file is reported together, never just the first one.
 
-TODO: embed JSON Schema reference — wire config-reload service output here
+Parser: `CaseTypeYamlLoader.java` — Validator: `ConfigValidator.java`
+
+---
+
+## Top-level keys at a glance
+
+| Key | Type | Required | Default |
+|-----|------|----------|---------|
+| [id](#id) | string | yes | — |
+| [displayName](#displayname) | string | yes | — |
+| [version](#version) | integer | yes | — |
+| [description](#description) | string | no | none |
+| [roles](#roles) | array | yes | — |
+| [fields](#fields) | array | no | empty list |
+| [statuses](#statuses) | array | no | open + closed |
+| [listColumns](#listcolumns) | array | no | empty list |
+| [stages](#stages) | array | no | empty list |
+| [forms](#forms) | array | no | none |
+| [workflows](#workflows) | object | no | none |
+| [attachments](#attachments) | array | no | empty list |
+| [defaultFieldEditability](#defaultfieldeditability) | string | no | `editable-by-default` |
+
+---
+
+## id
+
+- **Type:** string
+- **Required:** yes
+- **Pattern:** `[a-z][a-z0-9-]` (kebab-case, 2–63 characters total)
+- **Validator:** `ConfigValidator.java:129` (`CaseTypeLimits.ID_PATTERN`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing), [`WKS-CFG-009`](/docs/reference/error-codes) (pattern violation)
+
+Unique identifier for this case type within the deployment. Used in URLs, API paths, and BPMN references. Must be lowercase kebab-case, 2–63 characters.
+
+```yaml
+id: loan-application
+```
+
+---
+
+## displayName
+
+- **Type:** string
+- **Required:** yes
+- **Max length:** 40 characters (`CaseTypeLimits.MAX_DISPLAY_NAME_CHARS`)
+- **Validator:** `ConfigValidator.java:133` (length check), `ConfigValidator.java:124` (required check)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing), [`WKS-CFG-007`](/docs/reference/error-codes) (exceeds 40 chars)
+
+Human-readable name shown in navigation, list headers, and breadcrumbs.
+
+```yaml
+displayName: "Loan Application"
+```
+
+---
+
+## version
+
+- **Type:** integer (positive)
+- **Required:** yes
+- **Validator:** `ConfigValidator.java:127` (`checkRequiredInt`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing), [`WKS-CFG-002`](/docs/reference/error-codes) (not a positive integer)
+
+Schema version for this case type. Must be a positive integer (>= 1). Increment when making breaking changes to the field set; used by the version-migration tooling.
+
+```yaml
+version: 1
+```
+
+---
+
+## description
+
+- **Type:** string
+- **Required:** no
+- **Max length:** 400 characters (`CaseTypeLimits.MAX_DESCRIPTION_CHARS`)
+- **Default:** none
+- **Validator:** `ConfigValidator.java:140`
+- **Errors:** [`WKS-CFG-007`](/docs/reference/error-codes) (exceeds 400 chars)
+
+Free-form human-readable description of the case type. Shown in the admin panel and the case type list. YAML block scalars (`>`) are supported. No validator — the content is free-form; only the length limit is enforced.
+
+```yaml
+description: >
+  Handles retail loan applications from intake through
+  underwriting to final credit decision.
+```
+
+---
+
+## roles
+
+- **Type:** array of role objects
+- **Required:** yes (at least one entry)
+- **Max entries:** 20 (`CaseTypeLimits.MAX_ROLES`)
+- **Validator:** `ConfigValidator.java:762` (`checkRoles`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing or empty), [`WKS-CFG-003`](/docs/reference/error-codes) (duplicate name), [`WKS-CFG-004`](/docs/reference/error-codes) (exceeds limit), [`WKS-CFG-008`](/docs/reference/error-codes) (unknown permission), [`WKS-CFG-009`](/docs/reference/error-codes) (name pattern violation)
+
+Defines the access-control roles for this case type. Each role maps a kebab-case name to a list of permissions. Roles declared here are also used in `fields[].editableBy` cross-references.
+
+**Role object sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `name` | string | yes | Kebab-case, 2–63 characters |
+| `permissions` | array of string | yes | At least 1; max 10 per role |
+
+**Allowed permission values:** `view`, `create`, `edit`, `transition`
+
+```yaml
+roles:
+  - name: admin
+    permissions: [view, create, edit, transition]
+  - name: reviewer
+    permissions: [view, edit]
+```
+
+---
+
+## fields
+
+- **Type:** array of field objects
+- **Required:** no
+- **Max entries:** 50 (`CaseTypeLimits.MAX_FIELDS`)
+- **Default:** empty list
+- **Validator:** `ConfigValidator.java:426` (`checkFields`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing required sub-key), [`WKS-CFG-002`](/docs/reference/error-codes) (invalid type), [`WKS-CFG-003`](/docs/reference/error-codes) (duplicate id), [`WKS-CFG-004`](/docs/reference/error-codes) (exceeds limit), [`WKS-CFG-007`](/docs/reference/error-codes) (displayName too long), [`WKS-CFG-009`](/docs/reference/error-codes) (id pattern violation), [`WKS-FORM-001`](/docs/reference/error-codes) (invalid `editableBy` entry)
+
+Declares the data fields associated with cases of this type. Omitting `fields:` entirely is valid — case types with no structured fields are first-class.
+
+**Field object sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `id` | string | yes | Kebab- or snake-case, 2–63 characters |
+| `displayName` | string | yes | Max 40 chars |
+| `type` | string | yes | See allowed types below |
+| `required` | boolean | no | Default `false` |
+| `requiredOnCreate` | boolean | no | Defaults to the value of `required` |
+| `order` | integer | no | Sort order in UI; ties broken by declaration order |
+| `options` | array | only for `select` | 1–50 options; each entry needs `label` and `value` |
+| `minLength` / `maxLength` | integer | no | `text` / `textarea` fields |
+| `min` / `max` / `step` | number | no | `number` fields |
+| `dateMin` / `dateMax` | string | no | `date` fields (ISO-8601 date) |
+| `maxBytes` | long | no | `file` fields |
+| `allowedMimeTypes` | array of string | no | `file` fields |
+| `editableBy` | array of string | no | Role allow-list; format `role:<name>` |
+
+**Allowed `type` values:** `text`, `number`, `date`, `select`, `checkbox`, `textarea`, `file`
+
+```yaml
+fields:
+  - id: applicant
+    displayName: Applicant
+    type: text
+    required: true
+    order: 0
+  - id: amount
+    displayName: Amount
+    type: number
+    required: false
+    order: 1
+  - id: category
+    displayName: Category
+    type: select
+    required: true
+    order: 2
+    options:
+      - { label: "Personal", value: personal }
+      - { label: "Business", value: business }
+  - id: supporting_doc
+    displayName: Supporting document
+    type: file
+    required: false
+    order: 3
+    maxBytes: 10485760
+    allowedMimeTypes: [application/pdf, image/png]
+    editableBy: [role:admin]
+```
+
+---
+
+## statuses
+
+- **Type:** array of status objects
+- **Required:** no
+- **Max entries:** 10 (`CaseTypeLimits.MAX_STATUSES`)
+- **Default:** `[open (blue), closed (zinc, terminal)]`
+- **Validator:** `ConfigValidator.java:615` (`checkStatuses`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing required sub-key), [`WKS-CFG-003`](/docs/reference/error-codes) (duplicate id), [`WKS-CFG-006`](/docs/reference/error-codes) (exceeds limit), [`WKS-CFG-007`](/docs/reference/error-codes) (displayName too long), [`WKS-CFG-008`](/docs/reference/error-codes) (unknown color), [`WKS-CFG-009`](/docs/reference/error-codes) (id pattern violation)
+
+Flat case-level status set. When `statuses:` is omitted or empty, the two-element default `[open, closed]` is applied automatically. Stages can declare their own `statuses:` sub-list (see [stages](#stages)); when a stage omits its own list it falls back to this flat set.
+
+**Status object sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `id` | string | yes | Kebab-case, 2–63 characters |
+| `displayName` | string | yes | Max 40 chars |
+| `color` | string | no | See allowed colors below |
+| `terminal` | boolean | no | Default `false`; marks a status as a closed/terminal state |
+
+**Allowed `color` values:** `blue`, `amber`, `violet`, `emerald`, `zinc`, `red`, `cyan`, `rose`, `indigo`, `teal`
+
+```yaml
+statuses:
+  - { id: open,     displayName: Open,     color: blue }
+  - { id: approved, displayName: Approved, color: emerald, terminal: true }
+  - { id: rejected, displayName: Rejected, color: red,     terminal: true }
+```
+
+---
+
+## listColumns
+
+- **Type:** array of string
+- **Required:** no
+- **Max entries:** 12 (`CaseTypeLimits.MAX_LIST_COLUMNS`)
+- **Default:** empty list
+- **Validator:** `ConfigValidator.java:844` (`checkListColumns`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (blank entry), [`WKS-CFG-003`](/docs/reference/error-codes) (duplicate), [`WKS-CFG-005`](/docs/reference/error-codes) (exceeds limit or references unknown field)
+
+Controls which columns appear in the case list view. Each entry is either a declared `fields[].id` or one of the built-in system columns: `id`, `createdAt`, `updatedAt`, `status`, `assignee`.
+
+```yaml
+listColumns: [applicant, amount, status, createdAt]
+```
+
+---
+
+## stages
+
+- **Type:** array of stage objects (or bare strings)
+- **Required:** no
+- **Default:** empty list
+- **Validator:** `ConfigValidator.java:239` (`checkStages`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing `id`), [`WKS-CFG-007`](/docs/reference/error-codes) (displayName too long), [`WKS-CFG-031`](/docs/reference/error-codes) (duplicate id), [`WKS-CFG-032`](/docs/reference/error-codes) (id pattern violation), [`WKS-CFG-033`](/docs/reference/error-codes) (reserved id), [`WKS-ARCH-001`](/docs/reference/error-codes) (unknown archetype), [`WKS-STG-005`](/docs/reference/error-codes) (duplicate stage-scoped status id), [`WKS-STG-006`](/docs/reference/error-codes) (initialStatus not in stage status set), [`WKS-STG-008`](/docs/reference/error-codes) (empty stage statuses list)
+
+Defines the sequential stages a case moves through. Omitting `stages:` is valid — process-less or flat-status case types are first-class. Stages support both a bare string form (id only) and a rich object form.
+
+**Reserved stage ids (rejected with `WKS-CFG-033`):** `case`, `stage`, `none`, `all`, `flat`
+
+**Stage object sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `id` | string | yes | Kebab-case, 1–63 characters |
+| `displayName` | string | no | Defaults to title-cased `id`; max 40 chars |
+| `statuses` | array | no | Stage-scoped status set; omit to inherit flat case statuses |
+| `initialStatus` | string | no | Must match a declared stage status id; defaults to first declared |
+| `archetype` | string | no | One of `draft_section`, `submit_for_processing`, `business_final` |
+
+```yaml
+stages:
+  # Bare-string form (id only):
+  - intake
+  # Rich-object form:
+  - id: underwriting
+    displayName: Underwriting
+    statuses:
+      - { id: in-review, displayName: In review, color: blue }
+    initialStatus: in-review
+  - id: decision
+    displayName: Decision
+    archetype: business_final
+    statuses:
+      - { id: approved, displayName: Approved, color: emerald }
+      - { id: rejected, displayName: Rejected, color: red }
+    initialStatus: approved
+```
+
+---
+
+## forms
+
+- **Type:** array of form definition objects
+- **Required:** no
+- **Default:** none
+- **Validator:** `FormValidator.java:55` (topology / dataModel / rendering), `ConfigValidator.java:185` (archetype), `FormValidator.java:129` (sections when `dataModel: sectioned`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing required sub-key), [`WKS-CFG-008`](/docs/reference/error-codes) (invalid dataModel or rendering), [`WKS-FORM-001`](/docs/reference/error-codes) (invalid topology), [`WKS-ARCH-001`](/docs/reference/error-codes) (unknown archetype)
+
+Declares in-process forms that WKS renders during case lifecycle. Forms are reachable at `/cases/:id/forms/:formId`. Omitting `forms:` is valid — case types without forms use direct field editing.
+
+**Form definition sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `id` | string | yes | Identifies the form; used in `attachments[].routing.userTasks` |
+| `topology` | string | yes | Phase-0: only `single` allowed (`parallel` is Phase-1) |
+| `dataModel` | string | yes | `monolithic` or `sectioned` |
+| `rendering` | string | yes | `single-page` or `multi-section` |
+| `archetype` | string | no | `draft_section`, `submit_for_processing`, or `business_final` |
+| `fields` | array | no | Inline field definitions (monolithic forms) |
+| `sections` | array | required when `dataModel: sectioned` | Each section needs `id`, `label`, and `fields[]` |
+
+```yaml
+forms:
+  - id: intake
+    topology: single
+    dataModel: monolithic
+    rendering: single-page
+    archetype: submit_for_processing
+    fields:
+      - { id: applicant, displayName: Applicant, type: text, required: true, order: 0 }
+  - id: final-decision
+    topology: single
+    dataModel: sectioned
+    rendering: multi-section
+    archetype: business_final
+    sections:
+      - id: details
+        label: Application details
+        fields:
+          - { id: amount, displayName: Amount, type: number, required: true, order: 0 }
+      - id: outcome
+        label: Credit outcome
+        fields:
+          - { id: notes, displayName: Notes, type: textarea, required: false, order: 0 }
+```
+
+---
+
+## workflows
+
+- **Type:** object
+- **Required:** no
+- **Default:** none
+- **Validator:** `ConfigValidator.java:409` (`checkWorkflow`) — presence is intentionally not enforced; BPMN file resolution is validated at deploy time by `MappingValidator`
+- **Errors:** No errors emitted for a missing `workflows:` block (zero-process case types are valid). [`WKS-MAP-005`](/docs/reference/error-codes) is emitted when the referenced BPMN file cannot be found at deploy time.
+
+Declares a BPMN process to attach at the case level. Zero-process case types (no `workflows:`) are fully supported — stage progression happens via the REST API (`POST /api/cases/{id}/advance-stage`).
+
+**Sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `bpmn` | string | yes (if block present) | Filename of the BPMN file, relative to the config directory |
+
+Today, `workflows.bpmn` and `attachments[].file` typically reference the same BPMN file. The `workflows` block is the intent declaration; the `attachments` block provides the routing-rule binding. Both must be declared when you need BPMN-driven stage transitions (see [attachments](#attachments)).
+
+```yaml
+workflows:
+  bpmn: loan-application.bpmn
+```
+
+---
+
+## attachments
+
+- **Type:** array of attachment objects
+- **Required:** no
+- **Default:** empty list
+- **Validator:** `MappingValidator.java:93` (`validate`)
+- **Errors:** [`WKS-CFG-001`](/docs/reference/error-codes) (missing required sub-key), [`WKS-MAP-001`](/docs/reference/error-codes) (BPMN element id missing in file), [`WKS-MAP-002`](/docs/reference/error-codes) (precedence collision between endEvent and signal rules), [`WKS-MAP-003`](/docs/reference/error-codes) (scope references unknown stage), [`WKS-MAP-004`](/docs/reference/error-codes) (unsupported attachment type), [`WKS-MAP-005`](/docs/reference/error-codes) (BPMN file missing or unparseable), [`WKS-MAP-006`](/docs/reference/error-codes) (duplicate scope), [`WKS-MAP-008`](/docs/reference/error-codes) (unknown YAML key in mapping subtree), [`WKS-MAP-009`](/docs/reference/error-codes) (duplicate key in mapping subtree), [`WKS-CFG-027`](/docs/reference/error-codes) (userTask id not in BPMN), [`WKS-CFG-028`](/docs/reference/error-codes) (invalid stageTransition adjacency)
+
+Binds a BPMN file to the case type and maps BPMN elements (userTasks, events, signals) to WKS routing rules. Each attachment has a `scope` that determines which stage it governs.
+
+**Attachment object sub-keys:**
+
+| Sub-key | Type | Required | Notes |
+|---------|------|----------|-------|
+| `type` | string | yes | Phase-0: only `bpmn` |
+| `file` | string | yes | BPMN filename (relative to the config directory) |
+| `scope` | string | yes | `case` or `stage:<id>` |
+| `routing` | object | no | Routing rules block |
+
+**`routing` sub-keys:**
+
+| Sub-key | Type | Notes |
+|---------|------|-------|
+| `userTasks` | map | Keys are BPMN userTask element ids; values have `wksTask` (display name) and optional `form` (form id) |
+| `events.endEvent` | object | Requires `stageTransition` — syntax: `"<from> -> <to>"` where `<to>` is a stage id, `completed`, or `skipped` |
+| `events.signal` | map | Keys are BPMN signal ids; values have `stageTransition` |
+| `properties` | array | Each entry: `on` (e.g. `userTask:<id>`), `camunda:property`, and `emits` block |
+
+**Allowed `emits.type` values:** `status`, `named-signal`, `outcome`, `task-complete`
+
+```yaml
+attachments:
+  - type: bpmn
+    file: loan-application.bpmn
+    scope: case
+    routing:
+      userTasks:
+        review-task:
+          wksTask: "Review Application"
+          form: intake
+      events:
+        endEvent:
+          stageTransition: "underwriting -> completed"
+        signal:
+          signal-approve:
+            stageTransition: "intake -> underwriting"
+      properties:
+        - on: "userTask:review-task"
+          camunda:property: status
+          emits: { type: task-complete, scope: case }
+```
+
+---
+
+## defaultFieldEditability
+
+- **Type:** string
+- **Required:** no
+- **Default:** `editable-by-default`
+- **Validator:** `ConfigValidator.java:1007` (`checkDefaultFieldEditability`)
+- **Errors:** [`WKS-FORM-001`](/docs/reference/error-codes) (unknown value)
+
+Controls the fallback editability posture when a field has no `editableBy` list. Setting this to `locked-by-default` means all fields without an explicit `editableBy` list are read-only.
+
+**Allowed values:** `editable-by-default`, `locked-by-default`
+
+```yaml
+defaultFieldEditability: locked-by-default
+```
+
+---
+
+## Complete example
+
+The following case type exercises every documented key. It is assembled from the validated seed fixtures shipped with WKS Platform.
+
+```yaml
+id: loan-application
+displayName: "Loan Application"
+version: 1
+description: >
+  Full-featured loan processing case type. Walks three stages
+  (intake, underwriting, decision) driven by a BPMN process.
+  Demonstrates every top-level YAML key.
+
+# --- access control ---
+roles:
+  - name: admin
+    permissions: [view, create, edit, transition]
+  - name: underwriter
+    permissions: [view, edit]
+
+# --- field editability fallback ---
+defaultFieldEditability: locked-by-default
+
+# --- data fields ---
+fields:
+  - id: applicant
+    displayName: Applicant
+    type: text
+    required: true
+    order: 0
+    editableBy: [role:admin, role:underwriter]
+  - id: amount
+    displayName: Amount
+    type: number
+    required: true
+    order: 1
+    editableBy: [role:admin, role:underwriter]
+  - id: category
+    displayName: Category
+    type: select
+    required: true
+    order: 2
+    options:
+      - { label: "Personal", value: personal }
+      - { label: "Business", value: business }
+    editableBy: [role:admin]
+  - id: notes
+    displayName: Notes
+    type: textarea
+    required: false
+    order: 3
+    editableBy: [role:admin, role:underwriter]
+  - id: supporting_doc
+    displayName: Supporting document
+    type: file
+    required: false
+    order: 4
+    maxBytes: 10485760
+    allowedMimeTypes: [application/pdf, image/png]
+    editableBy: [role:admin]
+
+# --- case-level statuses (fallback when a stage has no own statuses list) ---
+statuses:
+  - { id: open,   displayName: Open,   color: blue }
+  - { id: closed, displayName: Closed, color: zinc, terminal: true }
+
+# --- list view columns ---
+listColumns: [applicant, amount, category, status, createdAt]
+
+# --- stages ---
+stages:
+  - id: intake
+    displayName: Intake
+    statuses:
+      - { id: drafting, displayName: Drafting, color: amber }
+    initialStatus: drafting
+  - id: underwriting
+    displayName: Underwriting
+    statuses:
+      - { id: in-review, displayName: In review, color: blue }
+    initialStatus: in-review
+  - id: decision
+    displayName: Decision
+    archetype: business_final
+    statuses:
+      - { id: approved, displayName: Approved, color: emerald, terminal: true }
+      - { id: rejected, displayName: Rejected, color: red,     terminal: true }
+    initialStatus: approved
+
+# --- forms ---
+forms:
+  - id: intake-form
+    topology: single
+    dataModel: monolithic
+    rendering: single-page
+    archetype: submit_for_processing
+    fields:
+      - { id: applicant, displayName: Applicant, type: text,   required: true,  order: 0 }
+      - { id: amount,    displayName: Amount,    type: number, required: true,  order: 1 }
+  - id: decision-form
+    topology: single
+    dataModel: sectioned
+    rendering: multi-section
+    archetype: business_final
+    sections:
+      - id: applicant-detail
+        label: Applicant details
+        fields:
+          - { id: applicant, displayName: Applicant, type: text,   required: true, order: 0 }
+          - { id: amount,    displayName: Amount,    type: number, required: true, order: 1 }
+      - id: outcome
+        label: Credit outcome
+        fields:
+          - { id: notes, displayName: Notes, type: textarea, required: false, order: 0 }
+
+# --- BPMN process intent ---
+workflows:
+  bpmn: loan-application.bpmn
+
+# --- BPMN routing rules ---
+# Note: attachments[].file references the same BPMN as workflows.bpmn.
+# Both blocks are required when using BPMN-driven stage transitions.
+attachments:
+  - type: bpmn
+    file: loan-application.bpmn
+    scope: case
+    routing:
+      userTasks:
+        intake-task:
+          wksTask: "Intake review"
+          form: intake-form
+        underwriting-task:
+          wksTask: "Underwriting review"
+        decide-task:
+          wksTask: "Final decision"
+          form: decision-form
+      events:
+        endEvent:
+          stageTransition: "decision -> completed"
+        signal:
+          signal-approve:
+            stageTransition: "intake -> underwriting"
+      properties:
+        - on: "userTask:intake-task"
+          camunda:property: status
+          emits: { type: task-complete, scope: case }
+        - on: "userTask:underwriting-task"
+          camunda:property: status
+          emits: { type: task-complete, scope: case }
+```

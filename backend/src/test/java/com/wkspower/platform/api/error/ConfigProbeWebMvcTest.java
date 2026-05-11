@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.wkspower.platform.api.GlobalExceptionHandler;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
+import com.wkspower.platform.security.SamlGatingFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -26,7 +27,9 @@ import org.springframework.test.web.servlet.MockMvc;
     controllers = ConfigProbeController.class,
     excludeAutoConfiguration = {SecurityAutoConfiguration.class},
     excludeFilters =
-        @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationFilter.class))
+        @Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = {JwtAuthenticationFilter.class, SamlGatingFilter.class}))
 @Import(GlobalExceptionHandler.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")

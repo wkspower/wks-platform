@@ -15,9 +15,11 @@ import com.wkspower.platform.api.GlobalExceptionHandler;
 import com.wkspower.platform.api.dto.request.LoginRequest;
 import com.wkspower.platform.domain.model.User;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.SecurityConfig.ProductionProfile;
 import com.wkspower.platform.security.WksUserPrincipal;
@@ -50,7 +52,12 @@ import org.springframework.test.web.servlet.MvcResult;
  * WKS error envelopes instead of Spring's default 403 HTML.
  */
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 class AuthControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -58,6 +65,7 @@ class AuthControllerTest {
 
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
+  @MockitoBean private LicenseService licenseService;
   @MockitoBean private AuthenticationManager authenticationManager;
   @MockitoBean private ProductionProfile productionProfile;
 

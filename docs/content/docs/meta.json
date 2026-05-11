@@ -1,4 +1,4 @@
 {
   "title": "WKS Platform",
-  "pages": ["start", "guides", "concepts", "reference", "operations"]
+  "pages": ["start", "concepts", "guides", "operations", "reference"]
 }

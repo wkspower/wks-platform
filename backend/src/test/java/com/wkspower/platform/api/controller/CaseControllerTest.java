@@ -32,10 +32,12 @@ import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.time.Instant;
@@ -56,7 +58,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /** Slice test for {@link CaseController}. Covers the four endpoints + the SpEL permission gate. */
 @WebMvcTest(CaseController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class CaseControllerTest {
 
@@ -82,6 +89,7 @@ class CaseControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
+  @MockitoBean LicenseService licenseService;
 
   // ---- POST /api/cases ---------------------------------------------------
 
