@@ -1,12 +1,81 @@
 ---
 title: Cases first, processes optional
-description: How WKS models work — and why the case type drives everything, with the process engine attached below.
-gate: "3"
-status: stub
-source: _bmad-output/planning-artifacts/CONCEPTS.md §principle inversion
+description: How WKS models work — the case type drives everything, and a process engine is one attachable execution backend below it.
 ---
 
-{/* The mental model entry point. Source material is comprehensive — needs voice-rules pass only. */}
-{/* Owner: Victor (with Claude) */}
+**WKS is case-management first. BPMN is one attachable execution mode, not the foundation.**
 
-TODO: content — voice-rules pass on CONCEPTS.md §principle inversion
+A case type with **zero attached processes** is fully valid. You declare a few fields, an optional sequence of stages, a status set per stage — and you have a working case-management surface. You attach a process when the work warrants one, and you leave it off when it doesn't.
+
+This is the principle inversion: declarative case management on top, optional execution attached below — not BPMN-on-top with everything else nailed to it.
+
+## Two mental models, side by side
+
+If you're coming from a BPMN-engine background, the shift is real. Here is where the two models differ.
+
+| Dimension | Camunda mental model | WKS mental model |
+|---|---|---|
+| Starting unit | A BPMN process definition. | A **case type** declared in YAML. |
+| What is required to begin | A `.bpmn` file with at least a start event, one task, and an end event. | An `id`, a `displayName`, and a `version`. Stages, forms, and any process attachment are optional. |
+| How stages relate | No first-class stage. Phases are modelled as sub-processes, lanes, or variable conventions. | **Stages** are first-class case-type entities with their own status set, ad-hoc tasks, forms, and (optionally) their own attached process. |
+| How forms relate | A form is bound to a userTask inside the BPMN file (embedded or external form key). | A **form** is a case-type primitive with three independent axes — topology, data model, rendering — and is reachable independently of any task. |
+| When BPMN enters | At minute zero. Nothing happens until a process instance is started. | Only when you decide the work needs externalised orchestration. The case type runs without it; you attach a process to a stage (or to the whole case) when it earns its place. |
+| Who owns transitions | The process definition. Variables and gateways drive state. | The case type. Transitions can come from a WKS auto-rule, a manual user action, or a backend signal routed through the **Mapping Layer**. |
+
+The vocabulary follows the inversion. Status is scoped to its stage, not a process variable. An ad-hoc task exists whether a process is attached or not. An attached process is a backend, not the source of case-management semantics.
+
+For a deeper Camunda-to-WKS concept map, see [Coming from Camunda](/docs/concepts/coming-from-camunda).
+
+## Building up additively: zero stages → stages → attached BPMN
+
+The clearest way to see the inversion is to build a case type up one layer at a time. Each layer is fully usable on its own; the next layer is opt-in.
+
+### Step 1 — A zero-stage case type
+
+Start with the minimum. A `support-ticket` case type with an `id`, a `displayName`, and a couple of fields. No stages declared. No forms. No process attached.
+
+What you get, today, with nothing else:
+
+- A case-creation surface for `support-ticket`.
+- Identity, owner, and case-global status.
+- Comments, attachments, ad-hoc tasks, and the audit trail.
+- An API and UI that can list, open, and update cases of this type.
+
+That is a working case-management product. No engine is involved. No BPMN file exists. The case type is real, persisted, versioned, and usable.
+
+### Step 2 — Add stages
+
+Now declare an ordered list of stages on the same case type — for example, `triage → resolution` — and a status set per stage. Nothing else changes; you have not introduced a process engine.
+
+What the new layer adds:
+
+- A current stage on every case, with the case advancing through the declared sequence.
+- A stage-scoped status set — `triage` has its own statuses; `resolution` has its own. A status `id` is the wire contract for that stage and is never reused across stages for a different meaning.
+- Per-stage ad-hoc tasks and forms, declared on the stage they belong to.
+- Stage transitions driven by a WKS auto-rule or a manual user action. Both sources are first-class — no engine required.
+
+The case type still has zero attached processes. It is still fully valid. It is now a structured, multi-stage case-management surface, and the only thing you added was YAML.
+
+### Step 3 — Attach a process
+
+Eventually one stage earns externalised orchestration — say, `resolution` needs a multi-step approval that benefits from a modeller. Now, and only now, you attach a BPMN process at `scope: stage:resolution`.
+
+What the attached process changes:
+
+- The `resolution` stage's task flow is driven by the BPMN — the userTasks are surfaced through the **Mapping Layer**, not invented in YAML.
+- Stage transitions out of `resolution` can come from a terminal `endEvent` or a named `signal` event, emitted as a `BackendSignal` and routed through the Mapping Layer.
+- In-stage status transitions can additionally come from a userTask `status` property, with precedence `endEvent` > named `signal` > userTask status property.
+
+What it does **not** change:
+
+- The `triage` stage still has no attached process. It still runs on WKS primitives alone.
+- The case type's identity, fields, roles, forms, status sets, and audit trail are unchanged. None of them moved into the BPMN file.
+- The mapping declaration — userTask mappings, event-to-transition mappings, property emission rules — lives in the attachment's `map:` block, not in listeners embedded in the process.
+- Replacing the BPMN file later (or swapping the backend entirely, when a non-BPMN adapter ships) does not rewrite the case type. The case type is the contract; the backend is the implementation.
+
+That is the inversion in motion: you added an execution backend below the case type, not above it. You can remove it tomorrow and the case type is still a case type.
+
+## What to read next
+
+- [Your first case type](/docs/start/your-first-case-type) — declare a real case type end to end and deploy it.
+- [Coming from Camunda](/docs/concepts/coming-from-camunda) — the concept-by-concept map from BPMN-engine terms to WKS terms, with a worked Mapping Layer example.
