@@ -1,21 +1,19 @@
 package com.wkspower.platform.api.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wkspower.platform.api.dto.request.LoginRequest;
 import com.wkspower.platform.domain.config.ValidationResult;
-import com.wkspower.platform.domain.config.rebase.CaseRebaseReport;
 import com.wkspower.platform.domain.exception.ErrorCode;
-import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.UserRepository;
-import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseEntityRepository;
 import com.wkspower.platform.infrastructure.persistence.repository.CaseTypeVersionJpaRepository;
-import jakarta.persistence.EntityManager;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
@@ -25,34 +23,48 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 3.9 AC5 — Postgres-IT exercising end-to-end rebase: dry-run preview, apply success,
- * irreconcilable rejection, version-arg rejection.
+ * Story 3.9 AC5 — Postgres-IT exercising end-to-end rebase over HTTP. Per the review remediation:
  *
- * <p>Exercises:
- *
- * <ol>
- *   <li>Scenario 1 — dry-run additive (v1 → v2): irreconcilable=[], no DB mutation
- *   <li>Scenario 2 — apply success (v1 → v2): cases.case_type_version mutated to 2
- *   <li>Scenario 3 — irreconcilable rejection (legacyField removed with data): 422 + WKS-CFG-034,
- *       version unchanged
- *   <li>Scenario 4 — reverse rebase: 422 + WKS-API-007
- *   <li>Scenario 5 — non-existent toVersion: 422 + WKS-API-007
- * </ol>
+ * <ul>
+ *   <li>Class is NOT {@code @Transactional} — every test commits its setup writes; reads after the
+ *       HTTP call go through a fresh {@link TransactionTemplate} so we only observe the committed
+ *       view (irreconcilable rejection must NOT mutate {@code cases.case_type_version}).
+ *   <li>Endpoint exercised via {@link TestRestTemplate} on a random port, hitting the real {@code
+ *       AdminController} chain through the security filter — proves the apply path's commit
+ *       boundary and audit semantics, not just the service surface.
+ *   <li>Scenarios cover dry-run, apply success, irreconcilable rejection, apply-path reverse
+ *       ({@code WKS-API-007}), apply-path no-op ({@code WKS-API-008}), and apply-path non-existent
+ *       toVersion ({@code WKS-API-007}). All rejection paths assert the {@code cases} row is
+ *       UNCHANGED via fresh-tx read.
+ *   <li>Per-test UUIDs in {@code @BeforeEach} — no shared CASE_TYPE_ID literal carries state across
+ *       methods.
+ * </ul>
  *
  * <p>Memory {@code feedback_production_validator_opt_out.md}: production-validation disabled.
- * Memory {@code project_postgres_it_parity_gap.md}: Postgres-IT mandatory for BYTEA reads +
- * cases.case_type_version writes.
+ * Memory {@code project_postgres_it_parity_gap.md}: Postgres-IT mandatory for BYTEA reads + {@code
+ * cases.case_type_version} writes.
  */
-@SpringBootTest(properties = "wks.bootstrap.production-validation.enabled=false")
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+    properties = "wks.bootstrap.production-validation.enabled=false")
 @ActiveProfiles("production")
 @Testcontainers(disabledWithoutDocker = true)
 class CaseRebasePostgresIT {
@@ -80,26 +92,32 @@ class CaseRebasePostgresIT {
   }
 
   @Autowired private ConfigService configService;
-  @Autowired private CaseRebaseService caseRebaseService;
   @Autowired private CaseRepository caseRepository;
   @Autowired private CaseTypeVersionRegistry versionRegistry;
   @Autowired private CaseEntityRepository caseEntityRepo;
   @Autowired private CaseTypeVersionJpaRepository ctVersionRepo;
   @Autowired private UserRepository userRepository;
-  @Autowired private EntityManager em;
-
-  private static final String CT_PREFIX = "it-rebase-";
+  @Autowired private TestRestTemplate rest;
+  @Autowired private ObjectMapper json;
+  @Autowired private PlatformTransactionManager txManager;
 
   /** Resolved from the seeded admin user at {@code @BeforeEach}. */
   private UUID adminUserId;
 
+  /** Per-test CaseType id — defeats any cross-test state leakage. */
+  private String ctId;
+
+  private TransactionTemplate freshTx;
+
   @BeforeEach
-  void resolveAdminUser() {
+  void perTestSetup() {
     adminUserId =
         userRepository
             .findByEmail("admin@wkspower.local")
             .orElseThrow(() -> new IllegalStateException("Admin user not seeded"))
             .id();
+    ctId = "it-rebase-" + UUID.randomUUID().toString().substring(0, 8);
+    freshTx = new TransactionTemplate(txManager);
   }
 
   // ---- YAML helpers ----
@@ -167,9 +185,7 @@ class CaseRebasePostgresIT {
         .getBytes(StandardCharsets.UTF_8);
   }
 
-  /**
-   * v2 (registry version after bump): mutate-class change — removes legacy-field which has data.
-   */
+  /** v2 mutate-class — removes legacy-field which has data on the case. */
   private static byte[] v2RemovesLegacyFieldYaml(String ctId) {
     return ("""
         id: %s
@@ -195,7 +211,7 @@ class CaseRebasePostgresIT {
         .getBytes(StandardCharsets.UTF_8);
   }
 
-  /** v1 with legacy-field — used for irreconcilable scenario. */
+  /** v1 with legacy-field — paired with v2RemovesLegacyFieldYaml for irreconcilable scenario. */
   private static byte[] v1WithLegacyFieldYaml(String ctId) {
     return ("""
         id: %s
@@ -237,58 +253,107 @@ class CaseRebasePostgresIT {
             0L,
             null,
             null);
+    // Each save commits in its own tx (the IT itself is NOT @Transactional).
     return caseRepository.save(kase);
   }
 
   @AfterEach
   void wipe() {
+    // Each cleanup commits — no class-level @Transactional to roll the world back implicitly.
     caseEntityRepo.deleteAll();
     ctVersionRepo.deleteAll();
+  }
+
+  // ---- HTTP helpers ----
+
+  private String login() {
+    ResponseEntity<String> resp =
+        rest.postForEntity(
+            "/api/auth/login", new LoginRequest("admin@wkspower.local", "admin"), String.class);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+    String setCookie = resp.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+    assertThat(setCookie).as("login Set-Cookie present").isNotNull();
+    int semi = setCookie.indexOf(';');
+    return semi > 0 ? setCookie.substring(0, semi) : setCookie;
+  }
+
+  private ResponseEntity<String> rebaseDryRun(String cookie, String ctId, UUID caseId, int to) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.add(HttpHeaders.COOKIE, cookie);
+    return rest.exchange(
+        "/api/admin/case-types/" + ctId + "/cases/" + caseId + "/rebase?to=" + to,
+        HttpMethod.GET,
+        new HttpEntity<>(headers),
+        String.class);
+  }
+
+  private ResponseEntity<String> rebaseApply(String cookie, String ctId, UUID caseId, int to) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.add(HttpHeaders.COOKIE, cookie);
+    return rest.exchange(
+        "/api/admin/case-types/" + ctId + "/cases/" + caseId + "/rebase?to=" + to,
+        HttpMethod.POST,
+        new HttpEntity<>(headers),
+        String.class);
+  }
+
+  /** Fresh-tx read — only observes committed state. */
+  private int readCommittedCaseVersion(UUID caseId) {
+    Integer v =
+        freshTx.execute(
+            status ->
+                caseEntityRepo
+                    .findById(caseId)
+                    .orElseThrow(() -> new AssertionError("case not found: " + caseId))
+                    .getCaseTypeVersion());
+    return v == null ? -1 : v;
+  }
+
+  private String firstErrorCode(String body) throws Exception {
+    JsonNode root = json.readTree(body);
+    JsonNode error = root.path("error");
+    JsonNode errorsArr = error.path("errors");
+    if (errorsArr.isArray() && errorsArr.size() > 0) {
+      return errorsArr.get(0).path("code").asText();
+    }
+    return error.path("code").asText();
   }
 
   // ---- Scenario 1: dry-run additive — irreconcilable=[], no DB mutation ----
 
   @Test
-  @Transactional
-  void scenario1_dryRun_additive_noMutation() {
-    String ctId = CT_PREFIX + "s1";
+  void scenario1_dryRun_additive_noMutation() throws Exception {
+    String cookie = login();
 
-    // Deploy v1
     ValidationResult v1 = configService.validateAndRegister("api.yaml", v1Yaml(ctId), "test:s1");
     assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
-
-    // Deploy v2 (additive — bumpVersion required for v2 registration after v1)
     ValidationResult v2 =
         configService.validateAndRegister("api.yaml", v2Yaml(ctId), "test:s1", true);
     assertThat(v2.isInvalid()).as("v2 deploy: " + v2.errors()).isFalse();
 
-    // Create case at v1
-    int v1Num = versionRegistry.currentVersion(ctId).orElseThrow() - 1; // v1 is one before current
-    // Re-query: v2 is current so v1 is 1 less
-    int currentV = versionRegistry.currentVersion(ctId).orElseThrow();
-    assertThat(currentV).isEqualTo(2);
-
     Case kase = createCase(ctId, 1, Map.of("name", "Alice"));
 
-    // Dry-run v1 → v2
-    CaseRebaseReport report = caseRebaseService.dryRun(ctId, kase.id(), 2);
+    ResponseEntity<String> resp = rebaseDryRun(cookie, ctId, kase.id(), 2);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    assertThat(report.fromVersion()).isEqualTo(1);
-    assertThat(report.toVersion()).isEqualTo(2);
-    assertThat(report.applied()).isFalse();
-    assertThat(report.irreconcilable()).isEmpty();
+    JsonNode body = json.readTree(resp.getBody());
+    JsonNode data = body.path("data");
+    assertThat(data.path("fromVersion").asInt()).isEqualTo(1);
+    assertThat(data.path("toVersion").asInt()).isEqualTo(2);
+    assertThat(data.path("applied").asBoolean()).isFalse();
+    assertThat(data.path("irreconcilable")).isEmpty();
 
-    // No DB mutation — case still at v1
-    int actualVersion = readCaseVersion(kase.id());
-    assertThat(actualVersion).as("dry-run must NOT mutate cases.case_type_version").isEqualTo(1);
+    // Fresh-tx read — dry-run must NOT mutate the cases row.
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(1);
   }
 
   // ---- Scenario 2: apply success — cases.case_type_version mutated ----
 
   @Test
-  @Transactional
-  void scenario2_apply_success_mutatesVersion() {
-    String ctId = CT_PREFIX + "s2";
+  void scenario2_apply_success_mutatesVersion() throws Exception {
+    String cookie = login();
 
     ValidationResult v1 = configService.validateAndRegister("api.yaml", v1Yaml(ctId), "test:s2");
     assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
@@ -298,70 +363,49 @@ class CaseRebasePostgresIT {
 
     Case kase = createCase(ctId, 1, Map.of("name", "Bob"));
 
-    // Apply v1 → v2
-    CaseRebaseReport report = caseRebaseService.apply(ctId, kase.id(), 2);
+    ResponseEntity<String> resp = rebaseApply(cookie, ctId, kase.id(), 2);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    assertThat(report.applied()).isTrue();
-    assertThat(report.fromVersion()).isEqualTo(1);
-    assertThat(report.toVersion()).isEqualTo(2);
-    assertThat(report.irreconcilable()).isEmpty();
+    JsonNode body = json.readTree(resp.getBody());
+    assertThat(body.path("data").path("applied").asBoolean()).isTrue();
+    assertThat(body.path("data").path("toVersion").asInt()).isEqualTo(2);
 
-    // DB mutated — case now at v2
-    em.flush();
-    em.clear();
-    int actualVersion = readCaseVersion(kase.id());
-    assertThat(actualVersion).as("apply must mutate cases.case_type_version to 2").isEqualTo(2);
+    // Fresh-tx read — apply commit must be visible to a new transaction.
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(2);
   }
 
-  // ---- Scenario 3: irreconcilable rejection (legacyField removed with data) ----
+  // ---- Scenario 3: irreconcilable rejection — fresh-tx read shows row UNCHANGED ----
 
   @Test
-  @Transactional
-  void scenario3_apply_irreconcilable_rejects422_versionUnchanged() {
-    String ctId = CT_PREFIX + "s3";
+  void scenario3_apply_irreconcilable_rejects422_versionUnchanged_freshTxRead() throws Exception {
+    String cookie = login();
 
-    // Deploy v1 with legacyField
     ValidationResult v1 =
         configService.validateAndRegister("api.yaml", v1WithLegacyFieldYaml(ctId), "test:s3");
     assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
-
-    // Deploy v2 (legacy-field removed) — needs bumpVersion=true since it's mutate-class.
-    // force=false: bumpVersion=true alone is sufficient for the registry gate.
     ValidationResult v2 =
         configService.validateAndRegister(
             "api.yaml", v2RemovesLegacyFieldYaml(ctId), "test:s3", true, false);
     assertThat(v2.isInvalid()).as("v2 deploy: " + v2.errors()).isFalse();
 
-    // Create case at v1 with legacy-field data
     Case kase = createCase(ctId, 1, Map.of("name", "Charlie", "legacy-field", "some-data"));
 
-    // After deploying v1 then bumping to v2, registry current is 2
     int targetVersion = versionRegistry.currentVersion(ctId).orElseThrow();
     assertThat(targetVersion).isEqualTo(2);
 
-    // The case has legacyField data but v2 removes legacyField → irreconcilable
-    assertThatThrownBy(() -> caseRebaseService.apply(ctId, kase.id(), targetVersion))
-        .isInstanceOf(WksConfigException.class)
-        .satisfies(
-            ex -> {
-              WksConfigException wce = (WksConfigException) ex;
-              assertThat(wce.getErrors()).hasSize(1);
-              assertThat(wce.getErrors().get(0).code()).isEqualTo(ErrorCode.WKS_CFG_034.wire());
-            });
+    ResponseEntity<String> resp = rebaseApply(cookie, ctId, kase.id(), targetVersion);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    assertThat(firstErrorCode(resp.getBody())).isEqualTo(ErrorCode.WKS_CFG_034.wire());
 
-    // Version unchanged
-    int actualVersion = readCaseVersion(kase.id());
-    assertThat(actualVersion)
-        .as("rejected apply must not mutate cases.case_type_version")
-        .isEqualTo(1);
+    // Fresh-tx read — proves the rejection did not commit a partial update.
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(1);
   }
 
-  // ---- Scenario 4: reverse rebase — 422 + WKS-API-007 ----
+  // ---- Scenario 4: apply-path reverse rebase — WKS-API-007 + UNCHANGED ----
 
   @Test
-  @Transactional
-  void scenario4_reverseRebase_rejects_api007() {
-    String ctId = CT_PREFIX + "s4";
+  void scenario4_applyPath_reverseRebase_rejects_api007_unchanged() throws Exception {
+    String cookie = login();
 
     ValidationResult v1 = configService.validateAndRegister("api.yaml", v1Yaml(ctId), "test:s4");
     assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
@@ -371,45 +415,49 @@ class CaseRebasePostgresIT {
 
     Case kase = createCase(ctId, 2, Map.of("name", "Dan"));
 
-    assertThatThrownBy(() -> caseRebaseService.dryRun(ctId, kase.id(), 1))
-        .isInstanceOf(WksConfigException.class)
-        .satisfies(
-            ex -> {
-              WksConfigException wce = (WksConfigException) ex;
-              assertThat(wce.getErrors().get(0).code()).isEqualTo(ErrorCode.WKS_API_007.wire());
-              assertThat(wce.getErrors().get(0).message()).contains("strictly greater");
-            });
+    // POST (apply path) reverse rebase: toVersion < fromVersion → WKS-API-007
+    ResponseEntity<String> resp = rebaseApply(cookie, ctId, kase.id(), 1);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    assertThat(firstErrorCode(resp.getBody())).isEqualTo(ErrorCode.WKS_API_007.wire());
+
+    // Fresh-tx read — row UNCHANGED.
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(2);
   }
 
-  // ---- Scenario 5: non-existent toVersion — 422 + WKS-API-007 ----
+  // ---- Scenario 5: apply-path non-existent toVersion — WKS-API-007 + UNCHANGED ----
 
   @Test
-  @Transactional
-  void scenario5_nonExistentToVersion_rejects_api007() {
-    String ctId = CT_PREFIX + "s5";
+  void scenario5_applyPath_nonExistentToVersion_rejects_api007_unchanged() throws Exception {
+    String cookie = login();
 
     ValidationResult v1 = configService.validateAndRegister("api.yaml", v1Yaml(ctId), "test:s5");
     assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
 
     Case kase = createCase(ctId, 1, Map.of("name", "Eve"));
 
-    assertThatThrownBy(() -> caseRebaseService.dryRun(ctId, kase.id(), 99))
-        .isInstanceOf(WksConfigException.class)
-        .satisfies(
-            ex -> {
-              WksConfigException wce = (WksConfigException) ex;
-              assertThat(wce.getErrors().get(0).code()).isEqualTo(ErrorCode.WKS_API_007.wire());
-              assertThat(wce.getErrors().get(0).message())
-                  .contains("not found in case_type_versions");
-            });
+    ResponseEntity<String> resp = rebaseApply(cookie, ctId, kase.id(), 99);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    assertThat(firstErrorCode(resp.getBody())).isEqualTo(ErrorCode.WKS_API_007.wire());
+
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(1);
   }
 
-  // ---- Helpers ----
+  // ---- Scenario 6: apply-path no-op rebase — WKS-API-008 + UNCHANGED ----
 
-  private int readCaseVersion(UUID caseId) {
-    return caseEntityRepo
-        .findById(caseId)
-        .orElseThrow(() -> new AssertionError("case not found: " + caseId))
-        .getCaseTypeVersion();
+  @Test
+  void scenario6_applyPath_noOpRebase_rejects_api008_unchanged() throws Exception {
+    String cookie = login();
+
+    ValidationResult v1 = configService.validateAndRegister("api.yaml", v1Yaml(ctId), "test:s6");
+    assertThat(v1.isInvalid()).as("v1 deploy: " + v1.errors()).isFalse();
+
+    Case kase = createCase(ctId, 1, Map.of("name", "Fae"));
+
+    // toVersion == fromVersion → WKS-API-008 (split from WKS-API-007 reverse)
+    ResponseEntity<String> resp = rebaseApply(cookie, ctId, kase.id(), 1);
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    assertThat(firstErrorCode(resp.getBody())).isEqualTo(ErrorCode.WKS_API_008.wire());
+
+    assertThat(readCommittedCaseVersion(kase.id())).isEqualTo(1);
   }
 }

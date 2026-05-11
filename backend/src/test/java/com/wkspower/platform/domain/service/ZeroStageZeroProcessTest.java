@@ -260,6 +260,11 @@ class ZeroStageZeroProcessTest {
         Collection<UUID> ids, java.util.Set<String> projectedFieldIds) {
       return Map.of();
     }
+
+    @Override
+    public int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion) {
+      return 0;
+    }
   }
 
   private static final class NoopValidator implements CaseDataValidator {

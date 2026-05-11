@@ -2,7 +2,9 @@ package com.wkspower.platform.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -23,6 +25,7 @@ import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
 import com.wkspower.platform.security.SecurityConfig;
@@ -50,6 +53,7 @@ class AdminControllerRebaseTest {
   @MockitoBean private CaseRebaseService caseRebaseService;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
+  @MockitoBean private LicenseService licenseService;
 
   private static final UUID CASE_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
   private static final String CT_ID = "bfsi-kyc";
@@ -92,7 +96,8 @@ class AdminControllerRebaseTest {
 
   @Test
   void apply_asAdmin_returns200WithAppliedTrue() throws Exception {
-    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3)))
+    when(caseRebaseService.apply(
+            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
         .thenReturn(cleanDryRunReport(true));
 
     mockMvc
@@ -110,7 +115,8 @@ class AdminControllerRebaseTest {
 
   @Test
   void apply_withIrreconcilable_returns422WithCfg034() throws Exception {
-    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3)))
+    when(caseRebaseService.apply(
+            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
         .thenThrow(
             new WksConfigException(
                 List.of(

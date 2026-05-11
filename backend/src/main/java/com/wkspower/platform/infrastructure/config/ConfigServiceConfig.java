@@ -155,7 +155,10 @@ public class ConfigServiceConfig {
   public CaseRebaseService caseRebaseService(
       CaseRepository caseRepository,
       CaseTypeVersionRegistry versionRegistry,
-      CaseTypeSource caseTypeSource) {
-    return new CaseRebaseService(caseRepository, versionRegistry, caseTypeSource);
+      CaseTypeSource caseTypeSource,
+      EventPublisher eventPublisher,
+      Clock clock) {
+    return new CaseRebaseService(
+        caseRepository, versionRegistry, caseTypeSource, eventPublisher, clock);
   }
 }
