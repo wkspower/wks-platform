@@ -95,6 +95,13 @@ public record CaseRebaseReport(
     /** A field removed in the target version has non-null data on the case. */
     REMOVED_FIELD_WITH_DATA,
     /** The case's current status has no equivalent id in the target version. */
-    STATUS_HAS_NO_EQUIVALENT
+    STATUS_HAS_NO_EQUIVALENT,
+    /**
+     * Story 3.9 review remediation — the case currently sits on a stage that exists in the source
+     * version but is removed (or renamed) in the target version. Phase-0 blocks the apply; Story
+     * 3-9.1 will introduce operator-supplied stage remap JSON. The {@code currentValue} carries the
+     * dangling stage id so the operator can identify the case's pinned stage in the report.
+     */
+    STAGE_REMOVED_WITH_ACTIVE_CASE
   }
 }
