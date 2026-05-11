@@ -274,25 +274,25 @@ public enum ErrorCode {
    */
   WKS_MAP_010("WKS-MAP-010"),
   /**
-   * Story 6.2 — parse-time: an attachment declares a {@code routing.outcomes:} block but no
-   * {@code routing.userTasks.<id>.outcomes:} list references any outcome key. The block is unused.
-   * The operator must either remove the orphaned {@code outcomes:} block or add the relevant
-   * outcome keys to a userTask's {@code outcomes:} list. Emitted by {@link
+   * Story 6.2 — parse-time: an attachment declares a {@code routing.outcomes:} block but no {@code
+   * routing.userTasks.<id>.outcomes:} list references any outcome key. The block is unused. The
+   * operator must either remove the orphaned {@code outcomes:} block or add the relevant outcome
+   * keys to a userTask's {@code outcomes:} list. Emitted by {@link
    * com.wkspower.platform.infrastructure.config.MappingValidator}.
    *
-   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
-   * "WKS-MAP-011"} is a stable contract; never reuse for any other meaning.
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-011"}
+   * is a stable contract; never reuse for any other meaning.
    */
   WKS_MAP_011("WKS-MAP-011"),
   /**
-   * Story 6.2 — parse-time: a {@code routing.userTasks.<id>.outcomes:} list declares an outcome
-   * key that has no corresponding {@code routing.outcomes.<key>} rule. The key is bound to a
-   * userTask but cannot be routed — the dispatch would always miss with {@code WKS-MAP-404} at
-   * runtime. Inverse of {@link #WKS_MAP_010} (rule without declaration). Emitted by {@link
+   * Story 6.2 — parse-time: a {@code routing.userTasks.<id>.outcomes:} list declares an outcome key
+   * that has no corresponding {@code routing.outcomes.<key>} rule. The key is bound to a userTask
+   * but cannot be routed — the dispatch would always miss with {@code WKS-MAP-404} at runtime.
+   * Inverse of {@link #WKS_MAP_010} (rule without declaration). Emitted by {@link
    * com.wkspower.platform.infrastructure.config.MappingValidator}.
    *
-   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
-   * "WKS-MAP-012"} is a stable contract; never reuse for any other meaning.
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-012"}
+   * is a stable contract; never reuse for any other meaning.
    */
   WKS_MAP_012("WKS-MAP-012"),
   /**
@@ -549,15 +549,15 @@ public enum ErrorCode {
    * Story 6.2 — runtime: emitted by {@link
    * com.wkspower.platform.domain.service.ExecutionSignalRouter#resetStatusForAdvancedStage} when a
    * stage advance succeeds but the next stage declares no statuses AND no top-level fallback
-   * applies — the case's existing status persists across the stage boundary. WARN-level;
-   * surfaces a stale-status condition that may indicate a missing {@code statuses:} declaration on
-   * the next stage. Operator action: either declare the next stage's statuses or set top-level
-   * statuses to seed the post-advance value.
+   * applies — the case's existing status persists across the stage boundary. WARN-level; surfaces a
+   * stale-status condition that may indicate a missing {@code statuses:} declaration on the next
+   * stage. Operator action: either declare the next stage's statuses or set top-level statuses to
+   * seed the post-advance value.
    *
    * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
-   * "WKS-STATUS-001"} is a stable contract; never reuse for any other meaning.
+   * "WKS-STAT-001"} is a stable contract; never reuse for any other meaning.
    */
-  WKS_STATUS_001("WKS-STATUS-001");
+  WKS_STAT_001("WKS-STAT-001");
 
   private final String wire;
 

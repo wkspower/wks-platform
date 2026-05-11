@@ -32,11 +32,11 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Story 6.2 — focused unit coverage for {@link ExecutionSignalRouter#resetStatusForAdvancedStage}
- * WKS-STATUS-001 warn path. When stage advance succeeds but the next stage's status set is empty
- * (no stage-scoped statuses, no top-level fallback), the router must log WARN with
- * wksErrorCode=WKS-STATUS-001 and leave the case status untouched.
+ * WKS-STAT-001 warn path. When stage advance succeeds but the next stage's status set is empty (no
+ * stage-scoped statuses, no top-level fallback), the router must log WARN with
+ * wksErrorCode=WKS-STAT-001 and leave the case status untouched.
  */
-class ExecutionSignalRouterStatus001Test {
+class ExecutionSignalRouterStat001Test {
 
   private static final UUID CASE_ID = UUID.randomUUID();
   private static final String CASE_TYPE_ID = "ct-status001";
@@ -46,7 +46,7 @@ class ExecutionSignalRouterStatus001Test {
   void resetStatusForAdvancedStage_warnsWhenNextStageHasNoStatuses() {
     // ---- arrange: case-type whose `review` stage declares NO statuses AND top-level statuses
     // are empty. This forces statusesFor("review") to return an empty list, triggering the
-    // WKS-STATUS-001 warn branch.
+    // WKS-STAT-001 warn branch.
     CaseTypeConfig caseType =
         CaseTypeConfig.builder()
             .id(CASE_TYPE_ID)
@@ -126,9 +126,9 @@ class ExecutionSignalRouterStatus001Test {
               "intake-task",
               Map.of("outcome", "approve")));
 
-      // ---- assert: warn was emitted with WKS-STATUS-001.
+      // ---- assert: warn was emitted with WKS-STAT-001.
       assertThat(appender.list)
-          .as("expected WKS-STATUS-001 warn")
+          .as("expected WKS-STAT-001 warn")
           .anyMatch(
               e ->
                   e.getLevel() == ch.qos.logback.classic.Level.WARN
@@ -137,7 +137,7 @@ class ExecutionSignalRouterStatus001Test {
                           .anyMatch(
                               kv ->
                                   "wksErrorCode".equals(kv.key)
-                                      && "WKS-STATUS-001".equals(kv.value)));
+                                      && "WKS-STAT-001".equals(kv.value)));
 
       // statusUpdater must NOT have been called (no reset since next stage has no statuses).
       verify(statusUpdater, never()).updateStatus(any(UUID.class), anyString());

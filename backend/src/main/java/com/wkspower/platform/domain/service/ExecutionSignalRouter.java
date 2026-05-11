@@ -565,11 +565,11 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
     List<? extends com.wkspower.platform.domain.config.model.StatusDefinition> nextStageStatuses =
         caseType.statusesFor(nextStageId);
     if (nextStageStatuses.isEmpty()) {
-      // Story 6.2 — WKS-STATUS-001: stage advance succeeded but next stage declares no statuses
+      // Story 6.2 — WKS-STAT-001: stage advance succeeded but next stage declares no statuses
       // AND no top-level fallback applies. The case's existing status persists across the stage
       // boundary (stale). WARN so the operator can investigate the missing declaration.
       log.atWarn()
-          .addKeyValue("wksErrorCode", ErrorCode.WKS_STATUS_001.wire())
+          .addKeyValue("wksErrorCode", ErrorCode.WKS_STAT_001.wire())
           .addKeyValue("caseId", preMutationRow.id().toString())
           .addKeyValue("oldStatus", preMutationRow.status())
           .addKeyValue("nextStageId", nextStageId)
