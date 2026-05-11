@@ -29,15 +29,4 @@ public record FormSubmitted(
     Instant submittedAt,
     Set<String> updatedFieldIds,
     /** Story 5.5 AC-7 — the pinned CaseTypeVersion the form was resolved against (D20). */
-    int caseTypeVersion) {
-
-  /**
-   * Backward-compat factory for callers (e.g. test helpers) that pre-date Story 5.5's {@code
-   * caseTypeVersion} slot. Defaults {@code caseTypeVersion} to {@code 0} as a sentinel — real
-   * production paths must always supply the version.
-   */
-  public static FormSubmitted of(
-      UUID caseId, String formId, UUID actorId, Instant submittedAt, Set<String> updatedFieldIds) {
-    return new FormSubmitted(caseId, formId, actorId, submittedAt, updatedFieldIds, 0);
-  }
-}
+    int caseTypeVersion) {}
