@@ -71,7 +71,9 @@ describe('TaskCompletionDialog (Story 6.2 AC1)', () => {
     // Title is always present; expect exactly two outcome buttons + the Cancel button.
     expect(screen.getByText('Approve')).toBeInTheDocument();
     expect(screen.getByText('Reject')).toBeInTheDocument();
-    const outcomeBtns = screen.getAllByRole('button').filter((b) => b.hasAttribute('data-outcome-key'));
+    const outcomeBtns = screen
+      .getAllByRole('button')
+      .filter((b) => b.hasAttribute('data-outcome-key'));
     expect(outcomeBtns).toHaveLength(2);
   });
 
@@ -188,6 +190,9 @@ describe('TaskCompletionDialog (Story 6.2 AC1)', () => {
       .getAllByRole('button')
       .filter((b) => b.hasAttribute('data-outcome-key'));
     expect(outcomeBtns).toHaveLength(2);
-    expect(outcomeBtns.map((b) => b.getAttribute('data-outcome-key'))).toEqual(['approve', 'reject']);
+    expect(outcomeBtns.map((b) => b.getAttribute('data-outcome-key'))).toEqual([
+      'approve',
+      'reject',
+    ]);
   });
 });
