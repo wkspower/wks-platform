@@ -222,9 +222,9 @@ class OutcomeDispatchIT {
   /**
    * Story 6.2 — applyStageTransition rejects a transition spec with a blank source segment.
    * MappingValidator anchors the grammar at deploy time, but a malformed spec sneaking through
-   * (e.g. admin REST PATCH, runtime hot-reload race) must not be silently treated as
-   * "from anywhere". The router throws WksMappingMissException → router's existing miss path
-   * catches and emits an audit row; the case row remains unchanged.
+   * (e.g. admin REST PATCH, runtime hot-reload race) must not be silently treated as "from
+   * anywhere". The router throws WksMappingMissException → router's existing miss path catches and
+   * emits an audit row; the case row remains unchanged.
    */
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(

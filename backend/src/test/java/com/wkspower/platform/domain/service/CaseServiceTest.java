@@ -395,9 +395,9 @@ class CaseServiceTest {
   // ---- gap-10 fix-a: initialStatus resolution ----------------------------
 
   /**
-   * Story 6.2 Decision B — when the YAML omits top-level statuses (validator injects
-   * {@code [open, closed]} with {@code explicitTopLevelStatuses = false}) and stages declare
-   * {@code initialStatus}, the first stage's initialStatus is used (gap-10 fix-a preserved).
+   * Story 6.2 Decision B — when the YAML omits top-level statuses (validator injects {@code [open,
+   * closed]} with {@code explicitTopLevelStatuses = false}) and stages declare {@code
+   * initialStatus}, the first stage's initialStatus is used (gap-10 fix-a preserved).
    */
   @Test
   void initialStatus_injectedDefaults_plusStageInitial_usesStageInitial() {

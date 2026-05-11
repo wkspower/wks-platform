@@ -53,13 +53,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <p>Skipped automatically when Docker is unavailable.
  *
- * <p>Slice test: invokes ExecutionSignalRouter.onSignal directly under TransactionTemplate
- * against the production PlatformTransactionManager. This mirrors the CIB seven
+ * <p>Slice test: invokes ExecutionSignalRouter.onSignal directly under TransactionTemplate against
+ * the production PlatformTransactionManager. This mirrors the CIB seven
  * SpringTransactionInterceptor txn boundary that CaseStatusAdapter.updateStatus
- * (Propagation.MANDATORY) joins in production. Known divergence: the engine's ACT_* tables are
- * not exercised — a router that swallowed a rollback signal without re-throwing would not be
- * caught here. Current router propagates WksMappingMissException so the divergence is
- * theoretical.
+ * (Propagation.MANDATORY) joins in production. Known divergence: the engine's ACT_* tables are not
+ * exercised — a router that swallowed a rollback signal without re-throwing would not be caught
+ * here. Current router propagates WksMappingMissException so the divergence is theoretical.
  */
 @SpringBootTest
 @ActiveProfiles("production")

@@ -782,13 +782,13 @@ public class CaseService {
   }
 
   /**
-   * Initial status for a newly-created case. Resolution order (Story 6.2 Decision B — refines
-   * Story 2.3 + gap-10 fix-a):
+   * Initial status for a newly-created case. Resolution order (Story 6.2 Decision B — refines Story
+   * 2.3 + gap-10 fix-a):
    *
    * <ol>
    *   <li>If the YAML declared top-level {@code statuses:} explicitly ({@code
-   *       explicitTopLevelStatuses == true}), use {@code statuses[0].id}. Author-declared
-   *       top-level statuses always win — they signal the author intended a flat lifecycle.
+   *       explicitTopLevelStatuses == true}), use {@code statuses[0].id}. Author-declared top-level
+   *       statuses always win — they signal the author intended a flat lifecycle.
    *   <li>Else if any stage declares an {@code initialStatus}, use the FIRST stage's value (gap-10
    *       fix-a preserved). Stage-scoped case types whose top-level statuses are validator-
    *       injected {@code [open, closed]} defaults fall through to this branch and pick {@code

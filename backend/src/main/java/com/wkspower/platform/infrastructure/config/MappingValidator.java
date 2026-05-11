@@ -412,7 +412,9 @@ public class MappingValidator {
               }
               for (int oi = 0; oi < rut.outcomes().size(); oi++) {
                 String declaredKey = rut.outcomes().get(oi);
-                if (declaredKey != null && !declaredKey.isBlank() && !ruleKeys.contains(declaredKey)) {
+                if (declaredKey != null
+                    && !declaredKey.isBlank()
+                    && !ruleKeys.contains(declaredKey)) {
                   errors.add(
                       ErrorDetail.ofField(
                           ErrorCode.WKS_MAP_012.wire(),

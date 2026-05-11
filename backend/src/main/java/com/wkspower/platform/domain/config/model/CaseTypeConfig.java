@@ -45,9 +45,9 @@ public record CaseTypeConfig(
     /**
      * Story 6.2 — internal validator-set marker that discriminates an author-declared top-level
      * {@code statuses:} block from {@link
-     * com.wkspower.platform.infrastructure.config.ConfigValidator}'s injected {@code [open, closed]}
-     * default. {@code true} when the YAML declared {@code statuses:} explicitly; {@code false} when
-     * the validator injected the canonical default. Consumed by {@link
+     * com.wkspower.platform.infrastructure.config.ConfigValidator}'s injected {@code [open,
+     * closed]} default. {@code true} when the YAML declared {@code statuses:} explicitly; {@code
+     * false} when the validator injected the canonical default. Consumed by {@link
      * com.wkspower.platform.domain.service.CaseService#initialStatus(CaseTypeConfig)} so the
      * resolution order prefers explicitly-declared top-level statuses over per-stage initialStatus
      * while still preserving the gap-10 fix (stage-scoped types whose top-level statuses are
@@ -292,10 +292,9 @@ public record CaseTypeConfig(
 
     /**
      * Story 6.2 — set the {@code explicitTopLevelStatuses} marker (Decision B). Defaults to {@code
-     * true} on the builder; {@link
-     * com.wkspower.platform.infrastructure.config.ConfigValidator} sets {@code false} only when it
-     * injects the canonical {@code [open, closed]} default for a YAML that omitted {@code
-     * statuses:}.
+     * true} on the builder; {@link com.wkspower.platform.infrastructure.config.ConfigValidator}
+     * sets {@code false} only when it injects the canonical {@code [open, closed]} default for a
+     * YAML that omitted {@code statuses:}.
      */
     public Builder explicitTopLevelStatuses(boolean v) {
       this.explicitTopLevelStatuses = v;

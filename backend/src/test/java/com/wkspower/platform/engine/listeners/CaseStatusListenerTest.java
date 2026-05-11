@@ -167,8 +167,7 @@ class CaseStatusListenerTest {
   void userTaskWithBothOutcomeAndStatus_emitsOutcomeAndLogsRoute001Warning() {
     // Wire a logback list-appender to capture the WARN with wksErrorCode=WKS-ROUTE-001.
     ch.qos.logback.classic.Logger listenerLogger =
-        (ch.qos.logback.classic.Logger)
-            org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
+        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
     ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
         new ch.qos.logback.core.read.ListAppender<>();
     appender.start();
@@ -200,7 +199,8 @@ class CaseStatusListenerTest {
                       && e.getKeyValuePairs().stream()
                           .anyMatch(
                               kv ->
-                                  "wksErrorCode".equals(kv.key) && "WKS-ROUTE-001".equals(kv.value)));
+                                  "wksErrorCode".equals(kv.key)
+                                      && "WKS-ROUTE-001".equals(kv.value)));
     } finally {
       listenerLogger.detachAppender(appender);
     }
@@ -209,8 +209,7 @@ class CaseStatusListenerTest {
   @Test
   void userTaskWithOutcomeButNoStatusProperty_doesNotEmitRoute001() {
     ch.qos.logback.classic.Logger listenerLogger =
-        (ch.qos.logback.classic.Logger)
-            org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
+        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
     ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
         new ch.qos.logback.core.read.ListAppender<>();
     appender.start();
@@ -234,7 +233,8 @@ class CaseStatusListenerTest {
                       && e.getKeyValuePairs().stream()
                           .anyMatch(
                               kv ->
-                                  "wksErrorCode".equals(kv.key) && "WKS-ROUTE-001".equals(kv.value)));
+                                  "wksErrorCode".equals(kv.key)
+                                      && "WKS-ROUTE-001".equals(kv.value)));
     } finally {
       listenerLogger.detachAppender(appender);
     }
