@@ -436,6 +436,82 @@ class MappingValidatorTest {
     assertThat(read.errors()).anyMatch(e -> "WKS-MAP-009".equals(e.code()));
   }
 
+  // ---- Story 6.2 — WKS-MAP-011 outcomes block unused; WKS-MAP-012 key without rule ----
+
+  @Test
+  void wksMap011_outcomesBlockDeclaredButNoUserTaskReferencesAny() {
+    // routing.outcomes is declared with rules, but no userTask carries an `outcomes:` list.
+    // The block is unused — every key would dispatch via a non-existent userTask binding.
+    String yaml =
+        GREEN_HEAD
+            + "  - id: review\n    displayName: Review\n"
+            + "attachments:\n"
+            + "  - type: bpmn\n    file: claim.bpmn\n    scope: case\n"
+            + "    routing:\n      userTasks:\n"
+            + "        review-claim: { wksTask: \"Review\" }\n"
+            + "      outcomes:\n"
+            + "        approve: { stageTransition: \"intake -> review\" }\n"
+            + "        reject: { stageTransition: \"intake -> review\" }\n";
+    var raw = parseYaml(yaml);
+    var result =
+        validator.validate(
+            raw,
+            Set.of("intake", "review"),
+            Map.of("claim.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes(StandardCharsets.UTF_8)));
+    assertCodes(result.errors()).contains("WKS-MAP-011");
+  }
+
+  @Test
+  void wksMap012_userTaskDeclaresOutcomeKeyButNoRuleBindsIt() {
+    // userTask declares outcomes [approve, escalate], but routing.outcomes only declares
+    // a rule for `approve`. `escalate` is bound to the userTask but unroutable.
+    String yaml =
+        GREEN_HEAD
+            + "  - id: review\n    displayName: Review\n"
+            + "attachments:\n"
+            + "  - type: bpmn\n    file: claim.bpmn\n    scope: case\n"
+            + "    routing:\n      userTasks:\n"
+            + "        review-claim:\n"
+            + "          wksTask: \"Review\"\n"
+            + "          outcomes: [approve, escalate]\n"
+            + "      outcomes:\n"
+            + "        approve: { stageTransition: \"intake -> review\" }\n";
+    var raw = parseYaml(yaml);
+    var result =
+        validator.validate(
+            raw,
+            Set.of("intake", "review"),
+            Map.of("claim.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes(StandardCharsets.UTF_8)));
+    assertCodes(result.errors()).contains("WKS-MAP-012");
+    // The escalate key is the one without a rule; approve is fine.
+    assertThat(result.errors())
+        .anyMatch(e -> "WKS-MAP-012".equals(e.code()) && e.message().contains("escalate"));
+  }
+
+  @Test
+  void wksMap011_and_012_greenWhenOutcomesProperlyBound() {
+    // Each userTask outcome key has a rule, and routing.outcomes has no orphans.
+    String yaml =
+        GREEN_HEAD
+            + "  - id: review\n    displayName: Review\n"
+            + "attachments:\n"
+            + "  - type: bpmn\n    file: claim.bpmn\n    scope: case\n"
+            + "    routing:\n      userTasks:\n"
+            + "        review-claim:\n"
+            + "          wksTask: \"Review\"\n"
+            + "          outcomes: [approve, reject]\n"
+            + "      outcomes:\n"
+            + "        approve: { stageTransition: \"intake -> review\" }\n"
+            + "        reject: { stageTransition: \"intake -> review\" }\n";
+    var raw = parseYaml(yaml);
+    var result =
+        validator.validate(
+            raw,
+            Set.of("intake", "review"),
+            Map.of("claim.bpmn", BPMN_WITH_REVIEW_AND_END.getBytes(StandardCharsets.UTF_8)));
+    assertCodes(result.errors()).doesNotContain("WKS-MAP-011", "WKS-MAP-012");
+  }
+
   // ---- helpers ----
 
   private static org.assertj.core.api.AbstractListAssert<?, List<? extends String>, String, ?>

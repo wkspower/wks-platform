@@ -386,6 +386,53 @@ public class MappingValidator {
             }
           }
 
+          // Story 6.2 — WKS-MAP-011: outcomes block declared but no userTask references any
+          // outcome key. The block is unused; operator must either remove it or add keys to a
+          // userTask's outcomes list.
+          if (declaredOutcomeKeys.isEmpty()) {
+            errors.add(
+                ErrorDetail.ofField(
+                    ErrorCode.WKS_MAP_011.wire(),
+                    "routing.outcomes block declared but no userTask declares any 'outcomes:' list"
+                        + " — the block is unused. Either remove the routing.outcomes block or add"
+                        + " outcome keys to a userTask's 'outcomes:' list.",
+                    base + "/routing/outcomes"));
+          }
+
+          // Story 6.2 — WKS-MAP-012: a userTask declares an outcome key but no corresponding
+          // routing.outcomes.<key> rule exists. The key is bound to a userTask but cannot be
+          // routed — runtime dispatch would always miss with WKS-MAP-404.
+          Set<String> ruleKeys = routing.outcomes().keySet();
+          if (routing.userTasks() != null) {
+            for (var utEntry : routing.userTasks().entrySet()) {
+              String taskId = utEntry.getKey();
+              RawCaseTypeConfig.RawUserTaskMapping rut = utEntry.getValue();
+              if (rut == null || rut.outcomes() == null) {
+                continue;
+              }
+              for (int oi = 0; oi < rut.outcomes().size(); oi++) {
+                String declaredKey = rut.outcomes().get(oi);
+                if (declaredKey != null && !declaredKey.isBlank() && !ruleKeys.contains(declaredKey)) {
+                  errors.add(
+                      ErrorDetail.ofField(
+                          ErrorCode.WKS_MAP_012.wire(),
+                          "userTask '"
+                              + taskId
+                              + "' declares outcome '"
+                              + declaredKey
+                              + "' but no routing.outcomes.<key> rule binds it — runtime"
+                              + " dispatch on this outcome would miss with WKS-MAP-404. Either"
+                              + " add a 'routing.outcomes."
+                              + declaredKey
+                              + "' rule or remove '"
+                              + declaredKey
+                              + "' from this userTask's outcomes list.",
+                          base + "/routing/userTasks/" + taskId + "/outcomes/" + oi));
+                }
+              }
+            }
+          }
+
           for (var outcomeEntry : routing.outcomes().entrySet()) {
             String outcomeKey = outcomeEntry.getKey();
             RawCaseTypeConfig.RawOutcomeMapping rom = outcomeEntry.getValue();
