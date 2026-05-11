@@ -62,7 +62,11 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function classifyError(err: unknown): { message: string; conflict: boolean; conflictReason: ConflictReason | null } {
+function classifyError(err: unknown): {
+  message: string;
+  conflict: boolean;
+  conflictReason: ConflictReason | null;
+} {
   if (err instanceof ApiError) {
     if (err.status === 409) {
       return {
@@ -150,9 +154,7 @@ export function TaskCompletionDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogTitle>{t('task.outcomes.title')}</AlertDialogTitle>
-        <AlertDialogDescription className="sr-only">
-          {task.name}
-        </AlertDialogDescription>
+        <AlertDialogDescription className="sr-only">{task.name}</AlertDialogDescription>
 
         {state.kind === 'failed' ? (
           <p className="text-sm text-[var(--destructive)]" role="alert">

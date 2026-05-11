@@ -22,8 +22,7 @@ export async function completeTask(
   variables: Record<string, unknown> = {},
   outcome?: string,
 ): Promise<TaskActionResponse> {
-  const allVariables =
-    outcome !== undefined ? { ...variables, outcome } : variables;
+  const allVariables = outcome !== undefined ? { ...variables, outcome } : variables;
   const result = await apiFetch<TaskActionResponse>(
     `/api/tasks/${encodeURIComponent(taskId)}/complete`,
     {

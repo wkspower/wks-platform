@@ -45,8 +45,14 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
       http.get(`/api/case-types/${CASE_TYPE_ID}`, () =>
         HttpResponse.json({
           data: {
-            id: CASE_TYPE_ID, displayName: 'Loan Application', version: 1,
-            fields: [], statuses: [], listColumns: [], stages: [], forms: [],
+            id: CASE_TYPE_ID,
+            displayName: 'Loan Application',
+            version: 1,
+            fields: [],
+            statuses: [],
+            listColumns: [],
+            stages: [],
+            forms: [],
           },
           meta: {},
         }),

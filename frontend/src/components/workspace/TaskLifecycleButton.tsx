@@ -185,8 +185,7 @@ export function TaskLifecycleButton({
   const [state, dispatch] = useReducer(reducer, { kind: 'idle' } as State);
   // Story 6.2 AC1 — dialog open state for multi-outcome picker.
   const [outcomeDialogOpen, setOutcomeDialogOpen] = useState(false);
-  const hasOutcomes =
-    outcomeMappings !== undefined && Object.keys(outcomeMappings).length > 0;
+  const hasOutcomes = outcomeMappings !== undefined && Object.keys(outcomeMappings).length > 0;
   const completeTask = useCompleteTask();
   const [takingLonger, setTakingLonger] = useReducer(
     (_prev: boolean, next: boolean) => next,
