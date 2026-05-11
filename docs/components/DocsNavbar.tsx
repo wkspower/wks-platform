@@ -24,27 +24,42 @@ export function DocsNavbar() {
   return (
     <>
       <style>{`
+        .wks-navbar-chrome {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          background: color-mix(in srgb, var(--color-surface, #FFFFFF) 95%, transparent);
+          backdrop-filter: saturate(180%) blur(8px);
+          -webkit-backdrop-filter: saturate(180%) blur(8px);
+          border-bottom: 1px solid var(--color-border, #E4E4E7);
+        }
+
         .wks-navbar {
           display: flex;
           align-items: center;
           gap: 1rem;
           width: 100%;
+          padding: 0 1rem;
+          height: 3.5rem;
           min-width: 0;
         }
+        @media (min-width: 640px) { .wks-navbar { padding: 0 1.5rem; } }
+        @media (min-width: 1024px) { .wks-navbar { padding: 0 2rem; gap: 2rem; } }
 
         .wks-navbar__wordmark {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
           font-family: var(--font-heading);
           font-weight: 700;
-          font-size: 1rem;
-          color: var(--color-brand-navy, #0B1437);
+          font-size: 1.125rem;
+          color: var(--color-foreground, #09090B);
           text-decoration: none;
           white-space: nowrap;
           flex-shrink: 0;
           letter-spacing: -0.01em;
         }
-        .wks-navbar__wordmark:hover {
-          color: var(--color-primary, #3B5BDB);
-        }
+        .wks-navbar__wordmark-mark { color: var(--color-primary, #3B5BDB); }
 
         .wks-navbar__sep {
           width: 1px;
@@ -71,7 +86,7 @@ export function DocsNavbar() {
         .wks-navbar__item {
           position: relative;
           flex: 1 1 0;
-          min-width: 0;
+          min-width: max-content;
           display: flex;
           align-items: center;
         }
@@ -148,13 +163,15 @@ export function DocsNavbar() {
         }
       `}</style>
 
+      <header className="wks-navbar-chrome">
       <nav className="wks-navbar" aria-label="Product site navigation">
         <a
           href="https://wkspower.com/"
           className="wks-navbar__wordmark"
           aria-label="WKS Platform home"
         >
-          WKS Platform
+          <span className="wks-navbar__wordmark-mark">WKS</span>
+          <span>Platform</span>
         </a>
 
         <div className="wks-navbar__sep" aria-hidden="true" />
@@ -189,6 +206,7 @@ export function DocsNavbar() {
           <span>GitHub</span>
         </a>
       </nav>
+      </header>
     </>
   );
 }

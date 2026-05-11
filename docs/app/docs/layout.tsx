@@ -10,6 +10,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <DocsLayout
         tree={source.pageTree}
         nav={{ component: <DocsNavbar /> }}
+        themeSwitch={{ enabled: false }}
         githubUrl="https://github.com/wkspower/wks-platform"
       >
         {children}
