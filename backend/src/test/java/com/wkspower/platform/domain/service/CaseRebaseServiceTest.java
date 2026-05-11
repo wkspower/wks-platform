@@ -448,6 +448,11 @@ class CaseRebaseServiceTest {
         Collection<UUID> ids, Set<String> projectedFieldIds) {
       throw new UnsupportedOperationException("not needed in unit tests");
     }
+
+    @Override
+    public int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion) {
+      return 0;
+    }
   }
 
   /** Minimal fake CaseTypeSource that returns pre-registered configs. */

@@ -161,6 +161,11 @@ class CaseServiceRequireCaseAccessTest {
         Collection<UUID> ids, Set<String> fieldIds) {
       return Map.of();
     }
+
+    @Override
+    public int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion) {
+      return 0;
+    }
   }
 
   private static final class NullValidator implements CaseDataValidator {

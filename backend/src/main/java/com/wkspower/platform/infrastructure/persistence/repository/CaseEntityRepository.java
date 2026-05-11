@@ -69,4 +69,23 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
       @Param("caseId") UUID caseId,
       @Param("status") String status,
       @Param("updatedAt") java.time.Instant updatedAt);
+
+  /**
+   * Story 3.9 review remediation — version-checked update of {@code case_type_version}. The {@code
+   * c.version = c.version + 1} clause bumps the optimistic-lock column atomically with the data
+   * write, and the {@code WHERE c.version = :ver} predicate rejects writes whose observed version
+   * is stale. {@code clearAutomatically} keeps the first-level cache from re-flushing the stale
+   * entity.
+   */
+  @Modifying(clearAutomatically = true)
+  @Query(
+      "UPDATE CaseEntity c "
+          + "   SET c.caseTypeVersion = :toCaseTypeVersion, "
+          + "       c.version = c.version + 1 "
+          + " WHERE c.id = :id "
+          + "   AND c.version = :ver")
+  int updateCaseTypeVersion(
+      @Param("id") UUID id,
+      @Param("toCaseTypeVersion") int toCaseTypeVersion,
+      @Param("ver") long ver);
 }

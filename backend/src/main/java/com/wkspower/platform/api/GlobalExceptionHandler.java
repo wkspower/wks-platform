@@ -5,6 +5,7 @@ import com.wkspower.platform.api.dto.ErrorPayload;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksAuthorizationException;
+import com.wkspower.platform.domain.exception.WksConcurrentModificationException;
 import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksDocumentException;
@@ -145,6 +146,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
           .body(
               ApiResponse.error(
                   ErrorPayload.ofAggregate(ex.getCode(), ex.getMessage(), ex.getErrors())));
+    } finally {
+      MDC.remove(MDC_KEY);
+    }
+  }
+
+  @ExceptionHandler(WksConcurrentModificationException.class)
+  public ResponseEntity<ApiResponse<Void>> handleConcurrentModification(
+      WksConcurrentModificationException ex) {
+    MDC.put(MDC_KEY, ex.getCode());
+    try {
+      log.warn("Concurrent modification on rebase: {}", ex.getCode());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
     } finally {
       MDC.remove(MDC_KEY);
     }
