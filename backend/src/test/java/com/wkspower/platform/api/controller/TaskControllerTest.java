@@ -15,11 +15,13 @@ import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.time.Instant;
@@ -41,7 +43,12 @@ import org.springframework.test.web.servlet.MockMvc;
  * Slice test for {@link TaskController}. Covers complete + claim contract incl. all error codes.
  */
 @WebMvcTest(TaskController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class TaskControllerTest {
 
@@ -61,6 +68,7 @@ class TaskControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
+  @MockitoBean LicenseService licenseService;
 
   // ---- POST /api/tasks/{id}/complete -------------------------------------
 

@@ -23,10 +23,12 @@ import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.time.Instant;
@@ -47,7 +49,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /** Slice test for {@link CaseController#transition}. Covers Story 2.4 AC1 contract. */
 @WebMvcTest(CaseController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class CaseTransitionControllerTest {
 
@@ -72,6 +79,7 @@ class CaseTransitionControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
+  @MockitoBean LicenseService licenseService;
 
   @Test
   void transitionReturns200WithUpdatedCase() throws Exception {

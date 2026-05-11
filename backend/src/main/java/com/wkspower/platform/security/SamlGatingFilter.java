@@ -15,6 +15,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -26,13 +27,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * license. When the feature is enabled, the filter is a no-op and the request proceeds down the
  * Spring Security chain (currently returning 401 until Story 10.4 wires the SAML provider).
  *
- * <p>This filter is registered before {@link JwtAuthenticationFilter} in {@link SecurityConfig}.
- * The per-request {@link LicenseService} call is constant-time (the service memoises the
- * license-verification result internally — Story 7.1/7.2 design); no bean-construction-time
- * snapshot is taken, satisfying AC3 (hot-reload without restart).
+ * <p>The response envelope matches {@link WksAuthenticationEntryPoint} ({@code code} / {@code
+ * message} / {@code field}) so SI clients can deserialise both error paths with one DTO. (Story 7-5
+ * AC1 literal text said {@code errorCode}, but Task 1 binds the implementation to the existing
+ * envelope shape — kept consistent with the rest of the WKS error surface.)
+ *
+ * <p>Registered before {@link JwtAuthenticationFilter} in {@link SecurityConfig}. The per-request
+ * {@link LicenseService} call is constant-time (the service memoises the license-verification
+ * result internally — Story 7.1/7.2 design); no bean-construction-time snapshot is taken,
+ * satisfying AC3 (hot-reload without restart).
  *
  * <p>Story 7.5 AC1 / AC2 / AC3.
  */
+@Component
 public class SamlGatingFilter extends OncePerRequestFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(SamlGatingFilter.class);
@@ -71,8 +78,7 @@ public class SamlGatingFilter extends OncePerRequestFilter {
   }
 
   private static boolean isSamlPath(String path) {
-    return path != null
-        && (path.equals(SAML_PATH_EXACT) || path.startsWith(SAML_PATH_PREFIX));
+    return path != null && (path.equals(SAML_PATH_EXACT) || path.startsWith(SAML_PATH_PREFIX));
   }
 
   private void rejectWithNotFound(HttpServletResponse response, String path) throws IOException {
@@ -81,8 +87,9 @@ public class SamlGatingFilter extends OncePerRequestFilter {
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
     Map<String, Object> body = new LinkedHashMap<>();
-    body.put("errorCode", ErrorCode.WKS_LIC_003.wire());
+    body.put("code", ErrorCode.WKS_LIC_003.wire());
     body.put("message", "SSO/SAML is not available on the current license.");
+    body.put("field", null);
     objectMapper.writeValue(response.getWriter(), body);
   }
 }

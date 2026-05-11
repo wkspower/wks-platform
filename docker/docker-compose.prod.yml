@@ -51,7 +51,6 @@ services:
       WKS_CORS_ORIGINS: ${WKS_CORS_ORIGINS:-}
       WKS_JWT_SECRET: ${WKS_JWT_SECRET}
       WKS_OPENAPI_ENABLED: ${WKS_OPENAPI_ENABLED:-false}
-      WKS_KEYCLOAK_ENABLED: ${WKS_KEYCLOAK_ENABLED:-false}
       # Consumed by ProductionBootstrapValidator AC7 for boot-time secret-rotation;
       # app does not use these at runtime; minio container is the actual consumer.
       WKS_MINIO_ROOT_USER: ${WKS_MINIO_ROOT_USER}

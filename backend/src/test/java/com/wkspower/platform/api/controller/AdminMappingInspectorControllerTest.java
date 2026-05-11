@@ -18,10 +18,12 @@ import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.SignalAuditRingBuffer;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import java.time.Instant;
 import java.util.List;
@@ -41,7 +43,12 @@ import org.springframework.test.web.servlet.MockMvc;
  * plus the {@code @PreAuthorize("hasRole('ADMIN')")} gate.
  */
 @WebMvcTest(AdminMappingInspectorController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class AdminMappingInspectorControllerTest {
 
@@ -51,6 +58,7 @@ class AdminMappingInspectorControllerTest {
   @MockitoBean private SignalAuditRingBuffer ringBuffer;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
+  @MockitoBean private LicenseService licenseService;
 
   // -- AC1 happy path ------------------------------------------------------
 

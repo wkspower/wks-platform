@@ -36,9 +36,9 @@ The `docker/.env` file is gitignored (Story 14.1.1 fix-up — no longer tracked)
 docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.sso.yml up
 ```
 
-`WKS_KEYCLOAK_ENABLED` is **RESERVED — forward-compat seam for Story 10.4. Setting this to `true` today logs a WARN at boot and changes NOTHING about auth enforcement. Built-in cookie-JWT is the sole auth gate until Story 10.4 ships.** (Story 14.1.1 AC4, finding C4.) Stacking `docker-compose.sso.yml` provisions a Keycloak container so realms can be pre-baked ahead of 10.4, but no WKS code path consumes the container until 10.4 wires the SAML adapter. Realms / clients are NOT pre-configured — Story 10.4 owns that.
+The Keycloak/SSO seam is **gated by the `auth.sso` license feature flag since Story 7-5.** Operators no longer toggle it directly — the announcer reads `LicenseService.isFeatureEnabled(AUTH_SSO)` at startup and per request. Enterprise / Demo licenses unlock the surface (the seam announces and `/api/auth/saml/**` paths fall through to the security chain, currently returning 401 until Story 10.4); OSS / Team / Expired / Degraded licenses 404 the SAML paths with `WKS-LIC-003`. Stacking `docker-compose.sso.yml` provisions a Keycloak container so realms can be pre-baked ahead of Story 10.4, but no WKS code path consumes the container until 10.4 wires the SAML adapter. Realms / clients are NOT pre-configured — Story 10.4 owns that.
 
-When `WKS_KEYCLOAK_ENABLED=true` the application emits `WKS-AUTH-001` at WARN explicitly stating the seam is INERT.
+When the license unlocks SSO, the application emits `WKS-AUTH-001` at WARN explicitly stating the seam is INERT (Story 14.1.1 AC4 wire string preserved — only the trigger source changed in Story 7-5).
 
 ## Production rotation guidance (Story 14.1.1 AC7)
 
