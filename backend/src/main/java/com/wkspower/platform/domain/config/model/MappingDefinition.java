@@ -104,6 +104,8 @@ public record MappingDefinition(List<AttachmentDefinition> attachments) {
     sb.append(", endEventMapping=").append(a.endEventMapping());
     sb.append(", signalMappings=").append(sortedMapString(a.signalMappings()));
     sb.append(", propertyEmissionRules=").append(a.propertyEmissionRules());
+    // Story 6.2 — include outcomeMappings in the hash (sorted by outcome key for stability).
+    sb.append(", outcomeMappings=").append(sortedMapString(a.outcomeMappings()));
     sb.append(']');
   }
 

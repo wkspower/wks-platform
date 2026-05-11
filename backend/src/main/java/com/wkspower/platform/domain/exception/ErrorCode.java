@@ -262,6 +262,18 @@ public enum ErrorCode {
    */
   WKS_MAP_009("WKS-MAP-009"),
   /**
+   * Story 6.2 AC5 — parse-time: a {@code routing.outcomes.<key>} rule in a mapping YAML references
+   * an outcome key that is not declared in any {@code userTasks.<id>.outcomes: []} list for that
+   * attachment. Emitted by {@link
+   * com.wkspower.platform.infrastructure.config.MappingValidator} at deploy time (before the
+   * runtime router ever sees the configuration). The operator must either add the key to the
+   * appropriate {@code userTasks.<id>.outcomes} list or remove the orphaned routing rule.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-010"}
+   * is a stable contract; never reuse for any other meaning.
+   */
+  WKS_MAP_010("WKS-MAP-010"),
+  /**
    * Runtime — emitted by {@link com.wkspower.platform.domain.service.ExecutionSignalRouter} when an
    * incoming {@link com.wkspower.platform.domain.port.ExecutionSignal} does not match any rule in
    * the active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the

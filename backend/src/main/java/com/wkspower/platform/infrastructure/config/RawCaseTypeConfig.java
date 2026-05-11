@@ -141,14 +141,43 @@ public record RawCaseTypeConfig(
   /** One {@code attachments[]} entry. */
   public record RawAttachment(String type, String file, String scope, RawRoutingBlock routing) {}
 
-  /** {@code routing: { userTasks, events, properties }} block inside an attachment. */
+  /**
+   * {@code routing: { userTasks, events, properties, outcomes }} block inside an attachment. Story
+   * 6.2 adds the {@code outcomes} map (outcome key → {@link RawOutcomeMapping}).
+   */
   public record RawRoutingBlock(
       Map<String, RawUserTaskMapping> userTasks,
       RawEventMappings events,
-      List<RawPropertyEmissionRule> properties) {}
+      List<RawPropertyEmissionRule> properties,
+      // Story 6.2 — top-level outcome routing rules: routing.outcomes.<key>
+      Map<String, RawOutcomeMapping> outcomes) {}
 
-  /** {@code routing.userTasks.<id>} entry. */
-  public record RawUserTaskMapping(String wksTask, String form) {}
+  /**
+   * {@code routing.userTasks.<id>} entry. Story 6.2 adds {@code outcomes} — the declared outcome
+   * catalog for this userTask (e.g. {@code [approve, reject, sendBack]}). Used by MappingValidator
+   * to emit WKS-MAP-010 when a routing rule references an undeclared outcome key.
+   */
+  public record RawUserTaskMapping(String wksTask, String form, List<String> outcomes) {
+    /** Backward-compat constructor — pre-6.2 callers that don't know about outcomes. */
+    public RawUserTaskMapping(String wksTask, String form) {
+      this(wksTask, form, null);
+    }
+  }
+
+  /**
+   * Story 6.2 — {@code routing.outcomes.<key>} entry. Field names match MappingValidator parsing
+   * (line references added at implementation time per {@code feedback_yaml_fixture_field_names}).
+   */
+  public record RawOutcomeMapping(
+      // REQUIRED: validated by MappingValidator.STAGE_TRANSITION regex (same as endEvent/signal)
+      String stageTransition,
+      // OPTIONAL: Phase-1 doc-only metadata listing expected payload.* keys
+      @JsonProperty("payloadFields") List<String> payloadFields) {
+    /** Backward-compat constructor when no payloadFields declared. */
+    public RawOutcomeMapping(String stageTransition) {
+      this(stageTransition, null);
+    }
+  }
 
   /** {@code routing.events: { endEvent, signal }} block. */
   public record RawEventMappings(
