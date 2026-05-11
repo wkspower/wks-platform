@@ -32,8 +32,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * {@link RebaseAuditListener} does NOT emit the {@code event=admin.case.rebase} audit line. The
  * test registers a {@link TransactionSynchronization} that throws in {@code beforeCommit}, forcing
  * a rollback after the {@code RebaseApplied} event has been published inside the tx. A Logback
- * {@link ListAppender} attached to the listener captures any audit lines so absence can be
- * asserted positively.
+ * {@link ListAppender} attached to the listener captures any audit lines so absence can be asserted
+ * positively.
  */
 @SpringBootTest
 @ActiveProfiles("dev")

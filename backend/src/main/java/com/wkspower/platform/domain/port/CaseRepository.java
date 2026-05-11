@@ -53,8 +53,8 @@ public interface CaseRepository {
    * @param toCaseTypeVersion the target CaseType version number
    * @param expectedVersion the optimistic-lock {@code @Version} value the caller observed at read
    *     time
-   * @return {@code 1} on successful update, {@code 0} when no row matched (caller MUST treat this as
-   *     a concurrent-modification signal and throw {@code WksConcurrentModificationException})
+   * @return {@code 1} on successful update, {@code 0} when no row matched (caller MUST treat this
+   *     as a concurrent-modification signal and throw {@code WksConcurrentModificationException})
    */
   int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion);
 }

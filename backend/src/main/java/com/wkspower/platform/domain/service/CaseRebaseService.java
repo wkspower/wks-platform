@@ -152,8 +152,7 @@ public class CaseRebaseService {
     // Story 3.9 review remediation — version-checked update. Closes the TOCTOU window between
     // resolveCase() and the write: a concurrent UPDATE that bumps c.version causes this UPDATE to
     // match zero rows, surfacing as WKS-CFG-035 instead of silently winning via JPA merge.
-    int affected =
-        caseRepository.updateCaseTypeVersion(kase.id(), toVersion, kase.version());
+    int affected = caseRepository.updateCaseTypeVersion(kase.id(), toVersion, kase.version());
     if (affected == 0) {
       throw new WksConcurrentModificationException(
           ErrorCode.WKS_CFG_035,
@@ -374,10 +373,7 @@ public class CaseRebaseService {
       if (fromStageIds.contains(currentStageId) && !toStageIds.contains(currentStageId)) {
         irreconcilable.add(
             new IrreconcilableItem(
-                IrreconcilableKind.STAGE_REMOVED_WITH_ACTIVE_CASE,
-                null,
-                null,
-                currentStageId));
+                IrreconcilableKind.STAGE_REMOVED_WITH_ACTIVE_CASE, null, null, currentStageId));
       }
     }
 

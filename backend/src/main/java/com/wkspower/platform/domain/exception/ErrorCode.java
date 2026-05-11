@@ -45,9 +45,9 @@ public enum ErrorCode {
    */
   WKS_API_007("WKS-API-007"),
   /**
-   * Story 3.9 review remediation — rebase request supplied {@code toVersion == fromVersion}; a no-op
-   * rebase is rejected so the caller distinguishes "you asked for the same version" from
-   * "you asked for a strictly-lower (reverse) version" (the latter remains {@link #WKS_API_007}).
+   * Story 3.9 review remediation — rebase request supplied {@code toVersion == fromVersion}; a
+   * no-op rebase is rejected so the caller distinguishes "you asked for the same version" from "you
+   * asked for a strictly-lower (reverse) version" (the latter remains {@link #WKS_API_007}).
    * Distinct wire string so SI devs grep {@code WKS-API-008} when chasing no-op vs reverse cases.
    * Stable contract per {@code feedback_error_codes_are_wire_contract.md} — never reuse.
    */
@@ -222,10 +222,10 @@ public enum ErrorCode {
   /**
    * Story 3.9 review remediation — rebase apply detected a concurrent modification on the {@code
    * cases} row between read and write. The version-checked JPQL UPDATE matched zero rows, meaning
-   * another caller bumped the optimistic-lock version after this rebase resolved its
-   * {@code fromVersion}. No mutation happens; the operator should reload and retry. Distinct from
-   * {@link #WKS_RTM_409} because the trigger surface is rebase-specific (operator tooling), not a
-   * generic Hibernate {@code ObjectOptimisticLockingFailureException}. Stable contract per {@code
+   * another caller bumped the optimistic-lock version after this rebase resolved its {@code
+   * fromVersion}. No mutation happens; the operator should reload and retry. Distinct from {@link
+   * #WKS_RTM_409} because the trigger surface is rebase-specific (operator tooling), not a generic
+   * Hibernate {@code ObjectOptimisticLockingFailureException}. Stable contract per {@code
    * feedback_error_codes_are_wire_contract.md} — never reuse for a different meaning.
    */
   WKS_CFG_035("WKS-CFG-035"),

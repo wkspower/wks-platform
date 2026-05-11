@@ -51,9 +51,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *       AdminController} chain through the security filter — proves the apply path's commit
  *       boundary and audit semantics, not just the service surface.
  *   <li>Scenarios cover dry-run, apply success, irreconcilable rejection, apply-path reverse
- *       ({@code WKS-API-007}), apply-path no-op ({@code WKS-API-008}), and apply-path
- *       non-existent toVersion ({@code WKS-API-007}). All rejection paths assert the {@code cases}
- *       row is UNCHANGED via fresh-tx read.
+ *       ({@code WKS-API-007}), apply-path no-op ({@code WKS-API-008}), and apply-path non-existent
+ *       toVersion ({@code WKS-API-007}). All rejection paths assert the {@code cases} row is
+ *       UNCHANGED via fresh-tx read.
  *   <li>Per-test UUIDs in {@code @BeforeEach} — no shared CASE_TYPE_ID literal carries state across
  *       methods.
  * </ul>
@@ -269,9 +269,7 @@ class CaseRebasePostgresIT {
   private String login() {
     ResponseEntity<String> resp =
         rest.postForEntity(
-            "/api/auth/login",
-            new LoginRequest("admin@wkspower.local", "admin"),
-            String.class);
+            "/api/auth/login", new LoginRequest("admin@wkspower.local", "admin"), String.class);
     assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
     String setCookie = resp.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
     assertThat(setCookie).as("login Set-Cookie present").isNotNull();
