@@ -129,6 +129,11 @@ public class SamlGatingFilter extends OncePerRequestFilter {
     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+    // The availability decision is per-request and license-tier-sensitive — must NOT be cached
+    // by intermediaries (CDN, browser, reverse proxy). Otherwise an upgrade from OSS → Enterprise
+    // would still serve cached 404s for the SAML surface.
+    response.setHeader("Cache-Control", "no-store");
+    response.setHeader("Pragma", "no-cache");
 
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("code", code);
