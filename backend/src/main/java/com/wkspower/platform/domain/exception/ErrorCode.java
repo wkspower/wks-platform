@@ -484,6 +484,12 @@ public enum ErrorCode {
    * Story 7.1 AC3.
    */
   WKS_LIC_002("WKS-LIC-002"),
+  /**
+   * SSO/SAML endpoint accessed while the {@code auth.sso} feature is disabled by the current
+   * license (OSS, Team, Expired, or Degraded state). The platform responds 404 — the endpoint does
+   * not exist for this license tier. HTTP 404. Story 7.5 AC1.
+   */
+  WKS_LIC_003("WKS-LIC-003"),
 
   // ---------------------------------------------------------------------------
   // Archetype validation band (Story 6.1) — YAML-surface archetype violations.
