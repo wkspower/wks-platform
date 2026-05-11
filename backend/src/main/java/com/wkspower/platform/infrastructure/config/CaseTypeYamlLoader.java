@@ -37,6 +37,16 @@ public class CaseTypeYamlLoader {
 
   private final YAMLMapper mapper;
 
+  /**
+   * Story 3.11 AC1 — sibling lenient mapper for prior-YAML re-parse on the blast-radius diff path.
+   * Identical to the strict {@link #mapper} except {@code FAIL_ON_UNKNOWN_PROPERTIES} is disabled:
+   * prior versions written under an older config schema (unknown legacy keys, mapping-subtree
+   * records that dropped {@code @JsonIgnoreProperties(ignoreUnknown = true)} in Story 4.3.1 AC8)
+   * still parse cleanly for diffing. Used ONLY for the prior side; the candidate (next) YAML
+   * continues to flow through the strict mapper above.
+   */
+  private final YAMLMapper lenientMapper;
+
   public CaseTypeYamlLoader() {
     YAMLMapper m =
         YAMLMapper.builder()
@@ -60,6 +70,22 @@ public class CaseTypeYamlLoader {
         .setCoercion(CoercionInputShape.Float, CoercionAction.Fail)
         .setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail);
     this.mapper = m;
+
+    // Story 3.11 AC1 — lenient sibling mapper for prior-YAML re-parse (schema-drift recovery).
+    YAMLMapper lm =
+        YAMLMapper.builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new ParameterNamesModule())
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+            .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
+            .build();
+    lm.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+    lm.coercionConfigFor(LogicalType.Textual)
+        .setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)
+        .setCoercion(CoercionInputShape.Float, CoercionAction.Fail)
+        .setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail);
+    this.lenientMapper = lm;
   }
 
   /**
@@ -97,6 +123,23 @@ public class CaseTypeYamlLoader {
 
   /** Load from raw bytes — used by tests and the (future) admin deploy endpoint. */
   public RawReadResult readBytes(String source, byte[] bytes) {
+    return readBytesWith(source, bytes, this.mapper);
+  }
+
+  /**
+   * Story 3.11 AC1 — lenient prior-YAML re-parse path. Mirrors {@link #readBytes(String, byte[])}
+   * but uses the lenient sibling mapper that tolerates unknown properties (schema-drift recovery).
+   * Caller (ConfigService.loadPriorConfig) treats a failed lenient read identically to a failed
+   * strict read — both produce {@code null} → WKS-CFG-030.
+   *
+   * <p>Used ONLY for the prior side of the blast-radius diff. The strict {@link #readBytes} remains
+   * the only path for candidate (next) YAML — forward-incoming deploys still validate strictly.
+   */
+  public RawReadResult readBytesLenient(String source, byte[] bytes) {
+    return readBytesWith(source, bytes, this.lenientMapper);
+  }
+
+  private RawReadResult readBytesWith(String source, byte[] bytes, YAMLMapper m) {
     if (bytes == null) {
       return RawReadResult.error(
           source, ErrorDetail.of(ErrorCode.WKS_CFG_099.wire(), "empty content"));
@@ -118,7 +161,7 @@ public class CaseTypeYamlLoader {
     }
     RawCaseTypeConfig raw;
     try (MappingIterator<RawCaseTypeConfig> it =
-        mapper.readerFor(RawCaseTypeConfig.class).readValues(bytes)) {
+        m.readerFor(RawCaseTypeConfig.class).readValues(bytes)) {
       if (!it.hasNextValue()) {
         return RawReadResult.error(
             source, ErrorDetail.of(ErrorCode.WKS_CFG_099.wire(), "YAML document is empty"));

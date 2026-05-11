@@ -21,8 +21,10 @@ import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.StatusOptionsAdminService;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
+import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * Wires the pure-Java {@link ConfigService} (domain) with its infrastructure ports so Spring can
@@ -41,7 +43,8 @@ public class ConfigServiceConfig {
       EventPublisher eventPublisher,
       CaseTypeVersionRegistry versionRegistry,
       MappingRegistry mappingRegistry,
-      CaseTypeContentHasher caseTypeContentHasher) {
+      CaseTypeContentHasher caseTypeContentHasher,
+      Environment environment) {
     return new ConfigService(
         source,
         registrar,
@@ -51,7 +54,10 @@ public class ConfigServiceConfig {
         eventPublisher,
         versionRegistry,
         mappingRegistry,
-        CaseTypeContentHasher::hashBytes);
+        CaseTypeContentHasher::hashBytes,
+        // Story 3.11 AC3 — adapt Spring Environment to a framework-free supplier so the domain
+        // can detect the production profile without a Spring dependency.
+        () -> Arrays.asList(environment.getActiveProfiles()));
   }
 
   /**

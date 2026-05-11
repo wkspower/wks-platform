@@ -77,9 +77,9 @@ class AdminControllerTest {
     byte[] bpmnBytes = "<x/>".getBytes();
     ArgumentCaptor<byte[]> yamlCap = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<byte[]> bpmnCap = ArgumentCaptor.forClass(byte[].class);
-    // Story 3.8 — controller now calls the 5-arg deploy overload (adds bumpVersion boolean)
+    // Story 3.11 — controller now calls the 6-arg deploy overload (adds force boolean)
     when(configService.deploy(
-            yamlCap.capture(), bpmnCap.capture(), any(), eq("admin"), anyBoolean()))
+            yamlCap.capture(), bpmnCap.capture(), any(), eq("admin"), anyBoolean(), anyBoolean()))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -144,7 +144,7 @@ class AdminControllerTest {
 
   @Test
   void validationFailureReturns422Aggregate() throws Exception {
-    when(configService.deploy(any(), any(), any(), any(), anyBoolean()))
+    when(configService.deploy(any(), any(), any(), any(), anyBoolean(), anyBoolean()))
         .thenReturn(
             DeployResult.invalid(
                 List.of(
@@ -172,7 +172,7 @@ class AdminControllerTest {
     // MaxUploadSizeExceededException
     // before reaching the handler chain. We simulate by configuring a tiny part cap via the test
     // and asserting the GlobalExceptionHandler maps the exception to 413 + WKS-API-413.
-    when(configService.deploy(any(), any(), any(), any(), anyBoolean()))
+    when(configService.deploy(any(), any(), any(), any(), anyBoolean(), anyBoolean()))
         .thenThrow(new MaxUploadSizeExceededException(1024L));
 
     mockMvc
@@ -186,7 +186,7 @@ class AdminControllerTest {
         .andExpect(status().isPayloadTooLarge())
         .andExpect(jsonPath("$.error.code").value("WKS-API-413"));
 
-    verify(configService).deploy(any(), any(), any(), any(), anyBoolean());
+    verify(configService).deploy(any(), any(), any(), any(), anyBoolean(), anyBoolean());
   }
 
   // ---- YAML-only deploy (Story 3.2: zero-process case types) -------------
@@ -210,9 +210,9 @@ class AdminControllerTest {
             List.of(),
             List.of());
     byte[] yamlBytes = "id: j9-zero-zero".getBytes();
-    // Story 3.8 — controller now calls the 4-arg validateAndRegister overload (adds bumpVersion)
+    // Story 3.11 — controller now calls the 5-arg validateAndRegister overload (adds force)
     when(configService.validateAndRegister(
-            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
+            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean(), anyBoolean()))
         .thenReturn(ValidationResult.ok(config));
 
     mockMvc
@@ -228,13 +228,14 @@ class AdminControllerTest {
         .andExpect(jsonPath("$.data.schemaUri").value("/api/admin/case-types/j9-zero-zero/schema"));
 
     verify(configService)
-        .validateAndRegister(eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean());
+        .validateAndRegister(
+            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean(), anyBoolean());
   }
 
   @Test
   void missingBpmnPartWithInvalidYamlReturns422() throws Exception {
     when(configService.validateAndRegister(
-            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean()))
+            eq("api-deploy.yaml"), any(byte[].class), any(), anyBoolean(), anyBoolean()))
         .thenReturn(
             ValidationResult.invalid(List.of(ErrorDetail.of("WKS-CFG-099", "YAML parse failed"))));
 
@@ -279,7 +280,7 @@ class AdminControllerTest {
     byte[] bpmnBytes = "<bpmn/>".getBytes();
 
     ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
-    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture()))
+    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture(), anyBoolean()))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -309,7 +310,7 @@ class AdminControllerTest {
         new DeploymentResult("dep-1", "loanProcess", "procDef-1", 1, Instant.now());
 
     ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
-    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture()))
+    when(configService.deploy(any(), any(), any(), any(), bumpCap.capture(), anyBoolean()))
         .thenReturn(DeployResult.ok(config, deployment));
 
     mockMvc
@@ -327,6 +328,136 @@ class AdminControllerTest {
     assertThat(bumpCap.getValue()).isFalse();
   }
 
+  // ---- Story 3.11: force-override param + production-profile rejection ----
+
+  @Test
+  void forceTrueInProductionProfile_rejectedWithApi006_yamlNotParsed() throws Exception {
+    when(configService.isProductionProfile()).thenReturn(true);
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(
+                    new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: x".getBytes()))
+                .param("force", "true")
+                .param("bumpVersion", "true")
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.error.errors[0].code").value("WKS-API-006"))
+        .andExpect(
+            jsonPath("$.error.errors[0].message")
+                .value(org.hamcrest.Matchers.containsString("production profile")));
+
+    // YAML must NOT have been parsed — service is never called for production-rejected force.
+    verifyNoInteractions(jwtTokenProvider);
+    org.mockito.Mockito.verify(configService).isProductionProfile();
+    org.mockito.Mockito.verifyNoMoreInteractions(configService);
+  }
+
+  @Test
+  void forceTrueWithoutBumpVersion_rejectedWithApi006() throws Exception {
+    when(configService.isProductionProfile()).thenReturn(false);
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(
+                    new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: x".getBytes()))
+                .param("force", "true")
+                // bumpVersion intentionally omitted
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.error.errors[0].code").value("WKS-API-006"))
+        .andExpect(
+            jsonPath("$.error.errors[0].message")
+                .value(org.hamcrest.Matchers.containsString("bumpVersion=true")));
+
+    org.mockito.Mockito.verify(configService).isProductionProfile();
+    org.mockito.Mockito.verifyNoMoreInteractions(configService);
+  }
+
+  @Test
+  void forceTrueWithBumpVersion_devProfile_threadsForceToService() throws Exception {
+    when(configService.isProductionProfile()).thenReturn(false);
+    CaseTypeConfig config =
+        CaseTypeConfig.builder()
+            .id("force-ct")
+            .displayName("Force CT")
+            .version(2)
+            .statuses(List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)))
+            .build();
+
+    ArgumentCaptor<Boolean> forceCap = ArgumentCaptor.forClass(Boolean.class);
+    when(configService.validateAndRegister(any(), any(), any(), eq(true), forceCap.capture()))
+        .thenReturn(ValidationResult.ok(config));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(
+                    new MockMultipartFile(
+                        "caseType", "ct.yaml", "text/plain", "id: force-ct".getBytes()))
+                .param("force", "true")
+                .param("bumpVersion", "true")
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
+
+    assertThat(forceCap.getValue())
+        .as("force=true must be threaded to ConfigService.validateAndRegister")
+        .isTrue();
+  }
+
+  @Test
+  void forceParamDefaultsFalse_existingBehaviorPreserved() throws Exception {
+    // When ?force is not supplied, configService.isProductionProfile is NOT called (no force
+    // gating). Service receives forceRequested=false — Story 3.8 behavior unchanged.
+    CaseTypeConfig config =
+        CaseTypeConfig.builder()
+            .id("no-force")
+            .displayName("No Force")
+            .version(1)
+            .statuses(List.of(new StatusDefinition("open", "Open", StatusColor.BLUE)))
+            .build();
+    DeploymentResult deployment =
+        new DeploymentResult("dep-1", "noForceProcess", "procDef-1", 1, Instant.now());
+    ArgumentCaptor<Boolean> forceCap = ArgumentCaptor.forClass(Boolean.class);
+    when(configService.deploy(any(), any(), any(), any(), anyBoolean(), forceCap.capture()))
+        .thenReturn(DeployResult.ok(config, deployment));
+
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(
+                    new MockMultipartFile(
+                        "caseType", "ct.yaml", "text/plain", "id: no-force".getBytes()))
+                .file(new MockMultipartFile("bpmn", "p.bpmn", "application/xml", "<x/>".getBytes()))
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isOk());
+
+    assertThat(forceCap.getValue()).isFalse();
+    // Production-profile check NEVER consulted on the no-force path (fast path).
+    org.mockito.Mockito.verify(configService, org.mockito.Mockito.never()).isProductionProfile();
+  }
+
+  @Test
+  void forceTrueWithRoleUser_rejectedAsForbidden_beforeForceLogic() throws Exception {
+    // @PreAuthorize runs before the controller body, so a non-ADMIN caller hits 403 first
+    // regardless of force=true semantics. This pins that the force-override gating is for
+    // ADMIN-authority callers only — the lower-authority rejection is upstream.
+    mockMvc
+        .perform(
+            multipart("/api/admin/deploy")
+                .file(
+                    new MockMultipartFile("caseType", "ct.yaml", "text/plain", "id: x".getBytes()))
+                .param("force", "true")
+                .param("bumpVersion", "true")
+                .with(user("user").roles("USER")))
+        .andExpect(status().isForbidden());
+
+    // configService MUST NOT be invoked — @PreAuthorize short-circuited.
+    verifyNoInteractions(configService);
+  }
+
   @Test
   void bumpVersionTrueIsThreadedToValidateAndRegister() throws Exception {
     // Story 3.8 — ?bumpVersion=true forwarded on YAML-only (no BPMN) path
@@ -339,7 +470,7 @@ class AdminControllerTest {
             .build();
 
     ArgumentCaptor<Boolean> bumpCap = ArgumentCaptor.forClass(Boolean.class);
-    when(configService.validateAndRegister(any(), any(), any(), bumpCap.capture()))
+    when(configService.validateAndRegister(any(), any(), any(), bumpCap.capture(), anyBoolean()))
         .thenReturn(ValidationResult.ok(config));
 
     mockMvc

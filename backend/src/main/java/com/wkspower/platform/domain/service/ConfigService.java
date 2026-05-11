@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,15 @@ public class ConfigService {
   private final CaseTypeVersionRegistry versionRegistry;
 
   /**
+   * Story 3.11 — active Spring-profile supplier used by the AC4 force-override path to detect the
+   * {@code production} profile and refuse to bypass the blast-radius gate. Domain stays
+   * framework-free: the infrastructure {@code ConfigServiceConfig} wires this as a lambda over
+   * {@code Environment::getActiveProfiles}; tests inject a fixed {@link List}. Defaults to an empty
+   * list (treated as dev/test) when the legacy 8-arg / 9-arg constructor is used.
+   */
+  private final Supplier<List<String>> activeProfilesSupplier;
+
+  /**
    * Per-{@code caseTypeId} mutex (Story 2.4 folded debt #2 — TOCTOU on concurrent deploys of the
    * same case-type id). Two threads racing the {@code reader.find → registrar.register} window
    * could both observe the same prior state, leading to interleaved registry writes. Locking on a
@@ -108,8 +118,9 @@ public class ConfigService {
   }
 
   /**
-   * Story 4.5 AC3 — full constructor that accepts the BPMN hash function. Wired by the
-   * infrastructure {@code ConfigServiceConfig} with {@code CaseTypeContentHasher::hashBytes}.
+   * Story 4.5 AC3 — 9-arg constructor that accepts the BPMN hash function. Delegates to the
+   * Story-3.11 full constructor with an empty active-profiles supplier (treated as dev/test —
+   * force-override is permitted, but admin must still pass {@code force=true}).
    */
   public ConfigService(
       CaseTypeSource source,
@@ -121,6 +132,35 @@ public class ConfigService {
       CaseTypeVersionRegistry versionRegistry,
       MappingRegistry mappingRegistry,
       Function<byte[], String> bpmnHasher) {
+    this(
+        source,
+        registrar,
+        reader,
+        bpmnValidator,
+        workflowEngine,
+        eventPublisher,
+        versionRegistry,
+        mappingRegistry,
+        bpmnHasher,
+        List::of);
+  }
+
+  /**
+   * Story 3.11 — full constructor accepting the active-profile supplier (Spring {@code
+   * Environment::getActiveProfiles} adapted to a {@link Supplier}). Wired by the infrastructure
+   * {@code ConfigServiceConfig}.
+   */
+  public ConfigService(
+      CaseTypeSource source,
+      CaseTypeRegistrar registrar,
+      CaseTypeReader reader,
+      BpmnValidationService bpmnValidator,
+      WorkflowEngine workflowEngine,
+      EventPublisher eventPublisher,
+      CaseTypeVersionRegistry versionRegistry,
+      MappingRegistry mappingRegistry,
+      Function<byte[], String> bpmnHasher,
+      Supplier<List<String>> activeProfilesSupplier) {
     this.source = source;
     this.registrar = registrar;
     this.reader = reader;
@@ -130,6 +170,19 @@ public class ConfigService {
     this.versionRegistry = versionRegistry;
     this.mappingRegistry = mappingRegistry;
     this.bpmnHasher = bpmnHasher;
+    this.activeProfilesSupplier =
+        activeProfilesSupplier == null ? List::of : activeProfilesSupplier;
+  }
+
+  /**
+   * Story 3.11 AC3 — true when the active Spring profile set contains {@code "production"}. Used by
+   * {@link com.wkspower.platform.api.controller.AdminController} to refuse {@code force=true}
+   * deploys before the multipart body is parsed. Matches the convention used by {@code
+   * ProductionBootstrapValidator} (literal string comparison; no abstraction).
+   */
+  public boolean isProductionProfile() {
+    List<String> profiles = activeProfilesSupplier.get();
+    return profiles != null && profiles.contains("production");
   }
 
   /**
@@ -178,7 +231,7 @@ public class ConfigService {
 
   /** Byte-driven YAML-only variant. Retained for the startup loader's BPMN-missing path. */
   public ValidationResult validateAndRegister(String sourceName, byte[] bytes) {
-    return validateAndRegister(sourceName, bytes, "system:startup", false);
+    return validateAndRegister(sourceName, bytes, "system:startup", false, false);
   }
 
   /**
@@ -187,20 +240,34 @@ public class ConfigService {
    * "system:startup"}. Defaults {@code bumpRequested=false}.
    */
   public ValidationResult validateAndRegister(String sourceName, byte[] bytes, String publishedBy) {
-    return validateAndRegister(sourceName, bytes, publishedBy, false);
+    return validateAndRegister(sourceName, bytes, publishedBy, false, false);
+  }
+
+  /** Story 3.8 — overload accepting {@code bumpRequested}; delegates with {@code force=false}. */
+  public ValidationResult validateAndRegister(
+      String sourceName, byte[] bytes, String publishedBy, boolean bumpRequested) {
+    return validateAndRegister(sourceName, bytes, publishedBy, bumpRequested, false);
   }
 
   /**
-   * Story 3.8 — full overload accepting {@code bumpRequested}. The blast-radius classifier runs
-   * here when a prior version exists; a mutate-class change without {@code bumpRequested=true} is
-   * rejected with {@code WKS-CFG-029}. The existing 2-arg and 3-arg overloads delegate here with
-   * {@code bumpRequested=false}.
+   * Story 3.11 — full overload accepting {@code forceRequested}. The blast-radius classifier still
+   * runs here when a prior version exists; {@code forceRequested=true} only matters when the prior
+   * YAML cannot be loaded or re-parsed (the AC4 dev/test escape hatch for the unparseable-prior
+   * path). Production-profile rejection of {@code force=true} happens at the controller layer (AC3)
+   * — by the time this method runs in production, {@code forceRequested} is guaranteed false.
    *
-   * @param bumpRequested {@code true} when the caller explicitly requested a version bump (e.g. via
-   *     {@code ?bumpVersion=true} on the admin deploy endpoint)
+   * @param bumpRequested {@code true} when the caller explicitly requested a version bump
+   * @param forceRequested {@code true} when the caller supplied {@code ?force=true} (dev/test
+   *     unparseable-prior override). Requires {@code bumpRequested=true} to take effect — the admin
+   *     controller already enforces the pairing pre-parse, so this method assumes the invariant
+   *     holds.
    */
   public ValidationResult validateAndRegister(
-      String sourceName, byte[] bytes, String publishedBy, boolean bumpRequested) {
+      String sourceName,
+      byte[] bytes,
+      String publishedBy,
+      boolean bumpRequested,
+      boolean forceRequested) {
     ValidationResult result = this.source.loadBytes(sourceName, bytes);
     if (result.isInvalid() || result.config().isEmpty()) {
       return result;
@@ -212,7 +279,7 @@ public class ConfigService {
     Optional<Integer> priorVersion = versionRegistry.currentVersion(validated.id());
     if (priorVersion.isPresent()) {
       ValidationResult gateResult =
-          runBlastRadiusGate(validated, result, priorVersion.get(), bumpRequested);
+          runBlastRadiusGate(validated, result, priorVersion.get(), bumpRequested, forceRequested);
       if (gateResult != null) {
         return gateResult; // Rejected — return the error result
       }
@@ -250,6 +317,14 @@ public class ConfigService {
    * ValidationResult#invalid(List) invalid result} when the change is mutate-class and {@code
    * bumpRequested=false}; returns {@code null} when the gate passes (caller should continue).
    *
+   * <p>Story 3.11 — adds {@code forceRequested}. Force-override ONLY waives the WKS-CFG-030
+   * unparseable-prior path (AC4). It does NOT waive WKS-CFG-029 (mutate-class without bump — that
+   * path requires the classifier to have run, which {@code force=true} skips entirely; the
+   * mandatory {@code bumpRequested=true} pairing means the operator pays the same cost anyway). It
+   * does NOT waive WKS-CFG-001..028 validator findings on the candidate YAML. The schema-drift case
+   * is NOT eligible for force-override — AC1's lenient path handles it cleanly without operator
+   * intervention; if lenient parsing succeeds {@code forceRequested} is silently ignored.
+   *
    * <p>This method does NOT throw — it returns an invalid ValidationResult which the caller must
    * propagate. This mirrors the existing multi-error pattern in {@code ConfigService}.
    */
@@ -257,9 +332,24 @@ public class ConfigService {
       CaseTypeConfig validated,
       ValidationResult yamlResult,
       int priorVersionNum,
-      boolean bumpRequested) {
+      boolean bumpRequested,
+      boolean forceRequested) {
     CaseTypeConfig prev = loadPriorConfig(validated.id(), priorVersionNum);
     if (prev == null) {
+      // Story 3.11 AC4 — dev/test force-override for unparseable prior. Production-profile
+      // rejection already happened at the controller layer (AC3); by the time we're here in
+      // production, forceRequested is guaranteed false. The bumpRequested pairing is also
+      // enforced at the controller layer (AC4 hard rule), but defensively re-check here so
+      // direct service callers (tests, future call sites) can't bypass.
+      if (forceRequested && bumpRequested) {
+        log.warn(
+            "ConfigService.runBlastRadiusGate: force-override active for caseTypeId={} v{}"
+                + " — WKS-CFG-030 path bypassed (prior YAML unparseable); blast-radius"
+                + " classification SKIPPED, deploy proceeding under admin force-override",
+            validated.id(),
+            priorVersionNum);
+        return null; // Gate bypassed
+      }
       // Story 3.8 PR #417 follow-up — fail CLOSED. AC2 requires the gate to apply on every
       // deploy with a prior version; if we cannot load or re-parse the prior YAML we cannot
       // classify the change, and silently bypassing the gate would let mutate-class edits ship
@@ -327,16 +417,38 @@ public class ConfigService {
 
   /**
    * Story 3.8 — load the prior {@link CaseTypeConfig} from the version registry's stored YAML.
-   * Returns {@code null} when the YAML cannot be loaded or re-parsed (fail-open).
+   * Returns {@code null} when the YAML cannot be loaded or re-parsed (fail-open at this layer;
+   * caller emits WKS-CFG-030).
+   *
+   * <p>Story 3.11 AC1 — strict-then-lenient fallback. Try the strict {@link
+   * CaseTypeSource#loadBytes} first; on failure (typically schema-drift: prior YAML written under
+   * an older config schema with unknown legacy keys, or mapping-subtree records that dropped
+   * {@code @JsonIgnoreProperties(ignoreUnknown = true)} in Story 4.3.1 AC8), try {@link
+   * CaseTypeSource#loadBytesLenient} which tolerates unknown keys for diff purposes only. INFO log
+   * emitted exactly once per gate-pass when the lenient path was actually needed (strict failed but
+   * lenient succeeded). Returns {@code null} ONLY when BOTH paths fail.
    */
   private CaseTypeConfig loadPriorConfig(String caseTypeId, int version) {
     Optional<CaseTypeVersionRecord> record = versionRegistry.findVersion(caseTypeId, version);
     if (record.isEmpty() || record.get().rawYaml() == null) {
       return null;
     }
-    ValidationResult prev =
-        source.loadBytes("prior:" + caseTypeId + ":" + version, record.get().rawYaml());
-    return prev.config().orElse(null);
+    byte[] yaml = record.get().rawYaml();
+    ValidationResult strict = source.loadBytes("prior:" + caseTypeId + ":" + version, yaml);
+    if (strict.config().isPresent()) {
+      return strict.config().get();
+    }
+    // Strict failed — try lenient (Story 3.11 AC1).
+    ValidationResult lenient = source.loadBytesLenient("prior:" + caseTypeId + ":" + version, yaml);
+    if (lenient.config().isPresent()) {
+      log.info(
+          "ConfigService.runBlastRadiusGate: prior YAML for caseTypeId={} v{} required lenient"
+              + " re-parse (schema-drift); blast-radius classification proceeded",
+          caseTypeId,
+          version);
+      return lenient.config().get();
+    }
+    return null; // Both paths failed — caller emits WKS-CFG-030 (AC2).
   }
 
   /**
@@ -391,41 +503,61 @@ public class ConfigService {
    */
   public DeployResult deploy(
       byte[] yamlBytes, byte[] bpmnBytes, String bpmnFilename, String actorEmail) {
-    return deploy(yamlBytes, bpmnBytes, bpmnFilename, actorEmail, false);
+    return deploy(yamlBytes, bpmnBytes, bpmnFilename, actorEmail, false, false);
   }
 
-  /** Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate. */
+  /** Story 3.8 — overload that threads {@code bumpRequested}; delegates with force=false. */
   public DeployResult deploy(
       byte[] yamlBytes,
       byte[] bpmnBytes,
       String bpmnFilename,
       String actorEmail,
       boolean bumpRequested) {
+    return deploy(yamlBytes, bpmnBytes, bpmnFilename, actorEmail, bumpRequested, false);
+  }
+
+  /** Story 3.11 — full overload threading {@code forceRequested}. */
+  public DeployResult deploy(
+      byte[] yamlBytes,
+      byte[] bpmnBytes,
+      String bpmnFilename,
+      String actorEmail,
+      boolean bumpRequested,
+      boolean forceRequested) {
     Map<String, byte[]> bpmnByName =
         (bpmnFilename != null && !bpmnFilename.isBlank() && bpmnBytes != null)
             ? Map.of(bpmnFilename, bpmnBytes)
             : Map.of();
     ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes, bpmnByName);
-    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested);
+    return deployWithYamlResult(
+        yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested, forceRequested);
   }
 
   public DeployResult deploy(byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
-    return deploy(yamlBytes, bpmnBytes, actorEmail, false);
+    return deploy(yamlBytes, bpmnBytes, actorEmail, false, false);
   }
 
-  /**
-   * Story 3.8 — overload that threads {@code bumpRequested} through the blast-radius gate (no BPMN
-   * filename variant — used by startup loader and tests).
-   */
+  /** Story 3.8 — overload that threads {@code bumpRequested}; delegates with force=false. */
   public DeployResult deploy(
       byte[] yamlBytes, byte[] bpmnBytes, String actorEmail, boolean bumpRequested) {
+    return deploy(yamlBytes, bpmnBytes, actorEmail, bumpRequested, false);
+  }
+
+  /** Story 3.11 — full overload threading {@code forceRequested} (no BPMN filename variant). */
+  public DeployResult deploy(
+      byte[] yamlBytes,
+      byte[] bpmnBytes,
+      String actorEmail,
+      boolean bumpRequested,
+      boolean forceRequested) {
     ValidationResult yamlResult = source.loadBytes("api-deploy.yaml", yamlBytes);
-    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested);
+    return deployWithYamlResult(
+        yamlResult, yamlBytes, bpmnBytes, actorEmail, bumpRequested, forceRequested);
   }
 
   private DeployResult deployWithYamlResult(
       ValidationResult yamlResult, byte[] yamlBytes, byte[] bpmnBytes, String actorEmail) {
-    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, false);
+    return deployWithYamlResult(yamlResult, yamlBytes, bpmnBytes, actorEmail, false, false);
   }
 
   private DeployResult deployWithYamlResult(
@@ -433,7 +565,8 @@ public class ConfigService {
       byte[] yamlBytes,
       byte[] bpmnBytes,
       String actorEmail,
-      boolean bumpRequested) {
+      boolean bumpRequested,
+      boolean forceRequested) {
     CaseTypeConfig caseType = yamlResult.config().orElse(null);
 
     BpmnValidationResult bpmnResult = bpmnValidator.validate(bpmnBytes, caseType);
@@ -455,7 +588,8 @@ public class ConfigService {
     Optional<Integer> priorVersion = versionRegistry.currentVersion(caseType.id());
     if (priorVersion.isPresent()) {
       ValidationResult gateResult =
-          runBlastRadiusGate(caseType, yamlResult, priorVersion.get(), bumpRequested);
+          runBlastRadiusGate(
+              caseType, yamlResult, priorVersion.get(), bumpRequested, forceRequested);
       if (gateResult != null) {
         // Rejected — propagate meta (blastRadius report) in the DeployResult
         return DeployResult.invalidWithMeta(gateResult.errors(), gateResult.responseMeta());

@@ -21,4 +21,20 @@ public interface CaseTypeSource {
   default ValidationResult loadBytes(String source, byte[] bytes) {
     return loadBytes(source, bytes, Map.of());
   }
+
+  /**
+   * Story 3.11 AC1 — lenient prior-YAML re-parse path used by the blast-radius diff. Tolerates
+   * unknown keys (schema-drift recovery) and skips semantic validation — projection only. The
+   * returned {@link ValidationResult#config()} is suitable for {@code CaseTypeDiff.classify} but
+   * does NOT carry validator findings: re-running validation against an obsolete schema would
+   * surface noise. Catastrophic parse failures still surface as a {@code WKS-CFG-099}-bearing
+   * invalid result.
+   *
+   * <p>The default returns an empty invalid result so adapter implementations can opt in
+   * incrementally. The production {@code CaseTypeSourceAdapter} overrides with the real
+   * implementation.
+   */
+  default ValidationResult loadBytesLenient(String source, byte[] bytes) {
+    return ValidationResult.invalid(java.util.List.of());
+  }
 }
