@@ -229,9 +229,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   /**
    * Story 3.4 / Decision 20 — CaseType version-registry exceptions. Story 3.4.1 AC4 (finding I6)
    * flips the HTTP semantic from {@code 409 Conflict} (misleading — it is not a client conflict) to
-   * {@code 503 Service Unavailable} with a {@code Retry-After: 5} header: the registry-not- primed
+   * {@code 503 Service Unavailable} with a {@code Retry-After: 5} header: the registry-not-primed
    * condition is recoverable (startup race, polling redeploy window) and "transient, retry safe" is
    * the most actionable signal for SI operators.
+   *
+   * <p>Story 5.5 AC-4 — {@code WKS-VER-002} (case pinned to unknown CaseTypeVersion) maps to HTTP
+   * 422 Unprocessable Entity instead: the request is structurally invalid (the case's pinned
+   * version is not in the registry — a data-integrity condition, not a transient service error).
+   * 503 + Retry-After would be misleading for this sub-code.
    */
   @ExceptionHandler(com.wkspower.platform.domain.exception.WksVersionException.class)
   public ResponseEntity<ApiResponse<Void>> handleVersion(
@@ -239,6 +244,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     MDC.put(MDC_KEY, ex.getCode());
     try {
       log.warn("CaseType version-registry error: {}", ex.getCode());
+      if (ErrorCode.WKS_VER_002.wire().equals(ex.getCode())) {
+        // Story 5.5 AC-4 — pinned-version not in registry: data-integrity error, not transient.
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));
+      }
+      // WKS-VER-001 (and any future VER codes) — transient, retry-safe.
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
           .header(HttpHeaders.RETRY_AFTER, "5")
           .body(ApiResponse.error(ErrorPayload.of(ex.getCode(), ex.getMessage())));

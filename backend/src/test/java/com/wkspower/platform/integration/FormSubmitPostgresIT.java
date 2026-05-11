@@ -13,12 +13,8 @@ import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
-import com.wkspower.platform.domain.model.User;
-import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.infrastructure.config.CaseTypeRegistry;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,57 +27,71 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 5.2 P7 — integration tests for {@code POST /api/cases/{caseId}/forms/{formId}/submit}.
+ * Story 5.5 AC-3 — Postgres-IT parity for {@link FormSubmitIT}.
  *
- * <p>Covers the four key scenarios:
+ * <p>CF#2 from Sprint 9 retro: the H2 FormSubmitIT siblings must be re-verified on a real Postgres
+ * at PR-open to guard against schema drift (H2 and Postgres differ on JSONB semantics for the
+ * {@code cases.data} column). This IT mirrors the four key scenarios from {@link FormSubmitIT}
+ * against a real Postgres instance provided by Testcontainers.
  *
- * <ul>
- *   <li>Happy path → 200 with updated case data.
- *   <li>Unknown form id → 404 (WKS-API-404).
- *   <li>Required field missing → 422 (WKS-FORM-002).
- *   <li>Empty body → 400 (WKS-FORM-003).
- * </ul>
+ * <p>Skipped automatically when Docker is unavailable.
  *
- * <p>Uses an H2 in-memory DB and no BPMN engine (no workflow declared on the case type) — the form
- * submit path does not require an active process instance.
+ * <p>Memory {@code feedback_production_validator_opt_out.md}: production-validation disabled — only
+ * exercises the form-submit surface, not the boot-invariant.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(
-    properties = {
-      "spring.datasource.url=jdbc:h2:mem:formsubmitit;DB_CLOSE_DELAY=-1",
-      "spring.datasource.driver-class-name=org.h2.Driver",
-      "wks.case-types.dir=",
-      "wks.jwt.secret=dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=",
-      "wks.bootstrap.production-validation.enabled=false"
-    })
-class FormSubmitIT {
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+    properties = "wks.bootstrap.production-validation.enabled=false")
+@ActiveProfiles("production")
+@Testcontainers(disabledWithoutDocker = true)
+class FormSubmitPostgresIT {
 
-  private static final String EMAIL = "form-submit-it@wkspower.local";
+  private static final String EMAIL = "form-submit-pg-it@wkspower.local";
   private static final String PASSWORD = "admin";
-  private static final String CASE_TYPE_ID = "form-submit-fixture";
+  private static final String CASE_TYPE_ID = "form-submit-pg-fixture";
   private static final String FORM_ID = "intake-form";
 
+  @Container
+  @SuppressWarnings("resource")
+  static final PostgreSQLContainer<?> POSTGRES =
+      new PostgreSQLContainer<>("postgres:16-alpine")
+          .withDatabaseName("wks")
+          .withUsername("wks")
+          .withPassword("wks");
+
+  @DynamicPropertySource
+  static void registerProperties(DynamicPropertyRegistry reg) {
+    reg.add("WKS_DB_URL", POSTGRES::getJdbcUrl);
+    reg.add("WKS_DB_USER", POSTGRES::getUsername);
+    reg.add("WKS_DB_PASSWORD", POSTGRES::getPassword);
+    reg.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+    reg.add("WKS_ADMIN_EMAIL", () -> EMAIL);
+    reg.add("WKS_ADMIN_PASSWORD", () -> PASSWORD);
+    reg.add("wks.jwt.secret", () -> "dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=");
+    reg.add("WKS_CORS_ORIGINS", () -> "http://localhost:5173");
+    reg.add("camunda.bpm.generic-properties.properties.enforceHistoryTimeToLive", () -> "false");
+    reg.add("wks.case-types.dir", () -> "");
+  }
+
   @Autowired private TestRestTemplate rest;
-  @Autowired private UserRepository users;
-  @Autowired private PasswordEncoder encoder;
   @Autowired private CaseTypeRegistry registry;
   @Autowired private ObjectMapper json;
 
   @BeforeEach
   void setup() {
-    if (users.findByEmail(EMAIL).isEmpty()) {
-      users.save(
-          new User(UUID.randomUUID(), EMAIL, Set.of("admin"), true), encoder.encode(PASSWORD));
-    }
     registry.register(caseTypeWithForm());
   }
 
   @Test
-  void happyPathReturns200WithUpdatedCaseData() throws Exception {
+  void happyPathReturns200WithUpdatedCaseDataOnPostgres() throws Exception {
     String cookie = login();
     String caseId = createCase(cookie);
 
@@ -98,7 +108,7 @@ class FormSubmitIT {
   }
 
   @Test
-  void unknownFormIdReturns404() throws Exception {
+  void unknownFormIdReturns404OnPostgres() throws Exception {
     String cookie = login();
     String caseId = createCase(cookie);
 
@@ -114,11 +124,10 @@ class FormSubmitIT {
   }
 
   @Test
-  void missingRequiredFieldReturns422WithWksForm002() throws Exception {
+  void missingRequiredFieldReturns422OnPostgres() throws Exception {
     String cookie = login();
     String caseId = createCase(cookie);
 
-    // Omit the required "applicant" field — only supply the optional "amount"
     ResponseEntity<String> resp =
         exchange(
             "/api/cases/" + caseId + "/forms/" + FORM_ID + "/submit",
@@ -131,7 +140,7 @@ class FormSubmitIT {
   }
 
   @Test
-  void emptyBodyReturns400WithWksForm003() throws Exception {
+  void emptyBodyReturns400OnPostgres() throws Exception {
     String cookie = login();
     String caseId = createCase(cookie);
 
@@ -178,8 +187,6 @@ class FormSubmitIT {
   }
 
   private static CaseTypeConfig caseTypeWithForm() {
-    // Two fields on the case type: "applicant" (required text) and "amount" (optional number).
-    // The intake-form references both so form validation covers both required and optional fields.
     List<FieldDefinition> fields =
         List.of(
             new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
@@ -190,10 +197,10 @@ class FormSubmitIT {
 
     return new CaseTypeConfig(
         CASE_TYPE_ID,
-        "Form Submit Fixture",
+        "Form Submit PG Fixture",
         1,
         null,
-        null, // no BPMN — form submit does not require an active process instance
+        null,
         fields,
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("applicant"),

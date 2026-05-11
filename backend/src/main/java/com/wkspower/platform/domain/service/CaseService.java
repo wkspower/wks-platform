@@ -217,7 +217,15 @@ public class CaseService {
           "Case " + caseId + " was modified by another transaction; reload and retry");
     }
 
-    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+    // Story 5.5 AC-4 — Decision D20 frozen-on-version: validate updated case data against the
+    // CaseType the case is PINNED to, not the latest deployed version. This ensures a v1-pinned
+    // case can still pass update validation after a v2 (with additional required fields) is
+    // deployed. Falls back to latest if the pinned version is not in the registry (defensive — the
+    // normal path always has the pinned version cached since register() now populates byVersion).
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(existing.caseTypeId(), existing.caseTypeVersion())
+            .orElseGet(() -> requireCaseType(existing.caseTypeId()));
     Map<String, Object> safeData = newData == null ? Map.of() : Map.copyOf(newData);
 
     List<ErrorDetail> violations = caseDataValidator.validate(caseType, safeData);
@@ -421,21 +429,19 @@ public class CaseService {
             .findById(caseId)
             .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
 
-    CaseTypeConfig caseType = requireCaseType(existing.caseTypeId());
+    // Story 5.5 AC-4 — Decision D20 frozen-on-version: resolve the form definition from the
+    // CaseTypeVersion the case is pinned to, NOT the latest deployed version. Server-side binding
+    // from case.caseTypeVersion — clients NEVER supply formVersion. WKS-VER-002 on registry miss.
+    FormDefinition form = resolveFormDefinitionForCase(existing, formId);
 
-    // Resolve the form definition by id — 404 if not declared on this case type.
-    FormDefinition form =
-        caseType.forms().stream()
-            .filter(f -> f.id().equals(formId))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new WksNotFoundException(
-                        "Form '"
-                            + formId
-                            + "' not found on case type '"
-                            + existing.caseTypeId()
-                            + "'"));
+    // Story 5.6 AC2 — field-level edit-permission check requires the pinned CaseTypeConfig (which
+    // carries editableBy declarations). Use findVersion so the permission check respects the same
+    // version the form was resolved against. Fallback to latest on registry miss (should not occur
+    // since resolveFormDefinitionForCase above already threw WKS-VER-002 on that path).
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(existing.caseTypeId(), existing.caseTypeVersion())
+            .orElseGet(() -> requireCaseType(existing.caseTypeId()));
 
     // Validate submitted field values against the form's field definitions.
     // Collections.unmodifiableMap(new HashMap<>(...)) is used instead of Map.copyOf() because
@@ -451,7 +457,7 @@ public class CaseService {
 
     // Story 5.6 AC2 — field-level edit-permission check on the diff of changed fields only. An
     // unchanged value passing through the form does NOT trigger rejection (round-tripped immutable
-    // display fields are common). The check operates against the case-type's full field set
+    // display fields are common). The check operates against the pinned case-type's full field set
     // (caseType.fields()) because field permissions live on the case-type, not the form view.
     Set<String> changedFieldIds = diffFieldIds(existing.data(), safeData);
     List<ErrorDetail> permViolations =
@@ -514,8 +520,10 @@ public class CaseService {
     Set<String> updatedFieldIds = diffFieldIds(existing.data(), safeData);
 
     // Publish FormSubmitted after commit so the audit listener never observes rolled-back state.
+    // Story 5.5 AC-7 — include caseTypeVersion in the audit payload (pinned version, not latest).
     eventPublisher.publishAfterCommit(
-        new FormSubmitted(caseId, formId, actorId, clock.now(), updatedFieldIds));
+        new FormSubmitted(
+            caseId, formId, actorId, clock.now(), updatedFieldIds, existing.caseTypeVersion()));
 
     return updated;
   }
@@ -769,6 +777,53 @@ public class CaseService {
         .findById(caseId)
         .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
     // Phase-0: no additional access check beyond authentication. Hook for Phase-1 RBAC.
+  }
+
+  /**
+   * Story 5.5 AC-4 — Decision D20 frozen-on-version invariant. Single source of truth for "what
+   * form does this case see right now." Controllers MUST consume this method — do NOT inline the
+   * lookup (memory {@code feedback_consolidate_property_readers.md} analog applies).
+   *
+   * <ol>
+   *   <li>Reads {@code case.caseTypeVersion()} (existing field on the Case record).
+   *   <li>Looks up the CaseTypeConfig snapshot from the {@code case_type_versions} registry via
+   *       {@link com.wkspower.platform.domain.port.CaseTypeReader#findVersion}.
+   *   <li>Finds the {@link FormDefinition} by {@code formId} on the pinned CaseTypeConfig.
+   * </ol>
+   *
+   * @throws WksVersionException ({@code WKS-VER-002}, HTTP 422) when the case's {@code
+   *     caseTypeVersion} is not in the {@code case_type_versions} registry — defensive guard,
+   *     should not fire on a healthy system, but discovered cases must not 500.
+   * @throws WksNotFoundException ({@code WKS-API-404}, HTTP 404) when the {@code formId} is not
+   *     declared on the pinned CaseTypeConfig (invalid request — form removed post-deploy).
+   */
+  public FormDefinition resolveFormDefinitionForCase(Case c, String formId) {
+    Objects.requireNonNull(c, "case");
+    Objects.requireNonNull(formId, "formId");
+    CaseTypeConfig pinnedCaseType =
+        caseTypeReader
+            .findVersion(c.caseTypeId(), c.caseTypeVersion())
+            .orElseThrow(
+                () ->
+                    new WksVersionException(
+                        ErrorCode.WKS_VER_002,
+                        "Case "
+                            + c.id()
+                            + " is pinned to CaseTypeVersion "
+                            + c.caseTypeVersion()
+                            + " which is not in the registry"));
+    return pinnedCaseType.forms().stream()
+        .filter(f -> f.id().equals(formId))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new WksNotFoundException(
+                    "Form '"
+                        + formId
+                        + "' not found on case type '"
+                        + c.caseTypeId()
+                        + "' at version "
+                        + c.caseTypeVersion()));
   }
 
   /**

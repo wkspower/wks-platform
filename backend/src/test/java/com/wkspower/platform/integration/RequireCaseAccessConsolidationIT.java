@@ -139,7 +139,7 @@ class RequireCaseAccessConsolidationIT {
             new FieldDefinition(
                 "applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null));
     FormDefinition intakeForm =
-        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields);
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
     return new CaseTypeConfig(
         CASE_TYPE_ID,
         "Require Access Fixture",

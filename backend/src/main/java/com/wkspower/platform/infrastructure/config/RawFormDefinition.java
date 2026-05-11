@@ -38,32 +38,4 @@ public record RawFormDefinition(
      * submit_for_processing}, {@code business_final}). Validated by {@link ConfigValidator} which
      * emits {@code WKS-ARCH-001} for unknown values.
      */
-    @JsonProperty("archetype") String archetype) {
-
-  /**
-   * Backward-compat constructor for callers (mostly tests) that pre-date Story 5.3's {@code
-   * sections} slot. Defaults {@code sections} and {@code archetype} to {@code null}.
-   */
-  public RawFormDefinition(
-      String id,
-      String topology,
-      String dataModel,
-      String rendering,
-      List<Map<String, Object>> fields) {
-    this(id, topology, dataModel, rendering, fields, null, null);
-  }
-
-  /**
-   * Backward-compat constructor for callers that pre-date Story 6.1's {@code archetype} slot.
-   * Defaults {@code archetype} to {@code null}.
-   */
-  public RawFormDefinition(
-      String id,
-      String topology,
-      String dataModel,
-      String rendering,
-      List<Map<String, Object>> fields,
-      List<RawFormSection> sections) {
-    this(id, topology, dataModel, rendering, fields, sections, null);
-  }
-}
+    @JsonProperty("archetype") String archetype) {}

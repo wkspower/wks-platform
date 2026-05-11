@@ -36,6 +36,7 @@ class FormDefinitionMapperTest {
                     true,
                     "order",
                     0)),
+            null,
             null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
 
@@ -92,7 +93,8 @@ class FormDefinitionMapperTest {
             new RawFormSection("employment", "Employment Details", employmentFields));
 
     var raw =
-        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, sections);
+        new RawFormDefinition(
+            "bank-form", "single", "sectioned", "multi-section", null, sections, null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
 
     assertThat(result.sections()).hasSize(2);
@@ -117,7 +119,7 @@ class FormDefinitionMapperTest {
     var section = new RawFormSection("personal", null, List.of());
     var raw =
         new RawFormDefinition(
-            "bank-form", "single", "sectioned", "multi-section", null, List.of(section));
+            "bank-form", "single", "sectioned", "multi-section", null, List.of(section), null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
 
     // label defaults to id when absent
@@ -131,7 +133,13 @@ class FormDefinitionMapperTest {
     var valid = new RawFormSection("employment", "Employment", List.of());
     var raw =
         new RawFormDefinition(
-            "bank-form", "single", "sectioned", "multi-section", null, List.of(blankId, valid));
+            "bank-form",
+            "single",
+            "sectioned",
+            "multi-section",
+            null,
+            List.of(blankId, valid),
+            null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
 
     // blank-id section is skipped; valid section remains
@@ -145,7 +153,8 @@ class FormDefinitionMapperTest {
     sections.add(null);
     sections.add(new RawFormSection("employment", "Employment", List.of()));
     var raw =
-        new RawFormDefinition("bank-form", "single", "sectioned", "multi-section", null, sections);
+        new RawFormDefinition(
+            "bank-form", "single", "sectioned", "multi-section", null, sections, null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
 
     assertThat(result.sections()).hasSize(1);
@@ -199,7 +208,9 @@ class FormDefinitionMapperTest {
                     "required",
                     false,
                     "order",
-                    0)));
+                    0)),
+            null,
+            null);
     FormDefinition result = FormDefinitionMapper.toDomain(raw);
     assertThat(result.archetype()).isNull();
   }

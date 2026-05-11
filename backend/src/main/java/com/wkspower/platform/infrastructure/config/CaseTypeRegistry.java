@@ -137,6 +137,12 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
               });
     }
     Registered incoming = new Registered(config, schemaGenerator.generate(config));
+    // Story 5.5 AC-4 — populate byVersion cache eagerly on register so that findVersion(id,
+    // version) never falls back to parsing the stub YAML written by the test-bypass path. The
+    // production path (ConfigService.applyVersionRegistry) writes full YAML before register; the
+    // test-bypass path writes a stub. Either way, the in-memory CaseTypeConfig is authoritative and
+    // is cached here, making the parse-validate round-trip unnecessary for same-version lookups.
+    byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
     AtomicReference<RegistrationResult> outcome = new AtomicReference<>();
 
     byId.compute(

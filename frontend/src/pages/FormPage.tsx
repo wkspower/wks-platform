@@ -128,7 +128,17 @@ export function FormPage() {
 
   return (
     <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-xl font-semibold">{formDef.id}</h1>
+      <div className="mb-6 flex items-center gap-3">
+        <h1 className="text-xl font-semibold">{formDef.id}</h1>
+        {/* Story 5.5 AC-4 — version-pin chip. caseDto.caseTypeVersion is the pinned version
+            (server now returns pinned CaseType, not latest — Decision D20). */}
+        <span
+          className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]"
+          aria-label={t('form.pinnedVersion', { version: String(caseDto.caseTypeVersion) })}
+        >
+          {t('form.pinnedVersion', { version: String(caseDto.caseTypeVersion) })}
+        </span>
+      </div>
       {draft.draft ? (
         <div
           role="status"
