@@ -76,6 +76,7 @@ public class CaseController {
   private final CaseTypePermissionEvaluator evaluator;
   private final WksStageAdvancer stageAdvancer;
   private final StageRepository stageRepository;
+
   /**
    * Story 5.5 AC-4 — used to resolve the pinned CaseTypeConfig for the case-detail response. The
    * response must embed the pinned CaseType (not the latest deployed) so the frontend form renderer

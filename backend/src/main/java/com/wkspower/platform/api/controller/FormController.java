@@ -47,6 +47,7 @@ public class FormController {
   private final CaseService caseService;
   private final StageRepository stageRepository;
   private final FormDraftService formDraftService;
+
   /**
    * Story 5.5 AC-4 — used to resolve the pinned CaseTypeConfig for the DTO response. The response
    * must embed the pinned CaseType (not the latest deployed) so the frontend renders the form the

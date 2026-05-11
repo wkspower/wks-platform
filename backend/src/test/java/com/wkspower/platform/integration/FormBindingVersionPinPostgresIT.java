@@ -37,9 +37,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * Story 5.5 AC-3 + AC-5 — Postgres-IT parity for {@link FormBindingVersionPinIT}.
  *
- * <p>Proves the frozen-on-version guarantee on a real Postgres (JSONB semantics differ from H2
- * for the {@code cases.data} column). The {@code case_type_versions} registry persistence and
- * {@code CaseTypeRegistry.findVersion} cache-miss path are both exercised on real Postgres.
+ * <p>Proves the frozen-on-version guarantee on a real Postgres (JSONB semantics differ from H2 for
+ * the {@code cases.data} column). The {@code case_type_versions} registry persistence and {@code
+ * CaseTypeRegistry.findVersion} cache-miss path are both exercised on real Postgres.
  *
  * <p>Skipped automatically when Docker is unavailable.
  *
@@ -75,8 +75,7 @@ class FormBindingVersionPinPostgresIT {
     reg.add("WKS_ADMIN_PASSWORD", () -> PASSWORD);
     reg.add("wks.jwt.secret", () -> "dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=");
     reg.add("WKS_CORS_ORIGINS", () -> "http://localhost:5173");
-    reg.add(
-        "camunda.bpm.generic-properties.properties.enforceHistoryTimeToLive", () -> "false");
+    reg.add("camunda.bpm.generic-properties.properties.enforceHistoryTimeToLive", () -> "false");
     reg.add("wks.case-types.dir", () -> "");
   }
 
@@ -105,20 +104,14 @@ class FormBindingVersionPinPostgresIT {
     registry.register(caseTypeV2());
 
     // GET the case — embedded CaseType must be v1
-    ResponseEntity<String> getResp =
-        exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
+    ResponseEntity<String> getResp = exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
     assertThat(getResp.getStatusCode()).isEqualTo(HttpStatus.OK);
     JsonNode caseBody = json.readTree(getResp.getBody());
     JsonNode caseTypeNode = caseBody.path("data").path("caseType");
     assertThat(caseTypeNode.path("version").asInt())
         .as("GET response must embed pinned v1 on Postgres")
         .isEqualTo(1);
-    JsonNode formFields =
-        caseTypeNode
-            .path("forms")
-            .elements()
-            .next()
-            .path("fields");
+    JsonNode formFields = caseTypeNode.path("forms").elements().next().path("fields");
     assertThat(formFields.size()).as("pinned v1 form must have 2 fields on Postgres").isEqualTo(2);
 
     // Submit with v1 payload — must succeed (no "email" required at v1)
@@ -131,8 +124,12 @@ class FormBindingVersionPinPostgresIT {
     assertThat(submitResp.getStatusCode())
         .as("v1 submit must succeed on Postgres even though v2 is live")
         .isEqualTo(HttpStatus.OK);
-    assertThat(json.readTree(submitResp.getBody())
-            .path("data").path("caseType").path("version").asInt())
+    assertThat(
+            json.readTree(submitResp.getBody())
+                .path("data")
+                .path("caseType")
+                .path("version")
+                .asInt())
         .as("submit response embeds pinned v1 on Postgres")
         .isEqualTo(1);
   }

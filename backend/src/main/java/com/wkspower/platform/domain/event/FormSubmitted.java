@@ -37,11 +37,7 @@ public record FormSubmitted(
    * production paths must always supply the version.
    */
   public static FormSubmitted of(
-      UUID caseId,
-      String formId,
-      UUID actorId,
-      Instant submittedAt,
-      Set<String> updatedFieldIds) {
+      UUID caseId, String formId, UUID actorId, Instant submittedAt, Set<String> updatedFieldIds) {
     return new FormSubmitted(caseId, formId, actorId, submittedAt, updatedFieldIds, 0);
   }
 }

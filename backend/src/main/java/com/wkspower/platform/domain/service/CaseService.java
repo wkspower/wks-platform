@@ -790,8 +790,8 @@ public class CaseService {
    *   <li>Finds the {@link FormDefinition} by {@code formId} on the pinned CaseTypeConfig.
    * </ol>
    *
-   * @throws WksVersionException ({@code WKS-VER-002}, HTTP 422) when the case's
-   *     {@code caseTypeVersion} is not in the {@code case_type_versions} registry — defensive guard,
+   * @throws WksVersionException ({@code WKS-VER-002}, HTTP 422) when the case's {@code
+   *     caseTypeVersion} is not in the {@code case_type_versions} registry — defensive guard,
    *     should not fire on a healthy system, but discovered cases must not 500.
    * @throws WksNotFoundException ({@code WKS-API-404}, HTTP 404) when the {@code formId} is not
    *     declared on the pinned CaseTypeConfig (invalid request — form removed post-deploy).

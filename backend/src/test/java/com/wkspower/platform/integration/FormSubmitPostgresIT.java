@@ -77,8 +77,7 @@ class FormSubmitPostgresIT {
     reg.add("WKS_ADMIN_PASSWORD", () -> PASSWORD);
     reg.add("wks.jwt.secret", () -> "dGVzdC1zZWNyZXQtZm9yLWludGVncmF0aW9uLXRlc3RzLTEyMzQ=");
     reg.add("WKS_CORS_ORIGINS", () -> "http://localhost:5173");
-    reg.add(
-        "camunda.bpm.generic-properties.properties.enforceHistoryTimeToLive", () -> "false");
+    reg.add("camunda.bpm.generic-properties.properties.enforceHistoryTimeToLive", () -> "false");
     reg.add("wks.case-types.dir", () -> "");
   }
 

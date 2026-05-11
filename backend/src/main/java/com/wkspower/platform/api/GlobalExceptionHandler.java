@@ -220,9 +220,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    * the most actionable signal for SI operators.
    *
    * <p>Story 5.5 AC-4 — {@code WKS-VER-002} (case pinned to unknown CaseTypeVersion) maps to HTTP
-   * 422 Unprocessable Entity instead: the request is structurally invalid (the case's pinned version
-   * is not in the registry — a data-integrity condition, not a transient service error). 503 +
-   * Retry-After would be misleading for this sub-code.
+   * 422 Unprocessable Entity instead: the request is structurally invalid (the case's pinned
+   * version is not in the registry — a data-integrity condition, not a transient service error).
+   * 503 + Retry-After would be misleading for this sub-code.
    */
   @ExceptionHandler(com.wkspower.platform.domain.exception.WksVersionException.class)
   public ResponseEntity<ApiResponse<Void>> handleVersion(

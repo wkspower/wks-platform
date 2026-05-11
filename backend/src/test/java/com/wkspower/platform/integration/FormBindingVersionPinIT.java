@@ -47,10 +47,10 @@ import org.springframework.test.context.TestPropertySource;
  * <p>AC-7 scenario: the submit response DTO carries {@code caseTypeVersion = 1} (pinned), even
  * though v2 is live.
  *
- * <p>Each test uses a unique case-type ID to avoid cross-test registry pollution: the
- * {@link CaseTypeRegistry} is a shared singleton (Spring context reuse) and once v2 is registered
- * for an ID, v1 cannot be re-registered (older-version guard). Per-test IDs isolate the version
- * lifecycle entirely.
+ * <p>Each test uses a unique case-type ID to avoid cross-test registry pollution: the {@link
+ * CaseTypeRegistry} is a shared singleton (Spring context reuse) and once v2 is registered for an
+ * ID, v1 cannot be re-registered (older-version guard). Per-test IDs isolate the version lifecycle
+ * entirely.
  *
  * <p>Uses H2 in-memory DB; companion Postgres-IT is {@code FormBindingVersionPinPostgresIT}.
  *
@@ -93,6 +93,7 @@ class FormBindingVersionPinIT {
    * independent of other tests sharing the same Spring context.
    *
    * <p>Steps:
+   *
    * <ol>
    *   <li>Register v1 and create a case → case.caseTypeVersion = 1.
    *   <li>Register v2 (adds a new required field "email").
@@ -114,8 +115,7 @@ class FormBindingVersionPinIT {
     registry.register(caseTypeV2(caseTypeId));
 
     // Step 3: GET the case — embedded CaseType must be v1 (no "email" field in forms)
-    ResponseEntity<String> getResp =
-        exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
+    ResponseEntity<String> getResp = exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
     assertThat(getResp.getStatusCode()).isEqualTo(HttpStatus.OK);
     JsonNode caseBody = json.readTree(getResp.getBody());
     JsonNode caseTypeNode = caseBody.path("data").path("caseType");
@@ -218,8 +218,7 @@ class FormBindingVersionPinIT {
   // ---- CaseType fixtures -----------------------------------------------------
 
   /**
-   * v1: "applicant" (required text) + "amount" (optional number).
-   * Form has 2 fields. Version = 1.
+   * v1: "applicant" (required text) + "amount" (optional number). Form has 2 fields. Version = 1.
    */
   private static CaseTypeConfig caseTypeV1(String caseTypeId) {
     List<FieldDefinition> fields =

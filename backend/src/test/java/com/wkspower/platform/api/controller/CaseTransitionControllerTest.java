@@ -66,6 +66,7 @@ class CaseTransitionControllerTest {
   com.wkspower.platform.domain.service.WksStageAdvancer stageAdvancer;
 
   @MockitoBean com.wkspower.platform.domain.port.StageRepository stageRepository;
+
   /** Story 5.5 AC-4 — CaseController now injects CaseTypeReader for pinned-version DTO build. */
   @MockitoBean com.wkspower.platform.domain.port.CaseTypeReader caseTypeReader;
 

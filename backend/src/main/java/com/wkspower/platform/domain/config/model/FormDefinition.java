@@ -48,5 +48,4 @@ public record FormDefinition(
     fields = fields == null ? List.of() : List.copyOf(fields);
     sections = sections == null ? List.of() : List.copyOf(sections);
   }
-
 }

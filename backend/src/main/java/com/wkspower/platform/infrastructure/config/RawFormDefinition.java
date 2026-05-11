@@ -38,6 +38,4 @@ public record RawFormDefinition(
      * submit_for_processing}, {@code business_final}). Validated by {@link ConfigValidator} which
      * emits {@code WKS-ARCH-001} for unknown values.
      */
-    @JsonProperty("archetype") String archetype) {
-
-}
+    @JsonProperty("archetype") String archetype) {}
