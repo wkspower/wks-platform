@@ -465,6 +465,16 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
           signal.caseInstance().id(),
           "malformed stageTransition '" + spec + "'");
     }
+    // Story 6.2 — WKS-MAP-404: reject a transition spec whose source stage segment is blank
+    // (e.g. "-> review", " -> ", "-> "). MappingValidator's stageTransition regex anchors the
+    // grammar at deploy time, but a malformed spec sneaking through (admin REST PATCH, runtime
+    // hot-reload race) must not be silently treated as "from anywhere".
+    if (parts[0].isBlank()) {
+      throw new WksMappingMissException(
+          signal.adapterName(),
+          signal.caseInstance().id(),
+          "source stage missing in transition spec '" + spec + "'");
+    }
     String to = parts[1].trim();
     String sourceRef = signal.adapterName() + ":" + signal.source();
     // The advancer determines the actual next stage (null = last stage completed on advance()).

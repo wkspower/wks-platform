@@ -219,6 +219,62 @@ class OutcomeDispatchIT {
         .isEqualTo(stageBefore);
   }
 
+  /**
+   * Story 6.2 — applyStageTransition rejects a transition spec with a blank source segment.
+   * MappingValidator anchors the grammar at deploy time, but a malformed spec sneaking through
+   * (e.g. admin REST PATCH, runtime hot-reload race) must not be silently treated as
+   * "from anywhere". The router throws WksMappingMissException → router's existing miss path
+   * catches and emits an audit row; the case row remains unchanged.
+   */
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"-> review", " -> ", "review -> ->", "intake -> review -> closed"})
+  void applyStageTransition_rejectsMalformedSpec(String malformedSpec) {
+    Case caseRow = setupCase(CASE_TYPE_ID + "-malformed-" + Math.abs(malformedSpec.hashCode()));
+    CaseTypeRef caseTypeRef = new CaseTypeRef(caseRow.caseTypeId(), "1");
+    fake.attach(caseTypeRef, AttachmentScope.ofCase());
+
+    mappingRegistry.register(
+        caseTypeRef,
+        "1",
+        new MappingDefinition(
+            List.of(
+                new AttachmentDefinition(
+                    "bpmn",
+                    "test.bpmn",
+                    "case",
+                    Optional.empty(),
+                    Map.of(),
+                    Optional.empty(),
+                    Map.of(),
+                    List.of(),
+                    Map.of("approve", new OutcomeMapping(malformedSpec))))));
+
+    String statusBefore = caseRow.status();
+    String stageBefore = caseRow.currentStageId();
+
+    assertThatNoException()
+        .isThrownBy(
+            () ->
+                fake.emit(
+                    new ExecutionSignal(
+                        ExecutionSignalKind.OUTCOME,
+                        "formOutcome",
+                        new CaseInstanceRef(caseRow.id(), caseTypeRef),
+                        "intake-task",
+                        Map.of("outcome", "approve"))));
+    em.flush();
+    em.clear();
+
+    Case after = caseRepository.findById(caseRow.id()).orElseThrow();
+    assertThat(after.status())
+        .as("malformed spec '" + malformedSpec + "' must not mutate status")
+        .isEqualTo(statusBefore);
+    assertThat(after.currentStageId())
+        .as("malformed spec '" + malformedSpec + "' must not mutate stage")
+        .isEqualTo(stageBefore);
+  }
+
   // ---- helpers -------------------------------------------------------
 
   private Case setupCase(String caseTypeId) {
