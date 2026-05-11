@@ -221,7 +221,6 @@ jobs:
           WKS_CORS_ORIGINS=http://localhost:8080
           WKS_JWT_SECRET=${JWT_FIXTURE}
           WKS_OPENAPI_ENABLED=false
-          WKS_KEYCLOAK_ENABLED=false
           WKS_MINIO_ROOT_USER=ci-fixture-minio-user
           WKS_MINIO_ROOT_PASSWORD=ci-fixture-minio-password
           WKS_HOST_PORT=8080

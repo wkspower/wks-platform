@@ -6,8 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -46,7 +48,7 @@ class ThemeControllerTest {
   // ---------------------------------------------------------------------------
 
   @WebMvcTest(ThemeController.class)
-  @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+  @Import({SecurityConfig.class, JwtAuthenticationFilter.class, SamlGatingFilter.class})
   @TestPropertySource(properties = "wks.theme.css-path=")
   static class WhenNoCssPathConfigured {
 
@@ -54,6 +56,7 @@ class ThemeControllerTest {
 
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserRepository userRepository;
+    @MockitoBean private LicenseService licenseService;
 
     @Test
     void returns204WhenNoThemeConfigured() throws Exception {
@@ -76,7 +79,7 @@ class ThemeControllerTest {
   // ---------------------------------------------------------------------------
 
   @WebMvcTest(ThemeController.class)
-  @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+  @Import({SecurityConfig.class, JwtAuthenticationFilter.class, SamlGatingFilter.class})
   @TestPropertySource(properties = "wks.theme.css-path=/tmp/nonexistent-99999.css")
   static class WhenFileIsMissing {
 
@@ -84,6 +87,7 @@ class ThemeControllerTest {
 
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserRepository userRepository;
+    @MockitoBean private LicenseService licenseService;
 
     @Test
     void returns204WhenFileIsMissing() throws Exception {
@@ -126,7 +130,7 @@ class ThemeControllerTest {
   }
 
   @WebMvcTest(ThemeController.class)
-  @Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+  @Import({SecurityConfig.class, JwtAuthenticationFilter.class, SamlGatingFilter.class})
   @ContextConfiguration(initializers = TestThemePathInitializer.class)
   static class WhenCssFileConfigured {
 
@@ -134,6 +138,7 @@ class ThemeControllerTest {
 
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserRepository userRepository;
+    @MockitoBean private LicenseService licenseService;
 
     @Test
     void returnsCssContentWhenThemeFileConfigured() throws Exception {

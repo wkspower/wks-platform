@@ -65,6 +65,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
+      SamlGatingFilter samlGatingFilter,
       CorsConfigurationSource corsConfigurationSource,
       WksAuthenticationEntryPoint authenticationEntryPoint,
       Environment environment,
@@ -104,6 +105,10 @@ public class SecurityConfig {
               }
               auth.requestMatchers("/api/**").authenticated().anyRequest().permitAll();
             })
+        // samlGatingFilter is registered first, so it runs before jwtAuthenticationFilter in the
+        // chain — both are positioned just before UsernamePasswordAuthenticationFilter, and Spring
+        // Security preserves registration order within the same slot.
+        .addFilterBefore(samlGatingFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

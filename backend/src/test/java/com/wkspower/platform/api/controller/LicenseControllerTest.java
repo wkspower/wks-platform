@@ -17,6 +17,7 @@ import com.wkspower.platform.domain.service.WksFeature;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.time.Instant;
@@ -40,7 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * each {@link LicenseState} variant and that unauthenticated requests are rejected with 401.
  */
 @WebMvcTest(LicenseController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, SamlGatingFilter.class})
 class LicenseControllerTest {
 
   @Autowired MockMvc mockMvc;

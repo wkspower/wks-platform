@@ -23,9 +23,11 @@ import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.ConfigService;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.workflow.DeploymentResult;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import java.time.Instant;
 import java.util.List;
@@ -45,7 +47,12 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
  * path, validation aggregate, and the multipart 413 mapping.
  */
 @WebMvcTest(AdminController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class AdminControllerTest {
 
@@ -53,6 +60,7 @@ class AdminControllerTest {
   @MockitoBean private ConfigService configService;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
+  @MockitoBean private LicenseService licenseService;
 
   // ---- happy path --------------------------------------------------------
 

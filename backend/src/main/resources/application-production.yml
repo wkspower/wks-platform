@@ -73,15 +73,10 @@ wks:
   documents:
     max-size-mb: 25
     bucket: ${WKS_STORAGE_BUCKET:wks-documents}
-  # Keycloak/SSO is a forward-compatible seam (Story 14.1 AC5). The compose
-  # `production-sso` profile provisions the container; this property gates the
-  # log surface that announces the seam. Auth-provider integration is gated on
-  # Story 10.4 (SSO/SAML via Keycloak) and Story 7.3 (Feature Flag Registry,
-  # which will subsume this property under feature.sso with license-tier
-  # gating). Until then the operator's direct toggle is `WKS_KEYCLOAK_ENABLED`.
-  # NOTE: this code path MUST NOT depend on LicenseService — Epic 7 has not shipped.
-  keycloak:
-    enabled: ${WKS_KEYCLOAK_ENABLED:false}
+  # Keycloak/SSO seam announcer (Story 14.1 AC5) is gated by LicenseService
+  # (auth.sso feature flag) since Story 7-5. The compose `production-sso`
+  # profile provisions the Keycloak container — orthogonal to the license
+  # gate. SAML provider activation lands in Story 10.4.
   case-types:
     # Operators typically set WKS_CASE_TYPES_DIR to a mounted path in container.
     dir: ${WKS_CASE_TYPES_DIR:./case-types/}

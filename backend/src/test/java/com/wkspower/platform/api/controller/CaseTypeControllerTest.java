@@ -19,10 +19,12 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
+import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.util.List;
@@ -42,7 +44,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /** Slice test for {@link CaseTypeController} (Story 2.5 AC9). */
 @WebMvcTest(CaseTypeController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class, JwtAuthenticationFilter.class})
+@Import({
+  SecurityConfig.class,
+  GlobalExceptionHandler.class,
+  JwtAuthenticationFilter.class,
+  SamlGatingFilter.class
+})
 @ActiveProfiles("dev")
 class CaseTypeControllerTest {
 
@@ -57,6 +64,7 @@ class CaseTypeControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
+  @MockitoBean LicenseService licenseService;
 
   // ---- GET /api/case-types (list) ---------------------------------------
 
