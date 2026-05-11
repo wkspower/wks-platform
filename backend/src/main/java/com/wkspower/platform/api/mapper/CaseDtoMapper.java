@@ -168,6 +168,12 @@ public final class CaseDtoMapper {
     // Story 5.2 — map form definitions to wire DTOs.
     List<FormDefinitionView> forms =
         caseType.forms().stream().map(CaseDtoMapper::toFormDefinitionView).toList();
+    // Story 5.6 AC4 — surface defaultFieldEditability so the frontend renderer can derive disabled
+    // state for fields with no editableBy declaration. Wire string is kebab-case.
+    String defaultFieldEditability =
+        caseType.defaultFieldEditability() == null
+            ? null
+            : caseType.defaultFieldEditability().wire();
     return new CaseTypeViewDto(
         caseType.id(),
         caseType.displayName(),
@@ -176,7 +182,8 @@ public final class CaseDtoMapper {
         caseType.statuses(),
         caseType.listColumns(),
         stages,
-        forms);
+        forms,
+        defaultFieldEditability);
   }
 
   /**
@@ -226,6 +233,9 @@ public final class CaseDtoMapper {
         s == null ? null : s.dateMin(),
         s == null ? null : s.dateMax(),
         s == null ? null : s.maxBytes(),
-        s == null || s.allowedMimeTypes() == null ? List.of() : s.allowedMimeTypes());
+        s == null || s.allowedMimeTypes() == null ? List.of() : s.allowedMimeTypes(),
+        // Story 5.6 AC1 — surface editableBy so the frontend renderer can disable fields whose
+        // role allow-list excludes the current user.
+        f.editableBy() == null ? List.of() : f.editableBy());
   }
 }

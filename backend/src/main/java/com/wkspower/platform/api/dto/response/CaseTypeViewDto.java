@@ -31,11 +31,18 @@ public record CaseTypeViewDto(
      * when omitted. Frontend uses this to render {@code SinglePageFormRenderer} without a second
      * round-trip.
      */
-    List<FormDefinitionView> forms) {
+    List<FormDefinitionView> forms,
+    /**
+     * Story 5.6 AC4 — top-level case-type setting controlling default field editability. Wire
+     * values: {@code editable-by-default} (Phase-0 default — preserves pre-5.6 behavior) or {@code
+     * locked-by-default}.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL) String defaultFieldEditability) {
 
   /**
    * Compact constructor — defensive-copy {@code stages} and {@code forms} so the wire shape is
-   * immutable end-to-end. Story 3.3 added {@code stages}; Story 5.2 adds {@code forms}.
+   * immutable end-to-end. Story 3.3 added {@code stages}; Story 5.2 adds {@code forms}; Story 5.6
+   * adds {@code defaultFieldEditability}.
    */
   public CaseTypeViewDto {
     stages = stages == null ? List.of() : List.copyOf(stages);
@@ -54,7 +61,22 @@ public record CaseTypeViewDto(
       List<StatusDefinition> statuses,
       List<String> listColumns,
       List<StageDefinitionView> stages) {
-    this(id, displayName, version, fields, statuses, listColumns, stages, List.of());
+    this(id, displayName, version, fields, statuses, listColumns, stages, List.of(), null);
+  }
+
+  /**
+   * Backward-compat constructor for pre-5.6 callers that predate {@code defaultFieldEditability}.
+   */
+  public CaseTypeViewDto(
+      String id,
+      String displayName,
+      int version,
+      List<FieldView> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<StageDefinitionView> stages,
+      List<FormDefinitionView> forms) {
+    this(id, displayName, version, fields, statuses, listColumns, stages, forms, null);
   }
 
   /**
@@ -101,7 +123,48 @@ public record CaseTypeViewDto(
       String dateMin,
       String dateMax,
       Long maxBytes,
-      List<String> allowedMimeTypes) {}
+      List<String> allowedMimeTypes,
+      /** Story 5.6 AC1 — role-id allow-list for write authorization. Empty list ⇒ omitted. */
+      List<String> editableBy) {
+
+    /** Backward-compat constructor for pre-5.6 callers that predate {@code editableBy}. */
+    public FieldView(
+        String id,
+        String displayName,
+        String type,
+        boolean required,
+        boolean requiredOnCreate,
+        int order,
+        List<OptionView> options,
+        Integer minLength,
+        Integer maxLength,
+        Number min,
+        Number max,
+        Number step,
+        String dateMin,
+        String dateMax,
+        Long maxBytes,
+        List<String> allowedMimeTypes) {
+      this(
+          id,
+          displayName,
+          type,
+          required,
+          requiredOnCreate,
+          order,
+          options,
+          minLength,
+          maxLength,
+          min,
+          max,
+          step,
+          dateMin,
+          dateMax,
+          maxBytes,
+          allowedMimeTypes,
+          List.of());
+    }
+  }
 
   /** Wire-shape for a single {@code select}-field option. */
   public record OptionView(String label, String value) {}

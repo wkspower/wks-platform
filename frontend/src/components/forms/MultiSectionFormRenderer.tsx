@@ -29,10 +29,18 @@ import {
   SelectValue,
 } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { t } from '@/i18n';
 import { getArchetypeAffordance } from '@/lib/archetypes';
 import { buildZodFromFieldDefs } from '@/lib/buildZodFromFieldDefs';
-import type { FieldDefinition, FormDefinitionView, FormSectionView } from '@/types/caseType';
+import type {
+  CaseTypeView,
+  FieldDefinition,
+  FormDefinitionView,
+  FormSectionView,
+} from '@/types/caseType';
+
+import { deriveFieldDisabled } from './deriveFieldDisabled';
 
 export interface MultiSectionFormRendererProps {
   /** The form definition (must have sections[]). */
@@ -56,6 +64,13 @@ export interface MultiSectionFormRendererProps {
     label: string;
     onClick: (values: Record<string, unknown>) => void;
   };
+  /**
+   * Story 5.6 AC3 / AC4 — Optional case-type view for per-field edit-permission derivation.
+   * Carries {@code defaultFieldEditability} (AC4) and {@code roles} (display-name lookup for the
+   * disabled-field tooltip). When omitted, every field is rendered without the {@code editableBy}
+   * disabled-state derivation — preserves pre-5.6 behavior.
+   */
+  caseType?: Pick<CaseTypeView, 'defaultFieldEditability' | 'roles'>;
 }
 
 type SectionStatus = 'incomplete' | 'complete' | 'error';
@@ -86,7 +101,9 @@ export function MultiSectionFormRenderer({
   onSuccess,
   onValuesChange,
   saveDraftAction,
+  caseType,
 }: MultiSectionFormRendererProps) {
+  const userRoles = useUserRoles();
   const sections = useMemo(() => formDefinition.sections ?? [], [formDefinition.sections]);
   const allFields = useMemo(() => sections.flatMap((s) => s.fields), [sections]);
 
@@ -368,7 +385,7 @@ export function MultiSectionFormRenderer({
                         {t('cases.create.noRequired', { caseTypeName: section.id })}
                       </p>
                     ) : (
-                      sortedFields.map((f) => renderField(f, isPending, form))
+                      sortedFields.map((f) => renderField(f, isPending, form, caseType, userRoles))
                     )}
                   </div>
                 ) : null}
@@ -445,8 +462,10 @@ function statusIcon(status: SectionStatus) {
 
 function renderField(
   f: FieldDefinition,
-  disabled: boolean,
+  pending: boolean,
   form: UseFormReturn<Record<string, unknown>>,
+  caseType: Pick<CaseTypeView, 'defaultFieldEditability' | 'roles'> | undefined,
+  userRoles: ReadonlySet<string>,
 ) {
   if (f.type === 'file') {
     return (
@@ -455,16 +474,17 @@ function renderField(
       </p>
     );
   }
+  // Story 5.6 AC3 / AC4 — per-field edit-permission disabled state.
+  const perm = caseType
+    ? deriveFieldDisabled(f, caseType, userRoles)
+    : { disabled: false, tooltip: null };
+  const disabled = pending || perm.disabled;
   return (
-    <FormField
-      key={f.id}
-      name={f.id}
-      label={f.displayName}
-      required={f.required}
-      disabled={disabled}
-    >
-      {(field) => renderInput(f, field, form)}
-    </FormField>
+    <div key={f.id} title={perm.tooltip ?? undefined}>
+      <FormField name={f.id} label={f.displayName} required={f.required} disabled={disabled}>
+        {(field) => renderInput(f, field, form)}
+      </FormField>
+    </div>
   );
 }
 

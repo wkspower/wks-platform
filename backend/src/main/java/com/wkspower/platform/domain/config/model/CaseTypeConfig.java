@@ -34,7 +34,14 @@ public record CaseTypeConfig(
      * Story 5.2 — form definitions declared in the YAML {@code forms[]} block. Empty list when
      * omitted (no-forms path is the zero-attachment equivalent for the forms surface).
      */
-    List<FormDefinition> forms) {
+    List<FormDefinition> forms,
+    /**
+     * Story 5.6 AC4 — top-level setting controlling the default editability of fields that omit an
+     * explicit {@code editableBy} declaration. Default {@link
+     * DefaultFieldEditability#EDITABLE_BY_DEFAULT} preserves pre-5.6 behavior for every existing
+     * seed YAML.
+     */
+    DefaultFieldEditability defaultFieldEditability) {
 
   public CaseTypeConfig {
     fields = List.copyOf(fields);
@@ -43,6 +50,42 @@ public record CaseTypeConfig(
     roles = List.copyOf(roles);
     stages = stages == null ? List.of() : List.copyOf(stages);
     forms = forms == null ? List.of() : List.copyOf(forms);
+    defaultFieldEditability =
+        defaultFieldEditability == null
+            ? DefaultFieldEditability.EDITABLE_BY_DEFAULT
+            : defaultFieldEditability;
+  }
+
+  /**
+   * Backwards-compatible secondary constructor — pre-Story-5.6 callers that did not know about
+   * {@code defaultFieldEditability}. Defaults the slot to {@link
+   * DefaultFieldEditability#EDITABLE_BY_DEFAULT} (Phase-0 default — preserves current behavior).
+   */
+  public CaseTypeConfig(
+      String id,
+      String displayName,
+      int version,
+      String description,
+      WorkflowRef workflow,
+      List<FieldDefinition> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<RoleDefinition> roles,
+      List<StageDefinition> stages,
+      List<FormDefinition> forms) {
+    this(
+        id,
+        displayName,
+        version,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages,
+        forms,
+        DefaultFieldEditability.EDITABLE_BY_DEFAULT);
   }
 
   /** Convenience lookup used by the JSON Schema generator and (future) case-data validation. */
@@ -107,7 +150,8 @@ public record CaseTypeConfig(
         listColumns,
         roles,
         stages,
-        forms);
+        forms,
+        defaultFieldEditability);
   }
 
   /** Returns a fresh {@link Builder} for programmatic construction (primarily in tests). */
@@ -128,6 +172,8 @@ public record CaseTypeConfig(
     private List<RoleDefinition> roles = List.of();
     private List<StageDefinition> stages = List.of();
     private List<FormDefinition> forms = List.of();
+    private DefaultFieldEditability defaultFieldEditability =
+        DefaultFieldEditability.EDITABLE_BY_DEFAULT;
 
     private Builder() {}
 
@@ -186,6 +232,11 @@ public record CaseTypeConfig(
       return this;
     }
 
+    public Builder defaultFieldEditability(DefaultFieldEditability v) {
+      this.defaultFieldEditability = v == null ? DefaultFieldEditability.EDITABLE_BY_DEFAULT : v;
+      return this;
+    }
+
     public CaseTypeConfig build() {
       return new CaseTypeConfig(
           id,
@@ -198,7 +249,8 @@ public record CaseTypeConfig(
           listColumns,
           roles,
           stages,
-          forms);
+          forms,
+          defaultFieldEditability);
     }
   }
 }

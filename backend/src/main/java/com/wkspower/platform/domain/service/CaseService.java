@@ -1,6 +1,7 @@
 package com.wkspower.platform.domain.service;
 
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.DefaultFieldEditability;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.config.model.FormDefinition;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -390,9 +392,28 @@ public class CaseService {
    * @throws WksValidationAggregateException (WKS-FORM-002) if any field value fails validation.
    */
   public Case submitForm(UUID caseId, String formId, Map<String, Object> formData, UUID actorId) {
+    // Backward-compat overload: callers that pre-date Story 5.6 do not supply an actor role set.
+    // The empty role set means: editableBy: [role:X] fields will be REJECTED for this caller (no
+    // role match), and editable-by-default fields with no editableBy declaration pass through.
+    // FormController's principal-aware overload is the recommended path post-5.6.
+    return submitForm(caseId, formId, formData, actorId, Set.of());
+  }
+
+  /**
+   * Story 5.6 — principal-aware submit overload. Carries the actor's role set so per-field edit
+   * permission checks ({@code editableBy} on {@link FieldDefinition}) can run. Recommended path for
+   * controllers.
+   */
+  public Case submitForm(
+      UUID caseId,
+      String formId,
+      Map<String, Object> formData,
+      UUID actorId,
+      Set<String> actorRoles) {
     Objects.requireNonNull(caseId, "caseId");
     Objects.requireNonNull(formId, "formId");
     Objects.requireNonNull(actorId, "actorId");
+    Objects.requireNonNull(actorRoles, "actorRoles");
 
     Case existing =
         caseRepository
@@ -425,6 +446,26 @@ public class CaseService {
     if (!violations.isEmpty()) {
       throw new WksValidationAggregateException(
           "Form submit validation failed (WKS-FORM-002)", violations);
+    }
+
+    // Story 5.6 AC2 — field-level edit-permission check on the diff of changed fields only. An
+    // unchanged value passing through the form does NOT trigger rejection (round-tripped immutable
+    // display fields are common). The check operates against the case-type's full field set
+    // (caseType.fields()) because field permissions live on the case-type, not the form view.
+    Set<String> changedFieldIds = diffFieldIds(existing.data(), safeData);
+    List<ErrorDetail> permViolations =
+        checkFieldEditPermissions(caseType, changedFieldIds, actorRoles);
+    if (!permViolations.isEmpty()) {
+      List<String> disallowedFields = permViolations.stream().map(ErrorDetail::field).toList();
+      log.info(
+          "CaseService.submitForm: REJECTED field-level edit for caseId={} formId={} actorId={}"
+              + " disallowedFields={}",
+          existing.id(),
+          formId,
+          actorId,
+          disallowedFields);
+      throw new WksValidationAggregateException(
+          "Field-level edit permission denied (WKS-AUTHZ-001)", permViolations);
     }
 
     // Persist via the existing update path (validates the merged data against the case-type schema
@@ -583,6 +624,62 @@ public class CaseService {
   }
 
   /**
+   * Story 5.6 AC2 — Per-field edit-permission check. Returns one {@link ErrorDetail} per
+   * changed-field whose {@code editableBy} declaration excludes the actor's role set, OR per
+   * changed-field with no {@code editableBy} when the case-type's {@code defaultFieldEditability}
+   * is {@code locked-by-default}.
+   *
+   * <p>Field path uses {@code "fields." + fieldId} so the frontend can map the violation to the
+   * specific input. Wire code is {@link ErrorCode#WKS_AUTHZ_FIELD} for every entry.
+   *
+   * <p>Unknown changed-field ids (i.e. submitted ids not declared on the case type) are silently
+   * skipped — {@code WKS-FORM-002} is the dedicated wire code for unknown-field rejection and runs
+   * earlier in {@code submitForm}.
+   */
+  static List<ErrorDetail> checkFieldEditPermissions(
+      CaseTypeConfig caseType, Set<String> changedFieldIds, Set<String> actorRoles) {
+    if (changedFieldIds.isEmpty()) {
+      return List.of();
+    }
+    boolean lockedByDefault =
+        caseType.defaultFieldEditability() == DefaultFieldEditability.LOCKED_BY_DEFAULT;
+    List<ErrorDetail> violations = new ArrayList<>();
+    for (String fieldId : changedFieldIds) {
+      FieldDefinition field = caseType.field(fieldId).orElse(null);
+      if (field == null) {
+        continue; // unknown field — WKS-FORM-002 owns this rejection path
+      }
+      List<String> editableBy = field.editableBy();
+      boolean allowed;
+      String requiredDescription;
+      if (editableBy.isEmpty()) {
+        allowed = !lockedByDefault;
+        requiredDescription = "(locked-by-default)";
+      } else {
+        Set<String> requiredRoles =
+            editableBy.stream()
+                .filter(s -> s.startsWith("role:"))
+                .map(s -> s.substring("role:".length()))
+                .collect(Collectors.toSet());
+        allowed = requiredRoles.stream().anyMatch(actorRoles::contains);
+        requiredDescription = requiredRoles.isEmpty() ? "(none)" : String.join(",", requiredRoles);
+      }
+      if (!allowed) {
+        violations.add(
+            ErrorDetail.ofField(
+                ErrorCode.WKS_AUTHZ_FIELD.wire(),
+                "Field '"
+                    + fieldId
+                    + "' is editable only by roles: ["
+                    + requiredDescription
+                    + "] — actor lacks the required role",
+                "fields." + fieldId));
+      }
+    }
+    return violations;
+  }
+
+  /**
    * Coerce a value to {@link Double} for numeric constraint checks. Returns {@code null} if the
    * value is not numeric (e.g. a string that isn't a parseable number — the full type check runs
    * inside {@link CaseDataValidator}).
@@ -637,6 +734,40 @@ public class CaseService {
               dataById.getOrDefault(s.id(), Map.of())));
     }
     return new Page<>(enriched, page.total(), page.page(), page.size());
+  }
+
+  /**
+   * Story 5.6 AC-0 — Single source of truth for case-level access on write-side controllers — do
+   * NOT inline.
+   *
+   * <p>Sprint 8 retro Action 2. Loads the case via {@link CaseRepository#findById} and confirms the
+   * principal has access. Phase-0 implementation: every authenticated principal has access — this
+   * method is the seam where Phase-1 RBAC lands without controller surgery (replace the body of one
+   * method, not edits across every controller).
+   *
+   * <p>Signature uses primitive {@code UUID actorId} + {@code Set<String> actorRoles} rather than
+   * {@code WksUserPrincipal} to preserve the framework-free posture of the domain layer (the
+   * principal type lives in {@code security/} and depends on Spring Security {@code UserDetails};
+   * importing it here would couple the domain to Spring). Controllers extract id+roles from the
+   * principal at the call site.
+   *
+   * @param caseId the case to load
+   * @param actorId the authenticated caller's id (kept for future RBAC-evaluation hook; unused in
+   *     Phase-0)
+   * @param actorRoles the authenticated caller's role set (kept for future RBAC; unused in Phase-0)
+   * @return the loaded {@link Case} so callers can avoid a duplicate {@code findById}
+   * @throws WksNotFoundException if the case does not exist (preserves pre-5.6 wire shape — same
+   *     exception, same message format used by FormController's downstream {@code submitForm} and
+   *     by FormDraftController's removed {@code requireCaseExists} helper)
+   */
+  public Case requireCaseAccess(UUID caseId, UUID actorId, Set<String> actorRoles) {
+    Objects.requireNonNull(caseId, "caseId");
+    Objects.requireNonNull(actorId, "actorId");
+    Objects.requireNonNull(actorRoles, "actorRoles");
+    return caseRepository
+        .findById(caseId)
+        .orElseThrow(() -> new WksNotFoundException("Case " + caseId + " not found"));
+    // Phase-0: no additional access check beyond authentication. Hook for Phase-1 RBAC.
   }
 
   /**

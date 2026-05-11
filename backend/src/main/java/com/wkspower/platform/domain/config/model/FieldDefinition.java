@@ -12,6 +12,13 @@ import java.util.Optional;
  * (driven by the case-type YAML) asks for this field at case creation time. Defaults to {@link
  * #required()} when the YAML omits the slot, preserving backwards-compatible behavior for seed
  * YAMLs that pre-date the grammar extension.
+ *
+ * <p>Story 5.6 introduces {@link #editableBy()} — declares the role-id allow-list authorised to
+ * change this field on form submit. Empty list means "no {@code editableBy} declared" — gated by
+ * the case-type's {@code defaultFieldEditability} (AC4): editable-by-default → unrestricted;
+ * locked-by-default → read-only for all. Entries are wire strings {@code role:&lt;roleId&gt;}; the
+ * validator cross-references each {@code &lt;roleId&gt;} against the case-type's {@code roles[]}
+ * declaration.
  */
 public record FieldDefinition(
     String id,
@@ -21,10 +28,13 @@ public record FieldDefinition(
     boolean requiredOnCreate,
     int order,
     List<FieldOption> options,
-    TypeSlots slots) {
+    TypeSlots slots,
+    /** Story 5.6 AC1 — role-id allow-list for write authorization. */
+    List<String> editableBy) {
 
   public FieldDefinition {
     options = options == null ? List.of() : List.copyOf(options);
+    editableBy = editableBy == null ? List.of() : List.copyOf(editableBy);
   }
 
   /**
@@ -41,7 +51,23 @@ public record FieldDefinition(
       int order,
       List<FieldOption> options,
       TypeSlots slots) {
-    this(id, displayName, type, required, required, order, options, slots);
+    this(id, displayName, type, required, required, order, options, slots, List.of());
+  }
+
+  /**
+   * Story 2.7 era — 8-arg ctor (with {@code requiredOnCreate}, no {@code editableBy}). Defaults
+   * {@code editableBy} to empty list per Story 5.6 additive-default pattern.
+   */
+  public FieldDefinition(
+      String id,
+      String displayName,
+      FieldType type,
+      boolean required,
+      boolean requiredOnCreate,
+      int order,
+      List<FieldOption> options,
+      TypeSlots slots) {
+    this(id, displayName, type, required, requiredOnCreate, order, options, slots, List.of());
   }
 
   /**
