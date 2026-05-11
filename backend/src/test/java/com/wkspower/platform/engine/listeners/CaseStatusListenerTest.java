@@ -162,6 +162,84 @@ class CaseStatusListenerTest {
     verify(exec, never()).getProcessEngineServices();
   }
 
+  // Story 6.2 — WKS-ROUTE-001: outcome shadows status property.
+  @Test
+  void userTaskWithBothOutcomeAndStatus_emitsOutcomeAndLogsRoute001Warning() {
+    // Wire a logback list-appender to capture the WARN with wksErrorCode=WKS-ROUTE-001.
+    ch.qos.logback.classic.Logger listenerLogger =
+        (ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
+    ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
+        new ch.qos.logback.core.read.ListAppender<>();
+    appender.start();
+    listenerLogger.addAppender(appender);
+
+    try {
+      UserTask userTask = mock(UserTask.class);
+      ExtensionElements userTaskExt = extensionWith("status", "in-review");
+      when(userTask.getExtensionElements()).thenReturn(userTaskExt);
+
+      DelegateExecution exec = baseExec("review-claim");
+      when(exec.getVariable("outcome")).thenReturn("approve");
+      when(exec.getBpmnModelElementInstance()).thenReturn(userTask);
+
+      listener.notify(exec);
+
+      // Outcome wins — OUTCOME signal emitted, NOT TASK_STATUS_CHANGED.
+      assertThat(captured).isNotNull();
+      assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.OUTCOME);
+      assertThat(captured.payload()).containsEntry("outcome", "approve");
+
+      // Warn was logged with WKS-ROUTE-001.
+      assertThat(appender.list)
+          .as("expected WKS-ROUTE-001 warn for outcome-shadows-status")
+          .anyMatch(
+              e ->
+                  e.getLevel() == ch.qos.logback.classic.Level.WARN
+                      && e.getKeyValuePairs() != null
+                      && e.getKeyValuePairs().stream()
+                          .anyMatch(
+                              kv ->
+                                  "wksErrorCode".equals(kv.key) && "WKS-ROUTE-001".equals(kv.value)));
+    } finally {
+      listenerLogger.detachAppender(appender);
+    }
+  }
+
+  @Test
+  void userTaskWithOutcomeButNoStatusProperty_doesNotEmitRoute001() {
+    ch.qos.logback.classic.Logger listenerLogger =
+        (ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(CaseStatusListener.class);
+    ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
+        new ch.qos.logback.core.read.ListAppender<>();
+    appender.start();
+    listenerLogger.addAppender(appender);
+
+    try {
+      UserTask userTask = mock(UserTask.class);
+      when(userTask.getExtensionElements()).thenReturn(null);
+
+      DelegateExecution exec = baseExec("review-claim");
+      when(exec.getVariable("outcome")).thenReturn("approve");
+      when(exec.getBpmnModelElementInstance()).thenReturn(userTask);
+
+      listener.notify(exec);
+
+      assertThat(captured.kind()).isEqualTo(ExecutionSignalKind.OUTCOME);
+      assertThat(appender.list)
+          .noneMatch(
+              e ->
+                  e.getKeyValuePairs() != null
+                      && e.getKeyValuePairs().stream()
+                          .anyMatch(
+                              kv ->
+                                  "wksErrorCode".equals(kv.key) && "WKS-ROUTE-001".equals(kv.value)));
+    } finally {
+      listenerLogger.detachAppender(appender);
+    }
+  }
+
   private DelegateExecution baseExec(String currentActivityId) {
     DelegateExecution exec = mock(DelegateExecution.class);
     when(exec.getVariable("caseId")).thenReturn(CASE.toString());

@@ -3,6 +3,7 @@ package com.wkspower.platform.engine.listeners;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.ExecutionSignal;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.engine.BpmnWorkflowAdapter;
 import com.wkspower.platform.engine.properties.CamundaPropertyReader;
@@ -91,7 +92,22 @@ public class CaseStatusListener implements ExecutionListener {
     Object outcomeRaw = execution.getVariable("outcome");
     if (outcomeRaw instanceof String outcomeKey
         && !outcomeKey.isBlank()
-        && element instanceof UserTask) {
+        && element instanceof UserTask userTaskElem) {
+      // Story 6.2 — WKS-ROUTE-001: when a userTask carries BOTH an outcome process variable AND
+      // an explicit <camunda:property name="status"> declaration, the outcome wins (drives
+      // multi-outcome routing) and the status property is shadowed. Operator action: remove one
+      // of the two declarations to disambiguate intent. WARN-level; never aborts the dispatch.
+      String shadowedStatus =
+          CamundaPropertyReader.read(userTaskElem.getExtensionElements(), "status");
+      if (shadowedStatus != null) {
+        log.atWarn()
+            .addKeyValue("wksErrorCode", ErrorCode.WKS_ROUTE_001.wire())
+            .addKeyValue("userTaskId", currentElementId)
+            .addKeyValue("caseId", caseId.toString())
+            .addKeyValue("outcomeKey", outcomeKey)
+            .addKeyValue("shadowedStatus", shadowedStatus)
+            .log("outcome shadows status property on userTask {}", currentElementId);
+      }
       adapter.emit(
           new ExecutionSignal(
               ExecutionSignalKind.OUTCOME,
