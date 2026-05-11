@@ -39,6 +39,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * result internally — Story 7.1/7.2 design); no bean-construction-time snapshot is taken,
  * satisfying AC3 (hot-reload without restart).
  *
+ * <p><b>Fail-closed policy.</b> If {@code LicenseService.isFeatureEnabled} throws (e.g. the
+ * service is mid-reload, dependency-injected stub mis-wired, or any unexpected runtime fault),
+ * the filter treats SSO as <em>unavailable</em> and emits 404 + {@code WKS-LIC-004}. This is
+ * deliberately the same HTTP shape as the "feature off" response so a degraded license layer
+ * cannot accidentally open the SAML surface to an unauthenticated caller. The underlying
+ * exception is logged at WARN for operators.
+ *
  * <p>Story 7.5 AC1 / AC2 / AC3.
  */
 @Component
@@ -74,7 +81,23 @@ public class SamlGatingFilter extends OncePerRequestFilter {
       chain.doFilter(request, response);
       return;
     }
-    if (licenseService.isFeatureEnabled(WksFeature.AUTH_SSO)) {
+    boolean ssoEnabled;
+    try {
+      ssoEnabled = licenseService.isFeatureEnabled(WksFeature.AUTH_SSO);
+    } catch (Exception e) {
+      // Fail CLOSED — see class Javadoc. Treat unknown-availability as unavailable so a
+      // degraded license layer cannot open the SAML surface.
+      LOG.warn(
+          "event=saml.gate.licenseService.error path={} errorCode={} cause={}",
+          path,
+          ErrorCode.WKS_LIC_004.wire(),
+          e.toString(),
+          e);
+      rejectWithNotFound(
+          response, path, ErrorCode.WKS_LIC_004.wire(), "SSO availability check unavailable");
+      return;
+    }
+    if (ssoEnabled) {
       // Feature is licensed — pass through; Story 10.4 will add the actual SAML provider.
       chain.doFilter(request, response);
       return;
@@ -83,19 +106,33 @@ public class SamlGatingFilter extends OncePerRequestFilter {
     LOG.debug(
         "event=saml.gate.blocked path={} licenseTier={} errorCode={}",
         path,
-        licenseService.getTier(),
+        safeTier(),
         ErrorCode.WKS_LIC_003.wire());
-    rejectWithNotFound(response, path);
+    rejectWithNotFound(
+        response,
+        path,
+        ErrorCode.WKS_LIC_003.wire(),
+        "SSO/SAML is not available on the current license.");
   }
 
-  private void rejectWithNotFound(HttpServletResponse response, String path) throws IOException {
+  /** Best-effort tier lookup for the debug log line — never throws. */
+  private String safeTier() {
+    try {
+      return licenseService.getTier();
+    } catch (Exception e) {
+      return "unknown";
+    }
+  }
+
+  private void rejectWithNotFound(
+      HttpServletResponse response, String path, String code, String message) throws IOException {
     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
     Map<String, Object> body = new LinkedHashMap<>();
-    body.put("code", ErrorCode.WKS_LIC_003.wire());
-    body.put("message", "SSO/SAML is not available on the current license.");
+    body.put("code", code);
+    body.put("message", message);
     body.put("field", null);
     objectMapper.writeValue(response.getWriter(), body);
   }

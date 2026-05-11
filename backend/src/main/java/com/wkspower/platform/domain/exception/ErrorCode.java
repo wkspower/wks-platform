@@ -490,6 +490,12 @@ public enum ErrorCode {
    * not exist for this license tier. HTTP 404. Story 7.5 AC1.
    */
   WKS_LIC_003("WKS-LIC-003"),
+   /**
+   * SSO/SAML availability could not be determined because the {@code LicenseService} threw while
+   * being consulted by {@code SamlGatingFilter}. The filter fails CLOSED (404, treats SSO as
+   * unavailable) and logs the underlying exception at WARN. HTTP 404. Story 7.5 review remediation.
+   */
+  WKS_LIC_004("WKS-LIC-004"),
 
   // ---------------------------------------------------------------------------
   // Archetype validation band (Story 6.1) — YAML-surface archetype violations.
