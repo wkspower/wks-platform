@@ -782,41 +782,46 @@ public class CaseService {
   }
 
   /**
-   * Initial status for a newly-created case. Resolution order (Story 2.3 + Story 6.2 gap-10 fix-a):
+   * Initial status for a newly-created case. Resolution order (Story 6.2 Decision B — refines
+   * Story 2.3 + gap-10 fix-a):
    *
    * <ol>
-   *   <li>If any stage declares an {@code initialStatus}, use the FIRST stage's {@code
-   *       initialStatus} — this gives stage-scoped case types (e.g. {@code bpmn-sequential-staged})
-   *       the correct initial status ({@code "drafting"}) instead of the ConfigValidator-injected
-   *       top-level default ({@code "open"}). Gap-10 fix: {@code case.status} now tracks the stage
-   *       lifecycle from the very first create. (JOURNEYS F4 step 2.)
-   *   <li>If no stage declares an {@code initialStatus}, use the top-level {@code statuses[0].id}
-   *       (legacy flat case types).
-   *   <li>Otherwise return {@code "open"} — this should not be reachable in practice since
-   *       ConfigValidator always injects the {@code [open, closed]} default when top-level statuses
-   *       are absent; guarded for safety.
+   *   <li>If the YAML declared top-level {@code statuses:} explicitly ({@code
+   *       explicitTopLevelStatuses == true}), use {@code statuses[0].id}. Author-declared
+   *       top-level statuses always win — they signal the author intended a flat lifecycle.
+   *   <li>Else if any stage declares an {@code initialStatus}, use the FIRST stage's value (gap-10
+   *       fix-a preserved). Stage-scoped case types whose top-level statuses are validator-
+   *       injected {@code [open, closed]} defaults fall through to this branch and pick {@code
+   *       "drafting"} (or whatever the first stage declares).
+   *   <li>Else fall back to {@code statuses[0].id} (the injected default {@code "open"}). Reachable
+   *       when stages exist but none declares an initialStatus AND the YAML omitted top-level
+   *       statuses.
+   *   <li>Else return {@code null} — only reachable when both stages and top-level statuses are
+   *       empty, which ConfigValidator's defaults guard against in practice.
    * </ol>
    *
-   * <p>Story 2.4's BPMN listener will keep the status in sync with engine state thereafter.
+   * <p>Story 2.4's BPMN listener / Story 4.4b's ExecutionSignalRouter keep the status in sync with
+   * engine state thereafter.
    */
   static String initialStatus(CaseTypeConfig caseType) {
-    // Branch 1: any stage declares an initialStatus — use the first stage's value (gap-10 fix-a).
-    // Rationale: stage-scoped case types declare statuses ONLY on stages, not at the top level.
-    // ConfigValidator injects [open, closed] as default top-level statuses, so checking top-level
-    // statuses first would always return "open" for stage-scoped types. Stage initialStatus
-    // takes precedence when declared.
+    // Branch a — author-declared top-level statuses always win.
+    if (caseType.explicitTopLevelStatuses() && !caseType.statuses().isEmpty()) {
+      return caseType.statuses().get(0).id();
+    }
+    // Branch b — first stage's initialStatus (gap-10 fix-a; preserves bpmn-sequential-staged
+    // behavior where top-level statuses are ConfigValidator-injected defaults).
     for (var stage : caseType.stages()) {
       Optional<String> stageInitial = stage.initialStatus();
       if (stageInitial.isPresent()) {
         return stageInitial.get();
       }
     }
-    // Branch 2: flat top-level statuses (legacy / no-stage case types).
+    // Branch c — fall back to top-level statuses (which may be the injected default).
     if (!caseType.statuses().isEmpty()) {
       return caseType.statuses().get(0).id();
     }
-    // Branch 3: zero-config fallback (should not reach — ConfigValidator injects defaults).
-    return "open";
+    // Branch d — neither stages nor top-level statuses available.
+    return null;
   }
 
   /**

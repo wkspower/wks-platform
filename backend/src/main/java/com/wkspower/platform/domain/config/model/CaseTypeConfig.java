@@ -41,7 +41,24 @@ public record CaseTypeConfig(
      * DefaultFieldEditability#EDITABLE_BY_DEFAULT} preserves pre-5.6 behavior for every existing
      * seed YAML.
      */
-    DefaultFieldEditability defaultFieldEditability) {
+    DefaultFieldEditability defaultFieldEditability,
+    /**
+     * Story 6.2 — internal validator-set marker that discriminates an author-declared top-level
+     * {@code statuses:} block from {@link
+     * com.wkspower.platform.infrastructure.config.ConfigValidator}'s injected {@code [open, closed]}
+     * default. {@code true} when the YAML declared {@code statuses:} explicitly; {@code false} when
+     * the validator injected the canonical default. Consumed by {@link
+     * com.wkspower.platform.domain.service.CaseService#initialStatus(CaseTypeConfig)} so the
+     * resolution order prefers explicitly-declared top-level statuses over per-stage initialStatus
+     * while still preserving the gap-10 fix (stage-scoped types whose top-level statuses are
+     * validator-injected defaults).
+     *
+     * <p>Not part of the external wire contract — never declared by users in YAML; never surfaced
+     * in DTO mappers. Direct {@code new CaseTypeConfig(...)} callers default to {@code true} via
+     * the compat constructors below, which preserves pre-6.2 semantics for tests that explicitly
+     * construct a config with top-level statuses.
+     */
+    boolean explicitTopLevelStatuses) {
 
   public CaseTypeConfig {
     fields = List.copyOf(fields);
@@ -54,6 +71,40 @@ public record CaseTypeConfig(
         defaultFieldEditability == null
             ? DefaultFieldEditability.EDITABLE_BY_DEFAULT
             : defaultFieldEditability;
+  }
+
+  /**
+   * Backwards-compatible constructor — pre-Story-6.2 callers that did not know about {@code
+   * explicitTopLevelStatuses}. Defaults the slot to {@code true} (caller explicitly supplied
+   * statuses).
+   */
+  public CaseTypeConfig(
+      String id,
+      String displayName,
+      int version,
+      String description,
+      WorkflowRef workflow,
+      List<FieldDefinition> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<RoleDefinition> roles,
+      List<StageDefinition> stages,
+      List<FormDefinition> forms,
+      DefaultFieldEditability defaultFieldEditability) {
+    this(
+        id,
+        displayName,
+        version,
+        description,
+        workflow,
+        fields,
+        statuses,
+        listColumns,
+        roles,
+        stages,
+        forms,
+        defaultFieldEditability,
+        true);
   }
 
   /**
@@ -151,7 +202,8 @@ public record CaseTypeConfig(
         roles,
         stages,
         forms,
-        defaultFieldEditability);
+        defaultFieldEditability,
+        explicitTopLevelStatuses);
   }
 
   /** Returns a fresh {@link Builder} for programmatic construction (primarily in tests). */
@@ -174,6 +226,7 @@ public record CaseTypeConfig(
     private List<FormDefinition> forms = List.of();
     private DefaultFieldEditability defaultFieldEditability =
         DefaultFieldEditability.EDITABLE_BY_DEFAULT;
+    private boolean explicitTopLevelStatuses = true;
 
     private Builder() {}
 
@@ -237,6 +290,18 @@ public record CaseTypeConfig(
       return this;
     }
 
+    /**
+     * Story 6.2 — set the {@code explicitTopLevelStatuses} marker (Decision B). Defaults to {@code
+     * true} on the builder; {@link
+     * com.wkspower.platform.infrastructure.config.ConfigValidator} sets {@code false} only when it
+     * injects the canonical {@code [open, closed]} default for a YAML that omitted {@code
+     * statuses:}.
+     */
+    public Builder explicitTopLevelStatuses(boolean v) {
+      this.explicitTopLevelStatuses = v;
+      return this;
+    }
+
     public CaseTypeConfig build() {
       return new CaseTypeConfig(
           id,
@@ -250,7 +315,8 @@ public record CaseTypeConfig(
           roles,
           stages,
           forms,
-          defaultFieldEditability);
+          defaultFieldEditability,
+          explicitTopLevelStatuses);
     }
   }
 }

@@ -289,10 +289,13 @@ public class BpmnSequentialStagedStatusPropagationIT {
         .displayName("BPMN Sequential Staged IT")
         .version(1)
         // Top-level statuses: ConfigValidator injects [open, closed] default when YAML omits them.
+        // explicitTopLevelStatuses(false) mirrors the validator-injected-default signal so
+        // CaseService.initialStatus() falls through to stages[0].initialStatus (gap-10 fix-a).
         .statuses(
             List.of(
                 new StatusDefinition("open", "Open", StatusColor.ZINC, false),
                 new StatusDefinition("closed", "Closed", StatusColor.ZINC, true)))
+        .explicitTopLevelStatuses(false)
         .stages(STAGES)
         .build();
   }

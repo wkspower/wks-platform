@@ -144,6 +144,11 @@ public class ConfigValidator {
 
     List<ErrorDetail> warnings = new ArrayList<>();
     List<FieldDefinition> fields = checkFields(raw.fields(), eb, errors, warnings);
+    // Story 6.2 Decision B — track whether the YAML declared statuses explicitly. When the YAML
+    // omits the slot, checkStatuses injects the canonical [open, closed] default and the marker
+    // flips to false so CaseService.initialStatus() knows to fall back to per-stage initialStatus
+    // (gap-10 fix-a preserved).
+    boolean explicitTopLevelStatuses = raw.statuses() != null && !raw.statuses().isEmpty();
     List<StatusDefinition> statuses = checkStatuses(raw.statuses(), eb, errors);
     List<RoleDefinition> roles = checkRoles(raw.roles(), eb, errors);
     // Story 5.6 AC1 — second pass over fields validates `editableBy` entries against the now-known
@@ -223,7 +228,8 @@ public class ConfigValidator {
             roles,
             stages,
             forms,
-            defaultFieldEditability);
+            defaultFieldEditability,
+            explicitTopLevelStatuses);
     // Story 4.3 — surface the validated MappingDefinition through ValidationResult so
     // ConfigService can populate MappingRegistry on registration. Empty MappingDefinition is the
     // first-class zero-attachment value (D22 — Story 4.2's MappingValidator returns empty()

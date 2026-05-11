@@ -395,14 +395,14 @@ class CaseServiceTest {
   // ---- gap-10 fix-a: initialStatus resolution ----------------------------
 
   /**
-   * Story 6.2 AC6 — when the YAML omits top-level statuses but stages declare {@code
-   * initialStatus}, the first stage's initialStatus is used (gap-10 fix-a).
+   * Story 6.2 Decision B — when the YAML omits top-level statuses (validator injects
+   * {@code [open, closed]} with {@code explicitTopLevelStatuses = false}) and stages declare
+   * {@code initialStatus}, the first stage's initialStatus is used (gap-10 fix-a preserved).
    */
   @Test
-  void initialStatus_stageScopedOnly_usesFirstStageInitialStatus() {
-    // Simulate bpmn-sequential-staged: no top-level statuses (ConfigValidator injects
-    // [open,closed])
-    // but stages declare their own statuses and initialStatus.
+  void initialStatus_injectedDefaults_plusStageInitial_usesStageInitial() {
+    // Simulate bpmn-sequential-staged: ConfigValidator injected [open, closed] defaults
+    // (explicitTopLevelStatuses = false). Stages declare their own statuses and initialStatus.
     CaseTypeConfig stagedType =
         CaseTypeConfig.builder()
             .id("staged")
@@ -412,6 +412,7 @@ class CaseServiceTest {
                 List.of(
                     new StatusDefinition("open", "Open", StatusColor.ZINC),
                     new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(false)
             .stages(
                 List.of(
                     new StageDefinition(
@@ -429,6 +430,73 @@ class CaseServiceTest {
             .build();
 
     assertThat(CaseService.initialStatus(stagedType)).isEqualTo("drafting");
+  }
+
+  /**
+   * Story 6.2 Decision B — when the YAML explicitly declared top-level {@code statuses:} ({@code
+   * explicitTopLevelStatuses == true}) AND stages also declare initialStatus, the explicit
+   * top-level wins. Author intent: flat lifecycle even alongside stages.
+   */
+  @Test
+  void initialStatus_explicitTopLevel_winsOverStageInitial() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("explicit-top")
+            .displayName("Explicit")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("triage", "Triage", StatusColor.BLUE),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(true)
+            .stages(
+                List.of(
+                    new StageDefinition(
+                        "intake",
+                        "Intake",
+                        0,
+                        List.of(new StatusDefinition("drafting", "Drafting", StatusColor.AMBER)),
+                        Optional.of("drafting"))))
+            .build();
+
+    assertThat(CaseService.initialStatus(type)).isEqualTo("triage");
+  }
+
+  /**
+   * Story 6.2 Decision B — no stages and only injected default statuses → returns the first
+   * injected default ("open"). Reaches branch c (fallback to top-level statuses[0]).
+   */
+  @Test
+  void initialStatus_noStages_injectedDefaultsOnly_returnsOpen() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("no-stages")
+            .displayName("No Stages")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("open", "Open", StatusColor.ZINC),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(false)
+            .build();
+    assertThat(CaseService.initialStatus(type)).isEqualTo("open");
+  }
+
+  /**
+   * Story 6.2 Decision B — empty stages and empty top-level statuses → branch d returns null.
+   * Defensive — ConfigValidator's injected defaults make this unreachable in practice, but the
+   * method must not throw.
+   */
+  @Test
+  void initialStatus_nothing_returnsNull() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("nothing")
+            .displayName("Nothing")
+            .version(1)
+            .explicitTopLevelStatuses(false)
+            .build();
+    assertThat(CaseService.initialStatus(type)).isNull();
   }
 
   /**
