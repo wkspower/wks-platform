@@ -143,4 +143,11 @@ export interface CaseTypeView {
    * roles); when absent, tooltips fall back to the role id. Optional.
    */
   roles?: { id: string; displayName?: string }[];
+  /**
+   * Story 6.2 AC1 — outcome-key → stageTransition map resolved from the first attachment's
+   * outcomeMappings block. Present only when the case type declares outcome mappings in its YAML.
+   * When present and non-empty, the task completion UI renders a multi-button outcome picker
+   * instead of the single "Complete task" CTA. Absent/empty → single-CTA path (no regression).
+   */
+  outcomeMappings?: Record<string, string>;
 }

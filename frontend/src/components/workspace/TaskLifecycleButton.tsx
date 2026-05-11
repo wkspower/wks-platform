@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 
 import { ApiError } from '@/api/client';
 import {
@@ -19,6 +19,8 @@ import { getArchetypeAffordance } from '@/lib/archetypes';
 import { caseQueryKeys, taskQueryKeys } from '@/lib/queryKeys';
 import type { ConflictReason, TaskActionResponse, TaskDto } from '@/types/task';
 
+import { TaskCompletionDialog } from './TaskCompletionDialog';
+
 const PROCESSING_TIMER_MS = 2_000;
 const TAKING_LONGER_TIMER_MS = 30_000;
 const CONFIRMED_FADE_MS = 2_000;
@@ -34,6 +36,12 @@ export interface TaskLifecycleButtonProps {
   task: TaskDto;
   onCompleted?: (response: TaskActionResponse) => void;
   onConflict?: (reason: ConflictReason) => void;
+  /**
+   * Story 6.2 AC1 — outcome-key → stageTransition map from the case type view. When non-empty,
+   * clicking the primary CTA opens {@link TaskCompletionDialog} instead of the inline
+   * confirming → confirmed flow. Empty/absent → single-CTA legacy path (no regression).
+   */
+  outcomeMappings?: Record<string, string>;
 }
 
 type State =
@@ -167,9 +175,18 @@ function classifyError(err: unknown): {
   };
 }
 
-export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifecycleButtonProps) {
+export function TaskLifecycleButton({
+  task,
+  onCompleted,
+  onConflict,
+  outcomeMappings,
+}: TaskLifecycleButtonProps) {
   const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(reducer, { kind: 'idle' } as State);
+  // Story 6.2 AC1 — dialog open state for multi-outcome picker.
+  const [outcomeDialogOpen, setOutcomeDialogOpen] = useState(false);
+  const hasOutcomes =
+    outcomeMappings !== undefined && Object.keys(outcomeMappings).length > 0;
   const completeTask = useCompleteTask();
   const [takingLonger, setTakingLonger] = useReducer(
     (_prev: boolean, next: boolean) => next,
@@ -213,6 +230,12 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
   }, [state.kind, queryClient, task.caseId]);
 
   function fire(): void {
+    // Story 6.2 AC1 — when outcome mappings are declared, open the outcome picker dialog instead
+    // of firing the single-CTA complete path. The dialog handles the mutation itself.
+    if (hasOutcomes) {
+      setOutcomeDialogOpen(true);
+      return;
+    }
     // P16 — guard against concurrent mutations from a fast retry / double-click. Reset any
     // previous mutation result before kicking off a fresh attempt.
     if (completeTask.isPending) return;
@@ -361,38 +384,54 @@ export function TaskLifecycleButton({ task, onCompleted, onConflict }: TaskLifec
   );
 
   return (
-    <div
-      className="inline-flex items-center gap-2"
-      data-archetype-terminal={isTerminal && state.kind === 'confirmed' ? 'true' : undefined}
-    >
-      {needsDialog && state.kind === 'idle' ? (
-        // Story 6.1 AC3 — business_final: AlertDialog interposes before fire().
-        // The trigger renders the MutationButton; confirmation fires the mutation.
-        <AlertDialog>
-          <AlertDialogTrigger asChild>{mutationButton}</AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogTitle>{t('task.confirm.title')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('task.confirm.description')}</AlertDialogDescription>
-            <div className="flex justify-end gap-2 pt-2">
-              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  fire();
-                }}
-              >
-                {archetypeLabel}
-              </AlertDialogAction>
-            </div>
-          </AlertDialogContent>
-        </AlertDialog>
-      ) : (
-        mutationButton
-      )}
-      {state.kind === 'processing' && takingLonger ? (
-        <span className="text-xs text-[var(--muted-foreground)]">
-          {t('task.processing.takingLonger')}
-        </span>
+    <>
+      {/* Story 6.2 AC1 — multi-button outcome picker. Renders outside the inline-flex container
+          so the dialog portal mounts at the correct DOM level. Only shown when outcomeMappings
+          is non-empty (hasOutcomes gate). */}
+      {hasOutcomes && outcomeMappings ? (
+        <TaskCompletionDialog
+          task={task}
+          outcomeMappings={outcomeMappings}
+          open={outcomeDialogOpen}
+          onOpenChange={setOutcomeDialogOpen}
+          onCompleted={onCompleted}
+          onConflict={onConflict}
+        />
       ) : null}
-    </div>
+      <div
+        className="inline-flex items-center gap-2"
+        data-archetype-terminal={isTerminal && state.kind === 'confirmed' ? 'true' : undefined}
+      >
+        {needsDialog && state.kind === 'idle' && !hasOutcomes ? (
+          // Story 6.1 AC3 — business_final: AlertDialog interposes before fire().
+          // Skipped when hasOutcomes (6.2 outcome picker takes precedence).
+          // The trigger renders the MutationButton; confirmation fires the mutation.
+          <AlertDialog>
+            <AlertDialogTrigger asChild>{mutationButton}</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>{t('task.confirm.title')}</AlertDialogTitle>
+              <AlertDialogDescription>{t('task.confirm.description')}</AlertDialogDescription>
+              <div className="flex justify-end gap-2 pt-2">
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    fire();
+                  }}
+                >
+                  {archetypeLabel}
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : (
+          mutationButton
+        )}
+        {state.kind === 'processing' && takingLonger ? (
+          <span className="text-xs text-[var(--muted-foreground)]">
+            {t('task.processing.takingLonger')}
+          </span>
+        ) : null}
+      </div>
+    </>
   );
 }

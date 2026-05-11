@@ -35,6 +35,8 @@ export interface CompleteTaskArgs {
   taskId: string;
   caseId: string;
   variables?: Record<string, unknown>;
+  /** Story 6.2 AC2 — outcome key to pass as process variable for OUTCOME signal routing. */
+  outcome?: string;
 }
 
 /**
@@ -50,7 +52,7 @@ export function useCompleteTask(): UseMutationResult<TaskActionResponse, Error, 
   const queryClient = useQueryClient();
   return useMutation<TaskActionResponse, Error, CompleteTaskArgs>({
     mutationKey: ['tasks', 'complete'],
-    mutationFn: ({ taskId, variables }) => completeTask(taskId, variables ?? {}),
+    mutationFn: ({ taskId, variables, outcome }) => completeTask(taskId, variables ?? {}, outcome),
     onSettled: (_data, _error, { caseId }) => {
       // Refresh case detail so the user sees the engine's truth (status / data). Task list
       // invalidation is intentionally NOT done here — on success it is handled by

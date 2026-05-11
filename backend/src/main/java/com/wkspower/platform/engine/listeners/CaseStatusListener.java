@@ -83,6 +83,24 @@ public class CaseStatusListener implements ExecutionListener {
     String currentElementId = execution.getCurrentActivityId();
     FlowElement element = execution.getBpmnModelElementInstance();
 
+    // Story 6.2 AC2 — if the client supplied an "outcome" process variable alongside the task
+    // completion (via POST /api/tasks/{id}/complete body.variables.outcome), emit OUTCOME signal
+    // so the router's dispatchOutcome path resolves the configured stageTransition mapping rule.
+    // The "outcome" key is NOT in RESERVED_PROCESS_VARIABLES (TaskService.sanitiseVariables) —
+    // it is intentionally allowed through so the Camunda execution carries it here.
+    Object outcomeRaw = execution.getVariable("outcome");
+    if (outcomeRaw instanceof String outcomeKey && !outcomeKey.isBlank()
+        && element instanceof UserTask) {
+      adapter.emit(
+          new ExecutionSignal(
+              ExecutionSignalKind.OUTCOME,
+              BpmnWorkflowAdapter.ADAPTER_NAME,
+              caseInstanceRef,
+              currentElementId,
+              Map.of("outcome", outcomeKey)));
+      return;
+    }
+
     ExecutionSignal signal = buildSignal(element, currentElementId, caseInstanceRef);
     if (signal == null) {
       return;

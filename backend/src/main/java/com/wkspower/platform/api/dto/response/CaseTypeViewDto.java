@@ -3,6 +3,7 @@ package com.wkspower.platform.api.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Subset of {@code CaseTypeConfig} embedded into {@link CaseDto} so the case-detail UI renders in
@@ -37,16 +38,26 @@ public record CaseTypeViewDto(
      * values: {@code editable-by-default} (Phase-0 default — preserves pre-5.6 behavior) or {@code
      * locked-by-default}.
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL) String defaultFieldEditability) {
+    @JsonInclude(JsonInclude.Include.NON_NULL) String defaultFieldEditability,
+    /**
+     * Story 6.2 AC1 — outcome-key → stageTransition map resolved from the first attachment's
+     * {@code outcomeMappings} block. Empty when no outcomeMappings are declared (legacy single-CTA
+     * path preserved). Frontend: when non-empty, replaces the single-CTA button with a
+     * multi-button outcome picker. Excluded from JSON when null/empty to avoid surfacing the field
+     * to pre-6.2 clients.
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) Map<String, String> outcomeMappings) {
 
   /**
-   * Compact constructor — defensive-copy {@code stages} and {@code forms} so the wire shape is
-   * immutable end-to-end. Story 3.3 added {@code stages}; Story 5.2 adds {@code forms}; Story 5.6
-   * adds {@code defaultFieldEditability}.
+   * Compact constructor — defensive-copy {@code stages}, {@code forms}, and {@code outcomeMappings}
+   * so the wire shape is immutable end-to-end. Story 3.3 added {@code stages}; Story 5.2 adds
+   * {@code forms}; Story 5.6 adds {@code defaultFieldEditability}; Story 6.2 adds
+   * {@code outcomeMappings}.
    */
   public CaseTypeViewDto {
     stages = stages == null ? List.of() : List.copyOf(stages);
     forms = forms == null ? List.of() : List.copyOf(forms);
+    outcomeMappings = outcomeMappings == null ? Map.of() : Map.copyOf(outcomeMappings);
   }
 
   /**
@@ -61,7 +72,7 @@ public record CaseTypeViewDto(
       List<StatusDefinition> statuses,
       List<String> listColumns,
       List<StageDefinitionView> stages) {
-    this(id, displayName, version, fields, statuses, listColumns, stages, List.of(), null);
+    this(id, displayName, version, fields, statuses, listColumns, stages, List.of(), null, Map.of());
   }
 
   /**
@@ -76,7 +87,24 @@ public record CaseTypeViewDto(
       List<String> listColumns,
       List<StageDefinitionView> stages,
       List<FormDefinitionView> forms) {
-    this(id, displayName, version, fields, statuses, listColumns, stages, forms, null);
+    this(id, displayName, version, fields, statuses, listColumns, stages, forms, null, Map.of());
+  }
+
+  /**
+   * Backward-compat constructor for pre-6.2 callers that predate {@code outcomeMappings}.
+   */
+  public CaseTypeViewDto(
+      String id,
+      String displayName,
+      int version,
+      List<FieldView> fields,
+      List<StatusDefinition> statuses,
+      List<String> listColumns,
+      List<StageDefinitionView> stages,
+      List<FormDefinitionView> forms,
+      String defaultFieldEditability) {
+    this(id, displayName, version, fields, statuses, listColumns, stages, forms,
+        defaultFieldEditability, Map.of());
   }
 
   /**

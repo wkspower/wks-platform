@@ -10,10 +10,12 @@ import com.wkspower.platform.api.dto.response.CaseTypeViewDto.OptionView;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto.StageDefinitionView;
 import com.wkspower.platform.api.dto.response.StageView;
 import com.wkspower.platform.api.dto.response.StatusView;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FormDefinition;
 import com.wkspower.platform.domain.config.model.FormSection;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.Case;
@@ -22,6 +24,7 @@ import com.wkspower.platform.domain.model.Stage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Domain-model → wire-DTO mapping for the case CRUD endpoints. Manual mapping (no MapStruct) per
@@ -160,6 +163,17 @@ public final class CaseDtoMapper {
   }
 
   public static CaseTypeViewDto toCaseTypeView(CaseTypeConfig caseType) {
+    return toCaseTypeView(caseType, Optional.empty());
+  }
+
+  /**
+   * Story 6.2 AC1 — overload accepting an optional {@link MappingDefinition} so that the
+   * {@code GET /api/case-types/{id}} endpoint can surface {@code outcomeMappings} (key →
+   * stageTransition) from the first attachment's outcome block. When {@code mapping} is empty the
+   * {@code outcomeMappings} field is omitted from JSON ({@code @JsonInclude(NON_EMPTY)}).
+   */
+  public static CaseTypeViewDto toCaseTypeView(
+      CaseTypeConfig caseType, Optional<MappingDefinition> mapping) {
     List<StageDefinitionView> stages =
         caseType.stages().stream()
             // Story 6.1 — thread archetype through to the wire DTO.
@@ -174,6 +188,18 @@ public final class CaseDtoMapper {
         caseType.defaultFieldEditability() == null
             ? null
             : caseType.defaultFieldEditability().wire();
+    // Story 6.2 AC1 — resolve outcomeMappings from first attachment; empty map when absent.
+    Map<String, String> outcomeMappings =
+        mapping
+            .flatMap(m -> m.attachments().isEmpty() ? Optional.empty() : Optional.of(m.attachments().get(0)))
+            .map(AttachmentDefinition::outcomeMappings)
+            .filter(om -> !om.isEmpty())
+            .map(om -> {
+              Map<String, String> result = new HashMap<>();
+              om.forEach((key, rule) -> result.put(key, rule.stageTransition()));
+              return (Map<String, String>) Map.copyOf(result);
+            })
+            .orElse(Map.of());
     return new CaseTypeViewDto(
         caseType.id(),
         caseType.displayName(),
@@ -183,7 +209,8 @@ public final class CaseDtoMapper {
         caseType.listColumns(),
         stages,
         forms,
-        defaultFieldEditability);
+        defaultFieldEditability,
+        outcomeMappings);
   }
 
   /**

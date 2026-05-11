@@ -19,6 +19,7 @@ import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.UserRepository;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -57,6 +58,8 @@ class CaseTypeControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
+  /** Story 6.2 AC1 — MappingRegistry injected into CaseTypeController for outcomeMappings projection. */
+  @MockitoBean MappingRegistry mappingRegistry;
 
   // ---- GET /api/case-types (list) ---------------------------------------
 

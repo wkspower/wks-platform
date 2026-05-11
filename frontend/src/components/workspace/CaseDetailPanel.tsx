@@ -228,7 +228,7 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
           {t('case.detail.announcement', { idShort })}
         </span>
       </header>
-      <CaseActionBar caseId={caseId} />
+      <CaseActionBar caseId={caseId} caseTypeId={caseDto.caseTypeId} />
       <Tabs value={tab} onValueChange={setTab} className="flex flex-1 flex-col">
         <TabsList className="px-4">
           <TabsTrigger value="activity">{t('tabs.activity')}</TabsTrigger>

@@ -98,3 +98,35 @@ export function getArchetypeAffordance(id: string | null | undefined): Archetype
 
 /** Expose the default for test assertions. */
 export { DEFAULT_AFFORDANCE };
+
+/**
+ * Story 6.2 AC1 — per-outcome button affordance for the multi-button outcome picker.
+ *
+ * The first outcome (outcomeIndex === 0) is rendered as the primary CTA. Subsequent outcomes
+ * are rendered with secondary tone. `terminalAccent` is true only when the archetype is
+ * `business_final` (matching the existing locked/terminal post-action state contract from 6.1).
+ *
+ * This function is archetype-agnostic for `tone` and `terminalAccent`: if the case type has no
+ * archetype declared, the first outcome still gets `tone='primary'`.
+ */
+export interface OutcomeAffordance {
+  tone: 'primary' | 'secondary';
+  terminalAccent: boolean;
+}
+
+/**
+ * Look up the per-outcome button affordance for a given archetype and outcome index.
+ *
+ * @param archetype - task/form archetype id (nullable — omitted means default).
+ * @param outcomeIndex - zero-based position in the ordered outcomes list.
+ * @returns The {@link OutcomeAffordance} for the given outcome slot.
+ */
+export function outcomeAffordance(
+  archetype: string | null | undefined,
+  outcomeIndex: number,
+): OutcomeAffordance {
+  return {
+    tone: outcomeIndex === 0 ? 'primary' : 'secondary',
+    terminalAccent: archetype === 'business_final',
+  };
+}

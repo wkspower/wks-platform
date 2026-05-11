@@ -10,6 +10,7 @@ import type { TaskDto } from '@/types/task';
 import { CaseActionBar } from './CaseActionBar';
 
 const CASE_ID = 'case-1';
+const CASE_TYPE_ID = 'loan-application';
 
 const TASK: TaskDto = {
   id: 't1',
@@ -38,11 +39,26 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
     vi.useRealTimers();
   });
 
+  // Story 6.2 — stub case-type endpoint (returns no outcomeMappings so single-CTA path is exercised).
+  beforeEach(() => {
+    server.use(
+      http.get(`/api/case-types/${CASE_TYPE_ID}`, () =>
+        HttpResponse.json({
+          data: {
+            id: CASE_TYPE_ID, displayName: 'Loan Application', version: 1,
+            fields: [], statuses: [], listColumns: [], stages: [], forms: [],
+          },
+          meta: {},
+        }),
+      ),
+    );
+  });
+
   it('renders the primary CTA with task.actionLabel when a task is pending', async () => {
     server.use(
       http.get(`/api/cases/${CASE_ID}/tasks`, () => HttpResponse.json({ data: [TASK], meta: {} })),
     );
-    render(wrap(<CaseActionBar caseId={CASE_ID} />));
+    render(wrap(<CaseActionBar caseId={CASE_ID} caseTypeId={CASE_TYPE_ID} />));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Save section' })).toBeInTheDocument(),
     );
@@ -52,7 +68,7 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
     server.use(
       http.get(`/api/cases/${CASE_ID}/tasks`, () => HttpResponse.json({ data: [], meta: {} })),
     );
-    render(wrap(<CaseActionBar caseId={CASE_ID} />));
+    render(wrap(<CaseActionBar caseId={CASE_ID} caseTypeId={CASE_TYPE_ID} />));
     // Wait for the empty-data state to settle: the populated bar is gone, the empty hint is not
     // yet visible (4s timer not yet fired).
     await waitFor(() => {
@@ -70,7 +86,7 @@ describe('CaseActionBar (Story 2.8 AC8/AC10)', () => {
     server.use(
       http.get(`/api/cases/${CASE_ID}/tasks`, () => HttpResponse.json({}, { status: 500 })),
     );
-    render(wrap(<CaseActionBar caseId={CASE_ID} />));
+    render(wrap(<CaseActionBar caseId={CASE_ID} caseTypeId={CASE_TYPE_ID} />));
     await waitFor(() => expect(screen.getByTestId('case-action-bar-error')).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
   });
