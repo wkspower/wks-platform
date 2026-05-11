@@ -392,6 +392,144 @@ class CaseServiceTest {
         .hasMessageContaining("not a known status id");
   }
 
+  // ---- gap-10 fix-a: initialStatus resolution ----------------------------
+
+  /**
+   * Story 6.2 Decision B — when the YAML omits top-level statuses (validator injects {@code [open,
+   * closed]} with {@code explicitTopLevelStatuses = false}) and stages declare {@code
+   * initialStatus}, the first stage's initialStatus is used (gap-10 fix-a preserved).
+   */
+  @Test
+  void initialStatus_injectedDefaults_plusStageInitial_usesStageInitial() {
+    // Simulate bpmn-sequential-staged: ConfigValidator injected [open, closed] defaults
+    // (explicitTopLevelStatuses = false). Stages declare their own statuses and initialStatus.
+    CaseTypeConfig stagedType =
+        CaseTypeConfig.builder()
+            .id("staged")
+            .displayName("Staged")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("open", "Open", StatusColor.ZINC),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(false)
+            .stages(
+                List.of(
+                    new StageDefinition(
+                        "intake",
+                        "Intake",
+                        0,
+                        List.of(new StatusDefinition("drafting", "Drafting", StatusColor.AMBER)),
+                        Optional.of("drafting")),
+                    new StageDefinition(
+                        "review",
+                        "Review",
+                        1,
+                        List.of(new StatusDefinition("in-review", "In Review", StatusColor.BLUE)),
+                        Optional.of("in-review"))))
+            .build();
+
+    assertThat(CaseService.initialStatus(stagedType)).isEqualTo("drafting");
+  }
+
+  /**
+   * Story 6.2 Decision B — when the YAML explicitly declared top-level {@code statuses:} ({@code
+   * explicitTopLevelStatuses == true}) AND stages also declare initialStatus, the explicit
+   * top-level wins. Author intent: flat lifecycle even alongside stages.
+   */
+  @Test
+  void initialStatus_explicitTopLevel_winsOverStageInitial() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("explicit-top")
+            .displayName("Explicit")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("triage", "Triage", StatusColor.BLUE),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(true)
+            .stages(
+                List.of(
+                    new StageDefinition(
+                        "intake",
+                        "Intake",
+                        0,
+                        List.of(new StatusDefinition("drafting", "Drafting", StatusColor.AMBER)),
+                        Optional.of("drafting"))))
+            .build();
+
+    assertThat(CaseService.initialStatus(type)).isEqualTo("triage");
+  }
+
+  /**
+   * Story 6.2 Decision B — no stages and only injected default statuses → returns the first
+   * injected default ("open"). Reaches branch c (fallback to top-level statuses[0]).
+   */
+  @Test
+  void initialStatus_noStages_injectedDefaultsOnly_returnsOpen() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("no-stages")
+            .displayName("No Stages")
+            .version(1)
+            .statuses(
+                List.of(
+                    new StatusDefinition("open", "Open", StatusColor.ZINC),
+                    new StatusDefinition("closed", "Closed", StatusColor.ZINC)))
+            .explicitTopLevelStatuses(false)
+            .build();
+    assertThat(CaseService.initialStatus(type)).isEqualTo("open");
+  }
+
+  /**
+   * Story 6.2 Decision B — empty stages and empty top-level statuses → branch d returns null.
+   * Defensive — ConfigValidator's injected defaults make this unreachable in practice, but the
+   * method must not throw.
+   */
+  @Test
+  void initialStatus_nothing_returnsNull() {
+    CaseTypeConfig type =
+        CaseTypeConfig.builder()
+            .id("nothing")
+            .displayName("Nothing")
+            .version(1)
+            .explicitTopLevelStatuses(false)
+            .build();
+    assertThat(CaseService.initialStatus(type)).isNull();
+  }
+
+  /**
+   * Story 6.2 AC6 — when top-level statuses are explicitly declared and NO stage has an
+   * initialStatus, the top-level statuses[0].id is used (legacy / flat case types).
+   */
+  @Test
+  void initialStatus_topLevelStatuses_usesFirstTopLevelStatus() {
+    CaseTypeConfig flatType = loanType(); // has status [open], no stages
+    assertThat(CaseService.initialStatus(flatType)).isEqualTo("open");
+  }
+
+  /**
+   * Story 6.2 AC6 — when stages exist but none declares an initialStatus (bare-string stage form),
+   * falls back to top-level statuses[0].id.
+   */
+  @Test
+  void initialStatus_stagesWithoutInitialStatus_fallsBackToTopLevel() {
+    CaseTypeConfig typeWithBareStagsAndFlatStatuses =
+        CaseTypeConfig.builder()
+            .id("bare-stages")
+            .displayName("Bare")
+            .version(1)
+            .statuses(List.of(new StatusDefinition("pending", "Pending", StatusColor.ZINC)))
+            .stages(
+                List.of(
+                    new StageDefinition("s1", "S1", 0), // no statuses, no initialStatus
+                    new StageDefinition("s2", "S2", 1)))
+            .build();
+
+    assertThat(CaseService.initialStatus(typeWithBareStagsAndFlatStatuses)).isEqualTo("pending");
+  }
+
   @Test
   void diffFieldIdsHandlesAddedRemovedAndChanged() {
     Map<String, Object> oldMap = Map.of("a", 1, "b", "two");

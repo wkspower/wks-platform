@@ -2,6 +2,7 @@ package com.wkspower.platform.infrastructure.config;
 
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition.OutcomeMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEmissionRule;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
@@ -198,6 +199,7 @@ public class MappingValidator {
       Optional<EndEventMapping> endEventOut = Optional.empty();
       Map<String, SignalMapping> signalsOut = new LinkedHashMap<>();
       List<PropertyEmissionRule> propsOut = new ArrayList<>();
+      Map<String, OutcomeMapping> outcomesOut = new LinkedHashMap<>();
 
       RawCaseTypeConfig.RawRoutingBlock routing = a.routing();
       if (routing != null) {
@@ -365,6 +367,108 @@ public class MappingValidator {
             }
           }
         }
+
+        // Story 6.2 — parse routing.outcomes.<key> blocks. Field names sourced from this method's
+        // String literal keys below (MappingValidator.java parse site — per
+        // feedback_yaml_fixture_field_names).
+        // Keys parsed: routing.outcomes.<key>.stageTransition (REQUIRED — this line)
+        //              routing.outcomes.<key>.payloadFields   (OPTIONAL List<String> — this line)
+        // Cross-ref: routing.userTasks.<id>.outcomes[] must declare every key referenced here;
+        // missing keys emit WKS-MAP-010.
+        if (routing.outcomes() != null && !routing.outcomes().isEmpty()) {
+          // Collect the full set of declared outcome keys across all userTasks.
+          Set<String> declaredOutcomeKeys = new HashSet<>();
+          if (routing.userTasks() != null) {
+            for (RawCaseTypeConfig.RawUserTaskMapping rut : routing.userTasks().values()) {
+              if (rut != null && rut.outcomes() != null) {
+                declaredOutcomeKeys.addAll(rut.outcomes());
+              }
+            }
+          }
+
+          // Story 6.2 — WKS-MAP-011: outcomes block declared but no userTask references any
+          // outcome key. The block is unused; operator must either remove it or add keys to a
+          // userTask's outcomes list.
+          if (declaredOutcomeKeys.isEmpty()) {
+            errors.add(
+                ErrorDetail.ofField(
+                    ErrorCode.WKS_MAP_011.wire(),
+                    "routing.outcomes block declared but no userTask declares any 'outcomes:' list"
+                        + " — the block is unused. Either remove the routing.outcomes block or add"
+                        + " outcome keys to a userTask's 'outcomes:' list.",
+                    base + "/routing/outcomes"));
+          }
+
+          // Story 6.2 — WKS-MAP-012: a userTask declares an outcome key but no corresponding
+          // routing.outcomes.<key> rule exists. The key is bound to a userTask but cannot be
+          // routed — runtime dispatch would always miss with WKS-MAP-404.
+          Set<String> ruleKeys = routing.outcomes().keySet();
+          if (routing.userTasks() != null) {
+            for (var utEntry : routing.userTasks().entrySet()) {
+              String taskId = utEntry.getKey();
+              RawCaseTypeConfig.RawUserTaskMapping rut = utEntry.getValue();
+              if (rut == null || rut.outcomes() == null) {
+                continue;
+              }
+              for (int oi = 0; oi < rut.outcomes().size(); oi++) {
+                String declaredKey = rut.outcomes().get(oi);
+                if (declaredKey != null
+                    && !declaredKey.isBlank()
+                    && !ruleKeys.contains(declaredKey)) {
+                  errors.add(
+                      ErrorDetail.ofField(
+                          ErrorCode.WKS_MAP_012.wire(),
+                          "userTask '"
+                              + taskId
+                              + "' declares outcome '"
+                              + declaredKey
+                              + "' but no routing.outcomes.<key> rule binds it — runtime"
+                              + " dispatch on this outcome would miss with WKS-MAP-404. Either"
+                              + " add a 'routing.outcomes."
+                              + declaredKey
+                              + "' rule or remove '"
+                              + declaredKey
+                              + "' from this userTask's outcomes list.",
+                          base + "/routing/userTasks/" + taskId + "/outcomes/" + oi));
+                }
+              }
+            }
+          }
+
+          for (var outcomeEntry : routing.outcomes().entrySet()) {
+            String outcomeKey = outcomeEntry.getKey();
+            RawCaseTypeConfig.RawOutcomeMapping rom = outcomeEntry.getValue();
+            String outcomeField = base + "/routing/outcomes/" + outcomeKey;
+
+            // WKS-MAP-010: outcome rule references a key not declared by any userTask.outcomes
+            // list.
+            if (!declaredOutcomeKeys.isEmpty() && !declaredOutcomeKeys.contains(outcomeKey)) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_MAP_010.wire(),
+                      "Outcome rule '"
+                          + outcomeKey
+                          + "' references an outcome key not declared in any"
+                          + " userTasks.<id>.outcomes list — add '"
+                          + outcomeKey
+                          + "' to the relevant task's outcomes list or remove this rule",
+                      outcomeField));
+            }
+
+            if (rom == null || rom.stageTransition() == null || rom.stageTransition().isBlank()) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_CFG_001.wire(),
+                      "outcome rule '" + outcomeKey + "' requires 'stageTransition'",
+                      outcomeField + "/stageTransition"));
+            } else {
+              checkStageTransition(
+                  rom.stageTransition(), stageIds, errors, outcomeField + "/stageTransition");
+              outcomesOut.put(
+                  outcomeKey, new OutcomeMapping(rom.stageTransition(), rom.payloadFields()));
+            }
+          }
+        }
       }
 
       // Story 4.3.1 AC3 — WKS-MAP-002 precedence-collision detection. Two rules from DIFFERENT
@@ -385,7 +489,15 @@ public class MappingValidator {
           && !scope.isBlank()) {
         definitions.add(
             new AttachmentDefinition(
-                type, file, scope, stageScopeId, userTasksOut, endEventOut, signalsOut, propsOut));
+                type,
+                file,
+                scope,
+                stageScopeId,
+                userTasksOut,
+                endEventOut,
+                signalsOut,
+                propsOut,
+                outcomesOut));
       }
     }
 

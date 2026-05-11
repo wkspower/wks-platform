@@ -1,5 +1,6 @@
 package com.wkspower.platform.engine.listeners;
 
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.port.CaseInstanceRef;
 import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.ExecutionSignal;
@@ -82,6 +83,40 @@ public class CaseStatusListener implements ExecutionListener {
 
     String currentElementId = execution.getCurrentActivityId();
     FlowElement element = execution.getBpmnModelElementInstance();
+
+    // Story 6.2 AC2 — if the client supplied an "outcome" process variable alongside the task
+    // completion (via POST /api/tasks/{id}/complete body.variables.outcome), emit OUTCOME signal
+    // so the router's dispatchOutcome path resolves the configured stageTransition mapping rule.
+    // The "outcome" key is NOT in RESERVED_PROCESS_VARIABLES (TaskService.sanitiseVariables) —
+    // it is intentionally allowed through so the Camunda execution carries it here.
+    Object outcomeRaw = execution.getVariable("outcome");
+    if (outcomeRaw instanceof String outcomeKey
+        && !outcomeKey.isBlank()
+        && element instanceof UserTask userTaskElem) {
+      // Story 6.2 — WKS-ROUTE-001: when a userTask carries BOTH an outcome process variable AND
+      // an explicit <camunda:property name="status"> declaration, the outcome wins (drives
+      // multi-outcome routing) and the status property is shadowed. Operator action: remove one
+      // of the two declarations to disambiguate intent. WARN-level; never aborts the dispatch.
+      String shadowedStatus =
+          CamundaPropertyReader.read(userTaskElem.getExtensionElements(), "status");
+      if (shadowedStatus != null) {
+        log.atWarn()
+            .addKeyValue("wksErrorCode", ErrorCode.WKS_ROUTE_001.wire())
+            .addKeyValue("userTaskId", currentElementId)
+            .addKeyValue("caseId", caseId.toString())
+            .addKeyValue("outcomeKey", outcomeKey)
+            .addKeyValue("shadowedStatus", shadowedStatus)
+            .log("outcome shadows status property on userTask {}", currentElementId);
+      }
+      adapter.emit(
+          new ExecutionSignal(
+              ExecutionSignalKind.OUTCOME,
+              BpmnWorkflowAdapter.ADAPTER_NAME,
+              caseInstanceRef,
+              currentElementId,
+              Map.of("outcome", outcomeKey)));
+      return;
+    }
 
     ExecutionSignal signal = buildSignal(element, currentElementId, caseInstanceRef);
     if (signal == null) {

@@ -5,13 +5,17 @@ import com.wkspower.platform.api.dto.response.CaseTypeSummaryDto;
 import com.wkspower.platform.api.dto.response.CaseTypeViewDto;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.WksAuthenticationException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,9 +42,16 @@ public class CaseTypeController {
   private final CaseTypeReader reader;
   private final CaseTypePermissionEvaluator evaluator;
 
-  public CaseTypeController(CaseTypeReader reader, CaseTypePermissionEvaluator evaluator) {
+  /** Story 6.2 AC1 — for resolving outcomeMappings to surface on the case-type view endpoint. */
+  private final MappingRegistry mappingRegistry;
+
+  public CaseTypeController(
+      CaseTypeReader reader,
+      CaseTypePermissionEvaluator evaluator,
+      MappingRegistry mappingRegistry) {
     this.reader = reader;
     this.evaluator = evaluator;
+    this.mappingRegistry = mappingRegistry;
   }
 
   @GetMapping
@@ -78,7 +89,11 @@ public class CaseTypeController {
       throw new AccessDeniedException(
           "Forbidden: missing verb 'view' on case type " + caseType.id());
     }
-    return ApiResponse.success(CaseDtoMapper.toCaseTypeView(caseType));
+    // Story 6.2 AC1 — resolve outcomeMappings from the active mapping version, if registered.
+    CaseTypeRef ref = new CaseTypeRef(caseType.id(), String.valueOf(caseType.version()));
+    Optional<MappingDefinition> mapping =
+        mappingRegistry.resolve(ref, String.valueOf(caseType.version()));
+    return ApiResponse.success(CaseDtoMapper.toCaseTypeView(caseType, mapping));
   }
 
   private static void requireAuthenticated(WksUserPrincipal actor) {

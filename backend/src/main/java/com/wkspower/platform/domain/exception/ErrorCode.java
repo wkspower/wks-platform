@@ -282,6 +282,40 @@ public enum ErrorCode {
    */
   WKS_MAP_009("WKS-MAP-009"),
   /**
+   * Story 6.2 AC5 — parse-time: a {@code routing.outcomes.<key>} rule in a mapping YAML references
+   * an outcome key that is not declared in any {@code userTasks.<id>.outcomes: []} list for that
+   * attachment. Emitted by {@link com.wkspower.platform.infrastructure.config.MappingValidator} at
+   * deploy time (before the runtime router ever sees the configuration). The operator must either
+   * add the key to the appropriate {@code userTasks.<id>.outcomes} list or remove the orphaned
+   * routing rule.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-010"}
+   * is a stable contract; never reuse for any other meaning.
+   */
+  WKS_MAP_010("WKS-MAP-010"),
+  /**
+   * Story 6.2 — parse-time: an attachment declares a {@code routing.outcomes:} block but no {@code
+   * routing.userTasks.<id>.outcomes:} list references any outcome key. The block is unused. The
+   * operator must either remove the orphaned {@code outcomes:} block or add the relevant outcome
+   * keys to a userTask's {@code outcomes:} list. Emitted by {@link
+   * com.wkspower.platform.infrastructure.config.MappingValidator}.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-011"}
+   * is a stable contract; never reuse for any other meaning.
+   */
+  WKS_MAP_011("WKS-MAP-011"),
+  /**
+   * Story 6.2 — parse-time: a {@code routing.userTasks.<id>.outcomes:} list declares an outcome key
+   * that has no corresponding {@code routing.outcomes.<key>} rule. The key is bound to a userTask
+   * but cannot be routed — the dispatch would always miss with {@code WKS-MAP-404} at runtime.
+   * Inverse of {@link #WKS_MAP_010} (rule without declaration). Emitted by {@link
+   * com.wkspower.platform.infrastructure.config.MappingValidator}.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-MAP-012"}
+   * is a stable contract; never reuse for any other meaning.
+   */
+  WKS_MAP_012("WKS-MAP-012"),
+  /**
    * Runtime — emitted by {@link com.wkspower.platform.domain.service.ExecutionSignalRouter} when an
    * incoming {@link com.wkspower.platform.domain.port.ExecutionSignal} does not match any rule in
    * the active {@link com.wkspower.platform.domain.config.model.MappingDefinition}, when the
@@ -530,7 +564,32 @@ public enum ErrorCode {
    * business_final}). Distinct from BPMN-side {@link #WKS_CFG_020} (missing) and {@link
    * #WKS_CFG_021} (contradiction); this code is the YAML-surface unknown-value violation.
    */
-  WKS_ARCH_001("WKS-ARCH-001");
+  WKS_ARCH_001("WKS-ARCH-001"),
+  /**
+   * Story 6.2 — runtime: emitted by {@link
+   * com.wkspower.platform.engine.listeners.CaseStatusListener} when a BPMN userTask carries BOTH an
+   * {@code outcome} process variable AND a {@code <camunda:property name="status">} declaration.
+   * The {@code outcome} variable always wins (drives multi-outcome routing); the {@code status}
+   * property is shadowed. WARN-level — never aborts the dispatch. Operator action: remove one of
+   * the two declarations to disambiguate intent.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
+   * "WKS-ROUTE-001"} is a stable contract; never reuse for any other meaning.
+   */
+  WKS_ROUTE_001("WKS-ROUTE-001"),
+  /**
+   * Story 6.2 — runtime: emitted by {@link
+   * com.wkspower.platform.domain.service.ExecutionSignalRouter#resetStatusForAdvancedStage} when a
+   * stage advance succeeds but the next stage declares no statuses AND no top-level fallback
+   * applies — the case's existing status persists across the stage boundary. WARN-level; surfaces a
+   * stale-status condition that may indicate a missing {@code statuses:} declaration on the next
+   * stage. Operator action: either declare the next stage's statuses or set top-level statuses to
+   * seed the post-advance value.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
+   * "WKS-STAT-001"} is a stable contract; never reuse for any other meaning.
+   */
+  WKS_STAT_001("WKS-STAT-001");
 
   private final String wire;
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { useCaseType } from '@/hooks/useCaseTypes';
 import { useCaseTasks } from '@/hooks/useTasks';
 import { t } from '@/i18n';
 
@@ -14,13 +15,21 @@ const NEXT_CASE_HINT_DELAY_MS = 4_000;
  * subsequent tasks render in a vertical stack below it). When the case has no pending tasks, a
  * subtle "Next case ({@code J})" hint appears after a 4s delay (the J/K shortcut already lives in
  * {@code CaseWorkspace}; 2.8 only ships the visible affordance).
+ *
+ * Story 6.2 AC1 — threads {@code caseTypeId} to resolve {@code outcomeMappings} from
+ * {@code GET /api/case-types/{id}} so the TaskLifecycleButton can render the multi-button picker
+ * when outcome mappings are declared.
  */
 export interface CaseActionBarProps {
   caseId: string;
+  /** Story 6.2 AC1 — needed to load outcomeMappings from the case-type view endpoint. */
+  caseTypeId: string;
 }
 
-export function CaseActionBar({ caseId }: CaseActionBarProps) {
+export function CaseActionBar({ caseId, caseTypeId }: CaseActionBarProps) {
   const tasksQuery = useCaseTasks(caseId);
+  const caseTypeQuery = useCaseType(caseTypeId);
+  const outcomeMappings = caseTypeQuery.data?.outcomeMappings ?? {};
   const [showHint, setShowHint] = useState(false);
 
   const hasTasks = (tasksQuery.data?.length ?? 0) > 0;
@@ -68,11 +77,11 @@ export function CaseActionBar({ caseId }: CaseActionBarProps) {
 
   return (
     <div className="flex flex-col gap-2 px-4 py-3" data-testid="case-action-bar">
-      <TaskLifecycleButton task={primary} />
+      <TaskLifecycleButton task={primary} outcomeMappings={outcomeMappings} />
       {secondary.length > 0 ? (
         <div className="flex flex-col gap-2">
           {secondary.map((task) => (
-            <TaskLifecycleButton key={task.id} task={task} />
+            <TaskLifecycleButton key={task.id} task={task} outcomeMappings={outcomeMappings} />
           ))}
         </div>
       ) : null}

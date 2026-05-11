@@ -144,6 +144,11 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
         (k, existing) -> {
           if (existing == null) {
             outcome.set(RegistrationResult.registered());
+            // Story 6.2 — cache byVersion ONLY when the registration is accepted by the
+            // older-version guard below. Caching eagerly before the guard would seed a
+            // historical-version slot for a config that subsequent guard rules may reject,
+            // leaving the version cache inconsistent with byId.
+            byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
             return incoming;
           }
           if (config.version() == existing.config.version()) {
@@ -166,6 +171,8 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
             return existing;
           }
           outcome.set(RegistrationResult.replaced());
+          // Replace path — version is newer than existing; cache it.
+          byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
           return incoming;
         });
     return outcome.get();

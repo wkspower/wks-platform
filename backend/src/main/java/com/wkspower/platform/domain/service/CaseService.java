@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -781,20 +782,46 @@ public class CaseService {
   }
 
   /**
-   * Initial status comes from the YAML — {@code statuses[0].id} per Story 2.3 Dev Notes §Initial
-   * status semantics. Story 2.4's BPMN listener will keep it in sync with engine state thereafter.
+   * Initial status for a newly-created case. Resolution order (Story 6.2 Decision B — refines Story
+   * 2.3 + gap-10 fix-a):
+   *
+   * <ol>
+   *   <li>If the YAML declared top-level {@code statuses:} explicitly ({@code
+   *       explicitTopLevelStatuses == true}), use {@code statuses[0].id}. Author-declared top-level
+   *       statuses always win — they signal the author intended a flat lifecycle.
+   *   <li>Else if any stage declares an {@code initialStatus}, use the FIRST stage's value (gap-10
+   *       fix-a preserved). Stage-scoped case types whose top-level statuses are validator-
+   *       injected {@code [open, closed]} defaults fall through to this branch and pick {@code
+   *       "drafting"} (or whatever the first stage declares).
+   *   <li>Else fall back to {@code statuses[0].id} (the injected default {@code "open"}). Reachable
+   *       when stages exist but none declares an initialStatus AND the YAML omitted top-level
+   *       statuses.
+   *   <li>Else return {@code null} — only reachable when both stages and top-level statuses are
+   *       empty, which ConfigValidator's defaults guard against in practice.
+   * </ol>
+   *
+   * <p>Story 2.4's BPMN listener / Story 4.4b's ExecutionSignalRouter keep the status in sync with
+   * engine state thereafter.
    */
-  private static String initialStatus(CaseTypeConfig caseType) {
-    return caseType.statuses().stream()
-        .map(StatusDefinition::id)
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "Case type "
-                        + caseType.id()
-                        + " has no statuses — should have been rejected by"
-                        + " the validator"));
+  static String initialStatus(CaseTypeConfig caseType) {
+    // Branch a — author-declared top-level statuses always win.
+    if (caseType.explicitTopLevelStatuses() && !caseType.statuses().isEmpty()) {
+      return caseType.statuses().get(0).id();
+    }
+    // Branch b — first stage's initialStatus (gap-10 fix-a; preserves bpmn-sequential-staged
+    // behavior where top-level statuses are ConfigValidator-injected defaults).
+    for (var stage : caseType.stages()) {
+      Optional<String> stageInitial = stage.initialStatus();
+      if (stageInitial.isPresent()) {
+        return stageInitial.get();
+      }
+    }
+    // Branch c — fall back to top-level statuses (which may be the injected default).
+    if (!caseType.statuses().isEmpty()) {
+      return caseType.statuses().get(0).id();
+    }
+    // Branch d — neither stages nor top-level statuses available.
+    return null;
   }
 
   /**
