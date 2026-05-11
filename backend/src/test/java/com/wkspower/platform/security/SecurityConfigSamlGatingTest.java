@@ -1,6 +1,8 @@
 package com.wkspower.platform.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -40,6 +43,7 @@ class SecurityConfigSamlGatingTest {
 
   @Autowired private TestRestTemplate rest;
   @Autowired private ObjectMapper json;
+  @Autowired private ApplicationContext ctx;
   @MockBean private LicenseService licenseService;
 
   @Test
@@ -72,6 +76,9 @@ class SecurityConfigSamlGatingTest {
 
   @Test
   void hotReloadFlipsGateWithoutContextRebuild() throws Exception {
+    // Capture the SamlGatingFilter bean identity BEFORE the first hit.
+    SamlGatingFilter filterBefore = ctx.getBean(SamlGatingFilter.class);
+
     when(licenseService.isFeatureEnabled(WksFeature.AUTH_SSO)).thenReturn(false);
     when(licenseService.getTier()).thenReturn("oss");
 
@@ -85,6 +92,16 @@ class SecurityConfigSamlGatingTest {
 
     ResponseEntity<String> second = rest.getForEntity("/api/auth/saml/metadata", String.class);
     assertThat(second.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+    // The exact same SamlGatingFilter bean instance handled both requests — no context rebuild,
+    // no proxy swap, no bean re-creation between the OSS hit and the Enterprise hit.
+    SamlGatingFilter filterAfter = ctx.getBean(SamlGatingFilter.class);
+    assertThat(filterAfter).isSameAs(filterBefore);
+
+    // Per-request consultation: the filter must call LicenseService.isFeatureEnabled(AUTH_SSO)
+    // exactly once per SAML-path request — never cached on the filter side. Two SAML hits ⇒
+    // two consultations.
+    verify(licenseService, times(2)).isFeatureEnabled(WksFeature.AUTH_SSO);
   }
 
   @Test
