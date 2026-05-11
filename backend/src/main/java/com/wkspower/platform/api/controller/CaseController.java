@@ -28,6 +28,7 @@ import com.wkspower.platform.domain.model.StageState;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.page.SortOrder;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.TaskService;
@@ -75,18 +76,26 @@ public class CaseController {
   private final CaseTypePermissionEvaluator evaluator;
   private final WksStageAdvancer stageAdvancer;
   private final StageRepository stageRepository;
+  /**
+   * Story 5.5 AC-4 — used to resolve the pinned CaseTypeConfig for the case-detail response. The
+   * response must embed the pinned CaseType (not the latest deployed) so the frontend form renderer
+   * shows the form the case was bound to (Decision D20 frozen-on-version).
+   */
+  private final CaseTypeReader caseTypeReader;
 
   public CaseController(
       CaseService caseService,
       TaskService taskService,
       CaseTypePermissionEvaluator evaluator,
       WksStageAdvancer stageAdvancer,
-      StageRepository stageRepository) {
+      StageRepository stageRepository,
+      CaseTypeReader caseTypeReader) {
     this.caseService = caseService;
     this.taskService = taskService;
     this.evaluator = evaluator;
     this.stageAdvancer = stageAdvancer;
     this.stageRepository = stageRepository;
+    this.caseTypeReader = caseTypeReader;
   }
 
   /**
@@ -121,7 +130,13 @@ public class CaseController {
       @PathVariable("id") UUID id, @AuthenticationPrincipal WksUserPrincipal actor) {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "view");
-    CaseTypeConfig caseType = caseService.requireCaseType(found.caseTypeId());
+    // Story 5.5 AC-4 — embed PINNED CaseType in the response (Decision D20). Frontend FormPage
+    // reads caseDto.caseType.forms to render the form; it must see the v-pinned form definition,
+    // not the latest deployed version. Falls back to latest on registry miss (defensive guard).
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(found.caseTypeId(), found.caseTypeVersion())
+            .orElseGet(() -> caseService.requireCaseType(found.caseTypeId()));
     List<Stage> history = stageRepository.loadHistory(id);
     return ApiResponse.success(CaseDtoMapper.toDto(found, caseType, history));
   }
@@ -195,7 +210,11 @@ public class CaseController {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "edit");
     Case updated = caseService.update(id, request.data(), request.version(), actor.id());
-    CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
+    // Story 5.5 AC-4 — embed pinned CaseType for D20 consistency; falls back to latest.
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(updated.caseTypeId(), updated.caseTypeVersion())
+            .orElseGet(() -> caseService.requireCaseType(updated.caseTypeId()));
     return ApiResponse.success(CaseDtoMapper.toDto(updated, caseType));
   }
 
@@ -221,7 +240,11 @@ public class CaseController {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "transition");
     Case updated = caseService.transition(id, request.action(), request.variables(), actor.id());
-    CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
+    // Story 5.5 AC-4 — embed pinned CaseType for D20 consistency; falls back to latest.
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(updated.caseTypeId(), updated.caseTypeVersion())
+            .orElseGet(() -> caseService.requireCaseType(updated.caseTypeId()));
     return ApiResponse.success(CaseDtoMapper.toDto(updated, caseType));
   }
 

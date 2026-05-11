@@ -284,5 +284,6 @@
   "form.draft.versionChanged.title": "This form has changed since your draft was saved",
   "form.draft.versionChanged.body": "The case-type version was bumped while you were away. Your draft cannot be applied to the new form. Discard the draft to continue with the current form, or cancel to come back later.",
   "form.draft.versionChanged.discardAndUseCurrent": "Discard draft and use current form",
-  "form.draft.versionChanged.cancel": "Cancel"
+  "form.draft.versionChanged.cancel": "Cancel",
+  "form.pinnedVersion": "Form pinned to CaseType v{version}"
 }

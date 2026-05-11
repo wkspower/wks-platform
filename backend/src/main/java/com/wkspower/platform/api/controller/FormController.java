@@ -7,6 +7,7 @@ import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksValidationException;
 import com.wkspower.platform.domain.model.Case;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.CaseService;
 import com.wkspower.platform.domain.service.FormDraftService;
@@ -46,12 +47,22 @@ public class FormController {
   private final CaseService caseService;
   private final StageRepository stageRepository;
   private final FormDraftService formDraftService;
+  /**
+   * Story 5.5 AC-4 — used to resolve the pinned CaseTypeConfig for the DTO response. The response
+   * must embed the pinned CaseType (not the latest deployed) so the frontend renders the form the
+   * case is bound to (Decision D20 frozen-on-version).
+   */
+  private final CaseTypeReader caseTypeReader;
 
   public FormController(
-      CaseService caseService, StageRepository stageRepository, FormDraftService formDraftService) {
+      CaseService caseService,
+      StageRepository stageRepository,
+      FormDraftService formDraftService,
+      CaseTypeReader caseTypeReader) {
     this.caseService = caseService;
     this.stageRepository = stageRepository;
     this.formDraftService = formDraftService;
+    this.caseTypeReader = caseTypeReader;
   }
 
   /**
@@ -100,7 +111,15 @@ public class FormController {
     // post-submit failure rolls back the deletion (preserving the draft) per AC6.
     formDraftService.deleteDraft(caseId, formId, actor.id());
 
-    CaseTypeConfig caseType = caseService.requireCaseType(updated.caseTypeId());
+    // Story 5.5 AC-4 — embed the PINNED CaseType in the response DTO (Decision D20). The
+    // frontend FormPage reads caseDto.caseType.forms to render the form definition; it must see
+    // the v-pinned form, not the latest deployed CaseType. Falls back to latest if pinned version
+    // is not in registry (defensive — should not occur after resolveFormDefinitionForCase succeeded
+    // above, but guards against race conditions on the read-only response path).
+    CaseTypeConfig caseType =
+        caseTypeReader
+            .findVersion(updated.caseTypeId(), updated.caseTypeVersion())
+            .orElseGet(() -> caseService.requireCaseType(updated.caseTypeId()));
     List<com.wkspower.platform.domain.model.Stage> history = stageRepository.loadHistory(caseId);
 
     CaseDto dto = CaseDtoMapper.toDto(updated, caseType, history);

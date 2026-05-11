@@ -376,6 +376,15 @@ public enum ErrorCode {
    * bootstrap migration closes the gap for pre-3.4 CaseTypes by materialising v1 rows.
    */
   WKS_VER_001("WKS-VER-001"),
+  /**
+   * Story 5.5 AC-4 — {@code CaseService.resolveFormDefinitionForCase} called for a Case whose
+   * {@code caseTypeVersion} has no matching row in {@code case_type_versions} registry (defensive
+   * guard — should never fire on a healthy system; discovered cases must not 500). HTTP 422.
+   *
+   * <p>Wire string is stable — SI devs grep this against audit logs per {@code
+   * feedback_error_codes_are_wire_contract.md}. Do NOT reuse for a different meaning.
+   */
+  WKS_VER_002("WKS-VER-002"),
 
   // 422 — Form Definition Schema validation (Story 5.1). Band: WKS-FORM-001..099.
   // Codes 002+ are RESERVED for Stories 5.2–5.8 — do NOT mint speculatively.
