@@ -15,6 +15,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -43,8 +45,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class SamlGatingFilter extends OncePerRequestFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(SamlGatingFilter.class);
-  private static final String SAML_PATH_PREFIX = "/api/auth/saml/";
-  private static final String SAML_PATH_EXACT = "/api/auth/saml";
+  // Ant matcher (case-insensitive, path-normalised) — covers /api/auth/saml and
+  // /api/auth/saml/** in one rule, defeats trivial casing/encoding bypasses
+  // (e.g. /API/AUTH/SAML/metadata, //api/auth/saml///init).
+  private static final RequestMatcher SAML_MATCHER =
+      new AntPathRequestMatcher("/api/auth/saml/**", null, /* caseSensitive */ false);
 
   private final LicenseService licenseService;
   private final ObjectMapper objectMapper;
@@ -59,7 +64,7 @@ public class SamlGatingFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
     String path = request.getRequestURI();
-    if (!isSamlPath(path)) {
+    if (!SAML_MATCHER.matches(request)) {
       chain.doFilter(request, response);
       return;
     }
@@ -75,10 +80,6 @@ public class SamlGatingFilter extends OncePerRequestFilter {
         licenseService.getTier(),
         ErrorCode.WKS_LIC_003.wire());
     rejectWithNotFound(response, path);
-  }
-
-  private static boolean isSamlPath(String path) {
-    return path != null && (path.equals(SAML_PATH_EXACT) || path.startsWith(SAML_PATH_PREFIX));
   }
 
   private void rejectWithNotFound(HttpServletResponse response, String path) throws IOException {
