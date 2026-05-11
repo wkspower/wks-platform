@@ -13,14 +13,18 @@ import com.wkspower.platform.domain.config.rebase.CaseRebaseReport.Irreconcilabl
 import com.wkspower.platform.domain.config.rebase.CaseRebaseReport.IrreconcilableKind;
 import com.wkspower.platform.domain.config.rebase.CaseRebaseReport.StatusAction;
 import com.wkspower.platform.domain.config.rebase.CaseRebaseReport.StatusMapping;
+import com.wkspower.platform.domain.event.RebaseApplied;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
+import com.wkspower.platform.domain.exception.WksConcurrentModificationException;
 import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseTypeSource;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
+import com.wkspower.platform.domain.port.Clock;
+import com.wkspower.platform.domain.port.EventPublisher;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,14 +57,20 @@ public class CaseRebaseService {
   private final CaseRepository caseRepository;
   private final CaseTypeVersionRegistry versionRegistry;
   private final CaseTypeSource caseTypeSource;
+  private final EventPublisher eventPublisher;
+  private final Clock clock;
 
   public CaseRebaseService(
       CaseRepository caseRepository,
       CaseTypeVersionRegistry versionRegistry,
-      CaseTypeSource caseTypeSource) {
+      CaseTypeSource caseTypeSource,
+      EventPublisher eventPublisher,
+      Clock clock) {
     this.caseRepository = caseRepository;
     this.versionRegistry = versionRegistry;
     this.caseTypeSource = caseTypeSource;
+    this.eventPublisher = eventPublisher;
+    this.clock = clock;
   }
 
   /**
@@ -100,10 +110,23 @@ public class CaseRebaseService {
    * @param toVersion the target CaseType version number
    * @return structured {@link CaseRebaseReport} with {@code applied=true}
    * @throws WksNotFoundException when the case id does not resolve to any row
-   * @throws WksConfigException with {@link ErrorCode#WKS_API_007} on invalid toVersion
+   * @throws WksConfigException with {@link ErrorCode#WKS_API_007} on reverse toVersion
+   * @throws WksConfigException with {@link ErrorCode#WKS_API_008} on no-op toVersion
    * @throws WksConfigException with {@link ErrorCode#WKS_CFG_034} when irreconcilable items exist
+   * @throws WksConcurrentModificationException with {@link ErrorCode#WKS_CFG_035} when the
+   *     version-checked update finds the row has been bumped concurrently
    */
   public CaseRebaseReport apply(String caseTypeId, UUID caseId, int toVersion) {
+    return apply(caseTypeId, caseId, toVersion, "ANONYMOUS", null);
+  }
+
+  /**
+   * Overload that accepts {@code actor} + {@code requestId} for the {@link RebaseApplied} event so
+   * the AFTER_COMMIT audit listener has the operator identity available. The no-arg overload is
+   * retained for tests that don't need to assert on the event payload.
+   */
+  public CaseRebaseReport apply(
+      String caseTypeId, UUID caseId, int toVersion, String actor, String requestId) {
     Case kase = resolveCase(caseTypeId, caseId);
     int fromVersion = kase.caseTypeVersion();
     validateVersionArg(caseTypeId, fromVersion, toVersion);
@@ -126,23 +149,37 @@ public class CaseRebaseService {
           Map.of("irreconcilable", report.irreconcilable()));
     }
 
-    // Mutate the case via repository.save — the caller's @Transactional boundary commits this.
-    Case updated =
-        new Case(
-            kase.id(),
-            kase.caseTypeId(),
-            toVersion,
-            kase.status(),
-            kase.assignee(),
-            kase.data(),
-            kase.processInstanceId(),
-            kase.createdAt(),
-            kase.createdBy(),
-            kase.updatedAt(),
-            kase.version(),
-            kase.currentStageId(),
-            kase.currentStageOrdinal());
-    caseRepository.save(updated);
+    // Story 3.9 review remediation — version-checked update. Closes the TOCTOU window between
+    // resolveCase() and the write: a concurrent UPDATE that bumps c.version causes this UPDATE to
+    // match zero rows, surfacing as WKS-CFG-035 instead of silently winning via JPA merge.
+    int affected =
+        caseRepository.updateCaseTypeVersion(kase.id(), toVersion, kase.version());
+    if (affected == 0) {
+      throw new WksConcurrentModificationException(
+          ErrorCode.WKS_CFG_035,
+          "case modified concurrently during rebase (caseId="
+              + kase.id()
+              + ", expectedVersion="
+              + kase.version()
+              + ") — reload and retry");
+    }
+
+    // Publish the domain event INSIDE the surrounding @Transactional. The AFTER_COMMIT listener
+    // (RebaseAuditListener) emits the audit log line only after commit — see memory
+    // feedback_transactional_db_exception_postgres.md. Rollback ⇒ no audit line.
+    if (eventPublisher != null) {
+      eventPublisher.publish(
+          new RebaseApplied(
+              kase.id(),
+              kase.caseTypeId(),
+              fromVersion,
+              toVersion,
+              "migration-rebase",
+              "migration-rebase",
+              actor,
+              requestId,
+              clock.now()));
+    }
 
     return buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, true);
   }
@@ -172,7 +209,21 @@ public class CaseRebaseService {
   }
 
   private void validateVersionArg(String caseTypeId, int fromVersion, int toVersion) {
-    if (toVersion <= fromVersion) {
+    // Story 3.9 review remediation — split no-op (toVersion == fromVersion) from reverse
+    // (toVersion < fromVersion) so SI devs grep distinct wire codes for distinct surfaces.
+    if (toVersion == fromVersion) {
+      throw new WksConfigException(
+          List.of(
+              ErrorDetail.of(
+                  ErrorCode.WKS_API_008.wire(),
+                  "toVersion equals current caseTypeVersion — no-op rebase rejected"
+                      + " (current="
+                      + fromVersion
+                      + ", requested="
+                      + toVersion
+                      + ")")));
+    }
+    if (toVersion < fromVersion) {
       throw new WksConfigException(
           List.of(
               ErrorDetail.of(
@@ -312,6 +363,24 @@ public class CaseRebaseService {
       }
     }
 
+    // Story 3.9 review remediation — stage-id rename detection. When the case currently sits on a
+    // stage S in fromVersion and toVersion does NOT declare a stage with the same id, the operator
+    // must manually decide where the case lands. Phase-0 surfaces this as irreconcilable; Story
+    // 3-9.1 will add operator-supplied mapping JSON for stage remap.
+    String currentStageId = kase.currentStageId();
+    if (currentStageId != null && !currentStageId.isBlank()) {
+      Set<String> toStageIds = collectStageIds(toConfig);
+      Set<String> fromStageIds = collectStageIds(fromConfig);
+      if (fromStageIds.contains(currentStageId) && !toStageIds.contains(currentStageId)) {
+        irreconcilable.add(
+            new IrreconcilableItem(
+                IrreconcilableKind.STAGE_REMOVED_WITH_ACTIVE_CASE,
+                null,
+                null,
+                currentStageId));
+      }
+    }
+
     return new CaseRebaseReport(
         kase.id(),
         kase.caseTypeId(),
@@ -321,6 +390,16 @@ public class CaseRebaseService {
         fieldMappings,
         statusMappings,
         irreconcilable);
+  }
+
+  private static Set<String> collectStageIds(CaseTypeConfig config) {
+    Set<String> ids = new HashSet<>();
+    if (config.stages() != null) {
+      for (StageDefinition stage : config.stages()) {
+        ids.add(stage.id());
+      }
+    }
+    return ids;
   }
 
   private static Map<String, FieldDefinition> indexFields(CaseTypeConfig config) {

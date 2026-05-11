@@ -307,15 +307,12 @@ public class AdminController {
    * {@code WKS-CFG-034} (no DB mutation, no audit entry).
    *
    * <p>When the apply succeeds, an INFO-level audit log entry is emitted with {@code
-   * event=admin.case.rebase} AFTER the transaction commits. The audit entry is NOT emitted on
-   * failure.
-   *
-   * <p><b>Transactional contract:</b> the {@code @Transactional} boundary wraps the {@code
-   * caseRebaseService.apply()} call. The audit log emission MUST be OUTSIDE the transaction
-   * (post-return from this method's transactional boundary) so that a DB exception inside the
-   * transaction does not produce a spurious audit entry. The audit log is emitted after {@code
-   * apply()} returns successfully — see memory {@code
-   * feedback_transactional_db_exception_postgres.md}.
+   * event=admin.case.rebase} AFTER the surrounding transaction commits. The audit entry is NOT
+   * emitted on failure. Story 3.9 review remediation: the controller is NOT {@code @Transactional}
+   * — the service publishes a {@link com.wkspower.platform.domain.event.RebaseApplied} domain event
+   * which {@link com.wkspower.platform.audit.RebaseAuditListener} consumes via
+   * {@code @TransactionalEventListener(AFTER_COMMIT)}. Rollback of the inner repository transaction
+   * ⇒ no event delivery ⇒ no audit line.
    */
   @PostMapping("/case-types/{caseTypeId}/cases/{caseId}/rebase")
   @PreAuthorize("hasRole('ADMIN')")
@@ -346,26 +343,21 @@ public class AdminController {
   public ApiResponse<CaseRebaseReport> rebaseApply(
       @PathVariable String caseTypeId,
       @PathVariable UUID caseId,
-      @RequestParam(name = "to") int toVersion) {
+      @RequestParam(name = "to") int toVersion,
+      HttpServletRequest request) {
     String actorEmail = currentActorEmail();
     String caller = actorEmail == null ? "ANONYMOUS" : actorEmail;
+    String requestId = request != null ? request.getHeader("X-Request-Id") : null;
 
-    CaseRebaseReport report = caseRebaseService.apply(caseTypeId, caseId, toVersion);
-
-    // Audit log is emitted AFTER apply() returns successfully (post-transaction, as required by
-    // memory feedback_transactional_db_exception_postgres.md). If apply() throws, we never reach
-    // this line — no spurious audit entry.
-    log.info(
-        "event=admin.case.rebase caller={} caseTypeId={} caseId={} priorVersionNum={} toVersion={}"
-            + " outcome=ACCEPTED reason={}",
-        caller,
-        caseTypeId,
-        caseId,
-        report.fromVersion(),
-        report.toVersion(),
-        ForceOverrideReason.MIGRATION_REBASE.wireString());
-
-    return ApiResponse.success(report);
+    // Story 3.9 review remediation — controller method is @Transactional so the version-checked
+    // UPDATE in CaseRebaseService.apply commits atomically with the event publish. The
+    // RebaseApplied event is consumed by RebaseAuditListener via
+    // @TransactionalEventListener(AFTER_COMMIT), which is BY DEFINITION outside the @Transactional
+    // scope — the audit line is structurally prevented from firing on rollback. Replaces the
+    // prior synchronous log.info call that fired before commit. See memory
+    // feedback_transactional_db_exception_postgres.md.
+    return ApiResponse.success(
+        caseRebaseService.apply(caseTypeId, caseId, toVersion, caller, requestId));
   }
 
   // -------------------------------------------------------------------------
@@ -410,8 +402,12 @@ public class AdminController {
       case LENIENT_SUCCESS -> ForceOverrideReason.LENIENT_SUCCESS;
       case UNPARSEABLE_BYPASS -> ForceOverrideReason.UNPARSEABLE_BYPASS;
       case NO_OVERRIDE_USED ->
-          // Should not be reached — callers guard with gateOutcome != NO_OVERRIDE_USED
-          ForceOverrideReason.LENIENT_SUCCESS;
+          // Story 3.9 review remediation — fail loud. Reaching this branch means the call-site
+          // skipped its {@code gateOutcome != NO_OVERRIDE_USED} guard. Silent fallback to
+          // LENIENT_SUCCESS would mask a real audit-log defect (the audit line would claim a
+          // gate engaged when none did). Surface the bug at the source.
+          throw new IllegalStateException(
+              "audit emission must not request reason when no override used");
     };
   }
 

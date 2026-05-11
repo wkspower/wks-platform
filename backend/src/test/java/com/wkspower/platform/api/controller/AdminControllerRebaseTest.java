@@ -2,7 +2,9 @@ package com.wkspower.platform.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -92,7 +94,7 @@ class AdminControllerRebaseTest {
 
   @Test
   void apply_asAdmin_returns200WithAppliedTrue() throws Exception {
-    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3)))
+    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
         .thenReturn(cleanDryRunReport(true));
 
     mockMvc
@@ -110,7 +112,7 @@ class AdminControllerRebaseTest {
 
   @Test
   void apply_withIrreconcilable_returns422WithCfg034() throws Exception {
-    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3)))
+    when(caseRebaseService.apply(eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
         .thenThrow(
             new WksConfigException(
                 List.of(
