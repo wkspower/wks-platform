@@ -137,13 +137,6 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
               });
     }
     Registered incoming = new Registered(config, schemaGenerator.generate(config));
-    // Populate byVersion cache eagerly on register so that findVersion(id, version) never falls
-    // back to parsing the stub YAML written by the test-bypass path. The production path
-    // (ConfigService.applyVersionRegistry) writes full YAML before register; the test-bypass path
-    // writes a stub. Either way, the in-memory CaseTypeConfig is authoritative and is cached here,
-    // making the parse-validate round-trip unnecessary for same-version lookups. Surfaced by
-    // BpmnSequentialStagedStatusPropagationPostgresIT (Story 6.2 AC7 gap-10 fix-b).
-    byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
     AtomicReference<RegistrationResult> outcome = new AtomicReference<>();
 
     byId.compute(
@@ -151,6 +144,11 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
         (k, existing) -> {
           if (existing == null) {
             outcome.set(RegistrationResult.registered());
+            // Story 6.2 — cache byVersion ONLY when the registration is accepted by the
+            // older-version guard below. Caching eagerly before the guard would seed a
+            // historical-version slot for a config that subsequent guard rules may reject,
+            // leaving the version cache inconsistent with byId.
+            byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
             return incoming;
           }
           if (config.version() == existing.config.version()) {
@@ -173,6 +171,8 @@ public class CaseTypeRegistry implements CaseTypeReader, CaseTypeRegistrar {
             return existing;
           }
           outcome.set(RegistrationResult.replaced());
+          // Replace path — version is newer than existing; cache it.
+          byVersion.putIfAbsent(new VersionKey(config.id(), config.version()), config);
           return incoming;
         });
     return outcome.get();
