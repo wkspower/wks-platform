@@ -227,9 +227,7 @@ public class MappingValidator {
                           + file,
                       fieldPath));
             }
-            userTasksOut.put(
-                taskId,
-                new UserTaskMapping(rut.wksTask(), rut.form()));
+            userTasksOut.put(taskId, new UserTaskMapping(rut.wksTask(), rut.form()));
           }
         }
 
@@ -393,7 +391,8 @@ public class MappingValidator {
             RawCaseTypeConfig.RawOutcomeMapping rom = outcomeEntry.getValue();
             String outcomeField = base + "/routing/outcomes/" + outcomeKey;
 
-            // WKS-MAP-010: outcome rule references a key not declared by any userTask.outcomes list.
+            // WKS-MAP-010: outcome rule references a key not declared by any userTask.outcomes
+            // list.
             if (!declaredOutcomeKeys.isEmpty() && !declaredOutcomeKeys.contains(outcomeKey)) {
               errors.add(
                   ErrorDetail.ofField(
@@ -417,8 +416,7 @@ public class MappingValidator {
               checkStageTransition(
                   rom.stageTransition(), stageIds, errors, outcomeField + "/stageTransition");
               outcomesOut.put(
-                  outcomeKey,
-                  new OutcomeMapping(rom.stageTransition(), rom.payloadFields()));
+                  outcomeKey, new OutcomeMapping(rom.stageTransition(), rom.payloadFields()));
             }
           }
         }

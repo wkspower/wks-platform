@@ -41,6 +41,7 @@ public class CaseTypeController {
 
   private final CaseTypeReader reader;
   private final CaseTypePermissionEvaluator evaluator;
+
   /** Story 6.2 AC1 — for resolving outcomeMappings to surface on the case-type view endpoint. */
   private final MappingRegistry mappingRegistry;
 

@@ -395,12 +395,13 @@ class CaseServiceTest {
   // ---- gap-10 fix-a: initialStatus resolution ----------------------------
 
   /**
-   * Story 6.2 AC6 — when the YAML omits top-level statuses but stages declare
-   * {@code initialStatus}, the first stage's initialStatus is used (gap-10 fix-a).
+   * Story 6.2 AC6 — when the YAML omits top-level statuses but stages declare {@code
+   * initialStatus}, the first stage's initialStatus is used (gap-10 fix-a).
    */
   @Test
   void initialStatus_stageScopedOnly_usesFirstStageInitialStatus() {
-    // Simulate bpmn-sequential-staged: no top-level statuses (ConfigValidator injects [open,closed])
+    // Simulate bpmn-sequential-staged: no top-level statuses (ConfigValidator injects
+    // [open,closed])
     // but stages declare their own statuses and initialStatus.
     CaseTypeConfig stagedType =
         CaseTypeConfig.builder()

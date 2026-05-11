@@ -167,10 +167,10 @@ public final class CaseDtoMapper {
   }
 
   /**
-   * Story 6.2 AC1 — overload accepting an optional {@link MappingDefinition} so that the
-   * {@code GET /api/case-types/{id}} endpoint can surface {@code outcomeMappings} (key →
-   * stageTransition) from the first attachment's outcome block. When {@code mapping} is empty the
-   * {@code outcomeMappings} field is omitted from JSON ({@code @JsonInclude(NON_EMPTY)}).
+   * Story 6.2 AC1 — overload accepting an optional {@link MappingDefinition} so that the {@code GET
+   * /api/case-types/{id}} endpoint can surface {@code outcomeMappings} (key → stageTransition) from
+   * the first attachment's outcome block. When {@code mapping} is empty the {@code outcomeMappings}
+   * field is omitted from JSON ({@code @JsonInclude(NON_EMPTY)}).
    */
   public static CaseTypeViewDto toCaseTypeView(
       CaseTypeConfig caseType, Optional<MappingDefinition> mapping) {
@@ -191,14 +191,19 @@ public final class CaseDtoMapper {
     // Story 6.2 AC1 — resolve outcomeMappings from first attachment; empty map when absent.
     Map<String, String> outcomeMappings =
         mapping
-            .flatMap(m -> m.attachments().isEmpty() ? Optional.empty() : Optional.of(m.attachments().get(0)))
+            .flatMap(
+                m ->
+                    m.attachments().isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(m.attachments().get(0)))
             .map(AttachmentDefinition::outcomeMappings)
             .filter(om -> !om.isEmpty())
-            .map(om -> {
-              Map<String, String> result = new HashMap<>();
-              om.forEach((key, rule) -> result.put(key, rule.stageTransition()));
-              return (Map<String, String>) Map.copyOf(result);
-            })
+            .map(
+                om -> {
+                  Map<String, String> result = new HashMap<>();
+                  om.forEach((key, rule) -> result.put(key, rule.stageTransition()));
+                  return (Map<String, String>) Map.copyOf(result);
+                })
             .orElse(Map.of());
     return new CaseTypeViewDto(
         caseType.id(),

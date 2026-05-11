@@ -782,8 +782,7 @@ public class CaseService {
   }
 
   /**
-   * Initial status for a newly-created case. Resolution order (Story 2.3 + Story 6.2 gap-10
-   * fix-a):
+   * Initial status for a newly-created case. Resolution order (Story 2.3 + Story 6.2 gap-10 fix-a):
    *
    * <ol>
    *   <li>If any stage declares an {@code initialStatus}, use the FIRST stage's {@code

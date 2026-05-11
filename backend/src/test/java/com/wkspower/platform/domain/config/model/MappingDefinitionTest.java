@@ -110,7 +110,13 @@ class MappingDefinitionTest {
             Map.of("approve", new OutcomeMapping("intake -> decision")));
     AttachmentDefinition withoutOutcomes =
         new AttachmentDefinition(
-            "bpmn", "x.bpmn", "case", Optional.empty(), Map.of(), Optional.empty(), Map.of(),
+            "bpmn",
+            "x.bpmn",
+            "case",
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Map.of(),
             List.of());
     String h1 = new MappingDefinition(List.of(withOutcomes)).computeHash();
     String h2 = new MappingDefinition(List.of(withoutOutcomes)).computeHash();

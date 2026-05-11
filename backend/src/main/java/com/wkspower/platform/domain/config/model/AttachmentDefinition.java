@@ -28,8 +28,8 @@ import java.util.Optional;
  * @param endEventMapping optional {@code events.endEvent} rule (single per attachment)
  * @param signalMappings BPMN signal id → {@link SignalMapping}
  * @param propertyEmissionRules ordered {@code map.properties[]} list
- * @param outcomeMappings Story 6.2 — outcome key → {@link OutcomeMapping} (optional; empty when
- *     the attachment has no multi-outcome routing rules, preserving single-outcome backward
+ * @param outcomeMappings Story 6.2 — outcome key → {@link OutcomeMapping} (optional; empty when the
+ *     attachment has no multi-outcome routing rules, preserving single-outcome backward
  *     compatibility)
  */
 public record AttachmentDefinition(
@@ -60,10 +60,10 @@ public record AttachmentDefinition(
   }
 
   /**
-   * Story 6.2 — 8-param backward-compatible constructor. Defaults {@code outcomeMappings} to
-   * {@link Map#of()} so all 20+ existing call sites remain unchanged. Debt: per memory
-   * {@code project_raw_casetype_config_constructor_debt}, remove this compat ctor on the next story
-   * that touches {@code AttachmentDefinition} (likely Story 6-3 — Edit Contract).
+   * Story 6.2 — 8-param backward-compatible constructor. Defaults {@code outcomeMappings} to {@link
+   * Map#of()} so all 20+ existing call sites remain unchanged. Debt: per memory {@code
+   * project_raw_casetype_config_constructor_debt}, remove this compat ctor on the next story that
+   * touches {@code AttachmentDefinition} (likely Story 6-3 — Edit Contract).
    */
   public AttachmentDefinition(
       String type,
@@ -125,18 +125,17 @@ public record AttachmentDefinition(
    * Story 6.2 — YAML {@code routing.outcomes.<key>} entry.
    *
    * <p>{@link #stageTransition()} is REQUIRED and follows the same {@code "<from> -> <to>"} syntax
-   * validated by {@code MappingValidator.STAGE_TRANSITION} and parsed by
-   * {@code ExecutionSignalRouter.applyStageTransition} (line 411 regex {@code \s*->\s*} split).
+   * validated by {@code MappingValidator.STAGE_TRANSITION} and parsed by {@code
+   * ExecutionSignalRouter.applyStageTransition} (line 411 regex {@code \s*->\s*} split).
    *
-   * <p>{@link #payloadFieldHints()} is OPTIONAL Phase-1 doc-only metadata listing expected
-   * {@code payload.*} keys (e.g. {@code [reason, conditions]}). Not used by the router in Story
-   * 6.2; reserved for Story 6-3 form-in-dialog rendering.
+   * <p>{@link #payloadFieldHints()} is OPTIONAL Phase-1 doc-only metadata listing expected {@code
+   * payload.*} keys (e.g. {@code [reason, conditions]}). Not used by the router in Story 6.2;
+   * reserved for Story 6-3 form-in-dialog rendering.
    */
   public record OutcomeMapping(String stageTransition, List<String> payloadFieldHints) {
     public OutcomeMapping {
       Objects.requireNonNull(stageTransition, "stageTransition");
-      payloadFieldHints =
-          payloadFieldHints == null ? List.of() : List.copyOf(payloadFieldHints);
+      payloadFieldHints = payloadFieldHints == null ? List.of() : List.copyOf(payloadFieldHints);
     }
 
     /** Convenience constructor when no payload field hints are declared. */

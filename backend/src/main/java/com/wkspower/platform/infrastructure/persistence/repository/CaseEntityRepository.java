@@ -43,10 +43,10 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
   /**
    * Story 6.2 gap-10 fix-b — added {@code clearAutomatically = true} so the JPA first-level-cache
    * is cleared after the JPQL UPDATE. Without this, {@code CaseRepository.findById} called
-   * immediately after {@code stageAdvancer.advance()} returns the stale (pre-advance)
-   * {@code currentStageId} from the Hibernate cache, causing {@code resetStatusForAdvancedStage} to
-   * resolve the wrong stage and overwrite {@code case.status} with the PREVIOUS stage's
-   * {@code initialStatus} instead of the next stage's.
+   * immediately after {@code stageAdvancer.advance()} returns the stale (pre-advance) {@code
+   * currentStageId} from the Hibernate cache, causing {@code resetStatusForAdvancedStage} to
+   * resolve the wrong stage and overwrite {@code case.status} with the PREVIOUS stage's {@code
+   * initialStatus} instead of the next stage's.
    */
   @Modifying(clearAutomatically = true)
   @Query(

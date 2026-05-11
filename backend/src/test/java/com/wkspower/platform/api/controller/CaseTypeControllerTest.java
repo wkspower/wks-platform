@@ -58,7 +58,11 @@ class CaseTypeControllerTest {
 
   @MockitoBean JwtTokenProvider jwtTokenProvider;
   @MockitoBean UserRepository userRepository;
-  /** Story 6.2 AC1 — MappingRegistry injected into CaseTypeController for outcomeMappings projection. */
+
+  /**
+   * Story 6.2 AC1 — MappingRegistry injected into CaseTypeController for outcomeMappings
+   * projection.
+   */
   @MockitoBean MappingRegistry mappingRegistry;
 
   // ---- GET /api/case-types (list) ---------------------------------------

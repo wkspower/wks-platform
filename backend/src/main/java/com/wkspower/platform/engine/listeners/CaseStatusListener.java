@@ -89,7 +89,8 @@ public class CaseStatusListener implements ExecutionListener {
     // The "outcome" key is NOT in RESERVED_PROCESS_VARIABLES (TaskService.sanitiseVariables) —
     // it is intentionally allowed through so the Camunda execution carries it here.
     Object outcomeRaw = execution.getVariable("outcome");
-    if (outcomeRaw instanceof String outcomeKey && !outcomeKey.isBlank()
+    if (outcomeRaw instanceof String outcomeKey
+        && !outcomeKey.isBlank()
         && element instanceof UserTask) {
       adapter.emit(
           new ExecutionSignal(

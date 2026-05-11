@@ -5,9 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.OutcomeMapping;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
-import com.wkspower.platform.domain.config.model.StageDefinition;
-import com.wkspower.platform.domain.config.model.StatusColor;
-import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
@@ -30,6 +27,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,11 +39,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * instance.
  *
  * <p>Per Sprint 9 CF#2 enforcement: any new IT touching persistence MUST ship a Postgres-IT variant
- * in the same PR. This test discharges that requirement for the gap-10 fix-b surface
- * ({@code statusUpdater.updateStatus} within the stage-advance transaction).
+ * in the same PR. This test discharges that requirement for the gap-10 fix-b surface ({@code
+ * statusUpdater.updateStatus} within the stage-advance transaction).
  *
  * <p>Covers the same lifecycle walk as {@link BpmnSequentialStagedStatusPropagationIT} but on a
  * real Postgres 16 container:
+ *
  * <ol>
  *   <li>Create case → assert {@code case.status = "drafting"} (AC6 gap-10 fix-a).
  *   <li>Dispatch OUTCOME signal → stage advances → assert {@code case.status = "in-review"} (AC7).
@@ -88,14 +88,30 @@ class BpmnSequentialStagedStatusPropagationPostgresIT {
   @Autowired private ExecutionSignalRouter backendSignalRouter;
   @Autowired private MappingRegistry mappingRegistry;
   @Autowired private CaseTypeRegistry caseTypeRegistry;
+  @Autowired private PlatformTransactionManager transactionManager;
+
+  /**
+   * Wraps {@code onSignal} dispatches in a Spring transaction so that {@code
+   * CaseStatusAdapter.updateStatus} (Propagation.MANDATORY) can join an active transaction. In
+   * production the containing transaction is opened by {@code CaseStatusListener} during BPMN
+   * engine execution; this template mirrors that boundary for the IT.
+   */
+  private void inTx(Runnable work) {
+    new TransactionTemplate(transactionManager).executeWithoutResult(s -> work.run());
+  }
 
   private static final Instant NOW = Instant.parse("2026-05-11T10:00:00Z");
-  private static final String CASE_TYPE_ID = "bpmn-seq-staged-pg-it";
+  // Must match BpmnSequentialStagedStatusPropagationIT.CASE_TYPE_ID — buildCaseTypeConfig()
+  // bakes that id into the returned CaseTypeConfig, and the router resolves status-reset via
+  // caseTypeReader.findVersion(caseTypeId, version). A mismatch silently logs and skips the
+  // status reset, leaving the case at its initial status. Each Postgres-IT runs in its own
+  // Spring context so there is no in-memory CaseTypeRegistry contention with the H2 sibling.
+  private static final String CASE_TYPE_ID = "bpmn-seq-staged-it";
   private static final String VERSION = "1";
 
   /**
-   * Full lifecycle walk on real Postgres:
-   * create → drafting → approve → in-review → approve → approved.
+   * Full lifecycle walk on real Postgres: create → drafting → approve → in-review → approve →
+   * approved.
    *
    * <p>Discharges Postgres-IT parity for gap-10 fix-b (Story 6.2 AC7).
    */
@@ -119,8 +135,7 @@ class BpmnSequentialStagedStatusPropagationPostgresIT {
             NOW,
             0L);
     caseRepository.save(toSave);
-    stageRepository.materialiseStages(
-        caseId, BpmnSequentialStagedStatusPropagationIT.STAGES, NOW);
+    stageRepository.materialiseStages(caseId, BpmnSequentialStagedStatusPropagationIT.STAGES, NOW);
     stageRepository.appendTransition(
         new StageRepository.Transition(
             caseId, null, null, "intake", 0, List.of(), "wks-auto-rule", "case-create", NOW));
@@ -132,7 +147,8 @@ class BpmnSequentialStagedStatusPropagationPostgresIT {
     // Assert AC6: initial status is "drafting" on real Postgres.
     Case created = caseRepository.findById(caseId).orElseThrow();
     assertThat(created.status())
-        .as("AC6 gap-10 fix-a on Postgres: case.status should be 'drafting' from intake stage initialStatus")
+        .as(
+            "AC6 gap-10 fix-a on Postgres: case.status should be 'drafting' from intake stage initialStatus")
         .isEqualTo("drafting");
     assertThat(created.currentStageId()).isEqualTo("intake");
 
@@ -154,13 +170,15 @@ class BpmnSequentialStagedStatusPropagationPostgresIT {
     mappingRegistry.register(caseTypeRef, VERSION, mapping1);
 
     // Dispatch OUTCOME signal: approve on intake stage → advance to review.
-    backendSignalRouter.onSignal(
-        new ExecutionSignal(
-            ExecutionSignalKind.OUTCOME,
-            "formOutcome",
-            new com.wkspower.platform.domain.port.CaseInstanceRef(caseId, caseTypeRef),
-            "intake-triage",
-            Map.of("outcome", "approve")));
+    inTx(
+        () ->
+            backendSignalRouter.onSignal(
+                new ExecutionSignal(
+                    ExecutionSignalKind.OUTCOME,
+                    "formOutcome",
+                    new com.wkspower.platform.domain.port.CaseInstanceRef(caseId, caseTypeRef),
+                    "intake-triage",
+                    Map.of("outcome", "approve"))));
 
     Case afterFirstAdvance = caseRepository.findById(caseId).orElseThrow();
     assertThat(afterFirstAdvance.currentStageId())
@@ -186,21 +204,24 @@ class BpmnSequentialStagedStatusPropagationPostgresIT {
                     Map.of("approve", new OutcomeMapping("review -> decision")))));
     mappingRegistry.register(caseTypeRef, VERSION, mapping2);
 
-    backendSignalRouter.onSignal(
-        new ExecutionSignal(
-            ExecutionSignalKind.OUTCOME,
-            "formOutcome",
-            new com.wkspower.platform.domain.port.CaseInstanceRef(caseId, caseTypeRef),
-            "review-assess",
-            Map.of("outcome", "approve")));
+    inTx(
+        () ->
+            backendSignalRouter.onSignal(
+                new ExecutionSignal(
+                    ExecutionSignalKind.OUTCOME,
+                    "formOutcome",
+                    new com.wkspower.platform.domain.port.CaseInstanceRef(caseId, caseTypeRef),
+                    "review-assess",
+                    Map.of("outcome", "approve"))));
 
     Case afterSecondAdvance = caseRepository.findById(caseId).orElseThrow();
     assertThat(afterSecondAdvance.currentStageId())
         .as("stage should advance from review to decision on Postgres")
         .isEqualTo("decision");
     assertThat(afterSecondAdvance.status())
-        .as("AC7 gap-10 fix-b on Postgres: case.status = 'approved' after review → decision advance"
-            + " (JOURNEYS F4 step 6)")
+        .as(
+            "AC7 gap-10 fix-b on Postgres: case.status = 'approved' after review → decision advance"
+                + " (JOURNEYS F4 step 6)")
         .isEqualTo("approved");
   }
 

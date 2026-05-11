@@ -16,10 +16,10 @@ import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.CaseTypeRef;
+import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ExecutionSignal;
 import com.wkspower.platform.domain.port.ExecutionSignalKind;
 import com.wkspower.platform.domain.port.FakeRecordingWorkflowAdapter;
-import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.infrastructure.persistence.RouterItPersistenceImports;
 import com.wkspower.platform.infrastructure.persistence.entity.RoleEntity;
@@ -52,8 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
  * propagates the next stage's {@code initialStatus} into {@code case.status} on OUTCOME-dispatch
  * stage advance.
  *
- * <p>Also covers AC6 (gap-10 fix-a): case creation with a stage-scoped CaseType initialises
- * {@code case.status} from the first stage's {@code initialStatus} (NOT the ConfigValidator-injected
+ * <p>Also covers AC6 (gap-10 fix-a): case creation with a stage-scoped CaseType initialises {@code
+ * case.status} from the first stage's {@code initialStatus} (NOT the ConfigValidator-injected
  * {@code "open"} default).
  *
  * <p>Uses H2 in-memory DB (DataJpaTest slice). Postgres-IT parity is provided by {@link
@@ -61,17 +61,21 @@ import org.springframework.transaction.annotation.Transactional;
  * is documented separately.
  *
  * <p>Walk (mirrors JOURNEYS F4 steps 2/4/6/8):
+ *
  * <ol>
  *   <li>Create case → assert {@code case.status = "drafting"} (AC6 — JOURNEYS F4 step 2).
- *   <li>Dispatch OUTCOME signal (approve) on {@code intake} stage → assert
- *       {@code case.status = "in-review"} (AC7 — JOURNEYS F4 step 4).
- *   <li>Dispatch OUTCOME signal (approve) on {@code review} stage → assert
- *       {@code case.status = "approved"} (AC7 — JOURNEYS F4 step 6).
+ *   <li>Dispatch OUTCOME signal (approve) on {@code intake} stage → assert {@code case.status =
+ *       "in-review"} (AC7 — JOURNEYS F4 step 4).
+ *   <li>Dispatch OUTCOME signal (approve) on {@code review} stage → assert {@code case.status =
+ *       "approved"} (AC7 — JOURNEYS F4 step 6).
  * </ol>
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({BpmnSequentialStagedStatusPropagationIT.TestConfig.class, RouterItPersistenceImports.class})
+@Import({
+  BpmnSequentialStagedStatusPropagationIT.TestConfig.class,
+  RouterItPersistenceImports.class
+})
 @ActiveProfiles("dev")
 @Transactional
 public class BpmnSequentialStagedStatusPropagationIT {
@@ -146,6 +150,7 @@ public class BpmnSequentialStagedStatusPropagationIT {
    * Full lifecycle walk asserting case.status tracks stage advance (gap-10 fix a + b).
    *
    * <p>AC6: After create, case.status = "drafting" (not "open").
+   *
    * <p>AC7: After OUTCOME dispatch, case.status = next stage's initialStatus.
    */
   @Test
@@ -167,7 +172,7 @@ public class BpmnSequentialStagedStatusPropagationIT {
                     List.of(),
                     Map.of(
                         "approve", new OutcomeMapping("intake -> review"),
-                        "reject",  new OutcomeMapping("intake -> closed")))));
+                        "reject", new OutcomeMapping("intake -> closed")))));
     mappingRegistry.register(caseTypeRef, VERSION, mapping);
 
     // --- AC6: create case with stage-scoped status type ---
@@ -198,8 +203,9 @@ public class BpmnSequentialStagedStatusPropagationIT {
     // Assert AC6: initial status is "drafting" (gap-10 fix-a).
     Case created = caseRepository.findById(caseId).orElseThrow();
     assertThat(created.status())
-        .as("AC6 gap-10 fix-a: case.status should be 'drafting' from intake stage initialStatus,"
-            + " not the ConfigValidator-injected 'open' default")
+        .as(
+            "AC6 gap-10 fix-a: case.status should be 'drafting' from intake stage initialStatus,"
+                + " not the ConfigValidator-injected 'open' default")
         .isEqualTo("drafting");
     assertThat(created.currentStageId()).isEqualTo("intake");
 
@@ -235,8 +241,9 @@ public class BpmnSequentialStagedStatusPropagationIT {
         .as("stage should advance from intake to review")
         .isEqualTo("review");
     assertThat(afterFirstAdvance.status())
-        .as("AC7 gap-10 fix-b: case.status should be 'in-review' from review stage initialStatus"
-            + " after OUTCOME dispatch stage advance")
+        .as(
+            "AC7 gap-10 fix-b: case.status should be 'in-review' from review stage initialStatus"
+                + " after OUTCOME dispatch stage advance")
         .isEqualTo("in-review");
 
     // --- AC7 step 2: OUTCOME dispatch on review stage — advance to decision ---
@@ -270,7 +277,8 @@ public class BpmnSequentialStagedStatusPropagationIT {
         .as("stage should advance from review to decision")
         .isEqualTo("decision");
     assertThat(afterSecondAdvance.status())
-        .as("AC7: case.status should be 'approved' from decision stage initialStatus (JOURNEYS F4 step 6)")
+        .as(
+            "AC7: case.status should be 'approved' from decision stage initialStatus (JOURNEYS F4 step 6)")
         .isEqualTo("approved");
   }
 
@@ -383,8 +391,13 @@ public class BpmnSequentialStagedStatusPropagationIT {
         com.wkspower.platform.domain.port.Clock clock,
         CaseTypeReader caseTypeReader) {
       return new ExecutionSignalRouter(
-          mappingRegistry, wksStageAdvancer, caseStatusUpdater, caseRepository,
-          eventPublisher, clock, caseTypeReader);
+          mappingRegistry,
+          wksStageAdvancer,
+          caseStatusUpdater,
+          caseRepository,
+          eventPublisher,
+          clock,
+          caseTypeReader);
     }
   }
 }

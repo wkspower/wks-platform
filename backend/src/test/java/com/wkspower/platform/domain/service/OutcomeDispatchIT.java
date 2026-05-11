@@ -41,17 +41,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Story 6.2 AC2 / AC5 — H2 integration test for OUTCOME signal dispatch via
- * {@link ExecutionSignalRouter}.
+ * Story 6.2 AC2 / AC5 — H2 integration test for OUTCOME signal dispatch via {@link
+ * ExecutionSignalRouter}.
  *
  * <p>H2-only rationale (documented per Story 6.2 PR body): the router itself is in-memory domain
- * logic — the only persistence surface is {@code CaseStatusUpdater.updateStatus} and
- * {@code StageRepository.appendTransition}, both covered at the Postgres-IT level by
- * {@link CaseTransitionPostgresIT} (4.4b) and {@link BpmnSequentialStagedStatusPropagationPostgresIT}
- * (6.2 gap-10 AC7). Adding a duplicate Postgres-IT for the outcome dispatch path would test the
- * same persistence contract already covered by those tests.
+ * logic — the only persistence surface is {@code CaseStatusUpdater.updateStatus} and {@code
+ * StageRepository.appendTransition}, both covered at the Postgres-IT level by {@link
+ * CaseTransitionPostgresIT} (4.4b) and {@link BpmnSequentialStagedStatusPropagationPostgresIT} (6.2
+ * gap-10 AC7). Adding a duplicate Postgres-IT for the outcome dispatch path would test the same
+ * persistence contract already covered by those tests.
  *
  * <p>Covers:
+ *
  * <ul>
  *   <li>AC2: OUTCOME signal with declared outcome key resolves the OutcomeMapping rule and applies
  *       the stageTransition (stage advances, status resets to next stage initialStatus).
@@ -61,7 +62,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({BpmnSequentialStagedStatusPropagationIT.TestConfig.class, RouterItPersistenceImports.class})
+@Import({
+  BpmnSequentialStagedStatusPropagationIT.TestConfig.class,
+  RouterItPersistenceImports.class
+})
 @ActiveProfiles("dev")
 @Transactional
 class OutcomeDispatchIT {
@@ -107,8 +111,8 @@ class OutcomeDispatchIT {
   }
 
   /**
-   * AC2 — OUTCOME signal with declared outcome key "approve" resolves the mapping rule and
-   * applies the stageTransition "intake -> review", advancing the stage.
+   * AC2 — OUTCOME signal with declared outcome key "approve" resolves the mapping rule and applies
+   * the stageTransition "intake -> review", advancing the stage.
    */
   @Test
   void outcomeDispatch_declaredKey_advancesStageAndResetsStatus() {
@@ -149,7 +153,8 @@ class OutcomeDispatchIT {
         .as("AC2: stage should advance to review on 'approve' outcome")
         .isEqualTo("review");
     // The router emits stage-advance + status-reset (two events from resetStatusForAdvancedStage).
-    // Status reset: review stage's initialStatus = "in-review" (from stubCaseTypeReader in TestConfig).
+    // Status reset: review stage's initialStatus = "in-review" (from stubCaseTypeReader in
+    // TestConfig).
     // Note: TestConfig.stubCaseTypeReader returns BpmnSequentialStagedStatusPropagationIT.STAGES
     // which has review.initialStatus = "in-review".
     assertThat(after.status())
@@ -158,8 +163,8 @@ class OutcomeDispatchIT {
   }
 
   /**
-   * AC5 — OUTCOME signal with undeclared key "sendBack" causes WksMappingMissException (WKS-MAP-404)
-   * BEFORE any mutation. The case row is unchanged.
+   * AC5 — OUTCOME signal with undeclared key "sendBack" causes WksMappingMissException
+   * (WKS-MAP-404) BEFORE any mutation. The case row is unchanged.
    */
   @Test
   void outcomeDispatch_undeclaredKey_throwsMissExceptionBeforeMutation() {
@@ -192,14 +197,16 @@ class OutcomeDispatchIT {
 
     // The router catches WksMappingMissException internally (AC4 — miss is NOT propagated).
     // FakeRecordingWorkflowAdapter.emit() → router.onSignal() → catches miss → emits audit row.
-    assertThatNoException().isThrownBy(() ->
-        fake.emit(
-            new ExecutionSignal(
-                ExecutionSignalKind.OUTCOME,
-                "formOutcome",
-                new CaseInstanceRef(caseRow.id(), caseTypeRef),
-                "review-task",
-                Map.of("outcome", "sendBack"))));
+    assertThatNoException()
+        .isThrownBy(
+            () ->
+                fake.emit(
+                    new ExecutionSignal(
+                        ExecutionSignalKind.OUTCOME,
+                        "formOutcome",
+                        new CaseInstanceRef(caseRow.id(), caseTypeRef),
+                        "review-task",
+                        Map.of("outcome", "sendBack"))));
     em.flush();
     em.clear();
 

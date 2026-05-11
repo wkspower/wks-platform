@@ -331,24 +331,23 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
   }
 
   /**
-   * Story 6.2 AC2 / AC5 — multi-outcome routing dispatch. Resolves the outcome key from the
-   * signal payload, looks up the matching {@link OutcomeMapping} rule from the first attachment,
-   * and delegates to {@link #applyStageTransition} (which emits the two-event
-   * {@code stage-advance} + {@code status-reset} pair with a shared correlationId).
+   * Story 6.2 AC2 / AC5 — multi-outcome routing dispatch. Resolves the outcome key from the signal
+   * payload, looks up the matching {@link OutcomeMapping} rule from the first attachment, and
+   * delegates to {@link #applyStageTransition} (which emits the two-event {@code stage-advance} +
+   * {@code status-reset} pair with a shared correlationId).
    *
    * <p>On miss: throws {@link WksMappingMissException} carrying {@code WKS-MAP-404} BEFORE any
    * mutation — the router's existing {@code auditMiss} path handles the audit row emission.
    *
-   * <p>The {@code source = backend(formOutcome)} discrimination reuses the existing
-   * {@link AuditSource.Backend} with {@code adapterName = signal.adapterName()} — the frontend
-   * dispatcher sets adapterName to {@code "formOutcome"} for outcome signals so the two-row audit
-   * contract (form-row source=form, effect-row source=backend(formOutcome)) is satisfied without
-   * introducing a new AuditSource variant. Document in PR.
+   * <p>The {@code source = backend(formOutcome)} discrimination reuses the existing {@link
+   * AuditSource.Backend} with {@code adapterName = signal.adapterName()} — the frontend dispatcher
+   * sets adapterName to {@code "formOutcome"} for outcome signals so the two-row audit contract
+   * (form-row source=form, effect-row source=backend(formOutcome)) is satisfied without introducing
+   * a new AuditSource variant. Document in PR.
    *
    * @return {@code true} always (stage-advance handled — caller skips {@code auditSuccess}).
    */
-  private boolean dispatchOutcome(
-      ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
+  private boolean dispatchOutcome(ExecutionSignal signal, Case caseRow, MappingDefinition mapping) {
     // Read the outcome key from the signal payload.
     Object raw = signal.payload().get("outcome");
     if (!(raw instanceof String outcomeKey) || ((String) raw).isBlank()) {
@@ -375,7 +374,8 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
           "no outcome rule for key '" + outcomeKey + "'");
     }
 
-    // Apply the stage transition (emits stage-advance + status-reset pair with shared correlationId).
+    // Apply the stage transition (emits stage-advance + status-reset pair with shared
+    // correlationId).
     applyStageTransition(signal, caseRow, rule.stageTransition());
     return true; // stage-advance handled — caller must NOT call auditSuccess.
   }
