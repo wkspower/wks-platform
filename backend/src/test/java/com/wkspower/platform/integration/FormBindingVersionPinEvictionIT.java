@@ -165,8 +165,7 @@ class FormBindingVersionPinEvictionIT {
             ? List.of(
                 new FieldDefinition(
                     "applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
-                new FieldDefinition(
-                    "email", "Email", FieldType.TEXT, true, 1, List.of(), null))
+                new FieldDefinition("email", "Email", FieldType.TEXT, true, 1, List.of(), null))
             : List.of(
                 new FieldDefinition(
                     "applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
