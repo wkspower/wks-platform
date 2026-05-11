@@ -275,4 +275,28 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          fast-it: excludes Postgres-Testcontainer ITs (filename suffix *PostgresIT.java) from the
+          failsafe run. Intended for the per-story dev loop (human or agent) where the 2-5min Docker
+          startup cost dominates wall-clock and raises tool-call-ceiling risk for agent dispatches.
+          CI never activates this profile and runs the full matrix.
+        -->
+        <profile>
+            <id>fast-it</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*PostgresIT.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

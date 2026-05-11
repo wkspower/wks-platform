@@ -26,7 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("production")
 @Testcontainers(disabledWithoutDocker = true)
-class CaseStatusIndexIT {
+class CaseStatusIndexPostgresIT {
 
   @Container
   @SuppressWarnings("resource")

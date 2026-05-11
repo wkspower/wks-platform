@@ -157,6 +157,26 @@ docker buildx build -f docker/Dockerfile -t wks:ci .
 
 "Lint + test + build" is **not** the full set. `format:check` is a separate step and Prettier regressions only surface there. When in doubt, grep `ci.yml` for `run:` and copy every command verbatim.
 
+### Inner loop: `-Pfast-it` for between-iteration runs
+
+For the per-story development loop (human or agent) — i.e. checking work *between* commits while iterating — use:
+
+```bash
+cd backend && ./mvnw -B -ntp verify -Pfast-it
+```
+
+The `fast-it` Maven profile (defined in `backend/pom.xml`) excludes `**/*PostgresIT.java` from failsafe. That cuts ~11 Testcontainer-based ITs whose Docker startup dominates wall-clock (~2–5 min), bringing the inner loop from ~4–8 min to ~1–2 min. This matters most for agent dispatches, where long `verify` runs raise tool-call-ceiling risk and API 529 retry cost.
+
+**This is not a CI bypass.** Postgres ITs still run in CI on every push, and the `.githooks/pre-push` hook still runs the full `verify` (without `-Pfast-it`) before any push leaves the machine — that pre-push gate is the "match CI locally" contract and is not negotiable. `-Pfast-it` is for the iteration cycle *before* the pre-push gate.
+
+When adding a new `*PostgresIT.java` class, run that one class directly to verify it passes:
+
+```bash
+cd backend && ./mvnw -B -ntp failsafe:integration-test -Dit.test=NewPostgresIT
+```
+
+Filename convention: any IT that requires Testcontainers/Postgres MUST be named `*PostgresIT.java` so the profile excludes it. H2-based ITs use the plain `*IT.java` suffix.
+
 ### Pre-push hook (one-time setup)
 
 A committed `pre-push` hook at `.githooks/pre-push` runs the full CI mirror automatically. Enable it once per clone:
