@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,7 +60,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import java.util.Map;
 /**
  * Story 2.3 D5b — end-to-end case flow over HTTP. Boots the full Spring context, registers a
  * loan-application case type + deploys a minimal BPMN through the engine, then drives {@code POST →
@@ -491,7 +491,7 @@ class CaseFlowIT {
                             "status",
                             ExecutionSignalKind.TASK_STATUS_CHANGED,
                             "stage:case")),
-                            Map.of())));
+                    Map.of())));
     mappingRegistry.register(caseTypeRef, "1", mappingDef);
   }
 

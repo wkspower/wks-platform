@@ -227,7 +227,7 @@ class ExecutionSignalRouterIT {
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -275,7 +275,7 @@ class ExecutionSignalRouterIT {
                         "stage",
                         ExecutionSignalKind.STAGE_TRANSITION,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -392,7 +392,7 @@ class ExecutionSignalRouterIT {
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     // First: status change. Second: stage advance.
     fake.emit(
@@ -598,7 +598,7 @@ class ExecutionSignalRouterIT {
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -705,7 +705,7 @@ class ExecutionSignalRouterIT {
                         "status",
                         ExecutionSignalKind.TASK_COMPLETED,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -756,7 +756,7 @@ class ExecutionSignalRouterIT {
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
                         "stage:stage1")),
-                        Map.of())));
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(

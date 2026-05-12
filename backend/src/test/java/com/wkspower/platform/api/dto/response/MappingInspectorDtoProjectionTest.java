@@ -34,7 +34,7 @@ class MappingInspectorDtoProjectionTest {
                     "wksTaskCompleted",
                     ExecutionSignalKind.TASK_COMPLETED,
                     "case")),
-                    Map.of());
+            Map.of());
     MappingDefinition mapping = new MappingDefinition(List.of(a));
 
     MappingInspectorDto dto = MappingInspectorDto.from("auto-loan", "1.4", mapping);
