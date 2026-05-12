@@ -85,7 +85,7 @@ class RebaseAuditListenerCommitFailureTest {
                         // Publish the RebaseApplied event inside the tx. With
                         // @TransactionalEventListener(AFTER_COMMIT), delivery depends on commit.
                         publisher.publishEvent(
-                            new RebaseApplied(
+                            RebaseApplied.withoutRemap(
                                 UUID.randomUUID(),
                                 "test-ct",
                                 1,

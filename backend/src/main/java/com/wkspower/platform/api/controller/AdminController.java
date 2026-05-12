@@ -1,5 +1,7 @@
 package com.wkspower.platform.api.controller;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.response.DeployResponseDto;
 import com.wkspower.platform.domain.config.DeployResult;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -300,19 +304,61 @@ public class AdminController {
     return ApiResponse.success(report);
   }
 
+  // -------------------------------------------------------------------------
+  // Story 3.9.1 — RebaseApplyRequest DTO (optional request body)
+  // -------------------------------------------------------------------------
+
   /**
-   * Story 3.9 AC2 / AC3 — apply rebase: atomically update {@code cases.case_type_version} from the
-   * current version to the requested {@code ?to=N} version, but ONLY when there are no
-   * irreconcilable items. When irreconcilable items exist, the request is rejected with HTTP 422 +
-   * {@code WKS-CFG-034} (no DB mutation, no audit entry).
+   * Story 3.9.1 AC-1 — optional request body for the rebase apply endpoint. When absent or {@code
+   * stageRemap} is empty, behavior is identical to Story 3.9 (dangling stages remain irreconcilable
+   * and block apply with WKS-CFG-034).
+   *
+   * <p>Example bodies:
+   *
+   * <pre>{@code
+   * // Stage rename: underwriting → review
+   * { "stageRemap": { "underwriting": "review" } }
+   *
+   * // Stage split: intake maps to intake-triage; other stage-specific remap pairs follow
+   * { "stageRemap": { "intake": "intake-triage" } }
+   *
+   * // No stage remap (default behavior)
+   * {}
+   * }</pre>
+   */
+  record RebaseApplyRequest(@JsonProperty("stageRemap") Map<String, String> stageRemap) {
+
+    @JsonCreator
+    public RebaseApplyRequest {}
+
+    /** Convenience: empty body (no stageRemap). */
+    public static RebaseApplyRequest empty() {
+      return new RebaseApplyRequest(Map.of());
+    }
+
+    public Map<String, String> effectiveRemap() {
+      return stageRemap == null ? Map.of() : stageRemap;
+    }
+  }
+
+  /**
+   * Story 3.9 AC2 / AC3 / Story 3.9.1 — apply rebase: atomically update {@code
+   * cases.case_type_version} from the current version to the requested {@code ?to=N} version, but
+   * ONLY when there are no irreconcilable items. When irreconcilable items exist, the request is
+   * rejected with HTTP 422 + {@code WKS-CFG-034} (no DB mutation, no audit entry).
+   *
+   * <p>Story 3.9.1: accepts an optional JSON body with {@code stageRemap} to resolve dangling stage
+   * ids. When {@code stageRemap} is present and covers the case's {@code currentStageId}, the stage
+   * is flipped atomically with the version bump. Validation of {@code stageRemap} keys
+   * (WKS-CFG-036) and values (WKS-CFG-037) runs before any DB mutation.
    *
    * <p>When the apply succeeds, an INFO-level audit log entry is emitted with {@code
    * event=admin.case.rebase} AFTER the surrounding transaction commits. The audit entry is NOT
-   * emitted on failure. Story 3.9 review remediation: the controller is NOT {@code @Transactional}
-   * — the service publishes a {@link com.wkspower.platform.domain.event.RebaseApplied} domain event
+   * emitted on failure. Story 3.9 review remediation: the controller is {@code @Transactional} —
+   * the service publishes a {@link com.wkspower.platform.domain.event.RebaseApplied} domain event
    * which {@link com.wkspower.platform.audit.RebaseAuditListener} consumes via
-   * {@code @TransactionalEventListener(AFTER_COMMIT)}. Rollback of the inner repository transaction
-   * ⇒ no event delivery ⇒ no audit line.
+   * {@code @TransactionalEventListener(AFTER_COMMIT)}. Rollback ⇒ no event delivery ⇒ no audit
+   * line.
    */
   @PostMapping("/case-types/{caseTypeId}/cases/{caseId}/rebase")
   @PreAuthorize("hasRole('ADMIN')")
@@ -321,9 +367,10 @@ public class AdminController {
       summary = "Apply rebase of a Case to a newer CaseType version",
       description =
           "Atomically updates cases.case_type_version to the requested ?to=N version. Rejected with"
-              + " HTTP 422 + WKS-CFG-034 when irreconcilable items exist (no DB mutation). Returns"
-              + " HTTP 200 with CaseRebaseReport (applied=true) on success and emits an audit log"
-              + " entry.")
+              + " HTTP 422 + WKS-CFG-034 when irreconcilable items exist (no DB mutation). Accepts"
+              + " an optional JSON body with stageRemap to resolve renamed/split stages"
+              + " (Story 3.9.1: WKS-CFG-036 / WKS-CFG-037 for invalid remap keys/values)."
+              + " Returns HTTP 200 with CaseRebaseReport (applied=true) on success.")
   @ApiResponses(
       value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -337,17 +384,21 @@ public class AdminController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "422",
             description =
-                "Invalid toVersion (WKS-API-007) or irreconcilable items present (WKS-CFG-034)",
+                "Invalid toVersion (WKS-API-007), irreconcilable items (WKS-CFG-034),"
+                    + " stageRemap from-key invalid (WKS-CFG-036), stageRemap to-value invalid"
+                    + " (WKS-CFG-037)",
             content = @Content)
       })
   public ApiResponse<CaseRebaseReport> rebaseApply(
       @PathVariable String caseTypeId,
       @PathVariable UUID caseId,
       @RequestParam(name = "to") int toVersion,
+      @RequestBody(required = false) RebaseApplyRequest body,
       HttpServletRequest request) {
     String actorEmail = currentActorEmail();
     String caller = actorEmail == null ? "ANONYMOUS" : actorEmail;
     String requestId = request != null ? request.getHeader("X-Request-Id") : null;
+    Map<String, String> stageRemap = (body != null) ? body.effectiveRemap() : Map.of();
 
     // Story 3.9 review remediation — controller method is @Transactional so the version-checked
     // UPDATE in CaseRebaseService.apply commits atomically with the event publish. The
@@ -357,7 +408,7 @@ public class AdminController {
     // prior synchronous log.info call that fired before commit. See memory
     // feedback_transactional_db_exception_postgres.md.
     return ApiResponse.success(
-        caseRebaseService.apply(caseTypeId, caseId, toVersion, caller, requestId));
+        caseRebaseService.apply(caseTypeId, caseId, toVersion, caller, requestId, stageRemap));
   }
 
   // -------------------------------------------------------------------------

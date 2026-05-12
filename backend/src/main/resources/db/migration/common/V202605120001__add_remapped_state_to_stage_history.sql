@@ -1,0 +1,19 @@
+-- Story 3.9.1 — Add REMAPPED state to case_stage_history.state.
+-- The state column uses VARCHAR(16) with no check constraint in the original migration
+-- (V202605050001__case_stage_history.sql), so only the JPA enum mapping needs to know about
+-- REMAPPED; no ALTER TABLE is required. This migration widens the column guard to VARCHAR(16)
+-- which already fits REMAPPED (7 chars).
+--
+-- H2 + Postgres compatible: sits in db/migration/common/ so both engines run it.
+-- No schema change is needed because the state column is VARCHAR with no check constraint.
+-- This migration file exists as the Flyway version-slot anchor for Story 3.9.1 (sole
+-- Flyway-bearing Sprint 11 story) and documents the intent for future reviewers.
+--
+-- If a Postgres CHECK constraint was added to limit the state values, it would need to be
+-- widened here with:
+--   ALTER TABLE case_stage_history DROP CONSTRAINT IF EXISTS case_stage_history_state_check;
+--   ALTER TABLE case_stage_history ADD CONSTRAINT case_stage_history_state_check
+--     CHECK (state IN ('PENDING', 'ACTIVE', 'COMPLETED', 'SKIPPED', 'REMAPPED'));
+-- Since the original DDL uses no check constraint, the JPA @Enumerated(STRING) mapping is the
+-- only gate. This migration is intentionally a no-op SQL so the version history records intent.
+SELECT 1;

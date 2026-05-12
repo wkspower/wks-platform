@@ -229,6 +229,22 @@ public enum ErrorCode {
    * feedback_error_codes_are_wire_contract.md} — never reuse for a different meaning.
    */
   WKS_CFG_035("WKS-CFG-035"),
+  /**
+   * Story 3.9.1 — stage-remap validation: operator-supplied {@code stageRemap} key does not exist
+   * in the {@code fromVersion.stages[]} set. The apply endpoint rejects with HTTP 422 before any DB
+   * mutation. The error body identifies the offending key: {@code { key: "<fromStageId>", reason:
+   * "not present in fromVersion.stages" }}. Stable contract per {@code
+   * feedback_error_codes_are_wire_contract.md} — never reuse for a different meaning.
+   */
+  WKS_CFG_036("WKS-CFG-036"),
+  /**
+   * Story 3.9.1 — stage-remap validation: operator-supplied {@code stageRemap} value does not exist
+   * in the {@code toVersion.stages[]} set. The apply endpoint rejects with HTTP 422 before any DB
+   * mutation. The error body identifies the offending entry: {@code { from: "<fromStageId>", to:
+   * "<toStageId>", reason: "not present in toVersion.stages" }}. Stable contract per {@code
+   * feedback_error_codes_are_wire_contract.md} — never reuse for a different meaning.
+   */
+  WKS_CFG_037("WKS-CFG-037"),
   /** YAML parse error / I/O failure (catastrophic — validator never produces). */
   WKS_CFG_099("WKS-CFG-099"),
 

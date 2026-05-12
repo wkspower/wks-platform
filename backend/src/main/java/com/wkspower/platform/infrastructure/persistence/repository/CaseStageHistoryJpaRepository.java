@@ -83,4 +83,22 @@ public interface CaseStageHistoryJpaRepository extends JpaRepository<CaseStageHi
       @Param("exitedAt") Instant exitedAt,
       @Param("source") String source,
       @Param("sourceRef") String sourceRef);
+
+  /**
+   * Story 3.9.1 — conditional UPDATE that closes the ACTIVE stage row with state {@code REMAPPED}.
+   * Pivots on {@code state = ACTIVE} so concurrent modifications are detected by rowcount-zero.
+   * Stamps {@code exited_at} and preserves {@code source}/{@code source_ref} from the caller.
+   */
+  @Modifying
+  @Query(
+      "UPDATE CaseStageHistoryEntity h "
+          + "   SET h.state = com.wkspower.platform.domain.model.StageState.REMAPPED, "
+          + "       h.exitedAt = :exitedAt "
+          + " WHERE h.caseId = :caseId "
+          + "   AND h.stageId = :stageId "
+          + "   AND h.state = com.wkspower.platform.domain.model.StageState.ACTIVE")
+  int conditionalUpdateRemapped(
+      @Param("caseId") UUID caseId,
+      @Param("stageId") String stageId,
+      @Param("exitedAt") Instant exitedAt);
 }

@@ -166,6 +166,16 @@ class CaseServiceRequireCaseAccessTest {
     public int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion) {
       return 0;
     }
+
+    @Override
+    public int updateCaseTypeVersionAndStage(
+        UUID caseId,
+        int toCaseTypeVersion,
+        String toStageId,
+        int toStageOrdinal,
+        long expectedVersion) {
+      return 0;
+    }
   }
 
   private static final class NullValidator implements CaseDataValidator {
@@ -234,5 +244,9 @@ class CaseServiceRequireCaseAccessTest {
 
     @Override
     public void appendTransition(Transition transition) {}
+
+    @Override
+    public void remapStage(
+        UUID caseId, String fromStageId, String toStageId, int toOrdinal, Instant at) {}
   }
 }

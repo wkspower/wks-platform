@@ -57,4 +57,25 @@ public interface CaseRepository {
    *     as a concurrent-modification signal and throw {@code WksConcurrentModificationException})
    */
   int updateCaseTypeVersion(UUID caseId, int toCaseTypeVersion, long expectedVersion);
+
+  /**
+   * Story 3.9.1 — version-checked update of {@code cases.case_type_version} AND {@code
+   * cases.current_stage_id} atomically. Used by the stage-remap apply path so that both the version
+   * bump and the stage-id flip land in the same DB write. Bumps the optimistic-lock
+   * {@code @Version} column atomically. Returns the number of rows affected (0 ⇒ concurrent
+   * modification).
+   *
+   * @param caseId the case row to update
+   * @param toCaseTypeVersion the target CaseType version number
+   * @param toStageId the new {@code current_stage_id} value after the remap
+   * @param toStageOrdinal the new {@code current_stage_ordinal} value after the remap
+   * @param expectedVersion the optimistic-lock {@code @Version} value observed at read time
+   * @return {@code 1} on success, {@code 0} when no row matched (concurrent-modification signal)
+   */
+  int updateCaseTypeVersionAndStage(
+      UUID caseId,
+      int toCaseTypeVersion,
+      String toStageId,
+      int toStageOrdinal,
+      long expectedVersion);
 }

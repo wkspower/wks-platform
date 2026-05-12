@@ -236,6 +236,10 @@ class WksStageAdvancerTest {
       }
       transitions.add(t);
     }
+
+    @Override
+    public void remapStage(
+        UUID caseId, String fromStageId, String toStageId, int toOrdinal, Instant at) {}
   }
 
   private static final class RecordingPublisher implements EventPublisher {

@@ -96,4 +96,26 @@ public interface CaseEntityRepository extends JpaRepository<CaseEntity, UUID> {
       @Param("id") UUID id,
       @Param("toCaseTypeVersion") int toCaseTypeVersion,
       @Param("ver") long ver);
+
+  /**
+   * Story 3.9.1 — version-checked update of {@code case_type_version} AND {@code current_stage_id}
+   * / {@code current_stage_ordinal} atomically. Used by the stage-remap apply path so the version
+   * bump and stage-id flip are a single DB write. Bumps the {@code @Version} column. {@code
+   * clearAutomatically} prevents stale first-level-cache reads after the UPDATE.
+   */
+  @Modifying(clearAutomatically = true)
+  @Query(
+      "UPDATE CaseEntity c "
+          + "   SET c.caseTypeVersion = :toCaseTypeVersion, "
+          + "       c.currentStageId = :toStageId, "
+          + "       c.currentStageOrdinal = :toStageOrdinal, "
+          + "       c.version = c.version + 1 "
+          + " WHERE c.id = :id "
+          + "   AND c.version = :ver")
+  int updateCaseTypeVersionAndStage(
+      @Param("id") UUID id,
+      @Param("toCaseTypeVersion") int toCaseTypeVersion,
+      @Param("toStageId") String toStageId,
+      @Param("toStageOrdinal") int toStageOrdinal,
+      @Param("ver") long ver);
 }

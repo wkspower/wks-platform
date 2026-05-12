@@ -146,10 +146,11 @@ public class ConfigServiceConfig {
   }
 
   /**
-   * Story 3.9 — wires the framework-free {@link CaseRebaseService} with its domain ports. The
-   * {@code @Transactional} boundary for the apply path lives on the caller ({@link
+   * Story 3.9 / 3.9.1 — wires the framework-free {@link CaseRebaseService} with its domain ports.
+   * The {@code @Transactional} boundary for the apply path lives on the caller ({@link
    * com.wkspower.platform.api.controller.AdminController}) per the hexagonal-layer rule (domain
-   * stays Spring-free).
+   * stays Spring-free). Story 3.9.1 adds {@link StageRepository} for the stage-remap history
+   * manipulation (close old ACTIVE row → REMAPPED, open new ACTIVE row).
    */
   @Bean
   public CaseRebaseService caseRebaseService(
@@ -157,8 +158,9 @@ public class ConfigServiceConfig {
       CaseTypeVersionRegistry versionRegistry,
       CaseTypeSource caseTypeSource,
       EventPublisher eventPublisher,
-      Clock clock) {
+      Clock clock,
+      StageRepository stageRepository) {
     return new CaseRebaseService(
-        caseRepository, versionRegistry, caseTypeSource, eventPublisher, clock);
+        caseRepository, versionRegistry, caseTypeSource, eventPublisher, clock, stageRepository);
   }
 }
