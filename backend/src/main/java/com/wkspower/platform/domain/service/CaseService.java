@@ -220,12 +220,21 @@ public class CaseService {
     // Story 5.5 AC-4 — Decision D20 frozen-on-version: validate updated case data against the
     // CaseType the case is PINNED to, not the latest deployed version. This ensures a v1-pinned
     // case can still pass update validation after a v2 (with additional required fields) is
-    // deployed. Falls back to latest if the pinned version is not in the registry (defensive — the
-    // normal path always has the pinned version cached since register() now populates byVersion).
+    // deployed. Review remediation: strict pin — WKS-VER-002 (HTTP 422) on registry miss. The
+    // prior fallback-to-latest masked eviction-induced inconsistencies (a case validated against
+    // v2 schema while still pinned to v1 silently produced wrong errors).
     CaseTypeConfig caseType =
         caseTypeReader
             .findVersion(existing.caseTypeId(), existing.caseTypeVersion())
-            .orElseGet(() -> requireCaseType(existing.caseTypeId()));
+            .orElseThrow(
+                () ->
+                    new WksVersionException(
+                        ErrorCode.WKS_VER_002,
+                        "case pinned to unknown CaseTypeVersion v"
+                            + existing.caseTypeVersion()
+                            + " for caseType "
+                            + existing.caseTypeId()
+                            + "; registry has no entry"));
     Map<String, Object> safeData = newData == null ? Map.of() : Map.copyOf(newData);
 
     List<ErrorDetail> violations = caseDataValidator.validate(caseType, safeData);
@@ -436,12 +445,22 @@ public class CaseService {
 
     // Story 5.6 AC2 — field-level edit-permission check requires the pinned CaseTypeConfig (which
     // carries editableBy declarations). Use findVersion so the permission check respects the same
-    // version the form was resolved against. Fallback to latest on registry miss (should not occur
-    // since resolveFormDefinitionForCase above already threw WKS-VER-002 on that path).
+    // version the form was resolved against. Review remediation: strict pin — WKS-VER-002 (HTTP
+    // 422) on registry miss. resolveFormDefinitionForCase above already throws WKS-VER-002 on
+    // that path, but defending here makes the contract explicit at every call site rather than
+    // relying on call-order coupling.
     CaseTypeConfig caseType =
         caseTypeReader
             .findVersion(existing.caseTypeId(), existing.caseTypeVersion())
-            .orElseGet(() -> requireCaseType(existing.caseTypeId()));
+            .orElseThrow(
+                () ->
+                    new WksVersionException(
+                        ErrorCode.WKS_VER_002,
+                        "case pinned to unknown CaseTypeVersion v"
+                            + existing.caseTypeVersion()
+                            + " for caseType "
+                            + existing.caseTypeId()
+                            + "; registry has no entry"));
 
     // Validate submitted field values against the form's field definitions.
     // Collections.unmodifiableMap(new HashMap<>(...)) is used instead of Map.copyOf() because

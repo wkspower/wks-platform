@@ -149,6 +149,74 @@ class FormBindingVersionPinIT {
   }
 
   /**
+   * AC-6 (a) — v1-pinned case validates against v1 form when a field was REMOVED in v2.
+   *
+   * <p>Specifically guards review-remediation concern: with the fallback-to-latest behaviour, a
+   * v1-pinned case submitting a v1-only field after v2 dropped it would fall through to v2 schema
+   * validation and silently strip the field. Now that update()/submitForm() strictly pin to the
+   * registered version, the v1 schema is authoritative.
+   *
+   * <p>v1 has {@code applicant, amount, note}. v2 drops {@code note}. v1-pinned case POSTs with
+   * {@code note} present — must succeed (validated against v1, where note is declared).
+   */
+  @Test
+  void v1PinnedValidatesAgainstV1AfterFieldRemovedInV2() throws Exception {
+    String caseTypeId = "fvp-t3-" + UUID.randomUUID().toString().substring(0, 8);
+    registry.register(caseTypeV1WithNote(caseTypeId));
+
+    String cookie = login();
+    String caseId = createCase(cookie, caseTypeId);
+
+    // Deploy v2 which DROPS the "note" field
+    registry.register(caseTypeV2NoteRemoved(caseTypeId));
+
+    // Submit with "note" present — must succeed under v1 validation
+    ResponseEntity<String> submitResp =
+        exchange(
+            "/api/cases/" + caseId + "/forms/" + FORM_ID + "/submit",
+            HttpMethod.POST,
+            cookie,
+            "{\"applicant\":\"Alice\",\"amount\":42,\"note\":\"v1-only field\"}");
+    assertThat(submitResp.getStatusCode())
+        .as("v1-pinned submit with v1-only field must succeed under v1 schema")
+        .isEqualTo(HttpStatus.OK);
+  }
+
+  /**
+   * AC-6 (b) — v1-pinned case is NOT subject to v2's newly-required field.
+   *
+   * <p>v1 requires {@code applicant}. v2 adds required {@code email}. v1-pinned case PUTs with v1
+   * shape (no email) — must succeed under v1 schema validation, not be rejected by v2's required.
+   */
+  @Test
+  void v1PinnedUpdateNotSubjectToV2NewRequiredField() throws Exception {
+    String caseTypeId = "fvp-t4-" + UUID.randomUUID().toString().substring(0, 8);
+    registry.register(caseTypeV1(caseTypeId));
+
+    String cookie = login();
+    String caseId = createCase(cookie, caseTypeId);
+
+    // Capture version (needed for PUT optimistic-lock header)
+    ResponseEntity<String> getResp = exchange("/api/cases/" + caseId, HttpMethod.GET, cookie, null);
+    long caseVersion = json.readTree(getResp.getBody()).path("data").path("version").asLong();
+
+    // Deploy v2 with new required field "email"
+    registry.register(caseTypeV2(caseTypeId));
+
+    // PUT with v1-shape body (no "email") — must succeed under v1 schema. UpdateCaseRequest
+    // carries the optimistic-lock version in the body (request.version()), not in If-Match.
+    ResponseEntity<String> putResp =
+        exchange(
+            "/api/cases/" + caseId,
+            HttpMethod.PUT,
+            cookie,
+            "{\"data\":{\"applicant\":\"Bob\",\"amount\":1},\"version\":" + caseVersion + "}");
+    assertThat(putResp.getStatusCode())
+        .as("v1-pinned PUT with v1 body must succeed even though v2 demands email")
+        .isEqualTo(HttpStatus.OK);
+  }
+
+  /**
    * AC-7 — submit response caseTypeVersion reflects pinned version.
    *
    * <p>The FormController embeds the pinned CaseType in the response DTO. After submitting,
@@ -233,6 +301,58 @@ class FormBindingVersionPinIT {
         caseTypeId,
         "FormBind Pin Fixture",
         1,
+        null,
+        null,
+        fields,
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("applicant"),
+        List.of(
+            new RoleDefinition(
+                "admin", List.of(Permission.CREATE, Permission.EDIT, Permission.VIEW))),
+        List.of(),
+        List.of(form));
+  }
+
+  /**
+   * v1 variant for AC-6 (a): includes optional "note" field. v2 (next fixture) drops it. A
+   * v1-pinned case must still accept "note" because it is declared on the pinned v1 schema.
+   */
+  private static CaseTypeConfig caseTypeV1WithNote(String caseTypeId) {
+    List<FieldDefinition> fields =
+        List.of(
+            new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
+            new FieldDefinition("amount", "Amount", FieldType.NUMBER, false, 1, List.of(), null),
+            new FieldDefinition("note", "Note", FieldType.TEXT, false, 2, List.of(), null));
+    FormDefinition form =
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
+    return new CaseTypeConfig(
+        caseTypeId,
+        "FormBind Pin Fixture",
+        1,
+        null,
+        null,
+        fields,
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("applicant"),
+        List.of(
+            new RoleDefinition(
+                "admin", List.of(Permission.CREATE, Permission.EDIT, Permission.VIEW))),
+        List.of(),
+        List.of(form));
+  }
+
+  /** v2 variant for AC-6 (a): drops the "note" field. */
+  private static CaseTypeConfig caseTypeV2NoteRemoved(String caseTypeId) {
+    List<FieldDefinition> fields =
+        List.of(
+            new FieldDefinition("applicant", "Applicant", FieldType.TEXT, true, 0, List.of(), null),
+            new FieldDefinition("amount", "Amount", FieldType.NUMBER, false, 1, List.of(), null));
+    FormDefinition form =
+        new FormDefinition(FORM_ID, "single", "monolithic", "single-page", fields, List.of(), null);
+    return new CaseTypeConfig(
+        caseTypeId,
+        "FormBind Pin Fixture",
+        2,
         null,
         null,
         fields,
