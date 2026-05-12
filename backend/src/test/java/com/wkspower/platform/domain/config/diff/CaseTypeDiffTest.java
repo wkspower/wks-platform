@@ -531,7 +531,8 @@ class CaseTypeDiffTest {
             java.util.Map.of(),
             java.util.Optional.empty(),
             java.util.Map.of(),
-            List.of());
+            List.of(),
+            java.util.Map.of());
     MappingDefinition prevMapping = new MappingDefinition(List.of(prevAttachment));
     MappingDefinition nextMapping = MappingDefinition.empty(); // removed → MUTATE_CLASS
 

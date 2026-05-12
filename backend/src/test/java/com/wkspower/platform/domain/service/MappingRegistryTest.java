@@ -31,7 +31,8 @@ class MappingRegistryTest {
                 Map.of(),
                 Optional.empty(),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
   }
 
   @Test

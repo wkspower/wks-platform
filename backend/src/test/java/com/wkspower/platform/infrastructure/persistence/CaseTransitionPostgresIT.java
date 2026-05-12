@@ -134,7 +134,8 @@ class CaseTransitionPostgresIT {
                 new com.wkspower.platform.domain.config.model.AttachmentDefinition.EndEventMapping(
                     "stage1 -> stage2")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     mappingRegistry.register(
         caseTypeRef,
         "1",
