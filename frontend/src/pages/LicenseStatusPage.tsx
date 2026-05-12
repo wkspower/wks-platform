@@ -1,8 +1,19 @@
 import type { LicenseStatus } from '@/api/license';
+import { DeferredBadge } from '@/components/license/DeferredBadge';
 import { Button } from '@/components/ui/Button';
 import { useLicenseStatus } from '@/hooks/useLicenseStatus';
 import { t } from '@/i18n';
 import { formatDate } from '@/lib/formatDate';
+
+/**
+ * Feature keys whose implementation is deferred to a future story.
+ * These rows show a Deferred badge in the feature table to set honest expectations.
+ * Story 7-6 AC-5.
+ */
+const DEFERRED_FEATURES: Record<string, string> = {
+  'audit.export': '15-7-audit-export-polish',
+  'audit.checksums': '15-N-audit-checksums',
+};
 
 // ---------------------------------------------------------------------------
 // Tier badge — color-coded with mandatory text label (AC4: no color-only)
@@ -150,27 +161,37 @@ export function LicenseStatusPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
-                {features.features.map((f) => (
-                  <tr key={f.key}>
-                    <td className="px-4 py-3">
-                      <code className="rounded bg-[var(--muted)] px-1 py-0.5 text-xs">{f.key}</code>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--foreground)]">{f.description}</td>
-                    <td className="px-4 py-3 text-[var(--muted-foreground)]">
-                      {f.bundleTiers.join(', ')}
-                    </td>
-                    <td
-                      className="px-4 py-3 text-center"
-                      aria-label={
-                        f.enabled
-                          ? t('license.status.features.enabled')
-                          : t('license.status.features.disabled')
-                      }
-                    >
-                      {f.enabled ? '✓' : '✗'}
-                    </td>
-                  </tr>
-                ))}
+                {features.features.map((f) => {
+                  const deferredTrackingStory = DEFERRED_FEATURES[f.key];
+                  return (
+                    <tr key={f.key}>
+                      <td className="px-4 py-3">
+                        <code className="rounded bg-[var(--muted)] px-1 py-0.5 text-xs">
+                          {f.key}
+                        </code>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--foreground)]">
+                        {f.description}
+                        {deferredTrackingStory !== undefined && (
+                          <DeferredBadge trackingStory={deferredTrackingStory} />
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">
+                        {f.bundleTiers.join(', ')}
+                      </td>
+                      <td
+                        className="px-4 py-3 text-center"
+                        aria-label={
+                          f.enabled
+                            ? t('license.status.features.enabled')
+                            : t('license.status.features.disabled')
+                        }
+                      >
+                        {f.enabled ? '✓' : '✗'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
