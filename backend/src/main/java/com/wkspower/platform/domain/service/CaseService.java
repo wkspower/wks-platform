@@ -216,6 +216,22 @@ public class CaseService {
    * {@code @Version} optimistic lock — mismatch surfaces as {@link WksConflictException}.
    */
   public Case update(UUID caseId, Map<String, Object> newData, long expectedVersion, UUID actorId) {
+    return update(caseId, newData, expectedVersion, actorId, null);
+  }
+
+  /**
+   * Story 6-3b AC1 — internal overload with {@code exemptFormId}. When non-null, the
+   * EditContractGate skips ownership-matches for fields owned by {@code exemptFormId}. Only
+   * {@link #submitForm} invokes this path; the public {@link #update(UUID, Map, long, UUID)}
+   * overload calls through with {@code null} so the direct-edit path (PUT /api/cases/{id})
+   * keeps its existing gate semantics unchanged.
+   */
+  private Case update(
+      UUID caseId,
+      Map<String, Object> newData,
+      long expectedVersion,
+      UUID actorId,
+      String exemptFormId) {
     Objects.requireNonNull(caseId, "caseId");
     Objects.requireNonNull(actorId, "actorId");
 
@@ -267,7 +283,8 @@ public class CaseService {
     if (mappingOpt.isPresent() && !changedFieldIds.isEmpty()) {
       List<Task> openTasks = workflowEngine.findTasksByCase(existing.id());
       List<EditContractGate.BlockReason> blocked =
-          EditContractGate.blockedFields(caseType, mappingOpt.get(), openTasks, changedFieldIds);
+          EditContractGate.blockedFields(
+              caseType, mappingOpt.get(), openTasks, changedFieldIds, exemptFormId);
       if (!blocked.isEmpty()) {
         // Per AC-2: emit one CaseDataEdited(BLOCKED) audit event per blocked field, AFTER_COMMIT.
         // The publish targets are AFTER_COMMIT listeners; since this path throws BEFORE commit,
@@ -289,17 +306,15 @@ public class CaseService {
               reason.openTaskId(),
               reason.formId());
         }
+        // Story 6-3b AC2 — user-facing message must not leak raw openTaskId / formId. The
+        // ids stay in the WARN log line above for SI debugging; the wire message is clean.
         List<ErrorDetail> blockDetails =
             blocked.stream()
                 .map(
                     r ->
                         ErrorDetail.ofField(
                             ErrorCode.WKS_EDIT_001.wire(),
-                            "Complete the task to update this field. (openTaskId="
-                                + r.openTaskId()
-                                + ", formId="
-                                + r.formId()
-                                + ")",
+                            "Complete the open task to update this field.",
                             r.fieldId()))
                 .toList();
         throw new WksValidationAggregateException(
@@ -578,7 +593,11 @@ public class CaseService {
     // presents the current state; a concurrent server-side update winning is acceptable. If
     // version-based conflict detection is required in future, the FormController request body
     // should accept a client-supplied version and thread it through to update() here.
-    Case updated = update(caseId, safeData, existing.version(), actorId);
+    //
+    // Story 6-3b AC1 — pass {@code formId} as the gate exemption: fields owned by THIS form
+    // (i.e. the form whose submit is in flight) must not trip WKS-EDIT-001 against the bound
+    // open task. Sibling forms (other open tasks' forms) remain gated by EditContractGate.
+    Case updated = update(caseId, safeData, existing.version(), actorId, formId);
 
     // Emit TASK_COMPLETED signal to advance the BPMN process token if a backend adapter is
     // registered for this case type. This is best-effort: a missing adapter registration (OSS

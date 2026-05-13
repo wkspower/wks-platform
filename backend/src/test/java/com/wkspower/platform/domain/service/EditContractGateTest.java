@@ -75,6 +75,71 @@ class EditContractGateTest {
     assertThat(blocked).isEmpty();
   }
 
+  // ---- Story 6-3b — form-submit gate exemption ----
+
+  @Test
+  void story_6_3b_exempt_form_unblocks_its_own_field() {
+    // Given: open intake-task bound to intake-form which owns "applicant".
+    // When: the gate is called with exemptFormId = intake-form (the form being submitted).
+    // Then: no block — the form is permitted to write the fields it owns.
+    CaseTypeConfig caseType = caseType(form("intake-form", "applicant"));
+    MappingDefinition mapping = mapping(attachment("intake-task", "intake-form"));
+    Task openTask = task("task-1", "intake-task");
+
+    List<EditContractGate.BlockReason> blocked =
+        EditContractGate.blockedFields(
+            caseType, mapping, List.of(openTask), Set.of("applicant"), "intake-form");
+
+    assertThat(blocked).isEmpty();
+  }
+
+  @Test
+  void story_6_3b_exempt_form_does_NOT_unblock_sibling_form_field() {
+    // Given: two open tasks — intake-task -> intake-form (owns applicant)
+    //                       review-task -> review-form (owns notes).
+    // When: the actor submits intake-form (exemptFormId = intake-form) but the write set
+    //       includes "notes" — a field owned by the sibling open task's form.
+    // Then: WKS-EDIT-001 still fires for "notes". An exempt form cannot bypass siblings'
+    //       ownership.
+    CaseTypeConfig caseType =
+        caseType(form("intake-form", "applicant"), form("review-form", "notes"));
+    MappingDefinition mapping =
+        mapping(
+            attachment("intake-task", "intake-form"), attachment("review-task", "review-form"));
+    Task intakeOpen = task("task-1", "intake-task");
+    Task reviewOpen = task("task-2", "review-task");
+
+    List<EditContractGate.BlockReason> blocked =
+        EditContractGate.blockedFields(
+            caseType,
+            mapping,
+            List.of(intakeOpen, reviewOpen),
+            Set.of("applicant", "notes"),
+            "intake-form");
+
+    // applicant: exempt (own form). notes: still blocked (sibling form).
+    assertThat(blocked).hasSize(1);
+    assertThat(blocked.get(0).fieldId()).isEqualTo("notes");
+    assertThat(blocked.get(0).formId()).isEqualTo("review-form");
+    assertThat(blocked.get(0).openTaskId()).isEqualTo("task-2");
+  }
+
+  @Test
+  void story_6_3b_null_exempt_preserves_legacy_semantics() {
+    // The 5-arg overload with exemptFormId = null must behave identically to the 4-arg
+    // overload (direct-edit PUT /api/cases/{id} path).
+    CaseTypeConfig caseType = caseType(form("intake-form", "applicant"));
+    MappingDefinition mapping = mapping(attachment("intake-task", "intake-form"));
+    Task openTask = task("task-1", "intake-task");
+
+    List<EditContractGate.BlockReason> blocked =
+        EditContractGate.blockedFields(
+            caseType, mapping, List.of(openTask), Set.of("applicant"), null);
+
+    assertThat(blocked).hasSize(1);
+    assertThat(blocked.get(0).formId()).isEqualTo("intake-form");
+  }
+
   @Test
   void allows_when_userTaskMapping_references_unknown_form_id() {
     CaseTypeConfig caseType = caseType(form("intake-form", "applicant"));

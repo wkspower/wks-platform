@@ -243,8 +243,13 @@ class CaseServiceTest {
                   .extracting(ErrorDetail::code)
                   .containsExactly(ErrorCode.WKS_EDIT_001.wire());
               assertThat(agg.getErrors().get(0).field()).isEqualTo("name");
+              // Story 6-3b AC2 — user-facing message must NOT leak raw ids. The localized
+              // copy is "Complete the open task to update this field."; the WKS-EDIT-001
+              // log line still carries openTaskId / formId for SI debugging.
               assertThat(agg.getErrors().get(0).message())
-                  .contains("openTaskId=task-1", "formId=intake-form");
+                  .isEqualTo("Complete the open task to update this field.");
+              assertThat(agg.getErrors().get(0).message())
+                  .doesNotContain("openTaskId=", "formId=");
             });
 
     // Pre-commit throw -> no AFTER_COMMIT audit, no CaseUpdated.
