@@ -142,7 +142,7 @@ jobs:
       - name: Assert schema readiness (Story 14.1.1 AC6)
         # Liveness (curl /api/health) ≠ readiness. Three positive structural
         # assertions covering finding I19:
-        #   (a) Flyway applied N>=7 migrations (parsed from container logs).
+        #   (a) Flyway applied N>=8 migrations (parsed from container logs).
         #   (b) ProductionBootstrapValidator emitted RUNTIME INVARIANT OK
         #       (proves WKS-API-053 datasource + WKS-API-055 secret checks both
         #       passed during boot).
@@ -164,8 +164,8 @@ jobs:
           fi
           if [[ -n "$flyway_applied" ]]; then
             echo "Flyway applied $flyway_applied migrations."
-            if (( flyway_applied < 7 )); then
-              echo "::error::Expected >=7 Flyway migrations on a fresh production boot, got $flyway_applied."
+            if (( flyway_applied < 8 )); then
+              echo "::error::Expected >=8 Flyway migrations on a fresh production boot, got $flyway_applied."
               exit 1
             fi
           else
