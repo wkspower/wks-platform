@@ -138,7 +138,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.of(new EndEventMapping("stage1 -> stage2")),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -180,7 +181,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.empty(),
                 Map.of("escalate", new SignalMapping("stage1 -> stage3")),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -224,7 +226,8 @@ class ExecutionSignalRouterIT {
                         "userTask:review",
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -271,7 +274,8 @@ class ExecutionSignalRouterIT {
                         "userTask:review",
                         "stage",
                         ExecutionSignalKind.STAGE_TRANSITION,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -314,7 +318,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.empty(),
                 Map.of(), // no signal rules at all
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -386,7 +391,8 @@ class ExecutionSignalRouterIT {
                         "userTask:review",
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     // First: status change. Second: stage advance.
     fake.emit(
@@ -442,7 +448,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.of(new EndEventMapping("stage1 -> stage2")),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
     // v2 mapping points to a different target stage — must NOT be consulted because the case is
     // pinned at v1.
     mappingRegistry.register(
@@ -457,7 +464,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.of(new EndEventMapping("stage1 -> stage3")),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -496,7 +504,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.of(new EndEventMapping("stage1 -> stage1")),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     try {
       fake.emit(
@@ -588,7 +597,8 @@ class ExecutionSignalRouterIT {
                         "userTask:manual",
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -632,7 +642,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.of(new EndEventMapping("stage1 -> stage2")),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -693,7 +704,8 @@ class ExecutionSignalRouterIT {
                         "userTask:review",
                         "status",
                         ExecutionSignalKind.TASK_COMPLETED,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -743,7 +755,8 @@ class ExecutionSignalRouterIT {
                         "userTask:review",
                         "status",
                         ExecutionSignalKind.TASK_STATUS_CHANGED,
-                        "stage:stage1")))));
+                        "stage:stage1")),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(
@@ -781,7 +794,8 @@ class ExecutionSignalRouterIT {
                 Map.of(),
                 Optional.empty(),
                 Map.of(),
-                List.of())));
+                List.of(),
+                Map.of())));
 
     fake.emit(
         new ExecutionSignal(

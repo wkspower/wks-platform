@@ -67,7 +67,8 @@ class ConfigServiceMappingRegistryTest {
                     Map.of(),
                     Optional.of(new EndEventMapping("stage1 -> stage2")),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     ValidationResult validatorOutput = ValidationResult.ok(cfg, List.of(), mapping);
     StubSource source = new StubSource(validatorOutput);
     StubRegistrar registrar = new StubRegistrar();
@@ -115,7 +116,8 @@ class ConfigServiceMappingRegistryTest {
                     Map.of(),
                     Optional.of(new EndEventMapping("stage1 -> stage2")),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     ValidationResult validatorOutput = ValidationResult.ok(authorCfg, List.of(), mapping);
     StubSource source = new StubSource(validatorOutput);
     StubRegistrar registrar = new StubRegistrar();
@@ -312,7 +314,8 @@ class ConfigServiceMappingRegistryTest {
                     Map.of(),
                     Optional.of(new EndEventMapping("stage1 -> stage2")),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     ValidationResult validatorOutput = ValidationResult.ok(cfg, List.of(), mapping);
     StubSource source = new StubSource(validatorOutput);
     StubRegistrar registrar = new StubRegistrar();

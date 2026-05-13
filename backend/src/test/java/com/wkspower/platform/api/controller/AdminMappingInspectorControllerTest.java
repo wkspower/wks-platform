@@ -73,7 +73,8 @@ class AdminMappingInspectorControllerTest {
             Map.of(),
             Optional.of(new EndEventMapping("draft -> underwriting")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     MappingDefinition mapping = new MappingDefinition(List.of(attachment));
     when(versionRegistry.currentVersion("auto-loan")).thenReturn(Optional.of(3));
     when(mappingRegistry.resolve(any(CaseTypeRef.class), eq("3"))).thenReturn(Optional.of(mapping));

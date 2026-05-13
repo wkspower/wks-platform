@@ -346,7 +346,8 @@ class BlastRadiusValidatorPostgresIT {
                         new AttachmentDefinition.UserTaskMapping("approval", "approval-form")),
                     Optional.empty(),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     mappingRegistry.register(new CaseTypeRef(id, "1"), "1", priorMapping);
 
     // v2 YAML carries the same shape (no schema deltas) so the only mutate signal is MAPPING.

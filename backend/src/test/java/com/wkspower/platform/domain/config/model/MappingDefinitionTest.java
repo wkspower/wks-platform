@@ -36,7 +36,8 @@ class MappingDefinitionTest {
             Map.of("t1", new UserTaskMapping("Review", null)),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition b =
         new AttachmentDefinition(
             "bpmn",
@@ -46,7 +47,8 @@ class MappingDefinitionTest {
             Map.of("t1", new UserTaskMapping("Review", null)),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(new MappingDefinition(List.of(a))).isEqualTo(new MappingDefinition(List.of(b)));
   }
 
@@ -117,7 +119,8 @@ class MappingDefinitionTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     String h1 = new MappingDefinition(List.of(withOutcomes)).computeHash();
     String h2 = new MappingDefinition(List.of(withoutOutcomes)).computeHash();
     assertThat(h1).isNotEqualTo(h2);
@@ -134,7 +137,8 @@ class MappingDefinitionTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(stageScoped.stageScopeId()).contains("underwriting");
 
     AttachmentDefinition caseScoped =
@@ -146,7 +150,8 @@ class MappingDefinitionTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(caseScoped.stageScopeId()).isEmpty();
   }
 }

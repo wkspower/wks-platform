@@ -33,7 +33,8 @@ class MappingInspectorDtoProjectionTest {
                     "userTask:complete",
                     "wksTaskCompleted",
                     ExecutionSignalKind.TASK_COMPLETED,
-                    "case")));
+                    "case")),
+            Map.of());
     MappingDefinition mapping = new MappingDefinition(List.of(a));
 
     MappingInspectorDto dto = MappingInspectorDto.from("auto-loan", "1.4", mapping);
@@ -70,7 +71,8 @@ class MappingInspectorDtoProjectionTest {
             Map.of(),
             Optional.of(new EndEventMapping("a -> b")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition a2 =
         new AttachmentDefinition(
             "bpmn",
@@ -80,7 +82,8 @@ class MappingInspectorDtoProjectionTest {
             Map.of(),
             Optional.of(new EndEventMapping("c -> d")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     MappingDefinition mapping = new MappingDefinition(List.of(a1, a2));
 
     MappingInspectorDto dto = MappingInspectorDto.from("multi", "2", mapping);

@@ -3,9 +3,13 @@ package com.wkspower.platform.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.wkspower.platform.domain.config.model.AttachmentDefinition;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldType;
+import com.wkspower.platform.domain.config.model.FormDefinition;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.config.model.Permission;
 import com.wkspower.platform.domain.config.model.RoleDefinition;
 import com.wkspower.platform.domain.config.model.StageDefinition;
@@ -13,21 +17,26 @@ import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.event.CaseCreated;
+import com.wkspower.platform.domain.event.CaseDataEdited;
 import com.wkspower.platform.domain.event.CaseUpdated;
+import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationAggregateException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.Case;
 import com.wkspower.platform.domain.model.CaseQuery;
 import com.wkspower.platform.domain.model.CaseSummary;
+import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.port.CaseDataValidator;
 import com.wkspower.platform.domain.port.CaseRepository;
 import com.wkspower.platform.domain.port.CaseStatusUpdater;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.port.ExecutionSignalHandler;
 import com.wkspower.platform.domain.port.ProcessDefinitionKeyResolver;
@@ -71,6 +80,10 @@ class CaseServiceTest {
   }
 
   private CaseService svc(CaseTypeConfig config) {
+    return svc(config, new MappingRegistry());
+  }
+
+  private CaseService svc(CaseTypeConfig config, MappingRegistry mappingRegistry) {
     WksStageAdvancer advancer =
         new WksStageAdvancer(new NoopStageRepository(), publisher, () -> FIXED);
     com.wkspower.platform.testsupport.FakeCaseTypeVersionRegistry registry =
@@ -117,7 +130,8 @@ class CaseServiceTest {
         advancer,
         registry,
         noopRouter,
-        noopStatusUpdater);
+        noopStatusUpdater,
+        mappingRegistry);
   }
 
   @Test
@@ -197,6 +211,157 @@ class CaseServiceTest {
     assertThat(publisher.events).hasSize(1);
     CaseUpdated event = (CaseUpdated) publisher.events.get(0);
     assertThat(event.changedFieldIds()).contains("amount");
+  }
+
+  // ----------------------------------------------------------------------
+  // Story 6.3 AC-2 / AC-3 / AC-6 — edit-contract gating + AFTER_COMMIT audit channel.
+  // Exercises CaseService.update with EditContractGate wired through MappingRegistry +
+  // WorkflowEngine.findTasksByCase. The gate degrades to allow when the case-type has no
+  // mapping registered; the tests below explicitly register a MappingDefinition tying a
+  // BPMN userTask key to a form that owns one of the two case-type fields.
+  // ----------------------------------------------------------------------
+
+  @Test
+  void directEdit_returns422_whenOpenTaskOwnsField() {
+    CaseTypeConfig loanWithForm = loanTypeWithForm();
+    MappingRegistry mappingRegistry = mappingRegistryFor(loanWithForm);
+    CaseService svc = svc(loanWithForm, mappingRegistry);
+    Case seeded = svc.create("loan-application", Map.of("name", "Asha"), null, ACTOR);
+    publisher.events.clear();
+    publisher.afterCommitEvents.clear();
+
+    // Open task owns the "name" field via the intake-form -> intake-task mapping.
+    engine.setOpenTasks(List.of(taskOpen(seeded.id(), "task-1", "intake-task")));
+
+    assertThatThrownBy(
+            () -> svc.update(seeded.id(), Map.of("name", "Bob"), seeded.version(), ACTOR))
+        .isInstanceOf(WksValidationAggregateException.class)
+        .satisfies(
+            ex -> {
+              WksValidationAggregateException agg = (WksValidationAggregateException) ex;
+              assertThat(agg.getErrors())
+                  .extracting(ErrorDetail::code)
+                  .containsExactly(ErrorCode.WKS_EDIT_001.wire());
+              assertThat(agg.getErrors().get(0).field()).isEqualTo("name");
+              assertThat(agg.getErrors().get(0).message())
+                  .contains("openTaskId=task-1", "formId=intake-form");
+            });
+
+    // Pre-commit throw -> no AFTER_COMMIT audit, no CaseUpdated.
+    assertThat(publisher.afterCommitEvents).noneMatch(e -> e instanceof CaseDataEdited);
+    assertThat(publisher.events).noneMatch(e -> e instanceof CaseUpdated);
+  }
+
+  @Test
+  void directEdit_returns200_whenNoOpenTaskOwnsField_andUserPermitted() {
+    CaseTypeConfig loanWithForm = loanTypeWithForm();
+    MappingRegistry mappingRegistry = mappingRegistryFor(loanWithForm);
+    CaseService svc = svc(loanWithForm, mappingRegistry);
+    Case seeded = svc.create("loan-application", Map.of("name", "Asha"), null, ACTOR);
+    publisher.events.clear();
+    publisher.afterCommitEvents.clear();
+
+    // No open tasks -> AC-3 happy path.
+    engine.setOpenTasks(List.of());
+
+    Case updated = svc.update(seeded.id(), Map.of("name", "Bob"), seeded.version(), ACTOR);
+
+    assertThat(updated.data()).containsEntry("name", "Bob");
+    assertThat(publisher.events).anyMatch(e -> e instanceof CaseUpdated);
+
+    // AC-6: one CaseDataEdited(APPLIED) per changed field, AFTER_COMMIT, sourced as User.
+    assertThat(publisher.afterCommitEvents)
+        .filteredOn(e -> e instanceof CaseDataEdited)
+        .hasSize(1)
+        .extracting(e -> (CaseDataEdited) e)
+        .singleElement()
+        .satisfies(
+            edited -> {
+              assertThat(edited.result()).isEqualTo(CaseDataEdited.Result.APPLIED);
+              assertThat(edited.fieldId()).isEqualTo("name");
+              assertThat(edited.source()).isInstanceOf(AuditSource.User.class);
+              assertThat(((AuditSource.User) edited.source()).actorId()).isEqualTo(ACTOR);
+            });
+  }
+
+  @Test
+  void directEdit_emits_no_audit_event_when_no_fields_changed() {
+    CaseTypeConfig loanWithForm = loanTypeWithForm();
+    MappingRegistry mappingRegistry = mappingRegistryFor(loanWithForm);
+    CaseService svc = svc(loanWithForm, mappingRegistry);
+    Case seeded = svc.create("loan-application", Map.of("name", "Asha"), null, ACTOR);
+    publisher.events.clear();
+    publisher.afterCommitEvents.clear();
+
+    engine.setOpenTasks(List.of());
+
+    // Re-PUT identical data — no field changes.
+    svc.update(seeded.id(), Map.of("name", "Asha"), seeded.version(), ACTOR);
+
+    assertThat(publisher.afterCommitEvents).noneMatch(e -> e instanceof CaseDataEdited);
+  }
+
+  // ---- 6.3 helpers ----
+
+  private static CaseTypeConfig loanTypeWithForm() {
+    return new CaseTypeConfig(
+        "loan-application",
+        "Loan Application",
+        1,
+        null,
+        new WorkflowRef("loan-application.bpmn"),
+        List.of(
+            new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null),
+            new FieldDefinition("amount", "Amount", FieldType.NUMBER, false, 0, List.of(), null)),
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("name"),
+        List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of(
+            new FormDefinition(
+                "intake-form",
+                "single",
+                "monolithic",
+                "single-page",
+                List.of(
+                    new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+                List.of(),
+                "submit_for_processing")));
+  }
+
+  private static MappingRegistry mappingRegistryFor(CaseTypeConfig caseType) {
+    MappingRegistry mr = new MappingRegistry();
+    AttachmentDefinition attachment =
+        new AttachmentDefinition(
+            "bpmn",
+            "loan-application.bpmn",
+            "case",
+            Optional.empty(),
+            Map.of("intake-task", new UserTaskMapping("intake-task", "intake-form")),
+            Optional.empty(),
+            Map.of(),
+            List.of(),
+            Map.of());
+    mr.register(
+        new CaseTypeRef(caseType.id(), String.valueOf(caseType.version())),
+        String.valueOf(caseType.version()),
+        new MappingDefinition(List.of(attachment)));
+    return mr;
+  }
+
+  private static Task taskOpen(UUID caseId, String taskId, String defKey) {
+    return new Task(
+        taskId,
+        "pi-1",
+        "pd-1",
+        caseId,
+        "loan-application",
+        defKey,
+        "Intake",
+        null,
+        "submit_for_processing",
+        FIXED,
+        null);
   }
 
   @Test
@@ -650,10 +815,15 @@ class CaseServiceTest {
   private static final class StubEngine implements WorkflowEngine {
     private final String returnedPi;
     private final RuntimeException failure;
+    private List<com.wkspower.platform.domain.model.Task> openTasks = List.of();
 
     StubEngine(String returnedPi, RuntimeException failure) {
       this.returnedPi = returnedPi;
       this.failure = failure;
+    }
+
+    void setOpenTasks(List<com.wkspower.platform.domain.model.Task> tasks) {
+      this.openTasks = List.copyOf(tasks);
     }
 
     @Override
@@ -689,7 +859,7 @@ class CaseServiceTest {
 
     @Override
     public List<com.wkspower.platform.domain.model.Task> findTasksByCase(UUID caseId) {
-      return List.of();
+      return openTasks;
     }
 
     @Override
@@ -700,10 +870,16 @@ class CaseServiceTest {
 
   private static final class StubPublisher implements EventPublisher {
     final List<Object> events = new ArrayList<>();
+    final List<Object> afterCommitEvents = new ArrayList<>();
 
     @Override
     public void publish(Object event) {
       events.add(event);
+    }
+
+    @Override
+    public void publishAfterCommit(Object event) {
+      afterCommitEvents.add(event);
     }
   }
 

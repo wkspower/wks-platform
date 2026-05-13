@@ -656,7 +656,41 @@ public enum ErrorCode {
    * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
    * "WKS-STAT-001"} is a stable contract; never reuse for any other meaning.
    */
-  WKS_STAT_001("WKS-STAT-001");
+  WKS_STAT_001("WKS-STAT-001"),
+
+  // ---------------------------------------------------------------------------
+  // Edit-contract band (Story 6.3) — direct-edit precedence semantics.
+  // Distinct prefix WKS-EDIT-NNN; band reserved 001..099. The contract: backend
+  // signals win over user direct-edits during open tasks; user edits win when no
+  // task is open (D18 re-anchored). Per feedback_error_codes_are_wire_contract.md:
+  // wire strings are stable contracts; never reuse for a different meaning.
+  // ---------------------------------------------------------------------------
+  /**
+   * Story 6.3 AC-2 — direct-edit attempt on a case-data field that is owned by an open {@code
+   * userTask}'s form. The edit-contract requires the user complete the task (form-submit path)
+   * instead of mutating the field directly. HTTP 422 Unprocessable Entity.
+   *
+   * <p>The error body carries {@code field}, {@code openTaskId}, and {@code formId} so the SI /
+   * frontend can render an actionable "Complete the task to update this field." message and
+   * deep-link to the open task.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
+   * "WKS-EDIT-001"} is a stable contract; never reuse for a different meaning.
+   */
+  WKS_EDIT_001("WKS-EDIT-001"),
+  /**
+   * Story 6.3 AC-5 — concurrent backend signal + user direct-edit race conflict. The user lost the
+   * race: a backend signal mutated the same field after the user loaded their form but before the
+   * user submit committed. Per D18 re-anchored, backend wins; the user submit is rejected. HTTP 409
+   * Conflict.
+   *
+   * <p>The error body carries {@code field}, {@code serverValue}, and a "you had typed:
+   * &lt;userValue&gt;" echo so the frontend reload-with-context UX can preserve user intent.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code
+   * "WKS-EDIT-002"} is a stable contract; never reuse for a different meaning.
+   */
+  WKS_EDIT_002("WKS-EDIT-002");
 
   private final String wire;
 

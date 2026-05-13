@@ -42,7 +42,8 @@ class MappingDiffTest {
                     Map.of(),
                     Optional.empty(),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     assertThat(MappingDiff.classify(prev, next)).isEqualTo(MappingChangeClass.APPEND_CLASS);
   }
 
@@ -100,7 +101,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.of(new EndEventMapping("a -> b")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition after =
         new AttachmentDefinition(
             "bpmn",
@@ -110,7 +112,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.of(new EndEventMapping("a -> c")),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(
             MappingDiff.classify(
                 new MappingDefinition(List.of(before)), new MappingDefinition(List.of(after))))
@@ -128,7 +131,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of("escalated", new SignalMapping("a -> b")),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition after =
         new AttachmentDefinition(
             "bpmn",
@@ -138,7 +142,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of("escalated", new SignalMapping("a -> c")),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(
             MappingDiff.classify(
                 new MappingDefinition(List.of(before)), new MappingDefinition(List.of(after))))
@@ -156,7 +161,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition after =
         new AttachmentDefinition(
             "bpmn",
@@ -166,7 +172,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     assertThat(
             MappingDiff.classify(
                 new MappingDefinition(List.of(before)), new MappingDefinition(List.of(after))))
@@ -184,7 +191,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     AttachmentDefinition after =
         new AttachmentDefinition(
             "bpmn",
@@ -194,7 +202,8 @@ class MappingDiffTest {
             Map.of(),
             Optional.empty(),
             Map.of(),
-            List.of());
+            List.of(),
+            Map.of());
     // Scope is part of the identity key — so the diff sees a removal + an addition. Removal is
     // mutate-class, by definition.
     assertThat(
@@ -224,6 +233,7 @@ class MappingDiffTest {
         userTasks,
         Optional.empty(),
         Map.of(),
-        properties);
+        properties,
+        Map.of());
   }
 }

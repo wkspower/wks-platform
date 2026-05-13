@@ -114,7 +114,8 @@ class CaseServiceRequireCaseAccessTest {
           public Optional<String> updateStatus(UUID caseId, String newStatus) {
             return Optional.empty();
           }
-        });
+        },
+        new MappingRegistry());
   }
 
   private static CaseTypeReader reader(CaseTypeConfig config) {

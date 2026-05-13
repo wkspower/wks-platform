@@ -83,7 +83,8 @@ class ZeroStageZeroProcessTest {
         advancer,
         registry,
         signalHandler,
-        statusUpdater);
+        statusUpdater,
+        new MappingRegistry());
   }
 
   // ---- AC11 §4 — create on zero-zero CaseType ----

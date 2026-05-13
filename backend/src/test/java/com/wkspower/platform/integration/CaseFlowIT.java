@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -489,7 +490,8 @@ class CaseFlowIT {
                             "userTask:manual",
                             "status",
                             ExecutionSignalKind.TASK_STATUS_CHANGED,
-                            "stage:case")))));
+                            "stage:case")),
+                    Map.of())));
     mappingRegistry.register(caseTypeRef, "1", mappingDef);
   }
 

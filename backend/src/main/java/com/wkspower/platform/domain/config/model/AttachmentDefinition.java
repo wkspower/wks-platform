@@ -59,33 +59,6 @@ public record AttachmentDefinition(
     outcomeMappings = Map.copyOf(outcomeMappings);
   }
 
-  /**
-   * Story 6.2 — 8-param backward-compatible constructor. Defaults {@code outcomeMappings} to {@link
-   * Map#of()} so all 20+ existing call sites remain unchanged. Debt: per memory {@code
-   * project_raw_casetype_config_constructor_debt}, remove this compat ctor on the next story that
-   * touches {@code AttachmentDefinition} (likely Story 6-3 — Edit Contract).
-   */
-  public AttachmentDefinition(
-      String type,
-      String file,
-      String scope,
-      Optional<String> stageScopeId,
-      Map<String, UserTaskMapping> userTaskMappings,
-      Optional<EndEventMapping> endEventMapping,
-      Map<String, SignalMapping> signalMappings,
-      List<PropertyEmissionRule> propertyEmissionRules) {
-    this(
-        type,
-        file,
-        scope,
-        stageScopeId,
-        userTaskMappings,
-        endEventMapping,
-        signalMappings,
-        propertyEmissionRules,
-        Map.of());
-  }
-
   /** YAML {@code map.userTasks.<id>} entry. */
   public record UserTaskMapping(String wksTask, String form) {
     public UserTaskMapping {

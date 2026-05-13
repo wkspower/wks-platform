@@ -129,7 +129,8 @@ class BpmnAttachmentLifecycleIT {
                     Map.of(),
                     Optional.of(new EndEventMapping("draft -> approved")),
                     Map.of(),
-                    List.of())));
+                    List.of(),
+                    Map.of())));
     mappingRegistry.register(caseTypeRef, "1", mapping);
 
     // Verify mapping is registered before detach
