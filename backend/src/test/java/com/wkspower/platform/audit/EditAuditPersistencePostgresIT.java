@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wkspower.platform.domain.event.CaseDataEdited;
 import com.wkspower.platform.domain.model.AuditSource;
+import com.wkspower.platform.infrastructure.persistence.AuditEventRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;

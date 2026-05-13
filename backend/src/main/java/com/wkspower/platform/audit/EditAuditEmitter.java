@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * shape stable for SI runbook greps.
  *
  * <p>Story 9-3 enhancement: each event is now ALSO persisted to the append-only {@code
- * audit_events} table via {@link AuditEventRepository#insert} (persist FIRST, log SECOND). If the
+ * audit_events} table via {@link AuditEventWriter#insert} (persist FIRST, log SECOND). If the
  * insert fails (DB down, FK violation), the failure is logged at WARN as {@code
  * event=audit.persist.failed} and the original {@code event=case.data.edit} slf4j line still fires
  * — the log stream remains the authoritative SI-runbook grep target per {@code
@@ -36,7 +36,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * strictly AFTER the surrounding transaction commits. A rollback after the event is published
  * suppresses the audit line entirely — the regression guard for the "ghost audit" defect. This
  * class is NOT {@code @Transactional}; the insert uses {@code REQUIRES_NEW} on the repository
- * method (see {@link AuditEventRepository#insert}).
+ * method (see {@link AuditEventWriter#insert}).
  *
  * <p>No new error codes are minted for the WARN line per Story 9-3 spec — {@code
  * audit.persist.failed} is a log-only signal, not a {@code WKS-AUDIT-xxx} band entry.
@@ -46,9 +46,9 @@ public class EditAuditEmitter {
 
   private static final Logger log = LoggerFactory.getLogger(EditAuditEmitter.class);
 
-  private final AuditEventRepository auditEventRepository;
+  private final AuditEventWriter auditEventRepository;
 
-  public EditAuditEmitter(AuditEventRepository auditEventRepository) {
+  public EditAuditEmitter(AuditEventWriter auditEventRepository) {
     this.auditEventRepository = auditEventRepository;
   }
 

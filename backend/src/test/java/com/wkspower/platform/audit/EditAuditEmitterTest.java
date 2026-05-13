@@ -32,14 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 class EditAuditEmitterTest {
 
-  private AuditEventRepository repository;
+  private AuditEventWriter repository;
   private EditAuditEmitter emitter;
   private Logger logbackLogger;
   private ListAppender<ILoggingEvent> appender;
 
   @BeforeEach
   void setUp() {
-    repository = mock(AuditEventRepository.class);
+    repository = mock(AuditEventWriter.class);
     emitter = new EditAuditEmitter(repository);
     logbackLogger = (Logger) LoggerFactory.getLogger(EditAuditEmitter.class);
     appender = new ListAppender<>();

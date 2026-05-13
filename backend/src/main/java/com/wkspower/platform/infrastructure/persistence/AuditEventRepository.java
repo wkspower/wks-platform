@@ -1,5 +1,10 @@
-package com.wkspower.platform.audit;
+package com.wkspower.platform.infrastructure.persistence;
 
+import com.wkspower.platform.audit.AuditEvent;
+import com.wkspower.platform.audit.AuditEventMapper;
+import com.wkspower.platform.audit.AuditEventWriter;
+import com.wkspower.platform.infrastructure.persistence.entity.AuditEventEntity;
+import com.wkspower.platform.infrastructure.persistence.repository.AuditEventJpaRepository;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <ul>
  *   <li>An audit insert failure does NOT roll back the caller's transaction (which already
- *       committed by the time {@link EditAuditEmitter} fires AFTER_COMMIT — the new transaction is
+ *       committed by the time {@code EditAuditEmitter} fires AFTER_COMMIT — the new transaction is
  *       a fresh boundary regardless).
  *   <li>Per {@code feedback_transactional_db_exception_postgres}: a caught DB exception inside the
  *       caller's {@code @Transactional} followed by another DB call aborts on Postgres. A fresh
@@ -36,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  * be the timeline / feed API, with no surrounding transaction anyway).
  */
 @Repository
-public class AuditEventRepository {
+public class AuditEventRepository implements AuditEventWriter {
 
   private final AuditEventJpaRepository delegate;
 
@@ -46,11 +51,12 @@ public class AuditEventRepository {
 
   /**
    * Insert one audit event in a fresh transaction. Caller-side failures (e.g. WARN-and-fallthrough
-   * in {@link EditAuditEmitter}) catch any {@link RuntimeException} thrown here without affecting
+   * in {@code EditAuditEmitter}) catch any {@link RuntimeException} thrown here without affecting
    * their own transaction.
    *
    * <p>{@code AuditEvent.createdAt} is ignored on write — the DB stamps it via the column DEFAULT.
    */
+  @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void insert(AuditEvent event) {
     AuditEventEntity entity =
@@ -73,6 +79,7 @@ public class AuditEventRepository {
    * {@code (case_id, occurred_at DESC)} index. Returns an empty list if no rows exist or {@code
    * limit <= 0}.
    */
+  @Override
   public List<AuditEvent> findByCaseId(UUID caseId, int limit) {
     if (limit <= 0) {
       return List.of();

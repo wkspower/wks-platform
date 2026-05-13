@@ -1,4 +1,4 @@
-package com.wkspower.platform.audit;
+package com.wkspower.platform.infrastructure.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,9 +12,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * Story 9-3 — JPA entity mirroring the {@code audit_events} table. Lives inside the {@code
- * com.wkspower.platform.audit} package (not the generic {@code infrastructure/persistence/entity}
- * tree) so the append-only invariant is co-located with the only repository allowed to touch it.
+ * Story 9-3 — JPA entity mirroring the {@code audit_events} table. Lives in {@code
+ * infrastructure.persistence.entity} per the ArchUnit rule {@code
+ * jpaEntitiesLiveOnlyInPersistenceEntityPackage} (Story 1.4 AC12).
  *
  * <p>Does NOT extend {@code BaseJpaEntity} because:
  *
@@ -25,14 +25,17 @@ import org.hibernate.type.SqlTypes;
  *       {@code @PrePersist} hook.
  * </ul>
  *
- * <p>Package-private. External code must go through {@link AuditEventRepository} which exposes only
- * insert + read — never the full {@code JpaRepository} mutation surface. The corresponding Spring
- * Data interface ({@link AuditEventJpaRepository}) is also package-private, so neither this entity
- * nor a {@code save/delete} call site can leak outside the package.
+ * <p>Append-only invariant: every column except {@code created_at} is {@code updatable=false}.
+ * External code must NEVER instantiate this entity directly; {@code
+ * com.wkspower.platform.audit.AuditEventRepository} is the only authorised writer and exposes only
+ * {@code insert} + read at its public surface. {@link AuditEventJpaRepository}'s {@code
+ * JpaRepository}-derived mutation methods ({@code save}, {@code delete}, {@code deleteAll}, ...)
+ * are off-contract — code review + the AC2 surface-guard test on {@code AuditEventRepository}
+ * enforce that no other call site reaches the JPA repository directly.
  */
 @Entity
 @Table(name = "audit_events")
-class AuditEventEntity {
+public class AuditEventEntity {
 
   @Id
   @Column(name = "id", nullable = false, updatable = false)
@@ -76,7 +79,7 @@ class AuditEventEntity {
     // JPA
   }
 
-  AuditEventEntity(
+  public AuditEventEntity(
       UUID id,
       UUID caseId,
       String eventType,
@@ -99,47 +102,47 @@ class AuditEventEntity {
     this.occurredAt = occurredAt;
   }
 
-  UUID getId() {
+  public UUID getId() {
     return id;
   }
 
-  UUID getCaseId() {
+  public UUID getCaseId() {
     return caseId;
   }
 
-  String getEventType() {
+  public String getEventType() {
     return eventType;
   }
 
-  String getSourceType() {
+  public String getSourceType() {
     return sourceType;
   }
 
-  Map<String, Object> getSourcePayload() {
+  public Map<String, Object> getSourcePayload() {
     return sourcePayload;
   }
 
-  String getResult() {
+  public String getResult() {
     return result;
   }
 
-  String getFieldId() {
+  public String getFieldId() {
     return fieldId;
   }
 
-  String getOpenTaskId() {
+  public String getOpenTaskId() {
     return openTaskId;
   }
 
-  String getFormId() {
+  public String getFormId() {
     return formId;
   }
 
-  Instant getOccurredAt() {
+  public Instant getOccurredAt() {
     return occurredAt;
   }
 
-  Instant getCreatedAt() {
+  public Instant getCreatedAt() {
     return createdAt;
   }
 }
