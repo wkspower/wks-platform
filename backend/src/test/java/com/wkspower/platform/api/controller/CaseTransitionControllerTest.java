@@ -77,6 +77,9 @@ class CaseTransitionControllerTest {
   /** Story 5.5 AC-4 — CaseController now injects CaseTypeReader for pinned-version DTO build. */
   @MockitoBean com.wkspower.platform.domain.port.CaseTypeReader caseTypeReader;
 
+  /** Story 2.6.1 — CaseController now injects MappingRegistry to project TaskDto.formId. */
+  @MockitoBean com.wkspower.platform.domain.service.MappingRegistry mappingRegistry;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator evaluator;
 
