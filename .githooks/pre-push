@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Mirrors .github/workflows/ci.yml verbatim so local green == CI green.
+# Mirrors .github/workflows/ci.yml but path-scoped: only runs the backend block
+# when backend files changed, and the frontend block when frontend files changed.
+# Backend uses -Pfast-it (skips *PostgresIT) — CI still runs the full matrix.
+#
 # Enable once per clone: git config core.hooksPath .githooks
-# Emergency skip: WKS_SKIP_CI_LOCAL=1 git push   (use only if you know why)
+# Emergency skip:        WKS_SKIP_CI_LOCAL=1 git push
+# Force full (no fast-it, run both blocks): WKS_FULL_CI_LOCAL=1 git push
 set -euo pipefail
 
 if [[ "${WKS_SKIP_CI_LOCAL:-0}" == "1" ]]; then
@@ -12,24 +16,76 @@ fi
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-echo "pre-push: backend — mvnw verify (incl. spotless, unit, ArchUnit)"
-( cd backend && ./mvnw -B -ntp verify )
+zero="0000000000000000000000000000000000000000"
+changed_files=""
+stdin_seen=0
 
-echo "pre-push: frontend — npm ci + lint + format:check + test + build"
-(
-  cd frontend
-  npm ci --no-audit --no-fund
-  npm run lint
-  npm run format:check
-  npm test
-  npm run build
+while read -r local_ref local_sha remote_ref remote_sha; do
+  stdin_seen=1
+  [[ -z "${local_sha:-}" ]] && continue
+  [[ "$local_sha" == "$zero" ]] && continue  # branch deletion
 
-  count=$(find dist/assets -name '*.woff2' | wc -l | tr -d ' ')
-  echo "pre-push: found $count woff2 files in dist/assets"
-  if [ "$count" -lt 4 ]; then
-    echo "pre-push: expected >= 4 woff2 files, found $count" >&2
-    exit 1
+  if [[ "$remote_sha" == "$zero" || -z "${remote_sha:-}" ]]; then
+    # New remote branch — diff against merge-base with the trunk.
+    base=$(git merge-base "$local_sha" origin/v2-develop 2>/dev/null \
+        || git merge-base "$local_sha" origin/main 2>/dev/null \
+        || true)
+    if [[ -n "$base" ]]; then
+      files=$(git diff --name-only "$base" "$local_sha")
+    else
+      files=$(git diff --name-only "$(git rev-list --max-parents=0 "$local_sha" | head -1)" "$local_sha")
+    fi
+  else
+    files=$(git diff --name-only "$remote_sha" "$local_sha")
   fi
-)
+  changed_files+="$files"$'\n'
+done
+
+if [[ "${WKS_FULL_CI_LOCAL:-0}" == "1" || "$stdin_seen" == "0" ]]; then
+  # No ref info (direct invocation) or explicit full-run override → run everything.
+  run_backend=1
+  run_frontend=1
+  fast_it_flag=""
+  echo "pre-push: running full mirror (no fast-it, both blocks)"
+else
+  run_backend=0
+  run_frontend=0
+  fast_it_flag="-Pfast-it"
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    case "$f" in
+      backend/*|pom.xml|.mvn/*) run_backend=1 ;;
+      frontend/*)               run_frontend=1 ;;
+    esac
+  done <<< "$changed_files"
+fi
+
+if [[ "$run_backend" == "1" ]]; then
+  echo "pre-push: backend — mvnw verify ${fast_it_flag:-(full)}"
+  ( cd backend && ./mvnw -B -ntp verify ${fast_it_flag} )
+else
+  echo "pre-push: skipping backend — no backend/** or pom changes"
+fi
+
+if [[ "$run_frontend" == "1" ]]; then
+  echo "pre-push: frontend — npm ci + lint + format:check + test + build"
+  (
+    cd frontend
+    npm ci --no-audit --no-fund
+    npm run lint
+    npm run format:check
+    npm test
+    npm run build
+
+    count=$(find dist/assets -name '*.woff2' | wc -l | tr -d ' ')
+    echo "pre-push: found $count woff2 files in dist/assets"
+    if [ "$count" -lt 4 ]; then
+      echo "pre-push: expected >= 4 woff2 files, found $count" >&2
+      exit 1
+    fi
+  )
+else
+  echo "pre-push: skipping frontend — no frontend/** changes"
+fi
 
 echo "pre-push: local CI mirror passed"

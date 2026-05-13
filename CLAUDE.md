@@ -159,7 +159,7 @@ docker buildx build -f docker/Dockerfile -t wks:ci .
 
 ### Inner loop: `-Pfast-it` for between-iteration runs
 
-For the per-story development loop (human or agent) — i.e. checking work *between* commits while iterating — use:
+For any inner-loop iteration (human or agent) — dev-story work *between* commits, **review-fix sessions** responding to PR comments, and rebase-fix iterations — use:
 
 ```bash
 cd backend && ./mvnw -B -ntp verify -Pfast-it
@@ -167,7 +167,11 @@ cd backend && ./mvnw -B -ntp verify -Pfast-it
 
 The `fast-it` Maven profile (defined in `backend/pom.xml`) excludes `**/*PostgresIT.java` from failsafe. That cuts ~11 Testcontainer-based ITs whose Docker startup dominates wall-clock (~2–5 min), bringing the inner loop from ~4–8 min to ~1–2 min. This matters most for agent dispatches, where long `verify` runs raise tool-call-ceiling risk and API 529 retry cost.
 
-**This is not a CI bypass.** Postgres ITs still run in CI on every push, and the `.githooks/pre-push` hook still runs the full `verify` (without `-Pfast-it`) before any push leaves the machine — that pre-push gate is the "match CI locally" contract and is not negotiable. `-Pfast-it` is for the iteration cycle *before* the pre-push gate.
+**This is not a CI bypass.** Postgres ITs still run in CI on every push. The `.githooks/pre-push` hook runs `verify -Pfast-it` by default (skipping `*PostgresIT`) and is **path-scoped**: the backend block only fires when `backend/**` or `pom.xml` changed, and the frontend block only fires when `frontend/**` changed. A docs-only push runs neither.
+
+Overrides:
+- `WKS_SKIP_CI_LOCAL=1 git push` — skip the hook entirely (emergency).
+- `WKS_FULL_CI_LOCAL=1 git push` — force the full mirror: drop `-Pfast-it` and run both blocks regardless of paths. Use this before a release-candidate push or when you've touched anything that might affect Postgres-only behaviour (Flyway migrations under `postgresql/`, JSON column mapping, dialect-specific SQL).
 
 When adding a new `*PostgresIT.java` class, run that one class directly to verify it passes:
 
