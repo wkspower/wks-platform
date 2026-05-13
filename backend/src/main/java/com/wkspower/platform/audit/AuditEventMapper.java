@@ -7,13 +7,13 @@ import java.util.UUID;
 
 /**
  * Story 9-3 — serializes the sealed {@link AuditSource} interface to/from the two-column DB shape
- * ({@code source_type VARCHAR}, {@code source_payload JSON}). AC4 round-trip contract: every variant
- * reconstructs identically after a write/read cycle.
+ * ({@code source_type VARCHAR}, {@code source_payload JSON}). AC4 round-trip contract: every
+ * variant reconstructs identically after a write/read cycle.
  *
  * <p>{@code source_type} values are stable wire strings (uppercase, snake_case) matching the sealed
  * permit list — per {@code feedback_error_codes_are_wire_contract} philosophy, these must NEVER be
- * renamed. They are independent of {@link AuditSource#toString()} which renders the legacy bare-wire
- * vocabulary ({@code "manual"}, {@code "wks-auto-rule"}, {@code "backend(...)"}, {@code
+ * renamed. They are independent of {@link AuditSource#toString()} which renders the legacy
+ * bare-wire vocabulary ({@code "manual"}, {@code "wks-auto-rule"}, {@code "backend(...)"}, {@code
  * "execution(unmapped:...)"}) for SI-runbook compatibility.
  *
  * <p>{@code source_payload} is variant-shaped JSON:
@@ -81,11 +81,14 @@ public final class AuditEventMapper {
       case SOURCE_USER -> new AuditSource.User(UUID.fromString(requireString(payload, "actorId")));
       case SOURCE_AUTO_RULE -> new AuditSource.AutoRule(requireString(payload, "ruleId"));
       case SOURCE_BACKEND -> new AuditSource.Backend(requireString(payload, "adapterName"));
-      case SOURCE_EXECUTION_UNMAPPED -> new AuditSource.ExecutionUnmapped(
-          requireString(payload, "originAdapter"));
-      default -> throw new IllegalArgumentException(
-          "Unknown source_type: '" + sourceType + "' (expected one of USER, AUTO_RULE, BACKEND,"
-              + " EXECUTION_UNMAPPED)");
+      case SOURCE_EXECUTION_UNMAPPED ->
+          new AuditSource.ExecutionUnmapped(requireString(payload, "originAdapter"));
+      default ->
+          throw new IllegalArgumentException(
+              "Unknown source_type: '"
+                  + sourceType
+                  + "' (expected one of USER, AUTO_RULE, BACKEND,"
+                  + " EXECUTION_UNMAPPED)");
     };
   }
 

@@ -20,8 +20,8 @@ import java.util.UUID;
  * Sprint 12 the only persisted event type is {@code "case.data.edit"}.
  *
  * <p>{@code result} is a free-form String at this layer to keep the persistence type independent of
- * the {@link CaseDataEdited.Result} enum — future event types may have different result vocabularies
- * (e.g. lifecycle: {@code "ENTERED"} / {@code "EXITED"}). Callers persisting a {@code
+ * the {@link CaseDataEdited.Result} enum — future event types may have different result
+ * vocabularies (e.g. lifecycle: {@code "ENTERED"} / {@code "EXITED"}). Callers persisting a {@code
  * CaseDataEdited} use {@code event.result().name()} verbatim.
  *
  * @param id append-only row id (UUID v4 — caller-generated for test determinism)

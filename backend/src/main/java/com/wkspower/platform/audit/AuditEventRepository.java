@@ -77,9 +77,7 @@ public class AuditEventRepository {
     if (limit <= 0) {
       return List.of();
     }
-    return delegate
-        .findByCaseIdOrderByOccurredAtDesc(caseId, PageRequest.of(0, limit))
-        .stream()
+    return delegate.findByCaseIdOrderByOccurredAtDesc(caseId, PageRequest.of(0, limit)).stream()
         .map(this::toDomain)
         .collect(Collectors.toList());
   }

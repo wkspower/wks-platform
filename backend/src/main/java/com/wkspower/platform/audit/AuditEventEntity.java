@@ -21,8 +21,8 @@ import org.hibernate.type.SqlTypes;
  * <ul>
  *   <li>The table has no {@code @Version} column — rows are never updated (append-only).
  *   <li>The table has no {@code @PreUpdate} callback — same reason.
- *   <li>{@code created_at} is DB-stamped via the column {@code DEFAULT CURRENT_TIMESTAMP}, not by
- *       a {@code @PrePersist} hook.
+ *   <li>{@code created_at} is DB-stamped via the column {@code DEFAULT CURRENT_TIMESTAMP}, not by a
+ *       {@code @PrePersist} hook.
  * </ul>
  *
  * <p>Package-private. External code must go through {@link AuditEventRepository} which exposes only
