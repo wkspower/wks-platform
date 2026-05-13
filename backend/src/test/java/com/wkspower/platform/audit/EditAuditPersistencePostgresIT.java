@@ -27,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -113,9 +114,14 @@ class EditAuditPersistencePostgresIT {
 
   @AfterEach
   void wipe() {
-    // Order matters: audit_events FK to cases is ON DELETE RESTRICT, so audit first.
-    jdbc.update("DELETE FROM audit_events");
-    jdbc.update("DELETE FROM cases");
+    // Order matters: audit_events FK to cases is ON DELETE RESTRICT, so audit first. Filter
+    // cases by case_type_id so other tests' seed data survives if this IT class ever shares a
+    // Testcontainer.
+    jdbc.update(
+        "DELETE FROM audit_events WHERE case_id IN (SELECT id FROM cases WHERE"
+            + " case_type_id = ?)",
+        "audit-it");
+    jdbc.update("DELETE FROM cases WHERE case_type_id = ?", "audit-it");
   }
 
   // ============================================================ AC4 — variant roundtrips
@@ -224,9 +230,9 @@ class EditAuditPersistencePostgresIT {
             s.setRollbackOnly();
             return null;
           });
-    } catch (RuntimeException expected) {
-      // Some configurations throw UnexpectedRollbackException; either way the inner REQUIRES_NEW
-      // transaction is independent and already committed.
+    } catch (UnexpectedRollbackException expected) {
+      // Outer transaction rolled back as requested. The inner REQUIRES_NEW transaction is
+      // independent and already committed before the rollback fires.
     }
 
     AuditEvent persisted = readOnly(event.id());
@@ -285,7 +291,10 @@ class EditAuditPersistencePostgresIT {
                     "SELECT COUNT(DISTINCT id) FROM audit_events WHERE case_id = ?",
                     Long.class,
                     caseId));
-    assertThat(distinct).as("all generated UUIDs are unique").isEqualTo(total);
+    // This test exercises pool/connection capacity under contention, not uniqueness — the IDs are
+    // random UUIDs so collisions are statistically impossible regardless. Real uniqueness lives at
+    // the PK constraint.
+    assertThat(distinct).as("connection pool handles concurrent inserts").isEqualTo(total);
   }
 
   // ============================================================ AC2 — append-only surface guard

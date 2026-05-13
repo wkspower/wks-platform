@@ -1,7 +1,7 @@
 package com.wkspower.platform.audit;
 
 import com.wkspower.platform.domain.model.AuditSource;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,7 +56,9 @@ public final class AuditEventMapper {
 
   /** Map an {@link AuditSource} to its persistence payload map. */
   public static Map<String, Object> sourcePayload(AuditSource source) {
-    Map<String, Object> payload = new HashMap<>();
+    // LinkedHashMap so the serialized JSON byte-shape is deterministic across runs — relevant if a
+    // future variant grows beyond a single key.
+    Map<String, Object> payload = new LinkedHashMap<>();
     switch (source) {
       case AuditSource.User u -> payload.put("actorId", u.actorId().toString());
       case AuditSource.AutoRule a -> payload.put("ruleId", a.ruleId());

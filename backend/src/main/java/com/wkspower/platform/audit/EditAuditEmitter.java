@@ -40,29 +40,37 @@ import org.springframework.transaction.event.TransactionalEventListener;
  *
  * <p>No new error codes are minted for the WARN line per Story 9-3 spec — {@code
  * audit.persist.failed} is a log-only signal, not a {@code WKS-AUDIT-xxx} band entry.
+ *
+ * <p>Catch boundary is {@link RuntimeException} (not {@link Throwable}): an {@link Error} is
+ * JVM-fatal and SI runbooks cannot act on it anyway. The slf4j wire-contract guarantee applies to
+ * recoverable persistence failures only — matching spec intent in §AC3.
  */
 @Component
 public class EditAuditEmitter {
 
   private static final Logger log = LoggerFactory.getLogger(EditAuditEmitter.class);
 
-  private final AuditEventWriter auditEventRepository;
+  private final AuditEventWriter auditEventWriter;
 
-  public EditAuditEmitter(AuditEventWriter auditEventRepository) {
-    this.auditEventRepository = auditEventRepository;
+  public EditAuditEmitter(AuditEventWriter auditEventWriter) {
+    this.auditEventWriter = auditEventWriter;
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onCaseDataEdited(CaseDataEdited event) {
+    // Build the persistence shape OUTSIDE the try — caller-side construction errors (e.g. null
+    // event.result()) should fail loudly, not be miscategorised as audit.persist.failed.
+    AuditEvent auditEvent = AuditEvent.fromCaseDataEdited(event);
+
     // Persist FIRST: append-only table is the timeline backing for Story 9-2. If the insert
     // throws, fall through to the slf4j line — never lose the wire-contract grep target.
     try {
-      auditEventRepository.insert(AuditEvent.fromCaseDataEdited(event));
+      auditEventWriter.insert(auditEvent);
     } catch (RuntimeException persistFailure) {
       log.warn(
           "event=audit.persist.failed caseId={} reason={}",
           event.caseId(),
-          persistFailure.getMessage());
+          persistFailure.toString());
     }
 
     // Story 6.3 wire-contract slf4j line — preserved verbatim for SI runbook greps.

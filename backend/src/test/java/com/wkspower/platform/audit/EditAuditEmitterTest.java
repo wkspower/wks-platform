@@ -107,7 +107,7 @@ class EditAuditEmitterTest {
     assertThat(warn.getLevel()).isEqualTo(Level.WARN);
     assertThat(warn.getFormattedMessage())
         .contains("event=audit.persist.failed")
-        .contains("reason=Connection refused")
+        .contains("reason=java.lang.RuntimeException: Connection refused")
         .contains("caseId=" + event.caseId());
 
     ILoggingEvent info = appender.list.get(1);

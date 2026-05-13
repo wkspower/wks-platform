@@ -70,8 +70,9 @@ public class AuditEventEntity {
   private Instant occurredAt;
 
   // DB-stamped via DEFAULT CURRENT_TIMESTAMP. insertable=false so Hibernate omits the column from
-  // INSERT and the DB default applies; the value is read back on the entity after flush via
-  // refresh() in the adapter (or left as null when only insert is needed).
+  // INSERT and the DB default applies. Field stays null on the freshly-persisted in-memory entity
+  // (Hibernate does not auto-refresh); production reads re-load through the repository's
+  // findByCaseId path which sees the DB value.
   @Column(name = "created_at", insertable = false, updatable = false)
   private Instant createdAt;
 

@@ -38,7 +38,18 @@ import org.springframework.transaction.annotation.Transactional;
  * insert-only-by-construction invariant.
  *
  * <p>Reads do NOT use {@code REQUIRES_NEW} — they should see the caller's view (most callers will
- * be the timeline / feed API, with no surrounding transaction anyway).
+ * be the timeline / feed API, with no surrounding transaction anyway). {@code findByCaseId} is
+ * annotated {@code @Transactional(readOnly=true)} to ensure a session is available even when
+ * open-session-in-view is disabled.
+ *
+ * <p>Design-decision deviation note (Story 9-3 spec §"Design decisions (closed in spec)" item 2):
+ * the spec prescribed a hand-rolled JdbcTemplate or narrow EntityManager wrapper to avoid the
+ * {@code JpaRepository} mutation surface. This implementation instead ships an {@code
+ * AuditEventWriter} port + JPA entity + Spring-Data {@code JpaRepository} delegate to align with
+ * the project's standard JPA pattern. The append-only invariant is preserved at the {@code
+ * AuditEventWriter} surface (only {@code insert} + {@code findByCaseId} reach callers); the {@code
+ * AuditEventJpaRepository} delegate is explicitly OFF-CONTRACT for direct autowiring — see its
+ * javadoc.
  */
 @Repository
 public class AuditEventRepository implements AuditEventWriter {
@@ -57,7 +68,7 @@ public class AuditEventRepository implements AuditEventWriter {
    * <p>{@code AuditEvent.createdAt} is ignored on write — the DB stamps it via the column DEFAULT.
    */
   @Override
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 5)
   public void insert(AuditEvent event) {
     AuditEventEntity entity =
         new AuditEventEntity(
@@ -80,6 +91,7 @@ public class AuditEventRepository implements AuditEventWriter {
    * limit <= 0}.
    */
   @Override
+  @Transactional(readOnly = true)
   public List<AuditEvent> findByCaseId(UUID caseId, int limit) {
     if (limit <= 0) {
       return List.of();
