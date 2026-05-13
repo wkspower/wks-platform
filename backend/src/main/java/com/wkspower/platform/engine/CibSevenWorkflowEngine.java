@@ -3,6 +3,7 @@ package com.wkspower.platform.engine;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.cibseven.bpm.engine.MismatchingMessageCorrelationException;
 import org.cibseven.bpm.engine.OptimisticLockingException;
@@ -317,6 +319,127 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
               dueAt));
     }
     return List.copyOf(out);
+  }
+
+  @Override
+  public CrossCaseTaskListResult listPendingTasks(Set<String> permittedCaseTypeIds, int limit) {
+    Objects.requireNonNull(permittedCaseTypeIds, "permittedCaseTypeIds");
+    if (limit <= 0 || permittedCaseTypeIds.isEmpty()) {
+      return CrossCaseTaskListResult.empty();
+    }
+    // Sprint 12 demo scale: fetch all active tasks ordered by createTime ASC and filter
+    // client-side by caseTypeId process variable membership. CIB seven's TaskQuery does not
+    // expose a stable {@code processVariableValueIn} surface in this SDK version, and we own the
+    // {@code caseTypeId} convention so reading from process variables is the source of truth.
+    // Story 13-4 introduces filtering at the query layer when scale demands it.
+    List<org.cibseven.bpm.engine.task.Task> engineTasks;
+    try {
+      engineTasks = taskService.createTaskQuery().active().orderByTaskCreateTime().asc().list();
+    } catch (ProcessEngineException ex) {
+      throw new WksWorkflowEngineException("CIB seven cross-case task query failed", ex);
+    }
+    if (engineTasks.isEmpty()) {
+      return CrossCaseTaskListResult.empty();
+    }
+    // Cache (caseId, caseTypeId) by processInstanceId — multiple pending tasks on the same
+    // process instance share variables, so a single getVariables call serves them all.
+    Map<String, java.util.Map.Entry<UUID, String>> piVarsCache = new java.util.HashMap<>();
+    java.util.ArrayList<Task> matched = new java.util.ArrayList<>();
+    for (org.cibseven.bpm.engine.task.Task engineTask : engineTasks) {
+      String pi = engineTask.getProcessInstanceId();
+      java.util.Map.Entry<UUID, String> piVars = piVarsCache.get(pi);
+      if (piVars == null) {
+        piVars = readPiVars(engineTask);
+        if (piVars == null) {
+          // Process instance terminated between query and variable read — drop the task rather
+          // than 500 the whole list. Matches the existing findTasksByCase defensive path.
+          piVarsCache.put(pi, MISSING_PI_SENTINEL);
+          continue;
+        }
+        piVarsCache.put(pi, piVars);
+      } else if (piVars == MISSING_PI_SENTINEL) {
+        continue;
+      }
+      String caseTypeId = piVars.getValue();
+      if (!permittedCaseTypeIds.contains(caseTypeId)) {
+        continue;
+      }
+      UUID caseId = piVars.getKey();
+      String archetype =
+          readArchetype(engineTask.getProcessDefinitionId(), engineTask.getTaskDefinitionKey());
+      UUID assignee = parseAssignee(engineTask.getAssignee());
+      Instant createdAt =
+          engineTask.getCreateTime() == null
+              ? Instant.EPOCH
+              : engineTask.getCreateTime().toInstant();
+      Instant dueAt = engineTask.getDueDate() == null ? null : engineTask.getDueDate().toInstant();
+      matched.add(
+          new Task(
+              engineTask.getId(),
+              engineTask.getProcessInstanceId(),
+              engineTask.getProcessDefinitionId(),
+              caseId,
+              caseTypeId,
+              engineTask.getTaskDefinitionKey(),
+              engineTask.getName(),
+              assignee,
+              archetype,
+              createdAt,
+              dueAt));
+    }
+    // Stable tiebreak by caseId — engine ordering is createTime ASC at millisecond resolution; on
+    // a tie we want a deterministic order so paging is stable across reads.
+    matched.sort(
+        java.util.Comparator.comparing(Task::createdAt).thenComparing(t -> t.caseId().toString()));
+    boolean truncated = matched.size() > limit;
+    List<Task> capped = truncated ? matched.subList(0, limit) : matched;
+    return new CrossCaseTaskListResult(List.copyOf(capped), truncated);
+  }
+
+  /**
+   * Sentinel entry stored in the per-call process-instance variable cache when a process instance
+   * has terminated between the task-list query and the variable read. Subsequent tasks on the same
+   * process instance can short-circuit without re-issuing the failing {@code getVariables} call.
+   */
+  private static final java.util.Map.Entry<UUID, String> MISSING_PI_SENTINEL =
+      java.util.Map.entry(new UUID(0L, 0L), "");
+
+  private java.util.Map.Entry<UUID, String> readPiVars(
+      org.cibseven.bpm.engine.task.Task engineTask) {
+    Map<String, Object> processVars;
+    try {
+      processVars = runtimeService.getVariables(engineTask.getProcessInstanceId());
+    } catch (NullValueException ex) {
+      return null;
+    } catch (ProcessEngineException ex) {
+      String msg = ex.getMessage() == null ? "" : ex.getMessage();
+      if (msg.contains("execution") && msg.contains("doesn't exist")) {
+        return null;
+      }
+      throw new WksWorkflowEngineException(
+          "CIB seven process-variable lookup failed for taskId=" + engineTask.getId(), ex);
+    }
+    Object caseIdRaw = processVars.get("caseId");
+    Object caseTypeIdRaw = processVars.get("caseTypeId");
+    if (caseIdRaw == null || caseTypeIdRaw == null) {
+      throw new WksWorkflowEngineException(
+          "Process instance "
+              + engineTask.getProcessInstanceId()
+              + " is missing 'caseId'/'caseTypeId' variables expected on every WKS process — task="
+              + engineTask.getId());
+    }
+    UUID caseId;
+    try {
+      caseId = UUID.fromString(caseIdRaw.toString());
+    } catch (IllegalArgumentException ex) {
+      throw new WksWorkflowEngineException(
+          "Process variable 'caseId' is not a UUID for task="
+              + engineTask.getId()
+              + " value="
+              + caseIdRaw,
+          ex);
+    }
+    return java.util.Map.entry(caseId, caseTypeIdRaw.toString());
   }
 
   @Override

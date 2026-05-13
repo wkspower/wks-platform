@@ -7,7 +7,7 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 
-import { completeTask, listTasksByCase } from '@/api/tasks';
+import { completeTask, listAllTasks, listTasksByCase, type CrossCaseTaskList } from '@/api/tasks';
 import { caseQueryKeys, taskQueryKeys } from '@/lib/queryKeys';
 import type { TaskActionResponse, TaskDto } from '@/types/task';
 
@@ -28,6 +28,18 @@ export function useCaseTasks(caseId: string | null): UseQueryResult<TaskDto[], E
     // CTA in the conflict-replay scenario (J6) before the second tab can fire the duplicate
     // request that surfaces the 409 + [Refresh case] recovery — defeating AC5.
     refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * Story 13-1 AC1 — fetch the cross-case task list for the Tasks screen. Server caps at 500;
+ * {@code data.truncated === true} signals the banner copy.
+ */
+export function useAllTasks(): UseQueryResult<CrossCaseTaskList, Error> {
+  return useQuery<CrossCaseTaskList, Error>({
+    queryKey: taskQueryKeys.allCases(),
+    queryFn: listAllTasks,
+    staleTime: STALE_TIME_MS,
   });
 }
 

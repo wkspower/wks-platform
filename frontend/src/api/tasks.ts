@@ -8,6 +8,22 @@ export async function listTasksByCase(caseId: string): Promise<TaskDto[]> {
   return result.data;
 }
 
+/** Story 13-1 AC1 — wire shape returned by {@code GET /api/tasks}. */
+export interface CrossCaseTaskList {
+  items: TaskDto[];
+  truncated: boolean;
+}
+
+/**
+ * Story 13-1 AC1 — list all pending user tasks across every case-type the caller can view.
+ * Server caps the response at 500 entries (oldest-first). When the cap is hit, {@code truncated}
+ * is {@code true} and the page renders a truncation banner above the list.
+ */
+export async function listAllTasks(): Promise<CrossCaseTaskList> {
+  const result = await apiFetch<CrossCaseTaskList>('/api/tasks');
+  return result.data;
+}
+
 /**
  * Story 2.4 — complete a user task. Phase 0 (Story 2.8) ships click-to-complete with empty
  * variables; task forms with custom variables are out of scope (story §Out of scope).

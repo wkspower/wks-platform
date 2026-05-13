@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -207,6 +209,40 @@ class TaskServiceTest {
         .isInstanceOf(WksNotFoundException.class);
   }
 
+  // ---- Story 13-1 listAcrossCases ---------------------------------------
+
+  @Test
+  void listAcrossCasesShortCircuitsOnEmptyPermittedSet() {
+    StubEngine engine = new StubEngine();
+    CrossCaseTaskListResult result = new TaskService(engine).listAcrossCases(Set.of(), 500);
+
+    assertThat(result.tasks()).isEmpty();
+    assertThat(result.truncated()).isFalse();
+    assertThat(engine.listCalls).isEqualTo(0);
+  }
+
+  @Test
+  void listAcrossCasesShortCircuitsOnNonPositiveLimit() {
+    StubEngine engine = new StubEngine();
+    CrossCaseTaskListResult result = new TaskService(engine).listAcrossCases(Set.of("A"), 0);
+
+    assertThat(result.tasks()).isEmpty();
+    assertThat(engine.listCalls).isEqualTo(0);
+  }
+
+  @Test
+  void listAcrossCasesDelegatesPermittedSetToEngine() {
+    StubEngine engine = new StubEngine();
+    engine.listResult = new CrossCaseTaskListResult(List.of(sampleTask("t1")), false);
+
+    CrossCaseTaskListResult result = new TaskService(engine).listAcrossCases(Set.of("A", "B"), 500);
+
+    assertThat(engine.listCalls).isEqualTo(1);
+    assertThat(engine.lastPermittedCaseTypeIds).containsExactlyInAnyOrder("A", "B");
+    assertThat(engine.lastLimit).isEqualTo(500);
+    assertThat(result.tasks()).hasSize(1);
+  }
+
   // ---- helpers -----------------------------------------------------------
 
   private static Task sampleTask(String id) {
@@ -252,6 +288,18 @@ class TaskServiceTest {
     RuntimeException claimFailure;
     Task afterClaim;
     boolean afterClaimMissing;
+    int listCalls;
+    Set<String> lastPermittedCaseTypeIds;
+    int lastLimit;
+    CrossCaseTaskListResult listResult = CrossCaseTaskListResult.empty();
+
+    @Override
+    public CrossCaseTaskListResult listPendingTasks(Set<String> permittedCaseTypeIds, int limit) {
+      listCalls++;
+      lastPermittedCaseTypeIds = permittedCaseTypeIds;
+      lastLimit = limit;
+      return listResult;
+    }
 
     @Override
     public DeploymentResult deploy(DeploymentRequest request) {
