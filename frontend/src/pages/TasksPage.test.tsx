@@ -24,6 +24,7 @@ function taskFixture(overrides: Partial<TaskDto>): TaskDto {
     assignee: null,
     archetype: 'draft_section',
     actionLabel: 'Draft application',
+    formId: null,
     createdAt: '2026-04-26T10:00:00Z',
     dueAt: null,
     ...overrides,
