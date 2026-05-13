@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/Badge';
 import { t } from '@/i18n';
-import { statusColorVar } from '@/lib/statusColor';
+import { statusOnFgVar, statusSoftBgVar } from '@/lib/statusColor';
 import type { CaseTypeView } from '@/types/caseType';
 
 export interface StatusBadgeProps {
@@ -9,14 +9,10 @@ export interface StatusBadgeProps {
 }
 
 /**
- * AC6 — solid-fill badge whose background reads from the configurable status palette tokens.
- * The badge always shows colour + text label (a11y: never colour alone). When the supplied
- * `status` does not resolve in `caseType.statuses[]` the badge falls back to the neutral
- * `--status-closed` token + the raw status id, with a `console.warn` so test runs surface
- * the misconfiguration.
- *
- * Foreground is hardcoded to `--primary-foreground` (white) for every palette colour — the
- * contrast ratios are verified by `styles/contrast.test.ts` (1.3 guardrail).
+ * Soft-bg + on-fg badge. The previous solid-fill version slammed white text on
+ * mid-saturation amber, sitting at borderline AA — see contrast.test.ts pairs.
+ * Badges still show colour + text (a11y: never colour alone). Unknown status →
+ * neutral closed-soft pair + raw id in title, with a `console.warn`.
  */
 export function StatusBadge({ status, caseType }: StatusBadgeProps) {
   const definition = caseType.statuses.find((s) => s.id === status);
@@ -29,8 +25,8 @@ export function StatusBadge({ status, caseType }: StatusBadgeProps) {
         variant="solid"
         title={status}
         style={{
-          backgroundColor: 'var(--status-closed)',
-          color: 'var(--primary-foreground)',
+          backgroundColor: 'var(--status-closed-soft)',
+          color: 'var(--status-closed-on)',
         }}
       >
         {t('cases.status.unknown')}
@@ -42,8 +38,8 @@ export function StatusBadge({ status, caseType }: StatusBadgeProps) {
     <Badge
       variant="solid"
       style={{
-        backgroundColor: statusColorVar(definition.color),
-        color: 'var(--primary-foreground)',
+        backgroundColor: statusSoftBgVar(definition.color),
+        color: statusOnFgVar(definition.color),
       }}
     >
       {definition.displayName}
