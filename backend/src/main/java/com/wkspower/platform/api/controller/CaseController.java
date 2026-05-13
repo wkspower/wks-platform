@@ -90,9 +90,9 @@ public class CaseController {
   private final CaseTypeReader caseTypeReader;
 
   /**
-   * Story 2-6-1 — resolves the case-type's {@link MappingDefinition} so {@code GET
-   * /{id}/tasks} can project each task's {@code formId} via the same {@code
-   * attachments[].userTaskMappings[].form} path the {@code EditContractGate} already reads.
+   * Story 2-6-1 — resolves the case-type's {@link MappingDefinition} so {@code GET /{id}/tasks} can
+   * project each task's {@code formId} via the same {@code attachments[].userTaskMappings[].form}
+   * path the {@code EditContractGate} already reads.
    */
   private final MappingRegistry mappingRegistry;
 
@@ -179,16 +179,15 @@ public class CaseController {
         TaskDtoMapper.toDtos(
             taskService.findByCase(id),
             taskService::readActionLabel,
-            (processDefinitionId, taskDefinitionKey) ->
-                resolveFormId(mapping, taskDefinitionKey));
+            (processDefinitionId, taskDefinitionKey) -> resolveFormId(mapping, taskDefinitionKey));
     return ApiResponse.success(dtos);
   }
 
   /**
    * Story 2-6-1 — walk the pinned mapping's {@code attachments[].userTaskMappings} for the first
-   * entry keyed by {@code taskDefinitionKey} that declares a non-blank {@code form}. Returns
-   * {@code null} when no mapping is registered (zero-attachment deploy), no attachment maps this
-   * userTask, or the mapped form id is blank. Same iteration semantics as {@code
+   * entry keyed by {@code taskDefinitionKey} that declares a non-blank {@code form}. Returns {@code
+   * null} when no mapping is registered (zero-attachment deploy), no attachment maps this userTask,
+   * or the mapped form id is blank. Same iteration semantics as {@code
    * EditContractGate#findFirstMatch} — deterministic by attachment order.
    */
   private static String resolveFormId(MappingDefinition mapping, String taskDefinitionKey) {

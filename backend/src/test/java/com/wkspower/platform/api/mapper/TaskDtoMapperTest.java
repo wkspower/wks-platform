@@ -12,9 +12,9 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
 
 /**
- * Story 2-6-1 — unit tests for {@link TaskDtoMapper#toDtos(List, BiFunction, BiFunction)}'s
- * {@code formId} projection. Mirrors the existing {@code actionLabelLookup} resilience contract:
- * an unloadable mapping must not poison sibling tasks.
+ * Story 2-6-1 — unit tests for {@link TaskDtoMapper#toDtos(List, BiFunction, BiFunction)}'s {@code
+ * formId} projection. Mirrors the existing {@code actionLabelLookup} resilience contract: an
+ * unloadable mapping must not poison sibling tasks.
  */
 class TaskDtoMapperTest {
 
@@ -22,8 +22,8 @@ class TaskDtoMapperTest {
   private static final UUID CASE_ID = UUID.randomUUID();
 
   private static Task task(String id, String pdId, String taskDefKey, String name) {
-    return new Task(id, "pi-1", pdId, CASE_ID, "loan", taskDefKey, name, null, "draft_section",
-        NOW, null);
+    return new Task(
+        id, "pi-1", pdId, CASE_ID, "loan", taskDefKey, name, null, "draft_section", NOW, null);
   }
 
   @Test
@@ -42,9 +42,7 @@ class TaskDtoMapperTest {
   void formIdIsNullWhenLookupReturnsNull() {
     List<TaskDto> dtos =
         TaskDtoMapper.toDtos(
-            List.of(task("t1", "pd-1", "draft", "Draft")),
-            (pd, k) -> "Draft",
-            (pd, k) -> null);
+            List.of(task("t1", "pd-1", "draft", "Draft")), (pd, k) -> "Draft", (pd, k) -> null);
 
     assertThat(dtos.get(0).formId()).isNull();
   }
@@ -53,9 +51,7 @@ class TaskDtoMapperTest {
   void formIdIsNullWhenLookupReturnsBlank() {
     List<TaskDto> dtos =
         TaskDtoMapper.toDtos(
-            List.of(task("t1", "pd-1", "draft", "Draft")),
-            (pd, k) -> "Draft",
-            (pd, k) -> "   ");
+            List.of(task("t1", "pd-1", "draft", "Draft")), (pd, k) -> "Draft", (pd, k) -> "   ");
 
     assertThat(dtos.get(0).formId()).isNull();
   }
@@ -74,9 +70,7 @@ class TaskDtoMapperTest {
 
     List<TaskDto> dtos =
         TaskDtoMapper.toDtos(
-            List.of(
-                task("t1", "pd-1", "draft", "Draft"),
-                task("t2", "pd-1", "review", "Review")),
+            List.of(task("t1", "pd-1", "draft", "Draft"), task("t2", "pd-1", "review", "Review")),
             (pd, k) -> k,
             formIdLookup);
 
@@ -118,9 +112,7 @@ class TaskDtoMapperTest {
         };
 
     TaskDtoMapper.toDtos(
-        List.of(
-            task("t1", "pd-1", "draft", "Draft"),
-            task("t2", "pd-1", "draft", "Draft")),
+        List.of(task("t1", "pd-1", "draft", "Draft"), task("t2", "pd-1", "draft", "Draft")),
         (pd, k) -> "Draft",
         formIdLookup);
 
