@@ -104,8 +104,7 @@ class EditContractGateTest {
     CaseTypeConfig caseType =
         caseType(form("intake-form", "applicant"), form("review-form", "notes"));
     MappingDefinition mapping =
-        mapping(
-            attachment("intake-task", "intake-form"), attachment("review-task", "review-form"));
+        mapping(attachment("intake-task", "intake-form"), attachment("review-task", "review-form"));
     Task intakeOpen = task("task-1", "intake-task");
     Task reviewOpen = task("task-2", "review-task");
 

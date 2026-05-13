@@ -225,8 +225,7 @@ export function MultiSectionFormRenderer({
       // Story 6-3b AC2 — see SinglePageFormRenderer for rationale.
       let editBlockedSeen = false;
       for (const e of err.envelopeErrors) {
-        const displayMessage =
-          e.code === 'WKS-EDIT-001' ? t('form.error.editBlocked') : e.message;
+        const displayMessage = e.code === 'WKS-EDIT-001' ? t('form.error.editBlocked') : e.message;
         if (e.code === 'WKS-EDIT-001') {
           editBlockedSeen = true;
         }

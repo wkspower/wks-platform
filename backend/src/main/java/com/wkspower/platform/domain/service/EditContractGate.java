@@ -54,16 +54,15 @@ public final class EditContractGate {
 
   /**
    * Story 6-3b AC1 — form-submit gate exemption. When {@code exemptFormId} is non-null, any
-   * userTaskMapping whose {@code form} equals {@code exemptFormId} is skipped during the
-   * ownership scan: fields owned by that form are NOT blocked. Sibling-form isolation: fields
-   * owned by a *different* open task's form remain blocked — a form can only exempt its own
-   * ownership, never its siblings'.
+   * userTaskMapping whose {@code form} equals {@code exemptFormId} is skipped during the ownership
+   * scan: fields owned by that form are NOT blocked. Sibling-form isolation: fields owned by a
+   * *different* open task's form remain blocked — a form can only exempt its own ownership, never
+   * its siblings'.
    *
-   * <p>Carve choice = option (c) per story spec. Rationale: the gate is the single source of
-   * truth for "what an open task owns"; threading the exempt through here keeps the rule
-   * pure and unit-testable in isolation. Threading it through {@code CaseService.update}
-   * (option b) would have required a public/private overload split with the same semantics
-   * but no test surface gain.
+   * <p>Carve choice = option (c) per story spec. Rationale: the gate is the single source of truth
+   * for "what an open task owns"; threading the exempt through here keeps the rule pure and
+   * unit-testable in isolation. Threading it through {@code CaseService.update} (option b) would
+   * have required a public/private overload split with the same semantics but no test surface gain.
    */
   public static List<BlockReason> blockedFields(
       CaseTypeConfig caseType,

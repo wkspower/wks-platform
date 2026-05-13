@@ -221,10 +221,10 @@ public class CaseService {
 
   /**
    * Story 6-3b AC1 — internal overload with {@code exemptFormId}. When non-null, the
-   * EditContractGate skips ownership-matches for fields owned by {@code exemptFormId}. Only
-   * {@link #submitForm} invokes this path; the public {@link #update(UUID, Map, long, UUID)}
-   * overload calls through with {@code null} so the direct-edit path (PUT /api/cases/{id})
-   * keeps its existing gate semantics unchanged.
+   * EditContractGate skips ownership-matches for fields owned by {@code exemptFormId}. Only {@link
+   * #submitForm} invokes this path; the public {@link #update(UUID, Map, long, UUID)} overload
+   * calls through with {@code null} so the direct-edit path (PUT /api/cases/{id}) keeps its
+   * existing gate semantics unchanged.
    */
   private Case update(
       UUID caseId,

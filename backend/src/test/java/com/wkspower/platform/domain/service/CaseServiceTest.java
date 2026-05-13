@@ -248,8 +248,7 @@ class CaseServiceTest {
               // log line still carries openTaskId / formId for SI debugging.
               assertThat(agg.getErrors().get(0).message())
                   .isEqualTo("Complete the open task to update this field.");
-              assertThat(agg.getErrors().get(0).message())
-                  .doesNotContain("openTaskId=", "formId=");
+              assertThat(agg.getErrors().get(0).message()).doesNotContain("openTaskId=", "formId=");
             });
 
     // Pre-commit throw -> no AFTER_COMMIT audit, no CaseUpdated.
