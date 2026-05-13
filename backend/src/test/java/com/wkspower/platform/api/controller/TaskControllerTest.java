@@ -9,14 +9,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import com.wkspower.platform.api.GlobalExceptionHandler;
+import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.TaskService;
+import java.util.Collection;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -63,6 +69,8 @@ class TaskControllerTest {
 
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator evaluator;
+
+  @MockitoBean CaseTypeReader caseTypeReader;
 
   @MockitoBean Clock clock;
 
@@ -267,6 +275,91 @@ class TaskControllerTest {
         .andExpect(status().isNotFound());
   }
 
+  // ---- GET /api/tasks (Story 13-1) ---------------------------------------
+
+  @Test
+  void listAcrossCasesReturnsEnvelopeWithItemsAndTruncated() throws Exception {
+    // AC1 — endpoint returns ApiResponse<CrossCaseTaskListDto> with items+truncated wrapper and
+    // reuses TaskDtoMapper.toDtos exactly (verified via the wire-shape assertions below).
+    when(caseTypeReader.all()).thenReturn(typesAB());
+    when(evaluator.hasVerb(any(), eq("A"), eq("view"))).thenReturn(true);
+    when(evaluator.hasVerb(any(), eq("B"), eq("view"))).thenReturn(true);
+    when(taskService.listAcrossCases(eq(Set.of("A", "B")), eq(500)))
+        .thenReturn(new CrossCaseTaskListResult(List.of(taskOnCaseType("t1", "A")), false));
+    when(taskService.readActionLabel(anyString(), anyString())).thenReturn("Action");
+
+    mockMvc
+        .perform(get("/api/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(1))
+        .andExpect(jsonPath("$.data.items[0].id").value("t1"))
+        .andExpect(jsonPath("$.data.items[0].caseTypeId").value("A"))
+        .andExpect(jsonPath("$.data.items[0].actionLabel").value("Action"))
+        .andExpect(jsonPath("$.data.truncated").value(false));
+  }
+
+  @Test
+  void listAcrossCasesSetsTruncatedTrueWhenEngineCaps() throws Exception {
+    // AC5 — when the engine result is at-or-over the cap, truncated=true flows through.
+    when(caseTypeReader.all()).thenReturn(typesAB());
+    when(evaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    when(taskService.listAcrossCases(any(), eq(500)))
+        .thenReturn(new CrossCaseTaskListResult(List.of(taskOnCaseType("t1", "A")), true));
+    when(taskService.readActionLabel(anyString(), anyString())).thenReturn("Action");
+
+    mockMvc
+        .perform(get("/api/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.truncated").value(true));
+  }
+
+  @Test
+  void listAcrossCasesFiltersOutCaseTypesWithoutViewVerb() throws Exception {
+    // AC4 — case-type C has no view verb; the permitted set passed to the service excludes it
+    // (verified by the eq(Set.of("A", "B")) match). Tasks on C never enter the result regardless
+    // of engine state.
+    when(caseTypeReader.all()).thenReturn(typesABC());
+    when(evaluator.hasVerb(any(), eq("A"), eq("view"))).thenReturn(true);
+    when(evaluator.hasVerb(any(), eq("B"), eq("view"))).thenReturn(true);
+    when(evaluator.hasVerb(any(), eq("C"), eq("view"))).thenReturn(false);
+    when(taskService.listAcrossCases(eq(Set.of("A", "B")), eq(500)))
+        .thenReturn(new CrossCaseTaskListResult(List.of(), false));
+
+    mockMvc
+        .perform(get("/api/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(0))
+        .andExpect(jsonPath("$.data.truncated").value(false));
+  }
+
+  @Test
+  void listAcrossCasesEmptyWhenUserHasNoPermittedCaseTypes() throws Exception {
+    // AC5 empty state — no view verb on any case-type returns items=[] without invoking the
+    // engine (verified by passing an empty Set to the service stub).
+    when(caseTypeReader.all()).thenReturn(typesAB());
+    when(evaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(false);
+    when(taskService.listAcrossCases(eq(Set.of()), eq(500)))
+        .thenReturn(CrossCaseTaskListResult.empty());
+
+    mockMvc
+        .perform(get("/api/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(0))
+        .andExpect(jsonPath("$.data.truncated").value(false));
+  }
+
+  private static Collection<CaseTypeConfig> typesAB() {
+    return List.of(stubType("A"), stubType("B"));
+  }
+
+  private static Collection<CaseTypeConfig> typesABC() {
+    return List.of(stubType("A"), stubType("B"), stubType("C"));
+  }
+
+  private static CaseTypeConfig stubType(String id) {
+    return CaseTypeConfig.builder().id(id).displayName(id).version(1).build();
+  }
+
   // ---- helpers -----------------------------------------------------------
 
   private static Task sampleTask(String archetype, UUID assignee) {
@@ -280,6 +373,22 @@ class TaskControllerTest {
         "Draft",
         assignee,
         archetype,
+        NOW,
+        null);
+  }
+
+  /** Story 13-1 — builder used by listAcrossCases tests to vary id + caseTypeId. */
+  private static Task taskOnCaseType(String id, String caseTypeId) {
+    return new Task(
+        id,
+        "pi-" + id,
+        "pd-1",
+        CASE_ID,
+        caseTypeId,
+        "draft",
+        "Draft",
+        null,
+        "draft_section",
         NOW,
         null);
   }
