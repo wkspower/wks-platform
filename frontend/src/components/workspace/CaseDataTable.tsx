@@ -14,6 +14,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Table, TBody, THead, Th, Td, Tr } from '@/components/ui/Table';
 import { t } from '@/i18n';
 import { urgencyDefaultSort } from '@/lib/buildCaseColumns';
@@ -62,7 +63,7 @@ const SKELETON_ROW_COUNT = 5;
 function SkeletonCell() {
   return (
     <Td>
-      <div aria-hidden className="h-4 rounded bg-[var(--muted)]/60 animate-pulse" />
+      <Skeleton className="h-4" />
     </Td>
   );
 }

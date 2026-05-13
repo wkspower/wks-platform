@@ -1,5 +1,7 @@
+import { ListChecks } from 'lucide-react';
 import { Fragment } from 'react';
 
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
 import { t } from '@/i18n';
 import { renderFieldValue } from '@/lib/renderFieldValue';
@@ -18,7 +20,7 @@ export function PropertiesTab({ caseDto, caseTypeView }: PropertiesTabProps) {
   const fields = caseTypeView?.fields ?? [];
   const data = caseDto?.data ?? {};
   if (fields.length === 0) {
-    return <p className="py-6 text-sm text-[var(--muted-foreground)]">{t('properties.empty')}</p>;
+    return <EmptyState icon={ListChecks} headline={t('properties.empty')} />;
   }
 
   return (

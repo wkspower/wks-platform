@@ -48,6 +48,26 @@ const PAIRS: Array<[string, string, string]> = [
   ['primary-foreground on primary', '--primary-foreground', '--primary'],
   ['muted-foreground on background', '--muted-foreground', '--background'],
   ['secondary-foreground on secondary', '--secondary-foreground', '--secondary'],
+  ['destructive-foreground on destructive', '--destructive-foreground', '--destructive'],
+  // Status soft/on pairs — used by StatusBadge in soft-bg + strong-fg form.
+  ['status-open-on on status-open-soft', '--status-open-on', '--status-open-soft'],
+  [
+    'status-in-progress-on on status-in-progress-soft',
+    '--status-in-progress-on',
+    '--status-in-progress-soft',
+  ],
+  ['status-review-on on status-review-soft', '--status-review-on', '--status-review-soft'],
+  ['status-resolved-on on status-resolved-soft', '--status-resolved-on', '--status-resolved-soft'],
+  ['status-closed-on on status-closed-soft', '--status-closed-on', '--status-closed-soft'],
+  [
+    'status-escalated-on on status-escalated-soft',
+    '--status-escalated-on',
+    '--status-escalated-soft',
+  ],
+  ['status-cyan-on on status-cyan-soft', '--status-cyan-on', '--status-cyan-soft'],
+  ['status-rose-on on status-rose-soft', '--status-rose-on', '--status-rose-soft'],
+  ['status-indigo-on on status-indigo-soft', '--status-indigo-on', '--status-indigo-soft'],
+  ['status-teal-on on status-teal-soft', '--status-teal-on', '--status-teal-soft'],
 ];
 
 describe('color contrast (WCAG AA)', () => {

@@ -12,14 +12,15 @@ describe('StatusBadge', () => {
     render(<StatusBadge status="open" caseType={caseType} />);
     const badge = screen.getByText('Open');
     expect(badge).toBeInTheDocument();
-    expect(badge.getAttribute('style')).toContain('var(--status-open)');
+    expect(badge.getAttribute('style')).toContain('var(--status-open-soft)');
+    expect(badge.getAttribute('style')).toContain('var(--status-open-on)');
   });
 
   it('falls back to neutral closed colour and i18n "Unknown" label on unknown status, raw id in title, with a warn', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     render(<StatusBadge status="unknown-status" caseType={caseType} />);
     const badge = screen.getByText('Unknown');
-    expect(badge.getAttribute('style')).toContain('var(--status-closed)');
+    expect(badge.getAttribute('style')).toContain('var(--status-closed-soft)');
     expect(badge.getAttribute('title')).toBe('unknown-status');
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();

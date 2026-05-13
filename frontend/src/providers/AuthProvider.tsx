@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
+import { Spinner } from '@/components/ui/Spinner';
 import { t } from '@/i18n';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -30,10 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         aria-live="polite"
       >
         <div className="flex flex-col items-center gap-4">
-          <div
-            className="size-10 animate-spin rounded-full border-2 border-muted border-t-primary"
-            aria-hidden="true"
-          />
+          <Spinner className="size-10" />
           <p className="font-heading text-lg">{t('app.brandName')}</p>
         </div>
       </div>

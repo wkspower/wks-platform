@@ -25,10 +25,9 @@ function shellAt(path = '/cases') {
 }
 
 describe('AppShell', () => {
-  it('renders sidebar nav, top bar header, and skip link', () => {
+  it('renders sidebar nav and skip link', () => {
     const { getByRole, getByText } = shellAt();
     expect(getByRole('navigation', { name: /primary navigation/i })).toBeInTheDocument();
-    expect(getByRole('banner')).toBeInTheDocument(); // <header> = banner role
     expect(getByText(/skip to main content/i)).toBeInTheDocument();
     expect(getByText('Cases content')).toBeInTheDocument();
   });

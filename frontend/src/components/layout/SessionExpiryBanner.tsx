@@ -7,6 +7,21 @@ import { t } from '@/i18n';
 export function SessionExpiryBanner() {
   const { expired, dismiss, triggerLogin } = useSessionExpiry();
   if (!expired) return null;
+  return <SessionExpiryBannerView dismiss={dismiss} triggerLogin={triggerLogin} />;
+}
+
+interface SessionExpiryBannerViewProps {
+  dismiss: () => void;
+  triggerLogin: () => void;
+}
+
+/**
+ * Presentational split — `BannerStack` calls `useSessionExpiry` once and
+ * routes the result here, so the banner subscription is hoisted above the
+ * priority gate. Standalone `SessionExpiryBanner` keeps the legacy hook-
+ * owning shape so its existing test mounts in isolation.
+ */
+export function SessionExpiryBannerView({ dismiss, triggerLogin }: SessionExpiryBannerViewProps) {
   return (
     <div
       role="alert"

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { ForbiddenScreen } from '@/components/errors/ForbiddenScreen';
+import { Spinner } from '@/components/ui/Spinner';
 import { useAuthStore } from '@/stores/authStore';
 
 interface RequireAuthProps {
@@ -21,10 +22,7 @@ export function RequireAuth({ children, requiredRole }: RequireAuthProps) {
         role="status"
         aria-live="polite"
       >
-        <div
-          className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary"
-          aria-hidden="true"
-        />
+        <Spinner className="size-8" />
       </div>
     );
   }

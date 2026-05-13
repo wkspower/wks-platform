@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 
+import { Spinner } from '@/components/ui/Spinner';
 import { useAuthStore } from '@/stores/authStore';
 
 export function RootRedirect() {
@@ -11,10 +12,7 @@ export function RootRedirect() {
         role="status"
         aria-live="polite"
       >
-        <div
-          className="size-8 animate-spin rounded-full border-2 border-muted border-t-primary"
-          aria-hidden="true"
-        />
+        <Spinner className="size-8" />
       </div>
     );
   }

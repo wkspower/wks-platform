@@ -57,7 +57,7 @@ describe('MappingInspectorPage', () => {
     );
     renderAt('/admin/mapping-inspector/simple');
 
-    expect(await screen.findByText(/Zero-attachment CaseType/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no BPMN attachments yet/i)).toBeInTheDocument();
   });
 
   it('renders WKS-MAP-404 rows with a deep link to the mapping panel', async () => {
@@ -159,6 +159,6 @@ describe('MappingInspectorPage', () => {
     renderAt('/admin/mapping-inspector/auto-loan');
     expect(await screen.findByText(/Loading mapping/i)).toBeInTheDocument();
     // Eventually transitions to the empty mapping state.
-    expect(await screen.findByText(/Zero-attachment CaseType/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no BPMN attachments yet/i)).toBeInTheDocument();
   });
 });

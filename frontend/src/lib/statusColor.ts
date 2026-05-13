@@ -19,6 +19,27 @@ export const STATUS_COLOR: Record<StatusColor, string> = {
   teal: 'var(--status-teal)',
 };
 
+const STATUS_COLOR_KEY: Record<StatusColor, string> = {
+  blue: 'open',
+  amber: 'in-progress',
+  violet: 'review',
+  emerald: 'resolved',
+  zinc: 'closed',
+  red: 'escalated',
+  cyan: 'cyan',
+  rose: 'rose',
+  indigo: 'indigo',
+  teal: 'teal',
+};
+
 export function statusColorVar(color: StatusColor): string {
   return STATUS_COLOR[color];
+}
+
+export function statusSoftBgVar(color: StatusColor): string {
+  return `var(--status-${STATUS_COLOR_KEY[color]}-soft)`;
+}
+
+export function statusOnFgVar(color: StatusColor): string {
+  return `var(--status-${STATUS_COLOR_KEY[color]}-on)`;
 }

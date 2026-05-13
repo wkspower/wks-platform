@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { ApiError } from '@/api/client';
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { useCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
@@ -33,7 +34,7 @@ function CloseButton({ onClose }: { onClose: () => void }) {
       type="button"
       aria-label={t('case.close')}
       onClick={onClose}
-      className="ml-auto inline-flex size-8 items-center justify-center rounded-[var(--radius-md)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      className="ml-auto inline-flex size-9 items-center justify-center rounded-[var(--radius-md)] hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
     >
       <X aria-hidden className="size-4" />
     </button>
@@ -74,16 +75,16 @@ function HeadingFocusable({
 function LoadingSkeleton() {
   return (
     <div aria-hidden className="flex flex-col gap-3 p-4">
-      <div className="h-6 w-1/3 animate-pulse rounded bg-[var(--muted)]/60" />
+      <Skeleton className="h-6 w-1/3" />
       <div className="flex gap-2">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-6 w-20 animate-pulse rounded bg-[var(--muted)]/60" />
+          <Skeleton key={i} className="h-6 w-20" />
         ))}
       </div>
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="grid grid-cols-[120px_1fr] gap-3">
-          <div className="h-4 animate-pulse rounded bg-[var(--muted)]/60" />
-          <div className="h-4 animate-pulse rounded bg-[var(--muted)]/60" />
+          <Skeleton className="h-4" />
+          <Skeleton className="h-4" />
         </div>
       ))}
     </div>

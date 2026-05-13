@@ -126,16 +126,20 @@ export function FormPage() {
       />
     );
 
+  // Form id is kebab-case in YAML (eg. "loan-application"). Title-case it for
+  // the page H1 so the user never sees a raw slug as the heading — when the
+  // YAML eventually gains a `displayName` field (Story 5.x), prefer that.
+  const headingFromId = formDef.id
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+
   return (
     <div className="mx-auto max-w-2xl p-6">
       <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-xl font-semibold">{formDef.id}</h1>
+        <h1 className="text-xl font-semibold">{headingFromId}</h1>
         {/* Story 5.5 AC-4 — version-pin chip. caseDto.caseTypeVersion is the pinned version
             (server now returns pinned CaseType, not latest — Decision D20). */}
-        <span
-          className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]"
-          aria-label={t('form.pinnedVersion', { version: String(caseDto.caseTypeVersion) })}
-        >
+        <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">
           {t('form.pinnedVersion', { version: String(caseDto.caseTypeVersion) })}
         </span>
       </div>

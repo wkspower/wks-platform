@@ -2,11 +2,9 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 import { RouteErrorBoundary } from '@/components/errors/RouteErrorBoundary';
 
+import { BannerStack } from './BannerStack';
 import { DarkSidebar } from './DarkSidebar';
-import { LicenseBanner } from './LicenseBanner';
-import { SessionExpiryBanner } from './SessionExpiryBanner';
 import { SkipLink } from './SkipLink';
-import { TopBar } from './TopBar';
 
 export function AppShell() {
   const location = useLocation();
@@ -15,9 +13,7 @@ export function AppShell() {
       <SkipLink />
       <DarkSidebar />
       <div className="flex min-w-0 flex-col">
-        <SessionExpiryBanner />
-        <LicenseBanner />
-        <TopBar />
+        <BannerStack />
         <main
           id="main"
           tabIndex={-1}

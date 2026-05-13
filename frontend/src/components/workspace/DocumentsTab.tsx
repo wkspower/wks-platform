@@ -5,6 +5,9 @@ import { ApiError } from '@/api/client';
 import { downloadUrl, getPreview, listDocuments, uploadDocument } from '@/api/documents';
 import type { CaseDocument, PreviewResponse } from '@/api/documents';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Spinner } from '@/components/ui/Spinner';
 import { t } from '@/i18n';
 
 export interface DocumentsTabProps {
@@ -34,7 +37,29 @@ function uploadErrorMessage(err: unknown): string {
     if (err.code === 'WKS-DOC-003') return t('documents.upload.error.filename');
     return err.message;
   }
-  return String(err);
+  return t('documents.error.generic');
+}
+
+function friendlyError(err: unknown): string {
+  if (err instanceof ApiError) return err.message;
+  return t('documents.error.generic');
+}
+
+/**
+ * Surface a human-readable label for the file type instead of the raw MIME.
+ * Falls back to the part after the slash, uppercased, so a misconfigured
+ * server response degrades gracefully — never shows `application/x-foo` to
+ * users.
+ */
+function friendlyFileType(mime: string): string {
+  if (mime === 'application/pdf') return 'PDF';
+  if (mime.startsWith('image/')) return mime.slice('image/'.length).toUpperCase();
+  if (mime === 'application/msword' || mime.includes('wordprocessingml')) return 'Word';
+  if (mime === 'application/vnd.ms-excel' || mime.includes('spreadsheetml')) return 'Excel';
+  if (mime === 'text/plain') return 'Text';
+  if (mime === 'text/csv') return 'CSV';
+  const tail = mime.split('/')[1];
+  return tail ? tail.toUpperCase() : 'File';
 }
 
 interface PreviewPaneProps {
@@ -60,7 +85,7 @@ function PreviewPane({ doc, onClose }: PreviewPaneProps) {
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(String(err));
+          setError(friendlyError(err));
           setLoading(false);
         }
       });
@@ -88,7 +113,7 @@ function PreviewPane({ doc, onClose }: PreviewPaneProps) {
 
       {loading && (
         <div className="flex h-24 items-center justify-center">
-          <div className="size-5 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+          <Spinner />
         </div>
       )}
 
@@ -141,7 +166,7 @@ export function DocumentsTab({ caseId }: DocumentsTabProps) {
         setLoading(false);
       })
       .catch((err) => {
-        setListError(String(err));
+        setListError(friendlyError(err));
         setLoading(false);
       });
   }, [caseId]);
@@ -245,25 +270,29 @@ export function DocumentsTab({ caseId }: DocumentsTabProps) {
       {/* Document list */}
       {loading && (
         <div className="flex items-center justify-center py-6">
-          <div className="size-5 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+          <Spinner />
         </div>
       )}
 
       {!loading && listError && (
-        <p role="alert" className="text-sm text-[var(--destructive)]">
-          {listError}
-        </p>
+        <ErrorState
+          headline={t('documents.error.list')}
+          body={listError}
+          action={
+            <Button variant="secondary" onClick={loadDocuments}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
       )}
 
       {!loading && !listError && documents.length === 0 && (
-        <div
+        <EmptyState
+          icon={FileText}
           data-testid="documents-empty"
-          className="flex flex-col items-center justify-center py-8 text-center"
-        >
-          <FileText aria-hidden className="size-10 text-[var(--muted-foreground)]/60" />
-          <h3 className="mt-3 text-base font-semibold">{t('documents.empty.title')}</h3>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">{t('documents.empty.body')}</p>
-        </div>
+          headline={t('documents.empty.title')}
+          body={t('documents.empty.body')}
+        />
       )}
 
       {!loading && !listError && documents.length > 0 && (
@@ -293,7 +322,7 @@ export function DocumentsTab({ caseId }: DocumentsTabProps) {
                 </div>
                 <div className="mt-0.5 flex items-center gap-2 pl-6">
                   <span className="truncate text-xs text-[var(--muted-foreground)]">
-                    {doc.contentType}
+                    {friendlyFileType(doc.contentType)}
                   </span>
                   <span className="flex-shrink-0 text-xs text-[var(--muted-foreground)]">
                     {formatDate(doc.uploadedAt)}
