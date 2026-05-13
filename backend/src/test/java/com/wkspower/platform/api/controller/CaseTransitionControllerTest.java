@@ -80,6 +80,9 @@ class CaseTransitionControllerTest {
   /** Story 2.6.1 — CaseController now injects MappingRegistry to project TaskDto.formId. */
   @MockitoBean com.wkspower.platform.domain.service.MappingRegistry mappingRegistry;
 
+  /** Story 9-2 — CaseController also injects AuditEventWriter for the audit-events endpoint. */
+  @MockitoBean com.wkspower.platform.audit.AuditEventWriter auditEventWriter;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator evaluator;
 
