@@ -131,6 +131,75 @@ describe('LicenseStatusPage', () => {
     expect(rows.length).toBe(5);
   });
 
+  // ---------------------------------------------------------------------------
+  // Story 7-6 AC-5: all three new feature rows present + Deferred badge for deferred features
+  // ---------------------------------------------------------------------------
+
+  it('showsAllThreeNewFeatureRowsWithDeferredBadge', async () => {
+    // OSS license — all 4 features disabled; white-label, audit.export, audit.checksums present.
+    const ossStatus: LicenseStatus = {
+      state: 'oss',
+      tier: 'oss',
+      expiredAt: null,
+      expiresAt: null,
+      licenseHolder: null,
+      publicKeyFingerprint: FAKE_FINGERPRINT,
+    };
+    const ossFeatures: LicenseFeaturesDto = {
+      tier: 'oss',
+      features: [
+        {
+          key: 'auth.sso',
+          description: 'SSO/SAML authentication (FR28)',
+          bundleTiers: ['enterprise', 'demo'],
+          enabled: false,
+        },
+        {
+          key: 'white-label',
+          description: 'White-labeling / custom branding (FR34)',
+          bundleTiers: ['enterprise', 'demo'],
+          enabled: false,
+        },
+        {
+          key: 'audit.export',
+          description: 'Audit log export (FR43)',
+          bundleTiers: ['enterprise', 'demo'],
+          enabled: false,
+        },
+        {
+          key: 'audit.checksums',
+          description: 'Tamper-evident audit checksums (FR46)',
+          bundleTiers: ['team', 'enterprise', 'demo'],
+          enabled: false,
+        },
+      ],
+    };
+    server.use(licenseStatusHandler(ossStatus), licenseFeaturesHandler(ossFeatures));
+    const { findAllByRole, findAllByText } = renderWithProviders(<LicenseStatusPage />);
+
+    // All 4 feature rows should be present (1 thead row + 4 tbody = 5 total rows)
+    const rows = await findAllByRole('row');
+    expect(rows.length).toBe(5);
+
+    // white-label row is present
+    const whiteLabelCodes = await findAllByText('white-label');
+    expect(whiteLabelCodes.length).toBeGreaterThan(0);
+
+    // audit.export row is present
+    const auditExportCodes = await findAllByText('audit.export');
+    expect(auditExportCodes.length).toBeGreaterThan(0);
+
+    // audit.checksums row is present
+    const auditChecksumsCodes = await findAllByText('audit.checksums');
+    expect(auditChecksumsCodes.length).toBeGreaterThan(0);
+
+    // Deferred badges appear for audit.export and audit.checksums (NOT white-label)
+    // The DeferredBadge renders text "Deferred" for each deferred feature.
+    const deferredBadges = await findAllByText('Deferred');
+    // 2 deferred features: audit.export and audit.checksums
+    expect(deferredBadges.length).toBe(2);
+  });
+
   it('renders OSS mode label for license holder when null', async () => {
     const ossStatus: LicenseStatus = {
       state: 'oss',

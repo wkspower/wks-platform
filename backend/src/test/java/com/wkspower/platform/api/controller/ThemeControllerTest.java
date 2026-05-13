@@ -1,5 +1,6 @@
 package com.wkspower.platform.api.controller;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -7,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.LicenseService;
+import com.wkspower.platform.domain.service.WksFeature;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
 import com.wkspower.platform.security.JwtTokenProvider;
 import com.wkspower.platform.security.SamlGatingFilter;
@@ -14,6 +16,7 @@ import com.wkspower.platform.security.SecurityConfig;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -58,9 +61,19 @@ class ThemeControllerTest {
     @MockitoBean private UserRepository userRepository;
     @MockitoBean private LicenseService licenseService;
 
+    @BeforeEach
+    void stubLicenseEnabled() {
+      // White-label feature enabled — this branch tests path/file guards, not the license gate.
+      when(licenseService.isFeatureEnabled(WksFeature.WHITE_LABEL)).thenReturn(true);
+    }
+
     @Test
-    void returns204WhenNoThemeConfigured() throws Exception {
-      mockMvc.perform(get("/api/theme.css")).andExpect(status().isNoContent());
+    void returns200EmptyCssWhenNoThemeConfigured() throws Exception {
+      // No path → feature enabled → empty CSS (200 with empty body), not 204
+      mockMvc
+          .perform(get("/api/theme.css"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentTypeCompatibleWith("text/css"));
     }
 
     /** M3 — anonymous users must not receive 401/403 (permitAll assertion). */
@@ -89,9 +102,20 @@ class ThemeControllerTest {
     @MockitoBean private UserRepository userRepository;
     @MockitoBean private LicenseService licenseService;
 
+    @BeforeEach
+    void stubLicenseEnabled() {
+      // White-label feature enabled — this branch tests file-missing fallback, not the license
+      // gate.
+      when(licenseService.isFeatureEnabled(WksFeature.WHITE_LABEL)).thenReturn(true);
+    }
+
     @Test
-    void returns204WhenFileIsMissing() throws Exception {
-      mockMvc.perform(get("/api/theme.css")).andExpect(status().isNoContent());
+    void returns200EmptyCssWhenFileIsMissing() throws Exception {
+      // File absent but feature enabled → empty CSS fallback (200 with empty body)
+      mockMvc
+          .perform(get("/api/theme.css"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentTypeCompatibleWith("text/css"));
     }
   }
 
@@ -139,6 +163,12 @@ class ThemeControllerTest {
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserRepository userRepository;
     @MockitoBean private LicenseService licenseService;
+
+    @BeforeEach
+    void stubLicenseEnabled() {
+      // White-label feature enabled — this branch verifies real CSS file is served.
+      when(licenseService.isFeatureEnabled(WksFeature.WHITE_LABEL)).thenReturn(true);
+    }
 
     @Test
     void returnsCssContentWhenThemeFileConfigured() throws Exception {

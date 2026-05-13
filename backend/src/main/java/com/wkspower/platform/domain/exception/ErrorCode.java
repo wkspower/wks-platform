@@ -53,6 +53,19 @@ public enum ErrorCode {
    */
   WKS_API_008("WKS-API-008"),
 
+  /**
+   * Honest-deferral stub — the endpoint is registered and license-gated, but the full
+   * implementation is deferred to a tracked follow-up story. The response body carries the tracking
+   * story key so operators know where the work is. HTTP 501 Not Implemented.
+   *
+   * <p>First use: {@code POST /api/admin/audit/export} (Story 7-6 AC-2; tracked at
+   * 15-7-audit-export-polish). Reusable for future endpoints that are gated-but-not-yet-built.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-API-501"}
+   * is a stable contract; never reuse for a different meaning.
+   */
+  WKS_API_501("WKS-API-501"),
+
   // 401 / 403 — auth.
   /** Authentication failed (unknown email, wrong password, or inactive user). */
   WKS_API_401("WKS-API-401"),
@@ -577,6 +590,17 @@ public enum ErrorCode {
    * unavailable) and logs the underlying exception at WARN. HTTP 404. Story 7.5 review remediation.
    */
   WKS_LIC_004("WKS-LIC-004"),
+  /**
+   * Audit-export endpoint ({@code POST /api/admin/audit/export}) accessed while the {@code
+   * audit.export} feature is disabled by the current license (OSS, Team, Expired, or Degraded
+   * state). HTTP 403 Forbidden — the caller is authenticated but the feature is not unlocked.
+   * Distinct from {@link #WKS_LIC_003} (SSO 404): audit-export returns 403 because the endpoint is
+   * registered (not absent) but access is denied without the feature. Story 7-6 AC-2.
+   *
+   * <p>Per {@code feedback_error_codes_are_wire_contract.md}: the wire string {@code "WKS-LIC-005"}
+   * is a stable contract; never reuse for a different meaning.
+   */
+  WKS_LIC_005("WKS-LIC-005"),
 
   // ---------------------------------------------------------------------------
   // Archetype validation band (Story 6.1) — YAML-surface archetype violations.
