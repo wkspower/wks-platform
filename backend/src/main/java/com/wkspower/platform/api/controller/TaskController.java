@@ -59,12 +59,12 @@ public class TaskController {
   }
 
   /**
-   * Story 13-1 AC1 / AC4 — list pending BPMN user tasks across every case-type the caller can
-   * view. Permission gate: the caller must hold the {@code view} verb on the case-type for any of
-   * its tasks to appear; case-types with no view permission contribute zero rows regardless of
-   * the engine state. Order is {@code createdAt ASC} (oldest first, with stable {@code caseId
-   * ASC} tiebreak), capped at {@link #CROSS_CASE_TASK_LIMIT}. {@code truncated = true} signals
-   * the cap was reached.
+   * Story 13-1 AC1 / AC4 — list pending BPMN user tasks across every case-type the caller can view.
+   * Permission gate: the caller must hold the {@code view} verb on the case-type for any of its
+   * tasks to appear; case-types with no view permission contribute zero rows regardless of the
+   * engine state. Order is {@code createdAt ASC} (oldest first, with stable {@code caseId ASC}
+   * tiebreak), capped at {@link #CROSS_CASE_TASK_LIMIT}. {@code truncated = true} signals the cap
+   * was reached.
    */
   @GetMapping
   public ApiResponse<CrossCaseTaskListDto> listAcrossCases(

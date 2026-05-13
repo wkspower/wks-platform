@@ -71,8 +71,8 @@ public interface WorkflowEngine {
 
   /**
    * Story 13-1 AC1 — list pending (active, uncompleted) BPMN user tasks across every case whose
-   * case-type id is in {@code permittedCaseTypeIds}, ordered by engine {@code createdAt ASC} with
-   * a stable {@code caseId ASC} tiebreak. Returns at most {@code limit} tasks; the {@link
+   * case-type id is in {@code permittedCaseTypeIds}, ordered by engine {@code createdAt ASC} with a
+   * stable {@code caseId ASC} tiebreak. Returns at most {@code limit} tasks; the {@link
    * CrossCaseTaskListResult#truncated()} flag is {@code true} when the engine had strictly more
    * matching rows than {@code limit}.
    *
@@ -81,9 +81,9 @@ public interface WorkflowEngine {
    * passes it here so the engine query can pre-filter (no post-pagination filter holes). An empty
    * permitted set short-circuits to {@link CrossCaseTaskListResult#empty()}.
    *
-   * <p>Default implementation returns empty — concrete adapters override. Default makes
-   * in-memory stubs in tests opt-in to the new surface without forcing them to implement engine
-   * paginated reads they do not exercise.
+   * <p>Default implementation returns empty — concrete adapters override. Default makes in-memory
+   * stubs in tests opt-in to the new surface without forcing them to implement engine paginated
+   * reads they do not exercise.
    *
    * <p>Implementations MUST translate engine exceptions into {@link
    * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.

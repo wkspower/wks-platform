@@ -398,14 +398,14 @@ public class CibSevenWorkflowEngine implements WorkflowEngine {
 
   /**
    * Sentinel entry stored in the per-call process-instance variable cache when a process instance
-   * has terminated between the task-list query and the variable read. Subsequent tasks on the
-   * same process instance can short-circuit without re-issuing the failing {@code getVariables}
-   * call.
+   * has terminated between the task-list query and the variable read. Subsequent tasks on the same
+   * process instance can short-circuit without re-issuing the failing {@code getVariables} call.
    */
   private static final java.util.Map.Entry<UUID, String> MISSING_PI_SENTINEL =
       java.util.Map.entry(new UUID(0L, 0L), "");
 
-  private java.util.Map.Entry<UUID, String> readPiVars(org.cibseven.bpm.engine.task.Task engineTask) {
+  private java.util.Map.Entry<UUID, String> readPiVars(
+      org.cibseven.bpm.engine.task.Task engineTask) {
     Map<String, Object> processVars;
     try {
       processVars = runtimeService.getVariables(engineTask.getProcessInstanceId());

@@ -224,8 +224,7 @@ class TaskServiceTest {
   @Test
   void listAcrossCasesShortCircuitsOnNonPositiveLimit() {
     StubEngine engine = new StubEngine();
-    CrossCaseTaskListResult result =
-        new TaskService(engine).listAcrossCases(Set.of("A"), 0);
+    CrossCaseTaskListResult result = new TaskService(engine).listAcrossCases(Set.of("A"), 0);
 
     assertThat(result.tasks()).isEmpty();
     assertThat(engine.listCalls).isEqualTo(0);
@@ -234,11 +233,9 @@ class TaskServiceTest {
   @Test
   void listAcrossCasesDelegatesPermittedSetToEngine() {
     StubEngine engine = new StubEngine();
-    engine.listResult =
-        new CrossCaseTaskListResult(List.of(sampleTask("t1")), false);
+    engine.listResult = new CrossCaseTaskListResult(List.of(sampleTask("t1")), false);
 
-    CrossCaseTaskListResult result =
-        new TaskService(engine).listAcrossCases(Set.of("A", "B"), 500);
+    CrossCaseTaskListResult result = new TaskService(engine).listAcrossCases(Set.of("A", "B"), 500);
 
     assertThat(engine.listCalls).isEqualTo(1);
     assertThat(engine.lastPermittedCaseTypeIds).containsExactlyInAnyOrder("A", "B");
@@ -297,8 +294,7 @@ class TaskServiceTest {
     CrossCaseTaskListResult listResult = CrossCaseTaskListResult.empty();
 
     @Override
-    public CrossCaseTaskListResult listPendingTasks(
-        Set<String> permittedCaseTypeIds, int limit) {
+    public CrossCaseTaskListResult listPendingTasks(Set<String> permittedCaseTypeIds, int limit) {
       listCalls++;
       lastPermittedCaseTypeIds = permittedCaseTypeIds;
       lastLimit = limit;

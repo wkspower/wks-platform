@@ -58,9 +58,9 @@ public class TaskService {
   /**
    * Story 13-1 AC1 — list pending user tasks across every case-type id in {@code
    * permittedCaseTypeIds}, ordered by {@code createdAt ASC} (tiebreak {@code caseId ASC}), capped
-   * at {@code limit}. RBAC is the controller's responsibility — the permitted set is computed
-   * there via {@code CaseTypePermissionEvaluator} and passed in. Empty permitted set returns the
-   * empty result without invoking the engine.
+   * at {@code limit}. RBAC is the controller's responsibility — the permitted set is computed there
+   * via {@code CaseTypePermissionEvaluator} and passed in. Empty permitted set returns the empty
+   * result without invoking the engine.
    */
   public CrossCaseTaskListResult listAcrossCases(Set<String> permittedCaseTypeIds, int limit) {
     Objects.requireNonNull(permittedCaseTypeIds, "permittedCaseTypeIds");

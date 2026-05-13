@@ -5,9 +5,9 @@ import java.util.Objects;
 
 /**
  * Story 13-1 AC1 — domain result of {@code WorkflowEngine.listPendingTasks(...)}. Carries the
- * ordered task list together with a {@code truncated} flag indicating whether the requested cap
- * was reached. The API layer projects this into {@code CrossCaseTaskListDto} without
- * re-interpreting the flag.
+ * ordered task list together with a {@code truncated} flag indicating whether the requested cap was
+ * reached. The API layer projects this into {@code CrossCaseTaskListDto} without re-interpreting
+ * the flag.
  *
  * @param tasks pending tasks ordered by {@code createdAt ASC, caseId ASC}; size never exceeds the
  *     cap passed to {@code listPendingTasks}.

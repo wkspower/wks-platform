@@ -5,11 +5,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import com.wkspower.platform.api.GlobalExceptionHandler;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
@@ -22,7 +21,6 @@ import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.LicenseService;
 import com.wkspower.platform.domain.service.TaskService;
-import java.util.Collection;
 import com.wkspower.platform.security.AuthenticatedUser;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.JwtAuthenticationFilter;
@@ -31,6 +29,7 @@ import com.wkspower.platform.security.SamlGatingFilter;
 import com.wkspower.platform.security.SecurityConfig;
 import com.wkspower.platform.security.WksUserPrincipal;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
