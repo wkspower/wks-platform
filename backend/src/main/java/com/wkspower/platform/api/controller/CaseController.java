@@ -308,6 +308,13 @@ public class CaseController {
     return ApiResponse.success(dtos, meta);
   }
 
+  // @Transactional pins the request-scoped TX so EventPublisher.publishAfterCommit fired by
+  // CaseService.update (CaseDataEdited per Story 6.3 / 9-3) takes the synchronization branch
+  // instead of falling through to a no-TX publishEvent — the latter is silently dropped by
+  // EditAuditEmitter's @TransactionalEventListener(AFTER_COMMIT). Sibling mutating endpoints
+  // (create, transition, advance-stage, skip-stage) are already @Transactional for the same
+  // reason; PUT was missed when the pattern was introduced.
+  @Transactional
   @PutMapping("/{id}")
   public ApiResponse<CaseDto> update(
       @PathVariable("id") UUID id,
