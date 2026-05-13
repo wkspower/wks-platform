@@ -299,6 +299,7 @@
   "form.error.caseLoad": "Could not load case.",
   "form.error.notFound": "Form not found on this case type.",
   "form.error.backToCase": "Back to case",
+  "form.error.editBlocked": "Complete the open task to update this field.",
   "form.sections.progress": "{complete} of {total} sections complete",
   "form.sections.status.complete": "✓",
   "form.sections.status.error": "✗",

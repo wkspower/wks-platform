@@ -111,6 +111,9 @@ export function MultiSectionFormRenderer({
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+  // Story 6-3b AC2 — WKS-EDIT-001 is structurally non-retryable from the form; suppress
+  // the Retry CTA when set. Reset on every new submit attempt.
+  const [editBlocked, setEditBlocked] = useState(false);
 
   // Track which sections are expanded — all open initially (AC1)
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
@@ -199,6 +202,7 @@ export function MultiSectionFormRenderer({
     setServerError(null);
     setIsError(false);
     setIsSuccess(false);
+    setEditBlocked(false);
     setIsPending(true);
     try {
       await submitForm(caseId, formDefinition.id, values);
@@ -218,14 +222,22 @@ export function MultiSectionFormRenderer({
       const knownIds = new Set(allFields.map((f) => f.id));
       const unmapped: string[] = [];
       let firstFieldName: string | null = null;
+      // Story 6-3b AC2 — see SinglePageFormRenderer for rationale.
+      let editBlockedSeen = false;
       for (const e of err.envelopeErrors) {
+        const displayMessage =
+          e.code === 'WKS-EDIT-001' ? t('form.error.editBlocked') : e.message;
+        if (e.code === 'WKS-EDIT-001') {
+          editBlockedSeen = true;
+        }
         if (e.field && knownIds.has(e.field)) {
-          form.setError(e.field, { type: 'server', message: e.message });
+          form.setError(e.field, { type: 'server', message: displayMessage });
           if (firstFieldName === null) firstFieldName = e.field;
-        } else if (e.message) {
-          unmapped.push(e.message);
+        } else if (displayMessage) {
+          unmapped.push(displayMessage);
         }
       }
+      setEditBlocked(editBlockedSeen);
       if (firstFieldName !== null) {
         openFirstErrorSection();
       }
@@ -302,7 +314,8 @@ export function MultiSectionFormRenderer({
       confirmingLabel={t('common.lifecycle.confirming')}
       confirmedLabel={t('common.lifecycle.confirmed')}
       failedLabel={failedLabel}
-      retryAction={retryAction}
+      // Story 6-3b AC2 — suppress Retry CTA for WKS-EDIT-001 (see SinglePageFormRenderer).
+      retryAction={editBlocked ? undefined : retryAction}
       // Story 6.1 AC4 — when an AlertDialog interposes, the button must NOT be type="submit"
       // so clicking the trigger opens the dialog rather than running HTML5 form validation.
       // The dialog's AlertDialogAction fires form.handleSubmit(onSubmit) explicitly.
