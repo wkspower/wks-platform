@@ -1,4 +1,4 @@
-export { ActivityTabPlaceholder } from './ActivityTabPlaceholder';
+export { ActivityTab } from './ActivityTab';
 export { CaseBreadcrumbs } from './CaseBreadcrumbs';
 export { CaseDataTable } from './CaseDataTable';
 export { CaseDetailPanel } from './CaseDetailPanel';

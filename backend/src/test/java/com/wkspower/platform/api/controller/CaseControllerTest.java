@@ -90,6 +90,9 @@ class CaseControllerTest {
   /** Story 2-6-1 — CaseController injects MappingRegistry to project TaskDto.formId. */
   @MockitoBean com.wkspower.platform.domain.service.MappingRegistry mappingRegistry;
 
+  /** Story 9-2 — CaseController injects AuditEventWriter for GET /{id}/audit-events. */
+  @MockitoBean com.wkspower.platform.audit.AuditEventWriter auditEventWriter;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator caseTypePermissionEvaluator;
 
@@ -484,6 +487,200 @@ class CaseControllerTest {
         .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data[0].actionLabel").value("Review"));
+  }
+
+  // ---- GET /api/cases/{id}/audit-events (Story 9-2 AC1, AC2) -------------
+
+  @Test
+  void listAuditEventsReturns200WithAllFourSourceVariants() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+
+    UUID actorUuid = UUID.fromString("00000000-0000-0000-0000-00000000beef");
+    Instant t = NOW;
+    when(auditEventWriter.findByCaseId(eq(caseId), eq(51)))
+        .thenReturn(
+            List.of(
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.User(actorUuid),
+                    "APPLIED",
+                    "priority",
+                    null,
+                    null,
+                    t),
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.AutoRule("rule-7"),
+                    "APPLIED",
+                    "status",
+                    null,
+                    null,
+                    t.minusSeconds(10)),
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.Backend("bpmn"),
+                    "BLOCKED",
+                    "amount",
+                    "task-1",
+                    "loan-form",
+                    t.minusSeconds(20)),
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.ExecutionUnmapped("rest"),
+                    "REJECTED",
+                    null,
+                    null,
+                    null,
+                    t.minusSeconds(30))));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(4))
+        .andExpect(jsonPath("$.data.truncated").value(false))
+        // USER variant — payload.actorId mirrors the persistence column.
+        .andExpect(jsonPath("$.data.items[0].source.type").value("USER"))
+        .andExpect(jsonPath("$.data.items[0].source.payload.actorId").value(actorUuid.toString()))
+        .andExpect(jsonPath("$.data.items[0].result").value("APPLIED"))
+        .andExpect(jsonPath("$.data.items[0].fieldId").value("priority"))
+        .andExpect(jsonPath("$.data.items[0].eventType").value("case.data.edit"))
+        // AUTO_RULE variant.
+        .andExpect(jsonPath("$.data.items[1].source.type").value("AUTO_RULE"))
+        .andExpect(jsonPath("$.data.items[1].source.payload.ruleId").value("rule-7"))
+        // BACKEND variant — BLOCKED row carries openTaskId + formId.
+        .andExpect(jsonPath("$.data.items[2].source.type").value("BACKEND"))
+        .andExpect(jsonPath("$.data.items[2].source.payload.adapterName").value("bpmn"))
+        .andExpect(jsonPath("$.data.items[2].result").value("BLOCKED"))
+        .andExpect(jsonPath("$.data.items[2].openTaskId").value("task-1"))
+        .andExpect(jsonPath("$.data.items[2].formId").value("loan-form"))
+        // EXECUTION_UNMAPPED variant.
+        .andExpect(jsonPath("$.data.items[3].source.type").value("EXECUTION_UNMAPPED"))
+        .andExpect(jsonPath("$.data.items[3].source.payload.originAdapter").value("rest"))
+        .andExpect(jsonPath("$.data.items[3].result").value("REJECTED"));
+  }
+
+  @Test
+  void listAuditEventsSetsTruncatedTrueWhenRepoReturnsMoreThanLimit() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+
+    UUID actorUuid = UUID.randomUUID();
+    Instant t = NOW;
+    // limit=2 → repo asked for 3; returning 3 rows → truncated=true, only 2 items in the wire.
+    when(auditEventWriter.findByCaseId(eq(caseId), eq(3)))
+        .thenReturn(
+            List.of(
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.User(actorUuid),
+                    "APPLIED",
+                    "f1",
+                    null,
+                    null,
+                    t),
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.User(actorUuid),
+                    "APPLIED",
+                    "f2",
+                    null,
+                    null,
+                    t.minusSeconds(1)),
+                auditEvent(
+                    caseId,
+                    new com.wkspower.platform.domain.model.AuditSource.User(actorUuid),
+                    "APPLIED",
+                    "f3",
+                    null,
+                    null,
+                    t.minusSeconds(2))));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events?limit=2").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(2))
+        .andExpect(jsonPath("$.data.truncated").value(true));
+  }
+
+  @Test
+  void listAuditEventsReturns200EmptyWhenNoRows() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    when(auditEventWriter.findByCaseId(eq(caseId), eq(51))).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(0))
+        .andExpect(jsonPath("$.data.truncated").value(false));
+  }
+
+  @Test
+  void listAuditEventsReturns403WithoutViewVerb() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(false);
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events").with(officerAuth()))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void listAuditEventsClampsLimitAboveCapToServerMax() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), anyString(), eq("view"))).thenReturn(true);
+    // limit=9999 → clamped to 200; repo asked for 201.
+    when(auditEventWriter.findByCaseId(eq(caseId), eq(201))).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events?limit=9999").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items.length()").value(0));
+  }
+
+  @Test
+  void listAuditEventsReturns404WhenCaseUnknown() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    when(caseService.findById(caseId)).thenThrow(new WksNotFoundException("missing"));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/audit-events").with(officerAuth()))
+        .andExpect(status().isNotFound());
+  }
+
+  /** Story 9-2 — minimal {@code AuditEvent} factory used by the audit-events slice tests. */
+  private static com.wkspower.platform.audit.AuditEvent auditEvent(
+      UUID caseId,
+      com.wkspower.platform.domain.model.AuditSource source,
+      String result,
+      String fieldId,
+      String openTaskId,
+      String formId,
+      Instant occurredAt) {
+    return new com.wkspower.platform.audit.AuditEvent(
+        UUID.randomUUID(),
+        caseId,
+        com.wkspower.platform.audit.AuditEvent.EVENT_TYPE_CASE_DATA_EDIT,
+        source,
+        result,
+        fieldId,
+        openTaskId,
+        formId,
+        occurredAt,
+        occurredAt);
   }
 
   // ---- PUT /api/cases/{id} -----------------------------------------------

@@ -6,15 +6,20 @@ import com.wkspower.platform.api.dto.request.StageAdvanceRequest;
 import com.wkspower.platform.api.dto.request.StageSkipRequest;
 import com.wkspower.platform.api.dto.request.TransitionRequest;
 import com.wkspower.platform.api.dto.request.UpdateCaseRequest;
+import com.wkspower.platform.api.dto.response.AuditEventListDto;
+import com.wkspower.platform.api.dto.response.AuditEventViewDto;
 import com.wkspower.platform.api.dto.response.CaseDto;
 import com.wkspower.platform.api.dto.response.CaseSummaryDto;
 import com.wkspower.platform.api.dto.response.StageActionResponse;
 import com.wkspower.platform.api.dto.response.TaskDto;
+import com.wkspower.platform.api.mapper.AuditEventViewMapper;
 import com.wkspower.platform.api.mapper.CaseDtoMapper;
 import com.wkspower.platform.api.mapper.TaskDtoMapper;
 import com.wkspower.platform.api.pagination.PageRequestParams;
 import com.wkspower.platform.api.pagination.SortSpec;
 import com.wkspower.platform.api.pagination.SortWhitelist;
+import com.wkspower.platform.audit.AuditEvent;
+import com.wkspower.platform.audit.AuditEventWriter;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition;
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
@@ -96,6 +101,13 @@ public class CaseController {
    */
   private final MappingRegistry mappingRegistry;
 
+  /**
+   * Story 9-2 — read-side port over the {@code audit_events} table. The interface is the narrow
+   * {@link AuditEventWriter} surface (insert + findByCaseId only); no other repository methods are
+   * reachable, preserving 9-3's append-only invariant.
+   */
+  private final AuditEventWriter auditEventWriter;
+
   public CaseController(
       CaseService caseService,
       TaskService taskService,
@@ -103,7 +115,8 @@ public class CaseController {
       WksStageAdvancer stageAdvancer,
       StageRepository stageRepository,
       CaseTypeReader caseTypeReader,
-      MappingRegistry mappingRegistry) {
+      MappingRegistry mappingRegistry,
+      AuditEventWriter auditEventWriter) {
     this.caseService = caseService;
     this.taskService = taskService;
     this.evaluator = evaluator;
@@ -111,7 +124,14 @@ public class CaseController {
     this.stageRepository = stageRepository;
     this.caseTypeReader = caseTypeReader;
     this.mappingRegistry = mappingRegistry;
+    this.auditEventWriter = auditEventWriter;
   }
+
+  /** Story 9-2 AC1 — default audit-event page size when {@code limit} is omitted. */
+  static final int AUDIT_EVENTS_DEFAULT_LIMIT = 50;
+
+  /** Story 9-2 AC1 — server cap; values above this are clamped silently. */
+  static final int AUDIT_EVENTS_MAX_LIMIT = 200;
 
   /**
    * AC4 atomicity surface (Story 3.1 code review B1, 2026-05-05): {@code @Transactional} pins the
@@ -205,6 +225,41 @@ public class CaseController {
       }
     }
     return null;
+  }
+
+  /**
+   * Story 9-2 AC1 — chronological audit feed for a case. Loads the case first so an unknown id
+   * surfaces 404 before the verb check (same pattern as {@code GET /{id}/tasks}); the {@code view}
+   * verb gates the read. {@code limit} clamps to {@code [1, 200]} (default 50). The repository is
+   * asked for {@code limit+1} rows so the controller can detect truncation cheaply without a second
+   * round-trip (§Design Decision 2). Rows are newest-first per the existing repo contract.
+   *
+   * <p>No new error codes; 403 / 404 / 200 use the existing wire envelope.
+   */
+  @GetMapping("/{id}/audit-events")
+  public ApiResponse<AuditEventListDto> listAuditEvents(
+      @PathVariable("id") UUID id,
+      @RequestParam(value = "limit", required = false) Integer limitParam,
+      @AuthenticationPrincipal WksUserPrincipal actor) {
+    Case found = caseService.findById(id);
+    requireVerb(actor, found.caseTypeId(), "view");
+    int limit = clampAuditEventsLimit(limitParam);
+    List<AuditEvent> rows = auditEventWriter.findByCaseId(id, limit + 1);
+    boolean truncated = rows.size() > limit;
+    List<AuditEventViewDto> items =
+        rows.stream().limit(limit).map(AuditEventViewMapper::toDto).toList();
+    return ApiResponse.success(new AuditEventListDto(items, truncated));
+  }
+
+  /** Clamp the optional {@code limit} query param to {@code [1, 200]} with default 50. */
+  private static int clampAuditEventsLimit(Integer limitParam) {
+    if (limitParam == null) {
+      return AUDIT_EVENTS_DEFAULT_LIMIT;
+    }
+    if (limitParam < 1) {
+      return 1;
+    }
+    return Math.min(limitParam, AUDIT_EVENTS_MAX_LIMIT);
   }
 
   @GetMapping
