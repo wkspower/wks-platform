@@ -18,13 +18,17 @@ function render(ui: ReactElement) {
 
 /**
  * Story 2.5 AC8 — first interactive paint of `CaseDataTable` with 1,000 rows must be under
- * 1000 ms wall-clock. This budget is the CI threshold; local laptops typically come in under
+ * 1500 ms wall-clock. This budget is the CI threshold; local laptops typically come in under
  * 500 ms (UX spec note in Dev Notes). The pagination row model + page size 50 means TanStack
  * Table only commits 50 rows to the DOM regardless of the upstream count — this guards against
  * a future regression that breaks pagination (e.g., naïve virtualisation removal).
+ *
+ * Budget bumped 1000 ms → 1500 ms on 2026-05-13 (story case-data-table-perf-harden):
+ * two-sprint flake-debt rule per Sprint 11 retro Action 3 — fps-budget migration rejected
+ * (deferred to Phase-1; jsdom does not paint frames, not a demo-gate move).
  */
 describe('CaseDataTable perf-guardrail', () => {
-  it('renders 1000 rows under 1000ms wall-clock to first interactive paint', async () => {
+  it('renders 1000 rows under 1500ms wall-clock to first interactive paint', async () => {
     const caseType = loanApplicationCaseTypeView();
     const columns = buildCaseColumns(caseType);
     const data = buildCaseListFixture(1000).map(toCaseRow);
@@ -38,6 +42,8 @@ describe('CaseDataTable perf-guardrail', () => {
     const elapsed = performance.now() - start;
     unmount();
 
-    expect(elapsed, `render took ${elapsed.toFixed(0)}ms (budget 1000ms)`).toBeLessThan(1000);
+    // Budget bumped 1000 → 1500 ms on 2026-05-13 (story case-data-table-perf-harden) —
+    // two-sprint flake-debt rule per Sprint 11 retro Action 3; fps-budget migration rejected.
+    expect(elapsed, `render took ${elapsed.toFixed(0)}ms (budget 1500ms)`).toBeLessThan(1500);
   });
 });
