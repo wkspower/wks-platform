@@ -86,10 +86,7 @@ export function ActivityTabRow({ event, currentUserId, now }: ActivityTabRowProp
       data-testid={`activity-row-${event.id}`}
       className="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-2"
     >
-      <Icon
-        aria-hidden
-        className="mt-0.5 size-4 flex-shrink-0 text-[var(--muted-foreground)]"
-      />
+      <Icon aria-hidden className="mt-0.5 size-4 flex-shrink-0 text-[var(--muted-foreground)]" />
       <div className="min-w-0 flex-1">
         <p className="text-sm">
           <span className="font-medium">{sourceCopy}</span>{' '}

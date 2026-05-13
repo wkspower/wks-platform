@@ -22,10 +22,7 @@ export function formatDateTime(value: Date | number | string): string {
  * <p>For events older than 30 days we fall back to {@link formatDate} (medium date) — relative
  * strings beyond ~a month stop being useful for an audit feed.
  */
-export function formatRelativeTime(
-  value: Date | number | string,
-  now: Date = new Date(),
-): string {
+export function formatRelativeTime(value: Date | number | string, now: Date = new Date()): string {
   const date = value instanceof Date ? value : new Date(value);
   const diffMs = date.getTime() - now.getTime();
   const absSeconds = Math.abs(diffMs) / 1000;

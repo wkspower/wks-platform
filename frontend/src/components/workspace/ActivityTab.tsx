@@ -75,11 +75,7 @@ export function ActivityTab({ caseId }: ActivityTabProps) {
 
   return (
     <div data-testid="activity-tab" className="flex flex-col gap-3 py-3">
-      <ul
-        className="flex flex-col gap-2"
-        role="list"
-        aria-label={t('activity.feed.listLabel')}
-      >
+      <ul className="flex flex-col gap-2" role="list" aria-label={t('activity.feed.listLabel')}>
         {data.items.map((event) => (
           <ActivityTabRow key={event.id} event={event} currentUserId={currentUserId} />
         ))}
