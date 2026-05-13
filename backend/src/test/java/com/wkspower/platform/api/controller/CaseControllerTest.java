@@ -87,6 +87,9 @@ class CaseControllerTest {
   /** Story 5.5 AC-4 — CaseController now injects CaseTypeReader for pinned-version DTO build. */
   @MockitoBean com.wkspower.platform.domain.port.CaseTypeReader caseTypeReader;
 
+  /** Story 2-6-1 — CaseController injects MappingRegistry to project TaskDto.formId. */
+  @MockitoBean com.wkspower.platform.domain.service.MappingRegistry mappingRegistry;
+
   @MockitoBean(name = "caseTypePermissionEvaluator")
   CaseTypePermissionEvaluator caseTypePermissionEvaluator;
 
@@ -314,7 +317,108 @@ class CaseControllerTest {
         .andExpect(jsonPath("$.data.length()").value(1))
         .andExpect(jsonPath("$.data[0].id").value("t1"))
         .andExpect(jsonPath("$.data[0].actionLabel").value("Draft application"))
-        .andExpect(jsonPath("$.data[0].caseId").value(caseId.toString()));
+        .andExpect(jsonPath("$.data[0].caseId").value(caseId.toString()))
+        // Story 2-6-1 — no mapping registered → formId is null (affordance suppressed).
+        .andExpect(jsonPath("$.data[0].formId").value(org.hamcrest.Matchers.nullValue()));
+  }
+
+  // ---- Story 2-6-1 — TaskDto.formId projection ---------------------------
+
+  @Test
+  void listTasksProjectsFormIdWhenMappingDeclaresForm() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(taskService.findByCase(caseId))
+        .thenReturn(
+            List.of(
+                new com.wkspower.platform.domain.model.Task(
+                    "t1",
+                    "pi-1",
+                    "pd-1",
+                    caseId,
+                    "loan-application",
+                    "draft",
+                    "Draft",
+                    null,
+                    "draft_section",
+                    NOW,
+                    null)));
+    when(taskService.readActionLabel("pd-1", "draft")).thenReturn("Draft");
+    when(mappingRegistry.resolve(any(), anyString()))
+        .thenReturn(
+            java.util.Optional.of(
+                new com.wkspower.platform.domain.config.model.MappingDefinition(
+                    List.of(
+                        new com.wkspower.platform.domain.config.model.AttachmentDefinition(
+                            "bpmn",
+                            "loan.bpmn",
+                            "case",
+                            java.util.Optional.empty(),
+                            Map.of(
+                                "draft",
+                                new com.wkspower.platform.domain.config.model.AttachmentDefinition
+                                    .UserTaskMapping("wks-draft", "loan-form")),
+                            java.util.Optional.empty(),
+                            Map.of(),
+                            List.of(),
+                            Map.of())))));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].formId").value("loan-form"));
+  }
+
+  @Test
+  void listTasksReturnsNullFormIdWhenNoMappingMatchesTaskDefinitionKey() throws Exception {
+    UUID caseId = UUID.randomUUID();
+    Case sample = sampleCase(caseId);
+    when(caseService.findById(caseId)).thenReturn(sample);
+    when(caseTypePermissionEvaluator.hasVerb(any(), eq("loan-application"), eq("view")))
+        .thenReturn(true);
+    when(taskService.findByCase(caseId))
+        .thenReturn(
+            List.of(
+                new com.wkspower.platform.domain.model.Task(
+                    "t1",
+                    "pi-1",
+                    "pd-1",
+                    caseId,
+                    "loan-application",
+                    "review",
+                    "Review",
+                    null,
+                    "draft_section",
+                    NOW,
+                    null)));
+    when(taskService.readActionLabel("pd-1", "review")).thenReturn("Review");
+    // Mapping registered but no userTaskMapping for "review" → formId null.
+    when(mappingRegistry.resolve(any(), anyString()))
+        .thenReturn(
+            java.util.Optional.of(
+                new com.wkspower.platform.domain.config.model.MappingDefinition(
+                    List.of(
+                        new com.wkspower.platform.domain.config.model.AttachmentDefinition(
+                            "bpmn",
+                            "loan.bpmn",
+                            "case",
+                            java.util.Optional.empty(),
+                            Map.of(
+                                "draft",
+                                new com.wkspower.platform.domain.config.model.AttachmentDefinition
+                                    .UserTaskMapping("wks-draft", "loan-form")),
+                            java.util.Optional.empty(),
+                            Map.of(),
+                            List.of(),
+                            Map.of())))));
+
+    mockMvc
+        .perform(get("/api/cases/" + caseId + "/tasks").with(officerAuth()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data[0].formId").value(org.hamcrest.Matchers.nullValue()));
   }
 
   @Test

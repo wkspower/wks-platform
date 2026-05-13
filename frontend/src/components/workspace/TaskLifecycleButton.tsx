@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useReducer, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { ApiError } from '@/api/client';
 import {
@@ -429,6 +430,22 @@ export function TaskLifecycleButton({
           <span className="text-xs text-[var(--muted-foreground)]">
             {t('task.processing.takingLonger')}
           </span>
+        ) : null}
+        {/* Story 2-6-1 AC2/AC3 — "Open form" affordance, rendered iff task.formId is non-null.
+            Secondary visual weight (ghost button) keeps the primary complete-task CTA's click
+            target intact. Targets the literal route from routes.tsx:51
+            (`/cases/:caseId/forms/:formId`). When formId is null the affordance is simply not
+            present — no tooltip, no greyed variant. */}
+        {task.formId ? (
+          <Button asChild type="button" variant="ghost">
+            <Link
+              to={`/cases/${task.caseId}/forms/${task.formId}`}
+              aria-label={t('task.openForm.aria')}
+              data-testid="task-open-form-link"
+            >
+              {t('task.openForm.label')}
+            </Link>
+          </Button>
         ) : null}
       </div>
     </>

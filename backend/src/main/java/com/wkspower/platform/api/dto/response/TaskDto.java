@@ -12,6 +12,12 @@ import java.util.UUID;
  * falling back to the {@code userTask.name} attribute. The mapper resolves it via {@code
  * WorkflowEngine.readActionLabel} so the domain {@link com.wkspower.platform.domain.model.Task}
  * stays lean (UI-string concerns belong at the API edge).
+ *
+ * <p>Story 2-6-1 — {@code formId} projects the form id bound to this userTask via the
+ * case-type's {@code attachments[].userTaskMappings[].form} entry (same path that {@code
+ * EditContractGate} reads via {@code userTaskMapping.form()}). {@code null} when no mapping
+ * declares a form for this {@code taskDefinitionKey}. Frontend uses it to render an "Open form"
+ * affordance on the task row when non-null.
  */
 public record TaskDto(
     String id,
@@ -23,5 +29,6 @@ public record TaskDto(
     UUID assignee,
     String archetype,
     String actionLabel,
+    String formId,
     Instant createdAt,
     Instant dueAt) {}

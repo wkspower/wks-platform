@@ -15,7 +15,10 @@ import com.wkspower.platform.api.mapper.TaskDtoMapper;
 import com.wkspower.platform.api.pagination.PageRequestParams;
 import com.wkspower.platform.api.pagination.SortSpec;
 import com.wkspower.platform.api.pagination.SortWhitelist;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition;
+import com.wkspower.platform.domain.config.model.AttachmentDefinition.UserTaskMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksStageException;
@@ -29,8 +32,10 @@ import com.wkspower.platform.domain.page.Page;
 import com.wkspower.platform.domain.page.PageRequest;
 import com.wkspower.platform.domain.page.SortOrder;
 import com.wkspower.platform.domain.port.CaseTypeReader;
+import com.wkspower.platform.domain.port.CaseTypeRef;
 import com.wkspower.platform.domain.port.StageRepository;
 import com.wkspower.platform.domain.service.CaseService;
+import com.wkspower.platform.domain.service.MappingRegistry;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.domain.service.WksStageAdvancer;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
@@ -84,19 +89,28 @@ public class CaseController {
    */
   private final CaseTypeReader caseTypeReader;
 
+  /**
+   * Story 2-6-1 — resolves the case-type's {@link MappingDefinition} so {@code GET
+   * /{id}/tasks} can project each task's {@code formId} via the same {@code
+   * attachments[].userTaskMappings[].form} path the {@code EditContractGate} already reads.
+   */
+  private final MappingRegistry mappingRegistry;
+
   public CaseController(
       CaseService caseService,
       TaskService taskService,
       CaseTypePermissionEvaluator evaluator,
       WksStageAdvancer stageAdvancer,
       StageRepository stageRepository,
-      CaseTypeReader caseTypeReader) {
+      CaseTypeReader caseTypeReader,
+      MappingRegistry mappingRegistry) {
     this.caseService = caseService;
     this.taskService = taskService;
     this.evaluator = evaluator;
     this.stageAdvancer = stageAdvancer;
     this.stageRepository = stageRepository;
     this.caseTypeReader = caseTypeReader;
+    this.mappingRegistry = mappingRegistry;
   }
 
   /**
@@ -152,9 +166,46 @@ public class CaseController {
       @PathVariable("id") UUID id, @AuthenticationPrincipal WksUserPrincipal actor) {
     Case found = caseService.findById(id);
     requireVerb(actor, found.caseTypeId(), "view");
+    // Story 2-6-1 — resolve the pinned mapping once per request, then build a
+    // (processDefinitionId, taskDefinitionKey) → formId lookup over its userTaskMappings.
+    // Mirrors the EditContractGate path (userTaskMapping.form()); returns null when no mapping
+    // declares a form for the taskDefinitionKey (frontend suppresses the affordance).
+    String versionKey = String.valueOf(found.caseTypeVersion());
+    MappingDefinition mapping =
+        mappingRegistry
+            .resolve(new CaseTypeRef(found.caseTypeId(), versionKey), versionKey)
+            .orElse(null);
     List<TaskDto> dtos =
-        TaskDtoMapper.toDtos(taskService.findByCase(id), taskService::readActionLabel);
+        TaskDtoMapper.toDtos(
+            taskService.findByCase(id),
+            taskService::readActionLabel,
+            (processDefinitionId, taskDefinitionKey) ->
+                resolveFormId(mapping, taskDefinitionKey));
     return ApiResponse.success(dtos);
+  }
+
+  /**
+   * Story 2-6-1 — walk the pinned mapping's {@code attachments[].userTaskMappings} for the first
+   * entry keyed by {@code taskDefinitionKey} that declares a non-blank {@code form}. Returns
+   * {@code null} when no mapping is registered (zero-attachment deploy), no attachment maps this
+   * userTask, or the mapped form id is blank. Same iteration semantics as {@code
+   * EditContractGate#findFirstMatch} — deterministic by attachment order.
+   */
+  private static String resolveFormId(MappingDefinition mapping, String taskDefinitionKey) {
+    if (mapping == null || taskDefinitionKey == null) {
+      return null;
+    }
+    for (AttachmentDefinition attachment : mapping.attachments()) {
+      UserTaskMapping userTaskMapping = attachment.userTaskMappings().get(taskDefinitionKey);
+      if (userTaskMapping == null) {
+        continue;
+      }
+      String formId = userTaskMapping.form();
+      if (formId != null && !formId.isBlank()) {
+        return formId;
+      }
+    }
+    return null;
   }
 
   @GetMapping

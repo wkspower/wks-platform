@@ -14,6 +14,12 @@ export interface TaskDto {
   archetype: string | null;
   /** BPMN-author-supplied CTA copy with userTask.name fallback (Story 2.8 AC1). */
   actionLabel: string | null;
+  /**
+   * Story 2-6-1 — form id bound to this userTask via `attachments[].userTaskMappings[].form` in
+   * the case-type YAML; `null` when no mapping declares a form. Frontend renders an "Open form"
+   * affordance on the task row when non-null.
+   */
+  formId: string | null;
   createdAt: string;
   dueAt: string | null;
 }
