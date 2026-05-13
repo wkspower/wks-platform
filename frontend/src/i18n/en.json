@@ -197,6 +197,9 @@
   "documents.upload.error.size": "File exceeds the {limit} MB size limit.",
   "documents.upload.error.mime": "File type not allowed.",
   "documents.upload.error.filename": "Filename contains invalid characters.",
+  "documents.error.generic": "Something went wrong. Please try again.",
+  "documents.error.list": "We couldn't load documents.",
+  "common.retry": "Retry",
 
   "cases.filter.nFilters": "{count} filters",
   "cases.filter.oneFilter": "1 filter",

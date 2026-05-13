@@ -1,6 +1,7 @@
 import type { LicenseStatus } from '@/api/license';
 import { DeferredBadge } from '@/components/license/DeferredBadge';
 import { Button } from '@/components/ui/Button';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { useLicenseStatus } from '@/hooks/useLicenseStatus';
 import { t } from '@/i18n';
 import { formatDate } from '@/lib/formatDate';
@@ -98,12 +99,15 @@ export function LicenseStatusPage() {
     return (
       <section aria-label={t('page.admin.license.title')}>
         <h1 className="font-heading text-2xl font-semibold">{t('page.admin.license.title')}</h1>
-        <p className="mt-[var(--space-4)] text-sm text-[var(--warning)]">
-          {t('license.status.error')}
-        </p>
-        <Button variant="ghost" onClick={retry} className="mt-[var(--space-2)]">
-          {t('license.status.retry')}
-        </Button>
+        <ErrorState
+          className="mt-[var(--space-6)]"
+          headline={t('license.status.error')}
+          action={
+            <Button variant="secondary" onClick={retry}>
+              {t('license.status.retry')}
+            </Button>
+          }
+        />
       </section>
     );
   }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { getCaseAuditEvents } from '@/api/auditEvents';
+import { Spinner } from '@/components/ui/Spinner';
 import { t } from '@/i18n';
 import { useAuthStore } from '@/stores/authStore';
 import type { AuditEventList } from '@/types/auditEvent';
@@ -56,8 +57,7 @@ export function ActivityTab({ caseId }: ActivityTabProps) {
         role="status"
         aria-live="polite"
       >
-        <div className="size-5 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-        <span className="sr-only">{t('activity.loading.label')}</span>
+        <Spinner label={t('activity.loading.label')} />
       </div>
     );
   }

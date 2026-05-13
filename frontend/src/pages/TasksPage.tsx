@@ -1,5 +1,9 @@
+import { Inbox } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Table, TBody, THead, Th, Td, Tr } from '@/components/ui/Table';
 import { useAllTasks } from '@/hooks/useTasks';
 import { t } from '@/i18n';
@@ -26,13 +30,18 @@ export function TasksPage() {
       {tasksQuery.isLoading ? (
         <TaskListSkeleton />
       ) : tasksQuery.isError ? (
-        <p className="mt-[var(--space-4)] text-[var(--muted-foreground)]" role="alert">
-          {t('page.tasks.error.label')}
-        </p>
+        <ErrorState
+          className="mt-[var(--space-4)]"
+          headline={t('page.tasks.error.label')}
+          data-testid="tasks-error"
+        />
       ) : tasksQuery.data && tasksQuery.data.items.length === 0 ? (
-        <p className="mt-[var(--space-4)] text-[var(--muted-foreground)]" data-testid="tasks-empty">
-          {t('page.tasks.empty.label')}
-        </p>
+        <EmptyState
+          icon={Inbox}
+          className="mt-[var(--space-4)]"
+          headline={t('page.tasks.empty.label')}
+          data-testid="tasks-empty"
+        />
       ) : tasksQuery.data ? (
         <>
           {tasksQuery.data.truncated ? (
@@ -66,7 +75,6 @@ function TaskListTable({ items }: TaskListTableProps) {
             <Th>{t('page.tasks.column.task')}</Th>
             <Th>{t('page.tasks.column.assignee')}</Th>
             <Th>{t('page.tasks.column.created')}</Th>
-            <Th>{t('page.tasks.column.action')}</Th>
           </Tr>
         </THead>
         <TBody>
@@ -103,19 +111,15 @@ function TaskRow({ task }: { task: TaskDto }) {
       <Td>
         <time dateTime={task.createdAt}>{formatRelativeTime(task.createdAt)}</time>
       </Td>
-      <Td>{task.actionLabel ?? task.name}</Td>
     </Tr>
   );
 }
 
 function TaskListSkeleton() {
   return (
-    <div className="mt-[var(--space-4)]" aria-hidden>
+    <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-2)]" aria-hidden>
       {Array.from({ length: 4 }).map((_, i) => (
-        <div
-          key={i}
-          className="my-[var(--space-2)] h-6 rounded bg-[var(--muted)]/60 animate-pulse"
-        />
+        <Skeleton key={i} className="h-6" />
       ))}
     </div>
   );
