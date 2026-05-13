@@ -108,6 +108,9 @@ export function SinglePageFormRenderer({
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+  // Story 6-3b AC2 — WKS-EDIT-001 is structurally non-retryable from the form; suppress
+  // the Retry CTA when set. Reset on every new submit attempt.
+  const [editBlocked, setEditBlocked] = useState(false);
   const bannerRef = useRef<HTMLDivElement | null>(null);
 
   // AC1 — all fields in order-sorted sequence.
@@ -162,6 +165,7 @@ export function SinglePageFormRenderer({
     setServerError(null);
     setIsError(false);
     setIsSuccess(false);
+    setEditBlocked(false);
     setIsPending(true);
     try {
       await submitForm(caseId, formDefinition.id, values);
@@ -182,14 +186,25 @@ export function SinglePageFormRenderer({
       const knownIds = new Set(sortedFields.map((f) => f.id));
       const unmapped: string[] = [];
       let firstFieldName: string | null = null;
+      // Story 6-3b AC2 — WKS-EDIT-001 (edit-contract gate) is structurally non-retryable:
+      // the only way to unblock is to complete the open task. Track presence so the submit
+      // CTA's Retry affordance can be suppressed below. The localized copy replaces the
+      // wire message so we never leak openTaskId / formId at render time even if a future
+      // backend regression reintroduces them.
+      let editBlockedSeen = false;
       for (const e of err.envelopeErrors) {
+        const displayMessage = e.code === 'WKS-EDIT-001' ? t('form.error.editBlocked') : e.message;
+        if (e.code === 'WKS-EDIT-001') {
+          editBlockedSeen = true;
+        }
         if (e.field && knownIds.has(e.field)) {
-          form.setError(e.field, { type: 'server', message: e.message });
+          form.setError(e.field, { type: 'server', message: displayMessage });
           if (firstFieldName === null) firstFieldName = e.field;
-        } else if (e.message) {
-          unmapped.push(e.message);
+        } else if (displayMessage) {
+          unmapped.push(displayMessage);
         }
       }
+      setEditBlocked(editBlockedSeen);
       if (firstFieldName !== null) {
         form.setFocus(firstFieldName);
       }
@@ -256,7 +271,10 @@ export function SinglePageFormRenderer({
       confirmingLabel={t('common.lifecycle.confirming')}
       confirmedLabel={t('common.lifecycle.confirmed')}
       failedLabel={failedLabel}
-      retryAction={retryAction}
+      // Story 6-3b AC2 — suppress Retry CTA for WKS-EDIT-001 (structurally futile until
+      // the open task is completed via the bound form, which is the submit currently being
+      // rejected by a sibling-form gate — retry has nothing to act on).
+      retryAction={editBlocked ? undefined : retryAction}
       // Story 6.1 AC4 — when an AlertDialog interposes, the button must NOT be type="submit"
       // so clicking the trigger opens the dialog rather than running HTML5 form validation.
       // The dialog's AlertDialogAction fires form.handleSubmit(onSubmit) explicitly.

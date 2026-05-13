@@ -40,12 +40,36 @@ public final class EditContractGate {
    * Compute block reasons for the changed-field set. Returns one {@link BlockReason} per field that
    * is owned by at least one open task's form. A field with multiple matches returns the first
    * match (deterministic by attachment iteration order).
+   *
+   * <p>Backwards-compatible overload: no form exemption. Direct-edit path (PUT /api/cases/{id})
+   * calls this entry point unchanged.
    */
   public static List<BlockReason> blockedFields(
       CaseTypeConfig caseType,
       MappingDefinition mapping,
       List<Task> openTasks,
       Set<String> changedFieldIds) {
+    return blockedFields(caseType, mapping, openTasks, changedFieldIds, null);
+  }
+
+  /**
+   * Story 6-3b AC1 — form-submit gate exemption. When {@code exemptFormId} is non-null, any
+   * userTaskMapping whose {@code form} equals {@code exemptFormId} is skipped during the ownership
+   * scan: fields owned by that form are NOT blocked. Sibling-form isolation: fields owned by a
+   * *different* open task's form remain blocked — a form can only exempt its own ownership, never
+   * its siblings'.
+   *
+   * <p>Carve choice = option (c) per story spec. Rationale: the gate is the single source of truth
+   * for "what an open task owns"; threading the exempt through here keeps the rule pure and
+   * unit-testable in isolation. Threading it through {@code CaseService.update} (option b) would
+   * have required a public/private overload split with the same semantics but no test surface gain.
+   */
+  public static List<BlockReason> blockedFields(
+      CaseTypeConfig caseType,
+      MappingDefinition mapping,
+      List<Task> openTasks,
+      Set<String> changedFieldIds,
+      String exemptFormId) {
     Objects.requireNonNull(caseType, "caseType");
     Objects.requireNonNull(openTasks, "openTasks");
     Objects.requireNonNull(changedFieldIds, "changedFieldIds");
@@ -56,13 +80,17 @@ public final class EditContractGate {
 
     List<BlockReason> blocked = new ArrayList<>();
     for (String fieldId : changedFieldIds) {
-      findFirstMatch(caseType, mapping, openTasks, fieldId).ifPresent(blocked::add);
+      findFirstMatch(caseType, mapping, openTasks, fieldId, exemptFormId).ifPresent(blocked::add);
     }
     return blocked;
   }
 
   private static Optional<BlockReason> findFirstMatch(
-      CaseTypeConfig caseType, MappingDefinition mapping, List<Task> openTasks, String fieldId) {
+      CaseTypeConfig caseType,
+      MappingDefinition mapping,
+      List<Task> openTasks,
+      String fieldId,
+      String exemptFormId) {
     for (Task openTask : openTasks) {
       for (AttachmentDefinition attachment : mapping.attachments()) {
         UserTaskMapping userTaskMapping =
@@ -72,6 +100,11 @@ public final class EditContractGate {
         }
         String formId = userTaskMapping.form();
         if (formId == null || formId.isBlank()) {
+          continue;
+        }
+        if (exemptFormId != null && exemptFormId.equals(formId)) {
+          // Story 6-3b — form-submit path is exempt from its own ownership. Sibling forms
+          // (different formId on a different open task) still gate.
           continue;
         }
         Optional<FormDefinition> form =
