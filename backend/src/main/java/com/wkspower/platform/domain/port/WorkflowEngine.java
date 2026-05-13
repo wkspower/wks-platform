@@ -1,5 +1,6 @@
 package com.wkspower.platform.domain.port;
 
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.workflow.DeploymentInfo;
 import com.wkspower.platform.domain.workflow.DeploymentRequest;
@@ -7,6 +8,7 @@ import com.wkspower.platform.domain.workflow.DeploymentResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -66,6 +68,29 @@ public interface WorkflowEngine {
    * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
    */
   List<Task> findTasksByCase(UUID caseId);
+
+  /**
+   * Story 13-1 AC1 — list pending (active, uncompleted) BPMN user tasks across every case whose
+   * case-type id is in {@code permittedCaseTypeIds}, ordered by engine {@code createdAt ASC} with
+   * a stable {@code caseId ASC} tiebreak. Returns at most {@code limit} tasks; the {@link
+   * CrossCaseTaskListResult#truncated()} flag is {@code true} when the engine had strictly more
+   * matching rows than {@code limit}.
+   *
+   * <p>RBAC is the caller's responsibility — the engine knows nothing about user roles. The
+   * controller computes the permitted case-type set via {@code CaseTypePermissionEvaluator} and
+   * passes it here so the engine query can pre-filter (no post-pagination filter holes). An empty
+   * permitted set short-circuits to {@link CrossCaseTaskListResult#empty()}.
+   *
+   * <p>Default implementation returns empty — concrete adapters override. Default makes
+   * in-memory stubs in tests opt-in to the new surface without forcing them to implement engine
+   * paginated reads they do not exercise.
+   *
+   * <p>Implementations MUST translate engine exceptions into {@link
+   * com.wkspower.platform.domain.exception.WksWorkflowEngineException}.
+   */
+  default CrossCaseTaskListResult listPendingTasks(Set<String> permittedCaseTypeIds, int limit) {
+    return CrossCaseTaskListResult.empty();
+  }
 
   /**
    * Read the {@code actionLabel} {@code camunda:property} for a user task definition, falling back

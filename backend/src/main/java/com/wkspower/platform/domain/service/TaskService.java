@@ -4,6 +4,7 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksValidationException;
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.port.WorkflowEngine;
 import java.util.List;
@@ -52,6 +53,21 @@ public class TaskService {
    */
   public String readActionLabel(String processDefinitionId, String taskDefinitionKey) {
     return workflowEngine.readActionLabel(processDefinitionId, taskDefinitionKey);
+  }
+
+  /**
+   * Story 13-1 AC1 — list pending user tasks across every case-type id in {@code
+   * permittedCaseTypeIds}, ordered by {@code createdAt ASC} (tiebreak {@code caseId ASC}), capped
+   * at {@code limit}. RBAC is the controller's responsibility — the permitted set is computed
+   * there via {@code CaseTypePermissionEvaluator} and passed in. Empty permitted set returns the
+   * empty result without invoking the engine.
+   */
+  public CrossCaseTaskListResult listAcrossCases(Set<String> permittedCaseTypeIds, int limit) {
+    Objects.requireNonNull(permittedCaseTypeIds, "permittedCaseTypeIds");
+    if (limit <= 0 || permittedCaseTypeIds.isEmpty()) {
+      return CrossCaseTaskListResult.empty();
+    }
+    return workflowEngine.listPendingTasks(permittedCaseTypeIds, limit);
   }
 
   /** Lookup a task by id; 404 if unknown. */

@@ -2,17 +2,27 @@ package com.wkspower.platform.api.controller;
 
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.request.CompleteTaskRequest;
+import com.wkspower.platform.api.dto.response.CrossCaseTaskListDto;
 import com.wkspower.platform.api.dto.response.TaskActionResponse;
+import com.wkspower.platform.api.dto.response.TaskDto;
+import com.wkspower.platform.api.mapper.TaskDtoMapper;
+import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.exception.WksConflictException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.model.CrossCaseTaskListResult;
 import com.wkspower.platform.domain.model.Task;
+import com.wkspower.platform.domain.port.CaseTypeReader;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.service.TaskService;
 import com.wkspower.platform.security.CaseTypePermissionEvaluator;
 import com.wkspower.platform.security.WksUserPrincipal;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,15 +39,45 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/tasks")
 public class TaskController {
 
+  /** Story 13-1 — server cap for {@code GET /api/tasks}. Refined by Story 13-4 filters. */
+  static final int CROSS_CASE_TASK_LIMIT = 500;
+
   private final TaskService taskService;
   private final CaseTypePermissionEvaluator evaluator;
+  private final CaseTypeReader caseTypeReader;
   private final Clock clock;
 
   public TaskController(
-      TaskService taskService, CaseTypePermissionEvaluator evaluator, Clock clock) {
+      TaskService taskService,
+      CaseTypePermissionEvaluator evaluator,
+      CaseTypeReader caseTypeReader,
+      Clock clock) {
     this.taskService = taskService;
     this.evaluator = evaluator;
+    this.caseTypeReader = caseTypeReader;
     this.clock = clock;
+  }
+
+  /**
+   * Story 13-1 AC1 / AC4 — list pending BPMN user tasks across every case-type the caller can
+   * view. Permission gate: the caller must hold the {@code view} verb on the case-type for any of
+   * its tasks to appear; case-types with no view permission contribute zero rows regardless of
+   * the engine state. Order is {@code createdAt ASC} (oldest first, with stable {@code caseId
+   * ASC} tiebreak), capped at {@link #CROSS_CASE_TASK_LIMIT}. {@code truncated = true} signals
+   * the cap was reached.
+   */
+  @GetMapping
+  public ApiResponse<CrossCaseTaskListDto> listAcrossCases(
+      @AuthenticationPrincipal WksUserPrincipal actor) {
+    Set<String> permittedCaseTypeIds =
+        caseTypeReader.all().stream()
+            .map(CaseTypeConfig::id)
+            .filter(id -> actor != null && evaluator.hasVerb(actor.authenticated(), id, "view"))
+            .collect(Collectors.toUnmodifiableSet());
+    CrossCaseTaskListResult result =
+        taskService.listAcrossCases(permittedCaseTypeIds, CROSS_CASE_TASK_LIMIT);
+    List<TaskDto> items = TaskDtoMapper.toDtos(result.tasks(), taskService::readActionLabel);
+    return ApiResponse.success(new CrossCaseTaskListDto(items, result.truncated()));
   }
 
   @PostMapping("/{id}/complete")
