@@ -33,5 +33,7 @@ export const caseTypeQueryKeys = {
 export const taskQueryKeys = {
   all: () => ['tasks'] as const,
   byCase: (caseId: string) => ['tasks', 'byCase', caseId] as const,
+  /** Story 13-1 — cross-case task list keyed under the same prefix for SSE invalidation. */
+  allCases: () => ['tasks', 'allCases'] as const,
   detail: (taskId: string) => ['task', taskId] as const,
 } as const;
