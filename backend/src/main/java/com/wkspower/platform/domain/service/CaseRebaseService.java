@@ -25,6 +25,7 @@ import com.wkspower.platform.domain.port.CaseTypeSource;
 import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.Clock;
 import com.wkspower.platform.domain.port.EventPublisher;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,13 +42,24 @@ import java.util.UUID;
  *
  * <ul>
  *   <li>{@link #dryRun(String, UUID, int)} — compute the rebase report without mutating DB state.
- *   <li>{@link #apply(String, UUID, int)} — compute the report, assert no irreconcilable items,
- *       then mutate {@code cases.case_type_version} via {@link CaseRepository#save}. The caller
- *       (AdminController) is responsible for emitting the audit log AFTER this method returns and
- *       for wrapping the call in a {@code @Transactional} boundary (see memory {@code
- *       feedback_transactional_db_exception_postgres.md} — catching a DB exception inside a
- *       transaction and then making another DB call aborts on Postgres).
+ *   <li>{@link #apply(String, UUID, int, String, String, Map)} — compute the report, assert no
+ *       irreconcilable items, then mutate {@code cases.case_type_version} via {@link
+ *       CaseRepository#save}. The caller (AdminController) is responsible for emitting the audit
+ *       log AFTER this method returns and for wrapping the call in a {@code @Transactional}
+ *       boundary (see memory {@code feedback_transactional_db_exception_postgres.md} — catching a
+ *       DB exception inside a transaction and then making another DB call aborts on Postgres).
  * </ul>
+ *
+ * <p>Story 3.9.1 — adds operator-supplied {@code stageRemap} to the apply path. When a case's
+ * current stage disappears in the target version, the operator may supply a {@code stageRemap} map
+ * ({@code {fromStageId: toStageId}}) to resolve the dangling stage instead of failing with
+ * WKS-CFG-034. The remap is validated (from-key in fromVersion.stages, to-value in
+ * toVersion.stages) before any DB mutation. On success the stage_history row is closed with state
+ * REMAPPED and a new ACTIVE row is opened for the target stage.
+ *
+ * <p>AC-5 scoping: {@code STAGE_REMOVED_WITH_ACTIVE_CASE} detection checks only the case's {@code
+ * currentStageId}. Historical stage_history rows referencing removed stages do NOT block rebase —
+ * those orphaned history rows carry their old stage-id forever.
  *
  * <p>This class is framework-free (no Spring imports). Wired into the Spring context via {@link
  * com.wkspower.platform.infrastructure.config.ConfigServiceConfig}.
@@ -60,17 +72,31 @@ public class CaseRebaseService {
   private final EventPublisher eventPublisher;
   private final Clock clock;
 
+  /** Optional — null when no stage history manipulation is needed (unit-test injections). */
+  private final com.wkspower.platform.domain.port.StageRepository stageRepository;
+
   public CaseRebaseService(
       CaseRepository caseRepository,
       CaseTypeVersionRegistry versionRegistry,
       CaseTypeSource caseTypeSource,
       EventPublisher eventPublisher,
       Clock clock) {
+    this(caseRepository, versionRegistry, caseTypeSource, eventPublisher, clock, null);
+  }
+
+  public CaseRebaseService(
+      CaseRepository caseRepository,
+      CaseTypeVersionRegistry versionRegistry,
+      CaseTypeSource caseTypeSource,
+      EventPublisher eventPublisher,
+      Clock clock,
+      com.wkspower.platform.domain.port.StageRepository stageRepository) {
     this.caseRepository = caseRepository;
     this.versionRegistry = versionRegistry;
     this.caseTypeSource = caseTypeSource;
     this.eventPublisher = eventPublisher;
     this.clock = clock;
+    this.stageRepository = stageRepository;
   }
 
   /**
@@ -117,7 +143,7 @@ public class CaseRebaseService {
    *     version-checked update finds the row has been bumped concurrently
    */
   public CaseRebaseReport apply(String caseTypeId, UUID caseId, int toVersion) {
-    return apply(caseTypeId, caseId, toVersion, "ANONYMOUS", null);
+    return apply(caseTypeId, caseId, toVersion, "ANONYMOUS", null, Map.of());
   }
 
   /**
@@ -127,6 +153,27 @@ public class CaseRebaseService {
    */
   public CaseRebaseReport apply(
       String caseTypeId, UUID caseId, int toVersion, String actor, String requestId) {
+    return apply(caseTypeId, caseId, toVersion, actor, requestId, Map.of());
+  }
+
+  /**
+   * Story 3.9.1 — full overload accepting operator-supplied {@code stageRemap}. When {@code
+   * stageRemap} is empty, behavior is identical to Story 3.9 (dangling stages remain irreconcilable
+   * and block apply with WKS-CFG-034). When non-empty, the remap is validated (WKS-CFG-036,
+   * WKS-CFG-037) and applied atomically inside the caller's {@code @Transactional} scope.
+   *
+   * @param stageRemap operator-supplied map of {@code {fromStageId → toStageId}}; may be null or
+   *     empty (preserves Story 3.9 behavior)
+   */
+  public CaseRebaseReport apply(
+      String caseTypeId,
+      UUID caseId,
+      int toVersion,
+      String actor,
+      String requestId,
+      Map<String, String> stageRemap) {
+    Map<String, String> remap = (stageRemap == null) ? Map.of() : stageRemap;
+
     Case kase = resolveCase(caseTypeId, caseId);
     int fromVersion = kase.caseTypeVersion();
     validateVersionArg(caseTypeId, fromVersion, toVersion);
@@ -134,8 +181,13 @@ public class CaseRebaseService {
     CaseTypeConfig fromConfig = loadConfig(caseTypeId, fromVersion);
     CaseTypeConfig toConfig = loadConfig(caseTypeId, toVersion);
 
+    // Story 3.9.1 — validate stageRemap keys + values before any DB mutation.
+    if (!remap.isEmpty()) {
+      validateStageRemap(remap, fromConfig, toConfig);
+    }
+
     CaseRebaseReport report =
-        buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, false);
+        buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, false, remap);
 
     if (!report.irreconcilable().isEmpty()) {
       throw new WksConfigException(
@@ -149,18 +201,45 @@ public class CaseRebaseService {
           Map.of("irreconcilable", report.irreconcilable()));
     }
 
-    // Story 3.9 review remediation — version-checked update. Closes the TOCTOU window between
-    // resolveCase() and the write: a concurrent UPDATE that bumps c.version causes this UPDATE to
-    // match zero rows, surfacing as WKS-CFG-035 instead of silently winning via JPA merge.
-    int affected = caseRepository.updateCaseTypeVersion(kase.id(), toVersion, kase.version());
-    if (affected == 0) {
-      throw new WksConcurrentModificationException(
-          ErrorCode.WKS_CFG_035,
-          "case modified concurrently during rebase (caseId="
-              + kase.id()
-              + ", expectedVersion="
-              + kase.version()
-              + ") — reload and retry");
+    Instant now = clock.now();
+
+    // Story 3.9.1 — when stageRemap covers the case's currentStageId, update both the version
+    // and the currentStageId atomically; also close the old stage_history row and open a new one.
+    String currentStageId = kase.currentStageId();
+    String remappedToStageId = (currentStageId != null) ? remap.get(currentStageId) : null;
+
+    int affected;
+    if (remappedToStageId != null) {
+      // Determine the ordinal of the target stage from toConfig.
+      int toOrdinal = findStageOrdinal(toConfig, remappedToStageId);
+      affected =
+          caseRepository.updateCaseTypeVersionAndStage(
+              kase.id(), toVersion, remappedToStageId, toOrdinal, kase.version());
+      if (affected == 0) {
+        throw new WksConcurrentModificationException(
+            ErrorCode.WKS_CFG_035,
+            "case modified concurrently during rebase (caseId="
+                + kase.id()
+                + ", expectedVersion="
+                + kase.version()
+                + ") — reload and retry");
+      }
+      // Flip stage history: close old ACTIVE row (REMAPPED), open new ACTIVE row.
+      if (stageRepository != null) {
+        stageRepository.remapStage(kase.id(), currentStageId, remappedToStageId, toOrdinal, now);
+      }
+    } else {
+      // Story 3.9 path — no stage remap for this case's current stage.
+      affected = caseRepository.updateCaseTypeVersion(kase.id(), toVersion, kase.version());
+      if (affected == 0) {
+        throw new WksConcurrentModificationException(
+            ErrorCode.WKS_CFG_035,
+            "case modified concurrently during rebase (caseId="
+                + kase.id()
+                + ", expectedVersion="
+                + kase.version()
+                + ") — reload and retry");
+      }
     }
 
     // Publish the domain event INSIDE the surrounding @Transactional. The AFTER_COMMIT listener
@@ -177,10 +256,67 @@ public class CaseRebaseService {
               "migration-rebase",
               actor,
               requestId,
-              clock.now()));
+              now,
+              remap.isEmpty() ? Map.of() : Map.copyOf(remap)));
     }
 
-    return buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, true);
+    return buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, true, remap);
+  }
+
+  /**
+   * Story 3.9.1 — validate the operator-supplied stageRemap before any DB mutation.
+   *
+   * @throws WksConfigException with {@link ErrorCode#WKS_CFG_036} when a from-key is not in
+   *     fromVersion.stages[]
+   * @throws WksConfigException with {@link ErrorCode#WKS_CFG_037} when a to-value is not in
+   *     toVersion.stages[]
+   */
+  void validateStageRemap(
+      Map<String, String> remap, CaseTypeConfig fromConfig, CaseTypeConfig toConfig) {
+    Set<String> fromStageIds = collectStageIds(fromConfig);
+    Set<String> toStageIds = collectStageIds(toConfig);
+
+    for (Map.Entry<String, String> entry : remap.entrySet()) {
+      String fromKey = entry.getKey();
+      String toValue = entry.getValue();
+
+      if (!fromStageIds.contains(fromKey)) {
+        throw new WksConfigException(
+            List.of(
+                ErrorDetail.of(
+                    ErrorCode.WKS_CFG_036.wire(),
+                    "stageRemap key '"
+                        + fromKey
+                        + "' is not present in fromVersion.stages — valid from-stage ids: "
+                        + fromStageIds)),
+            Map.of("key", fromKey, "reason", "not present in fromVersion.stages"));
+      }
+
+      if (!toStageIds.contains(toValue)) {
+        throw new WksConfigException(
+            List.of(
+                ErrorDetail.of(
+                    ErrorCode.WKS_CFG_037.wire(),
+                    "stageRemap value '"
+                        + toValue
+                        + "' for key '"
+                        + fromKey
+                        + "' is not present in toVersion.stages — valid to-stage ids: "
+                        + toStageIds)),
+            Map.of("from", fromKey, "to", toValue, "reason", "not present in toVersion.stages"));
+      }
+    }
+  }
+
+  private int findStageOrdinal(CaseTypeConfig config, String stageId) {
+    if (config.stages() != null) {
+      for (StageDefinition stage : config.stages()) {
+        if (stageId.equals(stage.id())) {
+          return stage.ordinal();
+        }
+      }
+    }
+    return 0;
   }
 
   // -------------------------------------------------------------------------
@@ -285,6 +421,7 @@ public class CaseRebaseService {
   /**
    * Build the {@link CaseRebaseReport} from the two configs and the case snapshot. Does NOT mutate
    * any state. The {@code applied} flag is set by the caller to distinguish dry-run from apply.
+   * Delegates to the stageRemap-aware overload with an empty map.
    */
   private CaseRebaseReport buildReport(
       Case kase,
@@ -293,6 +430,23 @@ public class CaseRebaseService {
       CaseTypeConfig fromConfig,
       CaseTypeConfig toConfig,
       boolean applied) {
+    return buildReport(kase, fromVersion, toVersion, fromConfig, toConfig, applied, Map.of());
+  }
+
+  /**
+   * Story 3.9.1 — stageRemap-aware {@link CaseRebaseReport} builder. When {@code stageRemap} is
+   * non-empty, a dangling currentStageId that is covered by the remap is NOT surfaced as {@code
+   * STAGE_REMOVED_WITH_ACTIVE_CASE} (it will be resolved by the remap on apply). Historical
+   * stage_history rows referencing removed stages do NOT block rebase (AC-5 scoping).
+   */
+  private CaseRebaseReport buildReport(
+      Case kase,
+      int fromVersion,
+      int toVersion,
+      CaseTypeConfig fromConfig,
+      CaseTypeConfig toConfig,
+      boolean applied,
+      Map<String, String> stageRemap) {
 
     Map<String, FieldDefinition> fromFields = indexFields(fromConfig);
     Map<String, FieldDefinition> toFields = indexFields(toConfig);
@@ -362,15 +516,19 @@ public class CaseRebaseService {
       }
     }
 
-    // Story 3.9 review remediation — stage-id rename detection. When the case currently sits on a
-    // stage S in fromVersion and toVersion does NOT declare a stage with the same id, the operator
-    // must manually decide where the case lands. Phase-0 surfaces this as irreconcilable; Story
-    // 3-9.1 will add operator-supplied mapping JSON for stage remap.
+    // Story 3.9.1 — stage-id rename detection scoped to ACTIVE stages only (AC-5). Historical
+    // stage_history rows referencing removed stages do NOT block rebase; only the case's
+    // currentStageId (the live head stage) is checked. When the operator supplies a stageRemap
+    // that covers the dangling currentStageId, the irreconcilable item is suppressed — the remap
+    // resolves it on apply.
     String currentStageId = kase.currentStageId();
     if (currentStageId != null && !currentStageId.isBlank()) {
       Set<String> toStageIds = collectStageIds(toConfig);
       Set<String> fromStageIds = collectStageIds(fromConfig);
-      if (fromStageIds.contains(currentStageId) && !toStageIds.contains(currentStageId)) {
+      boolean removedInTarget =
+          fromStageIds.contains(currentStageId) && !toStageIds.contains(currentStageId);
+      boolean coveredByRemap = stageRemap != null && stageRemap.containsKey(currentStageId);
+      if (removedInTarget && !coveredByRemap) {
         irreconcilable.add(
             new IrreconcilableItem(
                 IrreconcilableKind.STAGE_REMOVED_WITH_ACTIVE_CASE, null, null, currentStageId));

@@ -1,6 +1,7 @@
 package com.wkspower.platform.domain.event;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -11,6 +12,11 @@ import java.util.UUID;
  * line is emitted ONLY after the surrounding transaction commits — never on rollback. This
  * structurally replaces the prior {@code log.info} inside {@code AdminController.rebaseApply} which
  * fired before commit (review finding #1).
+ *
+ * <p>Story 3.9.1 — extended with {@code stageRemap} field (optional, default empty). When present,
+ * the audit line includes the remap pairs so operators can reconstruct the stage-flip history.
+ * Decision: extend rather than mint a sibling {@code StageRemapApplied} event — smaller diff, no
+ * current consumer needs distinct routing. Revisit if audit-query patterns surface the need.
  *
  * @param caseId the Case id whose version was rebased
  * @param caseTypeId the bound CaseType id
@@ -25,6 +31,8 @@ import java.util.UUID;
  * @param requestId correlation id from the inbound HTTP request, or {@code null} when absent
  * @param timestamp the {@link Instant} at which the rebase was applied (taken in the controller
  *     before the event is published)
+ * @param stageRemap the operator-supplied stage-id remap map, or {@code null} / empty when no stage
+ *     remap was applied. Keys are fromVersion stage ids; values are toVersion stage ids.
  */
 public record RebaseApplied(
     UUID caseId,
@@ -35,4 +43,30 @@ public record RebaseApplied(
     String forceOverrideReason,
     String actor,
     String requestId,
-    Instant timestamp) {}
+    Instant timestamp,
+    Map<String, String> stageRemap) {
+
+  /** Backward-compat factory — no stageRemap (Story 3.9 callsites). */
+  public static RebaseApplied withoutRemap(
+      UUID caseId,
+      String caseTypeId,
+      int fromVersion,
+      int toVersion,
+      String gateOutcome,
+      String forceOverrideReason,
+      String actor,
+      String requestId,
+      Instant timestamp) {
+    return new RebaseApplied(
+        caseId,
+        caseTypeId,
+        fromVersion,
+        toVersion,
+        gateOutcome,
+        forceOverrideReason,
+        actor,
+        requestId,
+        timestamp,
+        Map.of());
+  }
+}

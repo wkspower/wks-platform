@@ -81,4 +81,24 @@ public interface StageRepository {
 
   /** A pending stage that the transition skips over. */
   record SkippedStage(String stageId, int ordinal) {}
+
+  /**
+   * Story 3.9.1 — atomically closes the currently-ACTIVE {@code fromStageId} row with {@code state
+   * = REMAPPED} and inserts a new ACTIVE row for {@code toStageId}. Used by the stage-remap rebase
+   * apply path.
+   *
+   * <p>The insert of the new ACTIVE row is an INSERT (not a PENDING→ACTIVE flip) because the target
+   * stage may not have a PENDING row — it belongs to the target CaseType version which the case has
+   * not previously materialised history for.
+   *
+   * @param caseId owning case id
+   * @param fromStageId the stage id being remapped (must have an ACTIVE row)
+   * @param toStageId the replacement stage id
+   * @param toOrdinal the ordinal of the replacement stage in the target CaseType version
+   * @param at the timestamp stamped on the {@code exited_at} of the old row and {@code entered_at}
+   *     of the new row
+   * @throws com.wkspower.platform.domain.exception.WksStageException with {@code WKS-STG-003} when
+   *     the ACTIVE row for {@code fromStageId} is not found (concurrent modification guard)
+   */
+  void remapStage(UUID caseId, String fromStageId, String toStageId, int toOrdinal, Instant at);
 }

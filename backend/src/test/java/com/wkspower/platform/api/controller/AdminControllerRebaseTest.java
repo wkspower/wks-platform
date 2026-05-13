@@ -97,7 +97,7 @@ class AdminControllerRebaseTest {
   @Test
   void apply_asAdmin_returns200WithAppliedTrue() throws Exception {
     when(caseRebaseService.apply(
-            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
+            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class), any()))
         .thenReturn(cleanDryRunReport(true));
 
     mockMvc
@@ -116,7 +116,7 @@ class AdminControllerRebaseTest {
   @Test
   void apply_withIrreconcilable_returns422WithCfg034() throws Exception {
     when(caseRebaseService.apply(
-            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class)))
+            eq(CT_ID), eq(CASE_ID), eq(3), anyString(), nullable(String.class), any()))
         .thenThrow(
             new WksConfigException(
                 List.of(

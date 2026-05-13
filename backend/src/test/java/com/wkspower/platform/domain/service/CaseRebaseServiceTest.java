@@ -635,6 +635,40 @@ class CaseRebaseServiceTest {
       return 1;
     }
 
+    @Override
+    public int updateCaseTypeVersionAndStage(
+        UUID caseId,
+        int toCaseTypeVersion,
+        String toStageId,
+        int toStageOrdinal,
+        long expectedVersion) {
+      if (simulateConcurrentBumpOnNextUpdate) {
+        bumpStoredVersion(caseId);
+        simulateConcurrentBumpOnNextUpdate = false;
+      }
+      Case existing = store.get(caseId);
+      if (existing == null || existing.version() != expectedVersion) {
+        return 0;
+      }
+      Case bumped =
+          new Case(
+              existing.id(),
+              existing.caseTypeId(),
+              toCaseTypeVersion,
+              existing.status(),
+              existing.assignee(),
+              existing.data(),
+              existing.processInstanceId(),
+              existing.createdAt(),
+              existing.createdBy(),
+              existing.updatedAt(),
+              existing.version() + 1,
+              toStageId,
+              toStageOrdinal);
+      store.put(caseId, bumped);
+      return 1;
+    }
+
     /** Test helper — simulate a concurrent transaction bumping the @Version column. */
     void bumpStoredVersion(UUID caseId) {
       Case existing = store.get(caseId);

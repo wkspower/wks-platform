@@ -137,6 +137,18 @@ class CaseRepositoryAdapter implements CaseRepository {
     return cases.updateCaseTypeVersion(caseId, toCaseTypeVersion, expectedVersion);
   }
 
+  @Override
+  @Transactional
+  public int updateCaseTypeVersionAndStage(
+      UUID caseId,
+      int toCaseTypeVersion,
+      String toStageId,
+      int toStageOrdinal,
+      long expectedVersion) {
+    return cases.updateCaseTypeVersionAndStage(
+        caseId, toCaseTypeVersion, toStageId, toStageOrdinal, expectedVersion);
+  }
+
   private static CaseSummary toDomainSummary(CaseSummaryProjection p) {
     // The list path returns empty fields here; the service post-enriches via findDataByIds using
     // caseType.listColumns (Story 2.3 D4).

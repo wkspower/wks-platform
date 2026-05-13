@@ -31,12 +31,23 @@ public class RebaseAuditListener {
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onRebaseApplied(RebaseApplied event) {
-    log.info(
-        "event=admin.case.rebase outcome=ACCEPTED priorVersion={} newVersion={} caseId={}"
-            + " forceOverrideReason={}",
-        event.fromVersion(),
-        event.toVersion(),
-        event.caseId(),
-        event.forceOverrideReason());
+    if (event.stageRemap() != null && !event.stageRemap().isEmpty()) {
+      log.info(
+          "event=admin.case.rebase outcome=ACCEPTED priorVersion={} newVersion={} caseId={}"
+              + " forceOverrideReason={} stageRemap={}",
+          event.fromVersion(),
+          event.toVersion(),
+          event.caseId(),
+          event.forceOverrideReason(),
+          event.stageRemap());
+    } else {
+      log.info(
+          "event=admin.case.rebase outcome=ACCEPTED priorVersion={} newVersion={} caseId={}"
+              + " forceOverrideReason={}",
+          event.fromVersion(),
+          event.toVersion(),
+          event.caseId(),
+          event.forceOverrideReason());
+    }
   }
 }

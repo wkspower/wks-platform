@@ -137,6 +137,40 @@ class StageRepositoryAdapter implements StageRepository {
     cases.updateStageCache(t.caseId(), t.toStageId(), t.toOrdinal());
   }
 
+  @Override
+  @Transactional
+  public void remapStage(
+      UUID caseId, String fromStageId, String toStageId, int toOrdinal, Instant at) {
+    // 1) Close the previously-active fromStageId row with REMAPPED state.
+    int rc = history.conditionalUpdateRemapped(caseId, fromStageId, at);
+    if (rc == 0) {
+      throw new WksStageException(
+          ErrorCode.WKS_STG_003,
+          "Stage remap failed on case "
+              + caseId
+              + ": stage '"
+              + fromStageId
+              + "' was not ACTIVE (concurrent modification)");
+    }
+
+    // 2) Insert a new ACTIVE row for toStageId. The target stage has no PENDING row in
+    //    case_stage_history because the case has never been pinned to this toVersion's stages.
+    //    Direct INSERT into ACTIVE state; entered_at stamped at the remap time.
+    CaseStageHistoryEntity newRow =
+        new CaseStageHistoryEntity(
+            UUID.randomUUID(),
+            caseId,
+            toStageId,
+            toOrdinal,
+            StageState.ACTIVE,
+            at, // entered_at = remap timestamp
+            null, // exited_at = null (still active)
+            "rebase-remap",
+            fromStageId, // sourceRef = the stage being remapped FROM (for audit traceability)
+            at);
+    history.save(newRow);
+  }
+
   private static Stage toDomain(CaseStageHistoryEntity e) {
     return new Stage(
         e.getId(),
