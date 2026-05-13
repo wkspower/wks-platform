@@ -67,12 +67,19 @@ describe('CaseDetailPanel tabs', () => {
   });
 
   it('renders the correct panel per tab', async () => {
-    server.use(http.get(`/api/cases/${ID}`, () => HttpResponse.json({ data: dto, meta: {} })));
+    server.use(
+      http.get(`/api/cases/${ID}`, () => HttpResponse.json({ data: dto, meta: {} })),
+      // Story 9-2 — Activity tab now fetches the audit feed instead of rendering a placeholder.
+      http.get(`/api/cases/${ID}/audit-events`, () =>
+        HttpResponse.json({ data: { items: [], truncated: false }, meta: {} }),
+      ),
+    );
     const user = userEvent.setup();
     wrap(<CaseDetailPanel caseId={ID} onClose={() => undefined} />);
 
     await screen.findByRole('tab', { name: 'Properties' });
     await user.click(screen.getByRole('tab', { name: 'Activity' }));
-    expect(await screen.findByTestId('activity-placeholder')).toBeInTheDocument();
+    // Empty-state assertion: 0 audit events → confidence-frame empty copy renders.
+    expect(await screen.findByTestId('activity-empty')).toBeInTheDocument();
   });
 });

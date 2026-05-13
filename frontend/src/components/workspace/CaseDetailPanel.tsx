@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { useCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
 
-import { ActivityTabPlaceholder } from './ActivityTabPlaceholder';
+import { ActivityTab } from './ActivityTab';
 import { CaseActionBar } from './CaseActionBar';
 import { CaseBreadcrumbs } from './CaseBreadcrumbs';
 import { DocumentsTab } from './DocumentsTab';
@@ -237,7 +237,7 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
         </TabsList>
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <TabsContent value="activity">
-            <ActivityTabPlaceholder />
+            <ActivityTab caseId={caseId} />
           </TabsContent>
           <TabsContent value="properties">
             <PropertiesTab caseDto={caseDto} caseTypeView={caseDto.caseType} />
