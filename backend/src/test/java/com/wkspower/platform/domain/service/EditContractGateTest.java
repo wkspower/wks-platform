@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
  *   <li>Field owned by an open task's form -> BLOCKED with the matching openTaskId / formId.
  *   <li>No open tasks on the case -> ALLOWED (AC-3 happy path).
  *   <li>Open tasks exist but none reach the changed field -> ALLOWED (form does not own field).
- *   <li>Open task references a userTaskMapping whose form id is unknown -> ALLOWED (defensive
- *       skip; the deploy-time validator catches form-id typos but we never NPE at runtime).
+ *   <li>Open task references a userTaskMapping whose form id is unknown -> ALLOWED (defensive skip;
+ *       the deploy-time validator catches form-id typos but we never NPE at runtime).
  * </ol>
  */
 class EditContractGateTest {
@@ -70,8 +70,7 @@ class EditContractGateTest {
     Task openTask = task("task-1", "intake-task");
 
     List<EditContractGate.BlockReason> blocked =
-        EditContractGate.blockedFields(
-            caseType, mapping, List.of(openTask), Set.of("loan-amount"));
+        EditContractGate.blockedFields(caseType, mapping, List.of(openTask), Set.of("loan-amount"));
 
     assertThat(blocked).isEmpty();
   }
@@ -114,8 +113,7 @@ class EditContractGateTest {
         "single",
         "monolithic",
         "single-page",
-        List.of(
-            new FieldDefinition(fieldId, fieldId, FieldType.TEXT, false, 0, List.of(), null)),
+        List.of(new FieldDefinition(fieldId, fieldId, FieldType.TEXT, false, 0, List.of(), null)),
         List.of(),
         "submit_for_processing");
   }

@@ -21,9 +21,9 @@ import java.util.Set;
  * list of currently open {@link Task}s on the case, and the set of field ids the caller is
  * attempting to mutate.
  *
- * <p>Returns: per-field block reasons. A field is BLOCKED iff there exists an open task whose
- * BPMN {@code taskDefinitionKey} is mapped (via {@link AttachmentDefinition#userTaskMappings}) to
- * a {@link UserTaskMapping#form} whose {@link FormDefinition#fields} include that field.
+ * <p>Returns: per-field block reasons. A field is BLOCKED iff there exists an open task whose BPMN
+ * {@code taskDefinitionKey} is mapped (via {@link AttachmentDefinition#userTaskMappings}) to a
+ * {@link UserTaskMapping#form} whose {@link FormDefinition#fields} include that field.
  *
  * <p>Pure Java — no Spring, no port. Trivially unit-testable; consumed by {@code CaseService}.
  *
@@ -37,9 +37,9 @@ public final class EditContractGate {
   private EditContractGate() {}
 
   /**
-   * Compute block reasons for the changed-field set. Returns one {@link BlockReason} per field
-   * that is owned by at least one open task's form. A field with multiple matches returns the
-   * first match (deterministic by attachment iteration order).
+   * Compute block reasons for the changed-field set. Returns one {@link BlockReason} per field that
+   * is owned by at least one open task's form. A field with multiple matches returns the first
+   * match (deterministic by attachment iteration order).
    */
   public static List<BlockReason> blockedFields(
       CaseTypeConfig caseType,
@@ -62,10 +62,7 @@ public final class EditContractGate {
   }
 
   private static Optional<BlockReason> findFirstMatch(
-      CaseTypeConfig caseType,
-      MappingDefinition mapping,
-      List<Task> openTasks,
-      String fieldId) {
+      CaseTypeConfig caseType, MappingDefinition mapping, List<Task> openTasks, String fieldId) {
     for (Task openTask : openTasks) {
       for (AttachmentDefinition attachment : mapping.attachments()) {
         UserTaskMapping userTaskMapping =

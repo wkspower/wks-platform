@@ -666,9 +666,9 @@ public enum ErrorCode {
   // wire strings are stable contracts; never reuse for a different meaning.
   // ---------------------------------------------------------------------------
   /**
-   * Story 6.3 AC-2 — direct-edit attempt on a case-data field that is owned by an open
-   * {@code userTask}'s form. The edit-contract requires the user complete the task (form-submit
-   * path) instead of mutating the field directly. HTTP 422 Unprocessable Entity.
+   * Story 6.3 AC-2 — direct-edit attempt on a case-data field that is owned by an open {@code
+   * userTask}'s form. The edit-contract requires the user complete the task (form-submit path)
+   * instead of mutating the field directly. HTTP 422 Unprocessable Entity.
    *
    * <p>The error body carries {@code field}, {@code openTaskId}, and {@code formId} so the SI /
    * frontend can render an actionable "Complete the task to update this field." message and
@@ -681,8 +681,8 @@ public enum ErrorCode {
   /**
    * Story 6.3 AC-5 — concurrent backend signal + user direct-edit race conflict. The user lost the
    * race: a backend signal mutated the same field after the user loaded their form but before the
-   * user submit committed. Per D18 re-anchored, backend wins; the user submit is rejected. HTTP
-   * 409 Conflict.
+   * user submit committed. Per D18 re-anchored, backend wins; the user submit is rejected. HTTP 409
+   * Conflict.
    *
    * <p>The error body carries {@code field}, {@code serverValue}, and a "you had typed:
    * &lt;userValue&gt;" echo so the frontend reload-with-context UX can preserve user intent.

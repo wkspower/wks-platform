@@ -264,8 +264,7 @@ class CaseServiceTest {
     // No open tasks -> AC-3 happy path.
     engine.setOpenTasks(List.of());
 
-    Case updated =
-        svc.update(seeded.id(), Map.of("name", "Bob"), seeded.version(), ACTOR);
+    Case updated = svc.update(seeded.id(), Map.of("name", "Bob"), seeded.version(), ACTOR);
 
     assertThat(updated.data()).containsEntry("name", "Bob");
     assertThat(publisher.events).anyMatch(e -> e instanceof CaseUpdated);
@@ -313,8 +312,7 @@ class CaseServiceTest {
         new WorkflowRef("loan-application.bpmn"),
         List.of(
             new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null),
-            new FieldDefinition(
-                "amount", "Amount", FieldType.NUMBER, false, 0, List.of(), null)),
+            new FieldDefinition("amount", "Amount", FieldType.NUMBER, false, 0, List.of(), null)),
         List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
         List.of("name"),
         List.of(new RoleDefinition("officer", List.of(Permission.VIEW, Permission.CREATE))),
@@ -326,8 +324,7 @@ class CaseServiceTest {
                 "monolithic",
                 "single-page",
                 List.of(
-                    new FieldDefinition(
-                        "name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
+                    new FieldDefinition("name", "Name", FieldType.TEXT, true, 0, List.of(), null)),
                 List.of(),
                 "submit_for_processing")));
   }
