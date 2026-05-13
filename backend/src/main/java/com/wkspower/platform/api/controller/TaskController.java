@@ -76,7 +76,12 @@ public class TaskController {
             .collect(Collectors.toUnmodifiableSet());
     CrossCaseTaskListResult result =
         taskService.listAcrossCases(permittedCaseTypeIds, CROSS_CASE_TASK_LIMIT);
-    List<TaskDto> items = TaskDtoMapper.toDtos(result.tasks(), taskService::readActionLabel);
+    // Cross-case task list (Story 13-1) does not yet surface the open-form affordance — the
+    // null formIdLookup yields formId=null per task, which the frontend renders as "no open-form
+    // button". Whether 13-1 adopts formId is a deferred UX decision; until then this path stays
+    // explicitly null rather than pretending no mapping exists.
+    List<TaskDto> items =
+        TaskDtoMapper.toDtos(result.tasks(), taskService::readActionLabel, (pdId, tdKey) -> null);
     return ApiResponse.success(new CrossCaseTaskListDto(items, result.truncated()));
   }
 
