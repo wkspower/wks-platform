@@ -13,7 +13,7 @@ export const Checkbox = forwardRef<
       ref={ref}
       aria-invalid={hasError ? true : undefined}
       className={cn(
-        'peer size-4 shrink-0 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-[var(--primary)] data-[state=checked]:text-[var(--primary-foreground)]',
+        'peer size-4 shrink-0 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-[var(--disabled-fg)] disabled:bg-[var(--disabled-bg)] data-[state=checked]:bg-[var(--primary)] data-[state=checked]:text-[var(--primary-foreground)]',
         hasError && 'border-[var(--destructive)] focus-visible:ring-[var(--destructive)]',
         className,
       )}

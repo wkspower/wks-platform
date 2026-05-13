@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="WKS Platform">
+  <rect width="180" height="180" rx="40" fill="#0B1437"/>
+  <rect x="22" y="22" width="136" height="136" rx="28" fill="#22D3EE"/>
+  <path d="M44 60l20 72h15l11-44 11 44h15l20-72h-16l-12 47L96 60H84l-12 47L60 60H44z" fill="#0B1437"/>
+</svg>

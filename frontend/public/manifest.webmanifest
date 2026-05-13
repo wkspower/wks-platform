@@ -1,0 +1,13 @@
+{
+  "name": "WKS Platform",
+  "short_name": "WKS",
+  "description": "Case management platform for system integrators.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1437",
+  "theme_color": "#0B1437",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/apple-touch-icon.svg", "sizes": "180x180", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

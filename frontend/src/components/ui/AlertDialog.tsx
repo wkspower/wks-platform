@@ -114,7 +114,7 @@ export const AlertDialogAction = forwardRef<
     <AlertDialogPrimitive.Action
       ref={ref}
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] ring-offset-background transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex h-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] ring-offset-background transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-[var(--disabled-bg)] disabled:text-[var(--disabled-fg)]',
         className,
       )}
       {...props}
@@ -130,7 +130,7 @@ export const AlertDialogCancel = forwardRef<
     <AlertDialogPrimitive.Cancel
       ref={ref}
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--foreground)] ring-offset-background transition-colors hover:bg-[var(--accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex h-9 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--foreground)] ring-offset-background transition-colors hover:bg-[var(--accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-[var(--disabled-bg)] disabled:text-[var(--disabled-fg)]',
         className,
       )}
       {...props}

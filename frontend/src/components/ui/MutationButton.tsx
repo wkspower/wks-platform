@@ -114,7 +114,7 @@ export const MutationButton = forwardRef<HTMLButtonElement, MutationButtonProps>
           : state === 'confirmed'
             ? confirmedFaded
               ? ''
-              : 'bg-emerald-600 text-white hover:bg-emerald-600'
+              : 'bg-[var(--success)] text-white hover:bg-[var(--success)]'
             : state === 'failed'
               ? 'bg-[var(--destructive)] text-white hover:bg-[var(--destructive)]'
               : '';

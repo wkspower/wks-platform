@@ -75,12 +75,30 @@ export function LoginPage() {
   return (
     <Card className="w-full max-w-md bg-[var(--card)]">
       <CardHeader>
-        <p className="font-heading text-2xl font-bold text-[var(--brand-navy)]">
-          {t('app.brandName')}
-        </p>
-        <h1 className="mt-[var(--space-2)] text-lg font-medium text-[var(--foreground)]">
+        <div className="flex items-center gap-[var(--space-3)]">
+          <svg
+            viewBox="0 0 32 32"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={t('app.brandName')}
+            className="size-9 shrink-0"
+          >
+            <rect width="32" height="32" rx="7" fill="var(--secondary)" />
+            <path
+              d="M6 9.5l3.6 13h2.8L15 14l3.6 8.5h2.8L25 9.5h-3l-2 8.5L17.3 9.5h-2.6L12 18.1 9.7 9.5H6z"
+              fill="var(--brand-navy)"
+            />
+          </svg>
+          <p className="font-heading text-2xl font-bold text-[var(--brand-navy)]">
+            {t('app.brandName')}
+          </p>
+        </div>
+        <h1 className="mt-[var(--space-3)] text-lg font-medium text-[var(--foreground)]">
           {t('login.title')}
         </h1>
+        <p className="mt-[var(--space-1)] text-sm text-[var(--muted-foreground)]">
+          {t('login.tagline')}
+        </p>
       </CardHeader>
       <FormProvider {...form}>
         <form
@@ -121,7 +139,7 @@ export function LoginPage() {
               state={state}
               className="w-full"
               confirmingLabel={t('login.submitting')}
-              confirmedLabel={t('login.submit')}
+              confirmedLabel={t('login.confirmed')}
               failedLabel={t('common.lifecycle.failed')}
             >
               {t('login.submit')}
