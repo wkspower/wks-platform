@@ -222,6 +222,9 @@
   "task.confirm.title": "Confirm submission",
   "task.confirm.description": "This is a final action and cannot be undone after the case advances. Continue?",
 
+  "task.openForm.label": "Open form",
+  "task.openForm.aria": "Open the form for this task",
+
   "task.outcome.approve": "Approve",
   "task.outcome.reject": "Reject",
   "task.outcome.sendBack": "Send back",

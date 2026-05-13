@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
 import { server } from '@/test/server';
@@ -20,6 +21,7 @@ const TASK: TaskDto = {
   assignee: null,
   archetype: 'draft_section',
   actionLabel: 'Draft application',
+  formId: null,
   createdAt: '2026-04-26T10:00:00Z',
   dueAt: null,
 };
@@ -172,5 +174,48 @@ describe('TaskLifecycleButton — Story 6.1 AC3 archetype scenarios', () => {
     const task: TaskDto = { ...TASK, archetype: null, actionLabel: 'Process claim' };
     render(wrap(<TaskLifecycleButton task={task} />));
     expect(screen.getByRole('button', { name: 'Process claim' })).toBeInTheDocument();
+  });
+});
+
+/** Story 2-6-1 AC2/AC3/AC4 — "Open form" affordance keyed off task.formId. */
+describe('TaskLifecycleButton — Open form affordance (Story 2-6-1)', () => {
+  function wrapWithRouter(node: ReactNode) {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return (
+      <QueryClientProvider client={client}>
+        <MemoryRouter>{node}</MemoryRouter>
+      </QueryClientProvider>
+    );
+  }
+
+  it('AC2 — renders the Open form affordance when task.formId is non-null', () => {
+    const task: TaskDto = { ...TASK, formId: 'loan-form' };
+    render(wrapWithRouter(<TaskLifecycleButton task={task} />));
+    const link = screen.getByTestId('task-open-form-link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveTextContent('Open form');
+    expect(link).toHaveAttribute('aria-label', 'Open the form for this task');
+  });
+
+  it('AC3 — suppresses the affordance when task.formId is null', () => {
+    const task: TaskDto = { ...TASK, formId: null };
+    render(wrapWithRouter(<TaskLifecycleButton task={task} />));
+    expect(screen.queryByTestId('task-open-form-link')).not.toBeInTheDocument();
+  });
+
+  it('AC4 — affordance navigates to /cases/{caseId}/forms/{formId}', () => {
+    const task: TaskDto = { ...TASK, caseId: 'c1', formId: 'loan-form' };
+    render(wrapWithRouter(<TaskLifecycleButton task={task} />));
+    const link = screen.getByTestId('task-open-form-link');
+    expect(link).toHaveAttribute('href', '/cases/c1/forms/loan-form');
+  });
+
+  it('AC5 — existing complete-task CTA still renders alongside the affordance', () => {
+    const task: TaskDto = { ...TASK, formId: 'loan-form' };
+    render(wrapWithRouter(<TaskLifecycleButton task={task} />));
+    // Primary CTA (archetype-driven) is still present.
+    expect(screen.getByRole('button', { name: 'Save section' })).toBeInTheDocument();
+    // Affordance is its own anchor element (asChild Slot → <a>), not a button.
+    expect(screen.getByTestId('task-open-form-link').tagName).toBe('A');
   });
 });

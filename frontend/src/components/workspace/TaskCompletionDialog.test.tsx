@@ -20,6 +20,7 @@ const TASK: TaskDto = {
   assignee: null,
   archetype: 'submit_for_processing',
   actionLabel: 'Review claim',
+  formId: null,
   createdAt: '2026-05-11T10:00:00Z',
   dueAt: null,
 };
