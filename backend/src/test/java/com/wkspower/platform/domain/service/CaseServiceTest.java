@@ -117,7 +117,8 @@ class CaseServiceTest {
         advancer,
         registry,
         noopRouter,
-        noopStatusUpdater);
+        noopStatusUpdater,
+        new MappingRegistry());
   }
 
   @Test

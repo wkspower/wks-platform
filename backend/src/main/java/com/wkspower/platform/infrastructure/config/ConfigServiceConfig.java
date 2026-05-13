@@ -87,7 +87,8 @@ public class ConfigServiceConfig {
       WksStageAdvancer stageAdvancer,
       CaseTypeVersionRegistry versionRegistry,
       ExecutionSignalHandler backendSignalRouter,
-      CaseStatusUpdater caseStatusUpdater) {
+      CaseStatusUpdater caseStatusUpdater,
+      MappingRegistry mappingRegistry) {
     return new CaseService(
         caseRepository,
         caseTypeReader,
@@ -99,7 +100,8 @@ public class ConfigServiceConfig {
         stageAdvancer,
         versionRegistry,
         backendSignalRouter,
-        caseStatusUpdater);
+        caseStatusUpdater,
+        mappingRegistry);
   }
 
   /**

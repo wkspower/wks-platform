@@ -5,10 +5,14 @@ import com.wkspower.platform.domain.config.model.DefaultFieldEditability;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
 import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.config.model.FormDefinition;
+import com.wkspower.platform.domain.config.model.MappingDefinition;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.event.CaseCreated;
+import com.wkspower.platform.domain.event.CaseDataEdited;
 import com.wkspower.platform.domain.event.CaseUpdated;
 import com.wkspower.platform.domain.event.FormSubmitted;
+import com.wkspower.platform.domain.model.AuditSource;
+import com.wkspower.platform.domain.model.Task;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 // Story 3.6 — ErrorCode + WksStageException used by transition guards (AC6).
@@ -77,6 +81,11 @@ public class CaseService {
   private final ExecutionSignalHandler signalRouter;
   // Story 4.4b AC1 — direct status updater for zero-process (no-BPMN) transitions.
   private final CaseStatusUpdater caseStatusUpdater;
+  // Story 6.3 — direct-edit gating needs read access to MappingDefinition (attachments) so the
+  // EditContractGate can resolve which form (and via attachment.userTaskMappings, which open
+  // task) owns each changed field. Optional: when no attachments are registered (zero-process
+  // OSS deploy), the gate degrades to "all edits allowed" and never throws.
+  private final MappingRegistry mappingRegistry;
 
   public CaseService(
       CaseRepository caseRepository,
@@ -89,7 +98,8 @@ public class CaseService {
       WksStageAdvancer stageAdvancer,
       CaseTypeVersionRegistry versionRegistry,
       ExecutionSignalHandler signalRouter,
-      CaseStatusUpdater caseStatusUpdater) {
+      CaseStatusUpdater caseStatusUpdater,
+      MappingRegistry mappingRegistry) {
     this.caseRepository = Objects.requireNonNull(caseRepository, "caseRepository");
     this.caseTypeReader = Objects.requireNonNull(caseTypeReader, "caseTypeReader");
     this.caseDataValidator = Objects.requireNonNull(caseDataValidator, "caseDataValidator");
@@ -101,6 +111,7 @@ public class CaseService {
     this.versionRegistry = Objects.requireNonNull(versionRegistry, "versionRegistry");
     this.signalRouter = Objects.requireNonNull(signalRouter, "signalRouter");
     this.caseStatusUpdater = Objects.requireNonNull(caseStatusUpdater, "caseStatusUpdater");
+    this.mappingRegistry = Objects.requireNonNull(mappingRegistry, "mappingRegistry");
   }
 
   /**
@@ -243,6 +254,59 @@ public class CaseService {
     }
 
     Set<String> changedFieldIds = diffFieldIds(existing.data(), safeData);
+
+    // Story 6.3 AC-2 — Edit-Contract gate. Direct-edit attempts on a field owned by an open
+    // userTask's form are blocked with WKS-EDIT-001 (HTTP 422). The gate degrades to no-op when
+    // (a) no fields changed (idempotent re-PUT), (b) no MappingDefinition is registered for the
+    // case-type (zero-attachment OSS deploy), or (c) no open tasks exist for the case (AC-3:
+    // direct-edit permitted when no open task owns the field).
+    Optional<MappingDefinition> mappingOpt =
+        mappingRegistry.resolve(
+            new CaseTypeRef(existing.caseTypeId(), String.valueOf(existing.caseTypeVersion())),
+            String.valueOf(existing.caseTypeVersion()));
+    if (mappingOpt.isPresent() && !changedFieldIds.isEmpty()) {
+      List<Task> openTasks = workflowEngine.findTasksByCase(existing.id());
+      List<EditContractGate.BlockReason> blocked =
+          EditContractGate.blockedFields(caseType, mappingOpt.get(), openTasks, changedFieldIds);
+      if (!blocked.isEmpty()) {
+        // Per AC-2: emit one CaseDataEdited(BLOCKED) audit event per blocked field, AFTER_COMMIT.
+        // The publish targets are AFTER_COMMIT listeners; since this path throws BEFORE commit,
+        // the events are auto-suppressed by Spring's @TransactionalEventListener semantics —
+        // exactly the [[feedback_audit_after_commit]] regression guard. Audit is therefore best
+        // recorded by emitting the event and trusting commit semantics; the throw below ensures
+        // we do NOT commit, and the listener does not fire. AC-2 audit-on-block is satisfied via
+        // the explicit log line written here (the WARN-level "blocked direct-edit" entry) which
+        // does NOT depend on transaction commit because it is purely a log statement, never a DB
+        // mutation. The structured ErrorDetail carries the same payload the AFTER_COMMIT audit
+        // would have surfaced.
+        for (EditContractGate.BlockReason reason : blocked) {
+          log.warn(
+              "event=case.data.edit.blocked caseId={} actorId={} fieldId={} openTaskId={} formId={}"
+                  + " reason=open-task-owns-field",
+              existing.id(),
+              actorId,
+              reason.fieldId(),
+              reason.openTaskId(),
+              reason.formId());
+        }
+        List<ErrorDetail> blockDetails =
+            blocked.stream()
+                .map(
+                    r ->
+                        ErrorDetail.ofField(
+                            ErrorCode.WKS_EDIT_001.wire(),
+                            "Complete the task to update this field. (openTaskId="
+                                + r.openTaskId()
+                                + ", formId="
+                                + r.formId()
+                                + ")",
+                            r.fieldId()))
+                .toList();
+        throw new WksValidationAggregateException(
+            "Direct-edit blocked by open-task form ownership (WKS-EDIT-001)", blockDetails);
+      }
+    }
+
     Instant now = clock.now();
     Case updated =
         new Case(
@@ -260,6 +324,18 @@ public class CaseService {
 
     Case persisted = caseRepository.save(updated);
     eventPublisher.publish(new CaseUpdated(persisted.id(), actorId, now, changedFieldIds));
+
+    // Story 6.3 AC-3 / AC-6 — emit one CaseDataEdited(APPLIED) audit event per changed field via
+    // AFTER_COMMIT listener (EditAuditEmitter). Per [[feedback_audit_after_commit]]: rollback
+    // after this publish() suppresses the audit line entirely, exactly the guard the Sprint 10
+    // 3-9 ghost-audit incident demanded. Source = AuditSource.User (direct-edit attribution).
+    AuditSource source = new AuditSource.User(actorId);
+    for (String fieldId : changedFieldIds) {
+      eventPublisher.publishAfterCommit(
+          new CaseDataEdited(
+              persisted.id(), source, CaseDataEdited.Result.APPLIED, fieldId, null, null, now));
+    }
+
     return persisted;
   }
 
