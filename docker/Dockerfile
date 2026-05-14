@@ -58,6 +58,7 @@ ENV TZ=UTC \
 
 WORKDIR /app
 COPY --from=backend-build /app/target/*.jar /app/app.jar
+COPY case-types /app/case-types
 
 EXPOSE 8080
 

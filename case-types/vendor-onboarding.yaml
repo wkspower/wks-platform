@@ -1,0 +1,66 @@
+id: vendor-onboarding
+displayName: "Vendor Onboarding"
+version: 1
+roles:
+  - name: admin
+    permissions: [view, create, edit, transition]
+fields:
+  - id: company_name
+    displayName: "Company Name"
+    type: text
+    required: true
+    requiredOnCreate: true
+    order: 1
+    maxLength: 120
+  - id: contact_name
+    displayName: "Contact Name"
+    type: text
+    required: true
+    requiredOnCreate: true
+    order: 2
+    maxLength: 80
+  - id: contact_email
+    displayName: "Contact Email"
+    type: text
+    required: true
+    requiredOnCreate: true
+    order: 3
+    maxLength: 120
+  - id: vendor_category
+    displayName: "Vendor Category"
+    type: select
+    required: true
+    requiredOnCreate: true
+    order: 4
+    options:
+      - value: goods
+        label: "Goods"
+      - value: services
+        label: "Services"
+      - value: software
+        label: "Software"
+      - value: consulting
+        label: "Consulting"
+  - id: country
+    displayName: "Country"
+    type: text
+    order: 5
+    maxLength: 60
+  - id: annual_spend_estimate
+    displayName: "Annual Spend (USD)"
+    type: number
+    order: 6
+    min: 0
+  - id: expected_start_date
+    displayName: "Expected Start Date"
+    type: date
+    order: 7
+  - id: compliance_reviewed
+    displayName: "Compliance Reviewed"
+    type: checkbox
+    order: 8
+  - id: onboarding_notes
+    displayName: "Onboarding Notes"
+    type: textarea
+    order: 9
+    maxLength: 2000
