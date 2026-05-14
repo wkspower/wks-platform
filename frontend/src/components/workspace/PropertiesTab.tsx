@@ -68,11 +68,7 @@ export function PropertiesTab({ caseDto, caseTypeView }: PropertiesTabProps) {
                 onDone={() => setEditingId(null)}
               />
             ) : (
-              <ReadRow
-                field={field}
-                value={data[field.id]}
-                onEdit={() => setEditingId(field.id)}
-              />
+              <ReadRow field={field} value={data[field.id]} onEdit={() => setEditingId(field.id)} />
             )}
           </dd>
         </Fragment>
@@ -140,10 +136,7 @@ function InlineEditor({
 
   function save() {
     const payload = { ...caseData, [field.id]: draft };
-    mutation.mutate(
-      { data: payload, version: caseVersion },
-      { onSuccess: onDone },
-    );
+    mutation.mutate({ data: payload, version: caseVersion }, { onSuccess: onDone });
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLElement>) {
@@ -174,13 +167,7 @@ function InlineEditor({
         <Button type="button" size="sm" onClick={save} disabled={disabled}>
           {t('properties.save')}
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onDone}
-          disabled={disabled}
-        >
+        <Button type="button" size="sm" variant="outline" onClick={onDone} disabled={disabled}>
           {t('properties.cancel')}
         </Button>
       </div>
@@ -325,6 +312,8 @@ function FieldInput({
     default:
       // File round-trips through the Documents tab; should never reach the editor (ReadRow hides
       // the pencil), but render a no-op span so an unexpected type-widening doesn't crash.
-      return <span className="text-[var(--muted-foreground)]">{t('properties.file.placeholder')}</span>;
+      return (
+        <span className="text-[var(--muted-foreground)]">{t('properties.file.placeholder')}</span>
+      );
   }
 }

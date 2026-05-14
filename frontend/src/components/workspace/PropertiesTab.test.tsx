@@ -18,8 +18,22 @@ function ctView(over: Partial<CaseTypeView> = {}): CaseTypeView {
     displayName: 'Loan',
     version: 1,
     fields: [
-      { id: 'applicant_name', displayName: 'Applicant', type: 'text', required: true, order: 0, options: [] },
-      { id: 'amount', displayName: 'Amount', type: 'number', required: false, order: 1, options: [] },
+      {
+        id: 'applicant_name',
+        displayName: 'Applicant',
+        type: 'text',
+        required: true,
+        order: 0,
+        options: [],
+      },
+      {
+        id: 'amount',
+        displayName: 'Amount',
+        type: 'number',
+        required: false,
+        order: 1,
+        options: [],
+      },
       {
         id: 'priority',
         displayName: 'Priority',
@@ -31,7 +45,14 @@ function ctView(over: Partial<CaseTypeView> = {}): CaseTypeView {
           { value: 'high', label: 'High' },
         ],
       },
-      { id: 'attachment', displayName: 'Attachment', type: 'file', required: false, order: 3, options: [] },
+      {
+        id: 'attachment',
+        displayName: 'Attachment',
+        type: 'file',
+        required: false,
+        order: 3,
+        options: [],
+      },
     ],
     statuses: [],
     listColumns: [],
@@ -59,7 +80,9 @@ function caseDto(data: Record<string, unknown>, version = 1): CaseDto {
 }
 
 function renderTab(view: CaseTypeView, data: Record<string, unknown>, version = 1) {
-  return renderWithProviders(<PropertiesTab caseDto={caseDto(data, version)} caseTypeView={view} />);
+  return renderWithProviders(
+    <PropertiesTab caseDto={caseDto(data, version)} caseTypeView={view} />,
+  );
 }
 
 describe('PropertiesTab — read', () => {
