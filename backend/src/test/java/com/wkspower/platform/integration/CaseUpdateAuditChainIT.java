@@ -91,7 +91,13 @@ class CaseUpdateAuditChainIT {
             "/api/cases/" + caseId, HttpMethod.PUT, new HttpEntity<>(body, headers), String.class);
     assertThat(put.getStatusCode()).as("PUT body=%s", put.getBody()).isEqualTo(HttpStatus.OK);
 
-    List<AuditEvent> rows = auditEventRepository.findByCaseId(caseId, 10);
+    // d4a5d3574 added a case.created emission alongside case.data.edit, so the chain now carries
+    // both. Filter to case.data.edit to keep this test scoped to the EditAuditEmitter behaviour
+    // it was written to cover (the create-emission has its own coverage).
+    List<AuditEvent> rows =
+        auditEventRepository.findByCaseId(caseId, 10).stream()
+            .filter(e -> AuditEvent.EVENT_TYPE_CASE_DATA_EDIT.equals(e.eventType()))
+            .toList();
     assertThat(rows).as("audit_events populated by EditAuditEmitter").hasSize(1);
     AuditEvent row = rows.get(0);
     assertThat(row.eventType()).isEqualTo(AuditEvent.EVENT_TYPE_CASE_DATA_EDIT);
