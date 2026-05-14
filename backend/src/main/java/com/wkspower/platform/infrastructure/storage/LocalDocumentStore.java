@@ -25,7 +25,7 @@ public class LocalDocumentStore implements DocumentStore {
   private final Path basePath;
 
   public LocalDocumentStore(String basePath) {
-    this.basePath = Paths.get(basePath).toAbsolutePath();
+    this.basePath = Paths.get(basePath).toAbsolutePath().normalize();
     log.info("LocalDocumentStore initialised at {}", this.basePath);
   }
 
