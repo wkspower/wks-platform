@@ -43,3 +43,22 @@ export async function createCase(req: CreateCaseRequest): Promise<CaseDto> {
   });
   return result.data;
 }
+
+/** Request body for `POST /api/cases/{id}/transition`. */
+export interface TransitionCaseRequest {
+  action: string;
+  variables?: Record<string, unknown>;
+}
+
+/**
+ * `POST /api/cases/{id}/transition` — Story 2.4 endpoint. On zero-process case types, `action`
+ * is a declared status id and the call bypasses the BPMN engine entirely.
+ */
+export async function transitionCase(id: string, req: TransitionCaseRequest): Promise<CaseDto> {
+  const result = await apiFetch<CaseDto>(`/api/cases/${encodeURIComponent(id)}/transition`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  return result.data;
+}

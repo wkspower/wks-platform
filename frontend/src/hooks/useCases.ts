@@ -8,7 +8,14 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 
-import { createCase, getCase, listCases, type CreateCaseRequest } from '@/api/cases';
+import {
+  createCase,
+  getCase,
+  listCases,
+  transitionCase,
+  type CreateCaseRequest,
+  type TransitionCaseRequest,
+} from '@/api/cases';
 import { caseQueryKeys, type CaseListQuery } from '@/lib/queryKeys';
 import { toCaseRow, type CaseDto, type CaseRow } from '@/types/case';
 
@@ -114,6 +121,26 @@ export function useCreateCase(): UseMutationResult<CaseDto, Error, CreateCaseReq
   return useMutation<CaseDto, Error, CreateCaseRequest>({
     mutationKey: ['cases', 'create'],
     mutationFn: createCase,
+    onSuccess: (dto) => {
+      queryClient.setQueryData(caseQueryKeys.detail(dto.id), dto);
+      queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });
+    },
+    retry: false,
+  });
+}
+
+/**
+ * `POST /api/cases/{id}/transition` mutation. On success, primes the detail cache with the
+ * returned DTO (already carries the new status) and invalidates list queries so status filters
+ * pick up the change. No retry on failure — transitions are user-initiated state changes.
+ */
+export function useTransitionCase(
+  id: string,
+): UseMutationResult<CaseDto, Error, TransitionCaseRequest> {
+  const queryClient = useQueryClient();
+  return useMutation<CaseDto, Error, TransitionCaseRequest>({
+    mutationKey: ['cases', 'transition', id],
+    mutationFn: (req) => transitionCase(id, req),
     onSuccess: (dto) => {
       queryClient.setQueryData(caseQueryKeys.detail(dto.id), dto);
       queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });

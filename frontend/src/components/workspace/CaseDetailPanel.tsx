@@ -16,6 +16,7 @@ import { DocumentsTab } from './DocumentsTab';
 import { PropertiesTab } from './PropertiesTab';
 import { StageTimeline } from './StageTimeline';
 import { StatusBadge } from './StatusBadge';
+import { StatusTransitionControl } from './StatusTransitionControl';
 
 const HEADING_ID = 'case-detail-heading';
 
@@ -214,6 +215,7 @@ export function CaseDetailPanel({ caseId, onClose }: CaseDetailPanelProps) {
             {t('case.heading', { idShort })}
           </HeadingFocusable>
           <StatusBadge status={caseDto.status} caseType={caseDto.caseType} />
+          <StatusTransitionControl caseDto={caseDto} />
         </div>
         {/*
           Story 3.3 — Stage timeline. Single truthy-length gate (AC2 / Decision 19): the absence

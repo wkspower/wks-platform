@@ -53,6 +53,7 @@ export interface StatusDefinition {
   id: string;
   displayName: string;
   color: StatusColor;
+  terminal?: boolean;
 }
 
 export interface CaseTypeSummary {
