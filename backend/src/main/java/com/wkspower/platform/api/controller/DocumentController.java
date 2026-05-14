@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +70,11 @@ public class DocumentController {
    * {@code POST /api/cases/{caseId}/documents} — multipart {@code file} field. Returns {@code 201
    * Created} with the document metadata envelope.
    */
+  // @Transactional pins the request-scoped TX so EventPublisher.publishAfterCommit fired from
+  // DocumentService.upload is observed by CaseDocumentUploadedAuditEmitter's
+  // @TransactionalEventListener(AFTER_COMMIT) — see
+  // feedback_transactional_event_listener_requires_outer_tx.
+  @Transactional
   @PostMapping("/api/cases/{caseId}/documents")
   public ResponseEntity<ApiResponse<CaseDocumentDto>> upload(
       @PathVariable UUID caseId,

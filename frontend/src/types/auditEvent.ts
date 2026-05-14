@@ -28,8 +28,17 @@ export interface AuditEventView {
   id: string;
   eventType: string;
   source: AuditSourceView;
-  /** APPLIED | BLOCKED | REJECTED (free-form at this layer per 9-3 domain model). */
+  /**
+   * Free-form result string. For `case.data.edit`: APPLIED | BLOCKED | REJECTED. For
+   * `case.status.changed`: the new status id. For `case.created`: the literal "CREATED". For
+   * `case.document.uploaded`: the filename.
+   */
   result: string;
+  /**
+   * Prior value for delta-typed events — `case.status.changed` carries the old status id here
+   * (may be null on the very first transition). Null for non-delta event types.
+   */
+  previousResult: string | null;
   fieldId: string | null;
   openTaskId: string | null;
   formId: string | null;

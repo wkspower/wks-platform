@@ -676,6 +676,7 @@ class CaseControllerTest {
         com.wkspower.platform.audit.AuditEvent.EVENT_TYPE_CASE_DATA_EDIT,
         source,
         result,
+        null,
         fieldId,
         openTaskId,
         formId,

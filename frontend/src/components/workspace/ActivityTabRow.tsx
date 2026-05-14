@@ -1,4 +1,12 @@
-import { AlertCircle, Ban, CheckCircle2, Pencil } from 'lucide-react';
+import {
+  AlertCircle,
+  Ban,
+  CheckCircle2,
+  CirclePlus,
+  FileUp,
+  Pencil,
+  RefreshCw,
+} from 'lucide-react';
 
 import { t } from '@/i18n';
 import { formatRelativeTime } from '@/lib/formatDate';
@@ -47,37 +55,62 @@ function renderSource(event: AuditEventView, currentUserId: string | null): stri
 }
 
 function renderResult(event: AuditEventView): string {
-  // Edits dominate Sprint 12; the verb phrasing is field-aware for both APPLIED and BLOCKED.
-  // Non-edit event types currently fall back to the bare result string; future stories will
-  // introduce per-eventType copy bundles.
-  const fieldId = event.fieldId ?? '';
-  switch (event.result) {
-    case 'APPLIED':
-      return t('activity.result.applied', { fieldId });
-    case 'BLOCKED':
-      return t('activity.result.blocked', { fieldId });
-    case 'REJECTED':
-      return t('activity.result.rejected', { fieldId });
+  switch (event.eventType) {
+    case 'case.created':
+      return t('activity.event.caseCreated');
+    case 'case.status.changed':
+      return event.previousResult
+        ? t('activity.event.statusChanged', {
+            oldStatus: event.previousResult,
+            newStatus: event.result,
+          })
+        : t('activity.event.statusChangedFirst', { newStatus: event.result });
+    case 'case.document.uploaded':
+      return t('activity.event.documentUploaded', { fileName: event.result });
+    case 'case.data.edit': {
+      const fieldId = event.fieldId ?? '';
+      switch (event.result) {
+        case 'APPLIED':
+          return t('activity.result.applied', { fieldId });
+        case 'BLOCKED':
+          return t('activity.result.blocked', { fieldId });
+        case 'REJECTED':
+          return t('activity.result.rejected', { fieldId });
+        default:
+          return event.result;
+      }
+    }
     default:
       return event.result;
   }
 }
 
-function resultIcon(result: string) {
-  switch (result) {
-    case 'APPLIED':
-      return CheckCircle2;
-    case 'BLOCKED':
-      return Ban;
-    case 'REJECTED':
-      return AlertCircle;
+function eventIcon(event: AuditEventView) {
+  switch (event.eventType) {
+    case 'case.created':
+      return CirclePlus;
+    case 'case.status.changed':
+      return RefreshCw;
+    case 'case.document.uploaded':
+      return FileUp;
+    case 'case.data.edit':
+      switch (event.result) {
+        case 'APPLIED':
+          return CheckCircle2;
+        case 'BLOCKED':
+          return Ban;
+        case 'REJECTED':
+          return AlertCircle;
+        default:
+          return Pencil;
+      }
     default:
       return Pencil;
   }
 }
 
 export function ActivityTabRow({ event, currentUserId, now }: ActivityTabRowProps) {
-  const Icon = resultIcon(event.result);
+  const Icon = eventIcon(event);
   const sourceCopy = renderSource(event, currentUserId);
   const resultCopy = renderResult(event);
   const relative = formatRelativeTime(event.occurredAt, now);

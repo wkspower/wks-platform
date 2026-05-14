@@ -54,8 +54,11 @@ public class AuditEventEntity {
   @Column(name = "source_payload", nullable = false, updatable = false)
   private Map<String, Object> sourcePayload = new HashMap<>();
 
-  @Column(name = "result", nullable = false, updatable = false, length = 16)
+  @Column(name = "result", nullable = false, updatable = false, length = 64)
   private String result;
+
+  @Column(name = "previous_result", updatable = false, length = 64)
+  private String previousResult;
 
   @Column(name = "field_id", updatable = false, length = 128)
   private String fieldId;
@@ -87,6 +90,7 @@ public class AuditEventEntity {
       String sourceType,
       Map<String, Object> sourcePayload,
       String result,
+      String previousResult,
       String fieldId,
       String openTaskId,
       String formId,
@@ -97,6 +101,7 @@ public class AuditEventEntity {
     this.sourceType = sourceType;
     this.sourcePayload = sourcePayload;
     this.result = result;
+    this.previousResult = previousResult;
     this.fieldId = fieldId;
     this.openTaskId = openTaskId;
     this.formId = formId;
@@ -125,6 +130,10 @@ public class AuditEventEntity {
 
   public String getResult() {
     return result;
+  }
+
+  public String getPreviousResult() {
+    return previousResult;
   }
 
   public String getFieldId() {

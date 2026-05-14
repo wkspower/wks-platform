@@ -87,6 +87,7 @@ class EditAuditPersistenceIT {
         AuditEvent.EVENT_TYPE_CASE_DATA_EDIT,
         source,
         CaseDataEdited.Result.APPLIED.name(),
+        null,
         "customerName",
         null,
         null,

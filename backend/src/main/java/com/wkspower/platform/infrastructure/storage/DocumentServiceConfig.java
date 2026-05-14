@@ -2,6 +2,7 @@ package com.wkspower.platform.infrastructure.storage;
 
 import com.wkspower.platform.domain.port.DocumentRepository;
 import com.wkspower.platform.domain.port.DocumentStore;
+import com.wkspower.platform.domain.port.EventPublisher;
 import com.wkspower.platform.domain.service.DocumentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +21,9 @@ public class DocumentServiceConfig {
 
   @Bean
   public DocumentService documentService(
-      DocumentStore documentStore, DocumentRepository documentRepository) {
-    return new DocumentService(documentStore, documentRepository, maxSizeMb);
+      DocumentStore documentStore,
+      DocumentRepository documentRepository,
+      EventPublisher eventPublisher) {
+    return new DocumentService(documentStore, documentRepository, eventPublisher, maxSizeMb);
   }
 }

@@ -1,10 +1,13 @@
 package com.wkspower.platform.domain.service;
 
+import com.wkspower.platform.domain.event.CaseDocumentUploaded;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksDocumentException;
+import com.wkspower.platform.domain.model.AuditSource;
 import com.wkspower.platform.domain.model.CaseDocument;
 import com.wkspower.platform.domain.port.DocumentRepository;
 import com.wkspower.platform.domain.port.DocumentStore;
+import com.wkspower.platform.domain.port.EventPublisher;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,12 +33,17 @@ public class DocumentService {
 
   private final DocumentStore documentStore;
   private final DocumentRepository documentRepository;
+  private final EventPublisher eventPublisher;
   private final long maxSizeMb;
 
   public DocumentService(
-      DocumentStore documentStore, DocumentRepository documentRepository, long maxSizeMb) {
+      DocumentStore documentStore,
+      DocumentRepository documentRepository,
+      EventPublisher eventPublisher,
+      long maxSizeMb) {
     this.documentStore = documentStore;
     this.documentRepository = documentRepository;
+    this.eventPublisher = eventPublisher;
     this.maxSizeMb = maxSizeMb;
   }
 
@@ -119,7 +127,17 @@ public class DocumentService {
               actorId,
               now);
       try {
-        return documentRepository.save(doc);
+        CaseDocument saved = documentRepository.save(doc);
+        eventPublisher.publishAfterCommit(
+            new CaseDocumentUploaded(
+                saved.caseId(),
+                saved.id(),
+                saved.fileName(),
+                saved.contentType(),
+                saved.sizeBytes(),
+                new AuditSource.User(actorId),
+                saved.uploadedAt()));
+        return saved;
       } catch (Exception saveEx) {
         // Compensating delete: remove the already-stored object to avoid orphaned storage.
         try {

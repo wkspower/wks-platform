@@ -22,7 +22,10 @@ import java.util.UUID;
  * @param id append-only row id
  * @param eventType discriminator (e.g. {@code "case.data.edit"})
  * @param source {@link AuditSourceView} — {@code { type, payload }} variant shape
- * @param result result string ({@code "APPLIED"} / {@code "BLOCKED"} / {@code "REJECTED"})
+ * @param result result string ({@code "APPLIED"} / {@code "BLOCKED"} / {@code "REJECTED"}; for
+ *     {@code case.status.changed} rows, the new status id)
+ * @param previousResult prior value for delta-typed events ({@code case.status.changed} carries the
+ *     old status id here). Null for non-delta event types (edit, created).
  * @param fieldId field id (null for non-edit event types)
  * @param openTaskId open task that owned the field on BLOCKED (null on APPLIED)
  * @param formId form binding the field on BLOCKED (null on APPLIED)
@@ -33,6 +36,7 @@ public record AuditEventViewDto(
     String eventType,
     AuditSourceView source,
     String result,
+    String previousResult,
     String fieldId,
     String openTaskId,
     String formId,

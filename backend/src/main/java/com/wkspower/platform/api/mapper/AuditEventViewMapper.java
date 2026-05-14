@@ -30,6 +30,7 @@ public final class AuditEventViewMapper {
             AuditEventMapper.sourceType(event.source()),
             AuditEventMapper.sourcePayload(event.source())),
         event.result(),
+        event.previousResult(),
         event.fieldId(),
         event.openTaskId(),
         event.formId(),

@@ -29,6 +29,7 @@ function evt(partial: Partial<AuditEventView> & Pick<AuditEventView, 'source'>):
     eventType: partial.eventType ?? 'case.data.edit',
     source: partial.source,
     result: partial.result ?? 'APPLIED',
+    previousResult: partial.previousResult ?? null,
     fieldId: partial.fieldId ?? 'priority',
     openTaskId: partial.openTaskId ?? null,
     formId: partial.formId ?? null,
@@ -114,6 +115,66 @@ describe('ActivityTab', () => {
       'Unmapped backend signal (rest)',
     );
     expect(screen.getByTestId('activity-row-e5')).toHaveTextContent('rejected');
+  });
+
+  it('renders eventType-specific copy for non-edit events', async () => {
+    server.use(
+      http.get(`/api/cases/${CASE_ID}/audit-events`, () =>
+        envelope({
+          items: [
+            // case.created — literal "CREATED" result, no field/topic, "created the case" copy.
+            evt({
+              id: 'c1',
+              eventType: 'case.created',
+              source: { type: 'USER', payload: { actorId: ACTOR_ID } },
+              result: 'CREATED',
+              fieldId: null,
+            }),
+            // case.status.changed with prior status — "from X to Y" copy.
+            evt({
+              id: 's1',
+              eventType: 'case.status.changed',
+              source: { type: 'USER', payload: { actorId: ACTOR_ID } },
+              result: 'closed',
+              previousResult: 'in_progress',
+              fieldId: null,
+            }),
+            // case.status.changed first transition — no prior status, "set status to Y" copy.
+            evt({
+              id: 's2',
+              eventType: 'case.status.changed',
+              source: { type: 'BACKEND', payload: { adapterName: 'bpmn' } },
+              result: 'review',
+              previousResult: null,
+              fieldId: null,
+            }),
+            // case.document.uploaded — filename in result slot, "uploaded {filename}" copy.
+            evt({
+              id: 'd1',
+              eventType: 'case.document.uploaded',
+              source: { type: 'USER', payload: { actorId: ACTOR_ID } },
+              result: 'contract.pdf',
+              fieldId: null,
+            }),
+          ],
+          truncated: false,
+        }),
+      ),
+    );
+
+    renderWithProviders(<ActivityTab caseId={CASE_ID} />, {
+      initialAuth: {
+        user: { id: ACTOR_ID, email: 'actor@x', roles: ['officer'] },
+      },
+    });
+
+    await screen.findByTestId('activity-tab');
+    expect(screen.getByTestId('activity-row-c1')).toHaveTextContent('created the case');
+    expect(screen.getByTestId('activity-row-s1')).toHaveTextContent(
+      'changed status from in_progress to closed',
+    );
+    expect(screen.getByTestId('activity-row-s2')).toHaveTextContent('set status to review');
+    expect(screen.getByTestId('activity-row-d1')).toHaveTextContent('uploaded contract.pdf');
   });
 
   it('renders truncation notice when wire flag is set', async () => {

@@ -194,6 +194,10 @@
   "activity.result.applied": "edited field {fieldId}",
   "activity.result.blocked": "blocked edit on {fieldId} (open task)",
   "activity.result.rejected": "rejected edit on {fieldId}",
+  "activity.event.caseCreated": "created the case",
+  "activity.event.statusChanged": "changed status from {oldStatus} to {newStatus}",
+  "activity.event.statusChangedFirst": "set status to {newStatus}",
+  "activity.event.documentUploaded": "uploaded {fileName}",
 
   "documents.upload.cta": "Upload file",
   "documents.upload.dragDrop": "Drop files here or click to upload",

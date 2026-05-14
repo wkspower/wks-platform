@@ -2,6 +2,7 @@ package com.wkspower.platform.audit;
 
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseDataEdited;
+import com.wkspower.platform.domain.event.CaseDocumentUploaded;
 import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.model.AuditSource;
 import java.time.Instant;
@@ -30,7 +31,10 @@ import java.util.UUID;
  * @param caseId case the event pertains to (FK to {@code cases.id})
  * @param eventType discriminator (currently always {@code "case.data.edit"})
  * @param source typed source attribution (round-trips through AuditEventMapper)
- * @param result result string (e.g. {@code "APPLIED"} / {@code "BLOCKED"} / {@code "REJECTED"})
+ * @param result result string (e.g. {@code "APPLIED"} / {@code "BLOCKED"} / {@code "REJECTED"}; for
+ *     {@code case.status.changed} rows, the new status id)
+ * @param previousResult prior value for delta-typed events ({@code case.status.changed} stores the
+ *     old status id here). Null for non-delta event types (edit, created).
  * @param fieldId field the edit targeted (may be null for non-edit event types)
  * @param openTaskId open task that owned the field on BLOCKED (null on APPLIED)
  * @param formId form binding the field on BLOCKED (null on APPLIED)
@@ -44,6 +48,7 @@ public record AuditEvent(
     String eventType,
     AuditSource source,
     String result,
+    String previousResult,
     String fieldId,
     String openTaskId,
     String formId,
@@ -59,6 +64,9 @@ public record AuditEvent(
   /** Discriminator string for {@link CaseStatusChanged}-backed rows. Stable wire string. */
   public static final String EVENT_TYPE_CASE_STATUS_CHANGED = "case.status.changed";
 
+  /** Discriminator string for {@link CaseDocumentUploaded}-backed rows. Stable wire string. */
+  public static final String EVENT_TYPE_CASE_DOCUMENT_UPLOADED = "case.document.uploaded";
+
   /**
    * Build an {@code AuditEvent} from a {@link CaseDataEdited} domain event, generating a fresh row
    * id. The {@code createdAt} stays null — Postgres / H2 stamp it via the column DEFAULT.
@@ -70,6 +78,7 @@ public record AuditEvent(
         EVENT_TYPE_CASE_DATA_EDIT,
         event.source(),
         event.result().name(),
+        null,
         event.fieldId(),
         event.openTaskId(),
         event.formId(),
@@ -92,16 +101,16 @@ public record AuditEvent(
         null,
         null,
         null,
+        null,
         event.timestamp(),
         null);
   }
 
   /**
    * Build an {@code AuditEvent} from a {@link CaseStatusChanged} domain event. {@code result}
-   * carries the new status id verbatim; the old status is preserved on the slf4j wire line
-   * (audit_events row schema does not have a dedicated old-status column — extending the schema is
-   * folded into the next story that touches the audit table per the fold-into-stories rule). Source
-   * is taken verbatim — {@code User} on manual transitions, {@code Backend} on BPMN.
+   * carries the new status id verbatim; {@code previousResult} carries the old status id (may be
+   * null on the very first transition). Source is taken verbatim — {@code User} on manual
+   * transitions, {@code Backend} on BPMN.
    */
   public static AuditEvent fromCaseStatusChanged(CaseStatusChanged event) {
     return new AuditEvent(
@@ -110,6 +119,28 @@ public record AuditEvent(
         EVENT_TYPE_CASE_STATUS_CHANGED,
         event.source(),
         event.newStatus(),
+        event.oldStatus(),
+        null,
+        null,
+        null,
+        event.timestamp(),
+        null);
+  }
+
+  /**
+   * Build an {@code AuditEvent} from a {@link CaseDocumentUploaded} domain event. {@code result}
+   * carries the sanitized filename verbatim (this is the user-facing label the activity feed
+   * renders). The document id rides on the slf4j wire line for SI-runbook grep; persisting it as a
+   * separate column is deferred to the next story that needs to filter/index by document id.
+   */
+  public static AuditEvent fromCaseDocumentUploaded(CaseDocumentUploaded event) {
+    return new AuditEvent(
+        UUID.randomUUID(),
+        event.caseId(),
+        EVENT_TYPE_CASE_DOCUMENT_UPLOADED,
+        event.source(),
+        event.fileName(),
+        null,
         null,
         null,
         null,
