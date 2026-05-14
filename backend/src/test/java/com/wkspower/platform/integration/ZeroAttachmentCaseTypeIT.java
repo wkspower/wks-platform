@@ -212,12 +212,19 @@ class ZeroAttachmentCaseTypeIT {
         .as(
             "ExecutionSignalRouted must NOT be published for zero-attachment transition (router bypassed)")
         .isEmpty();
-    // CaseStatusChanged is only published by the BPMN engine listener (CaseStatusListener).
-    // Zero-process transitions call CaseStatusAdapter directly — no CaseStatusChanged published.
+    // Zero-process transitions now publish CaseStatusChanged with AuditSource.User so the audit
+    // emitter (CaseStatusChangedAuditEmitter) can record manual status changes — previously the
+    // zero-process path was audit-silent, which the thin-demo carry-forward #12 surfaced.
     assertThat(recorder.statusChanges)
-        .as(
-            "CaseStatusChanged must NOT be published on zero-process path (BPMN listener not invoked)")
-        .isEmpty();
+        .as("CaseStatusChanged must be published with User source on zero-process path")
+        .singleElement()
+        .satisfies(
+            evt -> {
+              assertThat(evt.oldStatus()).isEqualTo("open");
+              assertThat(evt.newStatus()).isEqualTo("closed");
+              assertThat(evt.processInstanceId()).isNull();
+              assertThat(evt.source().toString()).isEqualTo("manual");
+            });
   }
 
   // ---- AC3 — zero-attachment deploy stores null fingerprints ----

@@ -7,6 +7,7 @@ import com.wkspower.platform.domain.config.model.AttachmentDefinition.PropertyEm
 import com.wkspower.platform.domain.config.model.AttachmentDefinition.SignalMapping;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.MappingDefinition;
+import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.event.ExecutionSignalRouted;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.WksMappingMissException;
@@ -427,7 +428,16 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
           signal.caseInstance().id(),
           "userTask property emission missing scalar 'value' in payload");
     }
+    String oldStatus = caseRow.status();
     statusUpdater.updateStatus(caseRow.id(), newStatus);
+    eventPublisher.publish(
+        new CaseStatusChanged(
+            caseRow.id(),
+            oldStatus,
+            newStatus,
+            caseRow.processInstanceId(),
+            new AuditSource.Backend(signal.adapterName()),
+            clock.now()));
     return false; // status-only update — caller emits standard auditSuccess.
   }
 
@@ -583,6 +593,14 @@ public class ExecutionSignalRouter implements ExecutionSignalHandler {
 
     // Apply the status reset.
     statusUpdater.updateStatus(preMutationRow.id(), initialStatus);
+    eventPublisher.publish(
+        new CaseStatusChanged(
+            preMutationRow.id(),
+            preMutationRow.status(),
+            initialStatus,
+            preMutationRow.processInstanceId(),
+            auditSource,
+            clock.now()));
 
     // Emit status-reset audit (effect = status-reset).
     Map<String, String> statusResetDetail = new HashMap<>();

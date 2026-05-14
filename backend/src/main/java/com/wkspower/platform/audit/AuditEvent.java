@@ -2,6 +2,7 @@ package com.wkspower.platform.audit;
 
 import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseDataEdited;
+import com.wkspower.platform.domain.event.CaseStatusChanged;
 import com.wkspower.platform.domain.model.AuditSource;
 import java.time.Instant;
 import java.util.UUID;
@@ -55,6 +56,9 @@ public record AuditEvent(
   /** Discriminator string for {@link CaseCreated}-backed rows. Stable wire string. */
   public static final String EVENT_TYPE_CASE_CREATED = "case.created";
 
+  /** Discriminator string for {@link CaseStatusChanged}-backed rows. Stable wire string. */
+  public static final String EVENT_TYPE_CASE_STATUS_CHANGED = "case.status.changed";
+
   /**
    * Build an {@code AuditEvent} from a {@link CaseDataEdited} domain event, generating a fresh row
    * id. The {@code createdAt} stays null — Postgres / H2 stamp it via the column DEFAULT.
@@ -85,6 +89,27 @@ public record AuditEvent(
         EVENT_TYPE_CASE_CREATED,
         new AuditSource.User(event.actorId()),
         "CREATED",
+        null,
+        null,
+        null,
+        event.timestamp(),
+        null);
+  }
+
+  /**
+   * Build an {@code AuditEvent} from a {@link CaseStatusChanged} domain event. {@code result}
+   * carries the new status id verbatim; the old status is preserved on the slf4j wire line
+   * (audit_events row schema does not have a dedicated old-status column — extending the schema is
+   * folded into the next story that touches the audit table per the fold-into-stories rule). Source
+   * is taken verbatim — {@code User} on manual transitions, {@code Backend} on BPMN.
+   */
+  public static AuditEvent fromCaseStatusChanged(CaseStatusChanged event) {
+    return new AuditEvent(
+        UUID.randomUUID(),
+        event.caseId(),
+        EVENT_TYPE_CASE_STATUS_CHANGED,
+        event.source(),
+        event.newStatus(),
         null,
         null,
         null,

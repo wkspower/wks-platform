@@ -451,7 +451,16 @@ public class CaseService {
             "action");
       }
       // Zero-process path: mutate status directly via CaseStatusUpdater.
+      String oldStatus = existing.status();
       caseStatusUpdater.updateStatus(caseId, action);
+      eventPublisher.publish(
+          new com.wkspower.platform.domain.event.CaseStatusChanged(
+              caseId,
+              oldStatus,
+              action,
+              null,
+              new com.wkspower.platform.domain.model.AuditSource.User(actorId),
+              clock.now()));
     } else {
       // BPMN path: emit TASK_STATUS_CHANGED signal through the router (Mapping Layer).
       // The signal source is the fixed string "manual" so the router key is always
