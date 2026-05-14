@@ -10,7 +10,7 @@ WKS Platform is an open-source case management platform for system integrators.
 Define case types in YAML, drive lifecycles with BPMN workflows, and ship to
 your clients — no backend code required.
 
-Evaluate it in 30 minutes with `docker compose up`.
+Evaluate it in 30 minutes with `docker run -p 8080:8080 ghcr.io/wkspower/wks-platform` — no clone, no compose file, no config.
 
 ## Design system
 
@@ -37,16 +37,16 @@ are bundled (no Google Fonts CDN).
 
 ## Quick start
 
-Requires Docker 24+ and ~2 GB of free RAM. No Java, no Node, no additional
-configuration.
+Requires Docker 24+ and ~2 GB of free RAM. No clone, no Java, no Node, no
+additional configuration.
 
 ```bash
-git clone https://github.com/wkspower/wks-platform.git
-cd wks-platform/docker
-docker compose up --build
+docker run -p 8080:8080 ghcr.io/wkspower/wks-platform
 ```
 
-Open `http://localhost:8080/`. The REST health probe is at
+Open `http://localhost:8080/`. For the multi-container path (Postgres,
+MinIO, optional Keycloak) used in production and full-stack development,
+see [`docker/README.md`](./docker/README.md). The REST health probe is at
 `http://localhost:8080/api/health`. Interactive API docs (Swagger UI)
 live at `http://localhost:8080/swagger-ui/index.html`; see
 [`docs/api-conventions.md`](docs/api-conventions.md) for envelope,
@@ -82,7 +82,7 @@ For a fuller archival summary see [`docs/v1-archival.md`](./docs/v1-archival.md)
 ## Project status
 
 **What works today?** The platform foundation is complete: project
-skeleton + `docker compose up` boot, authentication + session
+skeleton + one-line `docker run` boot, authentication + session
 management, React application shell + design system, and the REST API
 foundation with H2/PostgreSQL persistence. Login works, `/api/health`
 is live, and Swagger UI serves the real endpoints.

@@ -8,9 +8,9 @@ comes next. Updated per milestone. For the architectural "why", see
 
 ### Platform foundation
 
-- **Project skeleton + zero-config boot** — `docker compose up --build`
-  from `docker/` brings the full stack up on a fresh machine with no
-  Java or Node installed.
+- **Project skeleton + zero-config boot** — `docker run -p 8080:8080
+  ghcr.io/wkspower/wks-platform` brings the platform up on a
+  fresh machine with no clone, no Java, and no Node installed.
 - **Authentication + session management** — Argon2id password hashing,
   short-lived JWT in an `HttpOnly` cookie, first-boot admin seed in
   dev, mandatory admin credentials in production.
@@ -37,8 +37,8 @@ integrator can stand up and try end-to-end.
 - Task completion with honest lifecycle semantics.
 
 At the end of this milestone the README's 30-minute evaluation claim
-is demonstrable: clone, `docker compose up`, deploy a sample case
-type, create a case, move it through its lifecycle.
+is demonstrable: `docker run`, deploy a sample case type, create a
+case, move it through its lifecycle — no clone required.
 
 ## Later
 

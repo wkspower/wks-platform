@@ -7,18 +7,16 @@ You will have a live WKS instance running and a case type deployed before you fi
 
 ## What you need
 
-- Docker and Docker Compose
+- Docker 24+
 - `curl`
 - `jq` (optional — makes JSON output readable)
 
-No database setup. No BPMN tooling. No environment configuration beyond what the image ships with.
+No clone. No database setup. No BPMN tooling. No environment configuration beyond what the image ships with.
 
 ## Step 1 — Boot the platform
 
 ```bash
-git clone https://github.com/wkspower/wks-platform.git
-cd wks-platform
-docker compose up -d
+docker run -d -p 8080:8080 --name wks ghcr.io/wkspower/wks-platform
 ```
 
 Wait about 20 seconds for the platform to be ready, then verify:
