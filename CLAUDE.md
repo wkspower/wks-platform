@@ -213,7 +213,18 @@ Each individual frontend command is faster than its Maven counterpart, but the s
 
 **Don't pipe build commands through `tail` / `head`.** The Bash tool already surfaces non-zero exit as a tool-error and gives you stdout. Trimming the output hides the exit signal the harness was already providing, which triggers a redundant second run just to confirm exit status — doubling the build cost for no information gain.
 
-**Rung 3 gates commit, not push.** The pre-push hook (see next section) runs rung 3 (`verify -Pfast-it` for backend, `lint + format:check + test + build` for frontend) automatically on every `git push`. Don't manually re-run rung 3 immediately before pushing — that's two full inner-loop verifies for one push. If rung 3 was green at commit time and you haven't touched code since, just push.
+**If rung 3 just passed and you haven't touched anything since, skip the push hook.** The pre-push hook re-runs rung 3 by default — that's a duplicate ~1–2 min for no signal if rung 3 was green against the exact tree you're pushing. In that case, push with:
+
+```bash
+WKS_SKIP_CI_LOCAL=1 git push
+```
+
+Conditions, all of which must hold:
+- Rung 3 (`verify -Pfast-it` for backend, `lint + format:check + test + build` for frontend) ran green in this session.
+- No files have been modified since (no edits, no rebase, no merge, no `git stash pop`, no branch switch).
+- The commit being pushed is the same SHA that was verified.
+
+**Disclosure required** ([[ci-skip-bypass-requires-ratify]]): when skipping, state it in the PR body — e.g. *"Pre-push hook skipped: rung 3 verified locally against HEAD `<sha>` at `<time>`, no touches since."* — and ask the caller to ratify. If any condition above is uncertain, don't skip; let the hook run.
 
 ### Pre-push hook (one-time setup)
 
