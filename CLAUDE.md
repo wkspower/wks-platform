@@ -181,6 +181,40 @@ cd backend && ./mvnw -B -ntp failsafe:integration-test -Dit.test=NewPostgresIT
 
 Filename convention: any IT that requires Testcontainers/Postgres MUST be named `*PostgresIT.java` so the profile excludes it. H2-based ITs use the plain `*IT.java` suffix.
 
+### Build-verification ladder — pick the lowest rung that answers your question
+
+`-Pfast-it` is the *full inner-loop verify*; it's still ~1–2 min. Don't run it after every edit. Each rung below costs ~5–10× the previous — climb only as high as the question requires:
+
+| Rung | Command | Cost | Use when |
+|---|---|---|---|
+| 0. None | _(no build)_ | 0s | Comment-only, Javadoc-only, rename-only, import-reorder edits. Spotless + commit hook catches the rest. |
+| 1. Compile | `./mvnw -q compile` | ~15–30s | "Did I break the build?" Catches syntax, missing imports, type errors. No tests run. |
+| 2. Targeted test class | `./mvnw -B -ntp -Dtest=ClassName test` | ~20–40s | Shaping a change while iterating on one test. Run only the test you're touching. |
+| 3. Fast-it verify | `./mvnw -B -ntp verify -Pfast-it` | ~1–2 min | "I think I'm done." Full unit + H2 IT surface. The gate before commit. |
+| 4. Full verify | `./mvnw -B -ntp verify` | ~4–8 min | Pre-push when you've touched Postgres-only surface (migrations under `postgresql/`, JSON columns, dialect SQL). Otherwise the hook handles this. |
+
+**Default for agents in review-fix loops:** rungs 1 → 2 → 3, in that order, climbing only when the lower rung passed. Jumping straight to rung 3 after every edit is the most common waste in agent dispatches.
+
+**Anti-pattern:** running rung 3 to verify a rung-0 change (e.g. `-Pfast-it verify` on a Javadoc edit). The verify will pass, but you paid ~3 min for zero signal that Spotless wouldn't already give you.
+
+### Frontend ladder — same principle, different toolchain
+
+Each individual frontend command is faster than its Maven counterpart, but the same trap exists: running `npm run build` to check a typo. Pick the lowest rung that answers your question:
+
+| Rung | Command (from `frontend/`) | Cost | Use when |
+|---|---|---|---|
+| 0. None | _(no command)_ | 0s | Comment-only edits, token-value tweaks in `src/styles/`, dead-file deletion. |
+| 1. Typecheck | `npx tsc --noEmit` | ~5–15s | "Did I break types?" Catches TS errors and missing imports without bundling. |
+| 2. Targeted test | `npx vitest run src/path/to/Foo.test.tsx` | ~5–20s | Iterating on one component/hook test. |
+| 3. Lint + test | `npm run lint && npm run format:check && npm test` | ~30–60s | "I think I'm done." The gate before commit. **Include `format:check`** — Prettier regressions surface nowhere else (see "Lint + test + build" note above). |
+| 4. Build | `npm run build` | ~30–90s | Pre-push when you've touched Vite-specific surface (asset imports, env vars, dynamic imports, bundling config). Otherwise the pre-push hook handles this. |
+
+**Anti-pattern:** running rung 4 (`npm run build`) to check whether a refactor compiles. Rung 1 (`tsc --noEmit`) answers that in a fraction of the time; the bundler step adds no signal beyond what tsc already gave you, unless you actually changed bundling-relevant surface.
+
+**Don't pipe build commands through `tail` / `head`.** The Bash tool already surfaces non-zero exit as a tool-error and gives you stdout. Trimming the output hides the exit signal the harness was already providing, which triggers a redundant second run just to confirm exit status — doubling the build cost for no information gain.
+
+**Rung 3 gates commit, not push.** The pre-push hook (see next section) runs rung 3 (`verify -Pfast-it` for backend, `lint + format:check + test + build` for frontend) automatically on every `git push`. Don't manually re-run rung 3 immediately before pushing — that's two full inner-loop verifies for one push. If rung 3 was green at commit time and you haven't touched code since, just push.
+
 ### Pre-push hook (one-time setup)
 
 A committed `pre-push` hook at `.githooks/pre-push` runs the full CI mirror automatically. Enable it once per clone:
