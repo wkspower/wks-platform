@@ -58,6 +58,15 @@ public class JsonSchemaGenerator {
           node.put("minLength", slots.minLength());
         }
       }
+      case EMAIL -> {
+        node.put("type", "string");
+        // JSON Schema annotation only — Draft 2020-12 leaves "format" non-enforcing by default.
+        // Runtime enforcement lives in CaseService.validateData (regex check on EMAIL branch).
+        node.put("format", "email");
+        if (slots != null && slots.maxLength() != null) {
+          node.put("maxLength", slots.maxLength());
+        }
+      }
       case NUMBER -> {
         node.put("type", "number");
         if (slots != null && slots.min() != null) {

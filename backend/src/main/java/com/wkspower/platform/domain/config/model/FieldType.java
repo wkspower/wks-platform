@@ -5,12 +5,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Optional;
 
 /**
- * The seven field types supported by Phase 0 case-type YAML. Wire form is the lowercase enum name;
- * any YAML mapper lives in infrastructure so this enum stays framework-free.
+ * The field types supported by Phase 0 case-type YAML. Wire form is the lowercase enum name; any
+ * YAML mapper lives in infrastructure so this enum stays framework-free.
  *
  * <p>Story 2.5 fixed Jackson serialisation to honour {@link #wire()} so {@code GET
  * /api/case-types/{id}} emits lowercase tokens that the frontend column generator
  * (`lib/buildCaseColumns.ts`) dispatches on.
+ *
+ * <p>{@code EMAIL} (added 2026-05-14) is a string field with server-side format validation — stored
+ * as a JSON string like {@code TEXT}, but rejected with {@code WKS-FORM-002} when the value does
+ * not match a practical {@code local@domain.tld} shape.
  */
 public enum FieldType {
   TEXT,
@@ -19,7 +23,8 @@ public enum FieldType {
   SELECT,
   CHECKBOX,
   TEXTAREA,
-  FILE;
+  FILE,
+  EMAIL;
 
   /** Returns the canonical wire token (lowercase enum name) — e.g. {@code "text"}. */
   @JsonValue

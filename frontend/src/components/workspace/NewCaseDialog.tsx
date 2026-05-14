@@ -347,6 +347,19 @@ function renderInput(
           value={String(field.value ?? '')}
         />
       );
+    case 'email':
+      return (
+        <Input
+          type="email"
+          // Browser-level shape hint + on-screen keyboard email layout. Authoritative shape
+          // check still runs server-side (CaseService.validateData EMAIL branch → WKS-FORM-002).
+          inputMode="email"
+          autoComplete="email"
+          maxLength={f.maxLength ?? undefined}
+          {...field}
+          value={String(field.value ?? '')}
+        />
+      );
     case 'textarea':
       return (
         <Textarea

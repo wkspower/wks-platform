@@ -515,6 +515,17 @@ function renderInput(
           value={String(field.value ?? '')}
         />
       );
+    case 'email':
+      return (
+        <Input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          maxLength={f.maxLength ?? undefined}
+          {...field}
+          value={String(field.value ?? '')}
+        />
+      );
     case 'textarea':
       return (
         <Textarea

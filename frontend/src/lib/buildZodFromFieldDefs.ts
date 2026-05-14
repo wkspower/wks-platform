@@ -53,6 +53,8 @@ function schemaForField(f: FieldDefinition, mode: BuildMode): z.ZodTypeAny {
     case 'text':
     case 'textarea':
       return textSchema(f);
+    case 'email':
+      return emailSchema(f);
     case 'number':
       return numberSchema(f);
     case 'date':
@@ -67,6 +69,16 @@ function schemaForField(f: FieldDefinition, mode: BuildMode): z.ZodTypeAny {
     default:
       return z.unknown();
   }
+}
+
+function emailSchema(f: FieldDefinition): z.ZodTypeAny {
+  // Reuses textSchema's min/max length wiring, then layers a practical email-shape check that
+  // matches the backend regex (CaseService.validateData EMAIL branch). Keeps the wire contract
+  // symmetric — anything the client rejects, the server would too.
+  const base = textSchema(f) as z.ZodString;
+  return base.regex(/[^\s@]+@[^\s@]+\.[^\s@]+/, {
+    message: t('cases.create.errors.invalidEmail'),
+  });
 }
 
 function textSchema(f: FieldDefinition): z.ZodTypeAny {

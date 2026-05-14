@@ -490,7 +490,7 @@ public class ConfigValidator {
                   ErrorCode.WKS_CFG_002,
                   "Invalid field type '"
                       + f.type()
-                      + "' — allowed: text|number|date|select|checkbox|textarea|file",
+                      + "' — allowed: text|number|date|select|checkbox|textarea|file|email",
                   base + ".type"));
         } else {
           ft = parsed.get();

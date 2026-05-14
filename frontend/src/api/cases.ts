@@ -44,6 +44,26 @@ export async function createCase(req: CreateCaseRequest): Promise<CaseDto> {
   return result.data;
 }
 
+/** Request body for `PUT /api/cases/{id}` — mirrors backend `UpdateCaseRequest`. */
+export interface UpdateCaseRequest {
+  data: Record<string, unknown>;
+  version: number;
+}
+
+/**
+ * `PUT /api/cases/{id}` — Story 2.3 update endpoint. Requires the `edit` verb. Optimistic
+ * concurrency via the `version` field: server 409 on stale version. On success the server
+ * emits a `CaseDataEdited` audit event after commit (no extra round-trip needed).
+ */
+export async function updateCase(id: string, req: UpdateCaseRequest): Promise<CaseDto> {
+  const result = await apiFetch<CaseDto>(`/api/cases/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  return result.data;
+}
+
 /** Request body for `POST /api/cases/{id}/transition`. */
 export interface TransitionCaseRequest {
   action: string;

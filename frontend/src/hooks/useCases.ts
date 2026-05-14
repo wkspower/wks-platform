@@ -13,8 +13,10 @@ import {
   getCase,
   listCases,
   transitionCase,
+  updateCase,
   type CreateCaseRequest,
   type TransitionCaseRequest,
+  type UpdateCaseRequest,
 } from '@/api/cases';
 import { caseQueryKeys, type CaseListQuery } from '@/lib/queryKeys';
 import { toCaseRow, type CaseDto, type CaseRow } from '@/types/case';
@@ -134,6 +136,26 @@ export function useCreateCase(): UseMutationResult<CaseDto, Error, CreateCaseReq
  * returned DTO (already carries the new status) and invalidates list queries so status filters
  * pick up the change. No retry on failure — transitions are user-initiated state changes.
  */
+/**
+ * `PUT /api/cases/{id}` mutation — surfaced from PropertiesTab inline edit. On success primes
+ * the detail cache (caller sees the new `version` immediately, so the next edit's optimistic
+ * concurrency check has the fresh value) and invalidates list queries so summary `fields`
+ * reflect the edit. On 409 the caller refetches the detail to recover the latest version; no
+ * automatic retry (the next edit would race the same stale version).
+ */
+export function useUpdateCase(id: string): UseMutationResult<CaseDto, Error, UpdateCaseRequest> {
+  const queryClient = useQueryClient();
+  return useMutation<CaseDto, Error, UpdateCaseRequest>({
+    mutationKey: ['cases', 'update', id],
+    mutationFn: (req) => updateCase(id, req),
+    onSuccess: (dto) => {
+      queryClient.setQueryData(caseQueryKeys.detail(dto.id), dto);
+      queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });
+    },
+    retry: false,
+  });
+}
+
 export function useTransitionCase(
   id: string,
 ): UseMutationResult<CaseDto, Error, TransitionCaseRequest> {

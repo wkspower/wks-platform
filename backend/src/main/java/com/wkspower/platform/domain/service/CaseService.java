@@ -706,6 +706,29 @@ public class CaseService {
             }
           }
         }
+        case EMAIL -> {
+          // Practical local@domain.tld check — not RFC-5322-perfect, but rejects the obvious
+          // shapes (missing @, missing TLD, embedded whitespace) that operators expect us to
+          // catch. maxLength slot reused identically to TEXT/TEXTAREA when declared.
+          if (value instanceof String strVal) {
+            if (slots != null && slots.maxLength() != null && strVal.length() > slots.maxLength()) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_FORM_002.wire(),
+                      "Field '"
+                          + f.displayName()
+                          + "' exceeds maximum length of "
+                          + slots.maxLength(),
+                      f.id()));
+            } else if (!strVal.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")) {
+              errors.add(
+                  ErrorDetail.ofField(
+                      ErrorCode.WKS_FORM_002.wire(),
+                      "Field '" + f.displayName() + "' must be a valid email address",
+                      f.id()));
+            }
+          }
+        }
         case NUMBER -> {
           if (slots != null) {
             Double numVal = toDouble(value);

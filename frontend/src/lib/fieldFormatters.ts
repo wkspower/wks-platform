@@ -40,6 +40,7 @@ export function formatFieldValue(field: FieldDefinition, value: unknown): string
     }
     case 'text':
     case 'textarea':
+    case 'email':
     default:
       return String(value);
   }

@@ -21,7 +21,7 @@ fields:
     maxLength: 80
   - id: contact_email
     displayName: "Contact Email"
-    type: text
+    type: email
     required: true
     requiredOnCreate: true
     order: 3
