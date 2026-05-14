@@ -1,5 +1,6 @@
 package com.wkspower.platform.audit;
 
+import com.wkspower.platform.domain.event.CaseCreated;
 import com.wkspower.platform.domain.event.CaseDataEdited;
 import com.wkspower.platform.domain.model.AuditSource;
 import java.time.Instant;
@@ -51,6 +52,9 @@ public record AuditEvent(
   /** Discriminator string for {@link CaseDataEdited}-backed rows. Stable wire string. */
   public static final String EVENT_TYPE_CASE_DATA_EDIT = "case.data.edit";
 
+  /** Discriminator string for {@link CaseCreated}-backed rows. Stable wire string. */
+  public static final String EVENT_TYPE_CASE_CREATED = "case.created";
+
   /**
    * Build an {@code AuditEvent} from a {@link CaseDataEdited} domain event, generating a fresh row
    * id. The {@code createdAt} stays null — Postgres / H2 stamp it via the column DEFAULT.
@@ -65,6 +69,25 @@ public record AuditEvent(
         event.fieldId(),
         event.openTaskId(),
         event.formId(),
+        event.timestamp(),
+        null);
+  }
+
+  /**
+   * Build an {@code AuditEvent} from a {@link CaseCreated} domain event. The acting user is wrapped
+   * in {@link AuditSource.User}. Result is the literal {@code "CREATED"}; field/task/form slots are
+   * null (creation is not field-scoped).
+   */
+  public static AuditEvent fromCaseCreated(CaseCreated event) {
+    return new AuditEvent(
+        UUID.randomUUID(),
+        event.caseId(),
+        EVENT_TYPE_CASE_CREATED,
+        new AuditSource.User(event.actorId()),
+        "CREATED",
+        null,
+        null,
+        null,
         event.timestamp(),
         null);
   }
