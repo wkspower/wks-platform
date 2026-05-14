@@ -1,21 +1,17 @@
-# CI — SLOW LANE (nightly + PR-to-main + on-demand + push-to-main)
+# CI — SLOW LANE (on-demand)
 #
 # Runs the full correctness suite that ci.yml (fast lane) skips:
 #   - Backend `mvn verify` WITHOUT -Pfast-it (full *PostgresIT.java sweep).
 #   - production-profile-smoke (Docker + Postgres + MinIO; Story 14.1 AC6 +
 #     Story 14.7 §8 H2-driver regression guard).
 #
-# Triggers: nightly cron, PR targeting main (pre-merge gate), push to main,
-# and manual workflow_dispatch for on-demand verification.
+# Triggers: manual workflow_dispatch only. Auto-triggers (nightly cron, PR-to-main,
+# push-to-main) are disabled while `main` still holds the v1 tree — the v2 paths
+# this workflow targets (`backend/mvnw`, `-Pfast-it`, `docker/docker-compose.prod.yml`)
+# do not exist there. Re-enable on v2 merge-back.
 name: CI (full)
 
 on:
-  schedule:
-    - cron: '0 3 * * *'
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
