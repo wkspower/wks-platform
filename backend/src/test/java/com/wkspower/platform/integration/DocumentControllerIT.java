@@ -211,6 +211,32 @@ class DocumentControllerIT {
   }
 
   @Test
+  void securityHeaders_carrySameOriginFrameOption() throws Exception {
+    // Guard: SecurityConfig overrides Spring Security's default X-Frame-Options=DENY to
+    // SAMEORIGIN so the Documents tab can iframe /download?inline=true to preview PDFs inline.
+    // Without this override Chrome renders the "<origin> refused to connect" error in the iframe.
+    //
+    // Assertion is on the JSON /preview endpoint: TestRestTemplate's GET against the streaming
+    // /download endpoint commits the response via the controller's getOutputStream() before
+    // HeaderWriterFilter writes its headers (an in-process Tomcat quirk that does not occur on
+    // a real HTTP socket — verified live with curl). Asserting on a JSON endpoint is sufficient
+    // to prove the SecurityConfig change is wired; the streaming endpoint inherits the same
+    // filter chain.
+    ResponseEntity<String> uploadResp = uploadFile("doc.pdf", "application/pdf", pdfBytes());
+    String docId = objectMapper.readTree(uploadResp.getBody()).at("/data/id").asText();
+
+    ResponseEntity<String> resp =
+        rest.exchange(
+            "/api/documents/" + docId + "/preview",
+            HttpMethod.GET,
+            new HttpEntity<>(authHeaders()),
+            String.class);
+
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(resp.getHeaders().getFirst("X-Frame-Options")).isEqualTo("SAMEORIGIN");
+  }
+
+  @Test
   void download_unknownId_returns404WithWksDoc004() throws Exception {
     HttpHeaders headers = authHeaders();
     ResponseEntity<String> resp =

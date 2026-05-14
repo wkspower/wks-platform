@@ -76,6 +76,11 @@ public class SecurityConfig {
 
     return http.cors(cors -> cors.configurationSource(corsConfigurationSource))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+        // SPA + API ship from the same JAR (same origin); the Documents tab frames
+        // /api/documents/{id}/download?inline=true to preview PDFs. Default DENY blocks
+        // that. Broader headers pass (CSP frame-ancestors, Referrer-Policy, etc.) is
+        // deferred to the next story that touches this config.
+        .headers(h -> h.frameOptions(f -> f.sameOrigin()))
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .httpBasic(basic -> basic.disable())
         .formLogin(form -> form.disable())
