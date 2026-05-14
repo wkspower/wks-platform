@@ -208,4 +208,43 @@ describe('PropertiesTab — inline edit', () => {
     // Editor still mounted.
     expect(screen.getByRole('textbox', { name: 'Applicant' })).toBeInTheDocument();
   });
+
+  it('client-side Zod blocks a malformed EMAIL value and does NOT fire PUT', async () => {
+    const view: CaseTypeView = {
+      ...ctView(),
+      fields: [
+        {
+          id: 'contact_email',
+          displayName: 'Contact Email',
+          type: 'email',
+          required: true,
+          order: 0,
+          options: [],
+          maxLength: 120,
+        },
+      ],
+    };
+    const seen = vi.fn();
+    server.use(
+      http.put(`/api/cases/${CASE_ID}`, () => {
+        seen();
+        return HttpResponse.json({ data: {}, meta: {} });
+      }),
+    );
+    const user = userEvent.setup();
+    renderTab(view, { contact_email: 'ada@example.com' });
+
+    await user.click(screen.getByLabelText('Edit Contact Email'));
+    const input = screen.getByRole('textbox', { name: 'Contact Email' });
+    await user.clear(input);
+    await user.type(input, 'notanemail');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent('Must be a valid email address'),
+    );
+    expect(seen).not.toHaveBeenCalled();
+    // Editor stays mounted so the user can correct.
+    expect(screen.getByRole('textbox', { name: 'Contact Email' })).toBeInTheDocument();
+  });
 });

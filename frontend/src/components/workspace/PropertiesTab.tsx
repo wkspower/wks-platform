@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip';
 import { useUpdateCase } from '@/hooks/useCases';
 import { t } from '@/i18n';
+import { buildZodFromFieldDefs } from '@/lib/buildZodFromFieldDefs';
 import { renderFieldValue } from '@/lib/renderFieldValue';
 import type { CaseDto } from '@/types/case';
 import type { CaseTypeView, FieldDefinition } from '@/types/caseType';
@@ -130,11 +131,28 @@ function InlineEditor({
   onDone: () => void;
 }) {
   const [draft, setDraft] = useState<unknown>(initial);
+  const [clientError, setClientError] = useState<string | null>(null);
   const mutation = useUpdateCase(caseId);
 
-  const errorMessage = mutation.isError ? toErrorMessage(mutation.error) : null;
+  // Server errors take precedence — they reflect what the wire actually saw. Client errors only
+  // fill in when the user has not yet attempted a save (or fixed it and retried) but the new
+  // draft still fails Zod.
+  const errorMessage = mutation.isError ? toErrorMessage(mutation.error) : clientError;
 
   function save() {
+    // Client-side Zod check on the single touched field — mirrors NewCaseDialog's pre-POST gate
+    // so EMAIL (and future-typed) bad input is rejected without a server round-trip. Server-side
+    // enforcement (CaseDataValidatorAdapter EMAIL post-check) is the source of truth; this is UX
+    // symmetry with create.
+    const schema = buildZodFromFieldDefs([field], 'edit');
+    const parsed = schema.safeParse({ [field.id]: draft });
+    if (!parsed.success) {
+      const issue =
+        parsed.error.issues.find((i) => i.path[0] === field.id) ?? parsed.error.issues[0];
+      setClientError(issue?.message ?? t('properties.error.generic'));
+      return;
+    }
+    setClientError(null);
     const payload = { ...caseData, [field.id]: draft };
     mutation.mutate({ data: payload, version: caseVersion }, { onSuccess: onDone });
   }

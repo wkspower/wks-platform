@@ -17,6 +17,7 @@ import com.wkspower.platform.domain.config.model.StatusColor;
 import com.wkspower.platform.domain.config.model.StatusDefinition;
 import com.wkspower.platform.domain.config.model.WorkflowRef;
 import com.wkspower.platform.domain.event.ConfigDeployed;
+import com.wkspower.platform.domain.exception.ErrorDetail;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,68 @@ class CaseDataValidatorAdapterTest {
     assertThat(CaseDataValidatorAdapter.pointerToField("/data/applicant/name", ct))
         .isEqualTo("name");
     assertThat(CaseDataValidatorAdapter.pointerToField("$.applicant.name", ct)).isEqualTo("name");
+  }
+
+  @Test
+  void rejectsMalformedEmailWithFormCode() {
+    CaseTypeConfig ct = caseTypeWithEmail();
+    List<ErrorDetail> errors = adapter.validate(ct, Map.of("contact_email", "notanemail"));
+    assertThat(errors)
+        .anySatisfy(
+            e -> {
+              assertThat(e.code()).isEqualTo("WKS-FORM-002");
+              assertThat(e.field()).isEqualTo("contact_email");
+            });
+  }
+
+  @Test
+  void acceptsWellFormedEmail() {
+    CaseTypeConfig ct = caseTypeWithEmail();
+    List<ErrorDetail> errors = adapter.validate(ct, Map.of("contact_email", "ada@example.com"));
+    assertThat(errors).isEmpty();
+  }
+
+  @Test
+  void emailCheckSkipsNullValues() {
+    // Required-presence is the JSON Schema's job and emits WKS-API-001 separately. The EMAIL
+    // post-check must not double-report when the value is absent (optional field left blank).
+    CaseTypeConfig ct = caseTypeWithOptionalEmail();
+    List<ErrorDetail> errors = adapter.validate(ct, Map.of());
+    assertThat(errors).noneMatch(e -> "WKS-FORM-002".equals(e.code()));
+  }
+
+  private static CaseTypeConfig caseTypeWithEmail() {
+    return new CaseTypeConfig(
+        "vendor-onboarding",
+        "vendor-onboarding",
+        1,
+        null,
+        new WorkflowRef("vendor-onboarding.bpmn"),
+        List.of(
+            new FieldDefinition(
+                "contact_email", "Contact Email", FieldType.EMAIL, true, 0, List.of(), null)),
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of("contact_email"),
+        List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
+  }
+
+  private static CaseTypeConfig caseTypeWithOptionalEmail() {
+    return new CaseTypeConfig(
+        "vendor-onboarding",
+        "vendor-onboarding",
+        1,
+        null,
+        new WorkflowRef("vendor-onboarding.bpmn"),
+        List.of(
+            new FieldDefinition(
+                "contact_email", "Contact Email", FieldType.EMAIL, false, 0, List.of(), null)),
+        List.of(new StatusDefinition("open", "Open", StatusColor.ZINC)),
+        List.of(),
+        List.of(new RoleDefinition("admin", List.of(Permission.VIEW, Permission.CREATE))),
+        List.of(),
+        List.of());
   }
 
   @Test

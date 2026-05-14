@@ -8,6 +8,7 @@ import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import com.wkspower.platform.domain.config.model.CaseTypeConfig;
 import com.wkspower.platform.domain.config.model.FieldDefinition;
+import com.wkspower.platform.domain.config.model.FieldType;
 import com.wkspower.platform.domain.event.ConfigDeployed;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +46,13 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
 
   private static final JsonSchemaFactory SCHEMA_FACTORY =
       JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
+
+  // Practical local@domain.tld shape — identical to the regex in CaseService.validateFormData
+  // (form-submit path). Direct CRUD (POST/PUT /api/cases) reuses it here so the EMAIL contract
+  // is enforced consistently across both ingress paths. Draft 2020-12 `format: "email"` in the
+  // generated schema remains annotation-only (networknt default); this post-check is the wire
+  // enforcement, emitting WKS-FORM-002 to match the form-submit code on the wire.
+  private static final Pattern EMAIL_RE = Pattern.compile("[^\\s@]+@[^\\s@]+\\.[^\\s@]+");
 
   private final JsonSchemaGenerator schemaGenerator;
   private final ObjectMapper objectMapper;
@@ -80,6 +89,29 @@ class CaseDataValidatorAdapter implements CaseDataValidator {
     for (ValidationMessage m : messages) {
       String field = pointerToField(m.getInstanceLocation().toString(), caseType);
       errors.add(ErrorDetail.ofField(ErrorCode.WKS_API_001.wire(), m.getMessage(), field));
+    }
+
+    // EMAIL post-check: networknt leaves `format: "email"` as annotation under Draft 2020-12, so
+    // direct CRUD would otherwise silently accept "not-an-email". Apply the same regex the
+    // form-submit path uses (CaseService.validateFormData). Skip null/non-string values — the
+    // schema's `type: "string"` and required handling already covered them above.
+    if (caseType != null && caseType.fields() != null) {
+      Map<String, Object> safe = data == null ? Map.of() : data;
+      for (FieldDefinition f : caseType.fields()) {
+        if (f.type() != FieldType.EMAIL) {
+          continue;
+        }
+        Object value = safe.get(f.id());
+        if (value instanceof String strVal
+            && !strVal.isEmpty()
+            && !EMAIL_RE.matcher(strVal).matches()) {
+          errors.add(
+              ErrorDetail.ofField(
+                  ErrorCode.WKS_FORM_002.wire(),
+                  "Field '" + f.displayName() + "' must be a valid email address",
+                  f.id()));
+        }
+      }
     }
     return List.copyOf(errors);
   }

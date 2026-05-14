@@ -61,7 +61,8 @@ public class JsonSchemaGenerator {
       case EMAIL -> {
         node.put("type", "string");
         // JSON Schema annotation only — Draft 2020-12 leaves "format" non-enforcing by default.
-        // Runtime enforcement lives in CaseService.validateData (regex check on EMAIL branch).
+        // Direct CRUD enforcement lives in CaseDataValidatorAdapter (post-check regex on EMAIL
+        // fields). The form-submit path enforces the same regex in CaseService.validateFormData.
         node.put("format", "email");
         if (slots != null && slots.maxLength() != null) {
           node.put("maxLength", slots.maxLength());
