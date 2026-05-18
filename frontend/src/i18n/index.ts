@@ -8,7 +8,6 @@ const FALLBACK_LOCALE = 'en';
 function pickLocale(): string {
   const requested = (import.meta.env.VITE_WKS_LOCALE as string | undefined) ?? FALLBACK_LOCALE;
   if (!SUPPORTED.has(requested)) {
-    // eslint-disable-next-line no-console
     console.warn(`[i18n] Unsupported locale '${requested}', falling back to '${FALLBACK_LOCALE}'`);
     return FALLBACK_LOCALE;
   }
@@ -32,7 +31,7 @@ export function t(key: string, params?: Record<string, string>): string {
   if (template === undefined) {
     if (!reportedMissing.has(key)) {
       reportedMissing.add(key);
-      // eslint-disable-next-line no-console
+
       console.warn(`[i18n] missing key '${key}' for locale '${locale}'`);
     }
     return key;

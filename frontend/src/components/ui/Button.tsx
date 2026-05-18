@@ -10,8 +10,7 @@ const button = cva(
     variants: {
       variant: {
         primary: 'bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] shadow-xs',
-        secondary:
-          'bg-surface text-foreground border border-border hover:bg-surface-hover shadow-xs',
+        secondary: 'bg-surface text-foreground border border-border hover:bg-surface-hover shadow-xs',
         ghost: 'text-foreground hover:bg-surface-hover',
         subtle: 'bg-surface-hover text-foreground hover:bg-surface-active',
         danger: 'bg-[var(--destructive)] text-white hover:opacity-90 shadow-xs',
@@ -29,9 +28,7 @@ const button = cva(
   },
 );
 
-export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof button> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof button> {
   asChild?: boolean;
 }
 

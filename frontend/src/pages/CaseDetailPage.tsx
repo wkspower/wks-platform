@@ -23,11 +23,7 @@ export function CaseDetailPage() {
     );
   }
   if (isError || !dto) {
-    return (
-      <div className="px-6 py-12 text-center text-[var(--destructive)]">
-        Failed to load case.
-      </div>
-    );
+    return <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load case.</div>;
   }
 
   return (

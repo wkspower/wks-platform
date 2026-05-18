@@ -9,7 +9,11 @@ export const DialogClose = DialogPrimitive.Close;
 
 export const DialogContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
-  ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { title?: string; description?: string; children: ReactNode }
+  ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    title?: string;
+    description?: string;
+    children: ReactNode;
+  }
 >(({ className, title, description, children, ...rest }, ref) => (
   <DialogPrimitive.Portal>
     <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 anim-fade" />

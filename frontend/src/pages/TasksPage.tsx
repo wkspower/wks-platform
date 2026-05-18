@@ -49,8 +49,12 @@ export function TasksPage() {
               <tr className="text-foreground-subtle text-[11px] uppercase tracking-wider">
                 <th className="text-left font-medium px-6 py-2 border-b border-border bg-background">Task</th>
                 <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Case</th>
-                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Assignee</th>
-                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Opened</th>
+                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">
+                  Assignee
+                </th>
+                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">
+                  Opened
+                </th>
                 <th className="w-8 border-b border-border bg-background" />
               </tr>
             </thead>

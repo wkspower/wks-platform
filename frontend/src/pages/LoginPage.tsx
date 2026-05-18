@@ -75,10 +75,13 @@ export function LoginPage() {
         </div>
         <div className="max-w-md">
           <h1 className="text-4xl font-heading font-semibold leading-tight">
-            Case management,<br />engineered for SIs.
+            Case management,
+            <br />
+            engineered for SIs.
           </h1>
           <p className="mt-4 text-white/70 text-[14px] leading-relaxed">
-            Configure case types in YAML, model workflows in BPMN, and ship branded portals to your customers in days, not months.
+            Configure case types in YAML, model workflows in BPMN, and ship branded portals to your customers
+            in days, not months.
           </p>
         </div>
         <div className="text-[12px] text-white/50">v0.1 · OSS · Apache 2.0</div>
@@ -146,13 +149,7 @@ export function LoginPage() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={isSubmitting}
-              className="w-full mt-1"
-            >
+            <Button type="submit" variant="primary" size="lg" disabled={isSubmitting} className="w-full mt-1">
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>

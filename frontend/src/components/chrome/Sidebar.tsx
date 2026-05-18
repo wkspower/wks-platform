@@ -1,12 +1,4 @@
-import {
-  ChevronsLeft,
-  ChevronsRight,
-  FileText,
-  Inbox,
-  LayoutGrid,
-  Settings,
-  Sparkles,
-} from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, FileText, Inbox, LayoutGrid, Settings, Sparkles } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { Avatar } from '@/components/ui/Avatar';
@@ -86,7 +78,8 @@ export function Sidebar() {
             Quick tip
           </div>
           <div className="text-[11px] text-foreground-muted mt-1">
-            Press <kbd className="rounded border border-border bg-surface-hover px-1">⌘K</kbd> to search anywhere.
+            Press <kbd className="rounded border border-border bg-surface-hover px-1">⌘K</kbd> to search
+            anywhere.
           </div>
         </div>
       )}

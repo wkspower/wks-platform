@@ -21,15 +21,18 @@ interface BaseProps {
   onCancel: () => void;
 }
 
-export function InlineFieldEditor({
-  field,
-  ...rest
-}: BaseProps & { field: FieldDefinition }) {
+export function InlineFieldEditor({ field, ...rest }: BaseProps & { field: FieldDefinition }) {
   if (field.type === 'select') {
     return <InlineSelectEditor options={field.options ?? []} {...rest} />;
   }
   const inputType =
-    field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'email' ? 'email' : 'text';
+    field.type === 'number'
+      ? 'number'
+      : field.type === 'date'
+        ? 'date'
+        : field.type === 'email'
+          ? 'email'
+          : 'text';
   return <InlineTextEditor inputType={inputType} {...rest} />;
 }
 

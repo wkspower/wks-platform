@@ -8,13 +8,7 @@ import { ApiError } from '@/api/client';
 import { Button } from '@/components/ui/Button';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { useCaseType, useCaseTypes } from '@/hooks/useCaseTypes';
 import { useCreateCase } from '@/hooks/useCases';
@@ -28,10 +22,7 @@ export function NewCaseDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   const effectiveId = caseTypeId || allowed[0]?.id || '';
   const { data: view } = useCaseType(effectiveId || undefined);
 
-  const createFields = useMemo(
-    () => (view ? view.fields.filter((f) => f.requiredOnCreate) : []),
-    [view],
-  );
+  const createFields = useMemo(() => (view ? view.fields.filter((f) => f.requiredOnCreate) : []), [view]);
   const schema = useMemo(
     () => (view ? buildZodFromFieldDefs(createFields, 'create') : z.object({})),
     [view, createFields],
@@ -119,7 +110,15 @@ export function NewCaseDialog({ open, onOpenChange }: { open: boolean; onOpenCha
                   ) : (
                     <Input
                       id={`new-${f.id}`}
-                      type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : f.type === 'email' ? 'email' : 'text'}
+                      type={
+                        f.type === 'number'
+                          ? 'number'
+                          : f.type === 'date'
+                            ? 'date'
+                            : f.type === 'email'
+                              ? 'email'
+                              : 'text'
+                      }
                       aria-invalid={!!err}
                       {...register(f.id)}
                     />
@@ -130,7 +129,10 @@ export function NewCaseDialog({ open, onOpenChange }: { open: boolean; onOpenCha
             })}
 
             {envelopeError && (
-              <div role="alert" className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]">
+              <div
+                role="alert"
+                className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]"
+              >
                 {envelopeError}
               </div>
             )}

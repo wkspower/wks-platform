@@ -26,7 +26,12 @@ export function Avatar({
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }) {
-  const sz = { xs: 'size-4 text-[8px]', sm: 'size-5 text-[9px]', md: 'size-6 text-[10px]', lg: 'size-8 text-xs' }[size];
+  const sz = {
+    xs: 'size-4 text-[8px]',
+    sm: 'size-5 text-[9px]',
+    md: 'size-6 text-[10px]',
+    lg: 'size-8 text-xs',
+  }[size];
   const c = colorFor(name ?? '?');
   return (
     <span

@@ -1,7 +1,12 @@
 import { ChevronRight } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
 
-import { InlineFieldEditor, InlineSelectEditor, InlineTextEditor, isInlineEditableField } from '@/components/cases/InlineEditCell';
+import {
+  InlineFieldEditor,
+  InlineSelectEditor,
+  InlineTextEditor,
+  isInlineEditableField,
+} from '@/components/cases/InlineEditCell';
 import { Avatar } from '@/components/ui/Avatar';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -39,7 +44,12 @@ export interface CasesTableProps {
   editing: InlineEditTarget | null;
   onStartEdit: (target: InlineEditTarget) => void;
   onCancelEdit: () => void;
-  onCommitEdit: (row: CaseRow, view: CaseTypeView | undefined, target: InlineEditTarget, next: unknown) => void;
+  onCommitEdit: (
+    row: CaseRow,
+    view: CaseTypeView | undefined,
+    target: InlineEditTarget,
+    next: unknown,
+  ) => void;
 }
 
 export const STATUS_FIELD_ID = '__status__';
@@ -97,7 +107,9 @@ export function CasesTable({
                 aria-label={allSelected ? 'Deselect all' : 'Select all visible'}
               />
             </th>
-            <th className="text-left font-medium px-3 py-2 border-b border-border bg-background sticky top-0 z-10">ID</th>
+            <th className="text-left font-medium px-3 py-2 border-b border-border bg-background sticky top-0 z-10">
+              ID
+            </th>
             {!isSingle && (
               <th className="text-left font-medium px-3 py-2 border-b border-border bg-background sticky top-0 z-10">
                 Case type
@@ -126,7 +138,10 @@ export function CasesTable({
         <tbody>
           {rows.length === 0 && (
             <tr>
-              <td colSpan={4 + dynamicCols.length + 3} className="px-3 py-12 text-center text-foreground-muted">
+              <td
+                colSpan={4 + dynamicCols.length + 3}
+                className="px-3 py-12 text-center text-foreground-muted"
+              >
                 No cases match the current filters.
               </td>
             </tr>
@@ -189,10 +204,7 @@ export function CasesTable({
                       onCancel={onCancelEdit}
                     />
                   ) : (
-                    <StatusBadge
-                      label={status?.displayName ?? row.status}
-                      color={status?.color}
-                    />
+                    <StatusBadge label={status?.displayName ?? row.status} color={status?.color} />
                   )}
                 </td>
                 {dynamicCols.map((c) => {

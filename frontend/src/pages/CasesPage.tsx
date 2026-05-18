@@ -230,9 +230,7 @@ export function CasesPage() {
         if (row) prevStatuses.set(id, row.status);
         applyOptimisticStatus(queryClient, id, statusId);
       }
-      const results = await Promise.allSettled(
-        ids.map((id) => transitionCase(id, { action: statusId })),
-      );
+      const results = await Promise.allSettled(ids.map((id) => transitionCase(id, { action: statusId })));
       let ok = 0;
       let fail = 0;
       for (const r of results) {
@@ -250,9 +248,7 @@ export function CasesPage() {
           message: `Updated ${ok} ${ok === 1 ? 'case' : 'cases'}`,
           undo: async () => {
             const undoResults = await Promise.allSettled(
-              Array.from(prevStatuses.entries()).map(([id, prev]) =>
-                transitionCase(id, { action: prev }),
-              ),
+              Array.from(prevStatuses.entries()).map(([id, prev]) => transitionCase(id, { action: prev })),
             );
             const undoFail = undoResults.filter((r) => r.status === 'rejected').length;
             if (undoFail > 0) {

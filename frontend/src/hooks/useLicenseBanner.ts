@@ -88,9 +88,7 @@ export function useLicenseBanner(): UseLicenseBannerResult {
         setExpiresAt(status.expiresAt ?? null);
 
         const expiringSoon =
-          status.state === 'valid' &&
-          status.expiresAt !== null &&
-          daysUntil(status.expiresAt) <= 30;
+          status.state === 'valid' && status.expiresAt !== null && daysUntil(status.expiresAt) <= 30;
         setIsExpiringSoon(expiringSoon);
         setIsOss(status.state === 'oss');
 

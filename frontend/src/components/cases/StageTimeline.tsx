@@ -12,7 +12,8 @@ export function StageTimeline({ stages }: { stages: StageView[] }) {
             className={cn(
               'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] border',
               s.state === 'COMPLETED' && 'bg-[var(--success-soft)] text-[var(--success)] border-transparent',
-              s.state === 'ACTIVE' && 'bg-[var(--primary-soft)] text-[var(--primary-soft-on)] border-[var(--primary)] font-medium',
+              s.state === 'ACTIVE' &&
+                'bg-[var(--primary-soft)] text-[var(--primary-soft-on)] border-[var(--primary)] font-medium',
               s.state === 'PENDING' && 'bg-surface text-foreground-muted border-border',
               s.state === 'SKIPPED' && 'bg-surface-hover text-foreground-subtle border-border line-through',
             )}

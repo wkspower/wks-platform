@@ -174,8 +174,7 @@ export function useFormDraft(
     }
   }, [caseId, formId]);
 
-  const isVersionMismatch =
-    draft !== null && draft.caseTypeVersionAtSave !== currentCaseTypeVersion;
+  const isVersionMismatch = draft !== null && draft.caseTypeVersionAtSave !== currentCaseTypeVersion;
 
   return {
     draft,

@@ -22,7 +22,10 @@ export function CaseDetailBody({ dto, compact = false }: { dto: CaseDto; compact
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="font-heading text-[18px] font-semibold truncate">
-                <Link to={`/cases?caseType=${dto.caseTypeId}`} className="text-foreground-muted hover:text-foreground">
+                <Link
+                  to={`/cases?caseType=${dto.caseTypeId}`}
+                  className="text-foreground-muted hover:text-foreground"
+                >
                   {dto.caseType.displayName}
                 </Link>
                 <span className="text-foreground-subtle mx-1.5">/</span>

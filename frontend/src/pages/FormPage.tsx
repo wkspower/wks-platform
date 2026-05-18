@@ -23,15 +23,9 @@ export function FormPage() {
   const qc = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useMemo(
-    () => dto?.caseType.forms?.find((f) => f.id === formId) ?? null,
-    [dto, formId],
-  );
+  const form = useMemo(() => dto?.caseType.forms?.find((f) => f.id === formId) ?? null, [dto, formId]);
 
-  const schema = useMemo(
-    () => (form ? buildZodFromFieldDefs(form.fields, 'submit') : z.object({})),
-    [form],
-  );
+  const schema = useMemo(() => (form ? buildZodFromFieldDefs(form.fields, 'submit') : z.object({})), [form]);
 
   const methods = useForm<Record<string, unknown>>({
     resolver: zodResolver(schema),
@@ -78,7 +72,7 @@ export function FormPage() {
         for (const e of err.envelopeErrors) {
           if (e.field) setError(e.field, { type: 'server', message: e.message });
         }
-        setSubmitError("Check highlighted fields and try again.");
+        setSubmitError('Check highlighted fields and try again.');
       } else {
         setSubmitError('Submission failed.');
       }
@@ -123,7 +117,15 @@ export function FormPage() {
                 ) : (
                   <Input
                     id={`f-${f.id}`}
-                    type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : f.type === 'email' ? 'email' : 'text'}
+                    type={
+                      f.type === 'number'
+                        ? 'number'
+                        : f.type === 'date'
+                          ? 'date'
+                          : f.type === 'email'
+                            ? 'email'
+                            : 'text'
+                    }
                     aria-invalid={!!err}
                     {...register(f.id)}
                   />
@@ -134,7 +136,10 @@ export function FormPage() {
           })}
 
           {submitError && (
-            <div role="alert" className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]">
+            <div
+              role="alert"
+              className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]"
+            >
               {submitError}
             </div>
           )}

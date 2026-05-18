@@ -1,21 +1,26 @@
 import { Command } from 'cmdk';
-import {
-  FileText,
-  Inbox,
-  LayoutGrid,
-  LogOut,
-  Search,
-  Settings,
-  Shield,
-} from 'lucide-react';
+import { FileText, Inbox, LayoutGrid, LogOut, Search, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { useAuthStore } from '@/stores/authStore';
 
-type Cmd = { id: string; label: string; group: string; Icon: typeof FileText; run: () => void; role?: string };
+type Cmd = {
+  id: string;
+  label: string;
+  group: string;
+  Icon: typeof FileText;
+  run: () => void;
+  role?: string;
+};
 
-export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function CommandPalette({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -23,11 +28,43 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
   const close = () => onOpenChange(false);
 
   const commands: Cmd[] = [
-    { id: 'nav-dashboard', label: 'Go to Dashboard', group: 'Navigate', Icon: LayoutGrid, run: () => navigate('/dashboard') },
-    { id: 'nav-cases', label: 'Go to Cases', group: 'Navigate', Icon: FileText, run: () => navigate('/cases') },
-    { id: 'nav-tasks', label: 'Go to My Tasks', group: 'Navigate', Icon: Inbox, run: () => navigate('/tasks') },
-    { id: 'nav-admin', label: 'Go to Admin', group: 'Navigate', Icon: Settings, run: () => navigate('/admin'), role: 'admin' },
-    { id: 'nav-license', label: 'View License Status', group: 'Admin', Icon: Shield, run: () => navigate('/admin/license'), role: 'admin' },
+    {
+      id: 'nav-dashboard',
+      label: 'Go to Dashboard',
+      group: 'Navigate',
+      Icon: LayoutGrid,
+      run: () => navigate('/dashboard'),
+    },
+    {
+      id: 'nav-cases',
+      label: 'Go to Cases',
+      group: 'Navigate',
+      Icon: FileText,
+      run: () => navigate('/cases'),
+    },
+    {
+      id: 'nav-tasks',
+      label: 'Go to My Tasks',
+      group: 'Navigate',
+      Icon: Inbox,
+      run: () => navigate('/tasks'),
+    },
+    {
+      id: 'nav-admin',
+      label: 'Go to Admin',
+      group: 'Navigate',
+      Icon: Settings,
+      run: () => navigate('/admin'),
+      role: 'admin',
+    },
+    {
+      id: 'nav-license',
+      label: 'View License Status',
+      group: 'Admin',
+      Icon: Shield,
+      run: () => navigate('/admin/license'),
+      role: 'admin',
+    },
     { id: 'logout', label: 'Sign out', group: 'Account', Icon: LogOut, run: () => void logout() },
   ].filter((c) => !c.role || user?.roles.includes(c.role));
 

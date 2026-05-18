@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user: null, status: 'unauthenticated', error: null });
         return;
       }
-      // eslint-disable-next-line no-console
+
       console.warn('[auth] hydrate failed', err);
       set({ user: null, status: 'unauthenticated', error: null });
     } finally {

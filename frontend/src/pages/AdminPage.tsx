@@ -34,19 +34,22 @@ export function AdminPage() {
             <Spinner />
           </div>
         ) : !types || types.length === 0 ? (
-          <p className="px-4 py-8 text-center text-[13px] text-foreground-muted">
-            No case types deployed.
-          </p>
+          <p className="px-4 py-8 text-center text-[13px] text-foreground-muted">No case types deployed.</p>
         ) : (
           <ul className="divide-y divide-divider">
             {types.map((t) => (
-              <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-hover">
+              <li
+                key={t.id}
+                className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-hover"
+              >
                 <div>
                   <div className="font-medium text-[13px]">{t.displayName}</div>
                   <div className="text-[11px] text-foreground-muted mt-0.5 flex items-center gap-1.5">
                     <span className="font-mono">{t.id}</span>
                     <Badge>v{t.version}</Badge>
-                    <span>· {t.statusCount} statuses · {t.fieldCount} fields</span>
+                    <span>
+                      · {t.statusCount} statuses · {t.fieldCount} fields
+                    </span>
                   </div>
                 </div>
                 <Link
@@ -65,10 +68,21 @@ export function AdminPage() {
 }
 
 function Card({
-  to, href, external, Icon, title, children, disabled,
+  to,
+  href,
+  external,
+  Icon,
+  title,
+  children,
+  disabled,
 }: {
-  to?: string; href?: string; external?: boolean; Icon: typeof Shield; title: string;
-  children: React.ReactNode; disabled?: boolean;
+  to?: string;
+  href?: string;
+  external?: boolean;
+  Icon: typeof Shield;
+  title: string;
+  children: React.ReactNode;
+  disabled?: boolean;
 }) {
   const cls =
     'block rounded-lg border border-border bg-canvas p-4 hover:border-border-strong transition-colors';
@@ -80,10 +94,20 @@ function Card({
     </>
   );
   if (disabled) return <div className={`${cls} opacity-60 pointer-events-none`}>{inner}</div>;
-  if (href) return (
-    <a className={cls} href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+  if (href)
+    return (
+      <a
+        className={cls}
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noreferrer' : undefined}
+      >
+        {inner}
+      </a>
+    );
+  return (
+    <Link to={to ?? '#'} className={cls}>
       {inner}
-    </a>
+    </Link>
   );
-  return <Link to={to ?? '#'} className={cls}>{inner}</Link>;
 }

@@ -34,7 +34,7 @@ export function formatFieldValue(field: FieldDefinition, value: unknown): string
       const stored = String(value);
       const match = field.options?.find((opt) => String(opt.value) === stored);
       if (match) return match.label;
-      // eslint-disable-next-line no-console
+
       console.warn(`formatFieldValue: select '${field.id}' has no option for '${String(value)}'`);
       return String(value);
     }

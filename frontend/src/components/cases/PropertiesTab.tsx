@@ -82,7 +82,13 @@ function FieldRow({ dto, field }: { dto: CaseDto; field: FieldDefinition }) {
             <Button size="icon" variant="ghost" onClick={cancel} aria-label="Cancel">
               <X className="size-3.5" />
             </Button>
-            <Button size="icon" variant="primary" onClick={save} disabled={update.isPending} aria-label="Save">
+            <Button
+              size="icon"
+              variant="primary"
+              onClick={save}
+              disabled={update.isPending}
+              aria-label="Save"
+            >
               <Check className="size-3.5" />
             </Button>
           </>

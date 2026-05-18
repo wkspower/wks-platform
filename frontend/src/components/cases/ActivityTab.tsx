@@ -28,19 +28,13 @@ export function ActivityTab({ dto }: { dto: CaseDto }) {
     );
   }
   if (!data || data.items.length === 0) {
-    return (
-      <div className="px-6 py-12 text-center text-foreground-muted text-[13px]">
-        No activity yet.
-      </div>
-    );
+    return <div className="px-6 py-12 text-center text-foreground-muted text-[13px]">No activity yet.</div>;
   }
 
   return (
     <div className="px-6 py-5">
       {data.truncated && (
-        <p className="mb-3 text-[12px] text-foreground-muted">
-          Showing the 50 most recent events.
-        </p>
+        <p className="mb-3 text-[12px] text-foreground-muted">Showing the 50 most recent events.</p>
       )}
       <ol className="relative pl-6 border-l border-border">
         {data.items.map((e) => (
@@ -95,7 +89,8 @@ function describeEvent(event: AuditEventView, dto: CaseDto): string {
   if (event.eventType === 'case.status.changed') {
     const newS = dto.caseType.statuses.find((s) => s.id === event.result)?.displayName ?? event.result;
     const prev = event.previousResult
-      ? dto.caseType.statuses.find((s) => s.id === event.previousResult)?.displayName ?? event.previousResult
+      ? (dto.caseType.statuses.find((s) => s.id === event.previousResult)?.displayName ??
+        event.previousResult)
       : null;
     return prev ? `Status changed from ${prev} to ${newS}` : `Status set to ${newS}`;
   }

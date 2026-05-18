@@ -1,13 +1,7 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import type { CaseTypeView } from '@/types/caseType';
 
@@ -21,13 +15,7 @@ export interface BulkActionBarProps {
   caseTypes?: CaseTypeView[];
 }
 
-export function BulkActionBar({
-  count,
-  onClear,
-  onAssign,
-  onSetStatus,
-  commonStatuses,
-}: BulkActionBarProps) {
+export function BulkActionBar({ count, onClear, onAssign, onSetStatus, commonStatuses }: BulkActionBarProps) {
   const [mode, setMode] = useState<null | 'assign' | 'status'>(null);
   const [assignee, setAssignee] = useState('');
 

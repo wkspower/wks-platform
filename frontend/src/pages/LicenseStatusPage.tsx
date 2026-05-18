@@ -11,7 +11,11 @@ export function LicenseStatusPage() {
   const features = useQuery({ queryKey: ['license', 'features'], queryFn: () => getLicenseFeatures() });
 
   if (status.isLoading || features.isLoading) {
-    return <div className="grid place-items-center py-20"><Spinner className="size-6" /></div>;
+    return (
+      <div className="grid place-items-center py-20">
+        <Spinner className="size-6" />
+      </div>
+    );
   }
   if (status.isError || !status.data) {
     return <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load license.</div>;
@@ -27,7 +31,9 @@ export function LicenseStatusPage() {
 
       <div className="mt-5 rounded-lg border border-border bg-canvas p-4">
         <div className="flex items-center gap-3">
-          <Icon className={`size-7 ${tone === 'success' ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`} />
+          <Icon
+            className={`size-7 ${tone === 'success' ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`}
+          />
           <div>
             <div className="font-semibold text-[14px] capitalize">{s.state}</div>
             <div className="text-[12px] text-foreground-muted">
@@ -59,13 +65,13 @@ export function LicenseStatusPage() {
                 <td className="px-3 py-2 text-foreground-muted">{f.description}</td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap gap-1">
-                    {f.bundleTiers.map((t) => <Badge key={t}>{t}</Badge>)}
+                    {f.bundleTiers.map((t) => (
+                      <Badge key={t}>{t}</Badge>
+                    ))}
                   </div>
                 </td>
                 <td className="px-3 py-2">
-                  <Badge tone={f.enabled ? 'success' : 'neutral'}>
-                    {f.enabled ? 'Enabled' : 'Disabled'}
-                  </Badge>
+                  <Badge tone={f.enabled ? 'success' : 'neutral'}>{f.enabled ? 'Enabled' : 'Disabled'}</Badge>
                 </td>
               </tr>
             ))}

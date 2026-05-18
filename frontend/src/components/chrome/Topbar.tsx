@@ -17,14 +17,11 @@ function useBreadcrumbs(): { label: string; href?: string }[] {
       { label: formMatch.params.caseId ?? '', href: `/cases/${formMatch.params.caseId}` },
       { label: 'Form' },
     ];
-  if (caseMatch)
-    return [
-      { label: 'Cases', href: '/cases' },
-      { label: caseMatch.params.caseId ?? '' },
-    ];
+  if (caseMatch) return [{ label: 'Cases', href: '/cases' }, { label: caseMatch.params.caseId ?? '' }];
   if (pathname.startsWith('/cases')) return [{ label: 'Cases' }];
   if (pathname.startsWith('/tasks')) return [{ label: 'My tasks' }];
-  if (pathname.startsWith('/admin/license')) return [{ label: 'Admin', href: '/admin' }, { label: 'License' }];
+  if (pathname.startsWith('/admin/license'))
+    return [{ label: 'Admin', href: '/admin' }, { label: 'License' }];
   if (pathname.startsWith('/admin/mapping-inspector'))
     return [{ label: 'Admin', href: '/admin' }, { label: 'Mapping inspector' }];
   if (pathname.startsWith('/admin')) return [{ label: 'Admin' }];

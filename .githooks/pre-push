@@ -68,13 +68,15 @@ else
 fi
 
 if [[ "$run_frontend" == "1" ]]; then
-  # Frontend v2 has no ESLint/Prettier config yet; build covers typecheck
-  # (`tsc -b && vite build`) and the test step is `vitest run --passWithNoTests`
-  # so the gate activates the moment a test lands. Kept in sync with ci.yml.
-  echo "pre-push: frontend — npm ci + test + build"
+  # Kept in sync with .github/workflows/ci.yml. Build covers typecheck
+  # (`tsc -b && vite build`); `vitest run --passWithNoTests` activates the gate
+  # the moment a test lands.
+  echo "pre-push: frontend — npm ci + lint + format:check + test + build"
   (
     cd frontend
     npm ci --no-audit --no-fund
+    npm run lint
+    npm run format:check
     npm test
     npm run build
 

@@ -18,7 +18,13 @@ const BINDINGS: Binding[] = [
   { keys: ['⌘', 'K'], description: 'Open command palette' },
 ];
 
-export function ShortcutsOverlay({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function ShortcutsOverlay({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent title="Keyboard shortcuts" description="Available when no input has focus.">

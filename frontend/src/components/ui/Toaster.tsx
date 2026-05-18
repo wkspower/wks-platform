@@ -48,10 +48,7 @@ export function toast(input: Omit<Toast, 'id' | 'ttlMs'> & { id?: string; ttlMs?
 export function ToastViewport() {
   const toasts = useToastStore((s) => s.toasts);
   return (
-    <div
-      aria-live="polite"
-      className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none"
-    >
+    <div aria-live="polite" className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} />
       ))}

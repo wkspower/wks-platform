@@ -21,7 +21,12 @@ export function MappingInspectorPage() {
     enabled: !!caseTypeId,
   });
 
-  if (mapping.isLoading) return <div className="grid place-items-center py-20"><Spinner /></div>;
+  if (mapping.isLoading)
+    return (
+      <div className="grid place-items-center py-20">
+        <Spinner />
+      </div>
+    );
   if (mapping.isError || !mapping.data) {
     return <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load mapping.</div>;
   }
@@ -30,11 +35,11 @@ export function MappingInspectorPage() {
   return (
     <div className="px-6 py-6 max-w-5xl">
       <Button asChild variant="ghost" size="xs">
-        <Link to="/admin"><ArrowLeft className="size-3.5" /> Admin</Link>
+        <Link to="/admin">
+          <ArrowLeft className="size-3.5" /> Admin
+        </Link>
       </Button>
-      <h1 className="mt-2 font-heading text-2xl font-semibold">
-        Mapping inspector
-      </h1>
+      <h1 className="mt-2 font-heading text-2xl font-semibold">Mapping inspector</h1>
       <p className="text-foreground-muted text-[13px] mt-0.5">
         <span className="font-mono">{m.caseTypeId}</span> · version {m.version}
         {m.emptyMapping && <span className="ml-2 text-[var(--warning)]">(no mappings)</span>}
@@ -59,7 +64,9 @@ export function MappingInspectorPage() {
                 {a.elements.map((e, i) => (
                   <tr key={i} className="border-t border-divider">
                     <td className="px-3 py-2 font-mono text-[12px]">{e.bpmnElement}</td>
-                    <td className="px-3 py-2"><Badge tone="brand">{e.wksEffect}</Badge></td>
+                    <td className="px-3 py-2">
+                      <Badge tone="brand">{e.wksEffect}</Badge>
+                    </td>
                     <td className="px-3 py-2 text-foreground-muted">{e.target ?? '—'}</td>
                     <td className="px-3 py-2 text-foreground-muted">{e.rule ?? '—'}</td>
                   </tr>
@@ -74,7 +81,9 @@ export function MappingInspectorPage() {
         <h2 className="text-[13px] font-semibold mb-2">Recent signals</h2>
         <div className="rounded-lg border border-border bg-canvas overflow-hidden">
           {signals.isLoading ? (
-            <div className="grid place-items-center py-8"><Spinner /></div>
+            <div className="grid place-items-center py-8">
+              <Spinner />
+            </div>
           ) : !signals.data || signals.data.signals.length === 0 ? (
             <p className="px-4 py-6 text-center text-[13px] text-foreground-muted">No recent signals.</p>
           ) : (
@@ -96,9 +105,7 @@ export function MappingInspectorPage() {
                     <td className="px-3 py-2 font-mono text-[12px]">{s.kind}</td>
                     <td className="px-3 py-2 text-foreground-muted">{s.source}</td>
                     <td className="px-3 py-2">
-                      <Badge tone={s.decision === 'matched-rule' ? 'success' : 'warning'}>
-                        {s.decision}
-                      </Badge>
+                      <Badge tone={s.decision === 'matched-rule' ? 'success' : 'warning'}>{s.decision}</Badge>
                     </td>
                     <td className="px-3 py-2 font-mono text-[12px]">{s.matchedRule ?? '—'}</td>
                     <td className="px-3 py-2">{s.effect ?? '—'}</td>

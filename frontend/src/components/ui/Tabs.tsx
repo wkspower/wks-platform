@@ -36,10 +36,6 @@ export const TabsContent = forwardRef<
   ElementRef<typeof TabsPrimitive.Content>,
   ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...rest }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn('focus-visible:outline-none', className)}
-    {...rest}
-  />
+  <TabsPrimitive.Content ref={ref} className={cn('focus-visible:outline-none', className)} {...rest} />
 ));
 TabsContent.displayName = 'TabsContent';
