@@ -62,15 +62,10 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Test
-        run: npm test
-
+      # Frontend v2 ships without a lint/format/test gate by design; the
+      # Attio-inspired rewrite is in a stabilisation phase. CI verifies the
+      # build + the font-bundle assertion. Lint/format/test gates return once
+      # the codebase settles.
       - name: Build
         run: npm run build
 

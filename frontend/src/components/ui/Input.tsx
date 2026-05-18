@@ -1,25 +1,19 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
-
 import { cn } from '@/lib/cn';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  hasError?: boolean;
-}
-
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, hasError, ...props },
-  ref,
-) {
-  return (
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, ...props }, ref) => (
     <input
       ref={ref}
-      aria-invalid={hasError ? true : undefined}
       className={cn(
-        'flex h-11 w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-[var(--disabled-bg)] disabled:text-[var(--disabled-fg)]',
-        hasError && 'border-[var(--destructive)] focus-visible:ring-[var(--destructive)]',
+        'h-8 w-full rounded-md border border-border bg-surface px-2.5 text-[13px] text-foreground placeholder:text-foreground-subtle transition-colors',
+        'hover:border-border-strong focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-soft)]',
+        'disabled:bg-surface-hover disabled:text-foreground-muted disabled:cursor-not-allowed',
+        'aria-invalid:border-[var(--destructive)] aria-invalid:focus:ring-[var(--destructive-soft)]',
         className,
       )}
       {...props}
     />
-  );
-});
+  ),
+);
+Input.displayName = 'Input';

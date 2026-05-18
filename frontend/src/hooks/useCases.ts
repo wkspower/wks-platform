@@ -18,8 +18,9 @@ import {
   type TransitionCaseRequest,
   type UpdateCaseRequest,
 } from '@/api/cases';
+import { toast } from '@/components/ui/Toaster';
 import { caseQueryKeys, type CaseListQuery } from '@/lib/queryKeys';
-import { toCaseRow, type CaseDto, type CaseRow } from '@/types/case';
+import { toCaseRow, type CaseDto, type CaseRow, type CaseSummary } from '@/types/case';
 
 const STALE_TIME_MS = 30_000;
 
@@ -37,19 +38,7 @@ export interface UseCasesResult {
   errors: Error[];
 }
 
-/**
- * Story 2.5 Multi-case-type fetch — see Dev Notes §Multi-case-type fetch.
- *
- * The backend list endpoint requires exactly one `caseType` per call. When the user selects
- * N case types in the filter bar this hook issues N parallel `useQuery`s and merges the rows
- * client-side. Phase 1 collapses to a single backend call once `GET /api/cases` accepts an
- * array of case-type ids.
- */
 export function useCases({ caseTypeIds, status, size = 100, sort }: UseCasesArgs): UseCasesResult {
-  // `combine` runs inside react-query and returns a stable reference between renders when none
-  // of the underlying query results changed. Without it, `useQueries` returns a fresh array each
-  // render, which would cascade through downstream `useMemo`s (filtered rows, columns) and
-  // re-render TanStack Table on every parent state change — defeating the AC8 perf budget.
   return useQueries({
     queries: caseTypeIds.map((caseType) => {
       const query: CaseListQuery = { caseType, status, size, sort, page: 0 };
@@ -63,11 +52,6 @@ export function useCases({ caseTypeIds, status, size = 100, sort }: UseCasesArgs
     combine: (results): UseCasesResult => {
       const errors: Error[] = [];
       let isError = false;
-      // The aggregate is "loading" until every active query has either data or an error. This
-      // wipes stale rows during chip-toggle transitions: when the user adds a new case type, its
-      // query starts without cached data, so the table renders the skeleton instead of mixing
-      // already-cached rows from other chips with the in-flight new chip. Without this, the user
-      // sees a partial table that doesn't match the chip selection.
       let isPending = false;
       for (const q of results) {
         if (q.isError) {
@@ -91,15 +75,7 @@ export function useCases({ caseTypeIds, status, size = 100, sort }: UseCasesArgs
   });
 }
 
-/**
- * Story 2.6 — single-case fetch for the detail panel. Short-circuits when `id` is null
- * (URL has no caseId). Query key is `['case', id]` — Story 4.3 SSE invalidation will hit
- * this exact shape.
- */
 export function useCase(id: string | null): UseQueryResult<CaseDto, Error> {
-  // `skipToken` is the v5-blessed way to disable a query without inventing a sentinel
-  // queryKey. It also makes the unsafe `id as string` cast unnecessary — when `id` is null
-  // TanStack never invokes the queryFn, so `getCase` only ever sees a real id.
   return useQuery<CaseDto, Error>({
     queryKey: id ? caseQueryKeys.detail(id) : caseQueryKeys.detail('__disabled__'),
     queryFn: id ? () => getCase(id) : skipToken,
@@ -108,16 +84,6 @@ export function useCase(id: string | null): UseQueryResult<CaseDto, Error> {
   });
 }
 
-/**
- * Story 2.7 — `POST /api/cases` mutation. On success: primes the detail-cache for the new id
- * (so the navigate to /cases/{id} paints from cache before the network round-trip), and
- * invalidates the cases-list queries so the next render picks the new row up. The new-case
- * highlight + announcement (recentlyCreated push) and the navigate are caller responsibility —
- * the hook stays UI-agnostic so unit tests can wrap it without a router.
- *
- * No automatic retry on 5xx — case-create has user-typed payload; silent retry can produce
- * duplicates if the backend half-succeeded. Idempotency-key headers ship in Phase 1.
- */
 export function useCreateCase(): UseMutationResult<CaseDto, Error, CreateCaseRequest> {
   const queryClient = useQueryClient();
   return useMutation<CaseDto, Error, CreateCaseRequest>({
@@ -132,25 +98,98 @@ export function useCreateCase(): UseMutationResult<CaseDto, Error, CreateCaseReq
 }
 
 /**
- * `POST /api/cases/{id}/transition` mutation. On success, primes the detail cache with the
- * returned DTO (already carries the new status) and invalidates list queries so status filters
- * pick up the change. No retry on failure — transitions are user-initiated state changes.
+ * Optimistic helper — patches the case detail cache + every cached list query that contains
+ * the case. Returns a rollback function that restores all touched snapshots.
  */
-/**
- * `PUT /api/cases/{id}` mutation — surfaced from PropertiesTab inline edit. On success primes
- * the detail cache (caller sees the new `version` immediately, so the next edit's optimistic
- * concurrency check has the fresh value) and invalidates list queries so summary `fields`
- * reflect the edit. On 409 the caller refetches the detail to recover the latest version; no
- * automatic retry (the next edit would race the same stale version).
- */
-export function useUpdateCase(id: string): UseMutationResult<CaseDto, Error, UpdateCaseRequest> {
+function patchCaseCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  id: string,
+  patch: (prev: CaseDto) => CaseDto,
+  patchSummary: (prev: CaseSummary) => CaseSummary,
+): () => void {
+  const detailKey = caseQueryKeys.detail(id);
+  const prevDetail = queryClient.getQueryData<CaseDto>(detailKey);
+  if (prevDetail) {
+    queryClient.setQueryData<CaseDto>(detailKey, patch(prevDetail));
+  }
+  // Patch every list query whose data contains this case.
+  const listSnapshots: Array<{ key: readonly unknown[]; data: CaseSummary[] }> = [];
+  const lists = queryClient.getQueriesData<CaseSummary[]>({ queryKey: caseQueryKeys.lists() });
+  for (const [key, data] of lists) {
+    if (!data) continue;
+    const idx = data.findIndex((s) => s.id === id);
+    if (idx === -1) continue;
+    listSnapshots.push({ key, data });
+    const next = [...data];
+    next[idx] = patchSummary(data[idx]!);
+    queryClient.setQueryData<CaseSummary[]>(key, next);
+  }
+  return () => {
+    if (prevDetail) queryClient.setQueryData(detailKey, prevDetail);
+    else queryClient.removeQueries({ queryKey: detailKey });
+    for (const { key, data } of listSnapshots) {
+      queryClient.setQueryData(key, data);
+    }
+  };
+}
+
+export interface UpdateCaseContext {
+  rollback: () => void;
+  prevData: Record<string, unknown> | null;
+  prevVersion: number | null;
+}
+
+export function useUpdateCase(
+  id: string,
+): UseMutationResult<CaseDto, Error, UpdateCaseRequest, UpdateCaseContext> {
   const queryClient = useQueryClient();
-  return useMutation<CaseDto, Error, UpdateCaseRequest>({
+  return useMutation<CaseDto, Error, UpdateCaseRequest, UpdateCaseContext>({
     mutationKey: ['cases', 'update', id],
     mutationFn: (req) => updateCase(id, req),
-    onSuccess: (dto) => {
+    onMutate: async (req) => {
+      await queryClient.cancelQueries({ queryKey: caseQueryKeys.detail(id) });
+      const prevDetail = queryClient.getQueryData<CaseDto>(caseQueryKeys.detail(id));
+      const rollback = patchCaseCaches(
+        queryClient,
+        id,
+        (prev) => ({ ...prev, data: { ...prev.data, ...req.data } }),
+        (prev) => ({ ...prev, fields: { ...prev.fields, ...req.data } }),
+      );
+      return {
+        rollback,
+        prevData: prevDetail?.data ?? null,
+        prevVersion: prevDetail?.version ?? null,
+      };
+    },
+    onError: (err, _req, ctx) => {
+      ctx?.rollback();
+      toast({ tone: 'error', message: `Couldn't update case — ${err.message}` });
+    },
+    onSuccess: (dto, _req, ctx) => {
       queryClient.setQueryData(caseQueryKeys.detail(dto.id), dto);
       queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });
+      const prevData = ctx?.prevData;
+      if (prevData == null) {
+        toast({ tone: 'success', message: 'Case updated' });
+        return;
+      }
+      toast({
+        tone: 'success',
+        message: 'Case updated',
+        undo: async () => {
+          // Use the latest server version to avoid 409 on undo.
+          const latest = queryClient.getQueryData<CaseDto>(caseQueryKeys.detail(dto.id)) ?? dto;
+          try {
+            const reverted = await updateCase(dto.id, { data: prevData, version: latest.version });
+            queryClient.setQueryData(caseQueryKeys.detail(dto.id), reverted);
+            queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });
+            toast({ tone: 'info', message: 'Change reverted' });
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : 'unknown error';
+            toast({ tone: 'error', message: `Couldn't undo — ${msg}` });
+          }
+        },
+      });
     },
     retry: false,
   });
@@ -158,15 +197,59 @@ export function useUpdateCase(id: string): UseMutationResult<CaseDto, Error, Upd
 
 export function useTransitionCase(
   id: string,
-): UseMutationResult<CaseDto, Error, TransitionCaseRequest> {
+): UseMutationResult<CaseDto, Error, TransitionCaseRequest, { rollback: () => void }> {
   const queryClient = useQueryClient();
-  return useMutation<CaseDto, Error, TransitionCaseRequest>({
+  return useMutation<CaseDto, Error, TransitionCaseRequest, { rollback: () => void }>({
     mutationKey: ['cases', 'transition', id],
     mutationFn: (req) => transitionCase(id, req),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: caseQueryKeys.detail(id) });
+      // The engine determines the resulting status; we can't reliably predict it, so the
+      // optimistic patch here is a noop for status. We still snapshot caches so onError has
+      // something to roll back to if the request fails mid-flight.
+      const rollback = patchCaseCaches(
+        queryClient,
+        id,
+        (prev) => prev,
+        (prev) => prev,
+      );
+      return { rollback };
+    },
+    onError: (err, _req, ctx) => {
+      ctx?.rollback();
+      toast({ tone: 'error', message: `Couldn't transition case — ${err.message}` });
+    },
     onSuccess: (dto) => {
       queryClient.setQueryData(caseQueryKeys.detail(dto.id), dto);
       queryClient.invalidateQueries({ queryKey: caseQueryKeys.lists() });
+      toast({ tone: 'success', message: 'Case transitioned' });
     },
     retry: false,
   });
+}
+
+/**
+ * Optimistic status flip for a single case — used by inline status edits and bulk status actions.
+ * Returns a function for the undo path that restores the previous status.
+ */
+export function applyOptimisticStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  id: string,
+  nextStatus: string,
+): { rollback: () => void; prevStatus: string | null } {
+  const detail = queryClient.getQueryData<CaseDto>(caseQueryKeys.detail(id));
+  const lists = queryClient.getQueriesData<CaseSummary[]>({ queryKey: caseQueryKeys.lists() });
+  let prevStatus: string | null = detail?.status ?? null;
+  for (const [, data] of lists) {
+    if (!data) continue;
+    const row = data.find((r) => r.id === id);
+    if (row && prevStatus == null) prevStatus = row.status;
+  }
+  const rollback = patchCaseCaches(
+    queryClient,
+    id,
+    (prev) => ({ ...prev, status: nextStatus }),
+    (prev) => ({ ...prev, status: nextStatus }),
+  );
+  return { rollback, prevStatus };
 }

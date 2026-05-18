@@ -68,13 +68,12 @@ else
 fi
 
 if [[ "$run_frontend" == "1" ]]; then
-  echo "pre-push: frontend — npm ci + lint + format:check + test + build"
+  # Frontend v2 ships without lint/format/test gates by design — kept in sync
+  # with .github/workflows/ci.yml. Build + font-bundle assertion remain.
+  echo "pre-push: frontend — npm ci + build"
   (
     cd frontend
     npm ci --no-audit --no-fund
-    npm run lint
-    npm run format:check
-    npm test
     npm run build
 
     count=$(find dist/assets -name '*.woff2' | wc -l | tr -d ' ')

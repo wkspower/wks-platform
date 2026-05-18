@@ -1,144 +1,104 @@
-import { Inbox } from 'lucide-react';
+import { ExternalLink, Inbox } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { Table, TBody, THead, Th, Td, Tr } from '@/components/ui/Table';
+import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
 import { useAllTasks } from '@/hooks/useTasks';
-import { t } from '@/i18n';
-import type { TaskDto } from '@/types/task';
+import { formatRelativeTime } from '@/lib/formatDate';
 
-/**
- * Story 13-1 — Tasks Screen: cross-case task list.
- *
- * Renders every pending BPMN user task across every case-type the caller can view (server-side
- * RBAC via `CaseTypePermissionEvaluator`). Sprint 12 scope is read-only:
- * - Row click navigates to `/cases/{caseId}` (existing case route).
- * - Orchestration dialogs (claim/complete from this surface), filters, and deep-link to a
- *   specific task inside the case panel are Sprint 13+ (stories 13-2 / 13-3 / 13-4).
- * - Server caps the response at 500 oldest-first entries; banner copy explains the truncation
- *   confidently rather than blocking interaction.
- */
 export function TasksPage() {
-  const tasksQuery = useAllTasks();
+  const { data, isLoading, isError } = useAllTasks();
 
   return (
-    <section>
-      <h1 className="font-heading text-2xl font-semibold">{t('page.tasks.title')}</h1>
+    <div className="min-h-full">
+      <header className="px-6 pt-5 pb-3 border-b border-border bg-canvas flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-[18px] font-semibold flex items-center gap-2">
+            <Inbox className="size-4" /> My Tasks
+          </h1>
+          <p className="text-[12px] text-foreground-muted mt-0.5">
+            {isLoading
+              ? 'Loading…'
+              : `${data?.items.length ?? 0} open ${data?.items.length === 1 ? 'task' : 'tasks'} across all cases`}
+          </p>
+        </div>
+      </header>
 
-      {tasksQuery.isLoading ? (
-        <TaskListSkeleton />
-      ) : tasksQuery.isError ? (
-        <ErrorState
-          className="mt-[var(--space-4)]"
-          headline={t('page.tasks.error.label')}
-          data-testid="tasks-error"
-        />
-      ) : tasksQuery.data && tasksQuery.data.items.length === 0 ? (
-        <EmptyState
-          icon={Inbox}
-          className="mt-[var(--space-4)]"
-          headline={t('page.tasks.empty.label')}
-          data-testid="tasks-empty"
-        />
-      ) : tasksQuery.data ? (
-        <>
-          {tasksQuery.data.truncated ? (
-            <div
-              role="status"
-              aria-live="polite"
-              data-testid="tasks-truncated-banner"
-              className="mt-[var(--space-4)] rounded border border-[var(--border)] bg-[var(--muted)] px-[var(--space-3)] py-[var(--space-2)] text-sm text-[var(--muted-foreground)]"
-            >
-              {t('page.tasks.truncated.label')}
-            </div>
-          ) : null}
-          <TaskListTable items={tasksQuery.data.items} />
-        </>
-      ) : null}
-    </section>
-  );
-}
+      {data?.truncated && (
+        <div className="mx-6 my-3 rounded-md border border-[var(--warning)] bg-[var(--warning-soft)] px-3 py-2 text-[12px] text-[var(--warning)]">
+          Showing the first 500 tasks. Narrow your filters in a future release.
+        </div>
+      )}
 
-interface TaskListTableProps {
-  items: TaskDto[];
-}
-
-function TaskListTable({ items }: TaskListTableProps) {
-  return (
-    <div className="mt-[var(--space-4)]">
-      <Table aria-label={t('page.tasks.title')}>
-        <THead>
-          <Tr>
-            <Th>{t('page.tasks.column.case')}</Th>
-            <Th>{t('page.tasks.column.task')}</Th>
-            <Th>{t('page.tasks.column.assignee')}</Th>
-            <Th>{t('page.tasks.column.created')}</Th>
-          </Tr>
-        </THead>
-        <TBody>
-          {items.map((task) => (
-            <TaskRow key={task.id} task={task} />
-          ))}
-        </TBody>
-      </Table>
+      <div className="bg-canvas">
+        {isLoading ? (
+          <div className="grid place-items-center py-20">
+            <Spinner className="size-6" />
+          </div>
+        ) : isError ? (
+          <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load tasks.</div>
+        ) : !data || data.items.length === 0 ? (
+          <div className="px-6 py-20 text-center">
+            <Inbox className="size-8 mx-auto text-foreground-subtle" />
+            <p className="mt-2 text-[14px] text-foreground-muted">You have no open tasks.</p>
+          </div>
+        ) : (
+          <table className="w-full text-[13px] border-separate border-spacing-0">
+            <thead>
+              <tr className="text-foreground-subtle text-[11px] uppercase tracking-wider">
+                <th className="text-left font-medium px-6 py-2 border-b border-border bg-background">Task</th>
+                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Case</th>
+                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Assignee</th>
+                <th className="text-left font-medium px-3 py-2 border-b border-border bg-background">Opened</th>
+                <th className="w-8 border-b border-border bg-background" />
+              </tr>
+            </thead>
+            <tbody>
+              {data.items.map((t) => (
+                <tr key={t.id} className="hover:bg-surface-hover">
+                  <td className="px-6 py-2 border-b border-divider">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{t.actionLabel ?? t.name}</span>
+                      {t.archetype && <Badge tone="brand">{t.archetype.replace(/_/g, ' ')}</Badge>}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 border-b border-divider">
+                    <Link
+                      to={`/cases/${t.caseId}`}
+                      className="font-mono text-[12px] text-[var(--primary)] hover:underline"
+                    >
+                      {t.caseId.slice(0, 8)}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2 border-b border-divider">
+                    {t.assignee ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Avatar name={t.assignee} size="sm" /> {t.assignee}
+                      </span>
+                    ) : (
+                      <span className="text-foreground-subtle">Unassigned</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 border-b border-divider text-foreground-muted">
+                    {formatRelativeTime(t.createdAt)}
+                  </td>
+                  <td className="px-3 py-2 border-b border-divider">
+                    {t.formId ? (
+                      <Link
+                        to={`/cases/${t.caseId}/forms/${t.formId}`}
+                        className="inline-flex items-center gap-1 text-[12px] text-[var(--primary)] hover:underline"
+                      >
+                        Open <ExternalLink className="size-3" />
+                      </Link>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
-}
-
-function TaskRow({ task }: { task: TaskDto }) {
-  // AC3 — row click navigates to /cases/{caseId}. The case identifier cell carries the actual
-  // <Link>, so screen readers reach the navigation control without an extra interactive layer
-  // and keyboard users get Enter/Space activation for free via the anchor. Sprint 13+ adds
-  // ?taskId= deep-link via Story 13-2 polish.
-  const caseHref = `/cases/${encodeURIComponent(task.caseId)}`;
-  // Case identifier presentation — short prefix of the UUID is enough for visual scanning at
-  // demo scale. Story 13-4 will surface a richer case label once a stable name field exists.
-  const caseLabel = task.caseId.length > 8 ? `${task.caseId.slice(0, 8)}…` : task.caseId;
-  return (
-    <Tr className="hover:bg-[var(--muted)]/40">
-      <Td>
-        <Link
-          to={caseHref}
-          className="text-[var(--primary)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-        >
-          {caseLabel}
-        </Link>
-      </Td>
-      <Td>{task.name}</Td>
-      <Td>{task.assignee ?? t('page.tasks.assignee.unassigned')}</Td>
-      <Td>
-        <time dateTime={task.createdAt}>{formatRelativeTime(task.createdAt)}</time>
-      </Td>
-    </Tr>
-  );
-}
-
-function TaskListSkeleton() {
-  return (
-    <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-2)]" aria-hidden>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-6" />
-      ))}
-    </div>
-  );
-}
-
-/**
- * Lightweight relative-time formatter — "5m ago", "3h ago", "2d ago". The Tasks screen is the
- * first surface in the app to need it (case list uses absolute updatedAt); a shared utility
- * arrives with Sprint 13's filter/sort work (Story 13-4) when more surfaces adopt the format.
- */
-function formatRelativeTime(iso: string): string {
-  const created = Date.parse(iso);
-  if (Number.isNaN(created)) return iso;
-  const deltaSeconds = Math.max(0, Math.floor((Date.now() - created) / 1000));
-  if (deltaSeconds < 60) return `${deltaSeconds}s ago`;
-  const minutes = Math.floor(deltaSeconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 }

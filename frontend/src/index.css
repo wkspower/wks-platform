@@ -2,34 +2,50 @@
 @import 'tailwindcss';
 
 @theme inline {
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-warning: var(--warning);
+  --color-border-strong: var(--border-strong);
+  --color-divider: var(--divider);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-brand-navy: var(--brand-navy);
+
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-item-hover: var(--sidebar-item-hover);
+  --color-sidebar-item-active: var(--sidebar-item-active);
+
   --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
   --color-info: var(--info);
-  --color-ring: var(--ring);
 
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
   --font-mono: var(--font-mono);
 
+  --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
-  --radius-full: var(--radius-full);
 
+  --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
 }
 
 @font-face {
@@ -39,7 +55,6 @@
   font-display: swap;
   src: url('@/assets/fonts/Poppins-SemiBold.woff2') format('woff2');
 }
-
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
@@ -47,7 +62,6 @@
   font-display: swap;
   src: url('@/assets/fonts/Poppins-Bold.woff2') format('woff2');
 }
-
 @font-face {
   font-family: 'Rubik';
   font-style: normal;
@@ -55,7 +69,6 @@
   font-display: swap;
   src: url('@/assets/fonts/Rubik-Regular.woff2') format('woff2');
 }
-
 @font-face {
   font-family: 'Rubik';
   font-style: normal;
@@ -64,30 +77,38 @@
   src: url('@/assets/fonts/Rubik-Medium.woff2') format('woff2');
 }
 
-html {
+html, body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-body);
   color: var(--foreground);
   background: var(--background);
+  font-size: 13.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-}
+body { min-height: 100vh; }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-}
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 600; letter-spacing: -0.01em; }
 
 *:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
+
+/* Scrollbars — slim, Attio-style */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); background-clip: padding-box; border: 2px solid transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -97,15 +118,10 @@ h6 {
   }
 }
 
-/* Story 6.1 — archetype-terminal design token + CSS hook.
- * --accent-terminal: distinct accent for business_final terminal-state affordances.
- * Applied via [data-archetype-terminal="true"] on the surrounding container so tests
- * assert attribute presence and CSS drives the visual — no DOM reads in logic code.
- */
-:root {
-  --accent-terminal: #dc2626; /* red-600 — signals finality; fallback to primary below */
-}
-
-[data-archetype-terminal='true'] {
-  border-color: var(--accent-terminal, var(--primary));
-}
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.anim-fade { animation: fadeIn var(--motion-normal) var(--ease-out); }
+.anim-slide-right { animation: slideInRight var(--motion-normal) var(--ease-out); }
+.anim-slide-up { animation: slideUp var(--motion-normal) var(--ease-out); }
