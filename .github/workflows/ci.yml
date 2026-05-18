@@ -62,11 +62,14 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
-      # Frontend v2 ships without a lint/format/test gate by design; the
-      # Attio-inspired rewrite is in a stabilisation phase. CI verifies the
-      # build + the font-bundle assertion. Lint/format/test gates return once
-      # the codebase settles.
-      - name: Build
+      # Frontend v2 has no ESLint/Prettier config yet (deliberate during the
+      # Attio-inspired rewrite's stabilisation phase). Typecheck is covered by
+      # `npm run build` (which runs `tsc -b && vite build`). The test step uses
+      # `--passWithNoTests` so it activates the gate the moment a test lands.
+      - name: Test
+        run: npm test
+
+      - name: Build (includes tsc typecheck)
         run: npm run build
 
       # Story 1.3 AC #13: at least 4 woff2 font files (Poppins SemiBold/Bold,
