@@ -1,182 +1,159 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { z } from 'zod';
 
-import { MultiSectionFormRenderer } from '@/components/forms/MultiSectionFormRenderer';
-import { SinglePageFormRenderer } from '@/components/forms/SinglePageFormRenderer';
-import { Alert } from '@/components/ui/Alert';
+import { ApiError } from '@/api/client';
+import { submitForm } from '@/api/forms';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Spinner } from '@/components/ui/Spinner';
+import { Textarea } from '@/components/ui/Textarea';
 import { useCase } from '@/hooks/useCases';
-import { useFormDraft } from '@/hooks/useFormDraft';
-import { t } from '@/i18n';
+import { buildZodFromFieldDefs } from '@/lib/buildZodFromFieldDefs';
+import { caseQueryKeys, taskQueryKeys } from '@/lib/queryKeys';
 
-/**
- * Story 5.2 — Route-accessible form page. Story 5.4 extends with draft-resume orchestration.
- *
- * <p>AC2 — when a draft exists for {@code (caseId, formId, currentUser)}, merge its {@code payload}
- * over the case's {@code data} so the user resumes from where they left off; render a small "Resumed
- * draft" banner with a Discard link.
- *
- * <p>AC3 — when the draft's {@code caseTypeVersionAtSave} differs from the case's current
- * {@code caseTypeVersion}, the renderer is NOT mounted; instead an inline {@code Alert} prompts the
- * user to discard the draft (and use the current form) or cancel back to the case.
- *
- * <p>Route: {@code /cases/:caseId/forms/:formId}
- */
 export function FormPage() {
   const { caseId, formId } = useParams<{ caseId: string; formId: string }>();
+  const { data: dto, isLoading } = useCase(caseId ?? null);
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const caseQuery = useCase(caseId ?? null);
-  // Hook is always called (rules-of-hooks) — when caseId/formId are absent we still mount but the
-  // GET will 404 fast and AC2/AC3 paths are bypassed by the early returns below.
-  const draft = useFormDraft(caseId ?? '', formId ?? '', caseQuery.data?.caseTypeVersion ?? 0);
+  const form = useMemo(() => dto?.caseType.forms?.find((f) => f.id === formId) ?? null, [dto, formId]);
 
-  if (caseQuery.isPending || draft.loading) {
+  const schema = useMemo(() => (form ? buildZodFromFieldDefs(form.fields, 'submit') : z.object({})), [form]);
+
+  const methods = useForm<Record<string, unknown>>({
+    resolver: zodResolver(schema),
+    mode: 'onBlur',
+    defaultValues: useMemo(() => (dto ? { ...dto.data } : {}), [dto]),
+  });
+  const { register, handleSubmit, formState, setError } = methods;
+
+  const submit = useMutation({
+    mutationFn: (values: Record<string, unknown>) => submitForm(caseId!, formId!, values),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: caseQueryKeys.detail(caseId!) });
+      qc.invalidateQueries({ queryKey: taskQueryKeys.byCase(caseId!) });
+      navigate(`/cases/${caseId}`);
+    },
+  });
+
+  if (isLoading || !dto) {
     return (
-      <div className="flex items-center justify-center p-8 text-sm text-[var(--muted-foreground)]">
-        {t('form.loading')}
+      <div className="grid place-items-center py-20">
+        <Spinner className="size-6" />
+      </div>
+    );
+  }
+  if (!form) {
+    return (
+      <div className="px-6 py-12 text-center text-foreground-muted">
+        Form not found on this case type.
+        <div className="mt-3">
+          <Link to={`/cases/${caseId}`} className="text-[var(--primary)] hover:underline">
+            ← Back to case
+          </Link>
+        </div>
       </div>
     );
   }
 
-  if (caseQuery.isError || !caseQuery.data) {
-    return (
-      <div className="flex items-center justify-center p-8 text-sm text-[var(--destructive)]">
-        {t('form.error.caseLoad')}
-      </div>
-    );
-  }
-
-  const caseDto = caseQuery.data;
-  const formDef = (caseDto.caseType.forms ?? []).find((f) => f.id === formId);
-
-  // CF2 fix — invalid formId shows an error state with navigation link, not floating text
-  if (!formDef) {
-    return (
-      <div className="mx-auto max-w-2xl p-6">
-        <p className="mb-4 text-sm text-[var(--destructive)]">{t('form.error.notFound')}</p>
-        <Button variant="ghost" onClick={() => navigate(`/cases/${caseId}`)}>
-          {t('form.error.backToCase')}
-        </Button>
-      </div>
-    );
-  }
-
-  // AC3 — version mismatch gate. Renderer is NOT mounted with a stale-version draft;
-  // discard-only policy (epics §5.4 AC3, no auto-rebase — Story 3.9 owns that surface).
-  if (draft.isVersionMismatch) {
-    return (
-      <div className="mx-auto max-w-2xl p-6">
-        <Alert role="alert" aria-live="polite" variant="warning">
-          <strong className="block">{t('form.draft.versionChanged.title')}</strong>
-          <span className="mt-1 block">{t('form.draft.versionChanged.body')}</span>
-          <div className="mt-4 flex gap-2">
-            <Button
-              type="button"
-              onClick={() => {
-                void draft.discard().then(() => window.location.reload());
-              }}
-            >
-              {t('form.draft.versionChanged.discardAndUseCurrent')}
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => navigate(`/cases/${caseId}`)}>
-              {t('form.draft.versionChanged.cancel')}
-            </Button>
-          </div>
-        </Alert>
-      </div>
-    );
-  }
-
-  // AC2 — merge draft payload over caseDto.data (draft wins on key collision).
-  const mergedDefaults: Record<string, unknown> | undefined = draft.draft
-    ? { ...(caseDto.data ?? {}), ...draft.draft.payload }
-    : caseDto.data;
-
-  // Renderer dispatch — route to MultiSectionFormRenderer for multi-section rendering
-  const renderer =
-    formDef.rendering === 'multi-section' ? (
-      <MultiSectionFormRenderer
-        formDefinition={formDef}
-        caseId={caseId!}
-        defaultValues={mergedDefaults}
-        onValuesChange={(values) =>
-          draft.scheduleSave(values, typeof window !== 'undefined' ? window.scrollY : 0, null)
+  const onSubmit = async (values: Record<string, unknown>) => {
+    setSubmitError(null);
+    try {
+      await submit.mutateAsync(values);
+    } catch (err) {
+      if (err instanceof ApiError && err.envelopeErrors?.length) {
+        for (const e of err.envelopeErrors) {
+          if (e.field) setError(e.field, { type: 'server', message: e.message });
         }
-        saveDraftAction={{
-          label: t('form.draft.save'),
-          onClick: (values) =>
-            void draft.saveNow(values, typeof window !== 'undefined' ? window.scrollY : 0, null),
-        }}
-        onSuccess={() => navigate(`/cases/${caseId}`)}
-      />
-    ) : (
-      <SinglePageFormRenderer
-        formDefinition={formDef}
-        caseId={caseId!}
-        defaultValues={mergedDefaults}
-        onValuesChange={(values) =>
-          draft.scheduleSave(values, typeof window !== 'undefined' ? window.scrollY : 0, null)
-        }
-        saveDraftAction={{
-          label: t('form.draft.save'),
-          onClick: (values) =>
-            void draft.saveNow(values, typeof window !== 'undefined' ? window.scrollY : 0, null),
-        }}
-        onSuccess={() => navigate(`/cases/${caseId}`)}
-      />
-    );
-
-  // Form id is kebab-case in YAML (eg. "loan-application"). Title-case it for
-  // the page H1 so the user never sees a raw slug as the heading — when the
-  // YAML eventually gains a `displayName` field (Story 5.x), prefer that.
-  const headingFromId = formDef.id
-    .replace(/[-_]+/g, ' ')
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+        setSubmitError('Check highlighted fields and try again.');
+      } else {
+        setSubmitError('Submission failed.');
+      }
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-xl font-semibold">{headingFromId}</h1>
-        {/* Story 5.5 AC-4 — version-pin chip. caseDto.caseTypeVersion is the pinned version
-            (server now returns pinned CaseType, not latest — Decision D20). */}
-        <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">
-          {t('form.pinnedVersion', { version: String(caseDto.caseTypeVersion) })}
-        </span>
-      </div>
-      {draft.draft ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="mb-4 flex items-center gap-2 text-sm text-[var(--muted-foreground)]"
-        >
-          <span>{t('form.draft.resumed')}</span>
-          <button
-            type="button"
-            className="underline"
-            onClick={() => {
-              void draft.discard().then(() => window.location.reload());
-            }}
-          >
-            {t('form.draft.discard')}
-          </button>
-        </div>
-      ) : null}
-      {draft.saveState === 'saving' ? (
-        <div className="mb-2 text-xs text-[var(--muted-foreground)]" aria-live="polite">
-          {t('form.draft.saving')}
-        </div>
-      ) : null}
-      {draft.saveState === 'saved' ? (
-        <div className="mb-2 text-xs text-[var(--muted-foreground)]" aria-live="polite">
-          {t('form.draft.saved')}
-        </div>
-      ) : null}
-      {draft.saveState === 'error' ? (
-        <div className="mb-2 text-xs text-[var(--destructive)]" aria-live="polite">
-          {t('form.draft.error')}
-        </div>
-      ) : null}
-      {renderer}
+    <div className="min-h-full bg-canvas">
+      <header className="border-b border-border px-6 pt-4 pb-3">
+        <Button variant="ghost" size="xs" onClick={() => navigate(`/cases/${caseId}`)}>
+          <ArrowLeft className="size-3.5" /> Back to case
+        </Button>
+        <h1 className="mt-2 font-heading text-[18px] font-semibold">{form.id}</h1>
+        <p className="text-[12px] text-foreground-muted">Case {dto.id.slice(0, 8)}</p>
+      </header>
+
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 max-w-2xl space-y-4" noValidate>
+          {form.fields.map((f) => {
+            const err = formState.errors[f.id]?.message as string | undefined;
+            return (
+              <div key={f.id}>
+                <label htmlFor={`f-${f.id}`} className="block text-[12px] font-medium mb-1.5">
+                  {f.displayName} {f.required && <span className="text-[var(--destructive)]">*</span>}
+                </label>
+                {f.type === 'textarea' ? (
+                  <Textarea id={`f-${f.id}`} aria-invalid={!!err} {...register(f.id)} />
+                ) : f.type === 'select' ? (
+                  <select
+                    id={`f-${f.id}`}
+                    aria-invalid={!!err}
+                    className="h-8 w-full rounded-md border border-border bg-surface px-2.5 text-[13px]"
+                    {...register(f.id)}
+                  >
+                    <option value="">Select…</option>
+                    {f.options.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <Input
+                    id={`f-${f.id}`}
+                    type={
+                      f.type === 'number'
+                        ? 'number'
+                        : f.type === 'date'
+                          ? 'date'
+                          : f.type === 'email'
+                            ? 'email'
+                            : 'text'
+                    }
+                    aria-invalid={!!err}
+                    {...register(f.id)}
+                  />
+                )}
+                {err && <p className="mt-1 text-[12px] text-[var(--destructive)]">{err}</p>}
+              </div>
+            );
+          })}
+
+          {submitError && (
+            <div
+              role="alert"
+              className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]"
+            >
+              {submitError}
+            </div>
+          )}
+
+          <div className="pt-2 flex gap-2">
+            <Button type="submit" variant="primary" disabled={submit.isPending}>
+              {submit.isPending ? 'Submitting…' : 'Submit'}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => navigate(`/cases/${caseId}`)}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

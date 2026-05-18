@@ -68,6 +68,9 @@ else
 fi
 
 if [[ "$run_frontend" == "1" ]]; then
+  # Kept in sync with .github/workflows/ci.yml. Build covers typecheck
+  # (`tsc -b && vite build`); `vitest run --passWithNoTests` activates the gate
+  # the moment a test lands.
   echo "pre-push: frontend — npm ci + lint + format:check + test + build"
   (
     cd frontend

@@ -17,9 +17,7 @@ export function renderFieldValue(field: FieldDefinition, value: unknown): ReactE
   }
 
   if (field.type === 'file') {
-    return (
-      <span className="text-[var(--muted-foreground)]">{t('properties.file.placeholder')}</span>
-    );
+    return <span className="text-[var(--muted-foreground)]">{t('properties.file.placeholder')}</span>;
   }
 
   return <span>{formatFieldValue(field, value)}</span>;

@@ -1,152 +1,164 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
 import { ApiError } from '@/api/client';
-import { Alert } from '@/components/ui/Alert';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/Card';
-import { FormField } from '@/components/ui/FormField';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { MutationButton, type MutationButtonState } from '@/components/ui/MutationButton';
-import { t } from '@/i18n';
-import { loginSchema, type LoginValues } from '@/pages/login/loginSchema';
 import { useAuthStore } from '@/stores/authStore';
 
-export function safeReturnTo(value: string | null): string {
-  if (!value) return '/cases';
-  // Parse against the current origin; this normalizes every encoding and
-  // backslash/whitespace edge case that ad-hoc `startsWith` checks miss.
-  // Reject anything that resolves to a different origin, and bounce the
-  // `/login` self-reference so we can't recursively redirect users back
-  // to the login screen.
-  let url: URL;
-  try {
-    url = new URL(value, window.location.origin);
-  } catch {
-    return '/cases';
-  }
-  if (url.origin !== window.location.origin) return '/cases';
-  if (url.pathname === '/login') return '/cases';
-  return url.pathname + url.search + url.hash;
-}
+const schema = z.object({
+  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
+});
 
-/**
- * Story 2.7 AC11 — LoginPage retrofitted to RHF + Zod. The reference pattern the case-creation
- * dialog inherits. {@code MutationButton} drives the 4-state visual; the existing 1-3 auth
- * envelope wiring (401 → invalid copy, anything else → generic copy) is unchanged.
- */
+type FormValues = z.infer<typeof schema>;
+
 export function LoginPage() {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const status = useAuthStore((s) => s.status);
   const login = useAuthStore((s) => s.login);
-  const [serverError, setServerError] = useState<{ message: string } | null>(null);
+  const error = useAuthStore((s) => s.error);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
-    shouldFocusError: true,
-    defaultValues: { email: '', password: '' },
-  });
+  const params = new URLSearchParams(location.search);
+  const returnTo = params.get('returnTo') ?? '/cases';
 
-  const state: MutationButtonState = form.formState.isSubmitting
-    ? 'confirming'
-    : form.formState.isSubmitSuccessful
-      ? 'confirmed'
-      : serverError
-        ? 'failed'
-        : 'idle';
+  useEffect(() => {
+    setSubmitError(null);
+  }, [location.search]);
 
-  async function onSubmit(values: LoginValues): Promise<void> {
-    setServerError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({ resolver: zodResolver(schema), mode: 'onBlur' });
+
+  if (status === 'authenticated') {
+    return <Navigate to={returnTo} replace />;
+  }
+
+  const onSubmit = async (values: FormValues) => {
+    setSubmitError(null);
     try {
       await login(values.email, values.password);
-      navigate(safeReturnTo(params.get('returnTo')), { replace: true });
+      navigate(returnTo, { replace: true });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setServerError({ message: t('login.error.invalid') });
+        setSubmitError('Email or password is incorrect.');
       } else {
-        setServerError({ message: t('login.error.generic') });
+        setSubmitError('Sign-in failed. Please try again.');
       }
     }
-  }
+  };
 
   return (
-    <Card className="w-full max-w-md bg-[var(--card)]">
-      <CardHeader>
-        <div className="flex items-center gap-[var(--space-3)]">
-          <svg
-            viewBox="0 0 32 32"
-            xmlns="http://www.w3.org/2000/svg"
-            role="img"
-            aria-label={t('app.brandName')}
-            className="size-9 shrink-0"
+    <main className="min-h-screen grid lg:grid-cols-2 bg-background">
+      {/* Left: visual */}
+      <aside
+        className="hidden lg:flex flex-col justify-between p-10 text-white"
+        style={{
+          background: 'linear-gradient(135deg, #0B1437 0%, #1e3a8a 50%, #3b5bdb 100%)',
+        }}
+      >
+        <div className="flex items-center gap-2 font-heading text-lg font-semibold">
+          <span
+            className="grid size-7 place-items-center rounded-md text-white font-bold"
+            style={{ background: 'rgba(255,255,255,0.15)' }}
           >
-            <rect width="32" height="32" rx="7" fill="var(--secondary)" />
-            <path
-              d="M6 9.5l3.6 13h2.8L15 14l3.6 8.5h2.8L25 9.5h-3l-2 8.5L17.3 9.5h-2.6L12 18.1 9.7 9.5H6z"
-              fill="var(--brand-navy)"
-            />
-          </svg>
-          <p className="font-heading text-2xl font-bold text-[var(--brand-navy)]">
-            {t('app.brandName')}
+            W
+          </span>
+          WKS Platform
+        </div>
+        <div className="max-w-md">
+          <h1 className="text-4xl font-heading font-semibold leading-tight">
+            Case management,
+            <br />
+            engineered for SIs.
+          </h1>
+          <p className="mt-4 text-white/70 text-[14px] leading-relaxed">
+            Configure case types in YAML, model workflows in BPMN, and ship branded portals to your customers
+            in days, not months.
           </p>
         </div>
-        <h1 className="mt-[var(--space-3)] text-lg font-medium text-[var(--foreground)]">
-          {t('login.title')}
-        </h1>
-        <p className="mt-[var(--space-1)] text-sm text-[var(--muted-foreground)]">
-          {t('login.tagline')}
-        </p>
-      </CardHeader>
-      <FormProvider {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          autoComplete="on"
-          noValidate
-          aria-describedby={serverError ? 'login-error' : undefined}
-        >
-          <CardContent className="flex flex-col gap-[var(--space-4)]">
-            <FormField<LoginValues> name="email" label={t('login.email')} required>
-              {(field) => (
-                <Input
-                  type="email"
-                  autoComplete="username"
-                  disabled={state === 'confirming'}
-                  {...field}
-                />
-              )}
-            </FormField>
-            <FormField<LoginValues> name="password" label={t('login.password')} required>
-              {(field) => (
-                <Input
-                  type="password"
-                  autoComplete="current-password"
-                  disabled={state === 'confirming'}
-                  {...field}
-                />
-              )}
-            </FormField>
-            {serverError ? (
-              <Alert id="login-error" variant="destructive" className="py-[var(--space-2)] text-xs">
-                {serverError.message}
-              </Alert>
-            ) : null}
-          </CardContent>
-          <CardFooter>
-            <MutationButton
-              state={state}
-              className="w-full"
-              confirmingLabel={t('login.submitting')}
-              confirmedLabel={t('login.confirmed')}
-              failedLabel={t('common.lifecycle.failed')}
+        <div className="text-[12px] text-white/50">v0.1 · OSS · Apache 2.0</div>
+      </aside>
+
+      {/* Right: form */}
+      <section className="flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          <div className="mb-7 lg:hidden flex items-center gap-2 font-heading text-lg font-semibold">
+            <span
+              className="grid size-7 place-items-center rounded-md text-white font-bold"
+              style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))' }}
             >
-              {t('login.submit')}
-            </MutationButton>
-          </CardFooter>
-        </form>
-      </FormProvider>
-    </Card>
+              W
+            </span>
+            WKS Platform
+          </div>
+          <h2 className="font-heading text-2xl font-semibold">Welcome back</h2>
+          <p className="text-foreground-muted text-[13px] mt-1">Sign in to your workspace</p>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-3" noValidate>
+            <div>
+              <label htmlFor="email" className="block text-[12px] font-medium mb-1.5">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                autoFocus
+                aria-invalid={!!errors.email}
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="mt-1 text-[12px] text-[var(--destructive)]">{errors.email.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-[12px] font-medium mb-1.5">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                aria-invalid={!!errors.password}
+                {...register('password')}
+              />
+              {errors.password && (
+                <p className="mt-1 text-[12px] text-[var(--destructive)]">{errors.password.message}</p>
+              )}
+            </div>
+
+            {submitError && (
+              <div
+                role="alert"
+                className="rounded-md border border-[var(--destructive)] bg-[var(--destructive-soft)] px-3 py-2 text-[12px] text-[var(--destructive)]"
+              >
+                {submitError}
+              </div>
+            )}
+            {!submitError && error === 'unexpected' && (
+              <div role="alert" className="text-[12px] text-[var(--destructive)]">
+                Sign-in failed. Please try again.
+              </div>
+            )}
+
+            <Button type="submit" variant="primary" size="lg" disabled={isSubmitting} className="w-full mt-1">
+              {isSubmitting ? 'Signing in…' : 'Sign in'}
+            </Button>
+          </form>
+
+          <p className="mt-8 text-[11px] text-foreground-subtle text-center">
+            By signing in you agree to the Acceptable Use Policy.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -3,20 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="WKS Platform — open-source case management for system integrators." />
+    <meta name="description" content="WKS Platform — case management." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#0B1437" />
-    <title>WKS Platform v2</title>
-    <!-- Story 14.5: runtime CSS theme override. The browser fetches /api/theme.css at startup;
-         a 204 (no file configured) is handled silently — no JS required. SI developers can
-         override :root variables (--primary, --secondary, --brand-navy, --font-heading,
-         --font-body) in the file served at WKS_THEME_CSS_PATH to brand the platform without
-         rebuilding the image.
-         NOTE: the Vite plugin 'theme-link-last' (vite.config.ts) moves this link to just before
-         the closing head tag in the production build, so it loads AFTER bundled CSS and wins the :root cascade. -->
-    <link rel="stylesheet" href="/api/theme.css" />
+    <title>WKS Platform</title>
   </head>
   <body>
     <div id="root"></div>

@@ -1,94 +1,83 @@
-import { createBrowserRouter, Navigate, Outlet, useSearchParams } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import { NotFoundPage } from '@/components/errors/NotFoundPage';
-import { AppShell } from '@/components/layout/AppShell';
-import { LoginLayout } from '@/components/layout/LoginLayout';
-import { RequireAuth } from '@/components/routing/RequireAuth';
-import { RootRedirect } from '@/components/routing/RootRedirect';
+import { AppShell } from '@/components/chrome/AppShell';
+import { Spinner } from '@/components/ui/Spinner';
 import { AdminPage } from '@/pages/AdminPage';
 import { CasesPage } from '@/pages/CasesPage';
-import { DevConsolePage } from '@/pages/DevConsolePage';
+import { CaseDetailPage } from '@/pages/CaseDetailPage';
+import { DashboardPage } from '@/pages/DashboardPage';
 import { FormPage } from '@/pages/FormPage';
 import { LicenseStatusPage } from '@/pages/LicenseStatusPage';
-import { LoginPage, safeReturnTo } from '@/pages/LoginPage';
+import { LoginPage } from '@/pages/LoginPage';
 import { MappingInspectorPage } from '@/pages/MappingInspectorPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 import { TasksPage } from '@/pages/TasksPage';
 import { useAuthStore } from '@/stores/authStore';
 
-function LoginGate() {
+function RootRedirect() {
   const status = useAuthStore((s) => s.status);
-  const [params] = useSearchParams();
-  if (status === 'authenticated') {
-    // Honor `?returnTo` when an already-authenticated user hits /login,
-    // so deep-link flows (e.g. copy/paste /login?returnTo=/admin) land
-    // on the intended page rather than defaulting to /cases.
-    return <Navigate to={safeReturnTo(params.get('returnTo'))} replace />;
+  if (status === 'pending') {
+    return (
+      <div className="grid min-h-screen place-items-center">
+        <Spinner className="size-6" />
+      </div>
+    );
+  }
+  return <Navigate to={status === 'authenticated' ? '/cases' : '/login'} replace />;
+}
+
+function RequireAuth({ requiredRole }: { requiredRole?: string }) {
+  const status = useAuthStore((s) => s.status);
+  const user = useAuthStore((s) => s.user);
+  const location = useLocation();
+  if (status === 'pending') {
+    return (
+      <div className="grid min-h-screen place-items-center">
+        <Spinner className="size-6" />
+      </div>
+    );
+  }
+  if (status !== 'authenticated' || !user) {
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?returnTo=${returnTo}`} replace />;
+  }
+  if (requiredRole && !user.roles.includes(requiredRole)) {
+    return <Navigate to="/cases" replace />;
   }
   return <Outlet />;
 }
 
 export const router = createBrowserRouter([
   { path: '/', element: <RootRedirect /> },
+  { path: '/login', element: <LoginPage /> },
   {
-    element: <LoginLayout />,
+    element: <RequireAuth />,
     children: [
       {
-        element: <LoginGate />,
-        children: [{ path: '/login', element: <LoginPage /> }],
+        element: <AppShell />,
+        children: [
+          { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/cases', element: <CasesPage /> },
+          { path: '/cases/:caseId', element: <CasesPage /> },
+          { path: '/cases/:caseId/full', element: <CaseDetailPage /> },
+          { path: '/cases/:caseId/forms/:formId', element: <FormPage /> },
+          { path: '/tasks', element: <TasksPage /> },
+        ],
       },
     ],
   },
   {
-    element: (
-      <RequireAuth>
-        <AppShell />
-      </RequireAuth>
-    ),
+    element: <RequireAuth requiredRole="admin" />,
     children: [
-      { path: '/cases', element: <CasesPage /> },
-      { path: '/cases/:caseId', element: <CasesPage /> },
-      // Story 5.2 — single-page form renderer route.
-      { path: '/cases/:caseId/forms/:formId', element: <FormPage /> },
-      { path: '/tasks', element: <TasksPage /> },
       {
-        path: '/admin',
-        element: (
-          <RequireAuth requiredRole="admin">
-            <AdminPage />
-          </RequireAuth>
-        ),
+        element: <AppShell />,
+        children: [
+          { path: '/admin', element: <AdminPage /> },
+          { path: '/admin/license', element: <LicenseStatusPage /> },
+          { path: '/admin/mapping-inspector/:caseTypeId', element: <MappingInspectorPage /> },
+        ],
       },
-      {
-        path: '/admin/license',
-        element: (
-          <RequireAuth requiredRole="admin">
-            <LicenseStatusPage />
-          </RequireAuth>
-        ),
-      },
-      // Story 4.6 — Admin Mapping Inspector (read-only).
-      {
-        path: '/admin/mapping-inspector/:caseTypeId',
-        element: (
-          <RequireAuth requiredRole="admin">
-            <MappingInspectorPage />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: '/dev',
-        element: (
-          <RequireAuth requiredRole="developer">
-            <DevConsolePage />
-          </RequireAuth>
-        ),
-      },
-      // Catch-all is nested under AppShell so authenticated 404s keep
-      // the sidebar + topbar chrome (AC #20). Unauthenticated users
-      // flow through RequireAuth → /login?returnTo=<path> before ever
-      // reaching this route, so no separate unauthenticated 404 is
-      // needed (they land on the login screen instead).
-      { path: '*', element: <NotFoundPage /> },
     ],
   },
+  { path: '*', element: <NotFoundPage /> },
 ]);

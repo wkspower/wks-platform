@@ -1,206 +1,83 @@
-import type { LicenseStatus } from '@/api/license';
-import { DeferredBadge } from '@/components/license/DeferredBadge';
-import { Button } from '@/components/ui/Button';
-import { ErrorState } from '@/components/ui/ErrorState';
-import { useLicenseStatus } from '@/hooks/useLicenseStatus';
-import { t } from '@/i18n';
-import { formatDate } from '@/lib/formatDate';
+import { useQuery } from '@tanstack/react-query';
+import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-/**
- * Feature keys whose implementation is deferred to a future story.
- * These rows show a Deferred badge in the feature table to set honest expectations.
- * Story 7-6 AC-5.
- */
-const DEFERRED_FEATURES: Record<string, string> = {
-  'audit.export': '15-7-audit-export-polish',
-  'audit.checksums': '15-N-audit-checksums',
-};
-
-// ---------------------------------------------------------------------------
-// Tier badge — color-coded with mandatory text label (AC4: no color-only)
-// ---------------------------------------------------------------------------
-
-const TIER_STYLES: Record<string, string> = {
-  oss: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
-  team: 'bg-[var(--secondary)]/15 text-[var(--secondary)]',
-  enterprise: 'bg-[var(--primary)]/15 text-[var(--primary)]',
-  demo: 'bg-[var(--warning)]/15 text-[var(--warning)]',
-};
-
-function TierBadge({ tier }: { tier: string }) {
-  const style = TIER_STYLES[tier] ?? TIER_STYLES['oss'];
-  const label = t(`license.tier.${tier}` as Parameters<typeof t>[0]) ?? tier.toUpperCase();
-  return (
-    <span
-      className={`inline-flex items-center rounded-[var(--radius-sm)] px-2 py-0.5 text-xs font-semibold ${style}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// State chip
-// ---------------------------------------------------------------------------
-
-const STATE_STYLES: Record<string, string> = {
-  valid: 'bg-[var(--success)]/15 text-[var(--success)]',
-  oss: 'bg-[var(--muted)] text-[var(--muted-foreground)]',
-  expired: 'bg-[var(--warning)]/15 text-[var(--warning)]',
-  degraded: 'bg-[var(--warning)]/15 text-[var(--warning)]',
-};
-
-function StateChip({ state }: { state: LicenseStatus['state'] }) {
-  const style = STATE_STYLES[state] ?? STATE_STYLES['oss'];
-  const label = t(`license.state.${state}` as Parameters<typeof t>[0]) ?? state;
-  return (
-    <span
-      className={`inline-flex items-center rounded-[var(--radius-sm)] px-2 py-0.5 text-xs font-medium ${style}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Label/value row
-// ---------------------------------------------------------------------------
-
-function LabelValue({ label, value, title }: { label: string; value: string; title?: string }) {
-  return (
-    <div className="flex flex-col gap-[var(--space-1)] sm:flex-row sm:items-baseline sm:gap-[var(--space-4)]">
-      <dt className="w-40 shrink-0 text-sm font-medium text-[var(--muted-foreground)]">{label}</dt>
-      <dd className="text-sm text-[var(--foreground)]" title={title}>
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// LicenseStatusPage
-// ---------------------------------------------------------------------------
+import { getLicenseFeatures, getLicenseStatus } from '@/api/license';
+import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
+import { formatDateTime } from '@/lib/formatDate';
 
 export function LicenseStatusPage() {
-  const { status, features, loading, error, retry } = useLicenseStatus();
+  const status = useQuery({ queryKey: ['license', 'status'], queryFn: () => getLicenseStatus() });
+  const features = useQuery({ queryKey: ['license', 'features'], queryFn: () => getLicenseFeatures() });
 
-  if (loading) {
+  if (status.isLoading || features.isLoading) {
     return (
-      <section aria-label={t('page.admin.license.title')}>
-        <h1 className="font-heading text-2xl font-semibold">{t('page.admin.license.title')}</h1>
-        <p className="mt-[var(--space-4)] text-sm text-[var(--muted-foreground)]">
-          {t('license.status.loading')}
-        </p>
-      </section>
+      <div className="grid place-items-center py-20">
+        <Spinner className="size-6" />
+      </div>
     );
   }
-
-  if (error || status === null) {
-    return (
-      <section aria-label={t('page.admin.license.title')}>
-        <h1 className="font-heading text-2xl font-semibold">{t('page.admin.license.title')}</h1>
-        <ErrorState
-          className="mt-[var(--space-6)]"
-          headline={t('license.status.error')}
-          action={
-            <Button variant="secondary" onClick={retry}>
-              {t('license.status.retry')}
-            </Button>
-          }
-        />
-      </section>
-    );
+  if (status.isError || !status.data) {
+    return <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load license.</div>;
   }
-
-  const holderDisplay = status.licenseHolder ?? t('license.status.holder.oss');
-  const expiresDisplay = status.expiresAt
-    ? formatDate(status.expiresAt)
-    : t('license.status.expires.never');
-  const fingerprintShort = status.publicKeyFingerprint.slice(0, 16);
-  const fingerprintFull = status.publicKeyFingerprint;
+  const s = status.data;
+  const Icon = s.state === 'valid' ? ShieldCheck : s.state === 'oss' ? Shield : ShieldAlert;
+  const tone = s.state === 'valid' || s.state === 'oss' ? 'success' : 'danger';
 
   return (
-    <section aria-label={t('page.admin.license.title')}>
-      <h1 className="font-heading text-2xl font-semibold">{t('page.admin.license.title')}</h1>
+    <div className="px-6 py-6 max-w-3xl">
+      <h1 className="font-heading text-2xl font-semibold">License</h1>
+      <p className="text-foreground-muted text-[13px] mt-0.5">Active tier and feature gates.</p>
 
-      {/* Status card */}
-      <div className="mt-[var(--space-6)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] p-[var(--space-6)]">
-        <div className="mb-[var(--space-4)] flex items-center gap-[var(--space-3)]">
-          <TierBadge tier={status.tier} />
-          <StateChip state={status.state} />
-        </div>
-        <dl className="flex flex-col gap-[var(--space-3)]">
-          <LabelValue label={t('license.status.holder')} value={holderDisplay} />
-          <LabelValue label={t('license.status.expires')} value={expiresDisplay} />
-          <LabelValue
-            label={t('license.status.fingerprint')}
-            value={fingerprintShort}
-            title={fingerprintFull}
+      <div className="mt-5 rounded-lg border border-border bg-canvas p-4">
+        <div className="flex items-center gap-3">
+          <Icon
+            className={`size-7 ${tone === 'success' ? 'text-[var(--success)]' : 'text-[var(--destructive)]'}`}
           />
-        </dl>
-      </div>
-
-      {/* Feature list */}
-      {features !== null && (
-        <div className="mt-[var(--space-6)]">
-          <h2 className="font-heading text-lg font-semibold">
-            {t('license.status.features.title')}
-          </h2>
-          <div className="mt-[var(--space-4)] overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)]">
-            <table className="w-full text-sm" aria-label={t('license.status.features.tableLabel')}>
-              <thead className="bg-[var(--muted)] text-[var(--muted-foreground)]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium">
-                    {t('license.status.features.col.feature')}
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium">
-                    {t('license.status.features.col.description')}
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium">
-                    {t('license.status.features.col.tiers')}
-                  </th>
-                  <th className="px-4 py-3 text-center font-medium">
-                    {t('license.status.features.col.active')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
-                {features.features.map((f) => {
-                  const deferredTrackingStory = DEFERRED_FEATURES[f.key];
-                  return (
-                    <tr key={f.key}>
-                      <td className="px-4 py-3">
-                        <code className="rounded bg-[var(--muted)] px-1 py-0.5 text-xs">
-                          {f.key}
-                        </code>
-                      </td>
-                      <td className="px-4 py-3 text-[var(--foreground)]">
-                        {f.description}
-                        {deferredTrackingStory !== undefined && (
-                          <DeferredBadge trackingStory={deferredTrackingStory} />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-[var(--muted-foreground)]">
-                        {f.bundleTiers.join(', ')}
-                      </td>
-                      <td
-                        className="px-4 py-3 text-center"
-                        aria-label={
-                          f.enabled
-                            ? t('license.status.features.enabled')
-                            : t('license.status.features.disabled')
-                        }
-                      >
-                        {f.enabled ? '✓' : '✗'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div>
+            <div className="font-semibold text-[14px] capitalize">{s.state}</div>
+            <div className="text-[12px] text-foreground-muted">
+              Tier <span className="font-medium text-foreground">{s.tier}</span>
+              {s.licenseHolder && <> · Issued to {s.licenseHolder}</>}
+              {s.expiresAt && <> · Expires {formatDateTime(s.expiresAt)}</>}
+            </div>
           </div>
         </div>
-      )}
-    </section>
+      </div>
+
+      <h2 className="mt-7 mb-2 text-[11px] uppercase tracking-wider text-foreground-subtle font-medium">
+        Features ({features.data?.features.length ?? 0})
+      </h2>
+      <div className="rounded-lg border border-border bg-canvas overflow-hidden">
+        <table className="w-full text-[13px]">
+          <thead className="bg-background">
+            <tr className="text-foreground-subtle text-[11px] uppercase tracking-wider">
+              <th className="text-left font-medium px-3 py-2">Key</th>
+              <th className="text-left font-medium px-3 py-2">Description</th>
+              <th className="text-left font-medium px-3 py-2">Tiers</th>
+              <th className="text-left font-medium px-3 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {features.data?.features.map((f) => (
+              <tr key={f.key} className="border-t border-divider">
+                <td className="px-3 py-2 font-mono text-[12px]">{f.key}</td>
+                <td className="px-3 py-2 text-foreground-muted">{f.description}</td>
+                <td className="px-3 py-2">
+                  <div className="flex flex-wrap gap-1">
+                    {f.bundleTiers.map((t) => (
+                      <Badge key={t}>{t}</Badge>
+                    ))}
+                  </div>
+                </td>
+                <td className="px-3 py-2">
+                  <Badge tone={f.enabled ? 'success' : 'neutral'}>{f.enabled ? 'Enabled' : 'Disabled'}</Badge>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

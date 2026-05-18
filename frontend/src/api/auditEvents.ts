@@ -9,8 +9,6 @@ import { apiFetch } from './client';
  */
 export async function getCaseAuditEvents(caseId: string, limit?: number): Promise<AuditEventList> {
   const qs = limit !== undefined ? `?limit=${encodeURIComponent(String(limit))}` : '';
-  const result = await apiFetch<AuditEventList>(
-    `/api/cases/${encodeURIComponent(caseId)}/audit-events${qs}`,
-  );
+  const result = await apiFetch<AuditEventList>(`/api/cases/${encodeURIComponent(caseId)}/audit-events${qs}`);
   return result.data;
 }

@@ -1,28 +1,16 @@
-import { Loader2 } from 'lucide-react';
-
 import { cn } from '@/lib/cn';
 
-export interface SpinnerProps {
-  /** Tailwind size utility, eg `size-4`, `size-5`. Defaults to `size-5`. */
-  className?: string;
-  /** Optional accessible label. Defaults to a visually hidden "Loading". */
-  label?: string;
-}
-
-/**
- * Single spinner primitive. The hand-rolled `rounded-full border-2 border-...
- * border-t-transparent` ring used to live in five places — they drifted on
- * thickness and animation timing. Consumers now compose this with their own
- * sizing utility.
- */
-export function Spinner({ className, label = 'Loading' }: SpinnerProps) {
+export function Spinner({ className }: { className?: string }) {
   return (
-    <>
-      <Loader2
-        aria-hidden
-        className={cn('animate-spin text-[var(--primary)]', className ?? 'size-5')}
-      />
-      <span className="sr-only">{label}</span>
-    </>
+    <svg
+      className={cn('size-4 animate-spin text-foreground-subtle', className)}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+      <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+    </svg>
   );
 }

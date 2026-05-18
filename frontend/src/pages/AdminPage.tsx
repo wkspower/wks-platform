@@ -1,96 +1,113 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, FileCog, Shield, Workflow } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
+import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
 import { useCaseTypes } from '@/hooks/useCaseTypes';
-import { t } from '@/i18n';
 
 export function AdminPage() {
-  const caseTypesQuery = useCaseTypes();
-  const caseTypes = caseTypesQuery.data ?? null;
+  const { data: types, isLoading } = useCaseTypes();
 
   return (
-    <section>
-      <h1 className="font-heading text-2xl font-semibold">{t('page.admin.title')}</h1>
-      <nav aria-label={t('page.admin.nav')} className="mt-[var(--space-4)]">
-        <Link
-          to="/admin/license"
-          className="inline-flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-4)] py-[var(--space-3)] text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)] focus-visible:ring-offset-2"
-        >
-          {t('page.admin.license.link')}
-        </Link>
-      </nav>
+    <div className="px-6 py-6 max-w-5xl">
+      <h1 className="font-heading text-2xl font-semibold">Admin</h1>
+      <p className="text-foreground-muted text-[13px] mt-0.5">Manage case types, deployments, and license.</p>
 
-      {/* Story 4.6 AC6 — Mapping Inspector section */}
-      <section aria-label={t('admin.mappingInspector.list.title')} className="mt-[var(--space-8)]">
-        <h2 className="font-heading text-lg font-semibold">
-          {t('admin.mappingInspector.list.title')}
-        </h2>
-        <p className="mt-[var(--space-1)] text-sm text-[var(--muted-foreground)]">
-          {t('admin.mappingInspector.list.subtitle')}
-        </p>
-        {caseTypes && caseTypes.length > 0 ? (
-          <ul
-            className="mt-[var(--space-3)] flex flex-wrap gap-[var(--space-2)]"
-            data-testid="mapping-inspector-case-type-list"
-          >
-            {caseTypes.map((ct) => (
-              <li key={ct.id}>
+      <div className="grid lg:grid-cols-3 gap-3 mt-5">
+        <Card to="/admin/license" Icon={Shield} title="License">
+          View status, tier, and feature gates.
+        </Card>
+        <Card href="/swagger-ui/index.html" external Icon={FileCog} title="API docs">
+          OpenAPI docs (springdoc) for backend endpoints.
+        </Card>
+        <Card to="/admin" Icon={Workflow} title="BPMN deploy" disabled>
+          Multipart deploy of case-type YAML + BPMN — coming soon.
+        </Card>
+      </div>
+
+      <h2 className="mt-8 mb-2 text-[11px] uppercase tracking-wider text-foreground-subtle font-medium">
+        Deployed case types
+      </h2>
+      <div className="rounded-lg border border-border bg-canvas overflow-hidden">
+        {isLoading ? (
+          <div className="grid place-items-center py-10">
+            <Spinner />
+          </div>
+        ) : !types || types.length === 0 ? (
+          <p className="px-4 py-8 text-center text-[13px] text-foreground-muted">No case types deployed.</p>
+        ) : (
+          <ul className="divide-y divide-divider">
+            {types.map((t) => (
+              <li
+                key={t.id}
+                className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-hover"
+              >
+                <div>
+                  <div className="font-medium text-[13px]">{t.displayName}</div>
+                  <div className="text-[11px] text-foreground-muted mt-0.5 flex items-center gap-1.5">
+                    <span className="font-mono">{t.id}</span>
+                    <Badge>v{t.version}</Badge>
+                    <span>
+                      · {t.statusCount} statuses · {t.fieldCount} fields
+                    </span>
+                  </div>
+                </div>
                 <Link
-                  to={`/admin/mapping-inspector/${encodeURIComponent(ct.id)}`}
-                  className="inline-flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-3)] py-[var(--space-2)] text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)] focus-visible:ring-offset-2"
+                  to={`/admin/mapping-inspector/${encodeURIComponent(t.id)}`}
+                  className="inline-flex items-center gap-1 text-[12px] text-[var(--primary)] hover:underline"
                 >
-                  <span>{ct.displayName}</span>
-                  <code className="text-xs text-[var(--muted-foreground)]">{ct.id}</code>
+                  Mapping inspector <ChevronRight className="size-3" />
                 </Link>
               </li>
             ))}
           </ul>
-        ) : (
-          <ManualCaseTypeIdForm />
         )}
-      </section>
-    </section>
+      </div>
+    </div>
   );
 }
 
-/**
- * Story 4.6 AC6 fallback — when the case-type listing endpoint returns no rows (or fails),
- * the admin can still navigate to the inspector by typing the caseTypeId manually. Documented
- * as a Phase-0 minimum to be upgraded by a future admin-list-endpoint story.
- */
-function ManualCaseTypeIdForm() {
-  const [value, setValue] = useState('');
-  const navigate = useNavigate();
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const trimmed = value.trim();
-    if (trimmed === '') {
-      return;
-    }
-    navigate(`/admin/mapping-inspector/${encodeURIComponent(trimmed)}`);
-  };
-  return (
-    <form
-      onSubmit={onSubmit}
-      className="mt-[var(--space-3)] flex max-w-md flex-col gap-[var(--space-2)] sm:flex-row sm:items-end"
-      data-testid="mapping-inspector-fallback-form"
-    >
-      <label className="flex flex-col gap-[var(--space-1)] text-sm">
-        <span className="font-medium">{t('admin.mappingInspector.list.fallback.label')}</span>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={t('admin.mappingInspector.list.fallback.placeholder')}
-          className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-3)] py-[var(--space-2)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)]"
-        />
-      </label>
-      <button
-        type="submit"
-        className="inline-flex items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-4)] py-[var(--space-2)] text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--secondary)]"
+function Card({
+  to,
+  href,
+  external,
+  Icon,
+  title,
+  children,
+  disabled,
+}: {
+  to?: string;
+  href?: string;
+  external?: boolean;
+  Icon: typeof Shield;
+  title: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+}) {
+  const cls =
+    'block rounded-lg border border-border bg-canvas p-4 hover:border-border-strong transition-colors';
+  const inner = (
+    <>
+      <Icon className="size-4 text-[var(--primary)]" />
+      <div className="mt-1.5 font-semibold text-[13px]">{title}</div>
+      <p className="text-[12px] text-foreground-muted mt-0.5">{children}</p>
+    </>
+  );
+  if (disabled) return <div className={`${cls} opacity-60 pointer-events-none`}>{inner}</div>;
+  if (href)
+    return (
+      <a
+        className={cls}
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noreferrer' : undefined}
       >
-        {t('admin.mappingInspector.list.fallback.submit')}
-      </button>
-    </form>
+        {inner}
+      </a>
+    );
+  return (
+    <Link to={to ?? '#'} className={cls}>
+      {inner}
+    </Link>
   );
 }

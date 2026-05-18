@@ -1,224 +1,121 @@
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
-import {
-  fetchMappingInspector,
-  fetchRecentSignals,
-  type ElementMappingRow,
-  type RecentSignalView,
-} from '@/api/mappingInspector';
-import { Table, TBody, Td, Th, THead, Tr } from '@/components/ui/Table';
-import { t } from '@/i18n';
+import { fetchMappingInspector, fetchRecentSignals } from '@/api/mappingInspector';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
+import { formatDateTime } from '@/lib/formatDate';
 
-const MAPPING_ANCHOR_ID = 'routing-block';
-const POLL_INTERVAL_MS = 5_000;
-
-/**
- * Story 4.6 AC4 — read-only admin Mapping Inspector page. Two panels:
- *   1. Mapping table — projected from /mapping-inspector (one row per declared element).
- *   2. Recent signals — projected from /recent-signals, polled every 5 s.
- * Rows with errorCode === 'WKS-MAP-404' get a warning treatment + a "view mapping" deep
- * link that smooth-scrolls to the mapping table.
- *
- * No edit affordance — per epics §4.6 the inspector is read-only; mapping edits live in
- * the Dev Console (Epic 11).
- */
 export function MappingInspectorPage() {
   const { caseTypeId } = useParams<{ caseTypeId: string }>();
-  const id = caseTypeId ?? '';
-
-  const mappingQuery = useQuery({
-    queryKey: ['mappingInspector', 'mapping', id],
-    queryFn: ({ signal }) => fetchMappingInspector(id, signal),
-    enabled: id !== '',
+  const mapping = useQuery({
+    queryKey: ['mapping', caseTypeId],
+    queryFn: () => fetchMappingInspector(caseTypeId!),
+    enabled: !!caseTypeId,
+  });
+  const signals = useQuery({
+    queryKey: ['signals', caseTypeId],
+    queryFn: () => fetchRecentSignals(caseTypeId!),
+    enabled: !!caseTypeId,
   });
 
-  const signalsQuery = useQuery({
-    queryKey: ['mappingInspector', 'signals', id],
-    queryFn: ({ signal }) => fetchRecentSignals(id, signal),
-    enabled: id !== '',
-    refetchInterval: POLL_INTERVAL_MS,
-    refetchIntervalInBackground: false,
-  });
-
-  const handleDeepLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const target = document.getElementById(MAPPING_ANCHOR_ID);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  if (mappingQuery.isLoading) {
+  if (mapping.isLoading)
     return (
-      <section aria-label={t('admin.mappingInspector.title')}>
-        <h1 className="font-heading text-2xl font-semibold">{t('admin.mappingInspector.title')}</h1>
-        <p className="mt-[var(--space-4)] text-sm text-[var(--muted-foreground)]">
-          {t('admin.mappingInspector.loading')}
-        </p>
-      </section>
+      <div className="grid place-items-center py-20">
+        <Spinner />
+      </div>
     );
+  if (mapping.isError || !mapping.data) {
+    return <div className="px-6 py-12 text-center text-[var(--destructive)]">Failed to load mapping.</div>;
   }
-
-  if (mappingQuery.isError) {
-    return (
-      <section aria-label={t('admin.mappingInspector.title')}>
-        <h1 className="font-heading text-2xl font-semibold">{t('admin.mappingInspector.title')}</h1>
-        <p className="mt-[var(--space-4)] text-sm text-[var(--warning)]">
-          {t('admin.mappingInspector.error')}
-        </p>
-      </section>
-    );
-  }
-
-  const mapping = mappingQuery.data;
-  const signals = signalsQuery.data?.signals ?? [];
+  const m = mapping.data;
 
   return (
-    <section aria-label={t('admin.mappingInspector.title')}>
-      <header className="mb-[var(--space-6)]">
-        <h1 className="font-heading text-2xl font-semibold">{t('admin.mappingInspector.title')}</h1>
-        <p className="mt-[var(--space-1)] text-sm text-[var(--muted-foreground)]">
-          {t('admin.mappingInspector.subtitle')}
-        </p>
-        {mapping && (
-          <div className="mt-[var(--space-3)] flex flex-wrap items-center gap-[var(--space-3)] text-sm">
-            <code className="rounded bg-[var(--muted)] px-2 py-0.5 text-xs">
-              {mapping.caseTypeId}
-            </code>
-            <span className="text-[var(--muted-foreground)]">
-              {t('admin.mappingInspector.activeVersion')}{' '}
-              <span className="font-medium text-[var(--foreground)]">{mapping.version}</span>
-            </span>
-          </div>
-        )}
-        <div
-          role="note"
-          className="mt-[var(--space-4)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--muted)] px-[var(--space-3)] py-[var(--space-2)] text-xs text-[var(--muted-foreground)]"
-        >
-          {t('admin.mappingInspector.noEdit')}
-        </div>
-      </header>
+    <div className="px-6 py-6 max-w-5xl">
+      <Button asChild variant="ghost" size="xs">
+        <Link to="/admin">
+          <ArrowLeft className="size-3.5" /> Admin
+        </Link>
+      </Button>
+      <h1 className="mt-2 font-heading text-2xl font-semibold">Mapping inspector</h1>
+      <p className="text-foreground-muted text-[13px] mt-0.5">
+        <span className="font-mono">{m.caseTypeId}</span> · version {m.version}
+        {m.emptyMapping && <span className="ml-2 text-[var(--warning)]">(no mappings)</span>}
+      </p>
 
-      {/* Panel 1: mapping table */}
-      <div id={MAPPING_ANCHOR_ID} className="mb-[var(--space-8)] scroll-mt-[var(--space-6)]">
-        <h2 className="font-heading text-lg font-semibold">
-          {t('admin.mappingInspector.mapping.title')}
-        </h2>
-        {!mapping || mapping.emptyMapping ? (
-          <p className="mt-[var(--space-3)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-4)] py-[var(--space-3)] text-sm text-[var(--muted-foreground)]">
-            {t('admin.mappingInspector.empty')}
-          </p>
-        ) : (
-          mapping.attachments.map((attachment) => (
-            <div key={attachment.name} className="mt-[var(--space-4)]">
-              <h3 className="text-sm font-medium text-[var(--foreground)]">
-                {t('admin.mappingInspector.attachmentLabel')}{' '}
-                <code className="rounded bg-[var(--muted)] px-1 py-0.5 text-xs">
-                  {attachment.bpmnSource}
-                </code>
-              </h3>
-              <div className="mt-[var(--space-2)] rounded-[var(--radius-md)] border border-[var(--border)]">
-                <Table>
-                  <THead>
-                    <Tr>
-                      <Th>{t('admin.mappingInspector.mapping.col.element')}</Th>
-                      <Th>{t('admin.mappingInspector.mapping.col.effect')}</Th>
-                      <Th>{t('admin.mappingInspector.mapping.col.target')}</Th>
-                      <Th>{t('admin.mappingInspector.mapping.col.rule')}</Th>
-                    </Tr>
-                  </THead>
-                  <TBody>
-                    {attachment.elements.map((row: ElementMappingRow, idx: number) => (
-                      <Tr key={`${attachment.name}-${row.bpmnElement}-${idx}`}>
-                        <Td>
-                          <code className="text-xs">{row.bpmnElement}</code>
-                        </Td>
-                        <Td>{row.wksEffect}</Td>
-                        <Td>{row.target ?? '—'}</Td>
-                        <Td>
-                          <code className="text-xs text-[var(--muted-foreground)]">
-                            {row.rule ?? '—'}
-                          </code>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </TBody>
-                </Table>
-              </div>
+      {m.attachments.map((a) => (
+        <section key={a.name} className="mt-6">
+          <h2 className="text-[13px] font-semibold mb-2">
+            {a.name} <span className="text-foreground-muted font-normal">· {a.bpmnSource}</span>
+          </h2>
+          <div className="rounded-lg border border-border bg-canvas overflow-hidden">
+            <table className="w-full text-[13px]">
+              <thead className="bg-background text-foreground-subtle text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th className="text-left font-medium px-3 py-2">BPMN element</th>
+                  <th className="text-left font-medium px-3 py-2">Effect</th>
+                  <th className="text-left font-medium px-3 py-2">Target</th>
+                  <th className="text-left font-medium px-3 py-2">Rule</th>
+                </tr>
+              </thead>
+              <tbody>
+                {a.elements.map((e, i) => (
+                  <tr key={i} className="border-t border-divider">
+                    <td className="px-3 py-2 font-mono text-[12px]">{e.bpmnElement}</td>
+                    <td className="px-3 py-2">
+                      <Badge tone="brand">{e.wksEffect}</Badge>
+                    </td>
+                    <td className="px-3 py-2 text-foreground-muted">{e.target ?? '—'}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{e.rule ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
+
+      <section className="mt-7">
+        <h2 className="text-[13px] font-semibold mb-2">Recent signals</h2>
+        <div className="rounded-lg border border-border bg-canvas overflow-hidden">
+          {signals.isLoading ? (
+            <div className="grid place-items-center py-8">
+              <Spinner />
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Panel 2: recent signals */}
-      <div>
-        <h2 className="font-heading text-lg font-semibold">
-          {t('admin.mappingInspector.signals.title')}
-        </h2>
-        {signals.length === 0 ? (
-          <p className="mt-[var(--space-3)] rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--card)] px-[var(--space-4)] py-[var(--space-3)] text-sm text-[var(--muted-foreground)]">
-            {t('admin.mappingInspector.signals.empty')}
-          </p>
-        ) : (
-          <div className="mt-[var(--space-3)] rounded-[var(--radius-md)] border border-[var(--border)]">
-            <Table>
-              <THead>
-                <Tr>
-                  <Th>{t('admin.mappingInspector.signals.col.timestamp')}</Th>
-                  <Th>{t('admin.mappingInspector.signals.col.kind')}</Th>
-                  <Th>{t('admin.mappingInspector.signals.col.source')}</Th>
-                  <Th>{t('admin.mappingInspector.signals.col.decision')}</Th>
-                  <Th>{t('admin.mappingInspector.signals.col.effect')}</Th>
-                </Tr>
-              </THead>
-              <TBody>
-                {signals.map((s: RecentSignalView, idx: number) => {
-                  const isMiss = s.errorCode != null;
-                  return (
-                    <Tr
-                      key={`${s.timestamp}-${idx}`}
-                      data-state={isMiss ? 'warning' : undefined}
-                      className={isMiss ? 'bg-[var(--warning)]/10' : undefined}
-                      data-testid={isMiss ? 'recent-signal-row-miss' : 'recent-signal-row'}
-                    >
-                      <Td>
-                        <time dateTime={s.timestamp} className="text-xs">
-                          {s.timestamp}
-                        </time>
-                      </Td>
-                      <Td>
-                        <code className="text-xs">{s.kind}</code>
-                      </Td>
-                      <Td>
-                        <code className="text-xs">{s.source}</code>
-                      </Td>
-                      <Td>
-                        {s.errorCode === 'WKS-MAP-404' ? (
-                          <a
-                            href={`#${MAPPING_ANCHOR_ID}`}
-                            onClick={handleDeepLink}
-                            className="text-[var(--secondary)] underline hover:text-[var(--secondary)]/80"
-                            data-testid="map-404-deep-link"
-                          >
-                            {s.decision}{' '}
-                            <span className="text-xs">
-                              {t('admin.mappingInspector.signals.viewMapping')}
-                            </span>
-                          </a>
-                        ) : (
-                          s.decision
-                        )}
-                      </Td>
-                      <Td>{s.effect ?? '—'}</Td>
-                    </Tr>
-                  );
-                })}
-              </TBody>
-            </Table>
-          </div>
-        )}
-      </div>
-    </section>
+          ) : !signals.data || signals.data.signals.length === 0 ? (
+            <p className="px-4 py-6 text-center text-[13px] text-foreground-muted">No recent signals.</p>
+          ) : (
+            <table className="w-full text-[13px]">
+              <thead className="bg-background text-foreground-subtle text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th className="text-left font-medium px-3 py-2">Time</th>
+                  <th className="text-left font-medium px-3 py-2">Kind</th>
+                  <th className="text-left font-medium px-3 py-2">Source</th>
+                  <th className="text-left font-medium px-3 py-2">Decision</th>
+                  <th className="text-left font-medium px-3 py-2">Rule</th>
+                  <th className="text-left font-medium px-3 py-2">Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                {signals.data.signals.map((s, i) => (
+                  <tr key={i} className="border-t border-divider">
+                    <td className="px-3 py-2 text-foreground-muted">{formatDateTime(s.timestamp)}</td>
+                    <td className="px-3 py-2 font-mono text-[12px]">{s.kind}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{s.source}</td>
+                    <td className="px-3 py-2">
+                      <Badge tone={s.decision === 'matched-rule' ? 'success' : 'warning'}>{s.decision}</Badge>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[12px]">{s.matchedRule ?? '—'}</td>
+                    <td className="px-3 py-2">{s.effect ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

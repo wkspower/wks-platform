@@ -21,9 +21,7 @@ export interface PreviewResponse {
  * {@code GET /api/cases/{caseId}/documents} — returns list ordered by uploadedAt DESC.
  */
 export async function listDocuments(caseId: string): Promise<CaseDocument[]> {
-  const result = await apiFetch<CaseDocument[]>(
-    `/api/cases/${encodeURIComponent(caseId)}/documents`,
-  );
+  const result = await apiFetch<CaseDocument[]>(`/api/cases/${encodeURIComponent(caseId)}/documents`);
   return result.data;
 }
 
@@ -35,13 +33,10 @@ export async function listDocuments(caseId: string): Promise<CaseDocument[]> {
 export async function uploadDocument(caseId: string, file: File): Promise<CaseDocument> {
   const form = new FormData();
   form.append('file', file);
-  const result = await apiFetch<CaseDocument>(
-    `/api/cases/${encodeURIComponent(caseId)}/documents`,
-    {
-      method: 'POST',
-      body: form,
-    },
-  );
+  const result = await apiFetch<CaseDocument>(`/api/cases/${encodeURIComponent(caseId)}/documents`, {
+    method: 'POST',
+    body: form,
+  });
   return result.data;
 }
 
@@ -49,9 +44,7 @@ export async function uploadDocument(caseId: string, file: File): Promise<CaseDo
  * {@code GET /api/documents/{documentId}/preview} — returns a preview URL or download URL.
  */
 export async function getPreview(documentId: string): Promise<PreviewResponse> {
-  const result = await apiFetch<PreviewResponse>(
-    `/api/documents/${encodeURIComponent(documentId)}/preview`,
-  );
+  const result = await apiFetch<PreviewResponse>(`/api/documents/${encodeURIComponent(documentId)}/preview`);
   return result.data;
 }
 

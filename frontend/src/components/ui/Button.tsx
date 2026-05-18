@@ -4,55 +4,38 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 
 import { cn } from '@/lib/cn';
 
-export const buttonVariants = cva(
-  // Base: legible disabled state via --disabled-* tokens (replaces opacity-50,
-  // which collapses on light backgrounds to ~AAA-violating grey).
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-[var(--font-body)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-[var(--disabled-bg)] disabled:text-[var(--disabled-fg)] disabled:border-transparent',
+const button = cva(
+  'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--ring-offset)]',
   {
     variants: {
       variant: {
-        default:
-          'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 focus-visible:ring-[var(--ring)]',
-        secondary:
-          'bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary)]/90 focus-visible:ring-[var(--ring)]',
-        destructive:
-          'bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[var(--destructive)]/90 focus-visible:ring-[var(--ring-destructive)]',
-        outline:
-          'border border-[var(--border)] bg-transparent hover:bg-[var(--muted)] focus-visible:ring-[var(--ring)]',
-        ghost: 'hover:bg-[var(--muted)] text-[var(--foreground)] focus-visible:ring-[var(--ring)]',
-        link: 'text-[var(--primary)] underline-offset-4 hover:underline focus-visible:ring-[var(--ring)]',
+        primary: 'bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] shadow-xs',
+        secondary: 'bg-surface text-foreground border border-border hover:bg-surface-hover shadow-xs',
+        ghost: 'text-foreground hover:bg-surface-hover',
+        subtle: 'bg-surface-hover text-foreground hover:bg-surface-active',
+        danger: 'bg-[var(--destructive)] text-white hover:opacity-90 shadow-xs',
+        link: 'text-[var(--primary)] underline-offset-2 hover:underline',
       },
       size: {
-        sm: 'h-8 px-3 text-xs',
-        md: 'h-11 px-4',
-        lg: 'h-12 px-6 text-base',
-        icon: 'size-11',
+        xs: 'h-6 px-2 text-xs',
+        sm: 'h-7 px-2.5 text-[13px]',
+        md: 'h-8 px-3 text-[13px]',
+        lg: 'h-10 px-4 text-sm',
+        icon: 'h-7 w-7',
       },
     },
-    defaultVariants: { variant: 'default', size: 'md' },
+    defaultVariants: { variant: 'secondary', size: 'md' },
   },
 );
 
-export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof button> {
   asChild?: boolean;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, size, asChild = false, type, ...props },
-  ref,
-) {
-  const Comp = asChild ? Slot : 'button';
-  // Default real <button> elements to type="button" so a Button placed inside
-  // a <form> without an explicit type doesn't accidentally submit the form.
-  // Slot/asChild callers own their child element's type (or its absence).
-  const resolvedType = asChild ? type : (type ?? 'button');
-  return (
-    <Comp
-      ref={ref}
-      type={resolvedType}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
-});
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild, ...rest }, ref) => {
+    const Comp = asChild ? Slot : 'button';
+    return <Comp ref={ref} className={cn(button({ variant, size }), className)} {...rest} />;
+  },
+);
+Button.displayName = 'Button';

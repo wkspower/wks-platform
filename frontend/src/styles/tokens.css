@@ -1,144 +1,97 @@
-/*
- * SI Override Surface — Story 14.5
- * =================================
- * The variables below are the primary brand surface. An SI developer can override
- * any of them by mounting a CSS file at the path set by WKS_THEME_CSS_PATH. The
- * file is served at GET /api/theme.css and loaded after these defaults, so the
- * cascade applies automatically — no image rebuild or frontend recompile required.
- *
- * Minimum override set (declare as :root overrides in your theme file):
- *   --primary        Primary brand color            default indigo  (#3b5bdb)
- *   --secondary      Secondary accent               default cyan    (#22d3ee)
- *   --brand-navy     Dark sidebar/header background default navy    (#0b1437)
- *   --font-heading   Heading font-family            default Poppins
- *   --font-body      Body font-family               default Rubik
- *   --logo-url       Optional CSS background-image URL for a custom logo;
- *                    not used by default components but available for
- *                    white-label CSS rules.
- *
- * All variables bridged via the @theme inline block in index.css cascade
- * automatically into Tailwind v4 utility classes (bg-primary, text-secondary,
- * etc.) without any additional configuration.
- *
- * White-label deepening (logo swap, per-field overrides, label customization)
- * is deferred to Story 15.6.
- */
+/* Attio-inspired token system, WKS brand accents */
 :root {
-  /* Brand + semantic colors */
+  /* Neutrals — Attio uses near-white surfaces, very subtle borders */
+  --background: #fbfbfa;
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f7f7f5;
+  --surface-active: #f1f1ee;
+  --border: #ecebe7;
+  --border-strong: #d9d8d3;
+  --divider: #f1f1ee;
+
+  /* Text */
+  --foreground: #1a1a1a;
+  --foreground-muted: #6b6b6b;
+  --foreground-subtle: #9a9a96;
+  --foreground-inverse: #ffffff;
+
+  /* Brand — WKS navy/cyan */
   --primary: #3b5bdb;
+  --primary-hover: #324ec4;
   --primary-foreground: #ffffff;
+  --primary-soft: #eef1fc;
+  --primary-soft-on: #2740b0;
   --secondary: #22d3ee;
   --secondary-foreground: #0b1437;
   --brand-navy: #0b1437;
-  --sidebar-bg: #0f1729;
-  --background: #fafafa;
-  --card: #ffffff;
-  --muted: #f4f4f5;
-  --border: #e4e4e7;
-  --muted-foreground: #71717a;
-  --foreground: #09090b;
+
+  /* Sidebar — slightly off-white, Attio-style */
+  --sidebar-bg: #f7f7f5;
+  --sidebar-fg: #3c3c3a;
+  --sidebar-fg-active: #1a1a1a;
+  --sidebar-item-hover: #ecebe7;
+  --sidebar-item-active: #e3e3df;
+
+  /* Semantic */
+  --success: #10a37f;
+  --success-soft: #e6f5f0;
+  --warning: #d97706;
+  --warning-soft: #fef3e6;
   --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --warning: #b45309;
-  --success: #047857;
+  --destructive-soft: #fdecec;
   --info: #2563eb;
+  --info-soft: #e8eefd;
 
-  /* Disabled state pair — replaces ad-hoc `disabled:opacity-50` so disabled
-   * controls remain legible (opacity-50 on a white card collapses to ~AAA-violating
-   * grey on grey). */
-  --disabled-bg: #f4f4f5;
-  --disabled-fg: #a1a1aa;
-
-  /* Rings — per-intent so destructive actions get a red focus ring instead of
-   * the brand indigo (matches the destructive button colour). */
-  --ring: var(--primary);
-  --ring-destructive: var(--destructive);
-
-  /* Status palette — solid anchor (legacy callers, dot indicators) plus
-   * soft-bg / on-fg pairs for badges. Soft is the surface, -on is the readable
-   * label colour. Verified by contrast.test.ts. */
+  /* Status palette (case lifecycle) */
   --status-open: #3b82f6;
-  --status-open-soft: #dbeafe;
-  --status-open-on: #1e40af;
+  --status-open-soft: #e8eefd;
   --status-in-progress: #f59e0b;
-  --status-in-progress-soft: #fef3c7;
-  --status-in-progress-on: #92400e;
-  --status-review: #8b5cf6;
-  --status-review-soft: #ede9fe;
-  --status-review-on: #5b21b6;
-  --status-resolved: #10b981;
-  --status-resolved-soft: #d1fae5;
-  --status-resolved-on: #065f46;
-  --status-closed: #a1a1aa;
-  --status-closed-soft: #f4f4f5;
-  --status-closed-on: #3f3f46;
-  --status-escalated: #ef4444;
-  --status-escalated-soft: #fee2e2;
-  --status-escalated-on: #991b1b;
-  --status-cyan: #06b6d4;
-  --status-cyan-soft: #cffafe;
-  --status-cyan-on: #155e75;
-  --status-rose: #f43f5e;
-  --status-rose-soft: #ffe4e6;
-  --status-rose-on: #9f1239;
-  --status-indigo: #6366f1;
-  --status-indigo-soft: #e0e7ff;
-  --status-indigo-on: #3730a3;
-  --status-teal: #14b8a6;
-  --status-teal-soft: #ccfbf1;
-  --status-teal-on: #115e59;
+  --status-in-progress-soft: #fef3e6;
+  --status-blocked: #ef4444;
+  --status-blocked-soft: #fdecec;
+  --status-done: #10a37f;
+  --status-done-soft: #e6f5f0;
+  --status-cancelled: #6b6b6b;
+  --status-cancelled-soft: #f1f1ee;
+  --status-pending: #8b5cf6;
+  --status-pending-soft: #f1ecfb;
+
+  /* Focus ring */
+  --ring: #3b5bdb;
+  --ring-offset: #ffffff;
 
   /* Typography */
-  --font-heading: 'Poppins', system-ui, sans-serif;
-  --font-body: 'Rubik', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Rubik', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
 
-  /* Type scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --tracking-tight: -0.01em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.025em;
-
-  /* Spacing (4px base) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-7: 1.75rem;
-  --space-8: 2rem;
-  --space-9: 2.25rem;
-  --space-10: 2.5rem;
-  --space-11: 2.75rem;
-  --space-12: 3rem;
-
-  /* Radii */
-  --radius-none: 0;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* Radii — Attio uses small rounded corners */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
 
-  /* Elevation */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Shadows — soft and subtle */
+  --shadow-xs: 0 1px 1px rgba(15, 15, 15, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 15, 15, 0.05), 0 1px 1px rgba(15, 15, 15, 0.03);
+  --shadow-md: 0 2px 4px rgba(15, 15, 15, 0.06), 0 1px 2px rgba(15, 15, 15, 0.04);
+  --shadow-lg: 0 8px 24px rgba(15, 15, 15, 0.08), 0 2px 6px rgba(15, 15, 15, 0.04);
+  --shadow-xl: 0 16px 48px rgba(15, 15, 15, 0.1), 0 4px 12px rgba(15, 15, 15, 0.04);
 
   /* Motion */
-  --motion-fast: 150ms;
-  --motion-normal: 300ms;
-  --motion-slow: 500ms;
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --motion-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Density (Attio-style: tight, ~32-36px row height) */
+  --row-h: 36px;
+  --row-h-sm: 32px;
+  --row-h-lg: 44px;
+  --topbar-h: 48px;
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 56px;
+  --drawer-w: 720px;
 }

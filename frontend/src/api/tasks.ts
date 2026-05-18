@@ -39,22 +39,18 @@ export async function completeTask(
   outcome?: string,
 ): Promise<TaskActionResponse> {
   const allVariables = outcome !== undefined ? { ...variables, outcome } : variables;
-  const result = await apiFetch<TaskActionResponse>(
-    `/api/tasks/${encodeURIComponent(taskId)}/complete`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variables: allVariables }),
-    },
-  );
+  const result = await apiFetch<TaskActionResponse>(`/api/tasks/${encodeURIComponent(taskId)}/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ variables: allVariables }),
+  });
   return result.data;
 }
 
 /** Story 2.4 — claim an unassigned user task. */
 export async function claimTask(taskId: string): Promise<TaskActionResponse> {
-  const result = await apiFetch<TaskActionResponse>(
-    `/api/tasks/${encodeURIComponent(taskId)}/claim`,
-    { method: 'POST' },
-  );
+  const result = await apiFetch<TaskActionResponse>(`/api/tasks/${encodeURIComponent(taskId)}/claim`, {
+    method: 'POST',
+  });
   return result.data;
 }
