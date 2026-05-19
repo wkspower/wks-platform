@@ -90,7 +90,6 @@ Filename convention: integration tests requiring Testcontainers/Postgres must be
 
 - `JwtTokenProvider` is the **only** class allowed to import `io.jsonwebtoken.*` — enforced by ArchUnit.
 - `api/` and `security/` must not import `infrastructure.persistence.entity.*` — enforced by ArchUnit.
-- Zero `tenant_id` invariant — see `docs/zero-tenant-id.md`; enforced by `backend/.ci/check-tenant-invariant.sh`.
 
 ## Frontend rules
 

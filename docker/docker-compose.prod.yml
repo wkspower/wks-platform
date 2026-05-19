@@ -1,4 +1,4 @@
-# WKS Platform — PRODUCTION compose surface (single-tenant).
+# WKS Platform — PRODUCTION compose surface (per-instance).
 #
 # Operator path:
 #   cp docker/.env.production.example docker/.env  # then fill in values
@@ -12,10 +12,9 @@
 # obsolete and removed).
 #
 # Architecture Decision 8 (§388–443) — single-image multi-stage build, env-only
-# config. Decision 25 (§932–958) — ZERO tenant_id in any compose value or env.
-# This file is the SINGLE-TENANT production reference. The PER-CLIENT shape
-# lives at deploy/templates/docker-compose.client.yml.template (Story 14.7) —
-# sibling, not derivation. Both surfaces share the env-var contract.
+# config. This file is the per-instance production reference. The PER-CLIENT
+# shape lives at deploy/templates/docker-compose.client.yml.template (Story 14.7)
+# — sibling, not derivation. Both surfaces share the env-var contract.
 #
 # Optional SSO seam (Keycloak): stack with docker/docker-compose.sso.yml via
 #   docker compose -f docker/docker-compose.prod.yml -f docker/docker-compose.sso.yml up
@@ -65,7 +64,7 @@ services:
 
   # Pinned: postgres:16-alpine — current Hetzner/AWS managed-Postgres LTS-class
   # baseline (PG16 LTS through 2028), matches deploy/templates/docker-compose.client.yml.template
-  # (14.7 single-tenant template).
+  # (14.7 per-instance template).
   postgres:
     image: postgres:16-alpine
     container_name: wks-postgres

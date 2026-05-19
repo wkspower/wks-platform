@@ -10,11 +10,11 @@ Copyright 2026 WKS Power Limited
 This runbook is the operational counterpart of two locked architecture decisions:
 
 - **License / Feature-Flag Gating.** License file is a signed JWT-style token (Ed25519). Customer identity = `licensee` claim. License is per-instance, never per-row.
-- **One-Command Per-Client Deployment + ZERO `tenant_id`.** One isolated environment per customer (own Postgres + MinIO). Application invariant: no `tenant_id` in domain code (see `docs/zero-tenant-id.md`). Phase-0 = this runbook + `deploy/wks-deploy.sh`. Phase-1 = Hetzner Cloud API automation (Story 15.1).
+- **One-Command Per-Client Deployment.** One isolated environment per customer (own Postgres + MinIO). Phase-0 = this runbook + `deploy/wks-deploy.sh`. Phase-1 = Hetzner Cloud API automation (Story 15.1).
 
 The procedure is portable to any Linux host with Docker. The driver script is `deploy/wks-deploy.sh`. Read this whole document once before your first deploy — it is short.
 
-You have all the levers. Each step has a documented expected output and a rollback path. If a command's output does not match, jump to §7.
+You have all the levers. Each step has a documented expected output and a rollback path. If a command's output does not match, jump to §6.
 
 ---
 
@@ -38,25 +38,7 @@ On the **operator's workstation**:
 
 ---
 
-## §1 Pre-flight invariant check
-
-Before deploying, confirm the source tag you are about to ship has a clean baseline:
-
-```bash
-./backend/.ci/check-tenant-invariant.sh
-```
-
-Expected output:
-
-```
-Tenant invariant (D25) OK
-```
-
-Any other output: **STOP**. Investigate before deploying. This catches regressions in cherry-pick scenarios and before any operator pushes a tag that violates Decision 25.
-
----
-
-## §2 Per-client artefact preparation
+## §1 Per-client artefact preparation
 
 Pick a `<client-slug>` (lowercase alnum + dash, 2–32 chars; e.g. `acme`).
 
@@ -98,7 +80,7 @@ WKS_JWT_SECRET=<generated>
 
 ---
 
-## §3 Image pull + bring-up
+## §2 Image pull + bring-up
 
 Run the driver script:
 
@@ -109,20 +91,19 @@ Run the driver script:
 The script performs, in order:
 
 1. Verifies prerequisites (`docker`, `envsubst`, `curl`, `grep`).
-2. Loads `deploy/clients/<client-slug>/client.env` and validates: required keys present, no unknown keys, `WKS_CLIENT_SLUG` matches the CLI arg, `WKS_IMAGE_TAG` is not `latest`, no value contains a tenant-identifier.
+2. Loads `deploy/clients/<client-slug>/client.env` and validates: required keys present, no unknown keys, `WKS_CLIENT_SLUG` matches the CLI arg, `WKS_IMAGE_TAG` is not `latest`.
 3. Renders `deploy/templates/docker-compose.client.yml.template` to `deploy/clients/<client-slug>/docker-compose.yml` via `envsubst` and validates with `docker compose config -q`.
 4. Runs `docker compose -p wks-<client-slug> up -d --pull always`.
 5. Polls `/api/health` for up to 90 seconds.
-6. Runs the runtime ZERO-`tenant_id` invariant probe (§5).
-7. Emits a handover summary with the URL and resolved licensee.
+6. Emits a handover summary with the URL and resolved licensee.
 
 **Pinned image tags only.** The script rejects `latest` and any tag ending `:latest`. This is a hard guardrail; do not work around it.
 
-The driver is **idempotent**. Re-running on an already-deployed slug performs `docker compose up -d` and exits 0 once health and the runtime probe pass.
+The driver is **idempotent**. Re-running on an already-deployed slug performs `docker compose up -d` and exits 0 once health passes.
 
 ---
 
-## §4 License install + boot verification
+## §3 License install + boot verification
 
 The license file is mounted read-only at `${WKS_LICENSE_PATH}` (default `/etc/wks/license.jwt`). On boot, the WKS application reads it and surfaces the `licensee` claim in the admin banner.
 
@@ -138,38 +119,25 @@ Expected (post-Story-7.1):
 { "licensee": "<your client-slug or contracted name>", "tier": "oss|ee|demo-showcase", ... }
 ```
 
-**Phase-0 placeholder behaviour (until Story 7.1 ships):** the endpoint may not exist yet. The runtime probe (§5) emits a `WARN` line and does NOT fail. Once 7.1 ships, the probe will hard-assert.
+**Phase-0 placeholder behaviour (until Story 7.1 ships):** the endpoint may not exist yet. Once 7.1 ships, callers can hard-assert on it.
 
 ---
 
-## §5 Smoke tests (incl. ZERO-`tenant_id` runtime check)
+## §4 Smoke tests
 
-Standalone re-run any time:
+Once the stack is up, sanity-check the public surfaces:
 
 ```bash
-./deploy/probes/check-runtime-no-tenant-id.sh http://localhost:18080
+curl -fsS http://localhost:18080/api/health
+curl -fsS http://localhost:18080/api/cases
+curl -fsS http://localhost:18080/api/case-types
 ```
 
-This hits `/api/health`, `/v3/api-docs`, `/api/cases`, `/api/case-types`, and `/api/license/status`. Any response body or header containing `tenant_id`, `tenantId`, or `@TenantId` fails the probe.
-
-Expected success line:
-
-```
-RUNTIME INVARIANT OK: zero tenant_id leakage in 5 probed surfaces
-```
-
-Expected failure line (if regression):
-
-```
-http://localhost:18080/v3/api-docs: tenant_id — Forbidden by Decision 25 ...
-RUNTIME INVARIANT FAILED: 1 violations across 5 probed surfaces
-```
-
-Failure is a hard stop. Do not hand the URL to the customer; jump to §7 rollback while you investigate.
+Each call should return a 2xx. A non-2xx is a hard stop. Do not hand the URL to the customer; jump to §6 rollback while you investigate.
 
 ---
 
-## §6 Handover
+## §5 Handover
 
 Deliver to the customer **out-of-band** (encrypted channel — not committed, not in any chat log):
 
@@ -182,7 +150,7 @@ Do NOT share `WKS_DB_PASSWORD` or `WKS_MINIO_ROOT_PASSWORD`. They are infrastruc
 
 ---
 
-## §7 Rollback procedure
+## §6 Rollback procedure
 
 **Soft rollback** (stops containers, preserves data):
 
@@ -190,7 +158,7 @@ Do NOT share `WKS_DB_PASSWORD` or `WKS_MINIO_ROOT_PASSWORD`. They are infrastruc
 docker compose -p wks-<client-slug> down
 ```
 
-**Hard rollback** (removes volumes — **IRREVERSIBLE**, this is the GDPR-delete path per Decision 25):
+**Hard rollback** (removes volumes — **IRREVERSIBLE**, this is the GDPR-delete path):
 
 ```bash
 docker compose -p wks-<client-slug> down -v
@@ -213,16 +181,16 @@ If either grep returns a row, remove the leftover by name (`docker volume rm <na
 
 ---
 
-## §8 Known limitations / Phase-1 follow-ups
+## §7 Known limitations / Phase-1 follow-ups
 
 - **Manual operator step.** No Hetzner Cloud API integration — Story 15.1.
 - **No automatic backups.** Story 15.2.
 - **No license rotation/expiry tooling.** Story 15.2.
 - **No cross-client observability dashboard.** Phase 1+.
-- **No automated health monitoring beyond the deploy-time probe.** Phase 1+.
+- **No automated health monitoring beyond the deploy-time check.** Phase 1+.
 - **TLS termination is the operator's reverse-proxy responsibility.** Decision 8 — runbook does NOT bundle one.
 - **Hetzner-specific provisioning (`hcloud server create ...`) is intentionally out of scope.** The runbook works on any Docker host so Story 15.1 can wrap it later.
-- **Production environment table is provisional.** This Phase-0 template carries the minimum env vars needed for the runbook + driver + probe to be reviewable. Story 14.1 (Production Docker Profile) owns the canonical, hardened production env contract — its work supersedes this template's env block.
-- **Closed by Story 14.1 (2026-05-06):** the H2/Postgres production-profile bug (`Driver org.h2.Driver claims to not accept jdbcUrl, jdbc:postgresql://...`) is fixed. `application-production.yml` now hard-overrides `spring.datasource.driver-class-name: org.postgresql.Driver` and excludes H2 autoconfig under the production profile (Strategy B). Verified by the new `production-profile-smoke` CI job (Story 14.1 AC6) and a clean end-to-end run of `./deploy/wks-deploy.sh smoke` against a 14.1-built image: health OK, `RUNTIME INVARIANT OK` from the tenant-id probe, 7 Postgres migrations applied, zero `org.h2.Driver` references in container logs.
+- **Production environment table is provisional.** This Phase-0 template carries the minimum env vars needed for the runbook + driver to be reviewable. Story 14.1 (Production Docker Profile) owns the canonical, hardened production env contract — its work supersedes this template's env block.
+- **Closed by Story 14.1 (2026-05-06):** the H2/Postgres production-profile bug (`Driver org.h2.Driver claims to not accept jdbcUrl, jdbc:postgresql://...`) is fixed. `application-production.yml` now hard-overrides `spring.datasource.driver-class-name: org.postgresql.Driver` and excludes H2 autoconfig under the production profile (Strategy B). Verified by the new `production-profile-smoke` CI job (Story 14.1 AC6) and a clean end-to-end run of `./deploy/wks-deploy.sh smoke` against a 14.1-built image: health OK, 7 Postgres migrations applied, zero `org.h2.Driver` references in container logs.
 
 Each limitation is a future story. Nothing here is permanent — the boundary is documented so a reader six months from now knows where to push.

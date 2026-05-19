@@ -10,12 +10,12 @@
 # the file-split in Story 14.1.1 fix-up removed the production stack from
 # this file entirely, so port-8080 collision is structurally impossible.
 #
-# The PRODUCTION single-tenant stack (Postgres + MinIO + WKS app) lives at
+# The PRODUCTION per-instance stack (Postgres + MinIO + WKS app) lives at
 # docker/docker-compose.prod.yml. The optional SSO seam (Keycloak) lives at
 # docker/docker-compose.sso.yml. See docker/README.md for operator commands.
 #
 # Architecture reference: Decision 8 (§388–443) — single-image multi-stage
-# build, env-only config. Decision 25 (§932–958) — ZERO tenant_id invariant.
+# build, env-only config.
 
 services:
   wks-platform:

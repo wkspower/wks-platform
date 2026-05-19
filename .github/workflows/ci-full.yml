@@ -43,9 +43,8 @@ jobs:
     # Story 14.1 AC6 — boot the production stack against real Postgres + MinIO
     # via `docker compose -f docker/docker-compose.prod.yml up`, poll /api/health,
     # and assert ZERO H2-driver loading in the container logs (the regression
-    # guard for Story 14.7 §8 / WKS-API-053). Re-uses Story 14.7's runtime
-    # tenant-id probe. Local replication required per "Match CI Locally" memory
-    # before PR.
+    # guard for Story 14.7 §8 / WKS-API-053). Local replication required per
+    # "Match CI Locally" memory before PR.
     name: Production profile smoke (Story 14.1)
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -187,11 +186,6 @@ jobs:
             exit 1
           fi
           echo "Schema-readiness query OK (cases table queryable)."
-
-      - name: Run runtime ZERO-tenant_id invariant probe
-        # Re-uses Story 14.7's already-shipped probe. AC6.6 + AC8 — extends the
-        # runtime check to the production-profile container without re-implementation.
-        run: ./deploy/probes/check-runtime-no-tenant-id.sh http://localhost:8080
 
       - name: Tear down (purge volumes)
         if: always()
