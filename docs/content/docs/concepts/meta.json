@@ -1,14 +1,6 @@
 {
   "title": "Concepts",
   "pages": [
-    "cases-first-processes-optional",
-    "case-types",
-    "cases",
-    "stages",
-    "statuses",
-    "archetypes",
-    "ad-hoc-tasks",
-    "attached-processes",
-    "forms"
+    "cases-first-processes-optional"
   ]
 }

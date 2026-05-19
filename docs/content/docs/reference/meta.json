@@ -1,9 +1,7 @@
 {
   "title": "Reference",
   "pages": [
-    "api",
     "yaml-schema",
-    "error-codes",
     "environment-variables"
   ]
 }

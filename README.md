@@ -77,8 +77,6 @@ network, Keycloak + OPA for auth) made evaluation painful and deployment
 brittle. v2 is a single-container monolith with strict hexagonal
 boundaries so the evaluation takes 30 minutes instead of 30 hours.
 
-For a fuller archival summary see [`docs/v1-archival.md`](./docs/v1-archival.md).
-
 ## Project status
 
 **What works today?** The platform foundation is complete: project

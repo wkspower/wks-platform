@@ -1,13 +1,12 @@
 # WKS API conventions
 
-Source of truth for every HTTP surface shipped by the backend. Story 1.4 set the shape; all later
-stories extend it without reshaping.
+Source of truth for every HTTP surface the backend ships.
 
 ## Envelope
 
 Every response — success or error — uses the same wrapper.
 
-**Success** (single resource):
+**Success** (single):
 
 ```json
 { "data": { ... }, "meta": {} }
@@ -19,13 +18,13 @@ Every response — success or error — uses the same wrapper.
 { "data": [ ... ], "meta": { "total": 42, "page": 0, "size": 20 } }
 ```
 
-**Error** (single):
+**Error**:
 
 ```json
 { "error": { "code": "WKS-API-003", "message": "size must be >= 1", "field": "size" }, "meta": {} }
 ```
 
-**Error** (multi, 422 only):
+**Error** (multi, 422):
 
 ```json
 {
@@ -33,8 +32,8 @@ Every response — success or error — uses the same wrapper.
     "code": "WKS-CFG-000",
     "message": "Configuration invalid",
     "errors": [
-      { "code": "WKS-CFG-101", "message": "name missing", "field": "name", "line": 3 },
-      { "code": "WKS-CFG-102", "message": "status 'foo' not declared", "field": "status", "line": 17 }
+      { "code": "WKS-CFG-001", "message": "name missing", "field": "name", "line": 3 },
+      { "code": "WKS-CFG-008", "message": "status 'foo' not declared", "field": "status", "line": 17 }
     ]
   },
   "meta": {}
@@ -51,9 +50,9 @@ Rules:
 
 Query params: `?page=0&size=20&sort=field[,asc|desc]`.
 
-- `page` is **zero-based**. Default `0`.
-- `size` defaults to `20`, clamps silently to `[1, 100]` above `100`, and raises `WKS-API-003` at 400 below `1` or for negative `page`.
-- `sort` is repeatable (`?sort=updatedAt,desc&sort=createdAt,asc`). Direction defaults to `asc`; omitting the comma means ascending.
+- `page` is **zero-based**, default `0`.
+- `size` defaults to `20`, clamps silently to `[1, 100]` above `100`, raises `WKS-API-003` at 400 below `1` or for negative `page`.
+- `sort` is repeatable (`?sort=updatedAt,desc&sort=createdAt,asc`). Direction defaults to `asc`.
 
 Responses include `meta.total`, `meta.page`, `meta.size`.
 
@@ -65,234 +64,80 @@ Page<MyEntity> page = repository.findAll(pageable);
 return PageMetaBuilder.paged(page, MyMapper::toDto);
 ```
 
-- Each list controller implements `SortWhitelist` (typically as a `Set<String>` constant).
+- Each list controller declares a sort allow-list (typically a `Set<String>` constant).
 - Unknown sort properties raise `WKS-API-004` — never fall through to Hibernate.
-- `PageMetaBuilder.paged(...)` is the **only** path for building list responses — do not hand-build `Map.of("total", …)`.
+- `PageMetaBuilder.paged(...)` is the **only** path for building list responses.
 
-## Date + ID conventions
+## Dates and IDs
 
 - Every timestamp on the wire is ISO 8601 with UTC offset: `"2026-04-24T14:22:18Z"`. Never millis, never arrays.
-- `WRITE_DATES_AS_TIMESTAMPS` is disabled explicitly in `JacksonConfig`. Do not re-enable via `spring.jackson.*` yaml keys.
-- Every identifier in request/response bodies is a `java.util.UUID`. Never auto-increment integers.
+- `WRITE_DATES_AS_TIMESTAMPS` is disabled in `JacksonConfig`. Don't re-enable via `spring.jackson.*` yaml.
+- Every identifier in request/response bodies is `java.util.UUID`. Never auto-increment integers.
 
-## Error codes (stable)
+## Error codes
 
-| Code          | HTTP | Reason                                                                   |
-| ------------- | ---- | ------------------------------------------------------------------------ |
-| `WKS-API-001` | 400  | Request body malformed / unreadable (reserved)                           |
-| `WKS-API-002` | 400  | JSON parse error                                                         |
-| `WKS-API-003` | 400  | Pagination param out of range (`size < 1`, `page < 0`, etc.)             |
-| `WKS-API-004` | 400  | Unknown sort property (not in resource allow-list)                       |
-| `WKS-API-005` | 400  | Unknown sort direction (not `asc` / `desc`)                              |
-| `WKS-API-401` | 401  | Authentication failed                                                    |
-| `WKS-API-403` | 403  | Forbidden                                                                |
-| `WKS-API-404` | 404  | Resource not found                                                       |
-| `WKS-API-413` | 413  | Multipart upload exceeds the 1 MB per-part / 2 MB per-request cap        |
-| `WKS-CFG-000` | 422  | Multi-error config aggregate (umbrella for `WksConfigException`)         |
-| `WKS-RTM-409` | 409  | Optimistic-locking conflict (case update raced with another transaction) |
-| `WKS-RTM-500` | 500  | Uncaught exception                                                       |
+Codes are defined once in `domain/exception/ErrorCode.java`. Wire strings are part of the public contract — never renumber or reuse a code once shipped. See [error-codes.md](./error-codes.md) for the full registry and conventions.
 
-Codes are defined once in `domain/exception/ErrorCode.java`. Wire strings are part of the public
-contract — never renumber or reuse a code once shipped.
+Common codes you'll see at the API edge:
 
-### Story 2.7 — additions
+| Code | HTTP | Meaning |
+|---|---|---|
+| `WKS-API-002` | 400 | JSON parse error |
+| `WKS-API-003` | 400 | Pagination param out of range |
+| `WKS-API-004` | 400 | Unknown sort property |
+| `WKS-API-401` | 401 | Authentication failed |
+| `WKS-API-403` | 403 | Forbidden |
+| `WKS-API-404` | 404 | Resource not found |
+| `WKS-API-413` | 413 | Multipart upload over cap |
+| `WKS-CFG-000` | 422 | Multi-error config aggregate |
+| `WKS-RTM-409` | 409 | Optimistic-locking conflict |
+| `WKS-RTM-500` | 500 | Uncaught exception |
 
-- `WKS-CFG-013` — case-type YAML marks a `file`-typed field as `requiredOnCreate: true` but file
-  upload is not yet supported on the create form. WARN-level finding (case-type still loads); the
-  create-form treats the field as optional until Story 3.1 ships document upload.
+## Endpoints
 
-### Config validation codes (WKS-CFG-001..099)
+### Case CRUD
 
-Case-type YAML validation (Story 2.1). Every entry carries `field` (dotted JSON-Pointer-flavour
-path — e.g. `fields[2].type`, `roles[0].permissions[1]`, 0-based array indices) and `line`
-(1-based YAML line number when derivable). Collected all at once; the validator never fails on
-first error.
+| Method | Path | Verb gate | Wire success |
+|---|---|---|---|
+| `POST` | `/api/cases` | `create` | `201 ApiResponse<CaseDto>` |
+| `GET` | `/api/cases/{id}` | `view` | `200 ApiResponse<CaseDto>` (embedded `caseType`) |
+| `GET` | `/api/cases` | `view` | `200 ApiResponse<List<CaseSummaryDto>>` + meta |
+| `PUT` | `/api/cases/{id}` | `view` | `200 ApiResponse<CaseDto>` |
 
-| Code          | HTTP | Reason                                                                                 |
-| ------------- | ---- | -------------------------------------------------------------------------------------- |
-| `WKS-CFG-001` | 422  | Required key missing (top-level or nested)                                             |
-| `WKS-CFG-002` | 422  | Invalid field `type` — not one of `text\|number\|date\|select\|checkbox\|textarea\|file` |
-| `WKS-CFG-003` | 422  | Duplicate id (field / status / role / listColumn)                                      |
-| `WKS-CFG-004` | 422  | `fields.length > 50` (or `roles > 20`, `permissions per role > 10`, `options > 50`)    |
-| `WKS-CFG-005` | 422  | `listColumns.length > 12` OR references unknown field id / system column               |
-| `WKS-CFG-006` | 422  | `statuses.length > 10`                                                                 |
-| `WKS-CFG-007` | 422  | Any `displayName` exceeds 40 characters                                                |
-| `WKS-CFG-008` | 422  | Unknown enum literal (status color, role permission verb)                              |
-| `WKS-CFG-009` | 422  | Malformed id — fails `[a-z][a-z0-9-]{1,62}` (field ids also accept `_`)                |
-| `WKS-CFG-011` | 422  | Registry rejected `replace` — incoming version older than registered (not validator)   |
-| `WKS-CFG-099` | 422  | YAML parse / I/O failure (catastrophic)                                                |
+`POST` body: `{ "caseTypeId", "data", "assignee" }`. `PUT` body: `{ "data", "version" }` — version mismatch surfaces as `WKS-RTM-409`.
 
-### BPMN validation codes (WKS-CFG-010..099)
+The list endpoint paginates via the standard envelope; sort allow-list is `[updatedAt, createdAt, status]`. The JSON `data` column is server-side projected — list rows carry only system columns plus the case-type's `listColumns` projections.
 
-BPMN parse + structural validation (Story 2.2). Runs after YAML validation and before the engine
-deploy on `POST /api/admin/deploy` and the startup loader's BPMN-present path. Same collect-all
-discipline as the YAML validator — every offending user task / expression surfaces a separate
-`ErrorDetail` rather than fail-on-first.
+### Transitions and tasks
 
-| Code          | HTTP | Reason                                                                                 |
-| ------------- | ---- | -------------------------------------------------------------------------------------- |
-| `WKS-CFG-010` | 422  | BPMN file missing / unreadable / not a BPMN 2.0 document                               |
-| `WKS-CFG-012` | 422  | Variable in BPMN expression not declared in the YAML case type (and not in the well-known set: `taskAssignee`, `caseId`, `caseStatus`) |
-| `WKS-CFG-020` | 422  | User task missing the required `archetype` declaration in `camunda:properties` (allowed: `draft_section`, `submit_for_processing`, `business_final`) |
-| `WKS-CFG-021` | 422  | Archetype contradiction — `business_final` carries `camunda:asyncAfter="true"`, OR `draft_section` has an outgoing flow targeting another task |
+All three gate on the `transition` verb.
 
-Codes `013..019` and `022..099` are reserved for future BPMN findings — do not fill in this band
-until a real validator failure mode needs a stable code.
+| Method | Path | Wire success |
+|---|---|---|
+| `POST` | `/api/cases/{id}/transition` | `200 ApiResponse<CaseDto>` |
+| `POST` | `/api/tasks/{id}/complete` | `200 ApiResponse<TaskActionResponse>` |
+| `POST` | `/api/tasks/{id}/claim` | `200 ApiResponse<TaskActionResponse>` |
 
-> **Variance from `architecture.md` §Decision 14.** That table allocates `WKS-CFG-100..199` to
-> BPMN validation. Story 2.2 follows the epic AC's `010..099` band so all "deploy-time validation"
-> codes stay contiguous below 100. Architecture doc gets a follow-up patch.
+`/transition` body: `{ "action", "variables" }`. `action` is the BPMN message name attached to an `<bpmn:intermediateCatchEvent>` / `<bpmn:receiveTask>`. Unknown / non-enabled actions return `WKS-RTM-409`.
 
-## Case CRUD endpoints (Story 2.3)
+`/complete` body: `{ "variables" }` (optional). Response carries `archetype` from the user task's `<camunda:property name="archetype" .../>` — the frontend's `TaskLifecycleButton` reads this to drive async UI states.
 
-The case-lifecycle surface is rooted at `/api/cases`:
+`/claim` has no body. Already-claimed tasks (by anyone) return `WKS-RTM-409`.
 
-| Method | Path                | Verb gate (per case-type YAML) | Wire success                                          |
-| ------ | ------------------- | ------------------------------ | ----------------------------------------------------- |
-| `POST` | `/api/cases`        | `create`                       | `201 ApiResponse<CaseDto>`                            |
-| `GET`  | `/api/cases/{id}`   | `view`                         | `200 ApiResponse<CaseDto>` (with embedded `caseType`) |
-| `GET`  | `/api/cases`        | `view`                         | `200 ApiResponse<List<CaseSummaryDto>>` + meta        |
-| `PUT`  | `/api/cases/{id}`   | `view` (Phase 0 simplification — `edit` arrives in Story 5.2) | `200 ApiResponse<CaseDto>` |
+Status changes are pushed by an engine-side `ExecutionListener` (`CaseStatusListener`) that writes through `CaseStatusUpdater` and publishes `CaseStatusChanged` via `EventPublisher`.
 
-`POST` request body: `{ "caseTypeId": "...", "data": { ... }, "assignee": "uuid|null" }`.
-`PUT` request body: `{ "data": { ... }, "version": <expected version> }` — version mismatch surfaces
-as `WKS-RTM-409` with HTTP 409.
+### Case types
 
-The `documentCount` field on `CaseDto` is always `0` until Epic 3 (Documents). The shape is frozen
-here so Story 3.2 can fill it without a DTO bump.
+Read-only public surface, gated by per-case-type `view`.
 
-The list endpoint paginates via the standard `?page=...&size=...&sort=...` envelope; the sort
-allow-list is `[updatedAt, createdAt, status]`. The JSON `data` column is never fetched on the
-list path (server-side projection) — list rows carry only system columns plus the case-type's
-`listColumns` field projections.
+`GET /api/case-types` — sorted by `displayName`, returns id + counts + `permissions[]` (verb subset the caller holds).
 
-## Case transitions and tasks (Story 2.4)
+`GET /api/case-types/{id}` — full `fields[]`, `statuses[]`, `listColumns[]`. Field entries are flattened `FieldView` records carrying per-type validation slots (`minLength`/`maxLength`/`min`/`max`/`step`/`dateMin`/`dateMax`/`options[]`/`maxBytes`/`allowedMimeTypes`). The wire field names mirror the YAML grammar tokens exactly.
 
-Three endpoints expose BPMN-driven case lifecycle. All three gate on the `transition` verb (per
-case-type YAML role grants).
-
-| Method | Path                                  | Verb gate    | Wire success                                          |
-| ------ | ------------------------------------- | ------------ | ----------------------------------------------------- |
-| `POST` | `/api/cases/{id}/transition`          | `transition` | `200 ApiResponse<CaseDto>` (post-transition state)    |
-| `POST` | `/api/tasks/{id}/complete`            | `transition` | `200 ApiResponse<TaskActionResponse>`                 |
-| `POST` | `/api/tasks/{id}/claim`               | `transition` | `200 ApiResponse<TaskActionResponse>` (with assignee) |
-
-`POST /api/cases/{id}/transition` body: `{ "action": "<bpmn-message-name>", "variables": { ... } }`.
-**Phase 0 supports message correlation only** — `action` is the BPMN message name attached to an
-`<bpmn:intermediateCatchEvent>`/`<bpmn:receiveTask>` of type `messageEventDefinition`. Signal-based
-transitions arrive in Story 8.2 if a real BPMN template requires them. Unknown / non-enabled
-actions surface `WKS-RTM-409` (no enabled receiver).
-
-`POST /api/tasks/{id}/complete` body: `{ "variables": { ... } }` (variables optional). Response:
-
-```json
-{
-  "data": {
-    "taskId": "engine-task-id",
-    "processInstanceId": null,
-    "caseId": "uuid",
-    "archetype": "draft_section | submit_for_processing | business_final",
-    "assignee": null,
-    "at": "2026-04-26T10:00:00Z"
-  }
-}
-```
-
-`archetype` is read from the user task's `<camunda:property name="archetype" .../>` and reflects
-the deploy-time invariant enforced by the BPMN validator (`WKS-CFG-020` / `WKS-CFG-021`); the
-runtime path does **not** re-validate. The frontend's `TaskLifecycleButton` (Story 2.8) uses this
-field to drive the three-layer async UI states defined in `architecture.md §Decision 9` — the
-backend never blocks on downstream BPMN work for `submit_for_processing`.
-
-`POST /api/tasks/{id}/claim` has no body. Response carries the new `assignee`. Already-claimed
-tasks (by anyone, including the same caller) surface `WKS-RTM-409`.
-
-Status changes are pushed by an engine-side `ExecutionListener` (`CaseStatusListener`) that fires
-on user-task and end-event commit. The listener writes `cases.status` through the
-`CaseStatusUpdater` port and publishes `CaseStatusChanged` via `EventPublisher`. Subscribers (audit
-log in Story 4.1, SSE bridge in Story 4.3) attach without touching this code.
-
-## Case types (Story 2.5)
-
-Public read surface for case-type metadata so the frontend can render the case-type filter,
-generate `CaseDataTable` columns, and resolve status colors without `ROLE_ADMIN`. Distinct from the
-admin authoring path (`/api/admin/...`) — this surface is read-only and gated by the per-case-type
-`view` verb.
-
-`GET /api/case-types`
-
-Returns the case types the caller has the `view` verb on, sorted by `displayName` ascending.
-
-```json
-{
-  "data": [
-    { "id": "loan-application", "displayName": "Loan Application", "version": 1,
-      "statusCount": 5, "fieldCount": 8, "permissions": ["view", "create"] }
-  ],
-  "meta": {}
-}
-```
-
-`statusCount` and `fieldCount` are convenience counts for a future case-type selector — the heavy
-fields (`fields[]`, `statuses[]`, `listColumns`) live on the detail endpoint below.
-
-`permissions[]` (Story 2.7) is the verb subset the **caller** holds on the case-type — a subset
-of the declared `view`, `create`, `edit`, `transition`, `assign`, `upload-document` verbs.
-The frontend uses this to filter the Create-Case dropdown to entries the user can actually act
-on, without an extra round-trip per case-type. The list endpoint still gates entries by the
-`view` verb; `permissions[]` only surfaces info the caller is otherwise entitled to derive from
-their own roles + the YAML.
-
-`GET /api/case-types/{id}`
-
-```json
-{
-  "data": {
-    "id": "loan-application",
-    "displayName": "Loan Application",
-    "version": 1,
-    "fields": [ { "id": "applicant_name", "displayName": "Applicant name", "type": "text",
-                  "required": true, "requiredOnCreate": true, "order": 0, "options": [],
-                  "maxLength": 80 } ],
-    "statuses": [ { "id": "open", "displayName": "Open", "color": "zinc" } ],
-    "listColumns": [ "applicant_name" ]
-  },
-  "meta": {}
-}
-```
-
-`fields[]` (Story 2.7 widening): every entry is a flattened `FieldView` carrying the per-type
-validation slots the frontend Zod builder reads — `minLength`/`maxLength` for `text`/`textarea`,
-`min`/`max`/`step` for `number`, `dateMin`/`dateMax` for `date`, `options[]` for `select`,
-`maxBytes`/`allowedMimeTypes` for `file`. Slots are nullable; only the slots relevant to `type`
-are populated. `requiredOnCreate` (default = `required`) controls whether the create-form dialog
-asks for this field at case-creation time. The wire field names mirror the YAML grammar tokens
-exactly (camelCase) so the validation contract is one shape end-to-end.
-
-`POST /api/cases` 422 (Story 2.7 AC10): every `errors[].field` is the YAML-declared field id
-verbatim (e.g., `applicant_name`), **not** a JSON-Pointer fragment (`/data/applicant_name`).
-The backend `CaseDataValidatorAdapter.pointerToField` resolver strips the `$.` / `/data/`
-prefix and (for nested paths, defensively — Phase 0 grammar is flat) returns the leaf segment.
-Empty / root pointer maps to the wire literal `data` so the frontend banner code can render it
-as a form-level violation. The frontend RHF `setError` mapping depends on this contract.
-
-- `404 WKS-API-404` — unknown id.
-- `403 WKS-API-403` — caller lacks `view` on this case type.
-- `401 WKS-API-401` — anonymous (JWT filter).
-
-`field.type` and `status.color` are emitted as lowercase wire tokens (`text`, `number`, `date`,
-`select`, `checkbox`, `textarea`, `file`; `blue`, `amber`, `violet`, `emerald`, `zinc`, `red`,
-`cyan`, `rose`, `indigo`, `teal`). The `roles[]` and the workflow `bpmn` reference are
-intentionally NOT echoed — the role/permission matrix is authorization metadata and the BPMN file
-path is internal.
+`field.type` and `status.color` are emitted as lowercase wire tokens. `roles[]` and the workflow `bpmn` reference are not echoed.
 
 ## Interactive docs
 
-`GET /v3/api-docs` returns the OpenAPI 3 JSON; Swagger UI lives at `GET /swagger-ui/index.html`.
-Both are reachable unauthenticated under the dev profile. In production they are disabled by
-default; set `WKS_OPENAPI_ENABLED=true` to opt in (see `application-production.yml` and
-`SecurityConfig`).
+`GET /v3/api-docs` returns the OpenAPI 3 JSON; Swagger UI lives at `GET /swagger-ui/index.html`. Both reachable unauthenticated under the dev profile. In production they are disabled by default; set `WKS_OPENAPI_ENABLED=true` to opt in.
 
-The generated spec declares a `cookieAuth` security scheme (`type: apiKey, in: cookie, name:
-WKS_SESSION`) applied globally — Swagger UI's "Try it out" will send the session cookie
-automatically once you've logged in.
+The generated spec declares a `cookieAuth` security scheme (`type: apiKey, in: cookie, name: WKS_SESSION`) applied globally.

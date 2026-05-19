@@ -1,5 +1,11 @@
 dist
 node_modules
+coverage
 *.tsbuildinfo
 package-lock.json
 public
+# tsc emits these from composite tsconfig.node.json — gitignored, not source.
+vite.config.js
+vite.config.d.ts
+vitest.config.js
+vitest.config.d.ts

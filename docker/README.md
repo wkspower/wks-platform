@@ -2,7 +2,7 @@
 
 Two compose files cover single-tenant operator surfaces: a zero-config dev stack (`docker-compose.yml`) and a single-tenant production stack (`docker-compose.prod.yml`, Postgres + MinIO + WKS app). An optional Keycloak SSO seam stacks on top of production via `docker-compose.sso.yml`. Per-client / multi-instance deployments live at [`deploy/`](../deploy/) (Story 14.7).
 
-Architecture reference: [`_bmad-output/planning-artifacts/architecture.md`](../_bmad-output/planning-artifacts/architecture.md) Decision 8 (§388–443) and Decision 25 (§932–958, ZERO `tenant_id` invariant).
+Architecture reference: zero `tenant_id` invariant — see [`docs/zero-tenant-id.md`](../docs/zero-tenant-id.md).
 
 ## Dev quick-start (zero env vars)
 

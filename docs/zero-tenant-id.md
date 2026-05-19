@@ -6,7 +6,7 @@ The application code in this repository must contain **zero** `tenant_id` (or `t
 
 ## Why
 
-Per-instance isolation (Decision 25) is the architectural foundation that lets WKS sell as both OSS and per-client managed hosting under the license-per-instance model (Decision 24, cross-referenced). Once `tenant_id` enters a domain row or a persistence query, multi-tenancy semantics leak into the model and the per-instance posture is compromised — the surface stops being equivalent across deployments and SI partners cannot reason about isolation by reading the code. Source of truth for the decision text and rationale: `_bmad-output/planning-artifacts/architecture.md` Decision 25 (planning repo `wks-platform2`).
+Per-instance isolation (Decision 25) is the architectural foundation that lets WKS sell as both OSS and per-client managed hosting under the license-per-instance model (Decision 24, cross-referenced). Once `tenant_id` enters a domain row or a persistence query, multi-tenancy semantics leak into the model and the per-instance posture is compromised — the surface stops being equivalent across deployments and SI partners cannot reason about isolation by reading the code.
 
 ## Approved alternatives
 
