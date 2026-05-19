@@ -231,11 +231,7 @@ export const TaskList = ({ businessKey, callback }) => {
         />
       )}
       {open && task && !task.processInstanceId && (
-        <AdHocTaskForm
-          task={task}
-          handleClose={handleClose}
-          open={open}
-        />
+        <AdHocTaskForm task={task} handleClose={handleClose} open={open} />
       )}
     </React.Fragment>
   )
