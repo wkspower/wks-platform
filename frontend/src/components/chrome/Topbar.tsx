@@ -22,8 +22,8 @@ function useBreadcrumbs(): { label: string; href?: string }[] {
   if (pathname.startsWith('/tasks')) return [{ label: 'My tasks' }];
   if (pathname.startsWith('/admin/license'))
     return [{ label: 'Admin', href: '/admin' }, { label: 'License' }];
-  if (pathname.startsWith('/admin/mapping-inspector'))
-    return [{ label: 'Admin', href: '/admin' }, { label: 'Mapping inspector' }];
+  if (pathname.startsWith('/admin/case-types/'))
+    return [{ label: 'Admin', href: '/admin' }, { label: 'Edit case type' }];
   if (pathname.startsWith('/admin')) return [{ label: 'Admin' }];
   if (pathname.startsWith('/dashboard')) return [{ label: 'Dashboard' }];
   return [];

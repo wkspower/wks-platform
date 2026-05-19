@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wkspower.platform.api.dto.ApiResponse;
 import com.wkspower.platform.api.dto.response.DeployResponseDto;
+import com.wkspower.platform.domain.config.CaseTypeVersionRecord;
 import com.wkspower.platform.domain.config.DeployResult;
 import com.wkspower.platform.domain.config.GateOutcome;
 import com.wkspower.platform.domain.config.ValidationResult;
@@ -11,7 +12,9 @@ import com.wkspower.platform.domain.config.rebase.CaseRebaseReport;
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
+import com.wkspower.platform.domain.exception.WksNotFoundException;
 import com.wkspower.platform.domain.exception.WksWorkflowEngineException;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +27,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,10 +64,15 @@ public class AdminController {
 
   private final ConfigService configService;
   private final CaseRebaseService caseRebaseService;
+  private final CaseTypeVersionRegistry versionRegistry;
 
-  public AdminController(ConfigService configService, CaseRebaseService caseRebaseService) {
+  public AdminController(
+      ConfigService configService,
+      CaseRebaseService caseRebaseService,
+      CaseTypeVersionRegistry versionRegistry) {
     this.configService = configService;
     this.caseRebaseService = caseRebaseService;
+    this.versionRegistry = versionRegistry;
   }
 
   // -------------------------------------------------------------------------
@@ -257,6 +267,37 @@ public class AdminController {
             deployment.deploymentId(),
             deployment.processDefinitionId(),
             "/api/admin/case-types/" + caseType.id() + "/schema"));
+  }
+
+  // -------------------------------------------------------------------------
+  // Case-type source endpoint (v0.1 MVP — powers the in-UI YAML editor)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Returns the raw YAML bytes of the currently active version of {@code caseTypeId}. Used by the
+   * admin editor page to load existing case-types for editing. The author-supplied YAML is
+   * persisted verbatim via {@link CaseTypeVersionRecord#rawYaml()}; this endpoint hands those bytes
+   * back unchanged so what the operator edits round-trips losslessly.
+   */
+  @GetMapping(path = "/case-types/{caseTypeId}/source")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(summary = "Get the raw YAML source of the active version of a case type")
+  public ResponseEntity<byte[]> caseTypeSource(@PathVariable String caseTypeId) {
+    int version =
+        versionRegistry
+            .currentVersion(caseTypeId)
+            .orElseThrow(() -> new WksNotFoundException("Case type " + caseTypeId + " not found"));
+    CaseTypeVersionRecord record =
+        versionRegistry
+            .findVersion(caseTypeId, version)
+            .orElseThrow(
+                () ->
+                    new WksNotFoundException(
+                        "Case type " + caseTypeId + ":v" + version + " not found"));
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType("application/x-yaml"))
+        .header(HttpHeaders.CACHE_CONTROL, "no-store")
+        .body(record.rawYaml());
   }
 
   // -------------------------------------------------------------------------

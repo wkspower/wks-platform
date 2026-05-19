@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { CaseDetailBody } from '@/components/cases/CaseDetailBody';
+import { CaseDetailBody } from '@/lib/wks-components';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useCase } from '@/hooks/useCases';

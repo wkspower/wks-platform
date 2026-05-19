@@ -12,6 +12,18 @@ docker compose -f docker/docker-compose.yml up --build
 
 H2 file-mode datasource at `./data/`, local storage, console logging. Story 1.1 contract — boots without any operator-supplied secrets and without any env file. The dev compose file contains only the dev `wks-platform` service, so port-8080 collision with the production stack is structurally impossible (Story 14.1.1 fix-up replaced the previous `profiles:`/tracked-`.env` mechanism with a file-split).
 
+### Database access (dev / evaluation)
+
+H2 console is enabled out-of-the-box. Once the stack is up:
+
+- **Browser**: <http://localhost:8080/h2-console>
+- **JDBC URL**: `jdbc:h2:file:./data/wksplatform`
+- **User**: `sa` &nbsp; **Password**: *(empty)*
+
+The H2 console is disabled under the production profile (`H2ConsoleAutoConfiguration` is excluded in `application-production.yml`).
+
+For desktop tools (DBeaver / DataGrip / IntelliJ), the backend must be stopped first — H2 holds an exclusive lock on the file in this configuration. Stop the backend, point the desktop client at the same JDBC URL above (using an absolute path), browse, then restart the backend. Inside Docker the file lives in the `wks-data` named volume; the in-app `/h2-console` is the easiest SQL path for that case.
+
 ## Production quick-start (single-tenant, Postgres + MinIO)
 
 ```bash

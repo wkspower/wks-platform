@@ -99,3 +99,35 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     envelopeErrors: Array.isArray(errors) ? errors : null,
   });
 }
+
+/**
+ * Variant of {@link apiFetch} that returns the response body as text. Used by endpoints that
+ * return non-JSON payloads (e.g. raw YAML source for the case-type editor). Error envelopes are
+ * still parsed as JSON — only success bodies are read as text.
+ */
+export async function apiFetchText(path: string, init: RequestInit = {}): Promise<string> {
+  const headers = new Headers(init.headers);
+  const response = await fetch(path, { ...init, headers, credentials: 'include' });
+  const correlationId = response.headers.get('X-Correlation-Id');
+  if (response.status === 401 && path !== LOGIN_PATH) {
+    sessionBus.emit({ requestPath: path });
+  }
+  if (response.ok) {
+    return await response.text();
+  }
+  let errorBody: ApiErrorEnvelope | null = null;
+  try {
+    errorBody = (await response.json()) as ApiErrorEnvelope;
+  } catch {
+    errorBody = null;
+  }
+  const errors = (errorBody?.error as { errors?: ApiEnvelopeError[] } | undefined)?.errors;
+  throw new ApiError({
+    status: response.status,
+    code: errorBody?.error.code ?? `WKS-API-${response.status}`,
+    message: errorBody?.error.message ?? response.statusText,
+    field: errorBody?.error.field ?? null,
+    correlationId,
+    envelopeErrors: Array.isArray(errors) ? errors : null,
+  });
+}
