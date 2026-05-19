@@ -300,6 +300,25 @@ public class AdminController {
         .body(record.rawYaml());
   }
 
+  /**
+   * Returns the Draft 2020-12 meta-schema describing the case-type YAML grammar — i.e. what fields
+   * may appear in a case-type file. Static resource served as {@code application/schema+json}.
+   * Powers Monaco YAML IntelliSense in the in-UI editor.
+   */
+  @GetMapping(path = "/case-types/meta-schema", produces = "application/schema+json")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(
+      summary = "JSON Schema describing the case-type YAML grammar (for editor IntelliSense)")
+  public ResponseEntity<byte[]> caseTypeMetaSchema() throws java.io.IOException {
+    try (var in =
+        new org.springframework.core.io.ClassPathResource("schema/case-type.meta-schema.json")
+            .getInputStream()) {
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CACHE_CONTROL, "public, max-age=300")
+          .body(in.readAllBytes());
+    }
+  }
+
   // -------------------------------------------------------------------------
   // Story 3.9 — Rebase endpoints
   // -------------------------------------------------------------------------

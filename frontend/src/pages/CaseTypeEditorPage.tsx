@@ -1,24 +1,30 @@
 import Editor, { loader } from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import { configureMonacoYaml } from 'monaco-yaml';
+import yamlWorker from 'monaco-yaml/yaml.worker?worker';
 import { ArrowLeft, Loader2, Save } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError } from '@/api/client';
-import { deployCaseType, getCaseTypeSource } from '@/api/caseTypes';
+import { deployCaseType, getCaseTypeMetaSchema, getCaseTypeSource } from '@/api/caseTypes';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { toast } from '@/components/ui/Toaster';
 
 if (typeof self !== 'undefined') {
   self.MonacoEnvironment = {
-    getWorker() {
+    getWorker(_, label) {
+      if (label === 'yaml') return new yamlWorker();
       return new editorWorker();
     },
   };
 }
 loader.config({ monaco });
+
+const META_SCHEMA_URI = 'wks://schema/case-type.meta-schema.json';
+let metaSchemaConfigured = false;
 
 interface ValidationError {
   code: string;
@@ -40,9 +46,21 @@ export function CaseTypeEditorPage() {
     if (!caseTypeId) return;
     let cancelled = false;
     setLoading(true);
-    getCaseTypeSource(caseTypeId)
-      .then((source) => {
+    Promise.all([
+      getCaseTypeSource(caseTypeId),
+      metaSchemaConfigured ? Promise.resolve(null) : getCaseTypeMetaSchema().catch(() => null),
+    ])
+      .then(([source, schema]) => {
         if (cancelled) return;
+        if (!metaSchemaConfigured && schema) {
+          configureMonacoYaml(monaco, {
+            validate: true,
+            hover: true,
+            completion: true,
+            schemas: [{ uri: META_SCHEMA_URI, fileMatch: ['*'], schema: schema as object }],
+          });
+          metaSchemaConfigured = true;
+        }
         setYaml(source);
         setDirty(false);
         setErrors([]);

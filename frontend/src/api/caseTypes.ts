@@ -22,6 +22,16 @@ export async function getCaseTypeSource(id: string): Promise<string> {
   return apiFetchText(`/api/admin/case-types/${encodeURIComponent(id)}/source`);
 }
 
+/**
+ * `GET /api/admin/case-types/meta-schema` — Draft 2020-12 JSON Schema describing the case-type
+ * YAML grammar (what fields may appear in the file). Distinct from the per-case data schema in
+ * `JsonSchemaGenerator`. ADMIN-only. Powers Monaco YAML IntelliSense in the editor.
+ */
+export async function getCaseTypeMetaSchema(): Promise<unknown> {
+  const text = await apiFetchText('/api/admin/case-types/meta-schema');
+  return JSON.parse(text);
+}
+
 export interface DeployResponse {
   caseTypeId: string;
   version: number;

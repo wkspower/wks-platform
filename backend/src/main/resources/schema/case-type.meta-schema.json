@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wks-platform.dev/schema/case-type.meta-schema.json",
+  "title": "WKS Case-Type Configuration",
+  "description": "Meta-schema for a case-type YAML — what may appear in the file edited by the in-UI Case-Type Editor. Drives Monaco YAML IntelliSense (autocomplete, hover, validation).",
+  "type": "object",
+  "required": ["id", "displayName", "fields"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Stable kebab-case identifier. Must be unique across the deployment."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable name shown in the case list and headers."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Author-supplied version. The registry assigns the authoritative version on deploy and overrides this."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional free-text description shown in admin tooling."
+    },
+    "defaultFieldEditability": {
+      "type": "string",
+      "enum": ["editableByDefault", "lockedByDefault"],
+      "description": "Top-level policy for fields that omit `editableBy`. `editableByDefault` (default) leaves them unrestricted; `lockedByDefault` makes them read-only unless `editableBy` is declared."
+    },
+    "workflow": {
+      "type": "object",
+      "description": "Optional BPMN attachment. When omitted, the case type advances stages manually with no engine involvement.",
+      "additionalProperties": false,
+      "required": ["bpmn"],
+      "properties": {
+        "bpmn": {
+          "type": "string",
+          "description": "Path to the BPMN file, relative to this YAML's parent directory."
+        },
+        "processKey": {
+          "type": "string",
+          "description": "Optional BPMN process key. When omitted the deployer infers it from the BPMN."
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "description": "Roles declared for this case type. Each role enumerates the verbs it can perform.",
+      "items": {
+        "type": "object",
+        "required": ["name", "permissions"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Role identifier (referenced by `editableBy: [role:<name>]`)."
+          },
+          "permissions": {
+            "type": "array",
+            "description": "Allowed verbs for this role.",
+            "items": {
+              "type": "string",
+              "enum": ["view", "create", "edit", "transition", "delete", "comment"]
+            }
+          }
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "description": "Field definitions for the case `data` payload.",
+      "items": { "$ref": "#/$defs/field" }
+    },
+    "statuses": {
+      "type": "array",
+      "description": "Status definitions. When omitted the validator injects [open, closed].",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Status identifier." },
+          "displayName": { "type": "string" },
+          "color": {
+            "type": "string",
+            "enum": ["gray", "blue", "green", "yellow", "orange", "red", "purple"]
+          },
+          "initial": { "type": "boolean", "description": "True for the starting status." },
+          "terminal": { "type": "boolean", "description": "True for terminal statuses." }
+        }
+      }
+    },
+    "listColumns": {
+      "type": "array",
+      "description": "Field ids surfaced as columns in the case list view.",
+      "items": { "type": "string" }
+    },
+    "stages": {
+      "type": "array",
+      "description": "Stage definitions. Optional — stage-less case types omit this entirely.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "initialStatus": { "type": "string", "description": "Optional initial status when entering this stage." },
+          "statuses": {
+            "type": "array",
+            "description": "Stage-scoped status list. Falls back to the top-level statuses when omitted.",
+            "items": { "$ref": "#/properties/statuses/items" }
+          }
+        }
+      }
+    },
+    "forms": {
+      "type": "array",
+      "description": "Form definitions for submit / draft surfaces.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "stage": { "type": "string", "description": "Stage id this form is scoped to." },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "fields": {
+                  "type": "array",
+                  "items": { "type": "string", "description": "Field id." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["id", "displayName", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Field identifier — snake_case."
+        },
+        "displayName": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["text", "textarea", "email", "number", "date", "select", "checkbox", "file"],
+          "description": "Field kind. Drives the rendered control and the per-case JSON Schema."
+        },
+        "required": { "type": "boolean", "description": "Required on form submit." },
+        "requiredOnCreate": { "type": "boolean", "description": "Required when the create-case dialog asks for it. Defaults to `required`." },
+        "order": { "type": "integer", "minimum": 0, "description": "Sort order on the form." },
+        "minLength": { "type": "integer", "minimum": 0, "description": "text / textarea / email only." },
+        "maxLength": { "type": "integer", "minimum": 1, "description": "text / textarea / email only." },
+        "min": { "type": "number", "description": "number only." },
+        "max": { "type": "number", "description": "number only." },
+        "options": {
+          "type": "array",
+          "description": "select only.",
+          "items": {
+            "type": "object",
+            "required": ["value"],
+            "additionalProperties": false,
+            "properties": {
+              "value": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "editableBy": {
+          "type": "array",
+          "description": "Role allow-list for write authorization. Entries shaped `role:<roleId>`.",
+          "items": { "type": "string", "pattern": "^role:[a-z][a-z0-9_-]*$" }
+        }
+      }
+    }
+  }
+}
