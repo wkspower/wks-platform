@@ -42,4 +42,6 @@ public class Task {
 	protected String due;
 	protected String followUp;
 
+	protected String completionNotes;
+
 }
