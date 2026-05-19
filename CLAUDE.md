@@ -36,7 +36,7 @@ wks-platform/
 2. **`engine/` is the only package that imports CIB seven.** Other code goes through `domain/port/WorkflowEngine`.
 3. **API controllers are thin.** Validate input, call domain service, return response. No business logic in controllers.
 4. **JPA entities are separate from domain models.** `infrastructure/persistence/` bridges JPA and domain. Domain models never have `@Entity`.
-5. **Stage transitions are BPMN-only.** YAML defines stage names/metadata; BPMN defines transition rules. Every case type has a BPMN process.
+5. **Workflow is optional and pluggable.** A case type may attach a BPMN process (via a `workflow:` block in its YAML) to drive stage transitions; if absent, stages advance manually via the domain service. `CaseService.transition` branches on the case's `processInstanceId`: present → route through `WorkflowEngine`; null/blank → update status directly. The BPMN engine (CIB seven) is a plug-in, not the spine.
 6. **Config-driven rendering.** YAML case-type config generates JSON Schema server-side. Frontend renders forms/tables/filters from that schema.
 
 ## Tech stack
@@ -121,4 +121,5 @@ Rules: append-only (never edit a committed migration); no conditional SQL inside
 - **Startup scan**: on `ApplicationReadyEvent`, every `*.yaml|*.yml` is parsed and validated. Invalid files log one WARN per error and are skipped; startup continues.
 - **Fail-fast**: `WKS_CASE_TYPES_FAIL_ON_INVALID=true` aborts the context on any invalid file.
 - **Validation philosophy**: collect-all — the validator returns every violation, never throws, never stops at the first failure.
-- **BPMN deploy**: `workflow.bpmn` is a path relative to the YAML file's parent directory. `POST /api/admin/deploy` is multipart (`caseType` + `bpmn`), each capped at 1 MB; `ROLE_ADMIN` required. Every `bpmn:userTask` must declare exactly one archetype (`draft_section` / `submit_for_processing` / `business_final`) via `<camunda:property name="archetype" value="..."/>`.
+- **Optional BPMN attachment**: a case type's `workflow:` block is optional. When omitted, the case type runs without a process instance; stages advance manually via the domain service. When present, `workflow.bpmn` is a path relative to the YAML file's parent directory.
+- **Deploy endpoint**: `POST /api/admin/deploy` is multipart (`caseType` required, `bpmn` optional), each capped at 1 MB; `ROLE_ADMIN` required. When a BPMN is attached, every `bpmn:userTask` must declare exactly one archetype (`draft_section` / `submit_for_processing` / `business_final`) via `<camunda:property name="archetype" value="..."/>`.

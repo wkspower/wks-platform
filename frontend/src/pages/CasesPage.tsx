@@ -4,15 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { BulkActionBar } from '@/components/cases/BulkActionBar';
-import { CaseDetailBody } from '@/components/cases/CaseDetailBody';
+import { FilterBar } from '@/components/cases/FilterBar';
+import { NewCaseDialog } from '@/components/cases/NewCaseDialog';
 import {
   ASSIGNEE_FIELD_ID,
+  CaseDetailBody,
   CasesTable,
   STATUS_FIELD_ID,
   type InlineEditTarget,
-} from '@/components/cases/CasesTable';
-import { FilterBar } from '@/components/cases/FilterBar';
-import { NewCaseDialog } from '@/components/cases/NewCaseDialog';
+} from '@/lib/wks-components';
 import { RecordDrawer } from '@/components/chrome/RecordDrawer';
 import { ShortcutsOverlay } from '@/components/chrome/ShortcutsOverlay';
 import { Button } from '@/components/ui/Button';

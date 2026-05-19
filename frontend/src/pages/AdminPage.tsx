@@ -53,10 +53,10 @@ export function AdminPage() {
                   </div>
                 </div>
                 <Link
-                  to={`/admin/mapping-inspector/${encodeURIComponent(t.id)}`}
+                  to={`/admin/case-types/${encodeURIComponent(t.id)}/edit`}
                   className="inline-flex items-center gap-1 text-[12px] text-[var(--primary)] hover:underline"
                 >
-                  Mapping inspector <ChevronRight className="size-3" />
+                  Edit YAML <ChevronRight className="size-3" />
                 </Link>
               </li>
             ))}

@@ -6,7 +6,7 @@ import {
   InlineSelectEditor,
   InlineTextEditor,
   isInlineEditableField,
-} from '@/components/cases/InlineEditCell';
+} from './InlineEditCell';
 import { Avatar } from '@/components/ui/Avatar';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { StatusBadge } from '@/components/ui/StatusBadge';

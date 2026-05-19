@@ -75,7 +75,10 @@ public class SecurityConfig {
     boolean exposeOpenApi = !production || openApiEnabledInProduction;
 
     return http.cors(cors -> cors.configurationSource(corsConfigurationSource))
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+        // /h2-console is a dev-only path (the H2 console autoconfig is excluded under the
+        // production profile via application-production.yml). Exempting it from CSRF here is
+        // a no-op in production because the path 404s.
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
         // SPA + API ship from the same JAR (same origin); the Documents tab frames
         // /api/documents/{id}/download?inline=true to preview PDFs. Default DENY blocks
         // that. Broader headers pass (CSP frame-ancestors, Referrer-Policy, etc.) is

@@ -27,6 +27,15 @@ spring:
     username: sa
     password: ""
 
+  # H2 web console for the dev/evaluation profile (auto-excluded under production —
+  # see application-production.yml H2ConsoleAutoConfiguration exclusion).
+  # Browse http://localhost:8080/h2-console with JDBC URL
+  # jdbc:h2:file:./data/wksplatform / user: sa / no password.
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   jpa:
     open-in-view: false
     hibernate:

@@ -9,7 +9,6 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { FormPage } from '@/pages/FormPage';
 import { LicenseStatusPage } from '@/pages/LicenseStatusPage';
 import { LoginPage } from '@/pages/LoginPage';
-import { MappingInspectorPage } from '@/pages/MappingInspectorPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { TasksPage } from '@/pages/TasksPage';
 import { useAuthStore } from '@/stores/authStore';
@@ -74,7 +73,13 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin', element: <AdminPage /> },
           { path: '/admin/license', element: <LicenseStatusPage /> },
-          { path: '/admin/mapping-inspector/:caseTypeId', element: <MappingInspectorPage /> },
+          {
+            path: '/admin/case-types/:caseTypeId/edit',
+            lazy: () =>
+              import('@/pages/CaseTypeEditorPage').then((m) => ({
+                Component: m.CaseTypeEditorPage,
+              })),
+          },
         ],
       },
     ],

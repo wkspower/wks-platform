@@ -22,6 +22,7 @@ import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
 import com.wkspower.platform.domain.exception.WksNotFoundException;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
@@ -51,6 +52,7 @@ class AdminControllerRebaseTest {
   @Autowired private MockMvc mockMvc;
   @MockitoBean private ConfigService configService;
   @MockitoBean private CaseRebaseService caseRebaseService;
+  @MockitoBean private CaseTypeVersionRegistry versionRegistry;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
   @MockitoBean private LicenseService licenseService;

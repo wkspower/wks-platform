@@ -1,11 +1,11 @@
 import { Hash } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { ActivityTab } from '@/components/cases/ActivityTab';
-import { DocumentsTab } from '@/components/cases/DocumentsTab';
-import { PropertiesTab } from '@/components/cases/PropertiesTab';
-import { StageTimeline } from '@/components/cases/StageTimeline';
-import { TasksTab } from '@/components/cases/TasksTab';
+import { ActivityTab } from './ActivityTab';
+import { DocumentsTab } from './DocumentsTab';
+import { PropertiesTab } from './PropertiesTab';
+import { StageTimeline } from './StageTimeline';
+import { TasksTab } from './TasksTab';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';

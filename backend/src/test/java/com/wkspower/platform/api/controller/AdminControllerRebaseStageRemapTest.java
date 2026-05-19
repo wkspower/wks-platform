@@ -19,6 +19,7 @@ import com.wkspower.platform.domain.config.rebase.CaseRebaseReport.StatusMapping
 import com.wkspower.platform.domain.exception.ErrorCode;
 import com.wkspower.platform.domain.exception.ErrorDetail;
 import com.wkspower.platform.domain.exception.WksConfigException;
+import com.wkspower.platform.domain.port.CaseTypeVersionRegistry;
 import com.wkspower.platform.domain.port.UserRepository;
 import com.wkspower.platform.domain.service.CaseRebaseService;
 import com.wkspower.platform.domain.service.ConfigService;
@@ -56,6 +57,7 @@ class AdminControllerRebaseStageRemapTest {
   @Autowired private MockMvc mockMvc;
   @MockitoBean private ConfigService configService;
   @MockitoBean private CaseRebaseService caseRebaseService;
+  @MockitoBean private CaseTypeVersionRegistry versionRegistry;
   @MockitoBean private JwtTokenProvider jwtTokenProvider;
   @MockitoBean private UserRepository userRepository;
   @MockitoBean private LicenseService licenseService;
