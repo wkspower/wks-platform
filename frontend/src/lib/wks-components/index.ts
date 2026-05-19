@@ -9,12 +9,7 @@
  */
 export { ActivityTab } from './ActivityTab';
 export { CaseDetailBody } from './CaseDetailBody';
-export {
-  ASSIGNEE_FIELD_ID,
-  CasesTable,
-  STATUS_FIELD_ID,
-  type InlineEditTarget,
-} from './CasesTable';
+export { ASSIGNEE_FIELD_ID, CasesTable, STATUS_FIELD_ID, type InlineEditTarget } from './CasesTable';
 export { DocumentsTab } from './DocumentsTab';
 export {
   InlineFieldEditor,

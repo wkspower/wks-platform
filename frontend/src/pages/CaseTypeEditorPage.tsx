@@ -72,9 +72,7 @@ export function CaseTypeEditorPage() {
       setBumpVersion(false);
     } catch (err) {
       if (err instanceof ApiError) {
-        const aggregate = err.envelopeErrors ?? [
-          { code: err.code, message: err.message, field: err.field },
-        ];
+        const aggregate = err.envelopeErrors ?? [{ code: err.code, message: err.message, field: err.field }];
         setErrors(aggregate);
         toast({ tone: 'error', message: `${err.code}: ${err.message}` });
       } else {
@@ -144,7 +142,7 @@ export function CaseTypeEditorPage() {
           <Editor
             value={yaml}
             language="yaml"
-            theme="vs-dark"
+            theme="light"
             options={{
               minimap: { enabled: false },
               fontSize: 13,

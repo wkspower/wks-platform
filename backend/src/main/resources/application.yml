@@ -35,6 +35,11 @@ spring:
     console:
       enabled: true
       path: /h2-console
+      # Dev/eval only: accept connections from outside localhost so the console
+      # works through Docker port forwarding (request appears to come from the
+      # bridge network IP, not 127.0.0.1). Production excludes H2 entirely.
+      settings:
+        web-allow-others: true
 
   jpa:
     open-in-view: false
