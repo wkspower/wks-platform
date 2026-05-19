@@ -8,8 +8,8 @@
 #   ./deploy/wks-deploy.sh <client-slug>
 #
 # Reads deploy/clients/<slug>/client.env, renders the per-client compose
-# template, places the license file, brings up the stack, polls /api/health,
-# and runs the runtime ZERO-tenant_id invariant probe.
+# template, places the license file, brings up the stack, and polls
+# /api/health.
 #
 # Idempotent: re-running on an existing slug performs `docker compose up -d`
 # and exits 0 once health + invariant probe pass.
@@ -28,8 +28,8 @@ usage() {
 Usage: ./deploy/wks-deploy.sh <client-slug>
 
 Phase-0 per-client deploy driver. Reads deploy/clients/<slug>/client.env,
-renders the compose template, brings up the stack, and runs the runtime
-ZERO-tenant_id invariant probe. See ${RUNBOOK} for the full procedure.
+renders the compose template, and brings up the stack. See ${RUNBOOK} for
+the full procedure.
 USAGE
 }
 
@@ -95,14 +95,6 @@ REQUIRED_KEYS=(
 )
 
 # --- Step 2: validate keys + values ----------------------------------------
-# Defence-in-depth scan: reject tenant_id / tenantId anywhere in the env file
-# (D25 invariant surfaced at deploy time, mirroring backend/.ci/check-tenant-invariant.sh).
-if grep -E '(tenant_id|tenantId|@TenantId)' "$ENV_FILE" >/dev/null; then
-  echo "ERROR: ${ENV_FILE} contains a tenant_id-like identifier." >&2
-  echo "       Forbidden by Decision 25 (Zero tenant_id invariant). See docs/zero-tenant-id.md." >&2
-  exit 1
-fi
-
 # Build the set of declared keys. Any KEY=VAL or KEY= line counts; comments and
 # blanks are ignored. envsubst will read the live shell environment, so we
 # `set -a; source; set +a` to export them; but we first lint the file shape.
@@ -220,15 +212,7 @@ if [[ $healthy -ne 1 ]]; then
 fi
 echo "Health OK: ${HEALTH_URL}"
 
-# --- Step 6: runtime invariant probe ----------------------------------------
-PROBE="deploy/probes/check-runtime-no-tenant-id.sh"
-if ! "$PROBE" "http://localhost:${WKS_HOST_PORT}"; then
-  echo "ERROR: runtime ZERO-tenant_id invariant probe FAILED." >&2
-  echo "       See Decision 25 / docs/zero-tenant-id.md." >&2
-  exit 1
-fi
-
-# --- Step 7: emit handover summary -----------------------------------------
+# --- Step 6: emit handover summary -----------------------------------------
 echo ""
 echo "================================================================="
 echo "Deploy OK for client: ${SLUG}"

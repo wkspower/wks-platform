@@ -4,7 +4,7 @@ description: One-command per-client deployment — from zero to a running WKS in
 gate: "3"
 ---
 
-A local demo proves the concept. A production deployment proves it to your client. WKS is designed for isolated per-client instances: one Postgres database, one MinIO object-store, one URL, one license — no shared infrastructure, no `tenant_id`, no row-level gymnastics. Each deployment is a three-container stack you bring up with a single `docker compose` command.
+A local demo proves the concept. A production deployment proves it to your client. WKS is designed for isolated per-client instances: one Postgres database, one MinIO object-store, one URL, one license — no shared infrastructure. Each deployment is a three-container stack you bring up with a single `docker compose` command.
 
 ## Quick start
 
@@ -26,7 +26,7 @@ openssl rand -base64 48   # use for WKS_JWT_SECRET (needs ≥32 bytes after deco
 
 ## docker-compose example
 
-The compose file at `docker/docker-compose.prod.yml` is the authoritative single-tenant production surface. It brings up three services:
+The compose file at `docker/docker-compose.prod.yml` is the authoritative per-instance production surface. It brings up three services:
 
 ```yaml
 services:

@@ -1,8 +1,6 @@
 # WKS Platform — Docker
 
-Two compose files cover single-tenant operator surfaces: a zero-config dev stack (`docker-compose.yml`) and a single-tenant production stack (`docker-compose.prod.yml`, Postgres + MinIO + WKS app). An optional Keycloak SSO seam stacks on top of production via `docker-compose.sso.yml`. Per-client / multi-instance deployments live at [`deploy/`](../deploy/) (Story 14.7).
-
-Architecture reference: zero `tenant_id` invariant — see [`docs/zero-tenant-id.md`](../docs/zero-tenant-id.md).
+Two compose files cover per-instance operator surfaces: a zero-config dev stack (`docker-compose.yml`) and a per-instance production stack (`docker-compose.prod.yml`, Postgres + MinIO + WKS app). An optional Keycloak SSO seam stacks on top of production via `docker-compose.sso.yml`. Per-client / multi-instance deployments live at [`deploy/`](../deploy/) (Story 14.7).
 
 ## Dev quick-start (zero env vars)
 
@@ -24,7 +22,7 @@ The H2 console is disabled under the production profile (`H2ConsoleAutoConfigura
 
 For desktop tools (DBeaver / DataGrip / IntelliJ), the backend must be stopped first — H2 holds an exclusive lock on the file in this configuration. Stop the backend, point the desktop client at the same JDBC URL above (using an absolute path), browse, then restart the backend. Inside Docker the file lives in the `wks-data` named volume; the in-app `/h2-console` is the easiest SQL path for that case.
 
-## Production quick-start (single-tenant, Postgres + MinIO)
+## Production quick-start (per-instance, Postgres + MinIO)
 
 ```bash
 cp docker/.env.production.example docker/.env
@@ -40,7 +38,7 @@ Brings up:
 
 The application waits for Postgres + MinIO healthchecks before booting. `/api/health` returns 200 once Flyway has migrated the schema. Story 14.1 hard-overrides the production datasource driver to `org.postgresql.Driver` — no H2 entanglement on the production classpath (verified in CI by the `production-profile-smoke` job).
 
-The `docker/.env` file is gitignored (Story 14.1.1 fix-up — no longer tracked). `.env.production.example` is the tracked template. Per Decision 25, neither file may carry `tenant_id` / `tenantId` — customer identity lives in the license file (Decision 24, Epic 7), not in domain rows or env config.
+The `docker/.env` file is gitignored (Story 14.1.1 fix-up — no longer tracked). `.env.production.example` is the tracked template. Customer identity lives in the license file (Decision 24, Epic 7).
 
 ## Optional SSO seam (Keycloak)
 
@@ -70,9 +68,9 @@ Every value marked `<MUST-BE-ROTATED>` in `docker/.env.production.example` is a 
 
 Failed validation aborts startup with a multi-line `WKS-API-055` log entry naming every offending var. Rotate, restart, repeat.
 
-## Multi-tenant on same host (Story 14.1.1 AC8)
+## Multiple instances on same host (Story 14.1.1 AC8)
 
-Operators running multiple single-tenant 14.1 instances on one host MUST set `COMPOSE_PROJECT_NAME` per deploy. Compose scopes named volumes and container names by project; without distinct project names, two deploys share the `wks-pgdata` / `wks-miniodata` volumes and clobber each other.
+Operators running multiple per-instance 14.1 deploys on one host MUST set `COMPOSE_PROJECT_NAME` per deploy. Compose scopes named volumes and container names by project; without distinct project names, two deploys share the `wks-pgdata` / `wks-miniodata` volumes and clobber each other.
 
 ```bash
 # First deploy.
@@ -100,8 +98,7 @@ For per-client / multi-instance rollback (different naming convention), see [`do
 
 ## Cross-references
 
-- **Per-client deployment** (Story 14.7): [`deploy/`](../deploy/) — driver script `wks-deploy.sh`, per-client compose template, runtime invariant probe. Same env-var contract as this single-tenant surface; service/volume/network names are slug-suffixed per client.
+- **Per-client deployment** (Story 14.7): [`deploy/`](../deploy/) — driver script `wks-deploy.sh`, per-client compose template. Same env-var contract as this per-instance surface; service/volume/network names are slug-suffixed per client.
 - **Architecture Decision 8** — production-profile contract, env-only secrets, single-image multi-stage build.
-- **Architecture Decision 25** — ZERO `tenant_id` invariant in any compose value or env file.
 - **Architecture Decision 24** — license file delivers customer identity (Epic 7).
 - **Story 14.1** — discharges Story 14.7 §8 / WKS-API-053 H2/Postgres bug; this profile is the canonical hardened production env contract.

@@ -59,7 +59,7 @@ WKS is designed for **one isolated environment per client deployment**. Each cli
 - Their own URL
 - Their own license file
 
-There is no `tenant_id` in the data model, no row-level security, and no shared-database multi-tenancy. This is an architectural invariant — not a configuration option.
+There is no row-level security or shared-database multi-tenancy — each deployment is its own environment.
 
 The practical consequence for a client evaluation: the data you put into a WKS instance is not shared with any other client's instance. Backup, restore, and data deletion all reduce to operating on a single environment. GDPR deletion for a client is "delete the environment."
 

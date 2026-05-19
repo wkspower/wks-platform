@@ -1,7 +1,7 @@
 # CI — fast lane (PR + v2-develop push).
-# Backend (-Pfast-it skips *PostgresIT), frontend, tenant-invariant,
-# deploy-runbook, docker-build. Full Postgres-IT and production-profile-smoke
-# run in ci-full.yml (nightly + PR-to-main + on-demand).
+# Backend (-Pfast-it skips *PostgresIT), frontend, deploy-runbook,
+# docker-build. Full Postgres-IT and production-profile-smoke run in
+# ci-full.yml (nightly + PR-to-main + on-demand).
 name: CI
 
 on:
@@ -79,14 +79,6 @@ jobs:
             exit 1
           fi
 
-  tenant-invariant:
-    name: Tenant invariant (D25)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Scan protected packages
-        run: ./backend/.ci/check-tenant-invariant.sh
-
   deploy-runbook:
     name: Deploy runbook (Story 14.7)
     runs-on: ubuntu-latest
@@ -99,7 +91,7 @@ jobs:
           sudo apt-get install -y shellcheck gettext-base
 
       - name: Shellcheck deploy scripts
-        run: shellcheck deploy/wks-deploy.sh deploy/probes/check-runtime-no-tenant-id.sh
+        run: shellcheck deploy/wks-deploy.sh
 
       - name: Render compose template against fixture
         env:
@@ -115,44 +107,6 @@ jobs:
             < deploy/templates/docker-compose.client.yml.template \
             > /tmp/wks-fixture/docker-compose.yml
           docker compose -f /tmp/wks-fixture/docker-compose.yml config -q
-
-      - name: Tenant invariant scan — operator surfaces (deploy/clients/, docker/.env*, application-production.yml)
-        # Story 14.7 AC9.3 (extended by Story 14.1 AC8): dedicated scan of
-        # operator-supplied env files + the production-profile YAML where
-        # tenant_id leakage would be a real bug. Story 3.0's narrow Java/SQL
-        # lint is intentionally left untouched — see docs/ops/per-client-deploy-runbook.md
-        # and the Dev Notes block of 14-7-per-client-deploy-runbook.md for the
-        # rationale (deploy scripts + templates + runbook intentionally
-        # reference the forbidden tokens to ENFORCE the invariant).
-        #
-        # Story 14.1 extends the scan paths to cover the single-tenant
-        # production surface: docker/.env.production.example, the dev/prod/sso
-        # compose files, docker/README.md, and
-        # backend/src/main/resources/application-production.yml.
-        run: |
-          if grep -RIE '(tenant_id|tenantId|@TenantId)' \
-               --exclude-dir=_fixture \
-               deploy/clients 2>/dev/null; then
-            echo "Tenant invariant (D25) FAILED in deploy/clients/. See docs/zero-tenant-id.md." >&2
-            exit 1
-          fi
-          # Strip comment lines (env / YAML use `#`) — the AC4/AC8 mandatory
-          # header sentence intentionally references the forbidden tokens to
-          # ENFORCE the invariant; we scan VALUE-bearing lines only.
-          for f in docker/.env.production.example \
-                   docker/docker-compose.yml \
-                   docker/docker-compose.prod.yml \
-                   docker/docker-compose.sso.yml \
-                   backend/src/main/resources/application-production.yml; do
-            if grep -nE '^[[:space:]]*[^#[:space:]].*(tenant_id|tenantId|@TenantId)' "$f" 2>/dev/null; then
-              echo "Tenant invariant (D25) FAILED in $f (non-comment line). See docs/zero-tenant-id.md." >&2
-              exit 1
-            fi
-          done
-          echo "Operator-surface tenant invariant (D25) OK"
-
-      - name: Re-run Story 3.0 static lint
-        run: ./backend/.ci/check-tenant-invariant.sh
 
   docker-build:
     name: Docker image (build only, no push)

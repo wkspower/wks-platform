@@ -1,3 +1,0 @@
-# Allowlist for the Zero tenant_id invariant (Decision 25, Story 3.0).
-# Each entry MUST be preceded by a line: # story-X.Y: <reason>
-# Empty on adoption — verified clean by Story 3.0 AC4.
