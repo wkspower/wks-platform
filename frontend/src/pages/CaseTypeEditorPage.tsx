@@ -24,7 +24,16 @@ if (typeof self !== 'undefined') {
 loader.config({ monaco });
 
 const META_SCHEMA_URI = 'wks://schema/case-type.meta-schema.json';
-let metaSchemaConfigured = false;
+
+// Register the YAML language and attach monaco-yaml's providers at module load.
+// Schema is plugged in once fetched (see effect). Registering up-front guarantees that
+// when <Editor language="yaml"> mounts, the language id is known and completion providers
+// are already attached — no race between Editor.create and configureMonacoYaml.
+const monacoYaml =
+  typeof window === 'undefined'
+    ? null
+    : configureMonacoYaml(monaco, { validate: true, hover: true, completion: true, schemas: [] });
+let metaSchemaLoaded = false;
 
 interface ValidationError {
   code: string;
@@ -48,18 +57,26 @@ export function CaseTypeEditorPage() {
     setLoading(true);
     Promise.all([
       getCaseTypeSource(caseTypeId),
-      metaSchemaConfigured ? Promise.resolve(null) : getCaseTypeMetaSchema().catch(() => null),
+      metaSchemaLoaded
+        ? Promise.resolve(null)
+        : getCaseTypeMetaSchema().catch((err: unknown) => {
+            // Don't block YAML load on schema failure — log loudly so missing autocomplete
+            // is debuggable from devtools instead of silently degrading.
+            // eslint-disable-next-line no-console
+            console.error('[CaseTypeEditor] meta-schema fetch failed; autocomplete disabled', err);
+            return null;
+          }),
     ])
       .then(([source, schema]) => {
         if (cancelled) return;
-        if (!metaSchemaConfigured && schema) {
-          configureMonacoYaml(monaco, {
+        if (!metaSchemaLoaded && schema && monacoYaml) {
+          monacoYaml.update({
             validate: true,
             hover: true,
             completion: true,
             schemas: [{ uri: META_SCHEMA_URI, fileMatch: ['*'], schema: schema as object }],
           });
-          metaSchemaConfigured = true;
+          metaSchemaLoaded = true;
         }
         setYaml(source);
         setDirty(false);
