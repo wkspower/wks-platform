@@ -9,8 +9,8 @@ Copyright 2026 WKS Power Limited
 
 This runbook is the operational counterpart of two locked architecture decisions:
 
-- **Decision 24 — License / Feature-Flag Gating** (`_bmad-output/planning-artifacts/architecture.md` §889–930). License file is a signed JWT-style token (Ed25519). Customer identity = `licensee` claim. License is per-instance, never per-row.
-- **Decision 25 — One-Command Per-Client Deployment + ZERO `tenant_id`** (`architecture.md` §932–958). One isolated environment per customer (own Postgres + MinIO). Application invariant: no `tenant_id` in domain code. Phase-0 = this runbook + `deploy/wks-deploy.sh`. Phase-1 = Hetzner Cloud API automation (Story 15.1).
+- **License / Feature-Flag Gating.** License file is a signed JWT-style token (Ed25519). Customer identity = `licensee` claim. License is per-instance, never per-row.
+- **One-Command Per-Client Deployment + ZERO `tenant_id`.** One isolated environment per customer (own Postgres + MinIO). Application invariant: no `tenant_id` in domain code (see `docs/zero-tenant-id.md`). Phase-0 = this runbook + `deploy/wks-deploy.sh`. Phase-1 = Hetzner Cloud API automation (Story 15.1).
 
 The procedure is portable to any Linux host with Docker. The driver script is `deploy/wks-deploy.sh`. Read this whole document once before your first deploy — it is short.
 

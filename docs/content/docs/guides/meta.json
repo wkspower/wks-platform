@@ -1,13 +1,6 @@
 {
   "title": "Guides",
   "pages": [
-    "add-stages-to-your-case-type",
-    "different-statuses-per-phase",
-    "attach-a-bpmn-process",
-    "how-bpmn-signals-become-case-state",
-    "troubleshoot-deployment-errors",
-    "version-your-case-type",
-    "control-who-can-do-what",
-    "demo-to-a-client"
+    "troubleshoot-deployment-errors"
   ]
 }

@@ -2,9 +2,9 @@
 
 Case management platform for system integrators. OSS core (Apache 2.0). Embedded CIB seven (Camunda 7 fork) BPMN engine.
 
-## Project Status
+## Project status
 
-v2 is a full rewrite. v1 code is archived (tagged `v1-final`, on the `v1` branch). During v2 development, the active trunk is **`v2-develop`** (forked from `develop` at `v1-final`); `develop` stays frozen at v1 until a bulk merge-back decision. Feature branches target `v2-develop`, not `develop`.
+v2 is a full rewrite. v1 code is archived (tagged `v1-final`, on the `v1` branch). The active trunk for v2 work is **`v2-develop`**; `develop` stays frozen at v1 until a bulk merge-back decision. Feature branches target `v2-develop`.
 
 ## Architecture
 
@@ -24,304 +24,101 @@ wks-platform/
 │       ├── security/        (Spring Security, RBAC filter, JWT)
 │       └── audit/           (Cross-cutting audit logging via domain events)
 ├── frontend/                (Vite + React + TypeScript)
-│   ├── src/
-│   └── components/ui/       (Shadcn/ui owned-source components)
 ├── docker/                  (Compose files, Dockerfiles)
-├── templates/               (BFSI template: YAML + BPMN + sample data)
-├── specs/                   (OpenAPI, JSON Schema — auto-generated in Phase 0)
-└── docs/                    (Getting-started, config reference)
+├── deploy/                  (Per-client deploy script + templates)
+├── case-types/              (YAML case-type definitions loaded at boot)
+└── docs/                    (Fumadocs site + reference markdown)
 ```
 
-## Critical Architectural Rules
+## Critical architectural rules
 
-1. **`domain/` package has ZERO framework dependencies.** No Spring annotations, no JPA annotations, no CIB seven imports. Pure Java only. This is NFR36 — non-negotiable.
-2. **`engine/` is the ONLY package that imports CIB seven.** Engine abstractions go through `domain/port/WorkflowEngine`. NFR35.
+1. **`domain/` has zero framework dependencies.** No Spring, no JPA, no CIB seven imports. Pure Java only.
+2. **`engine/` is the only package that imports CIB seven.** Other code goes through `domain/port/WorkflowEngine`.
 3. **API controllers are thin.** Validate input, call domain service, return response. No business logic in controllers.
 4. **JPA entities are separate from domain models.** `infrastructure/persistence/` bridges JPA and domain. Domain models never have `@Entity`.
-5. **All stage transitions are BPMN-only.** YAML defines stage names/metadata. BPMN defines transition rules. Every case type has a BPMN process.
-6. **Config-driven rendering.** YAML case type config generates JSON Schema server-side. Frontend renders forms/tables/filters from that schema. No hardcoded UI for case-specific fields.
+5. **Stage transitions are BPMN-only.** YAML defines stage names/metadata; BPMN defines transition rules. Every case type has a BPMN process.
+6. **Config-driven rendering.** YAML case-type config generates JSON Schema server-side. Frontend renders forms/tables/filters from that schema.
 
-## Tech Stack
+## Tech stack
 
-### Backend
-- Java 21 (required — compiler target `--release 21`; virtual threads for SSE)
-- Spring Boot 3.x
-- CIB seven (embedded, Spring Boot starter)
-- JPA/Hibernate + Flyway migrations
-- H2 (dev/eval, zero config) + PostgreSQL (production)
-- Argon2id password hashing
-- JWT in httpOnly cookies (not localStorage)
-- SLF4J + Logback structured JSON logging
+**Backend:** Java 21, Spring Boot 3.x, embedded CIB seven, JPA/Hibernate + Flyway, H2 (dev) + PostgreSQL (prod), Argon2id, JWT in httpOnly cookies, SLF4J + Logback JSON.
 
-### Frontend
-- Vite + React + TypeScript
-- Tailwind CSS + Shadcn/ui
-- TanStack Query (server state) + Zustand (client state)
-- TanStack Table (config-driven dynamic columns)
-- React Hook Form + Zod (forms)
-- React Router
-- Native `fetch` (no axios) + native `EventSource` (SSE)
-- `t(key)` function for i18n (JSON resource bundles, no framework in Phase 0)
+**Frontend:** Vite + React + TypeScript, Tailwind + Shadcn/ui, TanStack Query + Zustand, TanStack Table, React Hook Form + Zod, React Router, native `fetch` + native `EventSource`.
 
-### Infrastructure
-- Multi-stage Dockerfile: Node (vite build) -> Maven (package) -> JRE slim
-- GitHub Actions CI
-- JUnit 5 + Spring Boot Test + H2 (backend tests)
-- Vitest + React Testing Library (frontend tests)
-- Testcontainers for Postgres integration tests
-- ghcr.io for Docker image publishing
+**Infra:** Multi-stage Dockerfile (Node → Maven → JRE slim), GitHub Actions CI, JUnit 5 + Spring Boot Test (backend), Vitest + RTL (frontend), Testcontainers for Postgres ITs, ghcr.io for image publishing.
 
-## API Conventions
+## API conventions
 
 - Envelope: `{ data, error, meta }`
-- Error format: `{ error: { code: "WKS-CFG-003", message: "...", field: "..." } }`
-- Pagination: `?page=0&size=20` -> `meta: { total, page, size }`
-- Sorting: `?sort=updatedAt,desc`
-- Dates: ISO 8601
-- IDs: UUIDs
-- Auth: JWT in httpOnly cookie. 401 = expired/missing. 403 = insufficient permissions.
-- No API version prefix in Phase 0 (labeled v0/unstable)
-- springdoc-openapi auto-generates docs at `/swagger-ui`
+- Error format: `{ error: { code, message, field, line } }`. Collect all errors — never fail-on-first.
+- Pagination: `?page=0&size=20` → `meta: { total, page, size }`. Sort: `?sort=updatedAt,desc`.
+- Dates ISO 8601; IDs UUID; JWT in httpOnly cookie (401 = expired/missing, 403 = insufficient permissions).
+- springdoc-openapi at `/swagger-ui`.
 
-## Error Code Taxonomy
+Error code prefixes: `WKS-CFG-*` (config validation), `WKS-API-*` (input validation), `WKS-RTM-*` (runtime, e.g. `WKS-RTM-409` optimistic-lock conflict).
 
-- `WKS-CFG-001–009, 011, 099`: Case-type YAML validation (Story 2.1)
-- `WKS-CFG-010, 012, 020, 021`: BPMN validation (Story 2.2 — variance from `architecture.md`
-  §Decision 14 which lists `100..199`; we use the contiguous `010..099` band per the epic AC, so
-  all deploy-time validation codes stay below 100. Architecture doc gets a follow-up patch.)
-- `WKS-CFG-200–299`: Template validation (reserved)
-- `WKS-API-001–099`: API input validation (`WKS-API-413` for multipart cap, Story 2.2)
-- `WKS-RTM-001–099`: Runtime errors (`WKS-RTM-409` optimistic-lock conflict, Story 2.3)
-- Error structure: `{ code, message, field, line }`
-- Collection pattern: collect ALL errors, never fail-on-first
+## Environment
 
-## Environment Variables
+Zero-config for dev (H2 + local storage + console logging). Production env:
+`WKS_DB_URL`, `WKS_DB_USER`, `WKS_DB_PASSWORD`, `WKS_STORAGE_ENDPOINT`, `WKS_STORAGE_KEY`, `WKS_ADMIN_EMAIL`, `WKS_ADMIN_PASSWORD`, `WKS_CORS_ORIGINS`, `WKS_LOCALE`.
 
-Zero-config for dev (H2 + local storage + console logging). Production:
-- `WKS_DB_URL`, `WKS_DB_USER`, `WKS_DB_PASSWORD`
-- `WKS_STORAGE_ENDPOINT`, `WKS_STORAGE_KEY`
-- `WKS_ADMIN_EMAIL`, `WKS_ADMIN_PASSWORD` (required on first boot in production)
-- `WKS_CORS_ORIGINS`
-- `WKS_LOCALE` (default `en-IN`)
-
-## Design System
-
-- CSS variables for all tokens — never hardcoded hex or spacing values
-- Colors: primary `#3B5BDB`, secondary `#22D3EE`, brand navy `#0B1437`, zinc neutral scale
-- Typography: Poppins (headings), Rubik (body), JetBrains Mono (code) — all self-hosted, zero CDN
-- Spacing: 4px base unit scale
-- Motion: fast 150ms, normal 300ms, slow 500ms
-- All animations respect `prefers-reduced-motion`
-
-## Dev Workflow
+## Dev workflow
 
 ```bash
-# Start everything (dev mode, zero config)
-cd docker && docker compose up
-
-# Backend only
-cd backend && ./mvnw spring-boot:run
-
-# Frontend only (hot reload)
-cd frontend && npm run dev
-
-# Run backend tests
-cd backend && ./mvnw test
-
-# Run frontend tests
-cd frontend && npm test
+cd docker && docker compose up        # everything, dev mode, zero config
+cd backend && ./mvnw spring-boot:run  # backend only
+cd frontend && npm run dev            # frontend hot reload
+cd backend && ./mvnw test             # backend tests
+cd frontend && npm test               # frontend tests
 ```
 
-## Local CI gate before opening a PR
+## Local CI gate before pushing
 
-**Rule:** Before pushing a branch and opening a PR, run **every** `run:` step the CI workflow (`.github/workflows/ci.yml`) executes, in the same order — not a curated subset. Skipping even one step produces avoidable CI failures that waste review cycles.
-
-Current CI step sequence (keep this list in sync with `ci.yml` — when the workflow adds a step, add it here in the same commit):
-
-```bash
-# Backend job
-cd backend && ./mvnw -B -ntp verify
-
-# Frontend job
-cd frontend
-npm ci                         # if deps changed
-npm run lint
-npm run format:check           # easy to forget — runs Prettier
-npm test
-npm run build
-find dist/assets -name '*.woff2' | wc -l   # must be >= 4 (Story 1.3 AC #13)
-
-# Docker job
-docker buildx build -f docker/Dockerfile -t wks:ci .
-```
-
-"Lint + test + build" is **not** the full set. `format:check` is a separate step and Prettier regressions only surface there. When in doubt, grep `ci.yml` for `run:` and copy every command verbatim.
-
-### Inner loop: `-Pfast-it` for between-iteration runs
-
-For any inner-loop iteration (human or agent) — dev-story work *between* commits, **review-fix sessions** responding to PR comments, and rebase-fix iterations — use:
-
-```bash
-cd backend && ./mvnw -B -ntp verify -Pfast-it
-```
-
-The `fast-it` Maven profile (defined in `backend/pom.xml`) excludes `**/*PostgresIT.java` from failsafe. That cuts ~11 Testcontainer-based ITs whose Docker startup dominates wall-clock (~2–5 min), bringing the inner loop from ~4–8 min to ~1–2 min. This matters most for agent dispatches, where long `verify` runs raise tool-call-ceiling risk and API 529 retry cost.
-
-**This is not a CI bypass.** Postgres ITs still run in CI on every push. The `.githooks/pre-push` hook runs `verify -Pfast-it` by default (skipping `*PostgresIT`) and is **path-scoped**: the backend block only fires when `backend/**` or `pom.xml` changed, and the frontend block only fires when `frontend/**` changed. A docs-only push runs neither.
-
-Overrides:
-- `WKS_SKIP_CI_LOCAL=1 git push` — skip the hook entirely (emergency).
-- `WKS_FULL_CI_LOCAL=1 git push` — force the full mirror: drop `-Pfast-it` and run both blocks regardless of paths. Use this before a release-candidate push or when you've touched anything that might affect Postgres-only behaviour (Flyway migrations under `postgresql/`, JSON column mapping, dialect-specific SQL).
-
-When adding a new `*PostgresIT.java` class, run that one class directly to verify it passes:
-
-```bash
-cd backend && ./mvnw -B -ntp failsafe:integration-test -Dit.test=NewPostgresIT
-```
-
-Filename convention: any IT that requires Testcontainers/Postgres MUST be named `*PostgresIT.java` so the profile excludes it. H2-based ITs use the plain `*IT.java` suffix.
-
-### Build-verification ladder — pick the lowest rung that answers your question
-
-`-Pfast-it` is the *full inner-loop verify*; it's still ~1–2 min. Don't run it after every edit. Each rung below costs ~5–10× the previous — climb only as high as the question requires:
-
-| Rung | Command | Cost | Use when |
-|---|---|---|---|
-| 0. None | _(no build)_ | 0s | Comment-only, Javadoc-only, rename-only, import-reorder edits. Spotless + commit hook catches the rest. |
-| 1. Compile | `./mvnw -q compile` | ~15–30s | "Did I break the build?" Catches syntax, missing imports, type errors. No tests run. |
-| 2. Targeted test class | `./mvnw -B -ntp -Dtest=ClassName test` | ~20–40s | Shaping a change while iterating on one test. Run only the test you're touching. |
-| 3. Fast-it verify | `./mvnw -B -ntp verify -Pfast-it` | ~1–2 min | "I think I'm done." Full unit + H2 IT surface. The gate before commit. |
-| 4. Full verify | `./mvnw -B -ntp verify` | ~4–8 min | Pre-push when you've touched Postgres-only surface (migrations under `postgresql/`, JSON columns, dialect SQL). Otherwise the hook handles this. |
-
-**Default for agents in review-fix loops:** rungs 1 → 2 → 3, in that order, climbing only when the lower rung passed. Jumping straight to rung 3 after every edit is the most common waste in agent dispatches.
-
-**Anti-pattern:** running rung 3 to verify a rung-0 change (e.g. `-Pfast-it verify` on a Javadoc edit). The verify will pass, but you paid ~3 min for zero signal that Spotless wouldn't already give you.
-
-### Frontend ladder — same principle, different toolchain
-
-Each individual frontend command is faster than its Maven counterpart, but the same trap exists: running `npm run build` to check a typo. Pick the lowest rung that answers your question:
-
-| Rung | Command (from `frontend/`) | Cost | Use when |
-|---|---|---|---|
-| 0. None | _(no command)_ | 0s | Comment-only edits, token-value tweaks in `src/styles/`, dead-file deletion. |
-| 1. Typecheck | `npx tsc --noEmit` | ~5–15s | "Did I break types?" Catches TS errors and missing imports without bundling. |
-| 2. Targeted test | `npx vitest run src/path/to/Foo.test.tsx` | ~5–20s | Iterating on one component/hook test. |
-| 3. Lint + test | `npm run lint && npm run format:check && npm test` | ~30–60s | "I think I'm done." The gate before commit. **Include `format:check`** — Prettier regressions surface nowhere else (see "Lint + test + build" note above). |
-| 4. Build | `npm run build` | ~30–90s | Pre-push when you've touched Vite-specific surface (asset imports, env vars, dynamic imports, bundling config). Otherwise the pre-push hook handles this. |
-
-**Anti-pattern:** running rung 4 (`npm run build`) to check whether a refactor compiles. Rung 1 (`tsc --noEmit`) answers that in a fraction of the time; the bundler step adds no signal beyond what tsc already gave you, unless you actually changed bundling-relevant surface.
-
-**Don't pipe build commands through `tail` / `head`.** The Bash tool already surfaces non-zero exit as a tool-error and gives you stdout. Trimming the output hides the exit signal the harness was already providing, which triggers a redundant second run just to confirm exit status — doubling the build cost for no information gain.
-
-**If rung 3 just passed and you haven't touched anything since, skip the push hook.** The pre-push hook re-runs rung 3 by default — that's a duplicate ~1–2 min for no signal if rung 3 was green against the exact tree you're pushing. In that case, push with:
-
-```bash
-WKS_SKIP_CI_LOCAL=1 git push
-```
-
-Conditions, all of which must hold:
-- Rung 3 (`verify -Pfast-it` for backend, `lint + format:check + test + build` for frontend) ran green in this session.
-- No files have been modified since (no edits, no rebase, no merge, no `git stash pop`, no branch switch).
-- The commit being pushed is the same SHA that was verified.
-
-**Disclosure required** ([[ci-skip-bypass-requires-ratify]]): when skipping, state it in the PR body — e.g. *"Pre-push hook skipped: rung 3 verified locally against HEAD `<sha>` at `<time>`, no touches since."* — and ask the caller to ratify. If any condition above is uncertain, don't skip; let the hook run.
-
-### Pre-push hook (one-time setup)
-
-A committed `pre-push` hook at `.githooks/pre-push` runs the full CI mirror automatically. Enable it once per clone:
+Mirror what CI runs (`.github/workflows/ci.yml`). A committed `pre-push` hook at `.githooks/pre-push` does this automatically — enable once per clone:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-Emergency bypass (use only if you know why): `WKS_SKIP_CI_LOCAL=1 git push`. Do **not** use `--no-verify` — the hook exists because the memory-backed "match CI locally" rule kept getting violated.
+Inner-loop verify (skips Postgres-only ITs): `cd backend && ./mvnw -B -ntp verify -Pfast-it`. Full mirror runs in CI on every push.
 
----
+Emergency bypass: `WKS_SKIP_CI_LOCAL=1 git push`. Force full mirror: `WKS_FULL_CI_LOCAL=1 git push` (use before release-candidate pushes or when touching Postgres-specific surface like Flyway migrations under `postgresql/`, JSON column mapping, or dialect SQL).
 
-## Security rules (Story 1.2)
+Filename convention: integration tests requiring Testcontainers/Postgres must be named `*PostgresIT.java`; H2-based ITs use plain `*IT.java`.
 
-- `JwtTokenProvider` is the **only** class allowed to import `io.jsonwebtoken.*` — ArchUnit enforces this.
-- `api/` and `security/` must not import `infrastructure.persistence.entity.*` — ArchUnit enforces this.
+## Security rules
 
-## Frontend rules (Story 1.3)
+- `JwtTokenProvider` is the **only** class allowed to import `io.jsonwebtoken.*` — enforced by ArchUnit.
+- `api/` and `security/` must not import `infrastructure.persistence.entity.*` — enforced by ArchUnit.
+- Zero `tenant_id` invariant — see `docs/zero-tenant-id.md`; enforced by `backend/.ci/check-tenant-invariant.sh`.
 
-- **Never `bg-[#…]` or raw px in style props** — ESLint's `no-restricted-syntax` rules ban hex literals and px values outside `src/styles/**` and tests. Reference tokens via Tailwind utilities (`bg-primary`) or `bg-[var(--token)]`.
-- **Single fetch entry point.** `src/api/client.ts` (`apiFetch`) is the only place allowed to call `fetch()`. The `api/no-direct-fetch.test.ts` greps the source tree to enforce it.
-- **MSW for all fetch mocking.** Per-test handlers go through `server.use(...)`; lifecycle is owned by `src/test/setup.ts`. Do not `vi.spyOn(globalThis, 'fetch')`.
-- **Use `renderWithProviders`** (`src/test/renderWithProviders.tsx`) for every component test — it owns MemoryRouter + QueryClientProvider + auth-store seeding.
-- **Self-hosted fonts only.** No `googleapis.com` / `gstatic.com` in `index.html` or `index.css` — guarded by `styles/fonts.test.ts`.
+## Frontend rules
+
+- No `bg-[#…]` or raw px in style props — ESLint bans hex literals and px values outside `src/styles/**` and tests. Use Tailwind utilities or `bg-[var(--token)]`.
+- Single fetch entry point: `src/api/client.ts` (`apiFetch`). Don't call `fetch()` directly from other files.
+- Self-hosted fonts only — no `googleapis.com` / `gstatic.com` in `index.html` or `index.css`.
+
+## Frontend testing
+
+- Vitest + jsdom + `@testing-library/react`. Default `npm test` runs the full suite; `npm run test:coverage` runs the ratchet.
+- `src/test/setup.ts` owns the global lifecycle: jest-dom matchers, `cleanup()` after each test, `restoreAllMocks`, and a `fetch` stub that throws — every test that touches the network must stub fetch explicitly with `vi.spyOn(globalThis, 'fetch')`.
+- `src/test/renderWithProviders` is the single component-render entry point — it wraps `MemoryRouter` + `QueryClientProvider` and seeds the auth store. Use it; don't hand-wire providers per test.
+- **Coverage ratchet** in `vite.config.ts` `test.coverage.thresholds`. CI runs `npm run test:coverage` and fails if any threshold drops. Raise thresholds when you add coverage; **never lower them**. New features land with their tests in the same PR — that's how the ratchet works.
 
 ## Flyway conventions
 
-Migrations live under `backend/src/main/resources/db/migration/` and are split by dialect:
+Migrations under `backend/src/main/resources/db/migration/`, split by dialect:
 
-```
-db/migration/
-├── common/         — runs on every profile (dialect-portable SQL only)
-├── h2/             — dev profile only (H2-specific variants)
-└── postgresql/     — production profile only (Postgres-specific variants)
-```
+- `common/` — runs on every profile (dialect-portable SQL only)
+- `h2/` — dev profile only
+- `postgresql/` — production profile only
 
-`spring.flyway.locations` picks the right pair per profile:
+Rules: append-only (never edit a committed migration); no conditional SQL inside scripts (split into dialect folders instead); `ALTER TABLE … ADD COLUMN IF NOT EXISTS` is portable across H2 ≥ 1.4 and Postgres ≥ 9.6; identifiers stay lowercase (H2 upper-cases unquoted identifiers by default).
 
-- Dev (`application.yml`): `classpath:db/migration/common,classpath:db/migration/h2`
-- Production (`application-production.yml`): `classpath:db/migration/common,classpath:db/migration/postgresql`
+## Case-type configuration
 
-**Rules**:
-
-- **Append-only.** Never edit a committed migration — add a new `V{YYYYMMDD}{seq}__…sql` file. The numeric date is lexicographic and avoids conflicts.
-- **No conditional SQL.** Don't branch on `CURRENT_SCHEMA` or database name inside a script — split into dialect folders instead. Conditional SQL is how the lowercase-identifier bug bites.
-- **Default location: `common/`.** Use dialect folders only when one database needs a genuine variant (e.g. `UUID` type, `CITEXT`, native JSON operators).
-- **`ALTER TABLE … ADD COLUMN IF NOT EXISTS`** is portable across H2 (≥ 1.4) and Postgres (≥ 9.6) — prefer it when adding columns.
-- **Identifiers stay lowercase.** H2 upper-cases unquoted identifiers by default; mixing cases is the fastest way to hit a "relation does not exist" surprise under Postgres. Keep `users`, `user_roles`, `password_hash` — not `Users`, `UserRoles`.
-
-## Case type configuration
-
-- **Directory**: `WKS_CASE_TYPES_DIR` env var; defaults to `./case-types/` — resolves to `/app/case-types/` in container, relative to `backend/` in local `./mvnw spring-boot:run`.
-- **Startup scan**: on `ApplicationReadyEvent`, every `*.yaml|*.yml` in the directory is parsed, validated, and — on success — registered. Invalid files log one WARN per error (`wksErrorCode`, `file`, `errorField`, `line`) and are skipped; startup does not abort by default.
-- **Fail-fast mode**: `WKS_CASE_TYPES_FAIL_ON_INVALID=true` aborts the context when any file fails validation.
-- **Hot reload contract**: `ConfigService.validateAndRegister(Path)` — higher `version` swaps atomically; same version is idempotent; lower version is rejected with `WKS-CFG-011`.
-- **Validation philosophy**: collect-all. The validator returns a `ValidationResult` with every violation — never throws, never stops at the first failure. Reviewers grep for early `return` / `throw` inside validator methods during review.
-- **BPMN deploy**: `workflow.bpmn` is a path **relative to the YAML file's parent directory**. `POST /api/admin/deploy` is multipart (`caseType` + `bpmn`), each capped at 1 MB; `ROLE_ADMIN` required. Every `bpmn:userTask` must declare exactly one archetype (`draft_section` / `submit_for_processing` / `business_final`) via `<camunda:properties><camunda:property name="archetype" value="..."/>`. `enableDuplicateFiltering(true)` makes redeploy of identical bytes a no-op.
-
-### Case CRUD (Story 2.3)
-
-- **JSON column**: `cases.data` is `JSON` on H2 and `JSONB` on Postgres. Hibernate 6.6+ native `@JdbcTypeCode(SqlTypes.JSON)` maps it — no third-party hibernate-types adapter.
-- **Optimistic locking**: `cases.version` (from `BaseJpaEntity.@Version`) drives `PUT` semantics. Mismatch → HTTP 409 `WKS-RTM-409`.
-- **Permission gating**: `create` verb on POST, `view` on GET / list / PUT. `edit` tightening is Story 5.2.
-- **Engine ordering**: `CaseService.create` is engine-first / DB-second. Engine failure aborts the transaction cleanly; DB failure after engine success leaves a dangling process instance (accepted Phase 0 partial state — Phase 1 wraps in an outbox).
-
-### Case Transitions & Tasks (Story 2.4)
-
-- **Transition dispatch**: Phase 0 supports BPMN message correlation only — `action` is the `<bpmn:message name="...">` attached to an `intermediateCatchEvent`/`receiveTask`. Signal-based transitions can be added in Story 8.2.
-- **Engine-callback hexagonal pattern**: `CaseStatusListener` (a CIB seven `ExecutionListener`) updates `cases.status` via the `CaseStatusUpdater` port — never via direct JPA writes inside the listener. The JPA adapter participates in the engine transaction so listener failure rolls back both atomically. The listener is registered by `CaseStatusEnginePlugin` (`ProcessEnginePlugin` + `BpmnParseListener`) so BPMN XML stays free of `camunda:executionListener` boilerplate.
-- **Status mapping**: end event status comes from `<camunda:property name="status"/>` (or element id when absent). For user-task end, the listener picks the next active activity id via `runtimeService.getActiveActivityIds(...)`.
-- **Persistent process-definition mapping**: `case_type_deployments` Flyway table holds `caseTypeId → processDefinitionKey` durably; the in-memory cache is write-through. JVM restart no longer drops admin-deployed mappings.
-- **Concurrent-deploy hardening**: `ConfigService.deploy` holds a per-`caseTypeId` lock around the `reader.find → registrar.register` window.
-
-### Case List (Story 2.5)
-
-- **Wire-shape contract**: `StatusColor` and `FieldType` enums emit their lowercase `wire()` token via `@JsonValue`. The frontend column generator and status palette mapper read these tokens verbatim. `roles[]` and the `bpmn` reference are NOT echoed on the public surface.
-- **Phase-0 client-side filtering**: `GET /api/cases?caseType=…&size=100`; multi-case-type fans out into parallel `useQueries`. Phase 1 collapses to a single backend call.
-- **a11y**: semantic `<table>` + `<th scope="col">`, `aria-sort` on sortable headers, every `StatusBadge` shows colour + text label (never colour alone). Arrow keys move row focus, Enter / Space fires `onRowSelect`.
-- **Performance budget**: `CaseDataTable.perf.test.tsx` renders 1,000 fixture rows under 1000 ms wall-clock on CI (paginated to 50 visible rows). Virtualisation is Phase 1.
-
-### Case Workspace & Split-Pane (Story 2.6)
-
-- **Two CSS states, no width animation**: discrete `workspace-list-only` and `workspace-list-and-detail` classes. `transition-none` defeats inherited transitions — UX spec rejects layout-thrash animation explicitly.
-- **URL-driven selection**: `/cases` and `/cases/:caseId` both render `CasesPage`. Selection state from `useParams`; transitions via `useNavigate`. Selected case ID is **not** persisted across sessions — only `caseListFilters` and `sidebarCollapsed` are.
-- **Keyboard navigation**: Esc (close), J (next case), K (previous case). Skips when target is `<input>`, `<textarea>`, contenteditable, or `event.isComposing`. J on last / K on first row are no-ops.
-- **`useCase(id)` query key**: `['case', id]`. Story 4.3 SSE will `queryClient.invalidateQueries({queryKey: ['case', id]})` on `CaseStatusChanged` — keep this shape stable.
-- **Properties tab**: read-only Phase 0. `lib/fieldFormatters.ts` is the value-formatter shared with table cells. Inline edit is Phase 1.
-- **Embedded `caseType` in `CaseDto`**: `useCase(id)` returns the full `CaseDto` with embedded `caseType: CaseTypeView` frozen at `caseTypeVersion` — use this, not a separate `useCaseType()` call.
-
-### Forms (Stories 2.7 + 2.8)
-
-- **RHF canonical config**: `mode: 'onBlur'` + `reValidateMode: 'onChange'` + `shouldFocusError: true`. First error focuses on submit, then per-field rechecks are immediate.
-- **`<FormField>`**: render-prop wrapper that wires `id` / `htmlFor` / `aria-invalid` / `aria-describedby` / `aria-required` from RHF context automatically. Consumer renders the input via `children(fieldProps)`.
-- **Universal mutation lifecycle** (Story 2.8 AC7): every platform mutation MUST use one of two components — no parallel patterns:
-  - `<MutationButton>` (4-state: `idle | confirming | confirmed | failed`) for synchronous REST round-trips.
-  - `<TaskLifecycleButton>` (5-state, adds `processing`) for mutations whose completion is signalled async or may genuinely take >2s.
-- **Confidence-not-safety copy**: confirm the user's mental model — "Confirmed" / "This task was already completed by {name}. No changes were made." Failure copy interpolates `{reason}`.
-- **`LoginPage` is the reference pattern**: read `pages/LoginPage.tsx` for canonical wiring of `FormProvider` + `useForm({resolver: zodResolver(schema)})` + `<FormField>` + `<MutationButton>`.
-- **Server errors via `setError`**: on 422 with `errors[].field`, map onto RHF via `form.setError(fieldName, {type: 'server', message})`. `pointerToField` on the backend guarantees `field` is the YAML-declared id. Envelope-level errors render in a banner: "Couldn't create case. Your input is preserved. Try again or correct the highlighted fields."
+- **Directory**: `WKS_CASE_TYPES_DIR` env var; defaults to `./case-types/` (resolves to `/app/case-types/` in container).
+- **Startup scan**: on `ApplicationReadyEvent`, every `*.yaml|*.yml` is parsed and validated. Invalid files log one WARN per error and are skipped; startup continues.
+- **Fail-fast**: `WKS_CASE_TYPES_FAIL_ON_INVALID=true` aborts the context on any invalid file.
+- **Validation philosophy**: collect-all — the validator returns every violation, never throws, never stops at the first failure.
+- **BPMN deploy**: `workflow.bpmn` is a path relative to the YAML file's parent directory. `POST /api/admin/deploy` is multipart (`caseType` + `bpmn`), each capped at 1 MB; `ROLE_ADMIN` required. Every `bpmn:userTask` must declare exactly one archetype (`draft_section` / `submit_for_processing` / `business_final`) via `<camunda:property name="archetype" value="..."/>`.

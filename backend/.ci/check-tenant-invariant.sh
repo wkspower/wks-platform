@@ -7,8 +7,6 @@
 # layer (post-Epic 6 if Developer Console introduces one).
 #
 # Source of truth: docs/zero-tenant-id.md
-# Background: Decision 25 in _bmad-output/planning-artifacts/architecture.md
-#             (planning repo) — wks-platform2.
 #
 # Invoked from .github/workflows/ci.yml and runnable locally from any cwd.
 
