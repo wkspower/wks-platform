@@ -16,7 +16,13 @@ const TablerIcons = () => (
     title='Tabler Icons'
     secondary={
       <SecondaryAction
-        icon={<LinkIcon fontSize='small' />}
+        icon={
+          <LinkIcon
+            sx={{
+              fontSize: 'small',
+            }}
+          />
+        }
         link='https://tablericons.com/'
       />
     }

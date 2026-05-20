@@ -181,7 +181,9 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           fullScreen
           open={open}
           onClose={handleClose}
-          TransitionComponent={Transition}
+          slots={{
+            transition: Transition,
+          }}
         >
           <AppBar sx={{ position: 'relative' }}>
             <Toolbar>
@@ -315,7 +317,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           </Box>
 
           <Grid container spacing={2} sx={{ paddingLeft: 1, paddingRight: 1 }}>
-            <Grid item xs={12} sm={8}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 8,
+              }}
+            >
               <Box>
                 <Tabs value={mainTabIndex} onChange={handleMainTabChanged}>
                   <Tab
@@ -365,7 +372,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
               </Box>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 4,
+              }}
+            >
               <Box>
                 <Tabs value={rightTabIndex} onChange={handleRightTabChanged}>
                   <Tab
@@ -410,7 +422,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     spacing={2}
                     sx={{ display: 'flex', flexDirection: 'column' }}
                   >
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                       <Comments
                         aCase={aCase}
                         getCaseInfo={getCaseInfo}
@@ -423,7 +435,6 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             </Grid>
           </Grid>
         </Dialog>
-
         {manualInitProcessDefs && (
           <Dialog
             onClose={handleCloseProcessesDialog}

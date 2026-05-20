@@ -55,8 +55,10 @@ export const FormDetail = ({
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
         disableEnforceFocus={true}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -79,11 +81,10 @@ export const FormDetail = ({
             </Button>
           </Toolbar>
         </AppBar>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <Grid container spacing={1}>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtKey'
                   name='key'
@@ -93,7 +94,7 @@ export const FormDetail = ({
                   disabled
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtTitle'
                   name='title'
@@ -102,7 +103,7 @@ export const FormDetail = ({
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtToolTip'
                   name='toolTip'
@@ -111,7 +112,7 @@ export const FormDetail = ({
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <FormControl fullWidth>
                   <InputLabel id='sltDisplay-label'>Display</InputLabel>
                   <Select
@@ -129,7 +130,6 @@ export const FormDetail = ({
             </Grid>
           </MainCard>
         </Box>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder

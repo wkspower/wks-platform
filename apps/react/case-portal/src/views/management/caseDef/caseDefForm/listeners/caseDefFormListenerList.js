@@ -1,7 +1,7 @@
 import {
-  AddCircleOutline,
+  AddCircleOutlined,
   AssignmentTurnedIn,
-  DeleteOutline,
+  DeleteOutlined,
   EditOutlined,
 } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -99,24 +99,45 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
 
   return (
     <Grid rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12} md={7} lg={10}>
+      <Grid
+        size={{
+          xs: 12,
+          md: 7,
+          lg: 10,
+        }}
+      >
         <MainCard sx={{ mt: 2 }} content={false}>
           {hooks ? (
             <Box>
               {isLoading ? (
                 <Box
-                  display='flex'
-                  alignItems='center'
-                  justifyContent='center'
-                  height={650}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 650,
+                  }}
                 >
                   <CircularProgress />
                 </Box>
               ) : hooks.length ? (
                 <div style={{ height: 650, width: '100%' }}>
-                  <Grid container spacing={2} padding={2}>
+                  <Grid
+                    container
+                    spacing={2}
+                    sx={{
+                      padding: 2,
+                    }}
+                  >
                     {hooks.map((hook, index) => (
-                      <Grid key={index} item xs={12} md={6} lg={4}>
+                      <Grid
+                        key={index}
+                        size={{
+                          xs: 12,
+                          md: 6,
+                          lg: 4,
+                        }}
+                      >
                         <Card>
                           <CardContent>
                             {/* Displaying the "when-then" flow information */}
@@ -130,7 +151,9 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                               <Box
                                 component={AssignmentTurnedIn}
-                                color='green'
+                                sx={{
+                                  color: 'green',
+                                }}
                               />
                               <Typography variant='subtitle1'>Then</Typography>
                             </AccordionSummary>
@@ -166,7 +189,7 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
                               size='small'
                               onClick={() => handleRemoveHook(index)}
                             >
-                              <DeleteOutline />
+                              <DeleteOutlined />
                             </IconButton>
                           </CardActions>
                         </Card>
@@ -187,7 +210,6 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
           )}
         </MainCard>
       </Grid>
-
       <CaseDefFormEventsForm
         open={isHookFormOpen}
         onClose={closeHookForm}
@@ -197,14 +219,13 @@ export const CaseDefFormEvents = ({ caseDef, setCaseDef }) => {
         hookData={selectedHookIndex !== null ? hooks[selectedHookIndex] : null} // Pass the selected hook data for editing
         stages={caseDef.stages}
       />
-
       <IconButton
         color='primary'
         size='large'
         onClick={openHookForm}
         style={addButtonStyle}
       >
-        <AddCircleOutline fontSize='large' />
+        <AddCircleOutlined fontSize='large' />
       </IconButton>
     </Grid>
   )

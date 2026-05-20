@@ -169,7 +169,9 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        slots={{
+          transition: Transition,
+        }}
       >
         <div
           style={{

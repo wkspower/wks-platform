@@ -70,9 +70,11 @@ function CreateMainCard(
       {!darkTitle && title && (
         <CardHeader
           sx={headerSX}
-          titleTypographyProps={{ variant: 'subtitle1' }}
           title={title}
           action={secondary}
+          slotProps={{
+            title: { variant: 'subtitle1' },
+          }}
         />
       )}
       {darkTitle && title && (
@@ -82,14 +84,11 @@ function CreateMainCard(
           action={secondary}
         />
       )}
-
       {/* content & header divider */}
       {title && divider && <Divider />}
-
       {/* card content */}
       {content && <CardContent sx={contentSX}>{children}</CardContent>}
       {!content && children}
-
       {/* card footer - clipboard & highlighter  */}
       {codeHighlight && (
         <>

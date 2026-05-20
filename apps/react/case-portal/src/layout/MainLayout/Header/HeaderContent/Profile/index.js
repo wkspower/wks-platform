@@ -13,7 +13,7 @@ import Stack from '@mui/material/Stack'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import useTheme from '@mui/material/styles/useTheme'
+import { useTheme } from '@mui/material/styles'
 import Transitions from 'components/@extended/Transitions'
 import MainCard from 'components/MainCard'
 import ProfileTab from './ProfileTab'
@@ -88,7 +88,14 @@ const Profile = ({ keycloak }) => {
         aria-haspopup='true'
         onClick={handleToggle}
       >
-        <Stack direction='row' spacing={2} alignItems='center' sx={{ p: 0.5 }}>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            p: 0.5,
+          }}
+        >
           <Avatar alt='profile user' sx={{ width: 32, height: 32 }}>
             <UserOutlined />
           </Avatar>
@@ -134,14 +141,18 @@ const Profile = ({ keycloak }) => {
                     <CardContent sx={{ px: 2.5, pt: 3 }}>
                       <Grid
                         container
-                        justifyContent='space-between'
-                        alignItems='center'
+                        sx={{
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
                       >
-                        <Grid item>
+                        <Grid>
                           <Stack
                             direction='row'
                             spacing={1.25}
-                            alignItems='center'
+                            sx={{
+                              alignItems: 'center',
+                            }}
                           >
                             <Avatar
                               alt='profile user'
@@ -159,7 +170,7 @@ const Profile = ({ keycloak }) => {
                             </Stack>
                           </Stack>
                         </Grid>
-                        <Grid item>
+                        <Grid>
                           <IconButton
                             size='large'
                             color='secondary'

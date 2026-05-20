@@ -15,8 +15,13 @@ const DashboardCard = ({ title, subtitle, to, icon }) => (
         <Typography variant='h6' color='textSecondary'>
           {title}
         </Typography>
-        <Grid container alignItems='center'>
-          <Grid item>{icon}</Grid>
+        <Grid
+          container
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          <Grid>{icon}</Grid>
         </Grid>
       </Stack>
       <Box sx={{ pt: 2.25 }}>

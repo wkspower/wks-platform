@@ -1,4 +1,4 @@
-import { AddCircleOutline, PlayCircle } from '@mui/icons-material'
+import { AddCircleOutlined, PlayCircle } from '@mui/icons-material'
 import { Box } from '@mui/material'
 import Button from '@mui/material/Button'
 import List from '@mui/material/List'
@@ -86,7 +86,7 @@ export const TaskList = ({ businessKey, callback }) => {
       {fetching && <Typography>Loading...</Typography>}
       <Button
         variant='contained'
-        startIcon={<AddCircleOutline />}
+        startIcon={<AddCircleOutlined />}
         onClick={() => setModalOpen(true)}
       >
         {t('pages.caseform.actions.newTask')}

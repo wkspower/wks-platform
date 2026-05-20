@@ -128,7 +128,9 @@ export const NewCaseForm = ({
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -154,7 +156,7 @@ export const NewCaseForm = ({
           spacing={2}
           sx={{ display: 'flex', flexDirection: 'column' }}
         >
-          <Grid item xs={12} sx={{ m: 3 }}>
+          <Grid sx={{ m: 3 }} size={12}>
             <Box sx={{ pb: 1, display: 'flex', flexDirection: 'row' }}>
               <Typography variant='h5' color='textSecondary' sx={{ pr: 0.5 }}>
                 {form.title}

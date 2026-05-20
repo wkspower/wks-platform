@@ -60,8 +60,10 @@ export const FormNew = ({ open, handleClose }) => {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
         disableEnforceFocus={true}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -81,11 +83,16 @@ export const FormNew = ({ open, handleClose }) => {
             </Button>
           </Toolbar>
         </AppBar>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
-            <Grid container spacing={1} alignItems='center'>
-              <Grid item>
+            <Grid
+              container
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Grid>
                 <TextField
                   id='txtKey'
                   name='key'
@@ -94,7 +101,7 @@ export const FormNew = ({ open, handleClose }) => {
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtTitle'
                   name='title'
@@ -103,7 +110,7 @@ export const FormNew = ({ open, handleClose }) => {
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtToolTip'
                   name='toolTip'
@@ -112,7 +119,7 @@ export const FormNew = ({ open, handleClose }) => {
                   onChange={handleInputChange}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <FormControl fullWidth>
                   <InputLabel id='sltDisplay-label'>Display</InputLabel>
                   <Select
@@ -130,7 +137,6 @@ export const FormNew = ({ open, handleClose }) => {
             </Grid>
           </MainCard>
         </Box>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder

@@ -155,7 +155,9 @@ export const CaseDefFormEventsForm = ({
                 value={taskDefKey}
                 onChange={(e) => setTaskDefKey(e.target.value)}
                 variant='outlined'
-                InputLabelProps={{ shrink: true }}
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
               />
             </React.Fragment>
           )}

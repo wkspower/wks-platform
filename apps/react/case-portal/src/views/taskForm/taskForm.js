@@ -133,7 +133,9 @@ export const TaskForm = ({ open, handleClose, task }) => {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>

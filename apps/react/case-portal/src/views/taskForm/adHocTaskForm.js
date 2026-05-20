@@ -73,7 +73,9 @@ export const AdHocTaskForm = ({ open, handleClose, task }) => {
       fullScreen
       open={open}
       onClose={handleClose}
-      TransitionComponent={Transition}
+      slots={{
+        transition: Transition,
+      }}
     >
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar>
@@ -108,25 +110,39 @@ export const AdHocTaskForm = ({ open, handleClose, task }) => {
           )}
         </Toolbar>
       </AppBar>
-
       <Box sx={{ p: 2 }}>
         <MainCard>
           <Stack spacing={2}>
             <Stack direction='row' spacing={4}>
               <Box>
-                <Typography variant='caption' color='text.secondary'>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {t('pages.tasklist.datagrid.columns.due')}
                 </Typography>
                 <Typography>{task?.due || '—'}</Typography>
               </Box>
               <Box>
-                <Typography variant='caption' color='text.secondary'>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {t('pages.tasklist.datagrid.columns.assignee')}
                 </Typography>
                 <Typography>{assignee || '—'}</Typography>
               </Box>
               <Box>
-                <Typography variant='caption' color='text.secondary'>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {t('pages.tasklist.datagrid.columns.created')}
                 </Typography>
                 <Typography>{task?.created || '—'}</Typography>
@@ -134,7 +150,12 @@ export const AdHocTaskForm = ({ open, handleClose, task }) => {
             </Stack>
 
             <Box>
-              <Typography variant='caption' color='text.secondary'>
+              <Typography
+                variant='caption'
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {t('pages.tasklist.newTask.description')}
               </Typography>
               <Typography sx={{ whiteSpace: 'pre-wrap' }}>

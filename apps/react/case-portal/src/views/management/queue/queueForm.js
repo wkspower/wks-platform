@@ -50,8 +50,10 @@ export const QueueForm = ({ open, handleClose, queue, handleInputChange }) => {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
         disableEnforceFocus={true}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -74,7 +76,6 @@ export const QueueForm = ({ open, handleClose, queue, handleInputChange }) => {
             </Button>
           </Toolbar>
         </AppBar>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormControl key='ctrlId' sx={{ p: 1 }}>

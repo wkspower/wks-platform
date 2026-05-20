@@ -21,14 +21,24 @@ const AnalyticEcommerce = ({
       <Typography variant='h6' color='textSecondary'>
         {title}
       </Typography>
-      <Grid container alignItems='center'>
-        <Grid item>
-          <Typography variant='h4' color='inherit'>
+      <Grid
+        container
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Grid>
+          <Typography
+            variant='h4'
+            sx={{
+              color: 'inherit',
+            }}
+          >
             {count}
           </Typography>
         </Grid>
         {percentage && (
-          <Grid item>
+          <Grid>
             <Chip
               variant='combined'
               color={color}

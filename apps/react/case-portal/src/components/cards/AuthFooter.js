@@ -11,9 +11,11 @@ const AuthFooter = () => {
     <Container maxWidth='xl'>
       <Stack
         direction={matchDownSM ? 'column' : 'row'}
-        justifyContent={matchDownSM ? 'center' : 'space-between'}
         spacing={2}
-        textAlign={matchDownSM ? 'center' : 'inherit'}
+        sx={{
+          justifyContent: matchDownSM ? 'center' : 'space-between',
+          textAlign: matchDownSM ? 'center' : 'inherit',
+        }}
       >
         <Typography variant='subtitle2' color='secondary' component='span'>
           &copy; Mantis React Dashboard Template By&nbsp;
@@ -31,7 +33,9 @@ const AuthFooter = () => {
         <Stack
           direction={matchDownSM ? 'column' : 'row'}
           spacing={matchDownSM ? 1 : 3}
-          textAlign={matchDownSM ? 'center' : 'inherit'}
+          sx={{
+            textAlign: matchDownSM ? 'center' : 'inherit',
+          }}
         >
           <Typography
             variant='subtitle2'

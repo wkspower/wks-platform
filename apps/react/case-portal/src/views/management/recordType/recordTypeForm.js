@@ -67,8 +67,10 @@ export const RecordTypeForm = ({
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
         disableEnforceFocus={true}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -91,11 +93,10 @@ export const RecordTypeForm = ({
             </Button>
           </Toolbar>
         </AppBar>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <Grid container spacing={1}>
-              <Grid item>
+              <Grid>
                 <TextField
                   id='txtId'
                   name='id'
@@ -108,7 +109,6 @@ export const RecordTypeForm = ({
             </Grid>
           </MainCard>
         </Box>
-
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder

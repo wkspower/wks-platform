@@ -74,8 +74,10 @@ const NavCollapse = ({ menu, level }) => {
           primary={
             <Typography
               variant={selected === menu.id ? 'h6' : 'body1'}
-              color='inherit'
-              sx={{ my: 'auto' }}
+              sx={{
+                color: 'inherit',
+                my: 'auto',
+              }}
             >
               {menu.title}
             </Typography>
@@ -84,9 +86,11 @@ const NavCollapse = ({ menu, level }) => {
             menu.caption && (
               <Typography
                 variant='caption'
-                sx={{ ...theme.typography.subMenuCaption }}
-                display='block'
                 gutterBottom
+                sx={{
+                  display: 'block',
+                  ...theme.typography.subMenuCaption,
+                }}
               >
                 {menu.caption}
               </Typography>

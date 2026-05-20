@@ -83,11 +83,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           <Grid
             container
             direction='column'
-            justifyContent='flex-start'
-            alignItems='flex-start'
             spacing={1}
+            sx={{
+              justifyContent: 'flex-start',
+              alignItems: 'flex-start',
+            }}
           >
-            <Grid item>
+            <Grid>
               <MuiBreadcrumbs aria-label='breadcrumb'>
                 <Typography
                   component={Link}
@@ -103,7 +105,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               </MuiBreadcrumbs>
             </Grid>
             {title && (
-              <Grid item sx={{ mt: 2 }}>
+              <Grid sx={{ mt: 2 }}>
                 <Typography variant='h5'>{item.title}</Typography>
               </Grid>
             )}

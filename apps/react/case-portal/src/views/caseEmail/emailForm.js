@@ -24,7 +24,7 @@ export const EmailForm = ({ onSubmit }) => {
       </Typography>
       <form style={{ width: '100%' }} onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               fullWidth
               required
@@ -33,7 +33,7 @@ export const EmailForm = ({ onSubmit }) => {
               onChange={(e) => setRecipient(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               fullWidth
               required
@@ -42,7 +42,7 @@ export const EmailForm = ({ onSubmit }) => {
               onChange={(e) => setSubject(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               fullWidth
               required
@@ -53,7 +53,7 @@ export const EmailForm = ({ onSubmit }) => {
               onChange={(e) => setBody(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Button
               type='submit'
               variant='contained'

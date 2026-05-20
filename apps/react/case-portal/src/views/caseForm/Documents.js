@@ -81,7 +81,9 @@ function Documents({ aCase, initialValue }) {
               <Typography
                 variant='caption'
                 component='div'
-                color='text.secondary'
+                sx={{
+                  color: 'text.secondary',
+                }}
               >{`${Math.round(props.value)}%`}</Typography>
             </Box>
           </Box>
@@ -104,8 +106,10 @@ function Documents({ aCase, initialValue }) {
         <Grid
           container
           direction='column'
-          justifyContent='center'
-          alignItems='center'
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
           <Avatar
             style={{
@@ -138,7 +142,6 @@ function Documents({ aCase, initialValue }) {
           </Fade>
         </Grid>
       </Box>
-
       {filesUploaded && filesUploaded.length > 0 && (
         <List sx={{ border: '1px dashed #d9d9d9' }}>
           {filesUploaded.map((file, index) => {
@@ -185,7 +188,6 @@ function Documents({ aCase, initialValue }) {
           })}
         </List>
       )}
-
       <Snackbar
         open={!!messageError}
         autoHideDuration={6000}

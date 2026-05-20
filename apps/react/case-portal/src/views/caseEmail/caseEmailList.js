@@ -101,14 +101,29 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
                 primary={email.from}
                 secondary={
                   <>
-                    <Typography variant='body2' color='text.secondary'>
+                    <Typography
+                      variant='body2'
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {email.subject}
                     </Typography>
-                    <Typography variant='body2' color='text.secondary'>
+                    <Typography
+                      variant='body2'
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {t('pages.emails.datagrid.receivedDateTime')}:{' '}
                       {new Date(email.receivedDateTime).toLocaleString()}
                     </Typography>
-                    <Typography variant='body2' color='text.secondary'>
+                    <Typography
+                      variant='body2'
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {t('pages.emails.datagrid.hasAttachments')}:{' '}
                       {email.hasAttachments ? 'Yes' : 'No'}
                     </Typography>
@@ -121,15 +136,26 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
               timeout='auto'
               unmountOnExit
             >
-              <Box margin={1}>
-                <Typography variant='body2' color='text.secondary'>
+              <Box
+                sx={{
+                  margin: 1,
+                }}
+              >
+                <Typography
+                  variant='body2'
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {t('pages.emails.datagrid.to')}: {email.to}
                 </Typography>
                 <Typography
                   variant='body2'
-                  color='text.secondary'
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(email.body),
+                  }}
+                  sx={{
+                    color: 'text.secondary',
                   }}
                 />
               </Box>

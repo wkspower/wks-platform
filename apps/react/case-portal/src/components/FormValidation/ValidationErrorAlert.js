@@ -12,7 +12,12 @@ const ValidationErrorAlert = ({ errors, open, onClose }) => {
 
   return (
     <Alert severity='error' sx={{ mb: 2 }} onClose={onClose}>
-      <Typography variant='subtitle1' fontWeight='bold'>
+      <Typography
+        variant='subtitle1'
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {t('pages.validation.pleaseCorrectErrors')}
       </Typography>
       {errors.length > 0 ? (

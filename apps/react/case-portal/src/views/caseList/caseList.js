@@ -359,7 +359,6 @@ export const CaseList = ({ status, caseDefId }) => {
           </Tooltip>
         </Box>
       </Box>
-
       <MainCard sx={{ mt: 2 }} content={false}>
         <Box>
           {view === 'list' && (
@@ -423,8 +422,10 @@ export const CaseList = ({ status, caseDefId }) => {
                         anchorEl={anchorEl}
                         open={open}
                         onClose={handlePageSizeClose}
-                        MenuListProps={{
-                          'aria-labelledby': 'page-size-button',
+                        slotProps={{
+                          list: {
+                            'aria-labelledby': 'page-size-button',
+                          },
                         }}
                       >
                         {pageSizeOptions.map((option) => (
@@ -480,9 +481,7 @@ export const CaseList = ({ status, caseDefId }) => {
           )}
         </Box>
       </MainCard>
-
       <br />
-
       {openCaseForm && (
         <CaseForm
           aCase={aCase}
@@ -491,7 +490,6 @@ export const CaseList = ({ status, caseDefId }) => {
           keycloak={keycloak}
         />
       )}
-
       {openNewCaseForm && (
         <NewCaseForm
           handleClose={handleCloseNewCaseForm}
@@ -500,7 +498,6 @@ export const CaseList = ({ status, caseDefId }) => {
           setLastCreatedCase={setLastCreatedCase}
         />
       )}
-
       {lastCreatedCase && (
         <Snackbar
           open={snackOpen}

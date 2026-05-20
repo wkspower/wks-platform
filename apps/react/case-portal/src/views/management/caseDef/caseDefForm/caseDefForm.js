@@ -109,7 +109,9 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        slots={{
+          transition: Transition,
+        }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
