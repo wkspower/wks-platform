@@ -47,7 +47,7 @@ public class RecordControllerTest {
 	}
 
 	@AfterEach
-	private void teardown() {
+	void teardown() {
 		SecurityContextHolder.clearContext();
 	}
 

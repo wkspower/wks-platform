@@ -47,7 +47,7 @@ public class FormControllerTest {
 	}
 
 	@AfterEach
-	private void teardown() {
+	void teardown() {
 		SecurityContextHolder.clearContext();
 	}
 

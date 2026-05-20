@@ -66,7 +66,7 @@ public class CaseInstanceControllerTest {
 	}
 
 	@AfterEach
-	private void teardown() {
+	void teardown() {
 		SecurityContextHolder.clearContext();
 	}
 

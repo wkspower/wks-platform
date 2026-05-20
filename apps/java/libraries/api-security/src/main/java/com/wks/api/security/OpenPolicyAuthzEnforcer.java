@@ -14,8 +14,16 @@ package com.wks.api.security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,8 +42,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class OpenPolicyAuthzEnforcer implements AuthorizationManager<RequestAuthorizationContext> {
 
+	private static final int OPA_CONNECT_TIMEOUT_MS = 2000;
 	private static final int OPA_CONNECTION_REQUEST_TIMEOUT_MS = 2000;
-	private static final int OPA_READ_TIMEOUT_MS = 3000;
+	private static final int OPA_SOCKET_TIMEOUT_MS = 3000;
 
 	private final RestTemplate restTemplate;
 	private final List<RequestMatcher> matchers;
@@ -102,10 +111,25 @@ public final class OpenPolicyAuthzEnforcer implements AuthorizationManager<Reque
 	}
 
 	private RestTemplate createRestTemplate() {
-		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-		requestFactory.setConnectionRequestTimeout(OPA_CONNECTION_REQUEST_TIMEOUT_MS);
-		requestFactory.setReadTimeout(OPA_READ_TIMEOUT_MS);
-		return new RestTemplate(requestFactory);
+		ConnectionConfig connectionConfig = ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.of(OPA_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.setSocketTimeout(Timeout.of(OPA_SOCKET_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.build();
+
+		PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+				.setDefaultConnectionConfig(connectionConfig)
+				.build();
+
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(Timeout.of(OPA_CONNECTION_REQUEST_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.build();
+
+		CloseableHttpClient httpClient = HttpClients.custom()
+				.setConnectionManager(connectionManager)
+				.setDefaultRequestConfig(requestConfig)
+				.build();
+
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
 	}
 
 }

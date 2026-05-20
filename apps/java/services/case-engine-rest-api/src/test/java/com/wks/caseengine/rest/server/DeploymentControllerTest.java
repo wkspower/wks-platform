@@ -44,7 +44,7 @@ public class DeploymentControllerTest {
 	}
 
 	@AfterEach
-	private void teardown() {
+	void teardown() {
 		SecurityContextHolder.clearContext();
 	}
 

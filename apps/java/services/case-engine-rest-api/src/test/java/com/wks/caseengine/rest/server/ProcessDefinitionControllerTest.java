@@ -43,7 +43,7 @@ public class ProcessDefinitionControllerTest {
 	}
 
 	@AfterEach
-	private void teardown() {
+	void teardown() {
 		SecurityContextHolder.clearContext();
 	}
 

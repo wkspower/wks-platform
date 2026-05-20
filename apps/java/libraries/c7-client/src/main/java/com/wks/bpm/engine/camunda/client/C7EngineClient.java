@@ -383,7 +383,7 @@ public class C7EngineClient implements BpmEngineClient {
 		}
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-		return formatter.format(date);
+		return formatter.format(date.withOffsetSameInstant(java.time.ZoneOffset.UTC));
 	}
 
 	@Override
