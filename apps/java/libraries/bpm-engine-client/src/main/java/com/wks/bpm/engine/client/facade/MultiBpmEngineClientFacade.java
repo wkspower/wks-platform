@@ -38,9 +38,6 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	@Autowired
 	private BpmEngineClient c7EngineClient;
 
-	@Autowired
-	private BpmEngineClient c8EngineClient;
-
 	private BpmEngine getBpmEngine() {
 
 		// TODO implement bpmEngine decision
@@ -48,7 +45,10 @@ public class MultiBpmEngineClientFacade implements BpmEngineClientFacade {
 	}
 
 	private BpmEngineClient getEngineClient() {
-		return getBpmEngine().getType().equals(BpmEngineType.BPM_ENGINE_CAMUNDA7) ? c7EngineClient : c8EngineClient;
+		if (getBpmEngine().getType().equals(BpmEngineType.BPM_ENGINE_CAMUNDA7)) {
+			return c7EngineClient;
+		}
+		throw new UnsupportedOperationException("Only Camunda 7 is supported");
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
