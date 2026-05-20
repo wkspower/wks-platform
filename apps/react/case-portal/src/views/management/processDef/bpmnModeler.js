@@ -6,162 +6,92 @@ import IconButton from '@mui/material/IconButton'
 import Slide from '@mui/material/Slide'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { ProcessDefService } from 'services/ProcessDefService'
 import { DeploymentService } from 'services/DeploymentService'
 
+import BpmnModeler from 'bpmn-js/lib/Modeler'
 import {
-  BpmnModeler as CamundaWebModeler,
-  isBpmnIoEvent,
-  isContentSavedEvent,
-  isNotificationEvent,
-  isPropertiesPanelResizedEvent,
-  isUIUpdateRequiredEvent,
-} from '@wkspower/camunda-web-modeler'
+  BpmnPropertiesPanelModule,
+  BpmnPropertiesProviderModule,
+  CamundaPlatformPropertiesProviderModule,
+} from 'bpmn-js-properties-panel'
+import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json'
+
+import 'bpmn-js/dist/assets/diagram-js.css'
+import 'bpmn-js/dist/assets/bpmn-js.css'
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
+import '@bpmn-io/properties-panel/dist/assets/properties-panel.css'
+
 import newProcessXml from './new-process'
+
+const PROPERTIES_PANEL_WIDTH = 340
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
 })
 
 export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
-  const [bpmnXml, setBpmnXml] = useState()
+  const canvasRef = useRef(null)
+  const panelRef = useRef(null)
+  const modelerRef = useRef(null)
+  const [bpmnXml, setBpmnXml] = useState(null)
 
   useEffect(() => {
+    if (!open) return
+
     if (!processDef.id) {
       setBpmnXml(newProcessXml)
     } else {
       ProcessDefService.getBPMNXml(keycloak, processDef.id)
-        .then((data) => {
-          setBpmnXml(data)
-        })
+        .then((data) => setBpmnXml(data))
         .catch((err) => {
           setBpmnXml(null)
           console.log(err.message)
         })
     }
-  }, [open])
+  }, [open, processDef.id, keycloak])
 
-  const modelerRef = useRef()
+  useEffect(() => {
+    if (!open || !canvasRef.current || !panelRef.current) return
 
-  const onXmlChanged = useCallback((newXml) => {
-    // console.log(`Model has been changed because of ${reason}`);
-    // Do whatever you want here, save the XML and SVG in the backend etc.
-    setBpmnXml(newXml)
-  }, [])
-
-  const onSaveClicked = useCallback(async () => {
-    if (!modelerRef.current) {
-      // Should actually never happen, but required for type safety
-      return
-    }
-
-    // console.log("Saving model...");
-
-    const result = await modelerRef.current.save()
-    DeploymentService.deploy(keycloak, result.xml).then(() => {
-      handleClose()
+    const modeler = new BpmnModeler({
+      container: canvasRef.current,
+      propertiesPanel: { parent: panelRef.current },
+      additionalModules: [
+        BpmnPropertiesPanelModule,
+        BpmnPropertiesProviderModule,
+        CamundaPlatformPropertiesProviderModule,
+      ],
+      moddleExtensions: { camunda: camundaModdleDescriptor },
     })
 
-    // console.log("Saved model!", result.xml, result.svg);
-  }, [])
+    modelerRef.current = modeler
 
-  const onEvent = useCallback(
-    async (event) => {
-      if (isContentSavedEvent(event)) {
-        // Content has been saved, e.g. because user edited the model or because he switched
-        // from BPMN to XML.
-        onXmlChanged(event.data.xml, event.data.svg, event.data.reason)
-        return
-      }
+    return () => {
+      modeler.destroy()
+      modelerRef.current = null
+    }
+  }, [open])
 
-      if (isNotificationEvent(event)) {
-        // There's a notification the user is supposed to see, e.g. the model could not be
-        // imported because it was invalid.
-        return
-      }
+  useEffect(() => {
+    const modeler = modelerRef.current
+    if (!modeler || !bpmnXml) return
 
-      if (isUIUpdateRequiredEvent(event)) {
-        // Something in the modeler has changed and the UI (e.g. menu) should be updated.
-        // This happens when the user selects an element, for example.
-        return
-      }
+    modeler.importXML(bpmnXml).catch((err) => {
+      console.log('Failed to import BPMN XML', err)
+    })
+  }, [bpmnXml])
 
-      if (isPropertiesPanelResizedEvent(event)) {
-        // The user has resized the properties panel. You can save this value e.g. in local
-        // storage to restore it on next load and pass it as initializing option.
-        // console.log(`Properties panel has been resized to ${event.data.width}`);
-        return
-      }
+  const onSaveClicked = useCallback(async () => {
+    const modeler = modelerRef.current
+    if (!modeler) return
 
-      if (isBpmnIoEvent(event)) {
-        // Just a regular bpmn-js event - actually lots of them
-        return
-      }
-
-      // console.log("Unhandled event received", event);
-    },
-    [onXmlChanged],
-  )
-
-  /**
-   * ====
-   * CAUTION: Using useMemo() is important to prevent additional render cycles!
-   * ====
-   */
-
-  const xmlTabOptions = useMemo(
-    () => ({
-      className: undefined,
-      disabled: true,
-      monacoOptions: undefined,
-    }),
-    [],
-  )
-
-  const propertiesPanelOptions = useMemo(
-    () => ({
-      className: undefined,
-      containerId: undefined,
-      container: undefined,
-      elementTemplates: undefined,
-      hidden: undefined,
-      size: {
-        max: undefined,
-        min: undefined,
-        initial: undefined,
-      },
-    }),
-    [],
-  )
-
-  const modelerOptions = useMemo(
-    () => ({
-      className: undefined,
-      refs: [modelerRef],
-      container: undefined,
-      containerId: undefined,
-      size: {
-        max: undefined,
-        min: undefined,
-        initial: undefined,
-      },
-    }),
-    [],
-  )
-
-  const bpmnJsOptions = useMemo(() => undefined, [])
-
-  const modelerTabOptions = useMemo(
-    () => ({
-      className: undefined,
-      disabled: undefined,
-      bpmnJsOptions: bpmnJsOptions,
-      modelerOptions: modelerOptions,
-      propertiesPanelOptions: propertiesPanelOptions,
-    }),
-    [bpmnJsOptions, modelerOptions, propertiesPanelOptions],
-  )
+    const { xml } = await modeler.saveXML({ format: true })
+    DeploymentService.deploy(keycloak, xml).then(() => {
+      handleClose()
+    })
+  }, [keycloak, handleClose])
 
   return (
     <div>
@@ -175,14 +105,23 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       >
         <div
           style={{
+            display: 'flex',
             height: '100vh',
+            width: '100%',
           }}
         >
-          <CamundaWebModeler
-            xml={bpmnXml}
-            onEvent={onEvent}
-            xmlTabOptions={xmlTabOptions}
-            modelerTabOptions={modelerTabOptions}
+          <div
+            ref={canvasRef}
+            style={{ flex: 1, height: '100%', overflow: 'hidden' }}
+          />
+          <div
+            ref={panelRef}
+            style={{
+              width: PROPERTIES_PANEL_WIDTH,
+              height: '100%',
+              borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+              overflow: 'auto',
+            }}
           />
         </div>
 
