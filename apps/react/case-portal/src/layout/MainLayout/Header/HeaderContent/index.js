@@ -1,9 +1,5 @@
 import { Box, useMediaQuery } from '@mui/material'
-import {
-  NotificationBell,
-  NovuProvider,
-  PopoverNotificationCenter,
-} from '@novu/notification-center'
+import { Inbox } from '@novu/react'
 import MobileSection from './MobileSection'
 import Profile from './Profile'
 import Search from './Search'
@@ -18,16 +14,10 @@ const HeaderContent = ({ keycloak }) => {
       {!matchesXs && <Search />}
       {matchesXs && <Box sx={{ width: '100%', ml: 1 }} />}
       {Config.NovuEnabled ? (
-        <NovuProvider
-          subscriberId={keycloak.idTokenParsed.email}
+        <Inbox
           applicationIdentifier={Config.NovuAppId}
-        >
-          <PopoverNotificationCenter colorScheme={'light'}>
-            {({ unseenCount }) => (
-              <NotificationBell unseenCount={unseenCount} />
-            )}
-          </PopoverNotificationCenter>
-        </NovuProvider>
+          subscriberId={keycloak.idTokenParsed.email}
+        />
       ) : (
         <Notification />
       )}
