@@ -112,7 +112,7 @@ export const RecordTypeForm = ({
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder
-              form={recordType.fields}
+              initialForm={recordType.fields}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,

@@ -1,5 +1,5 @@
 import Config from 'consts/index'
-import { Formio } from 'formiojs'
+import { Formio } from '@formio/js'
 import MemoryTokenManager from 'plugins/MemoryTokenManager'
 
 class RecordTypeChoice extends Formio.Components.components.field {

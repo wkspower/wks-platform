@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Tooltip } from '@mui/material'
@@ -33,7 +33,6 @@ export const NewCaseForm = ({
   const [formData, setFormData] = useState(null)
   const [alertOpen, setAlertOpen] = useState(false)
   const [validationErrors, setValidationErrors] = useState([])
-  const formRef = useRef(null)
   const [formioInstance, setFormioInstance] = useState(null)
   const keycloak = useSession()
 
@@ -175,11 +174,10 @@ export const NewCaseForm = ({
             />
 
             <Form
-              ref={formRef}
               form={form.structure}
               submission={formData}
               onChange={onChange}
-              onInit={onFormInit}
+              formReady={onFormInit}
               options={{
                 fileService: new StorageService(),
                 validateOnInit: false,

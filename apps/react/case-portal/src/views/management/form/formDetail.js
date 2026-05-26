@@ -133,7 +133,7 @@ export const FormDetail = ({
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder
-              form={form.structure}
+              initialForm={form.structure}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,

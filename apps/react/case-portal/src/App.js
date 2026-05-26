@@ -7,7 +7,7 @@ import menuItemsDefs from './menu'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
 import RecordTypeChoice from './components/@formio/RecordTypeChoice'
-import { Formio } from 'formiojs'
+import { Formio } from '@formio/js'
 import './App.css'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))

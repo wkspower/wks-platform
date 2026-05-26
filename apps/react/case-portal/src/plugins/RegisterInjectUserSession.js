@@ -1,4 +1,4 @@
-import { Formio } from 'formiojs'
+import { Formio } from '@formio/js'
 
 export function RegisterInjectUserSession(keycloak) {
   const name = 'injectUserSession'

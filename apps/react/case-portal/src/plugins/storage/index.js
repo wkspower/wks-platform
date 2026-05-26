@@ -1,4 +1,4 @@
-import { Formio } from 'formiojs'
+import { Formio } from '@formio/js'
 import Config from '../../consts'
 import MemoryTokenManager from '../MemoryTokenManager'
 

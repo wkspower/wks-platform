@@ -140,7 +140,8 @@ export const FormNew = ({ open, handleClose }) => {
         <Box sx={{ p: 1 }}>
           <MainCard>
             <FormBuilder
-              form={form.structure}
+              initialForm={form.structure}
+              onChange={(structure) => setForm({ ...form, structure })}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,
