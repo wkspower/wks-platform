@@ -35,4 +35,3 @@ test('should be true if user has some role', () => {
 test('should be false if user dont have some role', () => {
   expect(store.hasRole(new Keycloak('client_task', 'unknown'))).toEqual(false)
 })
-/* eslint-disable no-undef */

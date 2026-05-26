@@ -32,4 +32,3 @@ test('should be initialize default realm when using app dns', () => {
   expect(realm).toEqual('app')
   expect(clientId).toEqual('wks-portal')
 })
-/* eslint-disable no-undef */

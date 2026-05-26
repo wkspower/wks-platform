@@ -132,7 +132,7 @@ export const getValidationMessage = (component, value) => {
     case 'url':
       try {
         new URL(value)
-      } catch (e) {
+      } catch {
         return i18next.t(
           'pages.validation.invalidUrl',
           'Please enter a valid URL',

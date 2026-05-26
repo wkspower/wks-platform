@@ -1,7 +1,7 @@
 export function tryParseJSONObject(jsonString) {
   try {
     JSON.parse(jsonString)
-  } catch (e) {
+  } catch {
     return false
   }
   return true
