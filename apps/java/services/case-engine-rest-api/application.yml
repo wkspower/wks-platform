@@ -54,68 +54,41 @@ case.engine.actuator.enabled: true
 case.engine.swagger.enabled: true
 
 # database drive options: mongo or jpa
-database.type: mongo
+database.type: jpa
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+  datasource:
+    jdbcUrl: ${WKS_DB_URL:jdbc:sqlserver://localhost:1433;database=wks;encrypt=true;trustServerCertificate=true;}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: ${WKS_DB_USER:sa}
+    password: ${WKS_DB_PASSWORD:Password123!}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        hbm2ddl:
+          auto: create
+        format_sql: true
+        default_schema: dbo
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-sqlserver.sql
+      continue-on-error: true
 
 # h2
 # spring:
-#   autoconfigure:
-#     exclude:
-#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-#   datasource:
-#     jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-#     driver-class-name: org.h2.Driver
-#     username: sa
-#     password:
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 2
-#       idle-timeout: 30000
-#       connection-timeout: 30000
-#       max-lifetime: 1800000
-#   jpa:
-#     database-platform: org.hibernate.dialect.H2Dialect
-#     hibernate:
-#       ddl-auto: create
-#     show-sql: true
-#     defer-datasource-initialization: true
-#     properties:
-#       hibernate:
-#         format_sql: true
-#   sql:
-#     init:
-#        schema-locations: classpath:schema-h2.sql
-#        mode: always
-
-# postgres
-# spring:
-#   autoconfigure:
-#     exclude:
-#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-#   datasource:
-#     jdbcUrl: jdbc:postgresql://localhost:5432/wks
-#     driver-class-name: org.postgresql.Driver
-#     username: wks
-#     password: wks00
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 2
-#       idle-timeout: 30000
-#       connection-timeout: 30000
-#       max-lifetime: 1800000
-#   jpa:
-#     database-platform: org.hibernate.dialect.PostgreSQLDialect
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-#     defer-datasource-initialization: true
-#     properties:
-#       hibernate:
-#         format_sql: true
-#   sql:
-#     init:
-#       schema-locations: classpath:schema-postgresql.sql
-#       mode: always
 
       

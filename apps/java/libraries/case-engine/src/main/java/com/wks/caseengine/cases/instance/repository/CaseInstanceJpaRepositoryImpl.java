@@ -61,7 +61,7 @@ public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 	    );
 
 	    filters.getStatus().ifPresent(status -> 
-	        predicates.add(cb.equal(root.get("status"), status))
+	        predicates.add(cb.equal(root.get("status"), status.getCode()))
 	    );
 
 	    Cursor cursor = filters.getCursor();

@@ -17,13 +17,11 @@ services:
             - KEYCLOAK_DEFAULT_USER_FIRST_NAME=${KEYCLOAK_DEFAULT_USER_FIRST_NAME}
             - KEYCLOAK_DEFAULT_USER_LAST_NAME=${KEYCLOAK_DEFAULT_USER_LAST_NAME}
         links:
-            - mongodb
             - camunda
             - keycloak
         depends_on:
-            mongodb:
-                condition: service_healthy
             camunda:
                 condition: service_healthy
             keycloak:
-                condition: service_healthy            
+                condition: service_healthy
+            

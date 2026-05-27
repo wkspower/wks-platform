@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,7 @@ import jakarta.persistence.EntityManagerFactory;
 		"com.wks.caseengine.cases.instance.email.repository", "com.wks.caseengine.cases.instance.repository",
 		"com.wks.caseengine.form", "com.wks.caseengine.queue", "com.wks.caseengine.record",
 		"com.wks.caseengine.record.type" })
-@EntityScan(basePackages = "com.wks.caseengine.entity")
+@EntityScan(basePackages = "com.wks.caseengine.jpa.entity")
 @EnableTransactionManagement
 public class EngineDatabaseTenantConfig {
 
@@ -46,12 +47,21 @@ public class EngineDatabaseTenantConfig {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+	@ConfigurationProperties("spring.jpa")
+	public JpaProperties jpaProperties() {
+		return new JpaProperties();
+	}
+
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaProperties jpaProperties) {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource);
-		em.setPackagesToScan("com.wks.caseengine.entity");
+		em.setPackagesToScan("com.wks.caseengine.jpa.entity");
+		
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
+		em.setJpaPropertyMap(jpaProperties.getProperties());
+		
 		return em;
 	}
 

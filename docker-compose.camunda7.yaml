@@ -13,9 +13,6 @@ services:
             retries: 3
             start_period: 5s
             timeout: 10s
-        depends_on:
-            mongodb:
-                condition: service_healthy
                 
     case-engine-rest-api:
         build:
@@ -23,18 +20,16 @@ services:
         ports:
             - 8081:8081
         links:
-            - mongodb
             - camunda
         environment:
             - CAMUNDA_VERSION=camunda7
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
-            - MONGO_DATABASE=${MONGO_WKS_DATABASE}
-            - MONGO_CONN=${MONGO_CONNECTION_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
             - OPA_URL=${OPA_URL}
+            - WKS_DB_URL=${WKS_DB_URL}
+            - WKS_DB_USER=${WKS_DB_USER}
+            - WKS_DB_PASSWORD=${WKS_DB_PASSWORD}
         depends_on:
-            mongodb:
-                condition: service_healthy
             camunda:
                 condition: service_healthy
 
