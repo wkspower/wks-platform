@@ -2,11 +2,11 @@
 sidebar_position: 2
 ---
 
-# 🗺️ Roadmap
+# Roadmap
 
 The WKS Platform roadmap outlines our vision for providing a robust, modern, and secure Business Process Management (BPM) and Case Management solution. This roadmap is a statement of intent and priorities. It is not a rigid schedule, and plans may evolve based on community feedback and market requirements.
 
-## 📊 Visual Roadmap
+## Visual Roadmap
 
 ```mermaid
 flowchart LR
@@ -41,7 +41,7 @@ flowchart LR
 
 ---
 
-## 🛠️ In Progress (Launch Q2 2026)
+## In Progress (Launch Q2 2026)
 
 This phase focuses on the upcoming major release, modernizing the core infrastructure of the platform.
 
@@ -49,10 +49,10 @@ This phase focuses on the upcoming major release, modernizing the core infrastru
 *   **Spring Boot Upgrade:** Migration to **Spring Boot 4.0.6**.
 *   **Camunda Engine Upgrade:** Official support for **Camunda 7.24**.
 
-## 📅 Planned (Next)
+## Planned (Next)
 
 *To be defined.*
 
-## 🔭 Future Vision (Later)
+## Future Vision (Later)
 
 *To be defined.*
