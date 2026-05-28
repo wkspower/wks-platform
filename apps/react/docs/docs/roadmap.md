@@ -9,9 +9,9 @@ The WKS Platform roadmap outlines our vision for providing a robust, modern, and
 ## 📊 Visual Roadmap
 
 ```mermaid
-graph LR
+flowchart LR
     %% Stage 1: In Progress
-    subgraph "In Progress (Launch Q2 2026)"
+    subgraph G1 ["In Progress (Launch Q2 2026)"]
         direction TB
         A[Spring Boot 4.0.6]
         B[Java 21 Support]
@@ -19,20 +19,18 @@ graph LR
     end
 
     %% Stage 2: Planned
-    subgraph "Planned (Next)"
+    subgraph G2 ["Planned (Next)"]
         TBD1[To be defined]
     end
 
     %% Stage 3: Future Vision
-    subgraph "Future Vision (Later)"
+    subgraph G3 ["Future Vision (Later)"]
         TBD2[To be defined]
     end
 
-    %% Logical Flow connecting groups
-    A -.-> TBD1
-    B -.-> TBD1
-    C -.-> TBD1
-    TBD1 -.-> TBD2
+    %% Logical Flow connecting subgraphs directly
+    G1 -.-> G2
+    G2 -.-> G3
 
     %% Styling
     classDef inprogress fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
