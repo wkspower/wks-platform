@@ -33,9 +33,15 @@ export const TaskForm = ({ open, handleClose, task }) => {
     let apiDataVariables = {}
     let apiDataFormComponents = {}
 
-    FormService.getByKey(keycloak, task.formKey)
-      .then((data) => {
-        apiDataFormComponents = data.structure
+    const formPromise = task.formKey
+      ? FormService.getByKey(keycloak, task.formKey).then(
+          (data) => data.structure,
+        )
+      : Promise.resolve(null)
+
+    formPromise
+      .then((structure) => {
+        apiDataFormComponents = structure
 
         apiDataVariables = {
           data: {},

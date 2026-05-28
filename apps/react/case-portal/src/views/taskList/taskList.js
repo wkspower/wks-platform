@@ -17,6 +17,7 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TaskService } from 'services'
 import { useSession } from '../../SessionStoreContext'
+import { AdHocTaskForm } from '../taskForm/adHocTaskForm'
 import { TaskForm } from '../taskForm/taskForm'
 import './taskList.css'
 
@@ -221,13 +222,16 @@ export const TaskList = ({ businessKey, callback }) => {
         </React.Fragment>
       )}
 
-      {open && task && (
+      {open && task && task.processInstanceId && (
         <TaskForm
           task={task}
           handleClose={handleClose}
           open={open}
           keycloak={keycloak}
         />
+      )}
+      {open && task && !task.processInstanceId && (
+        <AdHocTaskForm task={task} handleClose={handleClose} open={open} />
       )}
     </React.Fragment>
   )
