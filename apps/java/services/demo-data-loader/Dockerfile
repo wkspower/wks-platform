@@ -1,4 +1,4 @@
-FROM amazoncorretto:17.0.5
+FROM amazoncorretto:21
 
 ENV IMPORT_DIR_PATH /opt/data
 

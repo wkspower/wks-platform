@@ -39,12 +39,6 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.wks</groupId>
-			<artifactId>c8-client</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-
 	</dependencies>
 
 </project>

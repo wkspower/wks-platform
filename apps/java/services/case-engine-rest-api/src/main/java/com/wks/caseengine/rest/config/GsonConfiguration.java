@@ -11,9 +11,6 @@
  */
 package com.wks.caseengine.rest.config;
 
-import java.util.List;
-
-import org.springframework.boot.autoconfigure.gson.GsonBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,7 +21,7 @@ import com.wks.caseengine.json.GsonBuilderFactory;
 public class GsonConfiguration {
 
 	@Bean
-	public GsonBuilder gsonBuilder(List<GsonBuilderCustomizer> customizers) {
+	public GsonBuilder gsonBuilder() {
 		return new GsonBuilderFactory().getGsonBuilder();
 	}
 

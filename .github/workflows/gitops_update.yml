@@ -34,7 +34,7 @@ jobs:
       - name: Set up jdk 18
         uses: actions/setup-java@v3
         with:
-          java-version: "18"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Set up maven
@@ -98,7 +98,7 @@ jobs:
       - name: Set up jdk 18
         uses: actions/setup-java@v3
         with:
-          java-version: "18"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Set up maven

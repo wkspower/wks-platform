@@ -20,8 +20,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan(basePackageClasses = { com.wks.bpm.engine.client.facade.BpmEngineClientFacade.class,
-		com.wks.bpm.engine.camunda.client.config.Camunda7ClientScan.class,
-		com.wks.bpm.engine.camunda.client.config.Camunda8ClientScan.class })
+		com.wks.bpm.engine.camunda.client.config.Camunda7ClientScan.class })
 public class BpmEngineClientScan {
 
 }

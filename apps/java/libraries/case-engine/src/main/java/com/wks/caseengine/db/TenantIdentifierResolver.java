@@ -3,14 +3,11 @@ package com.wks.caseengine.db;
 import java.util.Map;
 import java.util.Optional;
 
-import org.checkerframework.checker.initialization.qual.Initialized;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.UnknownKeyFor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -43,7 +40,7 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
 	}
 
 	@Override
-	public @UnknownKeyFor @NonNull @Initialized boolean validateExistingCurrentSessions() {
+	public boolean validateExistingCurrentSessions() {
 		return false;
 	}
 	

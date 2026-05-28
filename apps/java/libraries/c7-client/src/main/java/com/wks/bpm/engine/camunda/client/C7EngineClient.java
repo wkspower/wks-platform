@@ -14,19 +14,7 @@ package com.wks.bpm.engine.camunda.client;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +37,7 @@ import org.camunda.community.rest.client.dto.CorrelationMessageDto;
 import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
 import org.camunda.community.rest.client.dto.TaskDto;
+import org.camunda.community.rest.client.dto.TaskWithAttachmentAndCommentDto;
 import org.camunda.community.rest.client.dto.UserIdDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
@@ -115,8 +104,8 @@ public class C7EngineClient implements BpmEngineClient {
 			writer.write(bpmnXml);
 			writer.close();
 
-			deploymentApi.createDeployment(tenantHolder.getTenantId().get(), null, false, false, fileName, new Date(),
-					file);
+			deploymentApi.createDeployment(tenantHolder.getTenantId().get(), null, false, false, fileName,
+					OffsetDateTime.now(), file);
 		} catch (IOException e) {
 			log.error("Error parsing the BPMN", e);
 			e.printStackTrace();
@@ -197,11 +186,11 @@ public class C7EngineClient implements BpmEngineClient {
 					.getProcessInstances(null, null, null, null, null, businessKey.orElse(null), null, null,
 							processDefinitionKey.orElse(null), null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, activityIdIn.orElse(null), null, null,
-							null, null, null)
+							null, null, null, null)
 					.stream()
 					.map(o -> ProcessInstance.builder().businessKey(o.getBusinessKey())
 							.caseInstanceId(o.getCaseInstanceId()).definitionId(o.getDefinitionId()).ended(o.getEnded())
-							.id(o.getId()).suspended(o.getSuspended()).tenantId(o.getTenantId()))
+							.id(o.getId()).suspended(o.getSuspended()).tenantId(o.getTenantId()).build())
 					.toArray(ProcessInstance[]::new);
 		} catch (ApiException e) {
 			log.error("Error getting camunda process instances", e);
@@ -307,9 +296,8 @@ public class C7EngineClient implements BpmEngineClient {
 
 	@Override
 	public Task getTask(final String taskId, final BpmEngine bpmEngine) {
-		TaskDto reponseDto;
 		try {
-			reponseDto = taskApi.getTask(taskId);
+			TaskWithAttachmentAndCommentDto reponseDto = taskApi.getTask(taskId);
 			return convertFromTaskDto(reponseDto);
 		} catch (ApiException e) {
 			log.error("Error getting camunda task", e);
@@ -329,7 +317,8 @@ public class C7EngineClient implements BpmEngineClient {
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-							null, null, null, null, null, null, null, null, null, null, null, null, null)
+							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null)
 					.stream().map(o -> convertFromTaskDto(o)).toArray(Task[]::new);
 		} catch (ApiException e) {
 			log.error("Error getting camunda tasks", e);
@@ -363,14 +352,38 @@ public class C7EngineClient implements BpmEngineClient {
 		return task;
 	}
 
-	private String formateDate(final Date date) {
+	private Task convertFromTaskDto(TaskWithAttachmentAndCommentDto reponseDto) {
+
+		Task task = new Task();
+		task.setAssignee(reponseDto.getAssignee());
+		task.setCaseDefinitionId(reponseDto.getCaseDefinitionId());
+		task.setCaseExecutionId(reponseDto.getCaseExecutionId());
+		task.setCaseInstanceId(reponseDto.getCaseInstanceId());
+		task.setCreated(formateDate(reponseDto.getCreated()));
+		task.setDescription(reponseDto.getDescription());
+		task.setDue(formateDate(reponseDto.getDue()));
+		task.setExecutionId(reponseDto.getExecutionId());
+		task.setFollowUp(formateDate(reponseDto.getFollowUp()));
+		task.setFormKey(reponseDto.getFormKey());
+		task.setId(reponseDto.getId());
+		task.setName(reponseDto.getName());
+		task.setOwner(reponseDto.getOwner());
+		task.setPriority(String.valueOf(reponseDto.getPriority()));
+		task.setProcessDefinitionId(reponseDto.getProcessDefinitionId());
+		task.setProcessInstanceId(reponseDto.getProcessInstanceId());
+		task.setTaskDefinitionKey(reponseDto.getTaskDefinitionKey());
+		task.setTenantId(reponseDto.getTenantId());
+
+		return task;
+	}
+
+	private String formateDate(final OffsetDateTime date) {
 		if (date == null) {
 			return null;
 		}
 
-		Instant instant = date.toInstant();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-		return formatter.format(instant.atOffset(java.time.ZoneOffset.UTC));
+		return formatter.format(date.withOffsetSameInstant(java.time.ZoneOffset.UTC));
 	}
 
 	@Override

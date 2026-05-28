@@ -14,20 +14,18 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <java.version>17</java.version>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.source>17</maven.compiler.source>
+        <java.version>21</java.version>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
 
         <servlet-api.version>2.5</servlet-api.version>
 
-        <spring.boot.version>3.1.1</spring.boot.version>
+        <spring.boot.version>4.0.6</spring.boot.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <spring.shell.version>2.0.1.RELEASE</spring.shell.version>
-        <spring.doc.version>2.5.0</spring.doc.version>
+        <spring.doc.version>2.7.0</spring.doc.version>
 
-        <camunda7.version>7.20.0</camunda7.version>
-        <camunda8.version>8.4.5</camunda8.version>
-        <camunda8.spring.version>8.4.2</camunda8.spring.version>
+        <camunda7.version>7.24.0</camunda7.version>
         <camunda-bpm-junit5.version>1.1.0</camunda-bpm-junit5.version>
 
         <lombok.version>1.18.22</lombok.version>
@@ -37,8 +35,6 @@
         <minio.version>8.4.5</minio.version>
 
         <findbugs-version>3.0.2</findbugs-version>
-        <jackson-version>2.14.1</jackson-version>
-        <jackson-databind-version>2.14.1</jackson-databind-version>
         <jackson-databind-nullable-version>0.2.6</jackson-databind-nullable-version>
         <jakarta-annotation-version>1.3.5</jakarta-annotation-version>
         <jaxb.version>2.3.1</jaxb.version>
@@ -82,18 +78,34 @@
 
         <module>libraries/c7-plugins</module>
         <module>libraries/c7-client</module>
-        <module>libraries/c8-client</module>
 
         <!-- Services -->
         <module>services/case-engine-rest-api</module>
         <module>services/c7-external-tasks</module>
-        <module>services/c8-external-tasks</module>
         <module>services/storage-api</module>
         <module>services/demo-data-loader</module>
     </modules>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

@@ -9,12 +9,12 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
-public class NoOpConnectionProvider implements MultiTenantConnectionProvider, HibernatePropertiesCustomizer {
+public class NoOpConnectionProvider implements MultiTenantConnectionProvider<String>, HibernatePropertiesCustomizer {
 
 	private static final long serialVersionUID = 1L;
 	
