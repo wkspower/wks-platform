@@ -21,6 +21,12 @@
         <servlet-api.version>2.5</servlet-api.version>
 
         <spring.boot.version>4.0.6</spring.boot.version>
+        <!-- Tomcat security fix: CVE-2026-41293/43512/43515 (critical),
+             43513/42498/41284 (high), 43514 (low) in tomcat-embed-core.
+             The Spring Boot BOM is imported (not inherited), so overriding
+             tomcat.version in <properties> is a no-op; the artifacts are pinned
+             explicitly in <dependencyManagement> below, ahead of the BOM import. -->
+        <tomcat.version>11.0.22</tomcat.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <spring.shell.version>2.0.1.RELEASE</spring.shell.version>
         <spring.doc.version>2.7.0</spring.doc.version>
@@ -44,6 +50,26 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Pinned ahead of the spring-boot-dependencies import so these
+                 versions win over the BOM (first-declared wins in
+                 dependencyManagement). Keeps all tomcat-embed artifacts aligned
+                 on the patched ${tomcat.version}. -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
