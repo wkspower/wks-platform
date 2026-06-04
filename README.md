@@ -72,7 +72,34 @@ WKS Platform is designed as a multi-tenant solution, allowing multiple organizat
 
 ## Installation
 
-[https://www.wkspower.com/docs/instalation-guide/](https://doc.wkspower.com/docs/Installation/Option%201%20Pre-built%20Docker%20Images/)
+> **⚠️ The Docker Compose stack in this repo is for LOCAL DEVELOPMENT only** — it is not
+> production-hardened. A separate production path lives under `docker/`.
+
+The local environment is a **single `docker-compose.yml`** driven by Compose profiles. The
+minimum is the default, and app images are pulled from the public GitHub Container Registry
+(`ghcr.io/wkspower/*`) — **no Maven/Yarn build required**.
+
+```bash
+git clone https://github.com/wkspower/wks-platform.git
+cd wks-platform
+cp .env-sample .env
+docker compose up -d            # core backend + case portal (http://localhost:3001)
+```
+
+Optional capabilities are profiles you turn on:
+
+| Profile | Adds | Enable with |
+| --- | --- | --- |
+| `portal` *(default)* | React case portal (port 3001) | on by default |
+| `notifications` | Kafka + email / websocket / Novu | `KAFKA_ENABLED=true docker compose --profile portal --profile notifications up -d` |
+| `proxy` | Traefik reverse proxy | `docker compose --profile portal --profile proxy up -d` |
+| `demo` | Seed demo data, then exit | `docker compose --profile portal --profile demo up -d` |
+
+To compile from source instead of pulling images: `docker compose up -d --build`
+(multi-stage Docker builds — still no host Maven needed).
+
+Full guide: [Installation docs](https://docs.wkspower.com/docs/Installation/).
+Camunda 8 is experimental/outdated — see `experimental/camunda8/`.
 
 ## Diagrams 
 

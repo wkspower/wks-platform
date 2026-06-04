@@ -1,0 +1,327 @@
+# =============================================================================
+#  WKS Platform — LOCAL DEVELOPMENT ONLY. This stack is NOT production-ready:
+#  it runs Keycloak in `start-dev`, uses demo/admin credentials, and validates
+#  no secrets. For production see docker/docker-compose.prod.yml (separate path).
+#
+#  ONE FILE, driven by Compose profiles. The minimum is the default.
+#
+#    docker compose up -d                 # minimum: core backend + portal
+#    COMPOSE_PROFILES= docker compose up   # backend only (run portal via yarn)
+#    KAFKA_ENABLED=true docker compose --profile portal --profile notifications up -d
+#    docker compose --profile portal --profile demo up -d   # + seed demo data
+#    docker compose up -d --build         # rebuild app images from source (no host mvn)
+#    docker compose down                  # stop (keeps data volumes)
+#
+#  Profiles: portal (default), notifications, proxy, demo.
+#  App images are pulled from GHCR (public) by default; --build compiles locally.
+#  Camunda 8 is experimental/outdated — see experimental/camunda8/.
+# =============================================================================
+
+name: wks-platform
+
+services:
+
+    # ------------------------------------------------------------------ core
+    # (no profile → always started)
+
+    minio:
+        image: quay.io/minio/minio
+        command: server /data --console-address ":9090"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+        ports:
+            - 9000:9000
+            - 9090:9090
+        environment:
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        volumes:
+            - minio:/data:rw
+
+    mongodb:
+        image: mongo:6.0.14
+        ports:
+            - 27017:27017
+        healthcheck:
+            test: mongosh --eval 'db.stats().ok' --quiet
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        volumes:
+            - mongo:/data/db:rw
+
+    opa:
+        # Upstream OPA with rules live-mounted from ./opa (no build needed).
+        image: openpolicyagent/opa:0.49.2-static
+        ports:
+            - 8181:8181
+        command:
+            - run
+            - --server
+            - /etc/rules/wks_policy_rules.rego
+        volumes:
+            - ./opa:/etc/rules:ro
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:20.0.3
+        command: start-dev
+        environment:
+            KC_HEALTH_ENABLED: "true"
+            KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+            KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+        healthcheck:
+            test: curl --fail http://localhost:8080/health/ready || exit 1
+            interval: 10s
+            retries: 10
+            start_period: 5s
+            timeout: 20s
+        ports:
+            - 8082:8080
+        volumes:
+            - keycloak:/opt/keycloak/data/
+
+    storage-api:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
+        build:
+            context: apps/java
+            dockerfile: services/storage-api/Dockerfile
+        ports:
+            - 8085:8085
+        environment:
+            - OPA_URL=${OPA_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - MINIO_HOST_INTERNAL=${MINIO_HOST_INTERNAL}
+            - MINIO_HOST_EXTERNAL=${MINIO_HOST_EXTERNAL}
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        depends_on:
+            minio:
+                condition: service_healthy
+
+    camunda:
+        image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
+        command: ./camunda.sh --rest --webapps
+        ports:
+            - 8080:8080
+        healthcheck:
+            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+
+    case-engine-rest-api:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
+        build:
+            context: apps/java
+            dockerfile: services/case-engine-rest-api/Dockerfile
+        ports:
+            - 8081:8081
+        environment:
+            - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_WKS_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - OPA_URL=${OPA_URL}
+            # The pre-built v1.4.14 image bundles a Camunda 8 / Zeebe client that
+            # can't reach a broker in Camunda 7 mode and reports health DOWN. The
+            # client is mandatory in that image (can't be removed), so we just drop
+            # its health contributor. Harmless on source-built images (no Zeebe).
+            - MANAGEMENT_HEALTH_ZEEBE_ENABLED=false
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            camunda:
+                condition: service_healthy
+
+    c7-external-tasks:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-v1.4.14}
+        build:
+            context: apps/java
+            dockerfile: services/c7-external-tasks/Dockerfile
+        environment:
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - CAMUNDA_USERNAME=${CAMUNDA_USERNAME}
+            - CAMUNDA_PASSWORD=${CAMUNDA_PASSWORD}
+            - KEYCLOAK_URL=${KEYCLOAK_TOKEN_URL}
+            - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+            - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
+            - DISABLE_BACKOFF_STRATEGY=${DISABLE_BACKOFF_STRATEGY}
+            # Kafka publishing — baked in but inert unless KAFKA_ENABLED=true
+            # (activate together with the `notifications` profile).
+            - KAFKA_ENABLED=${KAFKA_ENABLED:-false}
+            - KAFKA_URL=${KAFKA_URL}
+            - KAFKA_TOPIC_CASE_CREATE=${KAFKA_TOPIC_CASE_CREATE}
+            - KAFKA_TOPIC_CASE_EMAIL_OUTBOUND=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
+        depends_on:
+            camunda:
+                condition: service_healthy
+
+    # ------------------------------------------------------------- portal
+    # profile: portal (enabled by default via COMPOSE_PROFILES in .env)
+
+    case-portal:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-portal:${WKS_VERSION:-v1.4.14}
+        profiles: [portal]
+        build:
+            context: apps/react/case-portal
+            args:
+                GENERATE_SOURCEMAP: "false"
+        environment:
+            __SERVER_KEYCLOAK_URL__: ${REACT_APP_KEYCLOAK_URL}
+            __SERVER_API_URL__: ${REACT_APP_API_URL}
+            __SERVER_STORAGE_URL__: ${REACT_APP_STORAGE_URL}
+            __SERVER_WEBSOCKETS_ENABLED__: ${REACT_APP_WEBSOCKETS_ENABLED}
+            __SERVER_WEBSOCKETS_URL__: ${REACT_APP_WEBSOCKETS_URL}
+            __SERVER_WEBSOCKETS_CASE_CREATED__: ${REACT_APP_WEBSOCKETS_CASE_CREATED}
+            __SERVER_WEBSOCKETS_HUMAN_TASK_CREATED__: ${REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED}
+            __SERVER_NOVU_ENABLED__: ${REACT_APP_NOVU_ENABLED}
+            __SERVER_NOVU_PUBLISHER_API_URL__: ${REACT_APP_NOVU_PUBLISHER_API_URL}
+        ports:
+            - 3001:80
+
+    # ------------------------------------------------------ notifications
+    # profile: notifications — Kafka event bus + the consumers that act on it.
+    # Set KAFKA_ENABLED=true so the engine side actually publishes.
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:latest
+        profiles: [notifications]
+        container_name: zookeeper
+        ports:
+            - "2181:2181"
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+
+    kafka:
+        image: wurstmeister/kafka:latest
+        profiles: [notifications]
+        container_name: kafka
+        ports:
+            - "9092:9092"
+            - "9093:9093"
+        environment:
+            KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+            KAFKA_LISTENERS: INSIDE://kafka:9093,OUTSIDE://kafka:9092
+            KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        depends_on:
+            - zookeeper
+
+    email-sender:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/email-sender:${WKS_VERSION:-v1.4.14}
+        profiles: [notifications]
+        build:
+            context: apps/node/email-sender
+        environment:
+            - LOG_LEVEL=${EMAIL_SENDER_LOG_LEVEL}
+            - KAFKA_URL=${KAFKA_URL}
+            - KAFKA_TOPIC=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
+            - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+            - JWT_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
+            - JWT_TOKEN_CLIENT_ID=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_ID}
+            - JWT_TOKEN_CLIENT_SECRET=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_SECRET}
+            - JWT_TOKEN_GRANT_TYPE=${MAIL_TO_CASE_JWT_TOKEN_GRANT_TYPE}
+        depends_on:
+            - kafka
+
+    websocket-publisher:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/websocket-publisher:${WKS_VERSION:-v1.4.14}
+        profiles: [notifications]
+        build:
+            context: apps/node/websocket-publisher
+        ports:
+            - "8484:8484"
+        environment:
+            - LOG_LEVEL=${WEBSOCKET_LOG_LEVEL}
+            - WEBSOCKET_PORT=8484
+            - KAFKA_URL=${KAFKA_URL}
+        depends_on:
+            - kafka
+
+    novu-publisher:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/novu-publisher:${WKS_VERSION:-v1.4.14}
+        profiles: [notifications]
+        build:
+            context: apps/node/novu-publisher
+        ports:
+            - 3002:3002
+        environment:
+            - LOG_LEVEL=${NOVU_LOG_LEVEL}
+            - KAFKA_URL=${KAFKA_URL}
+            - NOVU_TRIGGER_URL=${NOVU_TRIGGER_URL}
+            - NOVU_API_KEY=${NOVU_API_KEY}
+            - NOVU_APP_ID=${NOVU_APP_ID}
+            - NOVU_CASE_CREATE_WORKFLOW=${KAFKA_TOPIC_CASE_CREATE}
+            - NOVU_HUMAN_TASK_CREATE_WORKFLOW=${KAFKA_TOPIC_CREATE_HUMAN_TASK}
+        depends_on:
+            - kafka
+
+    # --------------------------------------------------------------- proxy
+    # profile: proxy — Traefik reverse proxy / dashboard (optional).
+
+    traefik:
+        image: traefik:v2.8
+        profiles: [proxy]
+        command:
+            - --log.level=debug
+            - --api.insecure=true
+            - --api.dashboard=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --providers.docker=true
+            - --experimental.hub=true
+            - --providers.docker.exposedbydefault=false
+            - --serversTransport.insecureSkipVerify=true
+            - --providers.file.watch=true
+            - --providers.file.directory=/traefik
+        ports:
+            - 80:80
+            - 443:443
+            - 8888:8080
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./configs/traefik:/traefik:ro
+
+    # ---------------------------------------------------------------- demo
+    # profile: demo — one-shot loader that seeds demo data, then exits.
+
+    demo-data-loader:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/demo-data-loader:${WKS_VERSION:-v1.4.14}
+        profiles: [demo]
+        build:
+            context: apps/java
+            dockerfile: services/demo-data-loader/Dockerfile
+        environment:
+            - CAMUNDA7_DATA_IMPORT_ENABLED=true
+            - CAMUNDA8_DATA_IMPORT_ENABLED=false
+            - CAMUNDA_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_DEMO_DATA_LOADER_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - KEYCLOAK_DEFAULT_USER=${KEYCLOAK_DEFAULT_USER}
+            - KEYCLOAK_DEFAULT_USER_PASSWORD=${KEYCLOAK_DEFAULT_USER_PASSWORD}
+            - KEYCLOAK_DEFAULT_USER_EMAIL=${KEYCLOAK_DEFAULT_USER_EMAIL}
+            - KEYCLOAK_DEFAULT_USER_FIRST_NAME=${KEYCLOAK_DEFAULT_USER_FIRST_NAME}
+            - KEYCLOAK_DEFAULT_USER_LAST_NAME=${KEYCLOAK_DEFAULT_USER_LAST_NAME}
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            camunda:
+                condition: service_healthy
+            keycloak:
+                condition: service_healthy
+
+volumes:
+    mongo:
+        driver: local
+    minio:
+        driver: local
+    keycloak:
+        driver: local
