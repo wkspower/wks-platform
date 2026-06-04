@@ -69,8 +69,7 @@ docs(roadmap): finalize v1.5.0 modernization release documentation
 - CI (`build.yml`) must pass. Build and exercise the affected app before
   requesting review — see the per-app run instructions in the repo README.
 
-<!-- TODO(maintainers): document review requirements (required approvals,
-     code owners) if/when branch protection is configured. -->
+- Every PR needs **at least one approving review** before it's merged.
 
 ## Releases
 
@@ -99,12 +98,10 @@ release version.
 ### Changelog & release notes
 
 We don't maintain a hand-written `CHANGELOG.md`. Because PR titles are
-Conventional Commits, the squashed history **is** the changelog — generate the
-release notes from it (GitHub's "Generate release notes" on the tag/Release works
-well). This is exactly why clean, well-typed PR titles matter.
-
-<!-- TODO(maintainers): if you adopt GitHub Releases, note the convention here
-     (e.g. auto-generated notes, grouped by Conventional Commit type). -->
+Conventional Commits, the squashed history **is** the changelog. For each release
+(and each `-rc.N`) we **cut a GitHub Release** on the tag and use its *Generate
+release notes* to produce the notes from the merged PR titles — which is exactly
+why clean, well-typed PR titles matter.
 
 ## Security fixes
 
@@ -134,6 +131,8 @@ because **this repository is public**:
 
 ## Communication
 
-<!-- TODO(maintainers): document where releases and security fixes are announced
-     (team channel, mailing list, GitHub Releases) and who must be notified for a
-     security release. -->
+Releases are announced through the **GitHub Release** for the tag — its generated
+notes are the announcement. Notable user-facing changes are also reflected in the
+**documentation site** (`apps/react/docs`) so the published docs track the
+released behaviour. Security fixes are communicated the same way (the GitHub
+Release notes, alongside the published advisory).
