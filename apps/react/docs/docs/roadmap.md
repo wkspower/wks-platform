@@ -18,7 +18,7 @@ flowchart LR
     end
 
     %% v1.5.0: Next Release
-    subgraph V15 ["v1.5.0 (The Modernization)"]
+    subgraph V15 ["v1.5.0 (The Stabilization)"]
         direction TB
         A[Spring Boot 4.0.6]
         B[Java 21 Support]
@@ -57,9 +57,9 @@ The current production version supporting Java 17 and Spring Boot 3.x. This vers
 ---
 
 ## v1.5.0 (Next Release - In Progress)
-**Theme: The Modernization Release**
+**Theme: The Stabilization Release**
 
-A major architectural leap combining core infrastructure upgrades with a comprehensive security overhaul.
+A stabilization release that hardens the existing platform: upgrading core dependencies to current LTS/supported versions and clearing High and Critical vulnerabilities, without changing the application's capabilities.
 
 *   **Zero-Vulnerability Baseline**: Elimination of all High and Critical CVEs across the platform.
 *   **Java 21 & Spring Boot 4**: Transition to the latest LTS and next-gen framework standards.
