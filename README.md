@@ -83,17 +83,22 @@ minimum is the default, and app images are pulled from the public GitHub Contain
 git clone https://github.com/wkspower/wks-platform.git
 cd wks-platform
 cp .env-sample .env
-docker compose up -d            # core backend + case portal (http://localhost:3001)
+docker compose up -d            # core backend + case portal + demo seed
 ```
+
+On first run the `demo-data-loader` bootstraps the Keycloak realm and a `demo`
+user and seeds sample cases/processes — wait for it to finish, then open
+[http://localhost:3001](http://localhost:3001) and log in with `demo` / `demo`.
+To start **without** seeding (no login until you seed): `COMPOSE_PROFILES=portal docker compose up -d`.
 
 Optional capabilities are profiles you turn on:
 
 | Profile | Adds | Enable with |
 | --- | --- | --- |
 | `portal` *(default)* | React case portal (port 3001) | on by default |
-| `notifications` | Kafka + email / websocket / Novu | `KAFKA_ENABLED=true docker compose --profile portal --profile notifications up -d` |
-| `proxy` | Traefik reverse proxy | `docker compose --profile portal --profile proxy up -d` |
-| `demo` | Seed demo data, then exit | `docker compose --profile portal --profile demo up -d` |
+| `demo` *(default)* | Bootstrap Keycloak login + seed sample data, then exit | on by default; drop via `COMPOSE_PROFILES=portal` |
+| `notifications` | Kafka + email / websocket / Novu | `KAFKA_ENABLED=true docker compose --profile portal --profile demo --profile notifications up -d` |
+| `proxy` | Traefik reverse proxy | `docker compose --profile portal --profile demo --profile proxy up -d` |
 
 To compile from source instead of pulling images: `docker compose up -d --build`
 (multi-stage Docker builds — still no host Maven needed).

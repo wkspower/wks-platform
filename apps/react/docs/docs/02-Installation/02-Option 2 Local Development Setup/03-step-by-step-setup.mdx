@@ -24,20 +24,27 @@ The defaults in `.env` target `localhost` and work out of the box.
 
 ## Step 2: Start the platform 🚀
 
-### Minimum (recommended) — pulls pre-built images, no build
+### Default (recommended) — pulls pre-built images, no build
 
 ```bash
 docker compose up -d
 ```
 
-This starts the core backend plus the case portal (the `portal` profile is enabled by
-default in `.env`). First start pulls images and may take a few minutes to become healthy.
+This starts the core backend, the case portal, and the one-shot `demo-data-loader`
+(the `portal` and `demo` profiles are enabled by default in `.env`). First start pulls
+images and may take a few minutes; the loader **bootstraps the Keycloak realm + `demo`
+user and seeds sample cases**. Wait for `docker compose ps -a` to show `demo-data-loader`
+as `Exited (0)`, then log into [http://localhost:3001](http://localhost:3001) with
+`demo` / `demo`.
 
-### With seeded demo data
+### Without seeding
 
 ```bash
-docker compose --profile portal --profile demo up -d
+COMPOSE_PROFILES=portal docker compose up -d
 ```
+
+Starts the portal and backend but skips the loader — you'll need to provision the
+Keycloak realm/user yourself before you can log in.
 
 ### With notifications (Kafka + email/websocket/Novu)
 

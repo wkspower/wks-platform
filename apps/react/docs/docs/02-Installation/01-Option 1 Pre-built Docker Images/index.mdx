@@ -54,12 +54,15 @@ cp .env-sample .env
 ### 2. Run Docker Compose (pulls pre-built images)
 
 ```bash
-docker compose --profile portal --profile demo up -d
+docker compose up -d
 ```
 
 The app images are pulled from the **public** GitHub Container Registry
-(`ghcr.io/wkspower/*`) — no build and no Maven/Yarn required. The `demo` profile seeds
-demo cases, forms, processes, and Keycloak users. Camunda 7 is the engine.
+(`ghcr.io/wkspower/*`) — no build and no Maven/Yarn required. The default profiles
+(`portal` + `demo`) bring up the UI and run the one-shot loader that bootstraps the
+Keycloak realm/`demo` user and seeds sample cases, forms, and processes. Camunda 7 is
+the engine. Wait for the `demo-data-loader` container to reach `Exited (0)` before
+logging in.
 
 > Pin a specific release with `WKS_VERSION` in `.env` (defaults to the latest release).
 > Camunda 8 is experimental and outdated — see `experimental/camunda8/`.

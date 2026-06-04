@@ -290,7 +290,11 @@ services:
             - ./configs/traefik:/traefik:ro
 
     # ---------------------------------------------------------------- demo
-    # profile: demo — one-shot loader that seeds demo data, then exits.
+    # profile: demo (on by default) — one-shot loader that BOOTSTRAPS the
+    # Keycloak realm/clients/`demo` user required to log in AND seeds sample
+    # cases/forms/processes, then exits 0. Idempotent: safe to re-run (logs
+    # 409/"already exists" and continues). Drop it with COMPOSE_PROFILES=portal,
+    # but then the portal has no realm/user to log in against.
 
     demo-data-loader:
         image: ${WKS_REGISTRY:-ghcr.io/wkspower}/demo-data-loader:${WKS_VERSION:-v1.4.14}

@@ -36,15 +36,15 @@ Enable with `--profile <name>` (or via `COMPOSE_PROFILES` in `.env`):
 | Profile | Adds | What it gives you |
 | --- | --- | --- |
 | `portal` *(default)* | `case-portal` | The React UI on port 3001 |
+| `demo` *(default)* | `demo-data-loader` | One-shot loader that **bootstraps the Keycloak realm/clients/`demo` user needed to log in** and seeds sample cases, forms, and processes, then exits. Without it the portal has no realm/user to authenticate against. |
 | `notifications` | `kafka`, `zookeeper`, `email-sender`, `websocket-publisher`, `novu-publisher` | Event bus + email / websocket / Novu notifications. Set `KAFKA_ENABLED=true` so the engine publishes. |
 | `proxy` | `traefik` | Reverse proxy / dashboard (port 8888) |
-| `demo` | `demo-data-loader` | One-shot loader that seeds demo cases, forms, processes, and Keycloak users, then exits |
 
 ```bash
-docker compose up -d                                   # core + portal (default)
+docker compose up -d                                   # core + portal + demo seed (login-ready)
+COMPOSE_PROFILES=portal docker compose up -d           # portal, NO seed (can't log in until seeded)
 COMPOSE_PROFILES= docker compose up -d                 # backend only (run portal via yarn)
-KAFKA_ENABLED=true docker compose --profile portal --profile notifications up -d
-docker compose --profile portal --profile demo up -d   # seed demo data
+KAFKA_ENABLED=true docker compose --profile portal --profile demo --profile notifications up -d
 docker compose down                                    # stop (keeps data volumes)
 ```
 
