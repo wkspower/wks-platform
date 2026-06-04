@@ -13,8 +13,32 @@ fixes, refactors, dependency bumps, and security patches alike.
   `refactor/...`, `security/...` (e.g. `fix/case-portal-task-details`,
   `build/upgrade-deps`, `security/resolve-ui-vulnerabilities`).
 
-<!-- TODO(maintainers): confirm the develop → main promotion rule (when/how
-     develop is merged or fast-forwarded into main) and document it here. -->
+### Promoting `develop` → `main`
+
+Releases are cut from a short-lived release branch so `develop` stays open for
+ongoing (including breaking) work while a release stabilizes:
+
+- Cut a **`release/x.y`** branch off `develop` to freeze the release scope.
+- Only stabilization lands on `release/x.y` — bug fixes, docs, release-note
+  polish. No new features. Merge each fix back into `develop` so it isn't lost.
+- Validate the branch with **release candidates**: tag `vx.y.0-rc.1`,
+  `vx.y.0-rc.2`, … and deploy those images. The `-rc.N` suffix is a SemVer
+  pre-release, so it correctly sorts *before* the final `vx.y.0`.
+- Tag the final **`vx.y.0`** from `release/x.y` once an RC is accepted — same
+  code, final name (the tag drives the image build — see [Releases](#releases)).
+- **Merge `release/x.y` into `main`.** This is a merge, not a fast-forward:
+  `main` can carry patch commits (below) that aren't on the release branch, so
+  the histories may have diverged.
+
+### Out-of-band patches
+
+Patches fix an already-released version, so they branch off **`main`** (the
+released code), not `develop`:
+
+- Branch off `main`, make the fix, and tag the next **PATCH** (`v1.4.10 →
+  v1.4.11`). The tag triggers the image build.
+- **Merge the patch back into `develop`** (and into any active `release/x.y`)
+  so the fix isn't reintroduced as a regression in the next release.
 
 ## Commits — Conventional Commits
 
@@ -58,8 +82,13 @@ release version.
 
 - Use **semantic version** tags: `vMAJOR.MINOR.PATCH` (e.g. `v1.4.14`, heading to
   `v1.5.0`).
-- For an out-of-band patch on an existing release, use a suffix:
-  `v1.4.10-patch1`, `v1.4.7-fix1`.
+- Patches and fixes increment **PATCH** on the released line:
+  `v1.4.10 → v1.4.11` — no suffix. The next PATCH integer is always free, since
+  `develop` only issues the next MINOR (see
+  [Promoting `develop` → `main`](#promoting-develop--main)).
+- The only suffix we use is `-rc.N` for **release candidates** of an upcoming
+  version (`v1.5.0-rc.1`), validated before the final tag — see
+  [Promoting `develop` → `main`](#promoting-develop--main).
 - Cutting a release = creating and pushing the tag:
 
   ```bash
