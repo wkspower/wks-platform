@@ -43,38 +43,26 @@ This guide outlines the steps to quickly set up and run the WKS Platform using p
 
 ## 🚀 Step-by-Step Installation
 
-### 1. Clone the Docker Configuration Repository
+### 1. Clone the repository and create the env file
 
 ```bash
-git clone https://github.com/wkspower/wks-platform-docker.git
-cd wks-platform-docker
+git clone https://github.com/wkspower/wks-platform.git
+cd wks-platform
+cp .env-sample .env
 ```
 
-### 2. Run Docker Compose
-
-Choose one of the following options depending on the version of Camunda you want to use:
-
-#### For Camunda 7
+### 2. Run Docker Compose (pulls pre-built images)
 
 ```bash
-docker-compose \
-  -f docker-compose.yaml \
-  -f docker-compose.camunda7.yaml \
-  -f docker-compose.demo-data-loader.camunda7.yaml \
-  -f docker-compose.portal.yaml \
-  up -d --build
+docker compose --profile portal --profile demo up -d
 ```
 
-#### For Camunda 8
+The app images are pulled from the **public** GitHub Container Registry
+(`ghcr.io/wkspower/*`) — no build and no Maven/Yarn required. The `demo` profile seeds
+demo cases, forms, processes, and Keycloak users. Camunda 7 is the engine.
 
-```bash
-docker-compose \
-  -f docker-compose.yaml \
-  -f docker-compose.camunda8.yaml \
-  -f docker-compose.demo-data-loader.camunda8.yaml \
-  -f docker-compose.portal.yaml \
-  up -d --build
-```
+> Pin a specific release with `WKS_VERSION` in `.env` (defaults to the latest release).
+> Camunda 8 is experimental and outdated — see `experimental/camunda8/`.
 
 ### 3. Configure Hostnames
 
