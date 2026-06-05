@@ -1,30 +1,71 @@
 ---
 id: docker-compose files overview
-title: 📦 Docker-Compose Files
+title: 📦 Docker Compose & Profiles
 ---
 
-# Docker-Compose Files Overview 📦
+# Docker Compose & Profiles 📦
 
-## 🏗️ Core Components
-- `docker-compose.yaml`: Sets up essential services like Minio, MongoDB, OPA, Keycloak, and Storage-API.
-- `docker-compose.camunda[CAMUNDA_VERSION].yaml`: Incorporates Camunda servers with key backend components such as the REST-API and [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
-- `docker-compose.demo-data-loader.[CAMUNDA_VERSION].yaml`: Automates the loading of demo data into the platform
-    - [Demo Case Definitions, Forms and Processes](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/data) into Camunda and MongoDB
-    - [Realms, Groups and Users](https://github.com/wkspower/wks-platform/tree/develop/apps/java/services/demo-data-loader/src/main/resources) into Keycloak.
-- `docker-compose.event-hub.[CAMUNDA_VERSION].yaml`: Optional but necessary for integrating [System Notifications](https://docs.wkspower.com/docs/System%20Notifications/) and/or [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
-    - Customizes Camunda with a plugin sending Kafka messages for registered events.
-    - Starts Kafka and Zookeeper.
-    - Enables Kafka communication from [External Tasks](https://docs.camunda.org/manual/7.21/user-guide/process-engine/external-tasks/).
+> **⚠️ Local development only.** This stack is **not** production-ready (Keycloak runs in
+> `start-dev`, demo/admin credentials, no secret validation). For production, a separate
+> Postgres-based path exists under `docker/` — it is a different artifact.
 
-## 🛠️ Additional Components
-- `docker-compose.websocket.yaml`: Enables real-time communication for the case-portal. See [websockets for the case-portal](https://github.com/wkspower/wks-platform/issues/246).
-- `docker-compose.novu.yaml`: Manages notification dispatch using [novu-publisher](https://docs.wkspower.com/docs/System%20Notifications/).
-- `docker-compose.email-sender.yaml`: Handles outgoing [email communications](https://www.wkspower.com/blog/presenting-email-to-case/).
-- `docker-compose.portal.yaml`: Deploys the front-end React case-portal.
+The local environment is a **single `docker-compose.yml`** at the repo root. Optional
+capabilities are turned on with **Compose profiles** instead of juggling many `-f` files.
 
-## 🖥️ Shell Scripts for Local Development
+## 🏗️ Always-on core (no profile)
 
-For ease of local development, various shell scripts are available:
-- **Server Management:** `docker-servers-[startup/shutdown].sh` for managing all servers using Docker, ideal for UI development.
-- **Portal Management:** `docker-portal-[startup/shutdown].sh` focuses on backend development needs.
-- **Full Startup Scripts:** `docker-full-startup.sh` for comprehensive loading of all components, available for Camunda 7 and 8, facilitating quick testing and demos.
+Started by every `docker compose up`:
+
+| Service | Purpose |
+| --- | --- |
+| `mongodb` | Case data store |
+| `keycloak` | Identity / OAuth2 (port 8082) |
+| `opa` | Authorization policy engine |
+| `minio` | Object storage for attachments |
+| `storage-api` | File storage service (port 8085) |
+| `camunda` | Camunda 7 workflow engine (port 8080) |
+| `case-engine-rest-api` | Core case API (port 8081) |
+| `c7-external-tasks` | Camunda 7 external-task workers |
+
+This **is** the minimum working environment.
+
+## 🧩 Optional profiles
+
+Enable with `--profile <name>` (or via `COMPOSE_PROFILES` in `.env`):
+
+| Profile | Adds | What it gives you |
+| --- | --- | --- |
+| `portal` *(default)* | `case-portal` | The React UI on port 3001 |
+| `demo` *(default)* | `demo-data-loader` | One-shot loader that **bootstraps the Keycloak realm/clients/`demo` user needed to log in** and seeds sample cases, forms, and processes, then exits. Without it the portal has no realm/user to authenticate against. |
+| `notifications` | `kafka`, `zookeeper`, `email-sender`, `websocket-publisher`, `novu-publisher` | Event bus + email / websocket / Novu notifications. Set `KAFKA_ENABLED=true` so the engine publishes. |
+| `proxy` | `traefik` | Reverse proxy / dashboard (port 8888) |
+
+```bash
+docker compose up -d                                   # core + portal + demo seed (login-ready)
+COMPOSE_PROFILES=portal docker compose up -d           # portal, NO seed (can't log in until seeded)
+COMPOSE_PROFILES= docker compose up -d                 # backend only (run portal via yarn)
+KAFKA_ENABLED=true docker compose --profile portal --profile demo --profile notifications up -d
+docker compose down                                    # stop (keeps data volumes)
+```
+
+## 🖼️ Images vs. building from source
+
+Every app service has both an `image:` (pulled from the public GHCR registry,
+`ghcr.io/wkspower/*`) and a `build:`. So:
+
+- `docker compose up -d` **pulls** pre-built images — no Java/Node build, no Maven.
+- `docker compose up -d --build` **compiles from source** (multi-stage Docker builds; no
+  host Maven needed either).
+
+Pin the image tag with `WKS_VERSION` in `.env` (default: the latest release).
+
+## 🔌 Advanced overlay
+
+- `docker-compose.camunda-kafka-plugin.yaml` — adds the in-engine Camunda plugin that also
+  emits *human-task-created* events. Requires building the plugin jar first; see the file
+  header for the exact commands.
+
+## 🧪 Camunda 8 (experimental)
+
+Camunda 8 is **outdated and unsupported** — its files live under `experimental/camunda8/`
+with their own README. Camunda 7 (above) is the supported engine.
