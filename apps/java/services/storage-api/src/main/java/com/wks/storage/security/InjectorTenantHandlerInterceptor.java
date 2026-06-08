@@ -14,6 +14,7 @@ package com.wks.storage.security;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,9 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;
 
+	@Value("${wks.tenancy.claim-name:org}")
+	private String tenantClaimName;
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
@@ -50,7 +54,7 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
 	private void setTenantId(HttpServletRequest request, SecurityContextTenantHolder tenantHolder) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		BearerTokenHandlerInputResolver handler = new BearerTokenHandlerInputResolver();
+		BearerTokenHandlerInputResolver handler = new BearerTokenHandlerInputResolver(tenantClaimName);
 
 		Map<String, Object> params = handler.resolver(request, authentication);
 		if (params.isEmpty()) {
