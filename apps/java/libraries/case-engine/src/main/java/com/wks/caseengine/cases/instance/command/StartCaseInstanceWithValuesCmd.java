@@ -65,11 +65,18 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 		CaseInstance preparedCaseInstance = caseInstanceBuilder.build();
 
-		ProcessVariable caseInstanceProcessVariable = generateCaseInstanceProcessVariable(commandContext,
-				preparedCaseInstance);
+		if (commandContext.isWorkflowEngineEnabled()) {
+			ProcessVariable caseInstanceProcessVariable = generateCaseInstanceProcessVariable(commandContext,
+					preparedCaseInstance);
 
-		commandContext.getProcessInstanceService().start(commandContext.getCaseCreationProcess(),
-				Optional.of(businessKey), Optional.of(caseInstanceProcessVariable));
+			commandContext.getProcessInstanceService().start(commandContext.getCaseCreationProcess(),
+					Optional.of(businessKey), Optional.of(caseInstanceProcessVariable));
+		} else {
+			// wks.bpm.engine=none: no BPM round-trip. Persist directly, mirroring what the
+			// "caseSave" external task -> SaveCaseInstanceWithValuesCmd does in workflow mode
+			// (which is the ONLY place the case is written when a workflow engine is present).
+			commandContext.getCaseInstanceRepository().save(preparedCaseInstance);
+		}
 
 		return preparedCaseInstance;
 	}

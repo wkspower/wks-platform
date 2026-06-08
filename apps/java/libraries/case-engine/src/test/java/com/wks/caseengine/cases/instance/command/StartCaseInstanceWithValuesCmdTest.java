@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -97,6 +98,32 @@ public class StartCaseInstanceWithValuesCmdTest {
 		assertEquals(caseInstanceToSave.getStatus(), savedCaseInstance.getStatus());
 
 		verify(processInstanceService).start(eq("Process1"), eq(Optional.of("BK_1")), anyOptionalOfProcessVariable());
+	}
+
+	@Test
+	public void shouldPersistDirectlyWhenWorkflowEngineDisabled() throws DatabaseRecordNotFoundException {
+
+		// Given wks.bpm.engine=none (no workflow engine)
+		CaseInstance caseInstanceToSave = new CaseInstance();
+		caseInstanceToSave.setBusinessKey("BK_NONE");
+		caseInstanceToSave.setCaseDefinitionId("CD_1");
+		createCaseInstanceCmd.setCaseInstanceParam(caseInstanceToSave);
+
+		CaseDefinition caseDefinition = new CaseDefinition();
+		caseDefinition.setStages(Arrays.<CaseStage>asList(CaseStage.builder().name("Stage 1").build()));
+
+		commandContext.setBpmEngine("none");
+
+		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
+
+		// When
+		CaseInstance savedCaseInstance = createCaseInstanceCmd.execute(commandContext);
+
+		// Then: case is persisted directly, with NO BPM round-trip
+		assertEquals("BK_NONE", savedCaseInstance.getBusinessKey());
+		assertEquals("Stage 1", savedCaseInstance.getStage());
+		verify(caseInstanceRepository).save(any(CaseInstance.class));
+		verifyNoInteractions(processInstanceService);
 	}
 
 	// Helper method to create a properly typed Optional

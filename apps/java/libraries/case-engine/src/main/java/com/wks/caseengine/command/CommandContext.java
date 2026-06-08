@@ -46,6 +46,15 @@ public class CommandContext {
 	@Value("${case.engine.email-to-case-outbound-process}")
 	private String emailToCaseOutboundProcess;
 
+	// Workflow/BPM engine selector. "none" runs without a BPM engine (no Camunda
+	// round-trip); any other value (default camunda7) uses the workflow engine.
+	@Value("${wks.bpm.engine:camunda7}")
+	private String bpmEngine;
+
+	public boolean isWorkflowEngineEnabled() {
+		return !"none".equalsIgnoreCase(bpmEngine);
+	}
+
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;
 
