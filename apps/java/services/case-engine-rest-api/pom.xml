@@ -123,6 +123,32 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.5.0</version>
 			</plugin>
+			<!-- Share the demo seed collections with demo-data-loader instead of duplicating
+			     the file: copy the single source onto this module's classpath at build time. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-shared-seed-data</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/seed</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/../demo-data-loader/data/mongodb</directory>
+									<includes>
+										<include>mongo-base-collections.json</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

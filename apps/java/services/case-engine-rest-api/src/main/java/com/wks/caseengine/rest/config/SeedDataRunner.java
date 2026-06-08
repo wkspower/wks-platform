@@ -57,7 +57,9 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "wks.seed.enabled", havingValue = "true")
 public class SeedDataRunner implements CommandLineRunner {
 
-	private static final String SEED_RESOURCE = "seed/seed-collections.json";
+	// Single source of truth: demo-data-loader/data/mongodb/mongo-base-collections.json,
+	// copied onto this module's classpath at build time (see maven-resources-plugin in pom.xml).
+	private static final String SEED_RESOURCE = "seed/mongo-base-collections.json";
 
 	@Autowired
 	private CaseDefinitionRepository caseDefinitionRepository;
