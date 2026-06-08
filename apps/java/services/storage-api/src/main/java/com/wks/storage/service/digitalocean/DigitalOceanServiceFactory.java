@@ -13,6 +13,7 @@ package com.wks.storage.service.digitalocean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.service.BucketService;
@@ -21,6 +22,7 @@ import com.wks.storage.service.ServiceFactory;
 import com.wks.storage.service.UploadService;
 
 @Service("DigitalOceanServiceFactory")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "do")
 public class DigitalOceanServiceFactory implements ServiceFactory {
 
 	@Autowired

@@ -13,6 +13,7 @@ package com.wks.storage.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -69,6 +70,7 @@ public class StorageConfig {
 
 	@Bean
 	@Qualifier("DigitalOceanClient")
+	@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "do")
 	public MinioClientDelegate creatMinioClient() {
 		MinioClient client = MinioClient.builder().endpoint(endpoint, 443, true).credentials(accessKey, secretKey)
 				.region(signingRegion).build();
@@ -77,6 +79,7 @@ public class StorageConfig {
 
 	@Bean
 	@Qualifier("MinioClient")
+	@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "minio")
 	public MinioClientDelegate createClient() {
 		MinioClient client = MinioClient.builder().endpoint(endpoint, port, secure).credentials(accessKey, secretKey)
 				.build();

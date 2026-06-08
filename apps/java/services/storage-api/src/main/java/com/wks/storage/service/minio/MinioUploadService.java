@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.config.StorageConfig;
@@ -27,6 +28,7 @@ import com.wks.storage.service.UploadService;
 import io.minio.PostPolicy;
 
 @Service("MinioUploadService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "minio")
 public class MinioUploadService implements UploadService {
 
 	@Autowired

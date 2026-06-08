@@ -13,6 +13,7 @@ package com.wks.storage.service.minio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -23,6 +24,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 
 @Service("MinioBucketService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "minio")
 public class MinioBucketService implements BucketService {
 
 	@Autowired

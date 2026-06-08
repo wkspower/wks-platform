@@ -15,6 +15,7 @@ import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.config.StorageConfig;
@@ -23,6 +24,7 @@ import com.wks.storage.service.BucketService;
 import com.wks.storage.service.UploadService;
 
 @Service("FilesystemUploadService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "filesystem")
 public class FilesystemUploadService implements UploadService {
 
 	@Autowired

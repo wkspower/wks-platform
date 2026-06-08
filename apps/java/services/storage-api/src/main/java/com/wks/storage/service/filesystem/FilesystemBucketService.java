@@ -18,12 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.storage.config.StorageConfig;
 
 @Service("FilesystemBucketService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "filesystem")
 public class FilesystemBucketService implements com.wks.storage.service.BucketService {
 
 	@Autowired

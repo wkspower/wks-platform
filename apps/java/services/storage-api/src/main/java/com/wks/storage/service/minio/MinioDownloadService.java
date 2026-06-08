@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.storage.driver.MinioClientDelegate;
@@ -28,6 +29,7 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.http.Method;
 
 @Service("MinioDownloadService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "minio")
 public class MinioDownloadService implements DownloadService {
 
 	@Autowired

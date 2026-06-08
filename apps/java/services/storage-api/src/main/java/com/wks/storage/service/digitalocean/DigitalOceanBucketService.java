@@ -13,6 +13,7 @@ package com.wks.storage.service.digitalocean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
@@ -24,6 +25,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 
 @Service("DigitalOceanBucketService")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "do")
 public class DigitalOceanBucketService implements BucketService {
 
 	@Autowired
