@@ -105,6 +105,11 @@ why clean, well-typed PR titles matter.
 
 ## Security fixes
 
+How to **report** a vulnerability, which versions get fixes, and our remediation
+SLAs live in [`SECURITY.md`](./SECURITY.md). The release cadence and support
+window are in the [Support & Release Policy](./apps/react/docs/docs/release-policy.md).
+This section covers how a fix is **landed** once it's in hand.
+
 Security patches follow the same flow above, with a few additions that exist
 because **this repository is public**:
 

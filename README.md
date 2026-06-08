@@ -14,6 +14,8 @@
 
 [Subscribe for news & updates](https://share-eu1.hsforms.com/1gpWZRXQwSoWQNgCeuztetQ2dcag3)
 
+[Contributing](CONTRIBUTING.md) · [Security Policy](SECURITY.md) · [Support & Release Policy](apps/react/docs/docs/release-policy.md)
+
 Table of Contents
 -----------------
 - [WKS Platform](#wks-platform)
