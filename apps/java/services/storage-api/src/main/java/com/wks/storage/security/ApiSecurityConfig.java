@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import com.wks.api.security.JwksIssuerAuthenticationManagerResolver;
 import com.wks.api.security.OpenPolicyAuthzEnforcer;
@@ -39,16 +40,37 @@ public class ApiSecurityConfig {
 	@Value("${storage.swagger.enabled:true}")
 	private Boolean swaggerEnabled;
 
+	// Authorization (OPA) is orthogonal to authentication. When false the OPA
+	// enforcer is never instantiated (so it cannot fail closed) and authenticated
+	// requests are permitted. Authentication (oauth2ResourceServer) stays on.
+	@Value("${wks.authz.opa.enabled:true}")
+	private Boolean opaEnabled;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		OpenPolicyAuthzEnforcer enforcer = new OpenPolicyAuthzEnforcer(OpenPolicyAuthzEnforcerConfig.builder()
-				.opaAuthURL(opaUrl).actuatorEnabled(actuatorEnabled).swaggerEnabled(swaggerEnabled).build());
-
 		http.cors(Customizer.withDefaults())
-				.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(authz -> authz.anyRequest().access(enforcer))
-				.oauth2ResourceServer(oauth2 -> oauth2
-						.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl)));
+				.csrf(csrf -> csrf.disable());
+
+		if (Boolean.TRUE.equals(opaEnabled)) {
+			OpenPolicyAuthzEnforcer enforcer = new OpenPolicyAuthzEnforcer(OpenPolicyAuthzEnforcerConfig.builder()
+					.opaAuthURL(opaUrl).actuatorEnabled(actuatorEnabled).swaggerEnabled(swaggerEnabled).build());
+			http.authorizeHttpRequests(authz -> authz.anyRequest().access(enforcer));
+		} else {
+			http.authorizeHttpRequests(authz -> {
+				PathPatternRequestMatcher.Builder m = PathPatternRequestMatcher.withDefaults();
+				if (Boolean.TRUE.equals(actuatorEnabled)) {
+					authz.requestMatchers(m.matcher("/healthCheck"), m.matcher("/actuator/**")).permitAll();
+				}
+				if (Boolean.TRUE.equals(swaggerEnabled)) {
+					authz.requestMatchers(m.matcher("/swagger-ui/**"), m.matcher("/swagger-ui.html"),
+							m.matcher("/v3/api-docs/**")).permitAll();
+				}
+				authz.anyRequest().authenticated();
+			});
+		}
+
+		http.oauth2ResourceServer(oauth2 -> oauth2
+				.authenticationManagerResolver(new JwksIssuerAuthenticationManagerResolver(keycloakUrl)));
 		return http.build();
 	}
 
