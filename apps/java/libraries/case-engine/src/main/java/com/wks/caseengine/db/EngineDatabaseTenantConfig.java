@@ -11,8 +11,11 @@
  */
 package com.wks.caseengine.db;
 
+import java.util.Map;
+
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -39,6 +42,14 @@ import jakarta.persistence.EntityManagerFactory;
 @EnableTransactionManagement
 public class EngineDatabaseTenantConfig {
 
+	// Single schema source: Hibernate generates the schema from the JPA entities
+	// (no per-DB schema-*.sql files). The dialect is auto-detected from the
+	// connection, so the same config serves H2 and PostgreSQL. Multi-tenant
+	// Postgres provisioning still needs Flyway/Liquibase (prod follow-up); auto-DDL
+	// only creates the resolved/default tenant's schema.
+	@Value("${spring.jpa.hibernate.ddl-auto:update}")
+	private String ddlAuto;
+
 	@Bean
 	@ConfigurationProperties("spring.datasource")
 	public HikariConfig hikariConfig() {
@@ -58,6 +69,10 @@ public class EngineDatabaseTenantConfig {
 		em.setPackagesToScan("com.wks.caseengine.jpa.entity");
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
+		// The manual EMF does not honor spring.jpa.* auto-config, so set the schema
+		// generation property explicitly. Dialect is intentionally left unset for
+		// Hibernate auto-detection.
+		em.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto", ddlAuto));
 		return em;
 	}
 
