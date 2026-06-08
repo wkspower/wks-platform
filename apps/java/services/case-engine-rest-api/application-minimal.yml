@@ -1,0 +1,33 @@
+# Minimal, zero-external-container dev profile.
+# Activate with: mvn spring-boot:run -Dspring-boot.run.profiles=minimal
+#
+# This profile bundles the minimal-mode value of every orthogonal concern so a
+# developer can run case-engine-rest-api with NO external services. Each flag is
+# independently toggleable; this file just sets them all to their minimal value.
+#
+# Datastore: embedded H2 via the JPA path (no MongoDB container).
+database.type: jpa
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+  datasource:
+    jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  # The JPA EntityManagerFactory is built manually in EngineDatabaseTenantConfig
+  # (it does not honor spring.jpa.hibernate.ddl-auto), so the schema is created
+  # from schema-h2.sql via spring.sql.init rather than Hibernate DDL.
+  sql:
+    init:
+      schema-locations: classpath:schema-h2.sql
+      mode: always
+
+# --- Concerns decoupled by later work packages (WP-1.2 / WP-1.4 / WP-1.5) ---
+# Authorization: OPA off (WP-1.2)            -> wks.authz.opa.enabled: false
+# Authentication: dev-token issuer (WP-1.4)  -> wks.auth.mode: dev-token
+# Workflow/BPM: local, no Camunda (WP-1.5)   -> wks.bpm.engine: none
+# Tenancy: single tenant                     -> wks.tenancy.multi-tenant: false

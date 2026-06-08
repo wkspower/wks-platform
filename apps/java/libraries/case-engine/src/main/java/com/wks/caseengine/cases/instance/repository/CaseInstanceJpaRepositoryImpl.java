@@ -30,6 +30,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 @Component
+@org.springframework.transaction.annotation.Transactional
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 

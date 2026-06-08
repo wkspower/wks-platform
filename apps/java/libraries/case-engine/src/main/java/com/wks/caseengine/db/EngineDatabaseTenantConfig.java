@@ -35,7 +35,7 @@ import jakarta.persistence.EntityManagerFactory;
 		"com.wks.caseengine.cases.instance.email.repository", "com.wks.caseengine.cases.instance.repository",
 		"com.wks.caseengine.form", "com.wks.caseengine.queue", "com.wks.caseengine.record",
 		"com.wks.caseengine.record.type" })
-@EntityScan(basePackages = "com.wks.caseengine.entity")
+@EntityScan(basePackages = "com.wks.caseengine.jpa.entity")
 @EnableTransactionManagement
 public class EngineDatabaseTenantConfig {
 
@@ -46,10 +46,15 @@ public class EngineDatabaseTenantConfig {
 	}
 
 	@Bean
+	public DataSource dataSource() {
+		return new com.zaxxer.hikari.HikariDataSource(hikariConfig());
+	}
+
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource);
-		em.setPackagesToScan("com.wks.caseengine.entity");
+		em.setPackagesToScan("com.wks.caseengine.jpa.entity");
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
 		return em;
