@@ -81,7 +81,9 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 			        return tenant;
 			});
 		} catch (DataAccessException e) {
-			log.warn("Tenant database not found", e);
+			log.warn("tenant_database table not found; using the default datasource only "
+					+ "(expected in single-datasource / single-tenant setups)");
+			log.debug("tenant_database lookup failed", e);
 			return Collections.emptyList();
 		}
 	}

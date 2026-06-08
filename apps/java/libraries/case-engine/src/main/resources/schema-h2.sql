@@ -50,6 +50,19 @@ CREATE TABLE case_instance (
     owner VARCHAR(255)
 );
 
+CREATE TABLE tenant_database (
+    uid VARCHAR(36) DEFAULT RANDOM_UUID() PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    jdbc_url VARCHAR(1024) NOT NULL,
+    jdbc_user_name VARCHAR(255),
+    jdbc_password VARCHAR(255),
+    pool_size INT DEFAULT 5,
+    min_idle INT DEFAULT 1,
+    idle_timeout BIGINT DEFAULT 30000,
+    connection_timeout BIGINT DEFAULT 30000,
+    max_life_time BIGINT DEFAULT 1800000
+);
+
 CREATE TABLE case_email (
     uid VARCHAR(36) DEFAULT RANDOM_UUID() PRIMARY KEY,
     case_instance_business_key VARCHAR(255) NOT NULL,
