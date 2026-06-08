@@ -3,21 +3,39 @@
 #  it runs Keycloak in `start-dev`, uses demo/admin credentials, and validates
 #  no secrets. For production see docker/docker-compose.prod.yml (separate path).
 #
-#  ONE FILE, driven by Compose profiles. The minimum is the default.
+#  ONE FILE, driven by Compose profiles. Each concern is its own profile.
 #
-#    docker compose up -d                 # minimum: core backend + portal
-#    COMPOSE_PROFILES= docker compose up   # backend only (run portal via yarn)
-#    KAFKA_ENABLED=true docker compose --profile portal --profile notifications up -d
-#    docker compose --profile portal --profile demo up -d   # + seed demo data
-#    docker compose up -d --build         # rebuild app images from source (no host mvn)
-#    docker compose down                  # stop (keeps data volumes)
+#    docker compose up -d --build          # FULL stack (default profiles in .env)
+#    COMPOSE_PROFILES=core docker compose up -d --build   # MINIMAL: zero-dependency
+#                                          # backend only (embedded H2 + dev-token,
+#                                          # no Mongo/Keycloak/OPA/Camunda/MinIO).
+#                                          # Run the portal via `yarn start` in
+#                                          # dev-token mode (REACT_APP_AUTH_MODE=dev-token).
+#    docker compose down                   # stop (keeps data volumes)
 #
-#  Profiles: portal (default), notifications, proxy, demo.
-#  App images are pulled from GHCR (public) by default; --build compiles locally.
+#  Infra profiles (concern -> profile): mongodb, keycloak, opa, camunda
+#  (camunda + c7-external-tasks), storage (minio + storage-api).
+#  App profiles: full (case-engine-rest-api wired to all infra), core (minimal,
+#  H2/dev-token variant), portal, notifications, proxy, demo.
+#  The default COMPOSE_PROFILES (.env) enables the full stack; `core` is the minimal.
+#  NOTE: `core` and `full` both bind 8081 — never enable both together.
+#  App images are pulled from GHCR (public) by default; --build compiles locally
+#  (required for `core` — the published image predates the minimal profile).
 #  Camunda 8 is experimental/outdated — see experimental/camunda8/.
 # =============================================================================
 
 name: wks-platform
+
+# Shared base for the two case-engine-rest-api variants (full vs minimal/core).
+# They share image/build/port and are mutually exclusive (same 8081), selected by
+# the `full` or `core` profile.
+x-case-engine-rest-api: &case-engine-rest-api
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
+    build:
+        context: apps/java
+        dockerfile: services/case-engine-rest-api/Dockerfile
+    ports:
+        - 8081:8081
 
 services:
 
@@ -26,6 +44,7 @@ services:
 
     minio:
         image: quay.io/minio/minio
+        profiles: [storage]
         command: server /data --console-address ":9090"
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -43,6 +62,7 @@ services:
 
     mongodb:
         image: mongo:6.0.14
+        profiles: [mongodb]
         ports:
             - 27017:27017
         healthcheck:
@@ -57,6 +77,7 @@ services:
     opa:
         # Upstream OPA with rules live-mounted from ./opa (no build needed).
         image: openpolicyagent/opa:0.49.2-static
+        profiles: [opa]
         ports:
             - 8181:8181
         command:
@@ -68,6 +89,7 @@ services:
 
     keycloak:
         image: quay.io/keycloak/keycloak:20.0.3
+        profiles: [keycloak]
         command: start-dev
         environment:
             KC_HEALTH_ENABLED: "true"
@@ -86,6 +108,7 @@ services:
 
     storage-api:
         image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
+        profiles: [storage]
         build:
             context: apps/java
             dockerfile: services/storage-api/Dockerfile
@@ -104,6 +127,7 @@ services:
 
     camunda:
         image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
+        profiles: [camunda]
         command: ./camunda.sh --rest --webapps
         ports:
             - 8080:8080
@@ -114,13 +138,10 @@ services:
             start_period: 5s
             timeout: 10s
 
+    # Full variant: Mongo + Keycloak + OPA + Camunda. profile: full
     case-engine-rest-api:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
-        build:
-            context: apps/java
-            dockerfile: services/case-engine-rest-api/Dockerfile
-        ports:
-            - 8081:8081
+        <<: *case-engine-rest-api
+        profiles: [full]
         environment:
             - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
@@ -139,8 +160,20 @@ services:
             camunda:
                 condition: service_healthy
 
+    # Minimal/core variant: embedded H2 + dev-token + no OPA/Camunda. profile: core
+    # Zero external containers — activates the `minimal` Spring profile. Build from
+    # source (--build); the pre-built GHCR image predates this profile.
+    # Mutually exclusive with case-engine-rest-api (same port 8081); don't enable
+    # `core` and `full` together. Run the portal via `yarn start` in dev-token mode.
+    case-engine-rest-api-minimal:
+        <<: *case-engine-rest-api
+        profiles: [core]
+        environment:
+            - SPRING_PROFILES_ACTIVE=minimal
+
     c7-external-tasks:
         image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-v1.4.14}
+        profiles: [camunda]
         build:
             context: apps/java
             dockerfile: services/c7-external-tasks/Dockerfile
