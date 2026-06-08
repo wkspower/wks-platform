@@ -14,10 +14,9 @@ companion to two documents kept in the repository:
   — how to report a vulnerability and the remediation targets.
 
 :::note What's binding
-The **Community** lifecycle below is a *best-effort* commitment, not a contract.
-The **Support tiers** section is **DRAFT / proposed — not yet offered**; it
-describes where we're heading so the community policy is written to accommodate
-paid tiers. Commercial terms become binding only via a signed support agreement.
+The lifecycle below is a *best-effort* commitment, not a contract. Commercial
+support terms become binding only via a signed support agreement — see
+[Commercial support](#commercial-support).
 :::
 
 ## Versioning
@@ -66,32 +65,11 @@ positional, so it's easy to reason about without tracking per-version dates:
 
 ---
 
-## Support tiers — DRAFT (not yet offered)
+## Commercial support
 
-:::warning Proposed
-The tiers below are a **proposal**. They are not available to purchase and create
-no obligation until a support agreement is signed. They are published here so the
-community lifecycle above stays compatible with paid support.
-:::
-
-Two independent levers sit on top of the community baseline — buying **time** on
-old lines, and **early access** to what's next:
-
-| | **Community** (OSS, free) | **Extended / LTS** (paid) | **Early Access / Priority** (paid) |
-|---|---|---|---|
-| Supported lines | current + previous minor | a chosen minor kept alive **past** community EOL | current, plus **RC / next** builds |
-| Security fixes | best-effort targets, public timing | **backported** to your frozen line | **pre-disclosure / embargoed** fixes ([SECURITY.md](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md#advance--embargoed-disclosure-proposed)) |
-| Remediation SLA | targets (Critical 72h …), not contractual | contractual, backport-inclusive | contractual + **tighter** (e.g. Critical 24h) |
-| Releases | scheduled + out-of-band | hotfix builds on the LTS line | RC access, priority hotfixes |
-| Disclosure | public advisory | public advisory | **advance notice under NDA** |
-
-> **Rollout intent:** **Extended / LTS** support for previous versions is the
-> first tier we expect to offer (it maps directly to the most common
-> system-integrator and enterprise ask — staying on a stable line longer).
-> Early Access / Priority follows.
-
-All SLAs measure **time to a release-ready fix**; **publishing a release is
-maintainer-gated**, so no tier implies autonomous shipping.
+Extended support for older releases and priority response are available to
+commercial users. To discuss a support agreement,
+**[contact us](https://wkspower.com/contact-us-wks-platform)**.
 
 ## Release approval
 

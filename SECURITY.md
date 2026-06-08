@@ -6,14 +6,12 @@ and how quickly we aim to respond.
 
 It complements [`CONTRIBUTING.md`](./CONTRIBUTING.md#security-fixes), which
 describes how a security fix is branched, committed, and released. For the
-support lifecycle and tiers, see the
+support lifecycle, see the
 [Support & Release Policy](https://docs.wkspower.com/docs/release-policy).
 
-> **A note on what's binding.** The **Community** commitments below are
-> *best-effort targets*, not a contract. The **Commercial** sections are
-> **DRAFT / proposed — not yet offered**; they describe where we're heading so
-> the community policy is written to accommodate paid tiers, and they become
-> binding only via a signed support agreement.
+> **A note on what's binding.** The commitments below are *best-effort targets*,
+> not a contract. Commercial support terms become binding only via a signed
+> support agreement — see [Commercial support](#commercial-support).
 
 ## Reporting a vulnerability
 
@@ -96,39 +94,15 @@ previous, and the line winding down).
 | `< 1.4` | End-of-life | ❌ — please upgrade |
 
 See the [Support & Release Policy](https://docs.wkspower.com/docs/release-policy)
-for how long each line is supported, the release cadence, and the support tiers.
+for how long each line is supported and the release cadence.
 
 ---
 
-## Commercial security support — DRAFT (not yet offered)
+## Commercial support
 
-> The following describes a **proposed** commercial offering. It is not in effect
-> and creates no obligation until a support agreement is in place. The full tier
-> matrix lives in the
-> [Support & Release Policy](https://docs.wkspower.com/docs/release-policy#support-tiers).
-
-Two security-specific levers sit on top of the community baseline:
-
-- **Extended security support (LTS).** Backported security fixes for a chosen
-  minor line **past its community EOL**, so you can stay on a frozen version
-  without losing patches.
-- **Priority & advance disclosure (Early Access).** Tighter, *contractual*
-  remediation SLAs (e.g. Critical within **24 hours** of a release-ready fix) and
-  **advance notice of fixes under embargo** before public disclosure.
-
-### Advance & embargoed disclosure (proposed)
-
-For Early Access customers, we would operate a coordinated-disclosure embargo:
-
-- A private, NDA-bound notification channel and a maintained embargo list.
-- Advance notice of a forthcoming security release (and, where safe, the fix)
-  ahead of the public advisory, so customers can prepare deployments.
-- A fixed embargo window after which the advisory is published publicly here,
-  per the [reporting](#reporting-a-vulnerability) process above.
-
-Even under a commercial agreement, **release publication remains
-maintainer-gated** — contractual SLAs measure time to a release-ready fix plus a
-bounded approval window, not autonomous shipping.
+Extended security support for older releases and priority response are available
+to commercial users. To discuss a support agreement,
+**[contact us](https://wkspower.com/contact-us-wks-platform)**.
 
 ---
 
