@@ -16,6 +16,8 @@ logging:
 
 spring.mvc.converters.preferred-json-mapper: gson
 
+wks.auth.mode: ${WKS_AUTH_MODE:keycloak}
+
 wks.bpm.engine.camunda.version: ${CAMUNDA_VERSION:camunda7}
 
 camunda.bpm.client.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
