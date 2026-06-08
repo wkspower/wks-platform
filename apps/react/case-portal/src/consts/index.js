@@ -6,7 +6,10 @@ const Config = {
   AuthMode:
     getEnv(process.env.REACT_APP_AUTH_MODE, window.AUTH_MODE) || 'keycloak',
   AuthUrl: getEnv(process.env.REACT_APP_AUTH_URL, window.AUTH_URL),
-  AuthDevUser: getEnv(process.env.REACT_APP_AUTH_DEV_USER, window.AUTH_DEV_USER),
+  AuthDevUser: getEnv(
+    process.env.REACT_APP_AUTH_DEV_USER,
+    window.AUTH_DEV_USER,
+  ),
   StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
   WebsocketsEnabled: getEnv(
     process.env.REACT_APP_WEBSOCKETS_ENABLED,
