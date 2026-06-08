@@ -11,11 +11,14 @@ companion to two documents kept in the repository:
 - [`CONTRIBUTING.md`](https://github.com/wkspower/wks-platform/blob/main/CONTRIBUTING.md)
   — the mechanics of branching, tagging, and cutting a release (for contributors).
 - [`SECURITY.md`](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md)
-  — how to report a vulnerability and the remediation SLAs.
+  — how to report a vulnerability and the remediation targets.
 
-It is intentionally aligned with the lifecycle of our core framework,
-[Spring Boot](https://spring.io/support-policy/), so the platform never outlives
-the stack beneath it.
+:::note What's binding
+The **Community** lifecycle below is a *best-effort* commitment, not a contract.
+The **Support tiers** section is **DRAFT / proposed — not yet offered**; it
+describes where we're heading so the community policy is written to accommodate
+paid tiers. Commercial terms become binding only via a signed support agreement.
+:::
 
 ## Versioning
 
@@ -35,34 +38,81 @@ validation before a final version is tagged.
 |---|---|---|
 | **Minor** (`x.Y.0`) | Roughly every 6 months | Features, dependency modernization, security rollups |
 | **Patch** (`x.y.Z`) | As needed, typically monthly | Bug fixes and security fixes for a supported line |
-| **Out-of-band patch** | As required | Critical/High security fixes that can't wait for the next patch (see [SECURITY.md](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md#remediation-slas)) |
+| **Out-of-band patch** | As required | Critical/High security fixes that can't wait for the next patch (see [SECURITY.md](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md#remediation-targets-community)) |
 
 Like [PostgreSQL](https://www.postgresql.org/support/versioning/), we distinguish
 **scheduled** releases from **out-of-band** ones: routine fixes accumulate into
 the next scheduled patch, while an actively-exploited or Critical vulnerability
 triggers an immediate out-of-band release on the affected line.
 
-## Support window
+## Support window (Community)
 
-Each **minor** line is supported with bug and security fixes for **at least 12
-months** from its release, mirroring Spring Boot's open-source support window. In
-practice we support the **current** and the **previous** minor line at any time:
+We actively support the **current** and the **previous** minor line. The rule is
+positional, so it's easy to reason about without tracking per-version dates:
+
+- When a new minor reaches **GA**, the line it displaces to *third-oldest* enters
+  a **90-day migration grace period**, then goes end-of-life (EOL).
+- During a grace period, three lines briefly receive fixes (current, previous,
+  and the line winding down) — giving operators time to upgrade.
+- At our ~6-month cadence this works out to **roughly 12–15 months** of support
+  per minor. That duration is a *consequence* of the cadence, not an independent
+  guarantee — if releases come faster, the window is shorter.
 
 | Version | Status | Stack | Supported until |
 |---|---|---|---|
 | `1.5.x` | **Current** — the Stabilization release | Spring Boot 4.0.6 · Java 21 · Camunda 7.24 · zero Critical/High vulns | Active |
-| `1.4.x` | **Previous stable** | Java 17 · Spring Boot 3 | `1.5.0` GA + 90-day grace |
+| `1.4.x` | **Previous stable** | Java 17 · Spring Boot 3 | `1.6.0` GA + 90-day grace |
 | `< 1.4` | End-of-life | — | Unsupported — please upgrade |
 
-When a new minor reaches general availability, the line two minors back moves to
-end-of-life after a **90-day grace period**, giving operators time to upgrade.
+---
+
+## Support tiers — DRAFT (not yet offered)
+
+:::warning Proposed
+The tiers below are a **proposal**. They are not available to purchase and create
+no obligation until a support agreement is signed. They are published here so the
+community lifecycle above stays compatible with paid support.
+:::
+
+Two independent levers sit on top of the community baseline — buying **time** on
+old lines, and **early access** to what's next:
+
+| | **Community** (OSS, free) | **Extended / LTS** (paid) | **Early Access / Priority** (paid) |
+|---|---|---|---|
+| Supported lines | current + previous minor | a chosen minor kept alive **past** community EOL | current, plus **RC / next** builds |
+| Security fixes | best-effort targets, public timing | **backported** to your frozen line | **pre-disclosure / embargoed** fixes ([SECURITY.md](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md#advance--embargoed-disclosure-proposed)) |
+| Remediation SLA | targets (Critical 72h …), not contractual | contractual, backport-inclusive | contractual + **tighter** (e.g. Critical 24h) |
+| Releases | scheduled + out-of-band | hotfix builds on the LTS line | RC access, priority hotfixes |
+| Disclosure | public advisory | public advisory | **advance notice under NDA** |
+
+> **Rollout intent:** **Extended / LTS** support for previous versions is the
+> first tier we expect to offer (it maps directly to the most common
+> system-integrator and enterprise ask — staying on a stable line longer).
+> Early Access / Priority follows.
+
+All SLAs measure **time to a release-ready fix**; **publishing a release is
+maintainer-gated** (see the operations model below), so no tier implies
+autonomous shipping.
+
+## Operations model — an AI-assisted lifecycle
+
+The cadence and SLAs above are made realistic for a small team by an
+**AI/agentic operations layer** that handles the repetitive parts of the
+lifecycle — continuous vulnerability monitoring, preparing dependency fixes,
+packaging releases, and drafting advisories and release notes.
+
+The boundary is deliberate: **agents prepare; maintainers approve and publish.**
+Every release — community or commercial — passes through a human approval gate
+before it ships. This is what lets us offer tight remediation targets *and* keep
+releases trustworthy.
 
 ## Security fixes
 
-Security fixes follow the cadence above and the SLAs in
+Security fixes follow the cadence above and the targets in
 [`SECURITY.md`](https://github.com/wkspower/wks-platform/blob/main/SECURITY.md):
-Critical fixes target 72 hours and may ship out-of-band; High/Medium/Low ride the
-appropriate patch or scheduled release. Each fix is correlated with a
+Critical fixes target 72 hours to release-ready and may ship out-of-band;
+High/Medium/Low ride the appropriate patch or scheduled release. Each fix is
+correlated with a
 [GitHub Security Advisory](https://github.com/wkspower/wks-platform/security/advisories)
 and noted in the release notes for the tag that contains it.
 

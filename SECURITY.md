@@ -6,8 +6,14 @@ and how quickly we aim to respond.
 
 It complements [`CONTRIBUTING.md`](./CONTRIBUTING.md#security-fixes), which
 describes how a security fix is branched, committed, and released. For the
-support window and release cadence, see the
+support lifecycle and tiers, see the
 [Support & Release Policy](https://docs.wkspower.com/docs/release-policy).
+
+> **A note on what's binding.** The **Community** commitments below are
+> *best-effort targets*, not a contract. The **Commercial** sections are
+> **DRAFT / proposed — not yet offered**; they describe where we're heading so
+> the community policy is written to accommodate paid tiers, and they become
+> binding only via a signed support agreement.
 
 ## Reporting a vulnerability
 
@@ -33,25 +39,30 @@ please follow up on the same private report.
 > can open a normal issue or PR referencing the advisory — see the dependency
 > guidance in [`CONTRIBUTING.md`](./CONTRIBUTING.md#security-fixes).
 
-## Our response targets
+## Our response targets (Community)
 
-| Stage | Target |
+| Stage | Target (best-effort) |
 |---|---|
 | Acknowledge the report | within **3 business days** |
 | Initial assessment & severity triage | within **7 business days** |
 | Status updates while we work | at least every **7 days** until resolved |
 
-## Remediation SLAs
+## Remediation targets (Community)
 
 Once a vulnerability is confirmed and applicable to a supported version, we aim
-to ship a fix within the following windows. Severity is assessed with **CVSS**,
-and the clock is **escalated** when a vulnerability is listed in
+to make a fix **release-ready** within the following windows. These measure
+*time to a fix being ready to ship* — **publishing the release is gated on
+maintainer approval**, so the windows below are engineering targets, not an
+automated-release guarantee.
+
+Severity is assessed with **CVSS**, and the clock is **escalated** when a
+vulnerability is listed in
 [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) (known
 to be actively exploited) or has a high [EPSS](https://www.first.org/epss/)
 exploit-probability score — those move to the Critical track regardless of base
 score.
 
-| Severity (CVSS) | Target time to a released fix |
+| Severity (CVSS) | Target time to a release-ready fix |
 |---|---|
 | **Critical** (9.0–10.0) | **72 hours** — may warrant an out-of-band patch release |
 | **High** (7.0–8.9) | **14 days** |
@@ -72,17 +83,54 @@ and track it as a known exception. A current example is the transitive
 
 ## Supported versions
 
-Security fixes are applied to the **current stable minor** and the **previous
-minor** line. Older minors are end-of-life and should be upgraded.
+Security fixes are applied to the **current** and the **previous** minor line.
+When a new minor reaches general availability (GA), the line it displaces to
+third-oldest enters a **90-day migration grace period** and is then end-of-life
+(EOL). During a grace period three lines briefly receive fixes (current,
+previous, and the line winding down).
 
 | Version | Status | Security fixes |
 |---|---|---|
 | `1.5.x` | Current (Stabilization release — Spring Boot 4 / Java 21 / Camunda 7.24) | ✅ |
-| `1.4.x` | Previous stable (Java 17 / Spring Boot 3) | ✅ until `1.5.0` GA + a 90-day grace period |
+| `1.4.x` | Previous stable (Java 17 / Spring Boot 3) | ✅ until **`1.6.0` GA + 90-day grace** |
 | `< 1.4` | End-of-life | ❌ — please upgrade |
 
 See the [Support & Release Policy](https://docs.wkspower.com/docs/release-policy)
-for how long each line is supported and when releases ship.
+for how long each line is supported, the release cadence, and the support tiers.
+
+---
+
+## Commercial security support — DRAFT (not yet offered)
+
+> The following describes a **proposed** commercial offering. It is not in effect
+> and creates no obligation until a support agreement is in place. The full tier
+> matrix lives in the
+> [Support & Release Policy](https://docs.wkspower.com/docs/release-policy#support-tiers).
+
+Two security-specific levers sit on top of the community baseline:
+
+- **Extended security support (LTS).** Backported security fixes for a chosen
+  minor line **past its community EOL**, so you can stay on a frozen version
+  without losing patches.
+- **Priority & advance disclosure (Early Access).** Tighter, *contractual*
+  remediation SLAs (e.g. Critical within **24 hours** of a release-ready fix) and
+  **advance notice of fixes under embargo** before public disclosure.
+
+### Advance & embargoed disclosure (proposed)
+
+For Early Access customers, we would operate a coordinated-disclosure embargo:
+
+- A private, NDA-bound notification channel and a maintained embargo list.
+- Advance notice of a forthcoming security release (and, where safe, the fix)
+  ahead of the public advisory, so customers can prepare deployments.
+- A fixed embargo window after which the advisory is published publicly here,
+  per the [reporting](#reporting-a-vulnerability) process above.
+
+Even under a commercial agreement, **release publication remains
+maintainer-gated** — contractual SLAs measure time to a release-ready fix plus a
+bounded approval window, not autonomous shipping.
+
+---
 
 ## How we disclose
 
