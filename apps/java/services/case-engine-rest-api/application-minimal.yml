@@ -31,10 +31,10 @@ spring:
       mode: always
 
 # --- Authentication: embedded dev-token issuer (no Keycloak) ---
-# The resource server validates dev tokens via the embedded JWKS, so keycloak.url
-# must point at the in-process /dev-auth issuer served by this app.
+# The resource server validates dev tokens via the embedded JWKS, so the issuer
+# URL must point at the in-process /dev-auth issuer served by this app.
 wks.auth.mode: dev-token
-keycloak.url: ${KEYCLOAK_URL:http://localhost:8081/dev-auth}
+wks.auth.issuer-uri: ${KEYCLOAK_URL:http://localhost:8081/dev-auth}
 
 # --- Authorization: OPA off (no OPA container; authenticated requests permitted) ---
 wks.authz.opa.enabled: false

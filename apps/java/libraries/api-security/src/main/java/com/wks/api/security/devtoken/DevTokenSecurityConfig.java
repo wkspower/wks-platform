@@ -11,12 +11,18 @@
  */
 package com.wks.api.security.devtoken;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.wks.api.security.JwksIssuerAuthenticationManagerResolver;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Dedicated security filter chain exposing the embedded dev-token issuer
@@ -40,6 +46,18 @@ public class DevTokenSecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
 		return http.build();
+	}
+
+	/**
+	 * Authentication resolver for dev-token mode, pointing at the embedded
+	 * {@code /dev-auth} issuer. Replaces the {@code KeycloakAuthnConfig} bean
+	 * (which is inactive in dev-token mode) so the main filter chain autowires a
+	 * single resolver without branching on the auth mode.
+	 */
+	@Bean
+	public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
+			@Value("${wks.auth.issuer-uri:${keycloak.url:http://localhost:8081/dev-auth}}") String issuerUri) {
+		return new JwksIssuerAuthenticationManagerResolver(issuerUri);
 	}
 
 }

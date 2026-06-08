@@ -15,7 +15,9 @@ management.endpoints.web.exposure.include: health,info
 management.endpoint.health.show-details: never
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
+# Unified issuer URL consumed by both auth modes (keycloak + dev-token).
+# Sourced from the legacy KEYCLOAK_URL env var for backward-compatible compose/.env.
+wks.auth.issuer-uri: ${KEYCLOAK_URL:http://localhost:8082}
 
 # minio
 driver.storage.factoryclass: minio

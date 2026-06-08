@@ -30,7 +30,9 @@ spring.data.mongodb.database.max-connection-idle-time: 3000
 spring.data.mongodb.database.max-connection-life-time: 3000
 
 opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-keycloak.url: ${KEYCLOAK_URL:http://localhost:8082}
+# Unified issuer URL consumed by both auth modes (keycloak + dev-token).
+# Sourced from the legacy KEYCLOAK_URL env var for backward-compatible compose/.env.
+wks.auth.issuer-uri: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false
@@ -41,8 +43,8 @@ case.engine.case-creation-process: case-instance-create
 case.engine.email-to-case-process: email-to-case
 case.engine.email-to-case-outbound-process: email-to-case-outbound
 
-case.engine.actuator.enabled: true
-case.engine.swagger.enabled: true
+wks.api.actuator.enabled: true
+wks.api.swagger.enabled: true
 
 # database drive options: mongo or jpa
 database.type: mongo
