@@ -207,6 +207,9 @@ services:
                 GENERATE_SOURCEMAP: "false"
         environment:
             __SERVER_KEYCLOAK_URL__: ${REACT_APP_KEYCLOAK_URL}
+            __SERVER_AUTH_MODE__: ${REACT_APP_AUTH_MODE:-keycloak}
+            __SERVER_AUTH_URL__: ${REACT_APP_AUTH_URL:-}
+            __SERVER_AUTH_DEV_USER__: ${REACT_APP_AUTH_DEV_USER:-}
             __SERVER_API_URL__: ${REACT_APP_API_URL}
             __SERVER_STORAGE_URL__: ${REACT_APP_STORAGE_URL}
             __SERVER_WEBSOCKETS_ENABLED__: ${REACT_APP_WEBSOCKETS_ENABLED}
