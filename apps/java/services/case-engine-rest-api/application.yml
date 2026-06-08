@@ -16,7 +16,16 @@ logging:
 
 spring.mvc.converters.preferred-json-mapper: gson
 
+# --- Orthogonal concerns: maximal/secure defaults; each overridable by env (one
+# env-driven compose service) or by a per-concern Spring profile fragment. The
+# curated `minimal` group below bundles the zero-container fragment set. ---
+spring.profiles.group.minimal: db-h2,bpm-none,auth-dev,authz-off,single-tenant,seed
+
 wks.auth.mode: ${WKS_AUTH_MODE:keycloak}
+wks.authz.opa.enabled: ${WKS_AUTHZ_OPA_ENABLED:true}
+wks.bpm.engine: ${WKS_BPM_ENGINE:camunda7}
+wks.tenancy.multi-tenant: ${WKS_TENANCY_MULTI_TENANT:true}
+wks.seed.enabled: ${WKS_SEED_ENABLED:false}
 
 wks.bpm.engine.camunda.version: ${CAMUNDA_VERSION:camunda7}
 
@@ -46,69 +55,6 @@ case.engine.email-to-case-outbound-process: email-to-case-outbound
 wks.api.actuator.enabled: true
 wks.api.swagger.enabled: true
 
-# database drive options: mongo or jpa
-database.type: mongo
-
-# h2
-# spring:
-#   autoconfigure:
-#     exclude:
-#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-#   datasource:
-#     jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-#     driver-class-name: org.h2.Driver
-#     username: sa
-#     password:
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 2
-#       idle-timeout: 30000
-#       connection-timeout: 30000
-#       max-lifetime: 1800000
-#   jpa:
-#     database-platform: org.hibernate.dialect.H2Dialect
-#     hibernate:
-#       ddl-auto: create
-#     show-sql: true
-#     defer-datasource-initialization: true
-#     properties:
-#       hibernate:
-#         format_sql: true
-#   sql:
-#     init:
-#        schema-locations: classpath:schema-h2.sql
-#        mode: always
-
-# postgres
-# spring:
-#   autoconfigure:
-#     exclude:
-#       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-#       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-#   datasource:
-#     jdbcUrl: jdbc:postgresql://localhost:5432/wks
-#     driver-class-name: org.postgresql.Driver
-#     username: wks
-#     password: wks00
-#     hikari:
-#       maximum-pool-size: 10
-#       minimum-idle: 2
-#       idle-timeout: 30000
-#       connection-timeout: 30000
-#       max-lifetime: 1800000
-#   jpa:
-#     database-platform: org.hibernate.dialect.PostgreSQLDialect
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-#     defer-datasource-initialization: true
-#     properties:
-#       hibernate:
-#         format_sql: true
-#   sql:
-#     init:
-#       schema-locations: classpath:schema-postgresql.sql
-#       mode: always
-
-      
+# database drive options: mongo or jpa (overridable by env; the db-h2/db-postgres
+# profile fragments set jpa + the matching datasource — see application-db-*.yml)
+database.type: ${DATABASE_TYPE:mongo}

@@ -1,0 +1,18 @@
+# Concern fragment — Datastore: PostgreSQL via the JPA path.
+# Schema via Hibernate ddl-auto (resolved/default tenant only; multi-tenant Postgres
+# provisioning is a Flyway follow-up — auto-DDL won't create per-tenant schemas).
+database.type: jpa
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration
+  datasource:
+    jdbcUrl: ${WKS_DB_URL:jdbc:postgresql://localhost:5432/wks}
+    driver-class-name: org.postgresql.Driver
+    username: ${WKS_DB_USER:wks}
+    password: ${WKS_DB_PASSWORD:wks00}
+  jpa:
+    hibernate:
+      ddl-auto: ${WKS_DDL_AUTO:update}

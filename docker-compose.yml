@@ -3,34 +3,35 @@
 #  it runs Keycloak in `start-dev`, uses demo/admin credentials, and validates
 #  no secrets. For production see docker/docker-compose.prod.yml (separate path).
 #
-#  ONE FILE, driven by Compose profiles. Each concern is its own profile.
+#  ONE FILE, driven by Compose profiles + env. Each concern is its own profile;
+#  the app services are env-driven so ANY combination min->max loads from one file.
 #
-#    docker compose up -d --build          # FULL stack (default profiles in .env)
-#    COMPOSE_PROFILES=core docker compose up -d --build   # MINIMAL: zero-dependency
-#                                          # backend only (embedded H2 + dev-token,
-#                                          # no Mongo/Keycloak/OPA/Camunda/MinIO).
-#                                          # Run the portal via `yarn start` in
-#                                          # dev-token mode (REACT_APP_AUTH_MODE=dev-token).
+#    docker compose up -d --build          # FULL stack (default profiles+env in .env)
 #    docker compose down                   # stop (keeps data volumes)
 #
+#    # MINIMAL: zero-dependency backend (embedded H2 + dev-token, no infra):
+#    COMPOSE_PROFILES=app,portal \
+#    WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
+#    WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
+#    KEYCLOAK_URL=http://localhost:8081/dev-auth \
+#    docker compose up -d --build
+#
 #  Infra profiles (concern -> profile): mongodb, keycloak, opa, camunda
-#  (camunda + c7-external-tasks), storage (minio + storage-api).
-#  storage-fs: MinIO-free storage (local-disk driver + dev-token, self-contained);
-#  mutually exclusive with storage (both bind 8085).
-#  App profiles: full (case-engine-rest-api wired to all infra), core (minimal,
-#  H2/dev-token variant), portal, notifications, proxy, demo.
-#  The default COMPOSE_PROFILES (.env) enables the full stack; `core` is the minimal.
-#  NOTE: `core` and `full` both bind 8081 — never enable both together.
+#  (camunda + c7-external-tasks), storage (minio + storage-api), storage-fs
+#  (storage-api alone, MinIO-free). App/aux profiles: app (case-engine-rest-api),
+#  portal, notifications, proxy, demo.
+#  Concern env knobs (defaults = full/secure): WKS_AUTH_MODE, WKS_AUTHZ_OPA_ENABLED,
+#  WKS_BPM_ENGINE, WKS_TENANCY_MULTI_TENANT, WKS_SEED_ENABLED, DRIVER_STORAGE_FACTORYCLASS;
+#  WKS_SPRING_PROFILES carries the jpa datasource (db-h2 / db-postgres). Any point on
+#  the spectrum = COMPOSE_PROFILES=<infra subset> + matching env.
 #  App images are pulled from GHCR (public) by default; --build compiles locally
-#  (required for `core` — the published image predates the minimal profile).
+#  (required for minimal/filesystem — the published image predates these).
 #  Camunda 8 is experimental/outdated — see experimental/camunda8/.
 # =============================================================================
 
 name: wks-platform
 
-# Shared base for the two case-engine-rest-api variants (full vs minimal/core).
-# They share image/build/port and are mutually exclusive (same 8081), selected by
-# the `full` or `core` profile.
+# Image/build/port for the single env-driven case-engine-rest-api service.
 x-case-engine-rest-api: &case-engine-rest-api
     image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
     build:
@@ -39,9 +40,7 @@ x-case-engine-rest-api: &case-engine-rest-api
     ports:
         - 8081:8081
 
-# Shared base for the two storage-api variants (minio-backed vs filesystem).
-# They share image/build/port and are mutually exclusive (same 8085), selected by
-# the `storage` (MinIO) or `storage-fs` (MinIO-free) profile.
+# Image/build/port for the single env-driven storage-api service.
 x-storage-api: &storage-api
     image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
     build:
@@ -119,37 +118,35 @@ services:
         volumes:
             - keycloak:/opt/keycloak/data/
 
-    # MinIO-backed storage. profile: storage
+    # One env-driven storage-api (started by the `storage` or `storage-fs` profile).
+    # Defaults to the MinIO driver + Keycloak/OPA (full). For MinIO-free local-disk:
+    #   DRIVER_STORAGE_FACTORYCLASS=filesystem WKS_AUTH_MODE=dev-token
+    #   WKS_AUTHZ_OPA_ENABLED=false KEYCLOAK_URL=http://localhost:8085/dev-auth
+    #   DRIVER_STORAGE_UPLOADS_BACKEND_PORT=8085 COMPOSE_PROFILES=...,storage-fs
+    # The MinIO container is only pulled in under the `storage` profile, and the
+    # dependency is required:false so storage-fs runs without it. Build from source
+    # for the filesystem driver (the GHCR image predates it).
     storage-api:
         <<: *storage-api
-        profiles: [storage]
+        profiles: [storage, storage-fs]
         environment:
+            - DRIVER_STORAGE_FACTORYCLASS=${DRIVER_STORAGE_FACTORYCLASS:-minio}
+            - WKS_AUTH_MODE=${WKS_AUTH_MODE:-keycloak}
+            - WKS_AUTHZ_OPA_ENABLED=${WKS_AUTHZ_OPA_ENABLED:-true}
             - OPA_URL=${OPA_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
             - MINIO_HOST_INTERNAL=${MINIO_HOST_INTERNAL}
             - MINIO_HOST_EXTERNAL=${MINIO_HOST_EXTERNAL}
             - MINIO_ROOT_USER=${MINIO_ROOT_USER}
             - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+            - STORAGE_FS_BASEPATH=${STORAGE_FS_BASEPATH:-/data/storage}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL=${DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL:-http}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_URL=${DRIVER_STORAGE_UPLOADS_BACKEND_URL:-localhost}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PORT=${DRIVER_STORAGE_UPLOADS_BACKEND_PORT:-9000}
         depends_on:
             minio:
                 condition: service_healthy
-
-    # MinIO-free storage: local-disk driver + dev-token auth, self-contained (no
-    # MinIO, no Keycloak, no OPA). profile: storage-fs
-    # Build from source (--build); the published image predates the filesystem driver.
-    # Mutually exclusive with storage-api (same port 8085) — don't enable storage + storage-fs together.
-    storage-api-fs:
-        <<: *storage-api
-        profiles: [storage-fs]
-        environment:
-            - DRIVER_STORAGE_FACTORYCLASS=filesystem
-            - STORAGE_FS_BASEPATH=/data/storage
-            - DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL=http
-            - DRIVER_STORAGE_UPLOADS_BACKEND_URL=localhost
-            - DRIVER_STORAGE_UPLOADS_BACKEND_PORT=8085
-            - WKS_AUTH_MODE=dev-token
-            - WKS_AUTHZ_OPA_ENABLED=false
-            - KEYCLOAK_URL=http://localhost:8085/dev-auth
+                required: false
         volumes:
             - storage-fs:/data/storage
 
@@ -166,11 +163,30 @@ services:
             start_period: 5s
             timeout: 10s
 
-    # Full variant: Mongo + Keycloak + OPA + Camunda. profile: full
+    # One env-driven case-engine-rest-api (profile: app). Every concern defaults to
+    # the full, secure stack and is overridable by env: WKS_AUTH_MODE, WKS_BPM_ENGINE,
+    # WKS_AUTHZ_OPA_ENABLED, WKS_TENANCY_MULTI_TENANT, WKS_SEED_ENABLED. Datastore
+    # selection that needs a datasource (jpa) is carried by a Spring profile via
+    # WKS_SPRING_PROFILES (db-h2 or db-postgres); mongo is the default, no profile.
+    # Optional infra is depends_on ... required:false, so the SAME service runs
+    # minimal (no infra) or full (mongodb+camunda enabled via COMPOSE_PROFILES).
+    # Minimal recipe: WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token
+    #   WKS_AUTHZ_OPA_ENABLED=false WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false
+    #   WKS_SEED_ENABLED=true KEYCLOAK_URL=http://localhost:8081/dev-auth
+    #   COMPOSE_PROFILES=app[,portal]   (build from source: the GHCR image is older)
     case-engine-rest-api:
         <<: *case-engine-rest-api
-        profiles: [full]
+        profiles: [app]
         environment:
+            # Datastore profile (datasource-carrying); empty = mongo default.
+            - SPRING_PROFILES_ACTIVE=${WKS_SPRING_PROFILES:-}
+            # Per-concern flags (defaults reproduce the full, secure stack).
+            - WKS_AUTH_MODE=${WKS_AUTH_MODE:-keycloak}
+            - WKS_AUTHZ_OPA_ENABLED=${WKS_AUTHZ_OPA_ENABLED:-true}
+            - WKS_BPM_ENGINE=${WKS_BPM_ENGINE:-camunda7}
+            - WKS_TENANCY_MULTI_TENANT=${WKS_TENANCY_MULTI_TENANT:-true}
+            - WKS_SEED_ENABLED=${WKS_SEED_ENABLED:-false}
+            # Infra connection coordinates (used by whichever concerns are active).
             - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
             - MONGO_DATABASE=${MONGO_WKS_DATABASE}
@@ -183,21 +199,13 @@ services:
             # its health contributor. Harmless on source-built images (no Zeebe).
             - MANAGEMENT_HEALTH_ZEEBE_ENABLED=false
         depends_on:
+            # Optional: only enforced when the infra profile is also active.
             mongodb:
                 condition: service_healthy
+                required: false
             camunda:
                 condition: service_healthy
-
-    # Minimal/core variant: embedded H2 + dev-token + no OPA/Camunda. profile: core
-    # Zero external containers — activates the `minimal` Spring profile. Build from
-    # source (--build); the pre-built GHCR image predates this profile.
-    # Mutually exclusive with case-engine-rest-api (same port 8081); don't enable
-    # `core` and `full` together. Run the portal via `yarn start` in dev-token mode.
-    case-engine-rest-api-minimal:
-        <<: *case-engine-rest-api
-        profiles: [core]
-        environment:
-            - SPRING_PROFILES_ACTIVE=minimal
+                required: false
 
     c7-external-tasks:
         image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-v1.4.14}

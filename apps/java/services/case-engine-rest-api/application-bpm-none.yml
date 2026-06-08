@@ -1,0 +1,3 @@
+# Concern fragment — Workflow/BPM: no Camunda round-trip (cases persist directly
+# via DirectCasePersistenceStrategy; NoopBpmEngineClient satisfies the facade).
+wks.bpm.engine: none
