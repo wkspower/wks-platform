@@ -62,7 +62,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
-          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}"
+          export REACT_APP_AUTH_ISSUER_URL="${{ env.KEYCLOAK_URL }}"
           export REACT_APP_API_URL="${{ env.WKS_API_URL }}"
           export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL }}"
           export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"

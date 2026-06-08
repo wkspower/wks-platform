@@ -26,8 +26,7 @@ function decodeJwtPayload(token) {
 // HTTP endpoint instead of a real Keycloak server. The surface mirrors exactly
 // what the app consumes from keycloak-js, so nothing downstream changes.
 export function createDevTokenAdapter(realm) {
-  const base = Config.AuthUrl || Config.LoginUrl
-  const user = Config.AuthDevUser || 'developer'
+  const base = Config.AuthIssuerUrl
 
   const adapter = {
     token: undefined,
@@ -57,7 +56,7 @@ export function createDevTokenAdapter(realm) {
     },
 
     async init() {
-      await fetchToken(adapter, base, realm, user)
+      await fetchToken(adapter, base, realm)
       adapter.authenticated = !!adapter.token
       return adapter.authenticated
     },
@@ -66,7 +65,7 @@ export function createDevTokenAdapter(realm) {
       // Re-fetch a fresh token; resolves true when a new token was obtained.
       const previous = adapter.token
       try {
-        await fetchToken(adapter, base, realm, user)
+        await fetchToken(adapter, base, realm)
         return adapter.token !== previous
       } catch (e) {
         console.error('Failed to refresh dev token', e)
@@ -86,10 +85,8 @@ export function createDevTokenAdapter(realm) {
   return adapter
 }
 
-async function fetchToken(adapter, base, realm, user) {
-  const url = `${base}/realms/${realm}/protocol/openid-connect/token?sub=${encodeURIComponent(
-    user,
-  )}`
+async function fetchToken(adapter, base, realm) {
+  const url = `${base}/realms/${realm}/protocol/openid-connect/token`
 
   const response = await fetch(url)
   if (!response.ok) {

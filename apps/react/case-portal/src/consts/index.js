@@ -2,13 +2,11 @@ console.log(process.env.NODE_ENV)
 
 const Config = {
   CaseEngineUrl: getEnv(process.env.REACT_APP_API_URL, window.API_URL),
-  LoginUrl: getEnv(process.env.REACT_APP_KEYCLOAK_URL, window.KEYCLOAK_URL),
   AuthMode:
     getEnv(process.env.REACT_APP_AUTH_MODE, window.AUTH_MODE) || 'keycloak',
-  AuthUrl: getEnv(process.env.REACT_APP_AUTH_URL, window.AUTH_URL),
-  AuthDevUser: getEnv(
-    process.env.REACT_APP_AUTH_DEV_USER,
-    window.AUTH_DEV_USER,
+  AuthIssuerUrl: getEnv(
+    process.env.REACT_APP_AUTH_ISSUER_URL,
+    window.AUTH_ISSUER_URL,
   ),
   StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
   WebsocketsEnabled: getEnv(

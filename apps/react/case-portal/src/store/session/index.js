@@ -24,7 +24,7 @@ function bootstrap() {
   }
 
   const kc = new Keycloak({
-    url: Config.LoginUrl,
+    url: Config.AuthIssuerUrl,
     realm: realm,
     clientId: clientId,
   })
