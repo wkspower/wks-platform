@@ -63,6 +63,12 @@ public class CaseInstanceJpaRepositoryImplIT {
 			return new PersistenceAnnotationBeanPostProcessor();
 		}
 
+		/** In production the DataSource is TenantRoutingDatasource; the test builds the global one directly. */
+		@Bean
+		javax.sql.DataSource dataSource(com.zaxxer.hikari.HikariConfig hikariConfig) {
+			return new com.zaxxer.hikari.HikariDataSource(hikariConfig);
+		}
+
 		/** Single-tenant stub: no JWT in tests, so the resolver falls back to "public". */
 		@Bean
 		SecurityContextTenantHolder tenantHolder() {

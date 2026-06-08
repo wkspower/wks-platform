@@ -63,10 +63,17 @@ public class DevTokenController {
 
 	private final String defaultRoles;
 
+	private final List<String> allowedOrigins;
+
 	public DevTokenController(RSAKey devTokenRsaKey,
-			@Value("${wks.auth.devtoken.roles:User}") String defaultRoles) {
+			@Value("${wks.auth.devtoken.roles:User}") String defaultRoles,
+			@Value("${wks.auth.devtoken.allowed-origins:http://localhost:3001}") String allowedOrigins) {
 		this.rsaKey = devTokenRsaKey;
 		this.defaultRoles = defaultRoles;
+		this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
+				.map(String::trim)
+				.filter(o -> !o.isEmpty())
+				.toList();
 	}
 
 	/**
@@ -109,6 +116,9 @@ public class DevTokenController {
 				.claim("org", tenant)
 				.claim("preferred_username", sub)
 				.claim("realm_access", Map.of("roles", roleList))
+				// Keycloak tokens carry allowed-origins; BearerTokenHandlerInputResolver
+				// reads allowed-origins[0], so the dev token must provide it too.
+				.claim("allowed-origins", allowedOrigins)
 				.issueTime(Date.from(now))
 				.expirationTime(Date.from(exp))
 				.build();

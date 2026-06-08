@@ -45,10 +45,11 @@ public class EngineDatabaseTenantConfig {
 		return new HikariConfig();
 	}
 
-	@Bean
-	public DataSource dataSource() {
-		return new com.zaxxer.hikari.HikariDataSource(hikariConfig());
-	}
+	// NOTE: the DataSource bean is TenantRoutingDatasource (a tenant-routing
+	// AbstractRoutingDataSource built from hikariConfig). We deliberately do NOT
+	// declare a second DataSource bean here — doing so makes the EntityManagerFactory
+	// DataSource injection ambiguous and (since HikariDataSource extends HikariConfig)
+	// also makes TenantRoutingDatasource's HikariConfig injection ambiguous.
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {

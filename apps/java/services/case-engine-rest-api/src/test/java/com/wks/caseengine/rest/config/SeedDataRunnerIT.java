@@ -65,6 +65,12 @@ public class SeedDataRunnerIT {
 			return new PersistenceAnnotationBeanPostProcessor();
 		}
 
+		/** In production the DataSource is TenantRoutingDatasource; the test builds the global one directly. */
+		@Bean
+		javax.sql.DataSource dataSource(com.zaxxer.hikari.HikariConfig hikariConfig) {
+			return new com.zaxxer.hikari.HikariDataSource(hikariConfig);
+		}
+
 		@Bean
 		SecurityContextTenantHolder tenantHolder() {
 			return new SecurityContextTenantHolder() {
