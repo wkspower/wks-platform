@@ -67,7 +67,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Component
-@ConditionalOnProperty(value = "wks.bpm.engine.camunda.version", havingValue = "camunda7", matchIfMissing = true)
+// Keyed on the unified wks.bpm.engine selector (same as Camunda7ClientScan and
+// NoopBpmEngineClient) so wks.bpm.engine=none alone fully disables Camunda.
+@ConditionalOnProperty(value = "wks.bpm.engine", havingValue = "camunda7", matchIfMissing = true)
 @Slf4j
 public class C7EngineClient implements BpmEngineClient {
 

@@ -66,7 +66,8 @@ public class DevTokenController {
 	private final List<String> allowedOrigins;
 
 	public DevTokenController(RSAKey devTokenRsaKey,
-			@Value("${wks.auth.devtoken.roles:User}") String defaultRoles,
+			@Value("${wks.auth.devtoken.roles:"
+					+ "mgmt_case_def,mgmt_record_type,mgmt_form,client_case,client_task,client_record}") String defaultRoles,
 			@Value("${wks.auth.devtoken.allowed-origins:http://localhost:3001}") String allowedOrigins) {
 		this.rsaKey = devTokenRsaKey;
 		this.defaultRoles = defaultRoles;
@@ -92,7 +93,8 @@ public class DevTokenController {
 	 * @param tenant realm/org the token is issued for (from the path)
 	 * @param sub    subject / username (defaults to {@code developer})
 	 * @param roles  comma-separated realm roles (defaults to
-	 *               {@code wks.auth.devtoken.roles} or {@code User})
+	 *               {@code wks.auth.devtoken.roles}, itself defaulting to the realm
+	 *               roles the portal authorizes against so the dev user is fully usable)
 	 */
 	@GetMapping("/realms/{tenant}/protocol/openid-connect/token")
 	public Map<String, Object> token(@PathVariable String tenant,

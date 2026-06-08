@@ -69,7 +69,11 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 
 	@SuppressWarnings("unchecked")
 	private String getAllowedOrigin(Jwt jwt) {
-		return HttpUtils.getHost(((List<String>) jwt.getClaim("allowed-origins")).get(0));
+		List<String> allowedOrigins = (List<String>) jwt.getClaim("allowed-origins");
+		if (allowedOrigins == null || allowedOrigins.isEmpty()) {
+			return null;
+		}
+		return HttpUtils.getHost(allowedOrigins.get(0));
 	}
 
 }

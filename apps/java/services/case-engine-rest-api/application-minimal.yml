@@ -7,6 +7,9 @@
 # all to their minimal value. The default (no profile) setup is unchanged and secure.
 
 # --- Datastore: embedded H2 via the JPA path (no MongoDB container) ---
+# (database.type is the key bound by @ConditionalOnProperty; wks.datastore.type is
+# accepted too via SelectorAliasEnvironmentPostProcessor, but we set the canonical
+# key here so the datastore selection never depends on alias timing.)
 database.type: jpa
 
 spring:
@@ -42,6 +45,7 @@ wks.bpm.engine: none
 # --- Tenancy: single tenant (no JWT org -> default schema/db) ---
 wks.tenancy.multi-tenant: false
 wks.tenancy.default-tenant: ${WKS_TENANCY_DEFAULT_TENANT:localhost}
+wks.tenancy.claim-name: org
 
 # --- Seed the demo case definitions/forms/queues into the empty datastore on boot ---
 wks.seed.enabled: true

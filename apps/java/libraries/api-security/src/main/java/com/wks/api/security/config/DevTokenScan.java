@@ -11,22 +11,22 @@
  */
 package com.wks.api.security.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Brings the embedded dev-token issuer package into component scanning for any
- * service that already imports {@code ApiSecurityScan}.
+ * Brings the embedded dev-token issuer package ({@code com.wks.api.security.devtoken})
+ * into component scanning. It is discovered because services component-scan
+ * {@code com.wks.api.security.config} (the package of {@code ApiSecurityScan}).
  *
- * <p>
- * This configuration itself is unconditional and harmless: every bean in the
- * scanned {@code com.wks.api.security.devtoken} package is guarded by
- * {@code @ConditionalOnProperty(name = "wks.auth.mode", havingValue = "dev-token")},
- * so with the default {@code keycloak} mode nothing is registered.
+ * <p>Gated on {@code wks.auth.mode=dev-token}, so in the default {@code keycloak}
+ * mode the devtoken package is not scanned at all.
  *
  * @author wks
  */
 @Configuration
+@ConditionalOnProperty(name = "wks.auth.mode", havingValue = "dev-token")
 @ComponentScan(basePackages = { "com.wks.api.security.devtoken" })
 public class DevTokenScan {
 

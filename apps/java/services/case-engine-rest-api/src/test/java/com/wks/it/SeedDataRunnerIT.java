@@ -9,11 +9,10 @@
  *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.db;
+package com.wks.it;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,34 +27,42 @@ import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.repository.CaseInstanceJpaRepositoryImpl;
-import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
-import com.wks.caseengine.repository.JpaPaginator;
+import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionJpaRepositoryImpl;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.db.EngineDatabaseTenantConfig;
+import com.wks.caseengine.form.FormJpaRepositoryImpl;
+import com.wks.caseengine.queue.QueueJpaRepositoryImpl;
+import com.wks.caseengine.rest.config.GsonConfiguration;
+import com.wks.caseengine.rest.config.SeedDataRunner;
 
 /**
- * WP-1.0 acceptance: proves the real {@link EngineDatabaseTenantConfig} JPA wiring
- * boots against an embedded H2 database (database.type=jpa) and serves CRUD on the
- * single ("public") schema with NO external datastore container.
+ * WP-1.1 acceptance: proves the datastore-agnostic seeder deserializes the bundled
+ * demo collections and persists them through the repository interfaces onto embedded
+ * H2 (database.type=jpa) — i.e. the minimal core boots with demo case definitions.
+ *
+ * <p>Lives in {@code com.wks.it} (outside every production @ComponentScan) so its
+ * nested @SpringBootConfiguration is not picked up by other tests' contexts.
  */
-@SpringBootTest(classes = CaseInstanceJpaRepositoryImplIT.TestApp.class, properties = {
+@SpringBootTest(classes = SeedDataRunnerIT.TestApp.class, properties = {
 		"database.type=jpa",
-		"spring.datasource.jdbcUrl=jdbc:h2:mem:wks_jpa_it;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
+		"wks.seed.enabled=true",
+		"wks.tenancy.multi-tenant=false",
+		"spring.datasource.jdbcUrl=jdbc:h2:mem:wks_seed_it;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
 		"spring.sql.init.schema-locations=classpath:schema-h2.sql",
 		"spring.sql.init.mode=always",
 		"spring.autoconfigure.exclude="
-				+ "de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration,"
 				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
 				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
-public class CaseInstanceJpaRepositoryImplIT {
+public class SeedDataRunnerIT {
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
-	@Import({ EngineDatabaseTenantConfig.class, CaseInstanceJpaRepositoryImpl.class, JpaPaginator.class })
+	@Import({ EngineDatabaseTenantConfig.class, CaseDefinitionJpaRepositoryImpl.class, FormJpaRepositoryImpl.class,
+			QueueJpaRepositoryImpl.class, GsonConfiguration.class, SeedDataRunner.class })
 	static class TestApp {
 
 		@Bean
@@ -69,7 +76,6 @@ public class CaseInstanceJpaRepositoryImplIT {
 			return new com.zaxxer.hikari.HikariDataSource(hikariConfig);
 		}
 
-		/** Single-tenant stub: no JWT in tests, so the resolver falls back to "public". */
 		@Bean
 		SecurityContextTenantHolder tenantHolder() {
 			return new SecurityContextTenantHolder() {
@@ -99,24 +105,13 @@ public class CaseInstanceJpaRepositoryImplIT {
 	}
 
 	@Autowired
-	private CaseInstanceRepository repository;
+	private CaseDefinitionRepository caseDefinitionRepository;
 
 	@Test
-	public void shouldPersistAndReadCaseInstanceOnEmbeddedH2() throws Exception {
-		CaseInstance toSave = new CaseInstance("634d1eac797f75ecc4a10052", "WP10-0001", "loan-approval",
-				"Data Collection", "WIP_CASE_STATUS");
-
-		String uid = repository.save(toSave);
-		assertNotNull(uid, "save() must return the generated uid");
-
-		CaseInstance fetched = repository.get("WP10-0001");
-		assertNotNull(fetched);
-		assertEquals("WP10-0001", fetched.getBusinessKey());
-		assertEquals("loan-approval", fetched.getCaseDefinitionId());
-		assertEquals("Data Collection", fetched.getStage());
-		assertEquals(CaseStatus.WIP_CASE_STATUS, fetched.getStatus());
-
-		List<CaseInstance> all = repository.find();
-		assertFalse(all.isEmpty(), "find() must return the persisted case");
+	public void shouldSeedDemoCaseDefinitionsIntoH2() {
+		List<CaseDefinition> defs = caseDefinitionRepository.find();
+		assertFalse(defs.isEmpty(), "seeder must have inserted demo case definitions");
+		assertTrue(defs.stream().anyMatch(d -> "customer-support".equals(d.getId())),
+				"expected the 'customer-support' demo case definition to be seeded");
 	}
 }
