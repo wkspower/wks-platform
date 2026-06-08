@@ -4,6 +4,9 @@ import MemoryTokenManager from '../MemoryTokenManager'
 
 export class StorageService {
   async uploadFile(storage, file, fileName, dir, evt) {
+    if (Config.StorageMode === 'filesystem') {
+      return filesystem().uploadFile(file, dir, evt)
+    }
     return minio().uploadFile(file, dir, evt)
   }
 
@@ -12,7 +15,97 @@ export class StorageService {
   }
 
   async downloadFile(file) {
+    if (Config.StorageMode === 'filesystem') {
+      return filesystem().downloadFile(file)
+    }
     return minio().downloadFile(file)
+  }
+}
+
+export function filesystem() {
+  function authHeader() {
+    return `Bearer ${MemoryTokenManager.getToken()}`
+  }
+
+  return {
+    uploadFile(file, dir, progressCallback, abortCallback) {
+      return new Promise((resolve, reject) => {
+        const bucket = dir || 'files'
+        const url = `${Config.StorageUrl}/storage/filesystem/${encodeURIComponent(
+          bucket,
+        )}/uploads?object=${encodeURIComponent(file.name)}`
+
+        const fd = new FormData()
+        fd.append('file', file)
+
+        const request = new XMLHttpRequest()
+        request.open('POST', url)
+        request.setRequestHeader('Authorization', authHeader())
+
+        request.upload.addEventListener('progress', function (e) {
+          if (typeof progressCallback === 'function') {
+            progressCallback(e)
+          }
+
+          if (typeof abortCallback === 'function') {
+            abortCallback(() => request.abort())
+          }
+        })
+
+        request.addEventListener('load', function () {
+          if (request.status >= 200 && request.status < 300) {
+            resolve({
+              storage: 'filesystem',
+              dir: dir,
+              name: file.name,
+              url: file.name,
+              size: file.size,
+              type: file.type,
+            })
+          } else {
+            reject(request.response || 'Unable to upload file')
+          }
+        })
+
+        request.addEventListener('error', function (e) {
+          e.networkError = true
+          reject(e)
+        })
+
+        request.addEventListener('abort', function (e) {
+          e.networkError = true
+          reject(e)
+        })
+
+        request.send(fd)
+      })
+    },
+    downloadFile(file) {
+      const bucket = file.dir || 'files'
+      const url = `${Config.StorageUrl}/storage/filesystem/${encodeURIComponent(
+        bucket,
+      )}/downloads?object=${encodeURIComponent(file.name)}`
+
+      return fetch(url, {
+        headers: { Authorization: authHeader() },
+      }).then(async (resp) => {
+        const blob = await resp.blob()
+        const downloadUrl = window.URL.createObjectURL(blob)
+
+        const anchor = document.createElement('a')
+        document.body.appendChild(anchor)
+        anchor.href = downloadUrl
+        anchor.download = file.name
+
+        anchor.click()
+
+        setTimeout(() => {
+          window.URL.revokeObjectURL(downloadUrl)
+          document.body.removeChild(anchor)
+        }, 0)
+        return
+      })
+    },
   }
 }
 

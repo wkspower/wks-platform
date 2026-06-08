@@ -6,11 +6,15 @@ export const FileService = {
 }
 
 function upload({ dir, file, progress, keycloak }) {
-  function doUpload(url, fd) {
+  function doUpload(url, fd, storage) {
     return new Promise((resolve, reject) => {
       let request = new XMLHttpRequest()
 
       request.open('POST', url)
+
+      if (storage === 'filesystem') {
+        request.setRequestHeader('Authorization', `Bearer ${keycloak.token}`)
+      }
 
       request.addEventListener('openAndSetHeaders', function (...params) {
         request.open(...params)
@@ -26,7 +30,7 @@ function upload({ dir, file, progress, keycloak }) {
       request.addEventListener('load', function () {
         if (request.status >= 200 && request.status < 300) {
           resolve({
-            storage: 'minio',
+            storage: storage || 'minio',
             dir: dir,
             name: file.name,
             url: file.name,
@@ -50,6 +54,16 @@ function upload({ dir, file, progress, keycloak }) {
 
       request.send(fd)
     })
+  }
+
+  if (Config.StorageMode === 'filesystem') {
+    const bucket = dir || 'files'
+    const fd = new FormData()
+    fd.append('file', file)
+    const url = `${Config.StorageUrl}/storage/filesystem/${encodeURIComponent(
+      bucket,
+    )}/uploads?object=${encodeURIComponent(file.name)}`
+    return doUpload(url, fd, 'filesystem')
   }
 
   let goUploadToFileUrl = `${Config.StorageUrl}/storage/files/${dir}/uploads/${file.name}?content-type=${file.type}`
@@ -80,6 +94,31 @@ function upload({ dir, file, progress, keycloak }) {
 }
 
 function download(file, keycloak) {
+  if (Config.StorageMode === 'filesystem') {
+    const bucket = file.dir || 'files'
+    const url = `${Config.StorageUrl}/storage/filesystem/${encodeURIComponent(
+      bucket,
+    )}/downloads?object=${encodeURIComponent(file.name)}`
+
+    return fetch(url, createHeaders(keycloak)).then(async (resp) => {
+      const blob = await resp.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+
+      const anchor = document.createElement('a')
+      document.body.appendChild(anchor)
+      anchor.href = downloadUrl
+      anchor.download = file.name
+
+      anchor.click()
+
+      setTimeout(() => {
+        window.URL.revokeObjectURL(downloadUrl)
+        document.body.removeChild(anchor)
+      }, 0)
+      return
+    })
+  }
+
   let getObjectForUrl = `${Config.StorageUrl}/storage/files/${file.dir}/downloads/${file.name}?content-type=${file.type}`
   if (!file.dir) {
     getObjectForUrl = `${Config.StorageUrl}/storage/files/downloads/${file.name}?content-type=${file.type}`

@@ -9,6 +9,8 @@ const Config = {
     window.AUTH_ISSUER_URL,
   ),
   StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
+  StorageMode:
+    getEnv(process.env.REACT_APP_STORAGE_MODE, window.STORAGE_MODE) || 'minio',
   WebsocketsEnabled: getEnv(
     process.env.REACT_APP_WEBSOCKETS_ENABLED,
     window.WEBSOCKETS_ENABLED,
