@@ -15,6 +15,8 @@
 #
 #  Infra profiles (concern -> profile): mongodb, keycloak, opa, camunda
 #  (camunda + c7-external-tasks), storage (minio + storage-api).
+#  storage-fs: MinIO-free storage (local-disk driver + dev-token, self-contained);
+#  mutually exclusive with storage (both bind 8085).
 #  App profiles: full (case-engine-rest-api wired to all infra), core (minimal,
 #  H2/dev-token variant), portal, notifications, proxy, demo.
 #  The default COMPOSE_PROFILES (.env) enables the full stack; `core` is the minimal.
@@ -36,6 +38,17 @@ x-case-engine-rest-api: &case-engine-rest-api
         dockerfile: services/case-engine-rest-api/Dockerfile
     ports:
         - 8081:8081
+
+# Shared base for the two storage-api variants (minio-backed vs filesystem).
+# They share image/build/port and are mutually exclusive (same 8085), selected by
+# the `storage` (MinIO) or `storage-fs` (MinIO-free) profile.
+x-storage-api: &storage-api
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
+    build:
+        context: apps/java
+        dockerfile: services/storage-api/Dockerfile
+    ports:
+        - 8085:8085
 
 services:
 
@@ -106,14 +119,10 @@ services:
         volumes:
             - keycloak:/opt/keycloak/data/
 
+    # MinIO-backed storage. profile: storage
     storage-api:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
+        <<: *storage-api
         profiles: [storage]
-        build:
-            context: apps/java
-            dockerfile: services/storage-api/Dockerfile
-        ports:
-            - 8085:8085
         environment:
             - OPA_URL=${OPA_URL}
             - KEYCLOAK_URL=${KEYCLOAK_URL}
@@ -124,6 +133,25 @@ services:
         depends_on:
             minio:
                 condition: service_healthy
+
+    # MinIO-free storage: local-disk driver + dev-token auth, self-contained (no
+    # MinIO, no Keycloak, no OPA). profile: storage-fs
+    # Build from source (--build); the published image predates the filesystem driver.
+    # Mutually exclusive with storage-api (same port 8085) — don't enable storage + storage-fs together.
+    storage-api-fs:
+        <<: *storage-api
+        profiles: [storage-fs]
+        environment:
+            - DRIVER_STORAGE_FACTORYCLASS=filesystem
+            - STORAGE_FS_BASEPATH=/data/storage
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL=http
+            - DRIVER_STORAGE_UPLOADS_BACKEND_URL=localhost
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PORT=8085
+            - WKS_AUTH_MODE=dev-token
+            - WKS_AUTHZ_OPA_ENABLED=false
+            - KEYCLOAK_URL=http://localhost:8085/dev-auth
+        volumes:
+            - storage-fs:/data/storage
 
     camunda:
         image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
@@ -364,4 +392,6 @@ volumes:
     minio:
         driver: local
     keycloak:
+        driver: local
+    storage-fs:
         driver: local
