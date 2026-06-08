@@ -1,18 +1,19 @@
 # Minimal, zero-external-container dev profile.
 # Activate with: mvn spring-boot:run -Dspring-boot.run.profiles=minimal
 #
-# This profile bundles the minimal-mode value of every orthogonal concern so a
-# developer can run case-engine-rest-api with NO external services. Each flag is
-# independently toggleable; this file just sets them all to their minimal value.
-#
-# Datastore: embedded H2 via the JPA path (no MongoDB container).
+# Bundles the minimal-mode value of every orthogonal concern so a developer can run
+# case-engine-rest-api with NO external services (no MongoDB, Keycloak, OPA, Camunda,
+# MinIO, Kafka). Each flag is independently toggleable; this profile just sets them
+# all to their minimal value. The default (no profile) setup is unchanged and secure.
+
+# --- Datastore: embedded H2 via the JPA path (no MongoDB container) ---
 database.type: jpa
 
 spring:
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration
   datasource:
     jdbcUrl: jdbc:h2:mem:wks;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -26,8 +27,21 @@ spring:
       schema-locations: classpath:schema-h2.sql
       mode: always
 
-# --- Concerns decoupled by later work packages (WP-1.2 / WP-1.4 / WP-1.5) ---
-# Authorization: OPA off (WP-1.2)            -> wks.authz.opa.enabled: false
-# Authentication: dev-token issuer (WP-1.4)  -> wks.auth.mode: dev-token
-# Workflow/BPM: local, no Camunda (WP-1.5)   -> wks.bpm.engine: none
-# Tenancy: single tenant                     -> wks.tenancy.multi-tenant: false
+# --- Authentication: embedded dev-token issuer (no Keycloak) ---
+# The resource server validates dev tokens via the embedded JWKS, so keycloak.url
+# must point at the in-process /dev-auth issuer served by this app.
+wks.auth.mode: dev-token
+keycloak.url: ${KEYCLOAK_URL:http://localhost:8081/dev-auth}
+
+# --- Authorization: OPA off (no OPA container; authenticated requests permitted) ---
+wks.authz.opa.enabled: false
+
+# --- Workflow/BPM: local, no Camunda round-trip (cases persist directly) ---
+wks.bpm.engine: none
+
+# --- Tenancy: single tenant (no JWT org -> default schema/db) ---
+wks.tenancy.multi-tenant: false
+wks.tenancy.default-tenant: ${WKS_TENANCY_DEFAULT_TENANT:localhost}
+
+# --- Seed the demo case definitions/forms/queues into the empty datastore on boot ---
+wks.seed.enabled: true
