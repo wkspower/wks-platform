@@ -27,6 +27,10 @@ public class StorageServiceFactoryImpl implements StorageServiceFactory {
 	@Qualifier("DigitalOceanServiceFactory")
 	private ServiceFactory digitalOcean;
 
+	@Autowired
+	@Qualifier("FilesystemServiceFactory")
+	private ServiceFactory filesystem;
+
 	@Value("${driver.storage.factoryclass}")
 	private String factoryClass;
 
@@ -43,6 +47,10 @@ public class StorageServiceFactoryImpl implements StorageServiceFactory {
 
 		if ("do".equals(driver)) {
 			return digitalOcean;
+		}
+
+		if ("filesystem".equals(driver)) {
+			return filesystem;
 		}
 
 		throw new IllegalArgumentException(String.format("Factory name '%s' not found", driver));

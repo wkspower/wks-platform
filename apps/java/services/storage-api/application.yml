@@ -32,6 +32,11 @@ driver.storage.uploads.backend.url: ${MINIO_HOST_EXTERNAL:localhost}
 driver.storage.uploads.file.min.size:  1024
 driver.storage.uploads.file.max.size:  20000000
 
+# filesystem (local disk, no MinIO/DigitalOcean required)
+# Select with: driver.storage.factoryclass: filesystem
+# Files are stored under <basepath>/<tenant>/<object> and served by storage-api itself.
+driver.storage.filesystem.basepath: ${STORAGE_FS_BASEPATH:${java.io.tmpdir}/wks-storage}
+
 # digital ocean
 # driver.storage.factoryclass: do
 # driver.storage.endpoint.url: nyc3.digitaloceanspaces.com

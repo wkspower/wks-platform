@@ -64,6 +64,9 @@ public class StorageConfig {
 	@Value("${driver.storage.uploads.backend.port}")
 	private int uploadsPort;
 
+	@Value("${driver.storage.filesystem.basepath:${java.io.tmpdir}/wks-storage}")
+	private String filesystemBasePath;
+
 	@Bean
 	@Qualifier("DigitalOceanClient")
 	public MinioClientDelegate creatMinioClient() {
