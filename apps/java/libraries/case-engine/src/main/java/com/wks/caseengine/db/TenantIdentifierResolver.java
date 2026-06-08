@@ -23,7 +23,9 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
 
 	@Override
 	public String resolveCurrentTenantIdentifier() {
-		return tenantResolver.resolveTenant();
+		// Hibernate also calls this at bootstrap / schema generation with no request
+		// context, so it must yield the default schema rather than fail closed.
+		return tenantResolver.resolveTenantOrDefault();
 	}
 
 	@Override

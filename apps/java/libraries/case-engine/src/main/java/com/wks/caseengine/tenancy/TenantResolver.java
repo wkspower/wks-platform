@@ -23,6 +23,21 @@ public interface TenantResolver {
 	 */
 	String resolveTenant();
 
+	/**
+	 * Tenant for the current context, falling back to {@link #defaultTenant()}
+	 * instead of failing when none is available. Used by the JPA identifier
+	 * resolver: Hibernate also invokes it at bootstrap / schema generation (no
+	 * request context), where it must yield a schema rather than throw. Request-time
+	 * fail-closed enforcement stays on the {@link #resolveTenant()} path (Mongo).
+	 */
+	default String resolveTenantOrDefault() {
+		try {
+			return resolveTenant();
+		} catch (RuntimeException ex) {
+			return defaultTenant();
+		}
+	}
+
 	String defaultTenant();
 
 	boolean isMultiTenant();

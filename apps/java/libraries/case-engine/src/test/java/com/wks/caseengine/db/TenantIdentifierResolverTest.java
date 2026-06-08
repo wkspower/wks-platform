@@ -27,7 +27,9 @@ public class TenantIdentifierResolverTest {
 
     @Test
     void shouldReturnTenantIdWhenPresent() {
-        when(tenantResolver.resolveTenant()).thenReturn("tenant_123");
+        // The JPA resolver delegates to the non-throwing resolveTenantOrDefault()
+        // so Hibernate's bootstrap/DDL calls (no request context) never fail closed.
+        when(tenantResolver.resolveTenantOrDefault()).thenReturn("tenant_123");
 
         String tenantId = resolver.resolveCurrentTenantIdentifier();
         assertEquals("tenant_123", tenantId);
@@ -35,7 +37,7 @@ public class TenantIdentifierResolverTest {
 
     @Test
     void shouldReturnResolvedTenantFromStrategy() {
-        when(tenantResolver.resolveTenant()).thenReturn("public");
+        when(tenantResolver.resolveTenantOrDefault()).thenReturn("public");
 
         String tenantId = resolver.resolveCurrentTenantIdentifier();
         assertEquals("public", tenantId);

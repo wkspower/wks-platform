@@ -53,6 +53,17 @@ public class TenantResolverTest {
 	}
 
 	@Test
+	void multiTenantResolveOrDefaultShouldFallBackInsteadOfThrowing() {
+		// The JPA bootstrap path needs a schema even with no context; resolveTenantOrDefault
+		// must NOT propagate the fail-closed exception from resolveTenant().
+		when(holder.getTenantId()).thenReturn(Optional.empty());
+
+		MultiTenantResolver resolver = new MultiTenantResolver(holder, "public");
+
+		assertEquals("public", resolver.resolveTenantOrDefault());
+	}
+
+	@Test
 	void singleTenantShouldReturnContextTenantWhenPresent() {
 		when(holder.getTenantId()).thenReturn(Optional.of("tenant_123"));
 

@@ -15,8 +15,9 @@ FROM amazoncorretto:21
 VOLUME /tmp
 COPY --from=build /build/services/case-engine-rest-api/target/*.jar app.jar
 COPY --from=build /build/services/case-engine-rest-api/application.yml /application.yml
-# Minimal/dev profile config, activated with SPRING_PROFILES_ACTIVE=minimal
-# (zero-external-container mode: embedded H2 + dev-token + no OPA/Camunda).
-COPY --from=build /build/services/case-engine-rest-api/application-minimal.yml /application-minimal.yml
+# Per-concern profile fragments (application-db-h2.yml, application-bpm-none.yml,
+# application-auth-dev.yml, ...) activated via SPRING_PROFILES_ACTIVE /
+# WKS_SPRING_PROFILES — individually or through the `minimal` profile group.
+COPY --from=build /build/services/case-engine-rest-api/application-*.yml /
 EXPOSE 8081
 ENTRYPOINT ["java","-jar","/app.jar"]

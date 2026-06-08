@@ -49,8 +49,7 @@ import com.wks.caseengine.repository.JpaPaginator;
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
-		"spring.sql.init.schema-locations=classpath:schema-h2.sql",
-		"spring.sql.init.mode=always",
+		"spring.jpa.hibernate.ddl-auto=create",
 		"spring.autoconfigure.exclude="
 				+ "de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration,"
 				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
