@@ -91,20 +91,14 @@ old lines, and **early access** to what's next:
 > Early Access / Priority follows.
 
 All SLAs measure **time to a release-ready fix**; **publishing a release is
-maintainer-gated** (see the operations model below), so no tier implies
-autonomous shipping.
+maintainer-gated**, so no tier implies autonomous shipping.
 
-## Operations model — an AI-assisted lifecycle
+## Release approval
 
-The cadence and SLAs above are made realistic for a small team by an
-**AI/agentic operations layer** that handles the repetitive parts of the
-lifecycle — continuous vulnerability monitoring, preparing dependency fixes,
-packaging releases, and drafting advisories and release notes.
-
-The boundary is deliberate: **agents prepare; maintainers approve and publish.**
-Every release — community or commercial — passes through a human approval gate
-before it ships. This is what lets us offer tight remediation targets *and* keep
-releases trustworthy.
+Every release — community or commercial — passes through a **human approval gate**
+before it ships: maintainers review and publish each tagged release. Remediation
+SLAs therefore measure *time to a release-ready fix*, which is what lets us offer
+tight targets while keeping releases trustworthy.
 
 ## Security fixes
 
