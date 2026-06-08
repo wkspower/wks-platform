@@ -9,12 +9,11 @@
  *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.bpm.engine.client.facade;
+package com.wks.bpm.engine.noop.client;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.wks.bpm.engine.BpmEngine;
@@ -39,14 +38,17 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>It deliberately does NOT persist cases on {@code startProcess}: in workflow
  * mode the case is written by the {@code caseSave} external task, not by the BPM
- * client. With {@code wks.bpm.engine=none} the case is persisted directly by
- * {@code StartCaseInstanceWithValuesCmd}, so this client only needs to no-op the
+ * client. With {@code wks.bpm.engine=none} the case is persisted directly by the
+ * {@code DirectCasePersistenceStrategy}, so this client only no-ops the
  * orchestration calls. All other BPM operations (tasks, deployments, process
  * definitions/instances) return empty results.
+ *
+ * <p>Lives in its own {@code noop-bpm-engine-client} module (mirroring
+ * {@code c7-client}) so the contract module {@code bpm-engine-client} carries no
+ * concrete engine implementation. Discovered via {@code NoopBpmEngineClientScan}.
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "wks.bpm.engine", havingValue = "none")
 public class NoopBpmEngineClient implements BpmEngineClient {
 
 	@Override

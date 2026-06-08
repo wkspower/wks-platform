@@ -15,12 +15,24 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author victor.franca
+ * Component-scans the BPM facade plus every engine module's {@code *Scan} by
+ * package <em>name</em>, not by class. This is what decouples the contract
+ * module from the concrete engines: {@code bpm-engine-client} no longer depends
+ * on {@code c7-client} at compile time. Each engine's {@code *Scan} is
+ * {@code @ConditionalOnProperty(wks.bpm.engine=...)}, so whichever engine jar a
+ * service puts on its classpath (and the selected property) activates exactly
+ * one {@code BpmEngineClient}. Scanning a package whose jar is absent is a no-op.
  *
+ * <p><strong>One-way door:</strong> re-adding a compile dependency on a concrete
+ * engine module (e.g. {@code c7-client}) regresses this decoupling.
+ *
+ * @author victor.franca
  */
 @Configuration
-@ComponentScan(basePackageClasses = { com.wks.bpm.engine.client.facade.BpmEngineClientFacade.class,
-		com.wks.bpm.engine.camunda.client.config.Camunda7ClientScan.class })
+@ComponentScan(basePackages = {
+		"com.wks.bpm.engine.client.facade",
+		"com.wks.bpm.engine.camunda.client.config",
+		"com.wks.bpm.engine.noop.client.config" })
 public class BpmEngineClientScan {
 
 }

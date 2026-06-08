@@ -34,6 +34,8 @@ import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseStage;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.persistence.DirectCasePersistenceStrategy;
+import com.wks.caseengine.cases.instance.persistence.WorkflowCasePersistenceStrategy;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
@@ -80,7 +82,8 @@ public class StartCaseInstanceWithValuesCmdTest {
 		caseDefinition.setStagesLifecycleProcessKey("Process1");
 		caseDefinition.setStages(Arrays.<CaseStage>asList(CaseStage.builder().name("Stage 1").build()));
 
-		commandContext.setCaseCreationProcess("Process1");
+		commandContext.setCasePersistenceStrategy(
+				new WorkflowCasePersistenceStrategy(processInstanceService, gsonBuilder, "Process1"));
 
 		// When
 		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
@@ -112,7 +115,7 @@ public class StartCaseInstanceWithValuesCmdTest {
 		CaseDefinition caseDefinition = new CaseDefinition();
 		caseDefinition.setStages(Arrays.<CaseStage>asList(CaseStage.builder().name("Stage 1").build()));
 
-		commandContext.setBpmEngine("none");
+		commandContext.setCasePersistenceStrategy(new DirectCasePersistenceStrategy(caseInstanceRepository));
 
 		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
 

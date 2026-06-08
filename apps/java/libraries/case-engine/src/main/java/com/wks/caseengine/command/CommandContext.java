@@ -22,6 +22,7 @@ import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.email.repository.CaseEmailRepository;
+import com.wks.caseengine.cases.instance.persistence.CasePersistenceStrategy;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.form.FormRepository;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
@@ -45,15 +46,6 @@ public class CommandContext {
 
 	@Value("${case.engine.email-to-case-outbound-process}")
 	private String emailToCaseOutboundProcess;
-
-	// Workflow/BPM engine selector. "none" runs without a BPM engine (no Camunda
-	// round-trip); any other value (default camunda7) uses the workflow engine.
-	@Value("${wks.bpm.engine:camunda7}")
-	private String bpmEngine;
-
-	public boolean isWorkflowEngineEnabled() {
-		return !"none".equalsIgnoreCase(bpmEngine);
-	}
 
 	@Autowired
 	private SecurityContextTenantHolder securityContextTenantHolder;
@@ -87,6 +79,9 @@ public class CommandContext {
 
 	@Autowired
 	private BpmEngineClientFacade bpmEngineClientFacade;
+
+	@Autowired
+	private CasePersistenceStrategy casePersistenceStrategy;
 
 	@Autowired
 	private GenericBusinessKeyGenerator businessKeyCreator;

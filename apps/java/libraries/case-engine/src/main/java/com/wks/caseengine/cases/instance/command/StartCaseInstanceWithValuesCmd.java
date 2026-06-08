@@ -16,9 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Optional;
 
-import com.google.gson.Gson;
-import com.wks.bpm.engine.model.spi.ProcessVariable;
-import com.wks.bpm.engine.model.spi.ProcessVariableType;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.CaseStage;
@@ -65,31 +62,9 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 		CaseInstance preparedCaseInstance = caseInstanceBuilder.build();
 
-		if (commandContext.isWorkflowEngineEnabled()) {
-			ProcessVariable caseInstanceProcessVariable = generateCaseInstanceProcessVariable(commandContext,
-					preparedCaseInstance);
-
-			commandContext.getProcessInstanceService().start(commandContext.getCaseCreationProcess(),
-					Optional.of(businessKey), Optional.of(caseInstanceProcessVariable));
-		} else {
-			// wks.bpm.engine=none: no BPM round-trip. Persist directly, mirroring what the
-			// "caseSave" external task -> SaveCaseInstanceWithValuesCmd does in workflow mode
-			// (which is the ONLY place the case is written when a workflow engine is present).
-			commandContext.getCaseInstanceRepository().save(preparedCaseInstance);
-		}
-
-		return preparedCaseInstance;
-	}
-
-	private ProcessVariable generateCaseInstanceProcessVariable(CommandContext commandContext,
-			CaseInstance preparedCaseInstance) {
-
-		Gson gson = commandContext.getGsonBuilder().create();
-		ProcessVariable caseInstanceProcessVariable = ProcessVariable.builder()
-				.type(ProcessVariableType.JSON.getValue()).name("caseInstance")
-				.value(gson.toJsonTree(preparedCaseInstance).toString()).build();
-
-		return caseInstanceProcessVariable;
+		// Persistence is delegated to the active CasePersistenceStrategy
+		// (workflow round-trip vs direct save), selected by wks.bpm.engine.
+		return commandContext.getCasePersistenceStrategy().persist(preparedCaseInstance);
 	}
 
 	private String generateBusinessKey(CommandContext commandContext) {

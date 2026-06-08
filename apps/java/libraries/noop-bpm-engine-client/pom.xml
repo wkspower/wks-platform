@@ -9,21 +9,24 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>bpm-engine-client</artifactId>
-	<name>bpm-engine-client</name>
-	<description>BPM Engine Client</description>
+	<artifactId>noop-bpm-engine-client</artifactId>
+	<name>noop-bpm-engine-client</name>
+	<description>No-op BPM Engine Client (wks.bpm.engine=none)</description>
 
 	<packaging>jar</packaging>
 
 	<dependencies>
+		<!-- Brings spring-context, spring-boot-autoconfigure (@ConditionalOnProperty)
+		     and slf4j (@Slf4j); all provided by the consuming service at runtime. -->
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -32,15 +35,6 @@
 			<artifactId>bpm-engine-interface</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
-		<!--
-		  No compile dependency on any concrete engine module (c7-client /
-		  noop-bpm-engine-client). BpmEngineClientScan discovers their *Scan
-		  classes by package name off the classpath; each consuming service
-		  declares the engine module(s) it supports. Re-adding an engine dep here
-		  regresses the contract module's decoupling.
-		-->
-
 	</dependencies>
 
 </project>
