@@ -57,4 +57,4 @@ WKS Platform is released under the [MIT License](LICENSE).
 
 ## Contact
 
-Questions, feedback or contributions: victor@wkspower.com
+Questions, feedback or contributions: hello@wkspower.com
