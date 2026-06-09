@@ -123,8 +123,28 @@ docker compose up -d --build
 Then open [http://localhost:3001](http://localhost:3001) — the dev-token issuer
 logs you in automatically (no credentials). The same knobs work individually, so
 you can enable one concern at a time (e.g. keep Mongo but drop Keycloak); they are
-also pre-documented in `.env-sample`. For a MinIO-free attachment store, add
-`storage-fs` + `DRIVER_STORAGE_FACTORYCLASS=filesystem` + `REACT_APP_STORAGE_MODE=filesystem`.
+also pre-documented in `.env-sample`.
+
+#### Add MinIO-free attachments (filesystem storage)
+
+To also run attachments without MinIO, add the `storage-fs` profile and the
+filesystem driver. One catch: `storage-api` validates bearer tokens by fetching
+the dev-issuer JWKS **over the Docker network**, so `KEYCLOAK_URL` must be the
+engine's **service name** (`case-engine-rest-api`), not `localhost` — otherwise
+storage-api looks for the issuer inside its own container and you get `401` /
+connection-refused on `:8085`. The browser still mints via `localhost`
+(`REACT_APP_AUTH_ISSUER_URL`); the token's `iss` is not re-checked, only its
+signature, so the two URLs can differ.
+
+```bash
+COMPOSE_PROFILES=app,portal,storage-fs \
+WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
+WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
+KEYCLOAK_URL=http://case-engine-rest-api:8081/dev-auth \
+REACT_APP_AUTH_MODE=dev-token REACT_APP_AUTH_ISSUER_URL=http://localhost:8081/dev-auth \
+DRIVER_STORAGE_FACTORYCLASS=filesystem REACT_APP_STORAGE_MODE=filesystem \
+docker compose up -d --build
+```
 
 Optional capabilities are profiles you turn on:
 

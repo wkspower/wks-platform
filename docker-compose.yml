@@ -121,8 +121,11 @@ services:
     # One env-driven storage-api (started by the `storage` or `storage-fs` profile).
     # Defaults to the MinIO driver + Keycloak/OPA (full). For MinIO-free local-disk:
     #   DRIVER_STORAGE_FACTORYCLASS=filesystem WKS_AUTH_MODE=dev-token
-    #   WKS_AUTHZ_OPA_ENABLED=false KEYCLOAK_URL=http://localhost:8085/dev-auth
-    #   DRIVER_STORAGE_UPLOADS_BACKEND_PORT=8085 COMPOSE_PROFILES=...,storage-fs
+    #   WKS_AUTHZ_OPA_ENABLED=false COMPOSE_PROFILES=...,storage-fs
+    # In dev-token mode KEYCLOAK_URL must be the engine's SERVICE NAME, because
+    # storage-api fetches the dev-issuer JWKS over the Docker network (localhost
+    # here is storage-api itself -> 401 on :8085):
+    #   KEYCLOAK_URL=http://case-engine-rest-api:8081/dev-auth
     # The MinIO container is only pulled in under the `storage` profile, and the
     # dependency is required:false so storage-fs runs without it. Build from source
     # for the filesystem driver (the GHCR image predates it).
