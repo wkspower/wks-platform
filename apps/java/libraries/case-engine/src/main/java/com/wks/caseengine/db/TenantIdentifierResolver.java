@@ -1,7 +1,6 @@
 package com.wks.caseengine.db;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
@@ -10,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.stereotype.Component;
 
-import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.tenancy.TenantResolver;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,18 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
 
 	@Autowired
-	private SecurityContextTenantHolder holder;
+	private TenantResolver tenantResolver;
 
 	@Override
 	public String resolveCurrentTenantIdentifier() {
-		Optional<String> tenantId = holder.getTenantId();
-
-		if (!tenantId.isEmpty()) {
-			log.debug("using tenate database {}", tenantId.get());
-			return tenantId.get();
-		}
-
-		return "public";
+		// Hibernate also calls this at bootstrap / schema generation with no request
+		// context, so it must yield the default schema rather than fail closed.
+		return tenantResolver.resolveTenantOrDefault();
 	}
 
 	@Override
@@ -43,5 +37,5 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
 	public boolean validateExistingCurrentSessions() {
 		return false;
 	}
-	
+
 }

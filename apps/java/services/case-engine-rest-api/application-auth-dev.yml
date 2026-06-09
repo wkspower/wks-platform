@@ -1,0 +1,6 @@
+# Concern fragment — Authentication: embedded dev-token issuer (no Keycloak).
+# The resource server validates dev tokens via the in-process /dev-auth JWKS.
+# The validation issuer (wks.auth.devtoken.issuer-uri) defaults to this app's
+# /dev-auth in api-security-defaults.properties; override WKS_DEVTOKEN_ISSUER_URL
+# in multi-container deployments (point it at the engine's service name).
+wks.auth.mode: dev-token

@@ -32,7 +32,9 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(tenantHandler);
+		// The dev-token issuer endpoints (/dev-auth/**) are public and tenant-less;
+		// running them through the tenant resolver only produces noise, so exclude them.
+		registry.addInterceptor(tenantHandler).excludePathPatterns("/dev-auth/**");
 	}
 
 }

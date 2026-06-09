@@ -74,6 +74,21 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
+		<!-- BPM engine modules this service supports. bpm-engine-client no longer
+		     pulls a concrete engine transitively, so each engine is declared here;
+		     wks.bpm.engine selects which one activates (camunda7 default, or none). -->
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>c7-client</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>noop-bpm-engine-client</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>api-security</artifactId>

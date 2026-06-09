@@ -1,18 +1,17 @@
 /*
  * WKS Platform - Open-Source Project
- * 
+ *
  * This file is part of the WKS Platform, an open-source project developed by WKS Power.
- * 
+ *
  * WKS Platform is licensed under the MIT License.
- * 
+ *
  * © 2021 WKS Power. All rights reserved.
- * 
+ *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
 package com.wks.caseengine.db;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -25,7 +24,7 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.tenancy.TenantResolver;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory {
 
 	@Autowired
-	private SecurityContextTenantHolder holder;
+	private TenantResolver tenantResolver;
 
 	public EngineMongoDatabaseFactory(MongoClient mongoClient, String globalDB) {
 		super(mongoClient, globalDB);
@@ -50,18 +49,7 @@ public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
 				provider);
 
-		return getMongoClient().getDatabase(getTenantDatabase()).withCodecRegistry(pojoCodecRegistry);
-	}
-
-	private String getTenantDatabase() {
-		Optional<String> tenantId = holder.getTenantId();
-
-		if (!tenantId.isEmpty()) {
-			log.debug("using tenate database {}", tenantId.get());
-			return tenantId.get();
-		}
-
-		throw new IllegalArgumentException("Could't locate tenant database in session context holder");
+		return getMongoClient().getDatabase(tenantResolver.resolveTenant()).withCodecRegistry(pojoCodecRegistry);
 	}
 
 }

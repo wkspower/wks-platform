@@ -104,6 +104,7 @@
 
         <module>libraries/c7-plugins</module>
         <module>libraries/c7-client</module>
+        <module>libraries/noop-bpm-engine-client</module>
 
         <!-- Services -->
         <module>services/case-engine-rest-api</module>

@@ -33,11 +33,13 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.wks</groupId>
-			<artifactId>c7-client</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
+		<!--
+		  No compile dependency on any concrete engine module (c7-client /
+		  noop-bpm-engine-client). BpmEngineClientScan discovers their *Scan
+		  classes by package name off the classpath; each consuming service
+		  declares the engine module(s) it supports. Re-adding an engine dep here
+		  regresses the contract module's decoupling.
+		-->
 
 	</dependencies>
 

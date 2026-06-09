@@ -1,5 +1,6 @@
 import Keycloak from 'keycloak-js'
 import Config from '../../consts'
+import { createDevTokenAdapter } from './devTokenAdapter'
 
 function bootstrap() {
   let realm = ''
@@ -12,8 +13,18 @@ function bootstrap() {
     realm = hostname
   }
 
+  if (Config.AuthMode === 'dev-token') {
+    const kc = createDevTokenAdapter(realm)
+
+    return {
+      keycloak: kc,
+      realm,
+      clientId,
+    }
+  }
+
   const kc = new Keycloak({
-    url: Config.LoginUrl,
+    url: Config.AuthIssuerUrl,
     realm: realm,
     clientId: clientId,
   })

@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Component
+@org.springframework.transaction.annotation.Transactional
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class QueueJpaRepositoryImpl implements QueueRepository {
 

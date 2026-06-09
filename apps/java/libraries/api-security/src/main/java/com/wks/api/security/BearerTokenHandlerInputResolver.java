@@ -25,6 +25,17 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public final class BearerTokenHandlerInputResolver implements HandlerInputResolver {
 
+	/** JWT claim carrying the tenant id. Defaults to "org"; configurable to decouple the tenant claim from the DB name. */
+	private final String tenantClaimName;
+
+	public BearerTokenHandlerInputResolver() {
+		this("org");
+	}
+
+	public BearerTokenHandlerInputResolver(final String tenantClaimName) {
+		this.tenantClaimName = (tenantClaimName == null || tenantClaimName.isBlank()) ? "org" : tenantClaimName;
+	}
+
 	@Override
 	public Map<String, Object> resolver(HttpServletRequest request, Authentication authentication) {
 		return inputResolver(request, authentication);
@@ -45,7 +56,9 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 
 		if (authentication != null && authentication.getCredentials() instanceof Jwt) {
 			Jwt jwt = (Jwt) authentication.getCredentials();
-			input.put("org", jwt.getClaim("org"));
+			// Always emit under the "org" key (OPA policy + interceptor contract) but read
+			// the value from the configured tenant claim.
+			input.put("org", jwt.getClaim(tenantClaimName));
 			input.put("sub", jwt.getClaim("sub"));
 			input.put("allowed_origin", getAllowedOrigin(jwt));
 			input.put("realm_access", jwt.getClaimAsMap("realm_access"));
@@ -56,7 +69,11 @@ public final class BearerTokenHandlerInputResolver implements HandlerInputResolv
 
 	@SuppressWarnings("unchecked")
 	private String getAllowedOrigin(Jwt jwt) {
-		return HttpUtils.getHost(((List<String>) jwt.getClaim("allowed-origins")).get(0));
+		List<String> allowedOrigins = (List<String>) jwt.getClaim("allowed-origins");
+		if (allowedOrigins == null || allowedOrigins.isEmpty()) {
+			return null;
+		}
+		return HttpUtils.getHost(allowedOrigins.get(0));
 	}
 
 }

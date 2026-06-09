@@ -22,6 +22,7 @@ import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.businesskey.GenericBusinessKeyGenerator;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.email.repository.CaseEmailRepository;
+import com.wks.caseengine.cases.instance.persistence.CasePersistenceStrategy;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.form.FormRepository;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
@@ -78,6 +79,9 @@ public class CommandContext {
 
 	@Autowired
 	private BpmEngineClientFacade bpmEngineClientFacade;
+
+	@Autowired
+	private CasePersistenceStrategy casePersistenceStrategy;
 
 	@Autowired
 	private GenericBusinessKeyGenerator businessKeyCreator;

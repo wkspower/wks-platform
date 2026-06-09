@@ -1,0 +1,3 @@
+# Concern fragment — Seed the demo case definitions/forms/queues into the empty
+# datastore on boot (idempotent; routed through the DataImportService seam).
+wks.seed.enabled: true
