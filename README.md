@@ -89,7 +89,42 @@ docker compose up -d            # backend + case portal + demo seed
 On first run the `demo-data-loader` bootstraps the Keycloak realm and a `demo`
 user and seeds sample cases/processes — wait for it to finish, then open
 [http://localhost:3001](http://localhost:3001) and log in with `demo` / `demo`.
-To start **without** seeding (no login until you seed): `COMPOSE_PROFILES=app,portal docker compose up -d`.
+
+To start the full stack **without the demo bootstrap** — drop only the `demo`
+profile (you keep Keycloak/Mongo/OPA, but get no realm/user until you seed, so no
+login yet):
+
+```bash
+COMPOSE_PROFILES=mongodb,keycloak,opa,camunda,storage,app,portal docker compose up -d
+```
+
+> ⚠️ `COMPOSE_PROFILES=app,portal` on its own does **not** work: the `app` service
+> still defaults to Keycloak + OPA + Mongo + Camunda, so without that infra it
+> can't start or log in. To run app+portal alone, use the minimal-core toggles
+> below.
+
+### Minimal core — zero external containers
+
+Because the cross-cutting concerns are independently toggleable, the case engine
++ REST API + portal can run with **no Mongo, Keycloak, OPA, Camunda or MinIO** —
+embedded H2 datastore, an in-process dev-token issuer (the portal auto-logs in,
+no Keycloak), authorization off, no workflow engine. Build from source
+(`--build`; the published `v1.4.x` images predate these toggles):
+
+```bash
+COMPOSE_PROFILES=app,portal \
+WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
+WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
+KEYCLOAK_URL=http://localhost:8081/dev-auth \
+REACT_APP_AUTH_MODE=dev-token REACT_APP_AUTH_ISSUER_URL=http://localhost:8081/dev-auth \
+docker compose up -d --build
+```
+
+Then open [http://localhost:3001](http://localhost:3001) — the dev-token issuer
+logs you in automatically (no credentials). The same knobs work individually, so
+you can enable one concern at a time (e.g. keep Mongo but drop Keycloak); they are
+also pre-documented in `.env-sample`. For a MinIO-free attachment store, add
+`storage-fs` + `DRIVER_STORAGE_FACTORYCLASS=filesystem` + `REACT_APP_STORAGE_MODE=filesystem`.
 
 Optional capabilities are profiles you turn on:
 
@@ -97,7 +132,7 @@ Optional capabilities are profiles you turn on:
 | --- | --- | --- |
 | `app` *(default)* | case-engine-rest-api backend (port 8081) | on by default |
 | `portal` *(default)* | React case portal (port 3001) | on by default |
-| `demo` *(default)* | Bootstrap Keycloak login + seed sample data, then exit | on by default; drop via `COMPOSE_PROFILES=app,portal` |
+| `demo` *(default)* | Bootstrap Keycloak login + seed sample data, then exit | on by default; drop it (keep the rest) with the "without the demo bootstrap" command above |
 | `notifications` | Kafka + email / websocket / Novu | `KAFKA_ENABLED=true docker compose --profile app --profile portal --profile demo --profile notifications up -d` |
 | `proxy` | Traefik reverse proxy | `docker compose --profile app --profile portal --profile demo --profile proxy up -d` |
 
