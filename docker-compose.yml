@@ -99,15 +99,24 @@ services:
             - ./opa:/etc/rules:ro
 
     keycloak:
-        image: quay.io/keycloak/keycloak:20.0.3
+        image: quay.io/keycloak/keycloak:26.6.1
         profiles: [keycloak]
         command: start-dev
         environment:
             KC_HEALTH_ENABLED: "true"
-            KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-            KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+            # KC 26 renamed the bootstrap-admin vars; the old KEYCLOAK_ADMIN[_PASSWORD]
+            # still work but log a deprecation warning.
+            KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+            KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+        # KC 25+ serves health/metrics on a dedicated management port (9000), not
+        # the main HTTP port. The 26.x image also ships no curl/wget, so probe the
+        # readiness endpoint over bash's /dev/tcp instead.
         healthcheck:
-            test: curl --fail http://localhost:8080/health/ready || exit 1
+            test:
+                - CMD
+                - bash
+                - -c
+                - 'exec 3<>/dev/tcp/localhost/9000 && printf "GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3 && grep -q "200 OK" <&3'
             interval: 10s
             retries: 10
             start_period: 5s
