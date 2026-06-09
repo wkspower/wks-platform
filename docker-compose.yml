@@ -140,6 +140,7 @@ services:
             # storage-api reaches the issuing engine over the Docker network (used
             # only when WKS_AUTH_MODE=dev-token; ignored in keycloak mode).
             - WKS_DEVTOKEN_ISSUER_URL=${WKS_DEVTOKEN_ISSUER_URL:-http://case-engine-rest-api:8081/dev-auth}
+            - WKS_CORS_ALLOWED_ORIGINS=${WKS_CORS_ALLOWED_ORIGINS}
             - MINIO_HOST_INTERNAL=${MINIO_HOST_INTERNAL}
             - MINIO_HOST_EXTERNAL=${MINIO_HOST_EXTERNAL}
             - MINIO_ROOT_USER=${MINIO_ROOT_USER}
@@ -201,6 +202,7 @@ services:
             # same from any container (used only when WKS_AUTH_MODE=dev-token).
             - WKS_DEVTOKEN_ISSUER_URL=${WKS_DEVTOKEN_ISSUER_URL:-http://case-engine-rest-api:8081/dev-auth}
             - OPA_URL=${OPA_URL}
+            - WKS_CORS_ALLOWED_ORIGINS=${WKS_CORS_ALLOWED_ORIGINS}
             # The pre-built v1.4.14 image bundles a Camunda 8 / Zeebe client that
             # can't reach a broker in Camunda 7 mode and reports health DOWN. The
             # client is mandatory in that image (can't be removed), so we just drop
@@ -225,7 +227,7 @@ services:
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
             - CAMUNDA_USERNAME=${CAMUNDA_USERNAME}
             - CAMUNDA_PASSWORD=${CAMUNDA_PASSWORD}
-            - KEYCLOAK_URL=${KEYCLOAK_TOKEN_URL}
+            - KEYCLOAK_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
             - WKS_CASE_API_URL=${WKS_CASE_API_URL}
             - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
             - DISABLE_BACKOFF_STRATEGY=${DISABLE_BACKOFF_STRATEGY}
