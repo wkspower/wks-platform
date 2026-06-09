@@ -12,6 +12,7 @@
 package com.wks.api.security.devtoken;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author wks
  */
 @Configuration
+// Requires spring-security-web, a {@code provided}-scope dependency of this library; consumers
+// that do not bundle it (e.g. the headless c7-external-tasks worker) must skip this config. The
+// condition is read from bytecode metadata so it never loads SecurityFilterChain directly.
+@ConditionalOnClass(SecurityFilterChain.class)
 @ConditionalOnProperty(name = "wks.auth.mode", havingValue = "dev-token")
 public class DevTokenSecurityConfig {
 
