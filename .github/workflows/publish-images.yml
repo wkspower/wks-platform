@@ -3,35 +3,35 @@ name: Publish Images
 # Reusable workflow: builds and pushes every service image to GHCR. Called by
 # release.yml (tag -> vX.Y.Z + latest) and build.yml (develop -> develop).
 #
-# Tagging follows docker/metadata-action conventions:
-#   - image_tag: the human/floating tag — `develop` (branch name) or `v1.4.14` (release).
-#   - sha-<short>: an immutable, commit-pinned tag added to EVERY build so a floating
-#     `develop` deploy can still be pinned/rolled back to an exact commit.
-#   - latest: added only when `latest: true` (releases), matching `flavor: latest=auto`
-#     (latest == newest release, never a dev branch).
+# Tagging is fully event-driven via docker/metadata-action — the caller no longer
+# passes a tag. For each image the action derives:
+#   - type=ref,event=branch -> the branch name (e.g. `develop`).
+#   - type=ref,event=tag    -> the raw git tag, leading `v` kept (e.g. `v1.4.14`),
+#     matching every existing ghcr.io/wkspower/*:vX.Y.Z image and the CONTRIBUTING.md
+#     "the tag name is the image tag" convention. (Deliberately NOT type=semver,
+#     which would strip the `v` and diverge.)
+#   - type=sha              -> an immutable, commit-pinned `sha-<short>` tag added to
+#     EVERY build so a floating `develop` deploy can still be pinned/rolled back.
+#   - flavor latest=auto    -> `latest` is applied automatically on tag pushes
+#     (releases) and never on branch pushes.
+#
+# So: a develop push -> `develop` + `sha-<short>`; a `v1.5.0` tag push ->
+# `v1.5.0` + `latest` + `sha-<short>`.
 #
 # Java service images build their own jars inside the Dockerfile from the reactor
 # root (context: ./apps/java). When `maven_revision` is provided it is passed as the
 # REVISION build-arg so the jar version matches the image tag; left empty the pom's
-# ${revision} default (dev SNAPSHOT) applies.
+# ${revision} default (dev SNAPSHOT) applies. The image tag keeps its leading `v`
+# while the jar version is bare (release.yml strips it), so the two stay in step.
 
 on:
   workflow_call:
     inputs:
-      image_tag:
-        description: "Primary tag for all images (e.g. v1.4.14 or develop)"
-        required: true
-        type: string
       maven_revision:
         description: "Maven -Drevision for Java images; empty = pom default (SNAPSHOT)"
         required: false
         type: string
         default: ""
-      latest:
-        description: "Also tag images `latest` (releases only)"
-        required: false
-        type: boolean
-        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -52,26 +52,65 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # --- Java services: build from the reactor root, stamp the version ---
+          - name: storage-api
+            context: ./apps/java
+            file: apps/java/services/storage-api/Dockerfile
+            revision: true
+          - name: case-engine-rest-api
+            context: ./apps/java
+            file: apps/java/services/case-engine-rest-api/Dockerfile
+            revision: true
+          - name: c7-external-tasks
+            context: ./apps/java
+            file: apps/java/services/c7-external-tasks/Dockerfile
+            revision: true
+          - name: demo-data-loader
+            context: ./apps/java
+            file: apps/java/services/demo-data-loader/Dockerfile
+            revision: true
+          # --- OPA policy bundle ---
+          - name: opa
+            context: ./opa
+            file: opa/Dockerfile
+          # --- React portal (dist pre-built in the gated step below) ---
+          - name: case-portal
+            context: ./apps/react/case-portal
+            file: apps/react/case-portal/deployments/Dockerfile
+            portal: true
+          # --- Node services: build from their own dirs, no pre-build ---
+          - name: websocket-publisher
+            context: ./apps/node/websocket-publisher
+            file: apps/node/websocket-publisher/Dockerfile
+          - name: novu-publisher
+            context: ./apps/node/novu-publisher
+            file: apps/node/novu-publisher/Dockerfile
+          - name: email-sender
+            context: ./apps/node/email-sender
+            file: apps/node/email-sender/Dockerfile
 
     steps:
       - uses: actions/checkout@v4
 
-      # Immutable commit-pinned tag (docker/metadata-action type=sha format: sha-<7>).
-      - name: Compute sha tag
-        id: tags
-        run: echo "sha=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
       # The case-portal image's Dockerfile copies a pre-built `dist`, so the portal
-      # must be built here before the image build.
+      # must be built here before the image build. Only the case-portal matrix leg
+      # needs Node.
       - name: Set up Node
+        if: matrix.portal
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install dependencies for case-portal
+        if: matrix.portal
         run: yarn --cwd apps/react/case-portal install
 
       - name: Build for case-portal
+        if: matrix.portal
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
@@ -99,125 +138,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Each image is pushed as: <image_tag> + sha-<short> (+ latest on releases).
-      # The latest line resolves to "" off-release; build-push-action ignores blank tags.
+      # Event-driven tags/labels for this image. See header for the full scheme.
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_BASE }}/${{ matrix.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+          flavor: |
+            latest=auto
 
-      # --- Java services: build from the reactor root, stamp the version ---
-      - name: Build and push storage-api
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/java
-          file: apps/java/services/storage-api/Dockerfile
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: true
-          build-args: |
-            REVISION=${{ inputs.maven_revision }}
-          tags: |
-            ${{ env.IMAGE_BASE }}/storage-api:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/storage-api:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/storage-api:latest', env.IMAGE_BASE) || '' }}
-
-      - name: Build and push case-engine-rest-api
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/java
-          file: apps/java/services/case-engine-rest-api/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          build-args: |
-            REVISION=${{ inputs.maven_revision }}
-          tags: |
-            ${{ env.IMAGE_BASE }}/case-engine-rest-api:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/case-engine-rest-api:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/case-engine-rest-api:latest', env.IMAGE_BASE) || '' }}
-
-      - name: Build and push c7-external-tasks
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/java
-          file: apps/java/services/c7-external-tasks/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          build-args: |
-            REVISION=${{ inputs.maven_revision }}
-          tags: |
-            ${{ env.IMAGE_BASE }}/c7-external-tasks:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/c7-external-tasks:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/c7-external-tasks:latest', env.IMAGE_BASE) || '' }}
-
-      - name: Build and push demo-data-loader
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/java
-          file: apps/java/services/demo-data-loader/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          build-args: |
-            REVISION=${{ inputs.maven_revision }}
-          tags: |
-            ${{ env.IMAGE_BASE }}/demo-data-loader:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/demo-data-loader:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/demo-data-loader:latest', env.IMAGE_BASE) || '' }}
-
-      # --- OPA policy bundle ---
-      - name: Build and push opa
-        uses: docker/build-push-action@v6
-        with:
-          context: ./opa
-          file: opa/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.IMAGE_BASE }}/opa:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/opa:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/opa:latest', env.IMAGE_BASE) || '' }}
-
-      # --- React portal (dist built above) ---
-      - name: Build and push case-portal
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/react/case-portal
-          file: apps/react/case-portal/deployments/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.IMAGE_BASE }}/case-portal:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/case-portal:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/case-portal:latest', env.IMAGE_BASE) || '' }}
-
-      # --- Node services ---
-      - name: Build and push websocket-publisher
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/node/websocket-publisher
-          file: apps/node/websocket-publisher/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.IMAGE_BASE }}/websocket-publisher:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/websocket-publisher:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/websocket-publisher:latest', env.IMAGE_BASE) || '' }}
-
-      - name: Build and push novu-publisher
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/node/novu-publisher
-          file: apps/node/novu-publisher/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.IMAGE_BASE }}/novu-publisher:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/novu-publisher:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/novu-publisher:latest', env.IMAGE_BASE) || '' }}
-
-      - name: Build and push email-sender
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/node/email-sender
-          file: apps/node/email-sender/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.IMAGE_BASE }}/email-sender:${{ inputs.image_tag }}
-            ${{ env.IMAGE_BASE }}/email-sender:${{ steps.tags.outputs.sha }}
-            ${{ inputs.latest && format('{0}/email-sender:latest', env.IMAGE_BASE) || '' }}
+          build-args: ${{ matrix.revision && format('REVISION={0}', inputs.maven_revision) || '' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
