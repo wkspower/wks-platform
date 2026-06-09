@@ -32,7 +32,7 @@ name: wks-platform
 
 # Image/build/port for the single env-driven case-engine-rest-api service.
 x-case-engine-rest-api: &case-engine-rest-api
-    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-develop}
     build:
         context: apps/java
         dockerfile: services/case-engine-rest-api/Dockerfile
@@ -41,7 +41,7 @@ x-case-engine-rest-api: &case-engine-rest-api
 
 # Image/build/port for the single env-driven storage-api service.
 x-storage-api: &storage-api
-    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-v1.4.14}
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-develop}
     build:
         context: apps/java
         dockerfile: services/storage-api/Dockerfile
@@ -203,10 +203,10 @@ services:
             - WKS_DEVTOKEN_ISSUER_URL=${WKS_DEVTOKEN_ISSUER_URL:-http://case-engine-rest-api:8081/dev-auth}
             - OPA_URL=${OPA_URL}
             - WKS_CORS_ALLOWED_ORIGINS=${WKS_CORS_ALLOWED_ORIGINS}
-            # The pre-built v1.4.14 image bundles a Camunda 8 / Zeebe client that
-            # can't reach a broker in Camunda 7 mode and reports health DOWN. The
-            # client is mandatory in that image (can't be removed), so we just drop
-            # its health contributor. Harmless on source-built images (no Zeebe).
+            # Legacy released images (the Camunda 8 era, e.g. v1.4.x) bundle a
+            # Zeebe client that can't reach a broker in Camunda 7 mode and reports
+            # health DOWN; the client is mandatory there, so we drop its health
+            # contributor. Harmless on develop/source-built images (no Zeebe).
             - MANAGEMENT_HEALTH_ZEEBE_ENABLED=false
         depends_on:
             # Optional: only enforced when the infra profile is also active.
@@ -218,7 +218,7 @@ services:
                 required: false
 
     c7-external-tasks:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-develop}
         profiles: [camunda]
         build:
             context: apps/java
@@ -245,7 +245,7 @@ services:
     # profile: portal (enabled by default via COMPOSE_PROFILES in .env)
 
     case-portal:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-portal:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-portal:${WKS_VERSION:-develop}
         profiles: [portal]
         build:
             context: apps/react/case-portal
@@ -296,7 +296,7 @@ services:
             - zookeeper
 
     email-sender:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/email-sender:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/email-sender:${WKS_VERSION:-develop}
         profiles: [notifications]
         build:
             context: apps/node/email-sender
@@ -313,7 +313,7 @@ services:
             - kafka
 
     websocket-publisher:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/websocket-publisher:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/websocket-publisher:${WKS_VERSION:-develop}
         profiles: [notifications]
         build:
             context: apps/node/websocket-publisher
@@ -327,7 +327,7 @@ services:
             - kafka
 
     novu-publisher:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/novu-publisher:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/novu-publisher:${WKS_VERSION:-develop}
         profiles: [notifications]
         build:
             context: apps/node/novu-publisher
@@ -378,7 +378,7 @@ services:
     # but then the portal has no realm/user to log in against.
 
     demo-data-loader:
-        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/demo-data-loader:${WKS_VERSION:-v1.4.14}
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/demo-data-loader:${WKS_VERSION:-develop}
         profiles: [demo]
         build:
             context: apps/java
