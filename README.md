@@ -115,7 +115,6 @@ no Keycloak), authorization off, no workflow engine. Build from source
 COMPOSE_PROFILES=app,portal \
 WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
 WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
-KEYCLOAK_URL=http://localhost:8081/dev-auth \
 REACT_APP_AUTH_MODE=dev-token REACT_APP_AUTH_ISSUER_URL=http://localhost:8081/dev-auth \
 docker compose up -d --build
 ```
@@ -127,20 +126,17 @@ also pre-documented in `.env-sample`.
 
 #### Add MinIO-free attachments (filesystem storage)
 
-To also run attachments without MinIO, add the `storage-fs` profile and the
-filesystem driver. One catch: `storage-api` validates bearer tokens by fetching
-the dev-issuer JWKS **over the Docker network**, so `KEYCLOAK_URL` must be the
-engine's **service name** (`case-engine-rest-api`), not `localhost` — otherwise
-storage-api looks for the issuer inside its own container and you get `401` /
-connection-refused on `:8085`. The browser still mints via `localhost`
-(`REACT_APP_AUTH_ISSUER_URL`); the token's `iss` is not re-checked, only its
-signature, so the two URLs can differ.
+To also run attachments without MinIO, just add the `storage-fs` profile and the
+filesystem driver — no extra issuer wiring needed. In dev-token mode every backend
+defaults `WKS_DEVTOKEN_ISSUER_URL` to the engine's compose service name, so
+`storage-api` validates tokens against the engine over the Docker network out of
+the box (the browser keeps minting via `localhost`; only the signature is checked,
+not the `iss`):
 
 ```bash
 COMPOSE_PROFILES=app,portal,storage-fs \
 WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
 WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
-KEYCLOAK_URL=http://case-engine-rest-api:8081/dev-auth \
 REACT_APP_AUTH_MODE=dev-token REACT_APP_AUTH_ISSUER_URL=http://localhost:8081/dev-auth \
 DRIVER_STORAGE_FACTORYCLASS=filesystem REACT_APP_STORAGE_MODE=filesystem \
 docker compose up -d --build

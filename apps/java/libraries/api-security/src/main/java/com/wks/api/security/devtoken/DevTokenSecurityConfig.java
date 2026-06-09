@@ -53,10 +53,17 @@ public class DevTokenSecurityConfig {
 	 * {@code /dev-auth} issuer. Replaces the {@code KeycloakAuthnConfig} bean
 	 * (which is inactive in dev-token mode) so the main filter chain autowires a
 	 * single resolver without branching on the auth mode.
+	 *
+	 * <p>
+	 * Binds {@code wks.auth.devtoken.issuer-uri} (its own key, distinct from the
+	 * Keycloak {@code wks.auth.issuer-uri}) because validation fetches the JWKS over
+	 * the network: in a multi-container deployment a non-issuing service (e.g.
+	 * storage-api) must reach the issuing engine by its service name, not localhost.
+	 * The default lives in {@code api-security-defaults.properties}.
 	 */
 	@Bean
 	public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
-			@Value("${wks.auth.issuer-uri}") String issuerUri) {
+			@Value("${wks.auth.devtoken.issuer-uri}") String issuerUri) {
 		return new JwksIssuerAuthenticationManagerResolver(issuerUri);
 	}
 
