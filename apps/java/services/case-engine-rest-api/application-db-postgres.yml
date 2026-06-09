@@ -12,7 +12,8 @@ spring:
     jdbcUrl: ${WKS_DB_URL:jdbc:postgresql://localhost:5432/wks}
     driver-class-name: org.postgresql.Driver
     username: ${WKS_DB_USER:wks}
-    password: ${WKS_DB_PASSWORD:wks00}
+    # No committed default: the Postgres password must be supplied via WKS_DB_PASSWORD.
+    password: ${WKS_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: ${WKS_DDL_AUTO:update}
