@@ -56,7 +56,7 @@ public class DevTokenSecurityConfig {
 	 */
 	@Bean
 	public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
-			@Value("${wks.auth.issuer-uri:${keycloak.url:http://localhost:8081/dev-auth}}") String issuerUri) {
+			@Value("${wks.auth.issuer-uri}") String issuerUri) {
 		return new JwksIssuerAuthenticationManagerResolver(issuerUri);
 	}
 

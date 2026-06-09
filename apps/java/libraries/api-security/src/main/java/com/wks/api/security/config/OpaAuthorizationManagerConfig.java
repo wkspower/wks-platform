@@ -40,10 +40,10 @@ public class OpaAuthorizationManagerConfig {
 
 	@Bean
 	public AuthorizationManager<RequestAuthorizationContext> authorizationManager(
-			@Value("${opa.url:http://localhost:8181/v1/data/wks/authz/allow}") String opaUrl,
+			@Value("${opa.url}") String opaUrl,
 			@Value("${wks.api.actuator.enabled:true}") boolean actuatorEnabled,
 			@Value("${wks.api.swagger.enabled:true}") boolean swaggerEnabled,
-			@Value("${wks.auth.tenant-claim:org}") String tenantClaim) {
+			@Value("${wks.tenancy.claim-name}") String tenantClaim) {
 
 		return new OpenPolicyAuthzEnforcer(OpenPolicyAuthzEnforcerConfig.builder()
 				.opaAuthURL(opaUrl)

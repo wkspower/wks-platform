@@ -27,12 +27,9 @@ wks.bpm.engine: ${WKS_BPM_ENGINE:camunda7}
 wks.tenancy.multi-tenant: ${WKS_TENANCY_MULTI_TENANT:true}
 wks.seed.enabled: ${WKS_SEED_ENABLED:false}
 
-# api-security defaults (kept out of the Java @Value sites; override via env).
-# JWT claim carrying the tenant id, read by BearerTokenHandlerInputResolver.
-wks.tenancy.claim-name: ${WKS_TENANCY_CLAIM_NAME:org}
-# Dev-token issuer defaults (only consumed when wks.auth.mode=dev-token).
-wks.auth.devtoken.roles: ${WKS_DEVTOKEN_ROLES:mgmt_case_def,mgmt_record_type,mgmt_form,client_case,client_task,client_record}
-wks.auth.devtoken.allowed-origins: ${WKS_DEVTOKEN_ALLOWED_ORIGINS:http://localhost:3001}
+# api-security defaults (issuer-uri, opa.url, tenant claim, dev-token roles/origins)
+# live in the api-security library's api-security-defaults.properties — overridable
+# here or via env. The auth-dev profile fragment overrides wks.auth.issuer-uri.
 
 wks.bpm.engine.camunda.version: ${CAMUNDA_VERSION:camunda7}
 
@@ -44,11 +41,6 @@ spring.data.mongodb.database.min-pool-size: 0
 spring.data.mongodb.database.max-pool-size: 5
 spring.data.mongodb.database.max-connection-idle-time: 3000
 spring.data.mongodb.database.max-connection-life-time: 3000
-
-opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-# Unified issuer URL consumed by both auth modes (keycloak + dev-token).
-# Sourced from the legacy KEYCLOAK_URL env var for backward-compatible compose/.env.
-wks.auth.issuer-uri: ${KEYCLOAK_URL:http://localhost:8082}
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false

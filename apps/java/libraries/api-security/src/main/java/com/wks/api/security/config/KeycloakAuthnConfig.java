@@ -34,8 +34,9 @@ import jakarta.servlet.http.HttpServletRequest;
  * {@code SecurityFilterChain} autowires it without a branch.
  *
  * <p>
- * The issuer URL is unified under {@code wks.auth.issuer-uri}; it falls back to
- * the legacy {@code keycloak.url} key for backward compatibility.
+ * The issuer URL is unified under {@code wks.auth.issuer-uri}; its default lives
+ * in the library {@code api-security-defaults.properties} (sourced from the
+ * {@code KEYCLOAK_URL} env var) so it is not hardcoded here.
  *
  * @author wks
  */
@@ -45,7 +46,7 @@ public class KeycloakAuthnConfig {
 
 	@Bean
 	public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
-			@Value("${wks.auth.issuer-uri:${keycloak.url:http://localhost:8082}}") String issuerUri) {
+			@Value("${wks.auth.issuer-uri}") String issuerUri) {
 		return new JwksIssuerAuthenticationManagerResolver(issuerUri);
 	}
 

@@ -14,18 +14,9 @@ management.health.reds.enabled: false
 management.endpoints.web.exposure.include: health,info 
 management.endpoint.health.show-details: never
 
-opa.url: ${OPA_URL:http://localhost:8181/v1/data/wks/authz/allow}
-# Unified issuer URL consumed by both auth modes (keycloak + dev-token).
-# Sourced from the legacy KEYCLOAK_URL env var for backward-compatible compose/.env.
-wks.auth.issuer-uri: ${KEYCLOAK_URL:http://localhost:8082}
-
-# api-security defaults (kept out of the Java @Value sites; override via env).
-# JWT claim carrying the tenant id, read by BearerTokenHandlerInputResolver.
-wks.tenancy.claim-name: ${WKS_TENANCY_CLAIM_NAME:org}
-# Dev-token issuer defaults (storage-api scans api-security, so it instantiates the
-# dev-token controller when wks.auth.mode=dev-token, e.g. the storage-fs recipe).
-wks.auth.devtoken.roles: ${WKS_DEVTOKEN_ROLES:mgmt_case_def,mgmt_record_type,mgmt_form,client_case,client_task,client_record}
-wks.auth.devtoken.allowed-origins: ${WKS_DEVTOKEN_ALLOWED_ORIGINS:http://localhost:3001}
+# api-security defaults (issuer-uri, opa.url, tenant claim, dev-token roles/origins)
+# live in the api-security library's api-security-defaults.properties — overridable
+# here or via env.
 
 # minio
 driver.storage.factoryclass: minio
