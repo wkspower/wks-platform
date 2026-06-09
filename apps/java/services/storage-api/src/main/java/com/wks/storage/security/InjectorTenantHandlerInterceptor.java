@@ -35,7 +35,7 @@ public class InjectorTenantHandlerInterceptor implements HandlerInterceptor {
 	@Autowired
 	private SecurityContextTenantHolder tenantHolder;
 
-	@Value("${wks.tenancy.claim-name:org}")
+	@Value("${wks.tenancy.claim-name}")
 	private String tenantClaimName;
 
 	@Override

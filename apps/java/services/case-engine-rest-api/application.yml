@@ -27,6 +27,13 @@ wks.bpm.engine: ${WKS_BPM_ENGINE:camunda7}
 wks.tenancy.multi-tenant: ${WKS_TENANCY_MULTI_TENANT:true}
 wks.seed.enabled: ${WKS_SEED_ENABLED:false}
 
+# api-security defaults (kept out of the Java @Value sites; override via env).
+# JWT claim carrying the tenant id, read by BearerTokenHandlerInputResolver.
+wks.tenancy.claim-name: ${WKS_TENANCY_CLAIM_NAME:org}
+# Dev-token issuer defaults (only consumed when wks.auth.mode=dev-token).
+wks.auth.devtoken.roles: ${WKS_DEVTOKEN_ROLES:mgmt_case_def,mgmt_record_type,mgmt_form,client_case,client_task,client_record}
+wks.auth.devtoken.allowed-origins: ${WKS_DEVTOKEN_ALLOWED_ORIGINS:http://localhost:3001}
+
 wks.bpm.engine.camunda.version: ${CAMUNDA_VERSION:camunda7}
 
 camunda.bpm.client.base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}

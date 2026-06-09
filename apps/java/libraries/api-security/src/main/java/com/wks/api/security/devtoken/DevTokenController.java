@@ -66,9 +66,8 @@ public class DevTokenController {
 	private final List<String> allowedOrigins;
 
 	public DevTokenController(RSAKey devTokenRsaKey,
-			@Value("${wks.auth.devtoken.roles:"
-					+ "mgmt_case_def,mgmt_record_type,mgmt_form,client_case,client_task,client_record}") String defaultRoles,
-			@Value("${wks.auth.devtoken.allowed-origins:http://localhost:3001}") String allowedOrigins) {
+			@Value("${wks.auth.devtoken.roles}") String defaultRoles,
+			@Value("${wks.auth.devtoken.allowed-origins}") String allowedOrigins) {
 		this.rsaKey = devTokenRsaKey;
 		this.defaultRoles = defaultRoles;
 		this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
