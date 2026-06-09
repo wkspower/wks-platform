@@ -72,3 +72,18 @@ jobs:
           export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
           export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL }}"
           yarn --cwd apps/react/case-portal build
+
+  # On develop only: republish the floating :develop image set so `docker compose up`
+  # (default WKS_VERSION=develop) pulls a build that matches develop source. Releases
+  # are pinned via tags (release.yml). maven_revision empty -> jars keep the SNAPSHOT.
+  publish-develop:
+    if: github.ref == 'refs/heads/develop'
+    needs: [build-java, build-react]
+    uses: ./.github/workflows/publish-images.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      image_tag: develop
+      maven_revision: ""
+    secrets: inherit

@@ -4,12 +4,18 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wks</groupId>
     <artifactId>platform</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <name>wks-platform</name>
 
     <properties>
+        <!-- CI-friendly version: single source of truth for the platform version.
+             Defaults to the develop dev line; CI overrides it at release time with
+             `-Drevision=X.Y.Z` so the same version lands in the jars and the image tag.
+             flatten-maven-plugin (below) resolves ${revision} in the installed/published poms. -->
+        <revision>1.5.0-SNAPSHOT</revision>
+
         <project.javadoc.outputDirectory>website/static/javadoc</project.javadoc.outputDirectory>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -129,6 +135,39 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <!-- Flattens the installed/published pom so consumers get a self-contained
+                 artifact: ${revision} is resolved to a concrete version EVERYWHERE,
+                 including inter-module (com.wks) dependency versions, and the BOM-managed
+                 versions are inlined. `oss` mode (vs resolveCiFriendliesOnly) is required
+                 here because resolveCiFriendliesOnly leaves sibling-dep versions as the
+                 literal ${revision}, which breaks anyone consuming the pom outside the
+                 reactor (e.g. the published case-engine-rest-client). Inherited by every
+                 module; matches the GitHub Packages target in <distributionManagement>. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>oss</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

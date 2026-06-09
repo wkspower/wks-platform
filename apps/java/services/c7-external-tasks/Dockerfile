@@ -7,8 +7,11 @@
 FROM maven:3.9-amazoncorretto-21 AS build
 WORKDIR /build
 COPY . .
+# Optional release stamp: CI passes --build-arg REVISION=X.Y.Z so the jar version
+# matches the image tag. Unset (dev/local builds) = the pom's ${revision} default.
+ARG REVISION=
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -q clean package -pl services/c7-external-tasks -am -DskipTests
+    mvn -B -q clean package -pl services/c7-external-tasks -am -DskipTests ${REVISION:+-Drevision=$REVISION}
 
 # Stage 2: runtime image (matches the jar's Java 21 target).
 FROM amazoncorretto:21
