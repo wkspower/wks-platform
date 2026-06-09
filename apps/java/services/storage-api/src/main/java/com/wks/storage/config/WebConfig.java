@@ -26,9 +26,10 @@ public class WebConfig implements WebMvcConfigurer {
 	@Autowired
 	private InjectorTenantHandlerInterceptor tenantHandler;
 
-	// Comma-separated origin allow-list for the case portal. Defaults to the
-	// local portal origin; override via WKS_CORS_ALLOWED_ORIGINS per environment.
-	@Value("${WKS_CORS_ALLOWED_ORIGINS:http://localhost:3001}")
+	// Comma-separated origin allow-list for the case portal. The default lives in
+	// the api-security library's api-security-defaults.properties (env-overridable
+	// via WKS_CORS_ALLOWED_ORIGINS), so it isn't hardcoded here.
+	@Value("${wks.cors.allowed-origins}")
 	private String[] allowedOrigins;
 
 	@Override
