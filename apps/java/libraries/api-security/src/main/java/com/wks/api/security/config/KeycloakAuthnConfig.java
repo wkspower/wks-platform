@@ -12,6 +12,7 @@
 package com.wks.api.security.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +42,11 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author wks
  */
 @Configuration
+// spring-security is a {@code provided}-scope dependency of this library, so consumers that do
+// not bundle it (e.g. the headless c7-external-tasks worker, which only needs the tenant holder)
+// must not load this config. {@code @ConditionalOnClass} is read from bytecode metadata, so it
+// skips the class without triggering NoClassDefFoundError on AuthenticationManagerResolver.
+@ConditionalOnClass(AuthenticationManagerResolver.class)
 @ConditionalOnProperty(name = "wks.auth.mode", havingValue = "keycloak", matchIfMissing = true)
 public class KeycloakAuthnConfig {
 

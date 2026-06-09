@@ -12,6 +12,7 @@
 package com.wks.api.security.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,10 @@ import com.wks.api.security.OpenPolicyAuthzEnforcerConfig;
  * @author wks
  */
 @Configuration
+// Requires spring-security, a {@code provided}-scope dependency of this library. Consumers that
+// do not bundle it (e.g. the headless c7-external-tasks worker) must skip this config; the
+// condition is read from bytecode metadata so it never loads AuthorizationManager directly.
+@ConditionalOnClass(AuthorizationManager.class)
 @ConditionalOnProperty(name = "wks.authz.opa.enabled", havingValue = "true", matchIfMissing = true)
 public class OpaAuthorizationManagerConfig {
 

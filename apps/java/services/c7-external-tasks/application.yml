@@ -17,8 +17,15 @@ camunda.bpm.client:
   base-url: ${CAMUNDA_BASE_URL:http://localhost:8080/engine-rest}
   disable-backoff-strategy: ${DISABLE_BACKOFF_STRATEGY:true}
   max-tasks: 1
-  async-response-timeout: 120000
-  lock-duration: 500
+  # Long-poll hold time. Caps the worst-case pickup latency if the engine's fetch-and-lock
+  # request is not woken for a newly-created task (or the long-poll connection goes stale):
+  # the client re-polls at most every async-response-timeout. Keep low (10s) so a missed
+  # notification costs seconds, not minutes, and stale connections recycle quickly.
+  async-response-timeout: ${CAMUNDA_ASYNC_RESPONSE_TIMEOUT:10000}
+  # Time a fetched task stays locked while the worker runs. Must exceed real worker execution
+  # (Keycloak token + case-api HTTP round-trips, slow on a cold first call). 500ms was far too
+  # short, causing the lock to expire mid-execution -> complete() fails -> retry loop.
+  lock-duration: ${CAMUNDA_LOCK_DURATION:60000}
   basic-auth:
     username: ${CAMUNDA_USERNAME:demo}
     password: ${CAMUNDA_PASSWORD:demo}
