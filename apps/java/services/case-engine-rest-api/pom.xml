@@ -45,7 +45,16 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
-        		
+
+        <!-- PostgreSQL JDBC driver for the db-postgres datastore profile.
+             Version managed by the spring-boot-dependencies BOM. Runtime scope:
+             only loaded when SPRING_PROFILES_ACTIVE=db-postgres selects the JPA path. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
