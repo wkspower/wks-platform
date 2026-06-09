@@ -24,7 +24,5 @@ jobs:
       contents: read
       packages: write
     with:
-      image_tag: ${{ github.ref_name }}
       maven_revision: ${{ needs.vars.outputs.revision }}
-      latest: true
     secrets: inherit
