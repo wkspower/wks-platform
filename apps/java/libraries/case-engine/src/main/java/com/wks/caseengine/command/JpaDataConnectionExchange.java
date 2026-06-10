@@ -1,31 +1,74 @@
 package com.wks.caseengine.command;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.form.Form;
+import com.wks.caseengine.form.FormRepository;
+import com.wks.caseengine.queue.Queue;
+import com.wks.caseengine.queue.QueueRepository;
+import com.wks.caseengine.repository.Repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * JPA strategy for the data import seam. Persists the canonical
+ * {@code form}/{@code caseDefinition}/{@code queue} collections through the JPA
+ * repositories, so the same {@link DataImportService} path that backs the REST
+ * data-import endpoint also backs the JPA/H2 backend (e.g. the startup seeder in
+ * minimal mode). Selected when {@code database.type=jpa}; the Mongo counterpart
+ * is {@link MongoDataConnectionExchange}.
+ */
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class JpaDataConnectionExchange implements DataConnectionExchange {
 
-	  @PersistenceContext
-	    private EntityManager entityManager;
+	@Autowired
+	private CaseDefinitionRepository caseDefinitionRepository;
 
-	    @Override
-	    public JsonObject exportFromDatabase(Gson gson) {
-	    	throw new RuntimeException("not implemented");
-	    }
+	@Autowired
+	private FormRepository formRepository;
 
-	    @Override
-	    @Transactional
-	    public void importToDatabase(JsonObject data, Gson gson) {
-	    	throw new RuntimeException("not implemented");
-	    }
+	@Autowired
+	private QueueRepository queueRepository;
+
+	@Override
+	public JsonObject exportFromDatabase(Gson gson) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	@Transactional
+	public void importToDatabase(JsonObject data, Gson gson) {
+		// Forms first (case definitions reference a formKey), then definitions, then queues.
+		importEach(data, gson, "form", Form.class, formRepository);
+		importEach(data, gson, "caseDefinition", CaseDefinition.class, caseDefinitionRepository);
+		importEach(data, gson, "queue", Queue.class, queueRepository);
+	}
+
+	private <T> void importEach(JsonObject data, Gson gson, String key, Class<T> type, Repository<T> repository) {
+		JsonElement element = data.get(key);
+		if (element == null || !element.isJsonArray()) {
+			return;
+		}
+
+		JsonArray array = element.getAsJsonArray();
+		for (JsonElement item : array) {
+			try {
+				repository.save(gson.fromJson(item, type));
+			} catch (Exception e) {
+				log.warn("Import: failed to insert one {} record: {}", key, e.getMessage());
+			}
+		}
+	}
 
 }

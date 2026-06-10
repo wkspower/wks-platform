@@ -2,6 +2,9 @@
 target
 dist
 
+# Maven CI-friendly versions: flatten-maven-plugin output (transient build artifact)
+.flattened-pom.xml
+
 # Created by https://www.toptal.com/developers/gitignore/api/eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=eclipse
 

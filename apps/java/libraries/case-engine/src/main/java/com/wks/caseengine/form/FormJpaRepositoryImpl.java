@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Repository
+@org.springframework.transaction.annotation.Transactional
 @ConditionalOnProperty(name = "database.type", havingValue = "jpa", matchIfMissing = false)
 public class FormJpaRepositoryImpl implements FormRepository {
 

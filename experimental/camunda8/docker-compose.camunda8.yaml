@@ -148,7 +148,7 @@ services:
 
   case-engine-rest-api:
     # Overrides the root service to talk to Camunda 8 instead of 7 (pull-only).
-    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-v1.4.14}
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-develop}
     ports:
       - 8081:8081
     environment:
@@ -176,7 +176,7 @@ services:
 
   c8-external-tasks:
     # No source dir / not a Maven module — pull-only (see README).
-    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c8-external-tasks:${WKS_VERSION:-v1.4.14}
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c8-external-tasks:${WKS_VERSION:-develop}
     environment:
       - CAMUNDA8_ZEEBE_GATEWAY_ADDRESS=${CAMUNDA8_ZEEBE_GATEWAY_ADDRESS}
       - KEYCLOAK_URL=${KEYCLOAK_TOKEN_URL}

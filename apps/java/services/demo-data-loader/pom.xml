@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>demo-data-loader</artifactId>
@@ -14,8 +14,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.keycloak</groupId>
+			<!-- The standalone admin client tracks its own patch line (26.0.x),
+			     decoupled from the server version; compatible across 26.x. -->
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>20.0.0</version>
+			<version>26.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

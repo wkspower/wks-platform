@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -45,7 +45,16 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
-        		
+
+        <!-- PostgreSQL JDBC driver for the db-postgres datastore profile.
+             Version managed by the spring-boot-dependencies BOM. Runtime scope:
+             only loaded when SPRING_PROFILES_ACTIVE=db-postgres selects the JPA path. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -71,19 +80,34 @@
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>case-engine</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${revision}</version>
+		</dependency>
+
+		<!-- BPM engine modules this service supports. bpm-engine-client no longer
+		     pulls a concrete engine transitively, so each engine is declared here;
+		     wks.bpm.engine selects which one activates (camunda7 default, or none). -->
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>c7-client</artifactId>
+			<version>${revision}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>noop-bpm-engine-client</artifactId>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>api-security</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>case-engine-rest-dto</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>

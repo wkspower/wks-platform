@@ -105,6 +105,16 @@ public class MongoDataConnectionExchange implements DataConnectionExchange {
 							.collect(Collectors.toList()));
 		}
 
+		// Queues
+		JsonElement queuesJson = data.get("queue");
+		if (queuesJson != null) {
+			List<JsonObject> queues = gson.fromJson(queuesJson, new TypeToken<List<JsonObject>>() {
+			}.getType());
+			connection.getQueueCollection()
+					.insertMany(queues.stream().map(o -> new org.bson.json.JsonObject(gson.toJson(o)))
+							.collect(Collectors.toList()));
+		}
+
 		// Records Types
 		JsonElement recordTypesJson = data.get("recordType");
 		if (recordTypesJson != null) {

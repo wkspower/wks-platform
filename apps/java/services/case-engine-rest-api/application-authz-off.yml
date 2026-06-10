@@ -1,0 +1,4 @@
+# Concern fragment — Authorization: OPA off (no OPA container). Authenticated
+# requests are permitted (PermitAuthenticatedAuthorizationManager); authentication
+# stays enforced by the resource server.
+wks.authz.opa.enabled: false

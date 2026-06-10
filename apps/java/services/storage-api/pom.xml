@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>storage-api</artifactId>
@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>api-security</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>
@@ -49,6 +49,18 @@
 			<groupId>io.minio</groupId>
 			<artifactId>minio</artifactId>
 			<version>8.6.0</version>
+		</dependency>
+
+		<!-- minio 8.6.0 transitively pulls okhttp 5.x, whose JVM classes live in
+		     the okhttp-jvm artifact declared only via Gradle module metadata.
+		     Maven ignores that metadata and resolves only the okhttp stub jar,
+		     so the minio driver fails to boot (NoClassDefFoundError). Pin okhttp
+		     to the last single-jar 4.x, which is Maven-friendly and API-compatible
+		     with minio 8.6.0. -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.12.0</version>
 		</dependency>
 		
 		<dependency>

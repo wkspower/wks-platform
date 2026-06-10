@@ -1,0 +1,4 @@
+# Concern fragment — Tenancy: single tenant (no JWT org -> default schema/db).
+# wks.tenancy.claim-name defaults to "org" via api-security-defaults.properties.
+wks.tenancy.multi-tenant: false
+wks.tenancy.default-tenant: ${WKS_TENANCY_DEFAULT_TENANT:public}

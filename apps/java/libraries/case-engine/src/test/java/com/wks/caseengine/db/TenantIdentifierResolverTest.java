@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.hibernate.cfg.AvailableSettings;
@@ -15,28 +14,30 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.caseengine.tenancy.TenantResolver;
 
 @ExtendWith(MockitoExtension.class)
 public class TenantIdentifierResolverTest {
 
     @Mock
-    private SecurityContextTenantHolder holder;
+    private TenantResolver tenantResolver;
 
     @InjectMocks
     private TenantIdentifierResolver resolver;
 
     @Test
     void shouldReturnTenantIdWhenPresent() {
-        when(holder.getTenantId()).thenReturn(Optional.of("tenant_123"));
+        // The JPA resolver delegates to the non-throwing resolveTenantOrDefault()
+        // so Hibernate's bootstrap/DDL calls (no request context) never fail closed.
+        when(tenantResolver.resolveTenantOrDefault()).thenReturn("tenant_123");
 
         String tenantId = resolver.resolveCurrentTenantIdentifier();
         assertEquals("tenant_123", tenantId);
     }
 
     @Test
-    void shouldReturnPublicWhenNoTenantIdIsPresent() {
-        when(holder.getTenantId()).thenReturn(Optional.empty());
+    void shouldReturnResolvedTenantFromStrategy() {
+        when(tenantResolver.resolveTenantOrDefault()).thenReturn("public");
 
         String tenantId = resolver.resolveCurrentTenantIdentifier();
         assertEquals("public", tenantId);

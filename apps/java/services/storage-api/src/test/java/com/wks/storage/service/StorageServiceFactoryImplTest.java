@@ -34,6 +34,9 @@ public class StorageServiceFactoryImplTest {
 	@Mock
 	private ServiceFactory digitalOcean;
 
+	@Mock
+	private ServiceFactory filesystem;
+
 	@Test
 	public void shouldCreateFactoryForMinioDriver() {
 		ServiceFactory factory = storageServiceFactory.getFactory("minio");
@@ -46,6 +49,13 @@ public class StorageServiceFactoryImplTest {
 		ServiceFactory factory = storageServiceFactory.getFactory("do");
 
 		assertSame(factory, digitalOcean);
+	}
+
+	@Test
+	public void shouldCreateFactoryForFilesystemDriver() {
+		ServiceFactory factory = storageServiceFactory.getFactory("filesystem");
+
+		assertSame(factory, filesystem);
 	}
 
 	@Test
