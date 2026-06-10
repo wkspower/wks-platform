@@ -123,7 +123,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		ClientRepresentation externalTasksClient = new ClientRepresentation();
 		externalTasksClient.setClientId(externalTasksClientId);
 		externalTasksClient.setSecret(externalTasksSecret);
-		externalTasksClient.setPublicClient(true);
+		externalTasksClient.setPublicClient(false);
 		externalTasksClient.setProtocol("openid-connect");
 		externalTasksClient.setDirectAccessGrantsEnabled(true);
 		externalTasksClient.setStandardFlowEnabled(true);
@@ -140,7 +140,7 @@ public class KeycloakDataImportCommandRunner implements CommandLineRunner {
 		ClientRepresentation emailToCaseClient = new ClientRepresentation();
 		emailToCaseClient.setClientId(emailToCaseClientId);
 		emailToCaseClient.setSecret(emailToCaseSecret);
-		emailToCaseClient.setPublicClient(true);
+		emailToCaseClient.setPublicClient(false);
 		emailToCaseClient.setProtocol("openid-connect");
 		emailToCaseClient.setDirectAccessGrantsEnabled(true);
 		emailToCaseClient.setStandardFlowEnabled(true);
