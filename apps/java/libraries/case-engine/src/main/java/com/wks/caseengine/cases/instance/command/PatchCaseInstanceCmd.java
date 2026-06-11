@@ -23,11 +23,21 @@ import lombok.AllArgsConstructor;
  * @author victor.franca
  *
  */
-@AllArgsConstructor
-public class PatchCaseInstanceCmd implements Command<CaseInstance> {
+import com.wks.caseengine.command.AuditableCommand;
+import com.wks.caseengine.audit.AuditEventType;
+import java.util.Map;
+import java.util.HashMap;
 
-	private String businessKey;
-	private CaseInstance mergePatch;
+public class PatchCaseInstanceCmd implements AuditableCommand<CaseInstance> {
+
+	private final String businessKey;
+	private final CaseInstance mergePatch;
+	private CaseInstance oldCase;
+
+	public PatchCaseInstanceCmd(String businessKey, CaseInstance mergePatch) {
+		this.businessKey = businessKey;
+		this.mergePatch = mergePatch;
+	}
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
@@ -38,24 +48,67 @@ public class PatchCaseInstanceCmd implements Command<CaseInstance> {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
-		if (mergePatch.getStatus() != null) {
-			target.setStatus(mergePatch.getStatus());
-		}
-		if (mergePatch.getStage() != null) {
-			target.setStage(mergePatch.getStage());
-		}
-		if (mergePatch.getQueueId() != null) {
-			target.setQueueId(mergePatch.getQueueId());
-		}
+		if (target != null) {
+			this.oldCase = CaseInstance.builder()
+					.businessKey(target.getBusinessKey())
+					.status(target.getStatus() != null ? target.getStatus().getCode() : null)
+					.stage(target.getStage())
+					.queueId(target.getQueueId())
+					.build();
 
-		try {
-			commandContext.getCaseInstanceRepository().update(businessKey, target);
-		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+			if (mergePatch.getStatus() != null) {
+				target.setStatus(mergePatch.getStatus());
+			}
+			if (mergePatch.getStage() != null) {
+				target.setStage(mergePatch.getStage());
+			}
+			if (mergePatch.getQueueId() != null) {
+				target.setQueueId(mergePatch.getQueueId());
+			}
+
+			try {
+				commandContext.getCaseInstanceRepository().update(businessKey, target);
+			} catch (DatabaseRecordNotFoundException e) {
+				throw new CaseInstanceNotFoundException(e.getMessage(), e);
+			}
 		}
 
 		// TODO return the updated case instance from DB
 		return target;
+	}
+
+	@Override
+	public AuditEventType getAuditEventType() {
+		return AuditEventType.CASE_UPDATED;
+	}
+
+	@Override
+	public String getEntityId(CommandContext commandContext) {
+		return businessKey;
+	}
+
+	@Override
+	public String getAuditPayload(CommandContext commandContext, CaseInstance result) {
+		Map<String, Object> payloadMap = new HashMap<>();
+		if (oldCase != null && result != null) {
+			if (oldCase.getStatus() != null && !oldCase.getStatus().equals(result.getStatus())) {
+				payloadMap.put("status", createDiff(oldCase.getStatus().getCode(), result.getStatus() != null ? result.getStatus().getCode() : null));
+			}
+			if (oldCase.getStage() != null && !oldCase.getStage().equals(result.getStage())) {
+				payloadMap.put("stage", createDiff(oldCase.getStage(), result.getStage()));
+			}
+			if (oldCase.getQueueId() != null && !oldCase.getQueueId().equals(result.getQueueId())) {
+				payloadMap.put("queueId", createDiff(oldCase.getQueueId(), result.getQueueId()));
+			}
+		}
+		return commandContext.getGsonBuilder().create().toJson(payloadMap);
+	}
+
+	private Map<String, Object> createDiff(Object before, Object after) {
+		Map<String, Object> diff = new HashMap<>();
+		diff.put("before", before);
+		diff.put("after", after);
+		return diff;
 	}
 
 }

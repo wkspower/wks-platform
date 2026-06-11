@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
+import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
@@ -22,10 +23,19 @@ import lombok.AllArgsConstructor;
  * @author victor.franca
  *
  */
-@AllArgsConstructor
-public class DeleteCaseInstanceCmd implements Command<Void> {
+import com.wks.caseengine.command.AuditableCommand;
+import com.wks.caseengine.audit.AuditEventType;
+import java.util.Map;
+import java.util.HashMap;
 
-	private String businessKey;
+public class DeleteCaseInstanceCmd implements AuditableCommand<Void> {
+
+	private final String businessKey;
+	private CaseInstance caseInstance;
+
+	public DeleteCaseInstanceCmd(String businessKey) {
+		this.businessKey = businessKey;
+	}
 
 	@Override
 	public Void execute(CommandContext commandContext) {
@@ -34,12 +44,38 @@ public class DeleteCaseInstanceCmd implements Command<Void> {
 		// TODO close/archive process in PostClose/Archive hook
 
 		try {
+			this.caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
+		} catch (DatabaseRecordNotFoundException e) {
+			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
+
+		try {
 			commandContext.getCaseInstanceRepository().delete(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
 
 		return null;
+	}
+
+	@Override
+	public AuditEventType getAuditEventType() {
+		return AuditEventType.CASE_DELETED;
+	}
+
+	@Override
+	public String getEntityId(CommandContext commandContext) {
+		return businessKey;
+	}
+
+	@Override
+	public String getAuditPayload(CommandContext commandContext, Void result) {
+		Map<String, Object> payloadMap = new HashMap<>();
+		if (caseInstance != null) {
+			payloadMap.put("businessKey", caseInstance.getBusinessKey());
+			payloadMap.put("caseDefinitionId", caseInstance.getCaseDefinitionId());
+		}
+		return commandContext.getGsonBuilder().create().toJson(payloadMap);
 	}
 
 }

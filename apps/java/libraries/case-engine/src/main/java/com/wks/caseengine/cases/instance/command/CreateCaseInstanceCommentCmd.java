@@ -29,11 +29,20 @@ import lombok.AllArgsConstructor;
  * @author victor.franca
  *
  */
-@AllArgsConstructor
-public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
+import com.wks.caseengine.command.AuditableCommand;
+import com.wks.caseengine.audit.AuditEventType;
+import java.util.Map;
+import java.util.HashMap;
 
-	private String businessKey;
-	private CaseComment comment;
+public class CreateCaseInstanceCommentCmd implements AuditableCommand<CaseComment> {
+
+	private final String businessKey;
+	private final CaseComment comment;
+
+	public CreateCaseInstanceCommentCmd(String businessKey, CaseComment comment) {
+		this.businessKey = businessKey;
+		this.comment = comment;
+	}
 
 	@Override
 	public CaseComment execute(CommandContext commandContext) {
@@ -48,19 +57,41 @@ public class CreateCaseInstanceCommentCmd implements Command<CaseComment> {
 
 		comment.setId(ObjectId.get().toString());
 
-		if (caseInstance.getComments() == null) {
-			caseInstance.setComments(Arrays.asList(comment));
-		} else {
-			caseInstance.getComments().add(comment);
-		}
+		if (caseInstance != null) {
+			if (caseInstance.getComments() == null) {
+				caseInstance.setComments(Arrays.asList(comment));
+			} else {
+				caseInstance.getComments().add(comment);
+			}
 
-		try {
-			commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
-		} catch (DatabaseRecordNotFoundException e) {
-			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+			try {
+				commandContext.getCaseInstanceRepository().update(comment.getCaseId(), caseInstance);
+			} catch (DatabaseRecordNotFoundException e) {
+				throw new CaseInstanceNotFoundException(e.getMessage(), e);
+			}
 		}
 
 		return comment;
+	}
+
+	@Override
+	public AuditEventType getAuditEventType() {
+		return AuditEventType.COMMENT_ADDED;
+	}
+
+	@Override
+	public String getEntityId(CommandContext commandContext) {
+		return businessKey;
+	}
+
+	@Override
+	public String getAuditPayload(CommandContext commandContext, CaseComment result) {
+		Map<String, Object> payloadMap = new HashMap<>();
+		if (result != null) {
+			payloadMap.put("commentId", result.getId());
+			payloadMap.put("body", result.getBody());
+		}
+		return commandContext.getGsonBuilder().create().toJson(payloadMap);
 	}
 
 }

@@ -27,17 +27,27 @@ import com.wks.caseengine.command.CommandContext;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 import lombok.AllArgsConstructor;
-import lombok.Setter;
+import com.wks.caseengine.command.AuditableCommand;
+import com.wks.caseengine.audit.AuditEventType;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author victor.franca
  *
  */
-@AllArgsConstructor
-@Setter
-public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
+public class StartCaseInstanceWithValuesCmd implements AuditableCommand<CaseInstance> {
 
 	private CaseInstance caseInstanceParam;
+	private String businessKeyGenerated;
+
+	public StartCaseInstanceWithValuesCmd(CaseInstance caseInstanceParam) {
+		this.caseInstanceParam = caseInstanceParam;
+	}
+
+	public void setCaseInstanceParam(CaseInstance caseInstanceParam) {
+		this.caseInstanceParam = caseInstanceParam;
+	}
 
 	@Override
 	public CaseInstance execute(CommandContext commandContext) {
@@ -49,6 +59,7 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 						CaseAttributeType.STRING.getValue()));
 
 		String businessKey = generateBusinessKey(commandContext);
+		this.businessKeyGenerated = businessKey;
 
 		CaseInstance.CaseInstanceBuilder caseInstanceBuilder = CaseInstance.builder().businessKey(businessKey)
 				.attributes(caseInstanceParam.getAttributes()).caseDefinitionId(caseInstanceParam.getCaseDefinitionId())
@@ -65,6 +76,29 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 		// Persistence is delegated to the active CasePersistenceStrategy
 		// (workflow round-trip vs direct save), selected by wks.bpm.engine.
 		return commandContext.getCasePersistenceStrategy().persist(preparedCaseInstance);
+	}
+
+	@Override
+	public AuditEventType getAuditEventType() {
+		return AuditEventType.CASE_CREATED;
+	}
+
+	@Override
+	public String getEntityId(CommandContext commandContext) {
+		return businessKeyGenerated != null ? businessKeyGenerated : caseInstanceParam.getBusinessKey();
+	}
+
+	@Override
+	public String getAuditPayload(CommandContext commandContext, CaseInstance result) {
+		Map<String, Object> payloadMap = new HashMap<>();
+		if (result != null) {
+			payloadMap.put("businessKey", result.getBusinessKey());
+			payloadMap.put("caseDefinitionId", result.getCaseDefinitionId());
+			payloadMap.put("stage", result.getStage());
+			payloadMap.put("status", result.getStatus() != null ? result.getStatus().getCode() : null);
+			payloadMap.put("owner", result.getOwner() != null ? result.getOwner().getName() : null);
+		}
+		return commandContext.getGsonBuilder().create().toJson(payloadMap);
 	}
 
 	private String generateBusinessKey(CommandContext commandContext) {

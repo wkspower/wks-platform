@@ -11,6 +11,7 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
+import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.command.Command;
 import com.wks.caseengine.command.CommandContext;
@@ -22,19 +23,39 @@ import lombok.AllArgsConstructor;
  * @author victor.franca
  *
  */
-@AllArgsConstructor
-public class UpdateCaseInstanceCommentCmd implements Command<Void> {
+import com.wks.caseengine.command.AuditableCommand;
+import com.wks.caseengine.audit.AuditEventType;
+import java.util.Map;
+import java.util.HashMap;
+import com.wks.caseengine.cases.instance.CaseComment;
 
-	private String businessKey;
-	private String commentId;
-	private String body;
+public class UpdateCaseInstanceCommentCmd implements AuditableCommand<Void> {
+
+	private final String businessKey;
+	private final String commentId;
+	private final String body;
+	private CaseComment oldComment;
+
+	public UpdateCaseInstanceCommentCmd(String businessKey, String commentId, String body) {
+		this.businessKey = businessKey;
+		this.commentId = commentId;
+		this.body = body;
+	}
 
 	@Override
 	public Void execute(CommandContext commandContext) {
+		CaseInstance caseInstance;
 		try {
-			commandContext.getCaseInstanceRepository().get(businessKey);
+			caseInstance = commandContext.getCaseInstanceRepository().get(businessKey);
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
+		}
+
+		if (caseInstance != null && caseInstance.getComments() != null) {
+			this.oldComment = caseInstance.getComments().stream()
+					.filter(c -> commentId.equals(c.getId()))
+					.findFirst()
+					.orElse(null);
 		}
 
 		try {
@@ -42,8 +63,31 @@ public class UpdateCaseInstanceCommentCmd implements Command<Void> {
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
-		return null;
 
+		return null;
+	}
+
+	@Override
+	public AuditEventType getAuditEventType() {
+		return AuditEventType.COMMENT_UPDATED;
+	}
+
+	@Override
+	public String getEntityId(CommandContext commandContext) {
+		return businessKey;
+	}
+
+	@Override
+	public String getAuditPayload(CommandContext commandContext, Void result) {
+		Map<String, Object> payloadMap = new HashMap<>();
+		if (oldComment != null) {
+			payloadMap.put("commentId", oldComment.getId());
+			Map<String, Object> diff = new HashMap<>();
+			diff.put("before", oldComment.getBody());
+			diff.put("after", body);
+			payloadMap.put("body", diff);
+		}
+		return commandContext.getGsonBuilder().create().toJson(payloadMap);
 	}
 
 }

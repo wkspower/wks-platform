@@ -30,6 +30,22 @@ public class CommandExecutorImpl implements CommandExecutor {
 	public <T> T execute(final Command<T> command) {
 		T t = command.execute(commandContext);
 
+		if (command instanceof AuditableCommand) {
+			try {
+				@SuppressWarnings("unchecked")
+				AuditableCommand<T> auditableCommand = (AuditableCommand<T>) command;
+				commandContext.getAuditService().saveEvent(
+						auditableCommand.getAuditEventType(),
+						auditableCommand.getEntityId(commandContext),
+						auditableCommand.getEntityType(),
+						auditableCommand.getAuditPayload(commandContext, t),
+						commandContext
+				);
+			} catch (Exception e) {
+				log.error("Failed to write audit event for command {}", command.getClass().getSimpleName(), e);
+			}
+		}
+
 		if (commandContext.getSecurityContextTenantHolder().getUserId().isPresent()) {
 			log.debug("Command {} executed by user {}", command.getClass().getSimpleName(),
 					commandContext.getSecurityContextTenantHolder().getUserId().get());
