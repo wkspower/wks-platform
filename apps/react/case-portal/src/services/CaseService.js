@@ -14,6 +14,7 @@ export const CaseService = {
   addComment,
   updateComment,
   deleteComment,
+  getCaseHistory,
 }
 
 async function getAllByStatus(keycloak, status, limit) {
@@ -280,4 +281,23 @@ function mapperToCase(resp) {
   }
 
   return Promise.resolve({ data: toCase, paging: toPaging })
+}
+
+async function getCaseHistory(keycloak, businessKey) {
+  const url = `${Config.CaseEngineUrl}/audit/case/${businessKey}`
+
+  const headers = {
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { headers })
+    if (resp.status !== 200) {
+      throw new Error(`Failed to fetch history: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error fetching case history:', e)
+    return [] // Fallback list for resilience
+  }
 }

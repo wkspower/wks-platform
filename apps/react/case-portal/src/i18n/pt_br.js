@@ -76,6 +76,7 @@ const defs = {
         comments: 'Comentários',
         attachments: 'Anexos',
         emails: 'Emails',
+        history: 'Histórico',
       },
       manualProcesses: {
         title: 'Selecione o processo para iniciar',
@@ -87,6 +88,24 @@ const defs = {
           'Campos obrigatórios estão ausentes ou contêm valores inválidos.',
         pleaseFixErrors:
           'Por favor, corrija os seguintes erros antes de enviar.',
+      },
+      history: {
+        title: 'Histórico do Caso',
+        unavailable: 'O histórico do caso está temporariamente indisponível.',
+        empty: 'Nenhum evento de histórico registrado para este caso.',
+        events: {
+          CASE_CREATED: 'Caso criado por {{user}}',
+          CASE_UPDATED: 'Caso atualizado por {{user}}',
+          CASE_DELETED: 'Caso excluído por {{user}}',
+          COMMENT_ADDED: 'Comentário adicionado por {{user}}',
+          COMMENT_UPDATED: 'Comentário editado por {{user}}',
+          COMMENT_DELETED: 'Comentário removido por {{user}}',
+        },
+        diff: {
+          status: 'Status: {{before}} ➔ {{after}}',
+          stage: 'Etapa: {{before}} ➔ {{after}}',
+          queueId: 'Fila: {{before}} ➔ {{after}}',
+        },
       },
     },
     tasklist: {

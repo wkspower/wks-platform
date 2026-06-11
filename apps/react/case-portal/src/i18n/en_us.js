@@ -76,6 +76,7 @@ const defs = {
         comments: 'Comments',
         attachments: 'Attachments',
         emails: 'Emails',
+        history: 'History',
       },
       manualProcesses: {
         title: 'Choose a process to start',
@@ -85,6 +86,24 @@ const defs = {
         requiredFieldsMissing:
           'Required fields are missing or contain invalid values.',
         pleaseFixErrors: 'Please fix the following errors before submitting.',
+      },
+      history: {
+        title: 'Case History',
+        unavailable: 'Case history is temporarily unavailable.',
+        empty: 'No history events recorded for this case.',
+        events: {
+          CASE_CREATED: 'Case created by {{user}}',
+          CASE_UPDATED: 'Case updated by {{user}}',
+          CASE_DELETED: 'Case deleted by {{user}}',
+          COMMENT_ADDED: 'Comment added by {{user}}',
+          COMMENT_UPDATED: 'Comment updated by {{user}}',
+          COMMENT_DELETED: 'Comment deleted by {{user}}',
+        },
+        diff: {
+          status: 'Status: {{before}} ➔ {{after}}',
+          stage: 'Stage: {{before}} ➔ {{after}}',
+          queueId: 'Queue: {{before}} ➔ {{after}}',
+        },
       },
     },
     tasklist: {

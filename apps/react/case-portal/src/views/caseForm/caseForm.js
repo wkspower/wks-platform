@@ -37,6 +37,7 @@ import { CaseService, FormService } from '../../services'
 import { tryParseJSONObject } from '../../utils/jsonStringCheck'
 import { TaskList } from '../taskList/taskList'
 import Documents from './Documents'
+import { CaseHistory } from './CaseHistory'
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   const [caseDef, setCaseDef] = useState(null)
@@ -384,6 +385,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     label={t('pages.caseform.tabs.comments')}
                     {...a11yProps(3)}
                   />
+                  <Tab
+                    label={t('pages.caseform.tabs.history')}
+                    {...a11yProps(4)}
+                  />
                 </Tabs>
               </Box>
               <Box
@@ -418,6 +423,13 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                       />
                     </Grid>
                   </Grid>
+                </TabPanel>
+
+                <TabPanel value={rightTabIndex} index={4}>
+                  <CaseHistory
+                    businessKey={aCase.businessKey}
+                    keycloak={keycloak}
+                  />
                 </TabPanel>
               </Box>
             </Grid>
