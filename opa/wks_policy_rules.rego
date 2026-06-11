@@ -92,6 +92,20 @@ allow {
 }
 
 allow {
+    input.path == "audit"
+    input.method in ["GET", "OPTIONS"]
+    check_origin_request
+    is_user_profile
+}
+
+allow {
+    input.path == "audit"
+    input.method in ["GET", "OPTIONS"]
+    check_origin_request
+    is_manager_profile
+}
+
+allow {
     input.path == "record-type"
     input.method in ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS", "HEAD"]
     check_origin_request
