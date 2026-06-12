@@ -54,8 +54,9 @@ import com.wks.caseengine.rest.config.SeedDataRunner;
 		"spring.datasource.password=",
 		"spring.jpa.hibernate.ddl-auto=create",
 		"spring.autoconfigure.exclude="
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
+				+ "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration" })
 public class SeedDataRunnerIT {
 
 	@SpringBootConfiguration

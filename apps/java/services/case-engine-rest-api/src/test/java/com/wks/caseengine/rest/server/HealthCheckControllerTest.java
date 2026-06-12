@@ -24,7 +24,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 
 @WebMvcTest(controllers = HealthCheckController.class)
@@ -33,9 +32,6 @@ public class HealthCheckControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	@MockitoBean
-	private CaseDefinitionService caseDefinitionService;
 
 	@BeforeEach
 	public void setup() {

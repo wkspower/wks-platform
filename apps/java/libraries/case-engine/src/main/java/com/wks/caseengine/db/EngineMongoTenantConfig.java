@@ -38,6 +38,8 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
+import org.springframework.context.annotation.Primary;
+
 @Configuration
 @ConditionalOnProperty(name = "database.type", havingValue = "mongo", matchIfMissing = false)
 public class EngineMongoTenantConfig {
@@ -77,6 +79,7 @@ public class EngineMongoTenantConfig {
 	}
 
 	@Bean
+	@Primary
 	public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDbFactory, MappingMongoConverter converter) {
 		return new MongoTemplate(mongoDbFactory, converter);
 	}

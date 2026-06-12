@@ -52,8 +52,9 @@ import com.wks.caseengine.repository.JpaPaginator;
 		"spring.jpa.hibernate.ddl-auto=create",
 		"spring.autoconfigure.exclude="
 				+ "de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
+				+ "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration" })
 public class CaseInstanceJpaRepositoryImplIT {
 
 	@SpringBootConfiguration

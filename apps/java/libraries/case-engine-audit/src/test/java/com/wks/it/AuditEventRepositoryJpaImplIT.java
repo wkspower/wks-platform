@@ -34,7 +34,8 @@ import com.wks.caseengine.db.EngineDatabaseTenantConfig;
 		"spring.jpa.hibernate.ddl-auto=create",
 		"spring.autoconfigure.exclude="
 				+ "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,"
-				+ "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration" })
+				+ "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration" })
 public class AuditEventRepositoryJpaImplIT {
 
 	@SpringBootConfiguration

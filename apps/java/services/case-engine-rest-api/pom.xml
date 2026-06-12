@@ -152,6 +152,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.5.0</version>
+				<configuration>
+					<systemPropertyVariables>
+						<database.type>none</database.type>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

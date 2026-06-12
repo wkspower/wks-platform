@@ -41,6 +41,7 @@ spring.data.mongodb.database.min-pool-size: 0
 spring.data.mongodb.database.max-pool-size: 5
 spring.data.mongodb.database.max-connection-idle-time: 3000
 spring.data.mongodb.database.max-connection-life-time: 3000
+spring.modulith.events.mongodb.transaction-management.enabled: false
 
 management.health.mongo.enabled: false
 management.health.reds.enabled: false

@@ -25,10 +25,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.wks.caseengine.data.iimport.DataImportService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 import com.wks.caseengine.rest.server.data.DataImportController;
 
-@WebMvcTest(controllers = VariableController.class)
+@WebMvcTest(controllers = DataImportController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class DataImportControllerTest {
 
@@ -36,7 +37,7 @@ public class DataImportControllerTest {
 	private MockMvc mockMvc;
 
 	@MockitoBean
-	private DataImportController dataImportController;
+	private DataImportService dataImportService;
 
 	@BeforeEach
 	public void setup() {

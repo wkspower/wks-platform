@@ -18,13 +18,23 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.wks.api.security.context.SecurityContextTenantHolder;
+import com.wks.api.security.context.SecurityContextTenantHolderThreadLocallImpl;
 import com.wks.caseengine.rest.config.security.InjectorTenantHandlerInterceptor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
 	@Autowired
 	private InjectorTenantHandlerInterceptor tenantHandler;
+
+	@Bean
+	@ConditionalOnMissingBean
+	public static SecurityContextTenantHolder securityContextTenantHolder() {
+		return new SecurityContextTenantHolderThreadLocallImpl();
+	}
 
 	// Comma-separated origin allow-list for the case portal. The default lives in
 	// the api-security library's api-security-defaults.properties (env-overridable
