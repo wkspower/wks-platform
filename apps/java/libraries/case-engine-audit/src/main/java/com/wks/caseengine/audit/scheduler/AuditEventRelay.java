@@ -20,17 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "wks.audit.enabled", havingValue = "true", matchIfMissing = true)
 public class AuditEventRelay {
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    private final AuditEventRepository auditEventRepository;
+    private final TenantResolver tenantResolver;
+    private final SecurityContextTenantHolder tenantHolder;
+    private final TenantListProvider tenantListProvider;
 
-    @Autowired
-    private TenantResolver tenantResolver;
-
-    @Autowired
-    private SecurityContextTenantHolder tenantHolder;
-
-    @Autowired(required = false)
-    private TenantListProvider tenantListProvider;
+    public AuditEventRelay(AuditEventRepository auditEventRepository,
+                           TenantResolver tenantResolver,
+                           SecurityContextTenantHolder tenantHolder,
+                           @Autowired(required = false) TenantListProvider tenantListProvider) {
+        this.auditEventRepository = auditEventRepository;
+        this.tenantResolver = tenantResolver;
+        this.tenantHolder = tenantHolder;
+        this.tenantListProvider = tenantListProvider;
+    }
 
     @Scheduled(fixedDelay = 5000)
     public void relayEvents() {

@@ -16,8 +16,11 @@ import com.wks.caseengine.command.CommandContext;
 @Component
 public class AuditService {
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    private final AuditEventRepository auditEventRepository;
+
+    public AuditService(AuditEventRepository auditEventRepository) {
+        this.auditEventRepository = auditEventRepository;
+    }
 
     public void auditCaseCreated(CaseInstance caseInstance, CommandContext commandContext) {
         String tenantId = commandContext.getSecurityContextTenantHolder().getTenantId().orElse("default");

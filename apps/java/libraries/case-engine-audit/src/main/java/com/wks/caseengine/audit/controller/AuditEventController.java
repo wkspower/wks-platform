@@ -15,17 +15,17 @@ import com.wks.caseengine.audit.AuditEvent;
 import com.wks.caseengine.audit.repository.AuditEventRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("audit")
 @Tag(name = "Audit Trail & Case Feed", description = "Endpoints for compliance audit trail and case timeline events")
 @ConditionalOnProperty(name = "wks.audit.enabled", havingValue = "true", matchIfMissing = true)
+@RequiredArgsConstructor
 public class AuditEventController {
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
-
-    @Autowired
-    private GsonBuilder gsonBuilder;
+    private final AuditEventRepository auditEventRepository;
+    private final GsonBuilder gsonBuilder;
 
     @GetMapping(value = "/trail", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAuditTrail() {

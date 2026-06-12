@@ -16,8 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "wks.audit.enabled", havingValue = "true", matchIfMissing = true)
 public class AuditEventListener {
 
-    @Autowired
-    private AuditService auditService;
+    private final AuditService auditService;
+
+    public AuditEventListener(AuditService auditService) {
+        this.auditService = auditService;
+    }
 
     @EventListener
     public void onCommandExecuted(CommandExecutedEvent event) {

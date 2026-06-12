@@ -27,6 +27,7 @@
         <servlet-api.version>2.5</servlet-api.version>
 
         <spring.boot.version>4.0.6</spring.boot.version>
+        <spring.modulith.version>2.0.0</spring.modulith.version>
         <!-- Tomcat security fix: CVE-2026-41293/43512/43515 (critical),
              43513/42498/41284 (high), 43514 (low) in tomcat-embed-core.
              The Spring Boot BOM is imported (not inherited), so overriding
@@ -80,6 +81,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.modulith</groupId>
+                <artifactId>spring-modulith-bom</artifactId>
+                <version>${spring.modulith.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
