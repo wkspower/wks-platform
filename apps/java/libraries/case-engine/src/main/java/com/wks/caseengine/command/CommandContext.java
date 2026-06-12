@@ -29,8 +29,6 @@ import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.queue.QueueRepository;
 import com.wks.caseengine.record.RecordRepository;
 import com.wks.caseengine.record.type.RecordTypeRepository;
-import com.wks.caseengine.audit.service.AuditService;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -92,8 +90,5 @@ public class CommandContext {
 
 	@Autowired
 	private GsonBuilder gsonBuilder;
-
-	@Autowired
-	private AuditService auditService;
 
 }

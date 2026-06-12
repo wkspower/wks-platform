@@ -102,6 +102,7 @@
     <modules>
         <!-- Libraries -->
         <module>libraries/case-engine</module>
+        <module>libraries/case-engine-audit</module>
         <module>libraries/bpm-engine-interface</module>
         <module>libraries/bpm-engine-client</module>
         <module>libraries/api-security</module>

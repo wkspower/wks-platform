@@ -1,4 +1,4 @@
-package com.wks.caseengine.rest.config;
+package com.wks.caseengine.audit.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,6 @@
 package com.wks.it;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,9 +33,8 @@ import com.wks.caseengine.db.EngineDatabaseTenantConfig;
 		"spring.datasource.password=",
 		"spring.jpa.hibernate.ddl-auto=create",
 		"spring.autoconfigure.exclude="
-				+ "de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
+				+ "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,"
+				+ "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration" })
 public class AuditEventRepositoryJpaImplIT {
 
 	@SpringBootConfiguration

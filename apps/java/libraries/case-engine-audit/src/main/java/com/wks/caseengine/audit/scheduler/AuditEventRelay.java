@@ -1,9 +1,10 @@
-package com.wks.caseengine.rest.server.scheduler;
+package com.wks.caseengine.audit.scheduler;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@ConditionalOnProperty(name = "wks.audit.enabled", havingValue = "true", matchIfMissing = true)
 public class AuditEventRelay {
 
     @Autowired
@@ -66,7 +68,6 @@ public class AuditEventRelay {
                 log.info("Processing relay of {} pending audit events", unprocessed.size());
                 
                 for (AuditEvent event : unprocessed) {
-                    // Forensic logging acting as SIEM / console log simulation
                     log.info("[AUDIT-RELAY] Event: {}, ID: {}, Entity: {} ({}), User: {}, Timestamp: {}, Payload: {}",
                             event.getEventType(),
                             event.getId(),

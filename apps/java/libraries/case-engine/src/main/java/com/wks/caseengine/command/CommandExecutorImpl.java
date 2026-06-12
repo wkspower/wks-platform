@@ -1,17 +1,7 @@
-/*
- * WKS Platform - Open-Source Project
- * 
- * This file is part of the WKS Platform, an open-source project developed by WKS Power.
- * 
- * WKS Platform is licensed under the MIT License.
- * 
- * © 2021 WKS Power. All rights reserved.
- * 
- * For licensing information, see the LICENSE file in the root directory of the project.
- */
 package com.wks.caseengine.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,23 +17,16 @@ public class CommandExecutorImpl implements CommandExecutor {
 	@Autowired
 	private CommandContext commandContext;
 
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
+
 	public <T> T execute(final Command<T> command) {
 		T t = command.execute(commandContext);
 
-		if (command instanceof AuditableCommand) {
-			try {
-				@SuppressWarnings("unchecked")
-				AuditableCommand<T> auditableCommand = (AuditableCommand<T>) command;
-				commandContext.getAuditService().saveEvent(
-						auditableCommand.getAuditEventType(),
-						auditableCommand.getEntityId(commandContext),
-						auditableCommand.getEntityType(),
-						auditableCommand.getAuditPayload(commandContext, t),
-						commandContext
-				);
-			} catch (Exception e) {
-				log.error("Failed to write audit event for command {}", command.getClass().getSimpleName(), e);
-			}
+		try {
+			eventPublisher.publishEvent(new CommandExecutedEvent(command, t, commandContext));
+		} catch (Exception e) {
+			log.error("Failed to publish command execution event for {}", command.getClass().getSimpleName(), e);
 		}
 
 		if (commandContext.getSecurityContextTenantHolder().getUserId().isPresent()) {

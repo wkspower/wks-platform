@@ -1,7 +1,8 @@
-package com.wks.caseengine.rest.server;
+package com.wks.caseengine.audit.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("audit")
 @Tag(name = "Audit Trail & Case Feed", description = "Endpoints for compliance audit trail and case timeline events")
+@ConditionalOnProperty(name = "wks.audit.enabled", havingValue = "true", matchIfMissing = true)
 public class AuditEventController {
 
     @Autowired

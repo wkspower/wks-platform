@@ -83,6 +83,12 @@
 			<version>${revision}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.wks</groupId>
+			<artifactId>case-engine-audit</artifactId>
+			<version>${revision}</version>
+		</dependency>
+
 		<!-- BPM engine modules this service supports. bpm-engine-client no longer
 		     pulls a concrete engine transitively, so each engine is declared here;
 		     wks.bpm.engine selects which one activates (camunda7 default, or none). -->

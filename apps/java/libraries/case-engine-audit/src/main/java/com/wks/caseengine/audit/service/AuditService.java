@@ -62,7 +62,6 @@ public class AuditService {
             changes.put("queueId", createDiff(oldCase.getQueueId(), newCase.getQueueId()));
         }
 
-        // If no audited high-level properties changed, we don't save an update event
         if (changes.isEmpty()) {
             return;
         }
