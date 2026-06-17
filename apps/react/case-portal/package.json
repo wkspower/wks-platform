@@ -19,7 +19,7 @@
     "@wkspower/camunda-web-modeler": "^0.0.5",
     "bpmn-js": "^10.0.0",
     "date-fns": "^3.6.0",
-    "dompurify": "^3.4.7",
+    "dompurify": "^3.4.9",
     "formiojs": "^4.21.7",
     "framer-motion": "^11.0.28",
     "i18next": "^23.11.1",
