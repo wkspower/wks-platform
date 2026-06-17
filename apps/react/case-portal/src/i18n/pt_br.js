@@ -79,6 +79,7 @@ const defs = {
       },
       manualProcesses: {
         title: 'Selecione o processo para iniciar',
+        noProcesses: 'Nenhum processo manual disponível para esta etapa',
       },
       validation: {
         pleaseCorrectErrors:

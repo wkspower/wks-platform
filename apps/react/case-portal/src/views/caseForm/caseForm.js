@@ -433,24 +433,32 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
               {t('pages.caseform.manualProcesses.title')}
             </DialogTitle>
             <List>
-              {manualInitProcessDefs.map((process, index) => (
-                <React.Fragment key={process.definitionKey}>
-                  <ListItem
-                    button
-                    onClick={() => startProcess(process.definitionKey)}
-                    sx={{
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    }}
-                  >
-                    <ListItemText
-                      primary={process.name || process.definitionKey}
-                    />
-                  </ListItem>
-                  {index !== manualInitProcessDefs.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
+              {!manualInitProcessDefs || manualInitProcessDefs.length === 0 ? (
+                <ListItem>
+                  <ListItemText
+                    secondary={t('pages.caseform.manualProcesses.noProcesses')}
+                  />
+                </ListItem>
+              ) : (
+                manualInitProcessDefs.map((process, index) => (
+                  <React.Fragment key={process.definitionKey}>
+                    <ListItem
+                      button
+                      onClick={() => startProcess(process.definitionKey)}
+                      sx={{
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={process.name || process.definitionKey}
+                      />
+                    </ListItem>
+                    {index !== manualInitProcessDefs.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))
+              )}
             </List>
           </Dialog>
         )}
