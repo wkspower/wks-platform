@@ -80,6 +80,7 @@ const defs = {
       },
       manualProcesses: {
         title: 'Choose a process to start',
+        noProcesses: 'No manual processes available for this stage',
       },
       validation: {
         pleaseCorrectErrors: 'Please correct the following errors in the form:',
