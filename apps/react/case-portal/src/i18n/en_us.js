@@ -103,6 +103,7 @@ const defs = {
           status: 'Status: {{before}} ➔ {{after}}',
           stage: 'Stage: {{before}} ➔ {{after}}',
           queueId: 'Queue: {{before}} ➔ {{after}}',
+          comment: 'Changed: "{{before}}" ➔ "{{after}}"',
         },
       },
     },

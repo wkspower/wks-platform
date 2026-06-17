@@ -111,6 +111,26 @@ export const CaseHistory = ({ businessKey, keycloak }) => {
 
       // If comment body is logged
       if (payload.body) {
+        if (typeof payload.body === 'object') {
+          return (
+            <Typography
+              variant='body2'
+              color='textSecondary'
+              sx={{
+                mt: 0.5,
+                fontStyle: 'italic',
+                pl: 1,
+                borderLeft: '3px solid #ccc',
+              }}
+            >
+              {t('pages.caseform.history.diff.comment', {
+                before: payload.body.before || '',
+                after: payload.body.after || '',
+              })}
+            </Typography>
+          )
+        }
+
         return (
           <Typography
             variant='body2'
