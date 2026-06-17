@@ -8,5 +8,11 @@
     "kafkajs": "^2.2.4",
     "pino": "^8.19.0",
     "ws": "^8.21.0"
+  },
+  "overrides": {
+    "form-data": "^4.0.6"
+  },
+  "resolutions": {
+    "form-data": "^4.0.6"
   }
 }
