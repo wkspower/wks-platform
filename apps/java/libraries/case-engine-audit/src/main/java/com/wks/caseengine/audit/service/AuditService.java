@@ -191,7 +191,10 @@ public class AuditService {
     public void saveEvent(AuditEventType eventType, String entityId, String entityType, String payload, CommandContext commandContext) {
         String tenantId = commandContext.getSecurityContextTenantHolder().getTenantId().orElse("default");
         String userId = commandContext.getSecurityContextTenantHolder().getUserId().orElse("system");
+        saveEvent(eventType, entityId, entityType, payload, tenantId, userId);
+    }
 
+    public void saveEvent(AuditEventType eventType, String entityId, String entityType, String payload, String tenantId, String userId) {
         AuditEvent event = AuditEvent.builder()
                 .tenantId(tenantId)
                 .userId(userId)

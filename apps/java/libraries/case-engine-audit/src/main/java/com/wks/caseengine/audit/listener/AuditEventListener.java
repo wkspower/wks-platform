@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.wks.caseengine.command.AuditableCommand;
-import com.wks.caseengine.command.CommandExecutedEvent;
+import com.wks.caseengine.event.WksEvent;
 import com.wks.caseengine.audit.service.AuditService;
+import com.wks.caseengine.audit.AuditEventType;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,21 +23,18 @@ public class AuditEventListener {
     }
 
     @EventListener
-    public void onCommandExecuted(CommandExecutedEvent event) {
-        if (event.getCommand() instanceof AuditableCommand) {
-            try {
-                @SuppressWarnings("unchecked")
-                AuditableCommand<Object> auditableCommand = (AuditableCommand<Object>) event.getCommand();
-                auditService.saveEvent(
-                        auditableCommand.getAuditEventType(),
-                        auditableCommand.getEntityId(event.getCommandContext()),
-                        auditableCommand.getEntityType(),
-                        auditableCommand.getAuditPayload(event.getCommandContext(), event.getResult()),
-                        event.getCommandContext()
-                );
-            } catch (Exception e) {
-                log.error("Failed to write audit event for command {}", event.getCommand().getClass().getSimpleName(), e);
-            }
+    public void onWksEvent(WksEvent event) {
+        try {
+            auditService.saveEvent(
+                    AuditEventType.valueOf(event.getEventType()),
+                    event.getEntityId(),
+                    event.getEntityType(),
+                    event.getPayload(),
+                    event.getTenantId(),
+                    event.getUserId()
+            );
+        } catch (Exception e) {
+            log.error("Failed to write audit event for type {}", event.getEventType(), e);
         }
     }
 }

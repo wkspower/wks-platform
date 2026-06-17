@@ -201,6 +201,7 @@ services:
             - WKS_BPM_ENGINE=${WKS_BPM_ENGINE:-camunda7}
             - WKS_TENANCY_MULTI_TENANT=${WKS_TENANCY_MULTI_TENANT:-true}
             - WKS_SEED_ENABLED=${WKS_SEED_ENABLED:-false}
+            - WKS_EVENT_PROVIDER=${WKS_EVENT_PROVIDER:-spring}
             # Infra connection coordinates (used by whichever concerns are active).
             - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}

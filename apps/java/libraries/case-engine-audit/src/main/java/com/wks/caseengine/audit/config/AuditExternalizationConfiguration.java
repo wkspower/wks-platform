@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.modulith.events.EventExternalizationConfiguration;
 import org.springframework.modulith.events.RoutingTarget;
-import com.wks.caseengine.command.CommandExecutedEvent;
+import com.wks.caseengine.event.WksEvent;
 
 @Configuration
 @ConditionalOnProperty(name = "wks.audit.externalize.enabled", havingValue = "true")
@@ -14,8 +14,8 @@ public class AuditExternalizationConfiguration {
     @Bean
     EventExternalizationConfiguration eventExternalization() {
         return EventExternalizationConfiguration.externalizing()
-            .select(event -> event instanceof CommandExecutedEvent)
-            .route(CommandExecutedEvent.class, event -> RoutingTarget.forTarget("wks-audit-topic").withoutKey())
+            .select(event -> event instanceof WksEvent)
+            .route(WksEvent.class, event -> RoutingTarget.forTarget("wks-audit-topic").withoutKey())
             .build();
     }
 }
