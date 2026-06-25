@@ -1,0 +1,41 @@
+---
+id: configuration-versioning
+title: Configuration Versioning & the WKS Case Configuration Standard
+---
+
+# Configuration Versioning
+
+WKS configuration — case definitions, forms, record types and queues — is a contract. The **WKS Case Configuration Standard** makes that contract explicit, versioned, and machine-checkable, published as the [`@wkspower/case-config-schema`](https://github.com/wkspower/wks-platform/tree/develop/packages/case-config-schema) package.
+
+It is the **single source of truth**: the backend validates against it, the portal validates and renders against it, and tooling generates from it.
+
+---
+
+## `schemaVersion`
+
+Every configuration document carries a `schemaVersion` field recording which version of the Standard it conforms to.
+
+- Format: a `MAJOR.MINOR` string, e.g. `"1.0"`.
+- Bump **minor** for additive, backward-compatible changes; bump **major** for breaking changes.
+- An **absent or null** `schemaVersion` is treated as the **`1.0`** pre-versioning baseline (a tolerant read), so legacy and seed data remain valid without migration.
+
+---
+
+## Where the schemas live
+
+| Type | Schema |
+|------|--------|
+| Case Definition | `packages/case-config-schema/schemas/case-definition.schema.json` |
+| Form | `packages/case-config-schema/schemas/form.schema.json` |
+| Record Type | `packages/case-config-schema/schemas/record-type.schema.json` |
+| Queue | `packages/case-config-schema/schemas/queue.schema.json` |
+| `recordtype` extension | `packages/case-config-schema/schemas/ext/form-recordtype.schema.json` |
+| Hook vocabulary | `packages/case-config-schema/schemas/ext/case-hook-vocabulary.schema.json` |
+
+Each top-level schema is self-contained (internal `$defs` only) so it validates identically in any JSON Schema validator — the same files are consumed by the JavaScript portal and the Java backend.
+
+---
+
+## Anti-drift
+
+The shipped seed data is validated against these schemas in CI — on the backend (`ConfigSchemaValidationTest`, run during `mvn package`) and in the package's own test suite. If the schema, the seed data, and the model ever diverge, the build fails. That is what keeps the Standard honest.

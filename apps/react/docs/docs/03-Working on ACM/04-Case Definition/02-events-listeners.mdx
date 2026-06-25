@@ -1,0 +1,66 @@
+---
+id: event-listeners
+title: Event Listeners
+---
+
+**Event listeners** (the `caseHooks` array) are the case definition's automation: *when a matching event occurs, apply one or more actions* (typically a stage or queue transition). This is how stage transitions actually happen.
+
+---
+
+## Hook fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `eventType` | enum | ✅ | The event that triggers the hook. |
+| `processDefKey` | string | | BPMN process key the event must originate from. |
+| `taskDefKey` | string | | BPMN task key whose completion fires the hook. |
+| `actions` | array | ✅ | One or more actions to apply (see below). |
+
+### `eventType` vocabulary
+
+| Value | Meaning |
+|-------|---------|
+| `TASK_COMPLETE_EVENT_TYPE` | A BPMN user task completed. |
+
+---
+
+## Action fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `actionType` | enum | The kind of action (see vocabulary below). |
+| `newStage` | string | For a stage update: the target stage. |
+| `queueId` | string | For a queue update: the target queue. |
+
+### `actionType` vocabulary
+
+| Value | Carries | Effect |
+|-------|---------|--------|
+| `CASE_STAGE_UPDATE_ACTION` | `newStage` | Moves the case to the named stage. |
+| `CASE_QUEUE_UPDATE_ACTION` | `queueId` | Routes the case to the named queue. |
+
+:::caution Names, not ids
+Despite the field names, `newStage` holds the stage **name** (not its `id`), and `queueId` holds the queue **name** (not its `id`). This matches the current engine and portal behaviour — reference stages and queues by name.
+:::
+
+:::note Vocabulary is pinned
+These enum values are kept in lockstep with the Java enums `CaseEventType` and `CaseActionType` and the portal's hardcoded literals. Adding a value on only one side breaks silently, so the [Standard](./06-configuration-versioning.mdx) pins the vocabulary in [`ext/case-hook-vocabulary.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/ext/case-hook-vocabulary.schema.json).
+:::
+
+---
+
+## Example
+
+```json
+"caseHooks": [
+  {
+    "eventType": "TASK_COMPLETE_EVENT_TYPE",
+    "processDefKey": "customer-support",
+    "taskDefKey": "create-ticket",
+    "actions": [
+      { "actionType": "CASE_STAGE_UPDATE_ACTION", "newStage": "Issue Investigation" },
+      { "actionType": "CASE_QUEUE_UPDATE_ACTION", "queueId": "Regular Customers" }
+    ]
+  }
+]
+```

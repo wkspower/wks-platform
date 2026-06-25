@@ -1,89 +1,54 @@
 ---
 id: creating-case-definitions
-title: Creating Cases Definitions
+title: Creating Case Definitions
 ---
 
-# Creating Case Definitions in the WKS Platform
+# Creating Case Definitions
 
-This guide outlines the steps required to create case definitions using the WKS Platform's user interface (UI).
-
----
-
-## 1. Access the Case Definition Page
-
-1. Log in to the WKS Platform.
-2. Navigate to the **Administration** or **Configuration** section.
-3. Click **New Case Definition** or a similarly named option.
+A case definition is a JSON document conforming to the [WKS Case Configuration Standard](./06-configuration-versioning.mdx). You can author one through the **Case Builder** UI or by importing JSON. This guide covers the fields you set and the order that makes sense.
 
 ---
 
-## 2. Define Basic Information
+## 1. Open the Case Builder
 
-On the case definition creation page:
-
-- Enter a unique **Key** to identify the case definition.
-- Provide a **Name** and an optional **Description** to help distinguish it from others.
+Log in to the portal and go to **Management → Case Definitions**, then create a new definition (or edit an existing one). The builder is a tabbed editor; a **Schema** tab shows the live JSON and validates it against the Standard as you work.
 
 ---
 
-## 3. Configure Case Variables
+## 2. Set the basics
 
-- List the variables to be used in the case.
-- Specify the **Name**, **Data Type**, and any other relevant attributes for each variable.
-- Mark whether each variable is **Required** or **Optional**.
+Provide the core identity fields (see the [field reference](./index.mdx)):
 
----
-
-## 4. Create Case Milestones
-
-- Identify key milestones in the case lifecycle.
-- Define each milestone’s **Name**, **Description**, and any **Deadlines** or **Trigger Conditions**.
-- Set up milestone **Order** and **Dependencies**, if needed.
+- **`id`** — a stable slug, unique across case types.
+- **`name`** — the human-readable name.
+- **`formKey`** — the key of the [Form](../03-Forms/index.mdx) that captures and displays case data.
+- **`deployed`** — set to `true` to make the type available to end users.
+- **`stagesLifecycleProcessKey`** — the BPMN process key, if you run with a workflow engine; leave empty when running engine-less.
 
 ---
 
-## 5. Design Case Activities
+## 3. Define the stages
 
-- Define tasks or actions that move the case forward.
-- Provide an **Activity Name**, **Description**, and any related **Deadlines**, **Forms**, or **Rules**.
-- Specify the **Sequence** and **Dependencies** of activities.
+Add the ordered [stages](./01-stages.mdx) the case moves through. Each stage needs an `id`, a zero-based `index`, and a `name`. The `name` is what transitions reference.
 
 ---
 
-## 6. Configure Case Forms
+## 4. Wire up event listeners
 
-- Identify the information to collect during the case lifecycle.
-- Design and configure **Forms** for data input and display.
-- Specify **Fields**, **Validation Rules**, and **Layout** for each form.
+Add [event listeners](./02-events-listeners.mdx) (`caseHooks`) to drive automation — for example, *when task `create-ticket` completes, move to stage `Issue Investigation`*. Remember that stage and queue actions reference targets **by name**.
 
 ---
 
-## 7. Define Case Rules
+## 5. (Optional) Configure the Kanban board
 
-- Determine automation points or decision logic in the workflow.
-- Create rules with specific **Conditions** and **Actions**.
-- Set the criteria that trigger each rule.
+Set `kanbanConfig` (`title` / `content`) to control the board columns shown for this case type.
 
 ---
 
-## 8. Set Case Permissions
+## 6. Validate and save
 
-- Define user access and actions per role.
-- Assign permissions for:
-  - Viewing
-  - Editing
-  - Completing
-  - Other custom operations
-- Link each permission to the relevant **User Role** or **User Group**.
+Open the **Schema** tab to confirm the definition conforms to the Standard (the tab flags the number of issues if any). Validation does not block saving, but a conforming definition is one that will behave predictably. Save to persist via the configuration API.
 
----
-
-## 9. Review and Save
-
-- Review all configuration elements.
-- Confirm that everything is complete and accurate.
-- Click **Save** to finalize and publish the case definition.
-
----
-
-Congratulations! You have successfully created a case definition using the WKS Platform UI. Remember to regularly review and update case definitions as your processes evolve. Refer to the WKS Platform documentation or contact your system administrator for further assistance or advanced configuration options.
+:::tip
+You can also export and re-import definitions as JSON to move a configured case type between environments.
+:::
