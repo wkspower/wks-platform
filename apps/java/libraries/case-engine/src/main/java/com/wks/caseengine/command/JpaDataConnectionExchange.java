@@ -42,8 +42,15 @@ public class JpaDataConnectionExchange implements DataConnectionExchange {
 	private QueueRepository queueRepository;
 
 	@Override
+	@Transactional(readOnly = true)
 	public JsonObject exportFromDatabase(Gson gson) {
-		throw new RuntimeException("not implemented");
+		// Symmetric to importToDatabase: export the canonical form/caseDefinition/queue
+		// collections under the same keys the import side reads.
+		JsonObject exportedData = new JsonObject();
+		exportedData.add("form", gson.toJsonTree(formRepository.find()).getAsJsonArray());
+		exportedData.add("caseDefinition", gson.toJsonTree(caseDefinitionRepository.find()).getAsJsonArray());
+		exportedData.add("queue", gson.toJsonTree(queueRepository.find()).getAsJsonArray());
+		return exportedData;
 	}
 
 	@Override

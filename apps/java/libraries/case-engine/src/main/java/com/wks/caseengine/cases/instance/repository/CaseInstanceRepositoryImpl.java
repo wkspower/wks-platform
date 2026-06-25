@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
@@ -92,10 +93,21 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 	public void update(final String businessKey, final CaseInstance caseInstance)
 			throws DatabaseRecordNotFoundException {
 		Bson filter = Filters.eq("businessKey", businessKey);
-		Bson update = Updates.combine(Updates.set("status", caseInstance.getStatus()),
-				Updates.set("stage", caseInstance.getStage()), Updates.set("attributes", caseInstance.getAttributes()),
-				Updates.set("documents", caseInstance.getDocuments()),
-				Updates.set("queueId", caseInstance.getQueueId()), Updates.set("comments", caseInstance.getComments()));
+
+		// Only overwrite status when the patch carries a resolvable value; otherwise preserve
+		// the persisted status. Mirrors CaseInstanceJpaRepositoryImpl.update() so both backends
+		// behave identically (a patch touching only stage/queueId must not null out status).
+		List<Bson> updates = new ArrayList<>();
+		CaseStatus status = caseInstance.getStatus();
+		if (status != null) {
+			updates.add(Updates.set("status", status.getCode()));
+		}
+		updates.add(Updates.set("stage", caseInstance.getStage()));
+		updates.add(Updates.set("attributes", caseInstance.getAttributes()));
+		updates.add(Updates.set("documents", caseInstance.getDocuments()));
+		updates.add(Updates.set("queueId", caseInstance.getQueueId()));
+		updates.add(Updates.set("comments", caseInstance.getComments()));
+		Bson update = Updates.combine(updates);
 
 		CaseInstance updatedCaseInstance = getCollection().findOneAndUpdate(filter, update);
 		if (updatedCaseInstance == null) {
@@ -146,7 +158,7 @@ public class CaseInstanceRepositoryImpl implements CaseInstanceRepository {
 		return connection.getOperations();
 	}
 
-	private MongoCollection<CaseInstance> getCollection() {
+	protected MongoCollection<CaseInstance> getCollection() {
 		return connection.getCaseInstanceCollection();
 	}
 

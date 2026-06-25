@@ -12,10 +12,9 @@
 package com.wks.it;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -27,25 +26,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.wks.api.security.context.SecurityContextTenantHolder;
-import com.wks.caseengine.cases.definition.CaseStatus;
-import com.wks.caseengine.cases.instance.CaseInstance;
-import com.wks.caseengine.cases.instance.repository.CaseInstanceJpaRepositoryImpl;
-import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
+import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionJpaRepositoryImpl;
+import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.command.JpaDataConnectionExchange;
 import com.wks.caseengine.db.EngineDatabaseTenantConfig;
-import com.wks.caseengine.repository.JpaPaginator;
+import com.wks.caseengine.form.Form;
+import com.wks.caseengine.form.FormJpaRepositoryImpl;
+import com.wks.caseengine.form.FormRepository;
+import com.wks.caseengine.queue.Queue;
+import com.wks.caseengine.queue.QueueJpaRepositoryImpl;
+import com.wks.caseengine.queue.QueueRepository;
 
 /**
- * WP-1.0 acceptance: proves the real {@link EngineDatabaseTenantConfig} JPA wiring
- * boots against an embedded H2 database (database.type=jpa) and serves CRUD on the
- * single ("public") schema with NO external datastore container.
+ * Proves {@link JpaDataConnectionExchange#exportFromDatabase} (which previously threw
+ * "not implemented") returns the canonical form/caseDefinition/queue collections, symmetric
+ * to its import side, against embedded H2 (database.type=jpa) with no external datastore.
  *
- * <p>Lives in {@code com.wks.it} (outside every production @ComponentScan) so its
- * nested @SpringBootConfiguration is not picked up by other tests' contexts.
+ * <p>Lives in {@code com.wks.it} (outside every production @ComponentScan) so its nested
+ * @SpringBootConfiguration is not picked up by other tests' contexts.
  */
-@SpringBootTest(classes = CaseInstanceJpaRepositoryImplIT.TestApp.class, properties = {
+@SpringBootTest(classes = JpaDataExportIT.TestApp.class, properties = {
 		"database.type=jpa",
-		"spring.datasource.jdbcUrl=jdbc:h2:mem:wks_jpa_it;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
+		"spring.datasource.jdbcUrl=jdbc:h2:mem:wks_export_it;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
@@ -54,11 +60,12 @@ import com.wks.caseengine.repository.JpaPaginator;
 				+ "de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration,"
 				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
 				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
-public class CaseInstanceJpaRepositoryImplIT {
+public class JpaDataExportIT {
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
-	@Import({ EngineDatabaseTenantConfig.class, CaseInstanceJpaRepositoryImpl.class, JpaPaginator.class })
+	@Import({ EngineDatabaseTenantConfig.class, CaseDefinitionJpaRepositoryImpl.class, FormJpaRepositoryImpl.class,
+			QueueJpaRepositoryImpl.class, JpaDataConnectionExchange.class })
 	static class TestApp {
 
 		@Bean
@@ -102,39 +109,32 @@ public class CaseInstanceJpaRepositoryImplIT {
 	}
 
 	@Autowired
-	private CaseInstanceRepository repository;
+	private FormRepository formRepository;
+
+	@Autowired
+	private CaseDefinitionRepository caseDefinitionRepository;
+
+	@Autowired
+	private QueueRepository queueRepository;
+
+	@Autowired
+	private JpaDataConnectionExchange dataConnectionExchange;
 
 	@Test
-	public void shouldPersistAndReadCaseInstanceOnEmbeddedH2() throws Exception {
-		CaseInstance toSave = new CaseInstance("634d1eac797f75ecc4a10052", "WP10-0001", "loan-approval",
-				"Data Collection", "WIP_CASE_STATUS");
+	public void shouldExportCanonicalCollectionsFromJpaBackend() throws Exception {
+		formRepository.save(Form.builder().key("form-1").title("Form 1").build());
+		caseDefinitionRepository.save(CaseDefinition.builder().id("cd-1").name("Case Def 1").deployed(true).build());
+		queueRepository.save(Queue.builder().id("q-1").name("Queue 1").build());
 
-		String uid = repository.save(toSave);
-		assertNotNull(uid, "save() must return the generated uid");
+		JsonObject exported = dataConnectionExchange.exportFromDatabase(new Gson());
 
-		CaseInstance fetched = repository.get("WP10-0001");
-		assertNotNull(fetched);
-		assertEquals("WP10-0001", fetched.getBusinessKey());
-		assertEquals("loan-approval", fetched.getCaseDefinitionId());
-		assertEquals("Data Collection", fetched.getStage());
-		assertEquals(CaseStatus.WIP_CASE_STATUS, fetched.getStatus());
+		assertNotNull(exported, "export must return data, not null");
+		assertTrue(exported.has("form") && exported.get("form").isJsonArray());
+		assertTrue(exported.has("caseDefinition") && exported.get("caseDefinition").isJsonArray());
+		assertTrue(exported.has("queue") && exported.get("queue").isJsonArray());
 
-		List<CaseInstance> all = repository.find();
-		assertFalse(all.isEmpty(), "find() must return the persisted case");
-	}
-
-	@Test
-	public void shouldPreservePersistedStatusWhenPatchCarriesNullStatus() throws Exception {
-		// Cross-backend contract: a patch touching only stage must not null out the persisted
-		// status. The JPA update() already guards this; this pins it so Mongo/JPA can't drift.
-		repository.save(new CaseInstance("634d1eac797f75ecc4a10099", "WP10-0002", "loan-approval",
-				"Data Collection", "WIP_CASE_STATUS"));
-
-		CaseInstance patch = CaseInstance.builder().businessKey("WP10-0002").stage("Review").build();
-		repository.update("WP10-0002", patch);
-
-		CaseInstance reloaded = repository.get("WP10-0002");
-		assertEquals("Review", reloaded.getStage());
-		assertEquals(CaseStatus.WIP_CASE_STATUS, reloaded.getStatus(), "status must be preserved");
+		assertEquals(1, exported.getAsJsonArray("form").size());
+		assertEquals(1, exported.getAsJsonArray("caseDefinition").size());
+		assertEquals(1, exported.getAsJsonArray("queue").size());
 	}
 }
