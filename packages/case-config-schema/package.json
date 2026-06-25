@@ -1,0 +1,30 @@
+{
+  "name": "@wkspower/case-config-schema",
+  "version": "1.0.0",
+  "description": "The WKS Case Configuration Standard — canonical, versioned JSON Schemas for case-type configuration (CaseDefinition, Form, RecordType, Queue) plus a validator. Single source of truth consumed by the backend, the portal, and tooling.",
+  "license": "MIT",
+  "main": "src/index.js",
+  "types": "dist/types.d.ts",
+  "files": [
+    "schemas/",
+    "src/",
+    "dist/"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate-types.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "^15.0.3"
+  },
+  "keywords": [
+    "wks",
+    "case-management",
+    "json-schema",
+    "configuration",
+    "standard"
+  ]
+}

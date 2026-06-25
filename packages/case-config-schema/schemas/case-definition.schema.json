@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/case-definition",
+  "title": "WKS Case Definition",
+  "description": "A case type: the config-driven template for cases. Part of the WKS Case Configuration Standard. Self-contained (internal $defs only) so it validates identically across JSON Schema validators in any language.",
+  "type": "object",
+  "required": ["id", "name", "formKey"],
+  "properties": {
+    "schemaVersion": {
+      "$ref": "#/$defs/schemaVersion"
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable unique identifier for the case type (slug)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable case type name."
+    },
+    "formKey": {
+      "type": "string",
+      "description": "Key of the Form whose structure renders this case type's data."
+    },
+    "stagesLifecycleProcessKey": {
+      "type": "string",
+      "description": "Key of the BPMN process driving the stage lifecycle. Empty/absent when running engine-less (wks.bpm.engine=none)."
+    },
+    "deployed": {
+      "type": "boolean",
+      "description": "Whether this case type is available to end users."
+    },
+    "stages": {
+      "type": "array",
+      "description": "Ordered lifecycle stages.",
+      "items": { "$ref": "#/$defs/caseStage" }
+    },
+    "caseHooks": {
+      "type": "array",
+      "description": "Event-driven automation: on a matching event, apply actions (stage/queue transitions).",
+      "items": { "$ref": "#/$defs/actionHook" }
+    },
+    "kanbanConfig": {
+      "$ref": "#/$defs/kanbanConfig"
+    },
+    "bpmEngineId": {
+      "type": "string",
+      "deprecated": true,
+      "description": "Legacy field present in seed data. Not modeled on the engine's CaseDefinition and silently ignored on read. Documented here so the schema does not flag it; do not rely on it."
+    },
+    "_id": {
+      "description": "Storage envelope field (e.g. MongoDB ObjectId wrapper). Not part of the logical config contract."
+    }
+  },
+  "$defs": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline.",
+      "examples": ["1.0"]
+    },
+    "caseStage": {
+      "type": "object",
+      "required": ["id", "index", "name"],
+      "properties": {
+        "id": { "type": "string", "description": "Stage identifier (string, typically the ordinal as text)." },
+        "index": { "type": "integer", "minimum": 0, "description": "Zero-based ordering index." },
+        "name": { "type": "string", "description": "Display name of the stage." },
+        "processesDefinitions": {
+          "type": "array",
+          "description": "BPMN processes bound to this stage (manually or auto-started).",
+          "items": { "$ref": "#/$defs/caseStageProcessDefinition" }
+        }
+      }
+    },
+    "caseStageProcessDefinition": {
+      "type": "object",
+      "properties": {
+        "autoStart": { "type": "boolean" },
+        "definitionKey": { "type": "string" },
+        "definitionName": { "type": "string" }
+      }
+    },
+    "actionHook": {
+      "type": "object",
+      "required": ["eventType", "actions"],
+      "properties": {
+        "eventType": {
+          "type": "string",
+          "enum": ["TASK_COMPLETE_EVENT_TYPE"],
+          "description": "Event that triggers the hook. Vocabulary pinned to com.wks.caseengine.tasks.event.complete.CaseEventType."
+        },
+        "processDefKey": { "type": "string", "description": "BPMN process key the event must originate from." },
+        "taskDefKey": { "type": "string", "description": "BPMN task key whose completion fires the hook." },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/caseAction" }
+        }
+      }
+    },
+    "caseAction": {
+      "type": "object",
+      "required": ["actionType"],
+      "properties": {
+        "id": { "type": "string" },
+        "actionType": {
+          "type": "string",
+          "enum": ["CASE_STAGE_UPDATE_ACTION", "CASE_QUEUE_UPDATE_ACTION"],
+          "description": "Polymorphic discriminator. Vocabulary pinned to com.wks.caseengine.cases.definition.action.CaseActionType."
+        },
+        "newStage": {
+          "type": "string",
+          "description": "Target stage. NOTE: holds the stage NAME, not its id (matches current engine + portal behavior)."
+        },
+        "queueId": {
+          "type": "string",
+          "description": "Target queue. NOTE: holds the queue NAME despite the field name (matches current engine + portal behavior)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "actionType": { "const": "CASE_STAGE_UPDATE_ACTION" } } },
+          "then": { "required": ["newStage"] }
+        },
+        {
+          "if": { "properties": { "actionType": { "const": "CASE_QUEUE_UPDATE_ACTION" } } },
+          "then": { "required": ["queueId"] }
+        }
+      ]
+    },
+    "kanbanConfig": {
+      "type": "object",
+      "description": "Free-form kanban board configuration. Known keys documented; extra keys permitted.",
+      "properties": {
+        "title": { "type": "string", "description": "Comma-separated column titles (split on ',' by the portal)." },
+        "content": { "type": "string", "description": "Comma-separated content/field mapping for columns." }
+      }
+    }
+  }
+}

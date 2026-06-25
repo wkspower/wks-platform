@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/ext/case-hook-vocabulary",
+  "title": "WKS Case Hook vocabulary",
+  "description": "Normative enum vocabulary for case hooks, kept in lockstep with the Java enums. The portal hardcodes these string literals and the backend dispatches them via hand-rolled Gson deserializers (CaseActionDeserializer / ActionHookDeserializer); adding a value on one side without the other breaks silently. This file pins the shared vocabulary. The canonical structural shapes live inline in case-definition.schema.json ($defs.actionHook / $defs.caseAction).",
+  "type": "object",
+  "$defs": {
+    "eventType": {
+      "type": "string",
+      "enum": ["TASK_COMPLETE_EVENT_TYPE"],
+      "description": "Mirrors com.wks.caseengine.tasks.event.complete.CaseEventType."
+    },
+    "actionType": {
+      "type": "string",
+      "enum": ["CASE_STAGE_UPDATE_ACTION", "CASE_QUEUE_UPDATE_ACTION"],
+      "description": "Mirrors com.wks.caseengine.cases.definition.action.CaseActionType."
+    }
+  }
+}

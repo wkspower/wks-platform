@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/form",
+  "title": "WKS Form",
+  "description": "A Form.io-based form definition. Part of the WKS Case Configuration Standard. The component tree under `structure` is validated permissively (Form.io is an open component model); the WKS-specific `recordtype` extension is described in ext/form-recordtype.schema.json.",
+  "type": "object",
+  "required": ["key", "structure"],
+  "properties": {
+    "schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+    "key": { "type": "string", "description": "Unique form key, referenced by CaseDefinition.formKey." },
+    "title": { "type": ["string", "null"] },
+    "toolTip": { "type": ["string", "null"], "description": "Optional tooltip; may be null." },
+    "structure": { "$ref": "#/$defs/formStructure" },
+    "_id": { "description": "Storage envelope field. Not part of the logical config contract." }
+  },
+  "$defs": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 baseline.",
+      "examples": ["1.0"]
+    },
+    "formStructure": {
+      "type": "object",
+      "required": ["components"],
+      "description": "The Form.io schema tree.",
+      "properties": {
+        "display": {
+          "type": "string",
+          "enum": ["form", "wizard"],
+          "description": "Render mode. The portal reads structure.display directly."
+        },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/formComponent" }
+        }
+      }
+    },
+    "formComponent": {
+      "type": "object",
+      "description": "A Form.io component. Validated permissively (Form.io is an open component model and real trees include typeless container/layout components). WKS adds a non-standard `recordtype` component (see ext/form-recordtype.schema.json) that the portal rewrites into a native select at load time.",
+      "properties": {
+        "type": { "type": "string", "description": "Component type, e.g. textfield, textarea, number, datetime, select, checkbox, selectboxes, button, columns, panel, or the WKS extension 'recordtype'. Absent on container/layout wrappers." },
+        "key": { "type": "string" },
+        "label": { "type": "string" },
+        "input": { "type": "boolean" },
+        "components": {
+          "type": "array",
+          "description": "Nested components (panels, fieldsets, etc.).",
+          "items": { "$ref": "#/$defs/formComponent" }
+        },
+        "columns": {
+          "type": "array",
+          "description": "Columns layout; each column nests its own components.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/formComponent" }
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "recordtype" } }, "required": ["type"] },
+          "then": {
+            "required": ["customOptions"],
+            "properties": {
+              "customOptions": {
+                "type": "object",
+                "description": "WKS recordtype extension config. See ext/form-recordtype.schema.json.",
+                "properties": {
+                  "inputType": { "type": "string", "description": "'selectone' -> select; otherwise selectboxes." },
+                  "template": { "type": "string" },
+                  "recordType": {
+                    "type": "object",
+                    "properties": { "id": { "type": "string" } }
+                  },
+                  "valueProperty": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
