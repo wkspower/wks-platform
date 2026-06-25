@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +81,9 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 			        return tenant;
 			});
 		} catch (DataAccessException e) {
-			log.warn("Tenant database not found", e);
+			log.warn("tenant_database table not found; using the default datasource only "
+					+ "(expected in single-datasource / single-tenant setups)");
+			log.debug("tenant_database lookup failed", e);
 			return Collections.emptyList();
 		}
 	}

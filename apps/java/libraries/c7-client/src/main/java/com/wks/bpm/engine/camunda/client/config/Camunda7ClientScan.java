@@ -11,6 +11,7 @@
  */
 package com.wks.bpm.engine.camunda.client.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
+@ConditionalOnProperty(name = "wks.bpm.engine", havingValue = "camunda7", matchIfMissing = true)
 @ComponentScan(basePackages = { "com.wks.bpm.engine.camunda.client", "org.camunda.community.rest.client.springboot" })
 public class Camunda7ClientScan {
 

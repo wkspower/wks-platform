@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>c7-external-tasks</artifactId>
@@ -23,16 +23,28 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-json</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-jackson</artifactId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-gson</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.wks</groupId>
 			<artifactId>case-engine-rest-client</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${revision}</version>
 		</dependency>		
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-kafka</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -44,9 +56,8 @@
 			<version>${camunda7.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>javax.xml.bind</groupId>
-		    <artifactId>jaxb-api</artifactId>
-		    <version>${jaxb.version}</version>
+		    <groupId>jakarta.xml.bind</groupId>
+		    <artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -70,7 +81,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.5.0</version>
 			</plugin>
 		</plugins>
 	</build>

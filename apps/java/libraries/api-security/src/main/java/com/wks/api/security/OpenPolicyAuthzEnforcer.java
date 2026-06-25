@@ -1,43 +1,54 @@
 /*
  * WKS Platform - Open-Source Project
- * 
+ *
  * This file is part of the WKS Platform, an open-source project developed by WKS Power.
- * 
+ *
  * WKS Platform is licensed under the MIT License.
- * 
+ *
  * © 2021 WKS Power. All rights reserved.
- * 
+ *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
 package com.wks.api.security;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public final class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object> {
+public final class OpenPolicyAuthzEnforcer implements AuthorizationManager<RequestAuthorizationContext> {
 
-	private RestTemplate restTemplate;
-	private List<AntPathRequestMatcher> matchers;
+	private static final int OPA_CONNECT_TIMEOUT_MS = 2000;
+	private static final int OPA_CONNECTION_REQUEST_TIMEOUT_MS = 2000;
+	private static final int OPA_SOCKET_TIMEOUT_MS = 3000;
 
-	private OpenPolicyAuthzEnforcerConfig config;
+	private final RestTemplate restTemplate;
+	private final List<RequestMatcher> matchers;
+	private final OpenPolicyAuthzEnforcerConfig config;
 
 	public OpenPolicyAuthzEnforcer(String opaAuthURL) {
 		this(OpenPolicyAuthzEnforcerConfig.builder().opaAuthURL(opaAuthURL).build());
@@ -46,63 +57,79 @@ public final class OpenPolicyAuthzEnforcer implements AccessDecisionVoter<Object
 	public OpenPolicyAuthzEnforcer(final OpenPolicyAuthzEnforcerConfig config) {
 		this.config = config;
 		this.restTemplate = createRestTemplate();
-		this.matchers = new LinkedList<>();
+		this.matchers = new ArrayList<>();
+
+		PathPatternRequestMatcher.Builder builder = PathPatternRequestMatcher.withDefaults();
 
 		if (config.isActuatorEnabled()) {
-			this.matchers.addAll(Arrays.asList(new AntPathRequestMatcher("/healthCheck"),
-					new AntPathRequestMatcher("/actuator/**")));
+			this.matchers.add(builder.matcher("/healthCheck"));
+			this.matchers.add(builder.matcher("/actuator/**"));
 		}
 
 		if (config.isSwaggerEnabled()) {
-			this.matchers.addAll(Arrays.asList(new AntPathRequestMatcher("/swagger-ui/**"),
-					new AntPathRequestMatcher("/swagger-ui.html"), new AntPathRequestMatcher("/v3/api-docs/**")));
+			this.matchers.add(builder.matcher("/swagger-ui/**"));
+			this.matchers.add(builder.matcher("/swagger-ui.html"));
+			this.matchers.add(builder.matcher("/v3/api-docs/**"));
 		}
 	}
 
 	@Override
-	public boolean supports(ConfigAttribute attribute) {
-		return true;
-	}
+	public AuthorizationDecision authorize(Supplier<? extends Authentication> authentication,
+			RequestAuthorizationContext context) {
+		HttpServletRequest request = context.getRequest();
 
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return true;
-	}
-
-	@Override
-	public int vote(Authentication authentication, Object obj, Collection<ConfigAttribute> attributes) {
-		if (!(obj instanceof FilterInvocation)) {
-			return ACCESS_ABSTAIN;
+		if (matchers.stream().anyMatch(m -> m.matches(request))) {
+			return new AuthorizationDecision(true);
 		}
 
-		FilterInvocation filter = (FilterInvocation) obj;
-		HttpServletRequest request = filter.getRequest();
-
-		if (matchers.stream().filter(f -> f.matches(request)).count() > 0) {
-			return ACCESS_GRANTED;
+		Authentication auth;
+		try {
+			auth = authentication.get();
+		} catch (RuntimeException e) {
+			log.debug("No authentication available, denying", e);
+			return new AuthorizationDecision(false);
 		}
 
-		Map<String, Object> input = config.getHandler().resolver(request, authentication);
+		Map<String, Object> input = config.getHandler().resolver(request, auth);
 
 		HttpEntity<?> body = new HttpEntity<>(new OpenPolicyRequest(input));
-		OpenPolicyResponse response = restTemplate.postForObject(this.config.getOpaAuthURL(), body,
-				OpenPolicyResponse.class);
-		if (response == null) {
-			throw new RuntimeException("Error connecting to OPA Server");
+		OpenPolicyResponse response;
+		try {
+			response = restTemplate.postForObject(this.config.getOpaAuthURL(), body, OpenPolicyResponse.class);
+		} catch (RestClientException e) {
+			log.error("OPA call failed; denying request", e);
+			throw new AccessDeniedException("Authorization service unavailable", e);
 		}
 
-		if (!response.getResult()) {
+		if (response == null || !response.getResult()) {
 			log.debug("Denied with Input -> {}", input);
-			return ACCESS_DENIED;
+			return new AuthorizationDecision(false);
 		}
 
 		log.debug("Allowed with Input -> {}", input);
-		return ACCESS_GRANTED;
+		return new AuthorizationDecision(true);
 	}
 
 	private RestTemplate createRestTemplate() {
-		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-		return new RestTemplate(requestFactory);
+		ConnectionConfig connectionConfig = ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.of(OPA_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.setSocketTimeout(Timeout.of(OPA_SOCKET_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.build();
+
+		PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+				.setDefaultConnectionConfig(connectionConfig)
+				.build();
+
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(Timeout.of(OPA_CONNECTION_REQUEST_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+				.build();
+
+		CloseableHttpClient httpClient = HttpClients.custom()
+				.setConnectionManager(connectionManager)
+				.setDefaultRequestConfig(requestConfig)
+				.build();
+
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
 	}
 
 }

@@ -2,57 +2,72 @@
 sidebar_position: 2
 ---
 
-# 🗺️ Roadmap
+# Roadmap
 
-The WKS Platform roadmap outlines our vision for providing a robust, modern, and secure Business Process Management (BPM) and Case Management solution. This roadmap is a statement of intent and priorities. It is not a rigid schedule, and plans may evolve based on community feedback and market requirements.
+The WKS Platform roadmap outlines our vision for providing a robust, modern, and secure Business Process Management (BPM) and Case Management solution. We follow a versioned release strategy, focusing on stability, security, and developer experience.
 
-## 📊 Visual Roadmap
+## Platform Evolution
 
 ```mermaid
 flowchart LR
-    %% Stage 1: In Progress
-    subgraph G1 ["In Progress (Launch Q2 2026)"]
+    %% v1.4.14: Previous stable line
+    subgraph V14 ["v1.4.14"]
+        direction TB
+        L1[Java 17 / SB 3]
+        L2[Legacy Security State]
+    end
+
+    %% v1.5.0: Current release
+    subgraph V15 ["v1.5.0 (The Stabilization) — Current"]
         direction TB
         A[Spring Boot 4.0.6]
         B[Java 21 Support]
         C[Camunda 7.24]
+        S[Zero Critical Vulns]
     end
 
-    %% Stage 2: Planned
-    subgraph G2 ["Planned (Next)"]
-        TBD1[To be defined]
+    %% Future: TBD
+    subgraph V_FUTURE ["Future Vision"]
+        direction TB
+        F1[To be defined]
     end
 
-    %% Stage 3: Future Vision
-    subgraph G3 ["Future Vision (Later)"]
-        TBD2[To be defined]
-    end
-
-    %% Logical Flow connecting subgraphs directly
-    G1 -.-> G2
-    G2 -.-> G3
+    %% Logical Flow
+    V14 --> V15
+    V15 -.-> V_FUTURE
 
     %% Styling
-    classDef inprogress fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef completed fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+    classDef current fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef planned fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
-    class A,B,C inprogress;
-    class TBD1,TBD2 planned;
+    
+    class V14 completed;
+    class V15 current;
+    class V_FUTURE planned;
+    class L1,L2,A,B,C,S,F1 text;
 ```
 
 ---
 
-## 🛠️ In Progress (Launch Q2 2026)
+## v1.4.14
+**Theme: Maintenance & Support**
 
-This phase focuses on the upcoming major release, modernizing the core infrastructure of the platform.
+The previous stable line, on Java 17 and Spring Boot 3.x. It continues to receive maintenance updates through the v1.5.x migration grace period — see the [Support & Release Policy](./release-policy.md).
 
-*   **Java Migration:** Full support for **Java 21** (LTS).
-*   **Spring Boot Upgrade:** Migration to **Spring Boot 4.0.6**.
-*   **Camunda Engine Upgrade:** Official support for **Camunda 7.24**.
+---
 
-## 📅 Planned (Next)
+## v1.5.0 (Current Release)
+**Theme: The Stabilization Release**
 
-*To be defined.*
+The current release. A stabilization release that hardens the existing platform: upgrading core dependencies to current LTS/supported versions and clearing High and Critical vulnerabilities, without changing the application's capabilities.
 
-## 🔭 Future Vision (Later)
+*   **Zero-Vulnerability Baseline**: Elimination of all High and Critical CVEs across the platform.
+*   **Java 21 & Spring Boot 4**: Transition to the latest LTS and next-gen framework standards.
+*   **Camunda 7.24 Integration**: Optimized workflow engine performance and long-term support.
+
+---
+
+## Planned & Future Vision
+**Theme: TBD**
 
 *To be defined.*

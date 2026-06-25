@@ -1,0 +1,8 @@
+# Keep the Docker build context small: the multi-stage builds run `mvn` inside
+# the image, so host build output and tooling must not be shipped in.
+**/target/
+**/*.iml
+.idea/
+.vscode/
+**/.DS_Store
+**/*.log

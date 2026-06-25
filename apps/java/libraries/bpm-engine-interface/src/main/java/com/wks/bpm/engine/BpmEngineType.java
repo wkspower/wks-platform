@@ -18,10 +18,7 @@ import com.google.gson.annotations.SerializedName;
 public enum BpmEngineType implements Serializable {
 
 	@SerializedName("BPM_ENGINE_CAMUNDA7")
-	BPM_ENGINE_CAMUNDA7("BPM_ENGINE_CAMUNDA7", "Camunda 7", "url"),
-
-	@SerializedName("BPM_ENGINE_CAMUNDA8")
-	BPM_ENGINE_CAMUNDA8("BPM_ENGINE_CAMUNDA8", "Camunda 8", "cluster");
+	BPM_ENGINE_CAMUNDA7("BPM_ENGINE_CAMUNDA7", "Camunda 7", "url");
 
 	private final String code;
 

@@ -1,0 +1,163 @@
+name: Publish Images
+
+# Reusable workflow: builds and pushes every service image to GHCR. Called by
+# release.yml (tag -> vX.Y.Z + latest) and build.yml (develop -> develop).
+#
+# Tagging is fully event-driven via docker/metadata-action — the caller no longer
+# passes a tag. For each image the action derives:
+#   - type=ref,event=branch -> the branch name (e.g. `develop`).
+#   - type=ref,event=tag    -> the raw git tag, leading `v` kept (e.g. `v1.4.14`),
+#     matching every existing ghcr.io/wkspower/*:vX.Y.Z image and the CONTRIBUTING.md
+#     "the tag name is the image tag" convention. (Deliberately NOT type=semver,
+#     which would strip the `v` and diverge.)
+#   - type=sha              -> an immutable, commit-pinned `sha-<short>` tag added to
+#     EVERY build so a floating `develop` deploy can still be pinned/rolled back.
+#   - flavor latest=auto    -> `latest` is applied automatically on tag pushes
+#     (releases) and never on branch pushes.
+#
+# So: a develop push -> `develop` + `sha-<short>`; a `v1.5.0` tag push ->
+# `v1.5.0` + `latest` + `sha-<short>`.
+#
+# Java service images build their own jars inside the Dockerfile from the reactor
+# root (context: ./apps/java). When `maven_revision` is provided it is passed as the
+# REVISION build-arg so the jar version matches the image tag; left empty the pom's
+# ${revision} default (dev SNAPSHOT) applies. The image tag keeps its leading `v`
+# while the jar version is bare (release.yml strips it), so the two stay in step.
+
+on:
+  workflow_call:
+    inputs:
+      maven_revision:
+        description: "Maven -Drevision for Java images; empty = pom default (SNAPSHOT)"
+        required: false
+        type: string
+        default: ""
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/wkspower
+  KEYCLOAK_URL: http://localhost:8082
+  WKS_API_URL: http://localhost:8081
+  WKS_STORAGE_API_URL: http://localhost:8085
+  WEBSOCKET_ENABLED: false
+  WEBSOCKET_URL: ws://localhost:8484
+  TOPIC_CASE_CREATE: case-create
+  TOPIC_CREATE_HUMAN_TASK: human-task-create
+  NOVU_ENABLED: false
+  NOVU_PUBLISHER_API_URL: http://localhost:3002
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # --- Java services: build from the reactor root, stamp the version ---
+          - name: storage-api
+            context: ./apps/java
+            file: apps/java/services/storage-api/Dockerfile
+            revision: true
+          - name: case-engine-rest-api
+            context: ./apps/java
+            file: apps/java/services/case-engine-rest-api/Dockerfile
+            revision: true
+          - name: c7-external-tasks
+            context: ./apps/java
+            file: apps/java/services/c7-external-tasks/Dockerfile
+            revision: true
+          - name: demo-data-loader
+            context: ./apps/java
+            file: apps/java/services/demo-data-loader/Dockerfile
+            revision: true
+          # --- OPA policy bundle ---
+          - name: opa
+            context: ./opa
+            file: opa/Dockerfile
+          # --- React portal (dist pre-built in the gated step below) ---
+          - name: case-portal
+            context: ./apps/react/case-portal
+            file: apps/react/case-portal/deployments/Dockerfile
+            portal: true
+          # --- Node services: build from their own dirs, no pre-build ---
+          - name: websocket-publisher
+            context: ./apps/node/websocket-publisher
+            file: apps/node/websocket-publisher/Dockerfile
+          - name: novu-publisher
+            context: ./apps/node/novu-publisher
+            file: apps/node/novu-publisher/Dockerfile
+          - name: email-sender
+            context: ./apps/node/email-sender
+            file: apps/node/email-sender/Dockerfile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The case-portal image's Dockerfile copies a pre-built `dist`, so the portal
+      # must be built here before the image build. Only the case-portal matrix leg
+      # needs Node.
+      - name: Set up Node
+        if: matrix.portal
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies for case-portal
+        if: matrix.portal
+        run: yarn --cwd apps/react/case-portal install
+
+      - name: Build for case-portal
+        if: matrix.portal
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: |
+          export REACT_APP_AUTH_ISSUER_URL="${{ env.KEYCLOAK_URL }}"
+          export REACT_APP_API_URL="${{ env.WKS_API_URL }}"
+          export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL }}"
+          export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
+          export REACT_APP_WEBSOCKETS_URL="${{ env.WEBSOCKET_URL }}"
+          export REACT_APP_WEBSOCKETS_CASE_CREATED="${{ env.TOPIC_CASE_CREATE }}"
+          export REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED="${{ env.TOPIC_CREATE_HUMAN_TASK }}"
+          export REACT_APP_NOVU_ENABLED="${{ env.NOVU_ENABLED }}"
+          export REACT_APP_NOVU_PUBLISHER_API_URL="${{ env.NOVU_PUBLISHER_API_URL }}"
+          yarn --cwd apps/react/case-portal build
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Event-driven tags/labels for this image. See header for the full scheme.
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_BASE }}/${{ matrix.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+          flavor: |
+            latest=auto
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: ${{ matrix.revision && format('REVISION={0}', inputs.maven_revision) || '' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

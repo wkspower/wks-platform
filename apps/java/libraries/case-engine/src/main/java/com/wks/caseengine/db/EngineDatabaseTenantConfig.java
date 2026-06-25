@@ -11,10 +11,13 @@
  */
 package com.wks.caseengine.db;
 
+import java.util.Map;
+
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,9 +38,17 @@ import jakarta.persistence.EntityManagerFactory;
 		"com.wks.caseengine.cases.instance.email.repository", "com.wks.caseengine.cases.instance.repository",
 		"com.wks.caseengine.form", "com.wks.caseengine.queue", "com.wks.caseengine.record",
 		"com.wks.caseengine.record.type" })
-@EntityScan(basePackages = "com.wks.caseengine.entity")
+@EntityScan(basePackages = "com.wks.caseengine.jpa.entity")
 @EnableTransactionManagement
 public class EngineDatabaseTenantConfig {
+
+	// Single schema source: Hibernate generates the schema from the JPA entities
+	// (no per-DB schema-*.sql files). The dialect is auto-detected from the
+	// connection, so the same config serves H2 and PostgreSQL. Multi-tenant
+	// Postgres provisioning still needs Flyway/Liquibase (prod follow-up); auto-DDL
+	// only creates the resolved/default tenant's schema.
+	@Value("${spring.jpa.hibernate.ddl-auto:update}")
+	private String ddlAuto;
 
 	@Bean
 	@ConfigurationProperties("spring.datasource")
@@ -45,13 +56,23 @@ public class EngineDatabaseTenantConfig {
 		return new HikariConfig();
 	}
 
+	// NOTE: the DataSource bean is TenantRoutingDatasource (a tenant-routing
+	// AbstractRoutingDataSource built from hikariConfig). We deliberately do NOT
+	// declare a second DataSource bean here — doing so makes the EntityManagerFactory
+	// DataSource injection ambiguous and (since HikariDataSource extends HikariConfig)
+	// also makes TenantRoutingDatasource's HikariConfig injection ambiguous.
+
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource);
-		em.setPackagesToScan("com.wks.caseengine.entity");
+		em.setPackagesToScan("com.wks.caseengine.jpa.entity");
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
+		// The manual EMF does not honor spring.jpa.* auto-config, so set the schema
+		// generation property explicitly. Dialect is intentionally left unset for
+		// Hibernate auto-detection.
+		em.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto", ddlAuto));
 		return em;
 	}
 

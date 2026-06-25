@@ -51,9 +51,11 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script>
-      window.KEYCLOAK_URL = "$__SERVER_KEYCLOAK_URL__";
+      window.AUTH_MODE = "$__SERVER_AUTH_MODE__";
+      window.AUTH_ISSUER_URL = "$__SERVER_AUTH_ISSUER_URL__";
       window.API_URL = "$__SERVER_API_URL__";
       window.STORAGE_URL = "$__SERVER_STORAGE_URL__";
+      window.STORAGE_MODE = "$__SERVER_STORAGE_MODE__";
       window.WEBSOCKETS_ENABLED = "$__SERVER_WEBSOCKETS_ENABLED__";
       window.WEBSOCKETS_URL = "$__SERVER_WEBSOCKETS_URL__";
       window.WEBSOCKETS_CASE_CREATED = "$__SERVER_WEBSOCKETS_CASE_CREATED__";

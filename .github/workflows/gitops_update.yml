@@ -34,7 +34,7 @@ jobs:
       - name: Set up jdk 18
         uses: actions/setup-java@v3
         with:
-          java-version: "18"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Set up maven
@@ -49,7 +49,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
-          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL_LOCAL }}"
+          export REACT_APP_AUTH_ISSUER_URL="${{ env.KEYCLOAK_URL_LOCAL }}"
           export REACT_APP_API_URL="${{ env.WKS_API_URL_LOCAL }}"
           export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL_LOCAL }}"
           export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"
@@ -98,7 +98,7 @@ jobs:
       - name: Set up jdk 18
         uses: actions/setup-java@v3
         with:
-          java-version: "18"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Set up maven
@@ -113,7 +113,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
-          export REACT_APP_KEYCLOAK_URL="${{ env.KEYCLOAK_URL_DEMO }}"
+          export REACT_APP_AUTH_ISSUER_URL="${{ env.KEYCLOAK_URL_DEMO }}"
           export REACT_APP_API_URL="${{ env.WKS_API_URL_DEMO }}"
           export REACT_APP_STORAGE_URL="${{ env.WKS_STORAGE_API_URL_DEMO }}"
           export REACT_APP_WEBSOCKETS_ENABLED="${{ env.WEBSOCKET_ENABLED }}"

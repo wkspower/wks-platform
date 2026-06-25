@@ -11,7 +11,8 @@
  */
 package com.wks.caseengine.pagination.mongo;
 
-import org.springframework.util.Base64Utils;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import com.wks.caseengine.pagination.PaginationException;
 
@@ -26,8 +27,8 @@ public final class DigestUtils {
 		}
 
 		try {
-			byte[] decrypted = Base64Utils.decodeFromUrlSafeString(token.toString());
-			return new String(decrypted);
+			byte[] decrypted = Base64.getUrlDecoder().decode(token.toString());
+			return new String(decrypted, StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			log.error("Error encrypting token", e);
 			throw new PaginationException("Error decrypting token", e);
@@ -40,7 +41,7 @@ public final class DigestUtils {
 		}
 
 		try {
-			return Base64Utils.encodeToUrlSafeString(token.toString().getBytes());
+			return Base64.getUrlEncoder().encodeToString(token.toString().getBytes(StandardCharsets.UTF_8));
 		} catch (Exception e) {
 			log.error("Error encrypting token", e);
 			throw new PaginationException("Error encrypting token", e);

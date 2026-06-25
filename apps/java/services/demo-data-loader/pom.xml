@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.wks</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>demo-data-loader</artifactId>
@@ -14,8 +14,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.keycloak</groupId>
+			<!-- The standalone admin client tracks its own patch line (26.0.x),
+			     decoupled from the server version; compatible across 26.x. -->
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>20.0.0</version>
+			<version>26.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -60,6 +62,10 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-gson</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version> <!--$NO-MVN-MAN-VER$ -->
@@ -74,16 +80,6 @@
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongodb-driver-core</artifactId>
 			<version>${mongo.version}</version> <!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>io.camunda.spring</groupId>
-			<artifactId>spring-boot-starter-camunda</artifactId>
-			<version>${camunda8.spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.camunda</groupId>
-			<artifactId>zeebe-client-java</artifactId>
-			<version>${camunda8.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -107,33 +103,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.5.0</version>
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<!-- identity -->
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>identity</id>
-			<name>Camunda Identity</name>
-			<url>https://artifacts.camunda.com/artifactory/camunda-identity/</url>
-		</repository>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>identity-snapshots</id>
-			<name>Camunda Snapshot Identity</name>
-			<url>https://artifacts.camunda.com/artifactory/camunda-identity-snapshots/</url>
-		</repository>
-	</repositories>
 </project>

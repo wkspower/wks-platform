@@ -19,13 +19,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class StorageServiceFactoryImpl implements StorageServiceFactory {
 
-	@Autowired
+	@Autowired(required = false)
 	@Qualifier("MinioServiceFactory")
 	private ServiceFactory minio;
 
-	@Autowired
+	@Autowired(required = false)
 	@Qualifier("DigitalOceanServiceFactory")
 	private ServiceFactory digitalOcean;
+
+	@Autowired(required = false)
+	@Qualifier("FilesystemServiceFactory")
+	private ServiceFactory filesystem;
 
 	@Value("${driver.storage.factoryclass}")
 	private String factoryClass;
@@ -38,14 +42,26 @@ public class StorageServiceFactoryImpl implements StorageServiceFactory {
 	@Override
 	public ServiceFactory getFactory(String driver) {
 		if ("minio".equals(driver)) {
-			return minio;
+			return requireLoaded(minio, driver);
 		}
 
 		if ("do".equals(driver)) {
-			return digitalOcean;
+			return requireLoaded(digitalOcean, driver);
+		}
+
+		if ("filesystem".equals(driver)) {
+			return requireLoaded(filesystem, driver);
 		}
 
 		throw new IllegalArgumentException(String.format("Factory name '%s' not found", driver));
+	}
+
+	private static ServiceFactory requireLoaded(ServiceFactory factory, String driver) {
+		if (factory == null) {
+			throw new IllegalStateException(String.format(
+					"Storage driver '%s' beans are not loaded; check driver.storage.factoryclass", driver));
+		}
+		return factory;
 	}
 
 }

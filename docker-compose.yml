@@ -1,0 +1,423 @@
+# =============================================================================
+#  WKS Platform — LOCAL DEVELOPMENT ONLY. This stack is NOT production-ready:
+#  it runs Keycloak in `start-dev`, uses demo/admin credentials, and validates
+#  no secrets. For production see docker/docker-compose.prod.yml (separate path).
+#
+#  ONE FILE, driven by Compose profiles + env. Each concern is its own profile;
+#  the app services are env-driven so ANY combination min->max loads from one file.
+#
+#    docker compose up -d --build          # FULL stack (default profiles+env in .env)
+#    docker compose down                   # stop (keeps data volumes)
+#
+#    # MINIMAL: zero-dependency backend (embedded H2 + dev-token, no infra):
+#    COMPOSE_PROFILES=app,portal \
+#    WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token WKS_AUTHZ_OPA_ENABLED=false \
+#    WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false WKS_SEED_ENABLED=true \
+#    docker compose up -d --build
+#
+#  Infra profiles (concern -> profile): mongodb, keycloak, opa, camunda
+#  (camunda + c7-external-tasks), storage (minio + storage-api), storage-fs
+#  (storage-api alone, MinIO-free). App/aux profiles: app (case-engine-rest-api),
+#  portal, notifications, proxy, demo.
+#  Concern env knobs (defaults = full/secure): WKS_AUTH_MODE, WKS_AUTHZ_OPA_ENABLED,
+#  WKS_BPM_ENGINE, WKS_TENANCY_MULTI_TENANT, WKS_SEED_ENABLED, DRIVER_STORAGE_FACTORYCLASS;
+#  WKS_SPRING_PROFILES carries the jpa datasource (db-h2 / db-postgres). Any point on
+#  the spectrum = COMPOSE_PROFILES=<infra subset> + matching env.
+#  App images are pulled from GHCR (public) by default; --build compiles locally
+#  (required for minimal/filesystem — the published image predates these).
+#  Camunda 8 is experimental/outdated — see experimental/camunda8/.
+# =============================================================================
+
+name: wks-platform
+
+# Image/build/port for the single env-driven case-engine-rest-api service.
+x-case-engine-rest-api: &case-engine-rest-api
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-engine-rest-api:${WKS_VERSION:-develop}
+    build:
+        context: apps/java
+        dockerfile: services/case-engine-rest-api/Dockerfile
+    ports:
+        - 8081:8081
+
+# Image/build/port for the single env-driven storage-api service.
+x-storage-api: &storage-api
+    image: ${WKS_REGISTRY:-ghcr.io/wkspower}/storage-api:${WKS_VERSION:-develop}
+    build:
+        context: apps/java
+        dockerfile: services/storage-api/Dockerfile
+    ports:
+        - 8085:8085
+
+services:
+
+    # ------------------------------------------------------------------ core
+    # (no profile → always started)
+
+    minio:
+        image: quay.io/minio/minio
+        profiles: [storage]
+        command: server /data --console-address ":9090"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+        ports:
+            - 9000:9000
+            - 9090:9090
+        environment:
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        volumes:
+            - minio:/data:rw
+
+    mongodb:
+        image: mongo:6.0.14
+        profiles: [mongodb]
+        ports:
+            - 27017:27017
+        healthcheck:
+            test: mongosh --eval 'db.stats().ok' --quiet
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+        volumes:
+            - mongo:/data/db:rw
+
+    opa:
+        # Upstream OPA with rules live-mounted from ./opa (no build needed).
+        image: openpolicyagent/opa:0.49.2-static
+        profiles: [opa]
+        ports:
+            - 8181:8181
+        command:
+            - run
+            - --server
+            - /etc/rules/wks_policy_rules.rego
+        volumes:
+            - ./opa:/etc/rules:ro
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:26.6.1
+        profiles: [keycloak]
+        command: start-dev
+        environment:
+            KC_HEALTH_ENABLED: "true"
+            # KC 26 renamed the bootstrap-admin vars; the old KEYCLOAK_ADMIN[_PASSWORD]
+            # still work but log a deprecation warning.
+            KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+            KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+        # KC 25+ serves health/metrics on a dedicated management port (9000), not
+        # the main HTTP port. The 26.x image also ships no curl/wget, so probe the
+        # readiness endpoint over bash's /dev/tcp instead.
+        healthcheck:
+            test:
+                - CMD
+                - bash
+                - -c
+                - 'exec 3<>/dev/tcp/localhost/9000 && printf "GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3 && grep -q "200 OK" <&3'
+            interval: 10s
+            retries: 10
+            start_period: 5s
+            timeout: 20s
+        ports:
+            - 8082:8080
+        volumes:
+            - keycloak:/opt/keycloak/data/
+
+    # One env-driven storage-api (started by the `storage` or `storage-fs` profile).
+    # Defaults to the MinIO driver + Keycloak/OPA (full). For MinIO-free local-disk:
+    #   DRIVER_STORAGE_FACTORYCLASS=filesystem WKS_AUTH_MODE=dev-token
+    #   WKS_AUTHZ_OPA_ENABLED=false COMPOSE_PROFILES=...,storage-fs
+    # In dev-token mode no extra wiring is needed: WKS_DEVTOKEN_ISSUER_URL below
+    # defaults to the engine's service name, so storage-api fetches the dev-issuer
+    # JWKS from the engine over the Docker network (not from its own localhost).
+    # The MinIO container is only pulled in under the `storage` profile, and the
+    # dependency is required:false so storage-fs runs without it. Build from source
+    # for the filesystem driver (the GHCR image predates it).
+    storage-api:
+        <<: *storage-api
+        profiles: [storage, storage-fs]
+        environment:
+            - DRIVER_STORAGE_FACTORYCLASS=${DRIVER_STORAGE_FACTORYCLASS:-minio}
+            - WKS_AUTH_MODE=${WKS_AUTH_MODE:-keycloak}
+            - WKS_AUTHZ_OPA_ENABLED=${WKS_AUTHZ_OPA_ENABLED:-true}
+            - OPA_URL=${OPA_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            # dev-token validation issuer — defaults to the engine's service name so
+            # storage-api reaches the issuing engine over the Docker network (used
+            # only when WKS_AUTH_MODE=dev-token; ignored in keycloak mode).
+            - WKS_DEVTOKEN_ISSUER_URL=${WKS_DEVTOKEN_ISSUER_URL:-http://case-engine-rest-api:8081/dev-auth}
+            - WKS_CORS_ALLOWED_ORIGINS=${WKS_CORS_ALLOWED_ORIGINS}
+            - MINIO_HOST_INTERNAL=${MINIO_HOST_INTERNAL}
+            - MINIO_HOST_EXTERNAL=${MINIO_HOST_EXTERNAL}
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+            - STORAGE_FS_BASEPATH=${STORAGE_FS_BASEPATH:-/data/storage}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL=${DRIVER_STORAGE_UPLOADS_BACKEND_PROTOCOL:-http}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_URL=${DRIVER_STORAGE_UPLOADS_BACKEND_URL:-localhost}
+            - DRIVER_STORAGE_UPLOADS_BACKEND_PORT=${DRIVER_STORAGE_UPLOADS_BACKEND_PORT:-9000}
+        depends_on:
+            minio:
+                condition: service_healthy
+                required: false
+        volumes:
+            - storage-fs:/data/storage
+
+    camunda:
+        image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
+        profiles: [camunda]
+        command: ./camunda.sh --rest --webapps
+        ports:
+            - 8080:8080
+        healthcheck:
+            test: curl --fail http://localhost:8080/engine-rest/version || exit 1
+            interval: 10s
+            retries: 3
+            start_period: 5s
+            timeout: 10s
+
+    # One env-driven case-engine-rest-api (profile: app). Every concern defaults to
+    # the full, secure stack and is overridable by env: WKS_AUTH_MODE, WKS_BPM_ENGINE,
+    # WKS_AUTHZ_OPA_ENABLED, WKS_TENANCY_MULTI_TENANT, WKS_SEED_ENABLED. Datastore
+    # selection that needs a datasource (jpa) is carried by a Spring profile via
+    # WKS_SPRING_PROFILES (db-h2 or db-postgres); mongo is the default, no profile.
+    # Optional infra is depends_on ... required:false, so the SAME service runs
+    # minimal (no infra) or full (mongodb+camunda enabled via COMPOSE_PROFILES).
+    # Minimal recipe: WKS_SPRING_PROFILES=db-h2 WKS_AUTH_MODE=dev-token
+    #   WKS_AUTHZ_OPA_ENABLED=false WKS_BPM_ENGINE=none WKS_TENANCY_MULTI_TENANT=false
+    #   WKS_SEED_ENABLED=true COMPOSE_PROFILES=app[,portal]
+    #   (build from source: the GHCR image is older)
+    case-engine-rest-api:
+        <<: *case-engine-rest-api
+        profiles: [app]
+        environment:
+            # Datastore profile (datasource-carrying); empty = mongo default.
+            - SPRING_PROFILES_ACTIVE=${WKS_SPRING_PROFILES:-}
+            # Per-concern flags (defaults reproduce the full, secure stack).
+            - WKS_AUTH_MODE=${WKS_AUTH_MODE:-keycloak}
+            - WKS_AUTHZ_OPA_ENABLED=${WKS_AUTHZ_OPA_ENABLED:-true}
+            - WKS_BPM_ENGINE=${WKS_BPM_ENGINE:-camunda7}
+            - WKS_TENANCY_MULTI_TENANT=${WKS_TENANCY_MULTI_TENANT:-true}
+            - WKS_SEED_ENABLED=${WKS_SEED_ENABLED:-false}
+            # Infra connection coordinates (used by whichever concerns are active).
+            - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_WKS_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            # dev-token validation issuer — service-name default so it resolves the
+            # same from any container (used only when WKS_AUTH_MODE=dev-token).
+            - WKS_DEVTOKEN_ISSUER_URL=${WKS_DEVTOKEN_ISSUER_URL:-http://case-engine-rest-api:8081/dev-auth}
+            - OPA_URL=${OPA_URL}
+            - WKS_CORS_ALLOWED_ORIGINS=${WKS_CORS_ALLOWED_ORIGINS}
+            # Legacy released images (the Camunda 8 era, e.g. v1.4.x) bundle a
+            # Zeebe client that can't reach a broker in Camunda 7 mode and reports
+            # health DOWN; the client is mandatory there, so we drop its health
+            # contributor. Harmless on develop/source-built images (no Zeebe).
+            - MANAGEMENT_HEALTH_ZEEBE_ENABLED=false
+        depends_on:
+            # Optional: only enforced when the infra profile is also active.
+            mongodb:
+                condition: service_healthy
+                required: false
+            camunda:
+                condition: service_healthy
+                required: false
+
+    c7-external-tasks:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/c7-external-tasks:${WKS_VERSION:-develop}
+        profiles: [camunda]
+        build:
+            context: apps/java
+            dockerfile: services/c7-external-tasks/Dockerfile
+        environment:
+            - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
+            - CAMUNDA_USERNAME=${CAMUNDA_USERNAME}
+            - CAMUNDA_PASSWORD=${CAMUNDA_PASSWORD}
+            - KEYCLOAK_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
+            - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+            - WEBSOCKET_ENABLED=${WEBSOCKET_ENABLED}
+            - DISABLE_BACKOFF_STRATEGY=${DISABLE_BACKOFF_STRATEGY}
+            # Kafka publishing — baked in but inert unless KAFKA_ENABLED=true
+            # (activate together with the `notifications` profile).
+            - KAFKA_ENABLED=${KAFKA_ENABLED:-false}
+            - KAFKA_URL=${KAFKA_URL}
+            - KAFKA_TOPIC_CASE_CREATE=${KAFKA_TOPIC_CASE_CREATE}
+            - KAFKA_TOPIC_CASE_EMAIL_OUTBOUND=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
+        depends_on:
+            camunda:
+                condition: service_healthy
+
+    # ------------------------------------------------------------- portal
+    # profile: portal (enabled by default via COMPOSE_PROFILES in .env)
+
+    case-portal:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-portal:${WKS_VERSION:-develop}
+        profiles: [portal]
+        build:
+            context: apps/react/case-portal
+            args:
+                GENERATE_SOURCEMAP: "false"
+        environment:
+            __SERVER_AUTH_MODE__: ${REACT_APP_AUTH_MODE:-keycloak}
+            __SERVER_AUTH_ISSUER_URL__: ${REACT_APP_AUTH_ISSUER_URL:-}
+            __SERVER_API_URL__: ${REACT_APP_API_URL}
+            __SERVER_STORAGE_URL__: ${REACT_APP_STORAGE_URL}
+            __SERVER_STORAGE_MODE__: ${REACT_APP_STORAGE_MODE:-minio}
+            __SERVER_WEBSOCKETS_ENABLED__: ${REACT_APP_WEBSOCKETS_ENABLED}
+            __SERVER_WEBSOCKETS_URL__: ${REACT_APP_WEBSOCKETS_URL}
+            __SERVER_WEBSOCKETS_CASE_CREATED__: ${REACT_APP_WEBSOCKETS_CASE_CREATED}
+            __SERVER_WEBSOCKETS_HUMAN_TASK_CREATED__: ${REACT_APP_WEBSOCKETS_HUMAN_TASK_CREATED}
+            __SERVER_NOVU_ENABLED__: ${REACT_APP_NOVU_ENABLED}
+            __SERVER_NOVU_PUBLISHER_API_URL__: ${REACT_APP_NOVU_PUBLISHER_API_URL}
+        ports:
+            - 3001:80
+
+    # ------------------------------------------------------ notifications
+    # profile: notifications — Kafka event bus + the consumers that act on it.
+    # Set KAFKA_ENABLED=true so the engine side actually publishes.
+
+    zookeeper:
+        image: confluentinc/cp-zookeeper:latest
+        profiles: [notifications]
+        container_name: zookeeper
+        ports:
+            - "2181:2181"
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+
+    kafka:
+        image: wurstmeister/kafka:latest
+        profiles: [notifications]
+        container_name: kafka
+        ports:
+            - "9092:9092"
+            - "9093:9093"
+        environment:
+            KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+            KAFKA_LISTENERS: INSIDE://kafka:9093,OUTSIDE://kafka:9092
+            KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        depends_on:
+            - zookeeper
+
+    email-sender:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/email-sender:${WKS_VERSION:-develop}
+        profiles: [notifications]
+        build:
+            context: apps/node/email-sender
+        environment:
+            - LOG_LEVEL=${EMAIL_SENDER_LOG_LEVEL}
+            - KAFKA_URL=${KAFKA_URL}
+            - KAFKA_TOPIC=${KAFKA_TOPIC_CASE_EMAIL_OUTBOUND}
+            - WKS_CASE_API_URL=${WKS_CASE_API_URL}
+            - JWT_TOKEN_URL=${KEYCLOAK_TOKEN_URL}
+            - JWT_TOKEN_CLIENT_ID=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_ID}
+            - JWT_TOKEN_CLIENT_SECRET=${MAIL_TO_CASE_JWT_TOKEN_CLIENT_SECRET}
+            - JWT_TOKEN_GRANT_TYPE=${MAIL_TO_CASE_JWT_TOKEN_GRANT_TYPE}
+        depends_on:
+            - kafka
+
+    websocket-publisher:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/websocket-publisher:${WKS_VERSION:-develop}
+        profiles: [notifications]
+        build:
+            context: apps/node/websocket-publisher
+        ports:
+            - "8484:8484"
+        environment:
+            - LOG_LEVEL=${WEBSOCKET_LOG_LEVEL}
+            - WEBSOCKET_PORT=8484
+            - KAFKA_URL=${KAFKA_URL}
+        depends_on:
+            - kafka
+
+    novu-publisher:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/novu-publisher:${WKS_VERSION:-develop}
+        profiles: [notifications]
+        build:
+            context: apps/node/novu-publisher
+        ports:
+            - 3002:3002
+        environment:
+            - LOG_LEVEL=${NOVU_LOG_LEVEL}
+            - KAFKA_URL=${KAFKA_URL}
+            - NOVU_TRIGGER_URL=${NOVU_TRIGGER_URL}
+            - NOVU_API_KEY=${NOVU_API_KEY}
+            - NOVU_APP_ID=${NOVU_APP_ID}
+            - NOVU_CASE_CREATE_WORKFLOW=${KAFKA_TOPIC_CASE_CREATE}
+            - NOVU_HUMAN_TASK_CREATE_WORKFLOW=${KAFKA_TOPIC_CREATE_HUMAN_TASK}
+        depends_on:
+            - kafka
+
+    # --------------------------------------------------------------- proxy
+    # profile: proxy — Traefik reverse proxy / dashboard (optional).
+
+    traefik:
+        image: traefik:v2.8
+        profiles: [proxy]
+        command:
+            - --log.level=debug
+            - --api.insecure=true
+            - --api.dashboard=true
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --providers.docker=true
+            - --experimental.hub=true
+            - --providers.docker.exposedbydefault=false
+            - --serversTransport.insecureSkipVerify=true
+            - --providers.file.watch=true
+            - --providers.file.directory=/traefik
+        ports:
+            - 80:80
+            - 443:443
+            - 8888:8080
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./configs/traefik:/traefik:ro
+
+    # ---------------------------------------------------------------- demo
+    # profile: demo (on by default) — one-shot loader that BOOTSTRAPS the
+    # Keycloak realm/clients/`demo` user required to log in AND seeds sample
+    # cases/forms/processes, then exits 0. Idempotent: safe to re-run (logs
+    # 409/"already exists" and continues). Drop it with COMPOSE_PROFILES=portal,
+    # but then the portal has no realm/user to log in against.
+
+    demo-data-loader:
+        image: ${WKS_REGISTRY:-ghcr.io/wkspower}/demo-data-loader:${WKS_VERSION:-develop}
+        profiles: [demo]
+        build:
+            context: apps/java
+            dockerfile: services/demo-data-loader/Dockerfile
+        environment:
+            - CAMUNDA7_DATA_IMPORT_ENABLED=true
+            - CAMUNDA8_DATA_IMPORT_ENABLED=false
+            - CAMUNDA_URL=${CAMUNDA_BASE_URL}
+            - MONGO_DATABASE=${MONGO_DEMO_DATA_LOADER_DATABASE}
+            - MONGO_CONN=${MONGO_CONNECTION_URL}
+            - KEYCLOAK_URL=${KEYCLOAK_URL}
+            - KEYCLOAK_DEFAULT_USER=${KEYCLOAK_DEFAULT_USER}
+            - KEYCLOAK_DEFAULT_USER_PASSWORD=${KEYCLOAK_DEFAULT_USER_PASSWORD}
+            - KEYCLOAK_DEFAULT_USER_EMAIL=${KEYCLOAK_DEFAULT_USER_EMAIL}
+            - KEYCLOAK_DEFAULT_USER_FIRST_NAME=${KEYCLOAK_DEFAULT_USER_FIRST_NAME}
+            - KEYCLOAK_DEFAULT_USER_LAST_NAME=${KEYCLOAK_DEFAULT_USER_LAST_NAME}
+        depends_on:
+            mongodb:
+                condition: service_healthy
+            camunda:
+                condition: service_healthy
+            keycloak:
+                condition: service_healthy
+
+volumes:
+    mongo:
+        driver: local
+    minio:
+        driver: local
+    keycloak:
+        driver: local
+    storage-fs:
+        driver: local

@@ -1,0 +1,55 @@
+/*
+ * WKS Platform - Open-Source Project
+ *
+ * This file is part of the WKS Platform, an open-source project developed by WKS Power.
+ *
+ * WKS Platform is licensed under the MIT License.
+ *
+ * © 2021 WKS Power. All rights reserved.
+ *
+ * For licensing information, see the LICENSE file in the root directory of the project.
+ */
+package com.wks.storage.service.filesystem;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
+import com.wks.storage.service.BucketService;
+import com.wks.storage.service.DownloadService;
+import com.wks.storage.service.ServiceFactory;
+import com.wks.storage.service.UploadService;
+
+@Service("FilesystemServiceFactory")
+@ConditionalOnProperty(name = "driver.storage.factoryclass", havingValue = "filesystem")
+public class FilesystemServiceFactory implements ServiceFactory {
+
+	@Autowired
+	@Qualifier("FilesystemBucketService")
+	private BucketService bucketService;
+
+	@Autowired
+	@Qualifier("FilesystemDownloadService")
+	private DownloadService downloadService;
+
+	@Autowired
+	@Qualifier("FilesystemUploadService")
+	private UploadService uploadService;
+
+	@Override
+	public BucketService getBucketService() {
+		return bucketService;
+	}
+
+	@Override
+	public DownloadService getDownloadService() {
+		return downloadService;
+	}
+
+	@Override
+	public UploadService getUploadService() {
+		return uploadService;
+	}
+
+}
