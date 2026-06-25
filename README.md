@@ -12,6 +12,13 @@ Spring Boot, React and Camunda.
 > The Docker Compose stack in this repo is for **local development only** — it is not
 > production-hardened.
 
+## Prerequisites
+
+- **Docker Compose v2.20.0 or newer** (check with `docker compose version`). The stack uses the
+  `required:` field in `depends_on`, which older versions reject with
+  `Additional property required is not allowed`. On Windows/macOS, update Docker Desktop; make sure
+  you invoke `docker compose` (the v2 plugin) rather than the legacy `docker-compose` v1 command.
+
 ## Quick start (full stack)
 
 Brings up the full stack — backend, case portal, and a demo seed — with images pulled from the
