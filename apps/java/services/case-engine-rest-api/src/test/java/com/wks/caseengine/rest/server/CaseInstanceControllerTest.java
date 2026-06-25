@@ -11,17 +11,22 @@
  */
 package com.wks.caseengine.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -36,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
+import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
 import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseInstance;
@@ -73,8 +79,12 @@ public class CaseInstanceControllerTest {
 	@Test
 	public void shouldSaveCaseInstance() throws Exception {
 		when(caseDefinitionRepository.get("CD-1")).thenReturn(new CaseDefinition());
+		// Verify the deserialized payload actually flows through to the created entity
+		// (the controller returns the persisted case), not just that the call returns 200.
 		this.mockMvc.perform(post("/case").contentType(MediaType.APPLICATION_JSON).content("{\"caseDefinitionId\":\"CD-1\"}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.caseDefinitionId").value("CD-1"))
+				.andExpect(jsonPath("$.businessKey").exists());
 	}
 
 	@Test
@@ -94,6 +104,26 @@ public class CaseInstanceControllerTest {
 		this.mockMvc
 				.perform(patch("/case/{businessKey}", "1").contentType("application/merge-patch+json").content("{}"))
 				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	public void shouldApplyMergePatchFieldsAndPreserveStatus() throws Exception {
+		// A patch touching only stage must update stage and leave the persisted status intact.
+		// Capture what reaches the repository, not just the HTTP status.
+		CaseInstance persisted = new CaseInstance(null, "1", "CD-1", "Data Collection", "WIP_CASE_STATUS");
+		when(caseInstanceRepository.get("1")).thenReturn(persisted);
+
+		this.mockMvc
+				.perform(patch("/case/{businessKey}", "1").contentType("application/merge-patch+json")
+						.content("{\"stage\":\"Review\"}"))
+				.andExpect(status().isNoContent());
+
+		ArgumentCaptor<CaseInstance> captor = ArgumentCaptor.forClass(CaseInstance.class);
+		verify(caseInstanceRepository).update(eq("1"), captor.capture());
+
+		CaseInstance saved = captor.getValue();
+		assertEquals("Review", saved.getStage(), "patched stage must be applied");
+		assertEquals(CaseStatus.WIP_CASE_STATUS, saved.getStatus(), "omitted status must be preserved");
 	}
 
 	@Test

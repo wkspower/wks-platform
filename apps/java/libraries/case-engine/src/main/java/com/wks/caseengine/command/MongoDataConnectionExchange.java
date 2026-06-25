@@ -36,7 +36,7 @@ public class MongoDataConnectionExchange implements DataConnectionExchange {
 		// Cases Instances
 		ArrayList<JsonObject> caseInstances = connection.getCaseInstCollection().find()
 				.map(o -> gson.fromJson(o.getJson(), JsonObject.class)).into(new ArrayList<JsonObject>());
-		exportedData.add("casesInstance", gson.toJsonTree(caseInstances).getAsJsonArray());
+		exportedData.add("caseInstance", gson.toJsonTree(caseInstances).getAsJsonArray());
 
 		// Forms
 		exportedData.add("form",
@@ -66,7 +66,7 @@ public class MongoDataConnectionExchange implements DataConnectionExchange {
 			}
 		}
 		exportedData.add("record", recordsArray);
-		return null;
+		return exportedData;
 	}
 
 	@Override

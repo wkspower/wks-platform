@@ -17,8 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.Conventions;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +31,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoCollection;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
@@ -54,6 +62,19 @@ public class CaseInstanceRepositoryImplIT {
 			protected MongoOperations getOperations() {
 				return operations;
 			}
+
+			// The write path (update/get/save) goes through the driver collection rather than
+			// the template; build it with the same POJO codec registry the production
+			// EngineMongoTenantConfig configures so CaseInstance round-trips identically.
+			@Override
+			protected MongoCollection<CaseInstance> getCollection() {
+				CodecRegistry pojo = CodecRegistries.fromRegistries(
+						MongoClientSettings.getDefaultCodecRegistry(),
+						CodecRegistries.fromProviders(PojoCodecProvider.builder()
+								.conventions(Arrays.asList(Conventions.ANNOTATION_CONVENTION)).automatic(true).build()));
+				return ((MongoTemplate) operations).getDb().withCodecRegistry(pojo)
+						.getCollection("caseInstance", CaseInstance.class);
+			}
 		};
 	}
 
@@ -75,6 +96,31 @@ public class CaseInstanceRepositoryImplIT {
 		assertEquals("1", results.first().getCaseDefinitionId());
 		assertEquals("Data Collection", results.first().getStage());
 		assertEquals(CaseStatus.ARCHIVED_CASE_STATUS, results.first().getStatus());
+	}
+
+	@Test
+	public void shouldPreservePersistedStatusWhenPatchCarriesNullStatus() throws Exception {
+		// Regression: a patch touching only stage must not null out the persisted status.
+		// Mirrors the JPA backend's guard so both behave identically.
+		CaseInstance patch = CaseInstance.builder().businessKey("92935").stage("New Stage").build();
+		assertEquals(null, patch.getStatus(), "precondition: patch has no status");
+
+		repository.update("92935", patch);
+
+		CaseInstance reloaded = repository.get("92935");
+		assertEquals("New Stage", reloaded.getStage());
+		assertEquals(CaseStatus.ARCHIVED_CASE_STATUS, reloaded.getStatus(), "status must be preserved");
+	}
+
+	@Test
+	public void shouldWriteStatusWhenPatchCarriesStatus() throws Exception {
+		CaseInstance patch = CaseInstance.builder().businessKey("92935").stage("New Stage")
+				.status(CaseStatus.CLOSED_CASE_STATUS.getCode()).build();
+
+		repository.update("92935", patch);
+
+		CaseInstance reloaded = repository.get("92935");
+		assertEquals(CaseStatus.CLOSED_CASE_STATUS, reloaded.getStatus());
 	}
 
 	@Test
