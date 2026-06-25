@@ -17,8 +17,10 @@ import { CaseDefFormStages } from './caseDefFormStages'
 import { CaseDefGeneralForm } from './caseDefGeneralForm'
 import { CaseDefFormForm } from './caseDefFormForm'
 import { CaseKanbanForm } from './caseDefKanban'
+import { CaseDefSchemaView } from './caseDefSchemaView'
 import { CaseDefService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
+import { validateCaseDefinition } from 'utils/caseConfigSchema'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -69,6 +71,8 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
   }
+
+  const schemaErrorCount = validateCaseDefinition(caseDef).errors.length
 
   const handleSave = () => {
     if (caseDef.status && caseDef.status === 'new') {
@@ -147,6 +151,12 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
             <Tab label='Stages' {...a11yProps(1)} />
             <Tab label='Event Listeners' {...a11yProps(2)} />
             <Tab label='Kanban' {...a11yProps(3)} />
+            <Tab
+              label={
+                schemaErrorCount > 0 ? `Schema (${schemaErrorCount})` : 'Schema'
+              }
+              {...a11yProps(4)}
+            />
           </Tabs>
         </Box>
 
@@ -168,6 +178,10 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
 
         <TabPanel value={tabValue} index={3}>
           <CaseKanbanForm caseDef={caseDef} setCaseDef={setCaseDef} />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={4}>
+          <CaseDefSchemaView caseDef={caseDef} />
         </TabPanel>
       </Dialog>
     </div>

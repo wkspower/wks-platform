@@ -17,6 +17,7 @@
     "@syncfusion/ej2-react-kanban": "^20.4.42",
     "@tabler/icons-react": "^3.2.0",
     "@wkspower/camunda-web-modeler": "^0.0.5",
+    "@wkspower/case-config-schema": "file:../../../packages/case-config-schema",
     "bpmn-js": "^10.0.0",
     "date-fns": "^3.6.0",
     "dompurify": "^3.4.9",
