@@ -84,7 +84,7 @@
     "style-loader": "^4.0.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
+    "webpack-dev-server": "^5.2.5"
   },
   "resolutions": {
     "axios": "^1.7.4",
@@ -97,6 +97,7 @@
     "prismjs": "^1.30.0",
     "js-yaml": "^4.2.0",
     "launch-editor": "^2.14.1",
-    "dompurify": "^3.4.9"
+    "dompurify": "^3.4.9",
+    "http-proxy-middleware": "^2.0.10"
   }
 }
