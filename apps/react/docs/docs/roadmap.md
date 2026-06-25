@@ -10,15 +10,15 @@ The WKS Platform roadmap outlines our vision for providing a robust, modern, and
 
 ```mermaid
 flowchart LR
-    %% v1.4.14: Legacy Version
+    %% v1.4.14: Previous stable line
     subgraph V14 ["v1.4.14"]
         direction TB
         L1[Java 17 / SB 3]
         L2[Legacy Security State]
     end
 
-    %% v1.5.0: Next Release
-    subgraph V15 ["v1.5.0 (The Stabilization)"]
+    %% v1.5.0: Current release
+    subgraph V15 ["v1.5.0 (The Stabilization) — Current"]
         direction TB
         A[Spring Boot 4.0.6]
         B[Java 21 Support]
@@ -38,11 +38,11 @@ flowchart LR
 
     %% Styling
     classDef completed fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
-    classDef inprogress fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef current fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef planned fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
     
     class V14 completed;
-    class V15 inprogress;
+    class V15 current;
     class V_FUTURE planned;
     class L1,L2,A,B,C,S,F1 text;
 ```
@@ -52,14 +52,14 @@ flowchart LR
 ## v1.4.14
 **Theme: Maintenance & Support**
 
-The current production version supporting Java 17 and Spring Boot 3.x. This version will receive maintenance updates until v1.5.0 reaches full production readiness.
+The previous stable line, on Java 17 and Spring Boot 3.x. It continues to receive maintenance updates through the v1.5.x migration grace period — see the [Support & Release Policy](./release-policy.md).
 
 ---
 
-## v1.5.0 (Next Release - In Progress)
+## v1.5.0 (Current Release)
 **Theme: The Stabilization Release**
 
-A stabilization release that hardens the existing platform: upgrading core dependencies to current LTS/supported versions and clearing High and Critical vulnerabilities, without changing the application's capabilities.
+The current release. A stabilization release that hardens the existing platform: upgrading core dependencies to current LTS/supported versions and clearing High and Critical vulnerabilities, without changing the application's capabilities.
 
 *   **Zero-Vulnerability Baseline**: Elimination of all High and Critical CVEs across the platform.
 *   **Java 21 & Spring Boot 4**: Transition to the latest LTS and next-gen framework standards.
