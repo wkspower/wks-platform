@@ -1,6 +1,7 @@
 {
   "caseDefinition": [
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a53688c0c8884b1e83fdfe"
       },
@@ -65,6 +66,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a53699c0c8884b1e83fe00"
       },
@@ -99,6 +101,7 @@
       "kanbanConfig": {}
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536a5c0c8884b1e83fe02"
       },
@@ -132,6 +135,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536b0c0c8884b1e83fe04"
       },
@@ -165,6 +169,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536bdc0c8884b1e83fe06"
       },
@@ -198,6 +203,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536cac0c8884b1e83fe08"
       },
@@ -231,6 +237,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536d9c0c8884b1e83fe0a"
       },
@@ -264,6 +271,7 @@
       ]
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a536e6c0c8884b1e83fe0c"
       },
@@ -299,6 +307,7 @@
   ],
   "form": [
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5371222c70cba3b209fbd"
       },
@@ -878,6 +887,7 @@
       "toolTip": "Customer Support"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5371a22c70cba3b209fd3"
       },
@@ -1500,6 +1510,7 @@
       "toolTip": "Employee Onboarding"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5372322c70cba3b209fee"
       },
@@ -2056,6 +2067,7 @@
       "toolTip": "Order Processing"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5372c22c70cba3b20a00c"
       },
@@ -2613,6 +2625,7 @@
       "toolTip": "Service Request"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5373c22c70cba3b20a038"
       },
@@ -3191,6 +3204,7 @@
       "toolTip": "Project Management"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5374522c70cba3b20a054"
       },
@@ -3747,6 +3761,7 @@
       "toolTip": "Claim Processing"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5374e22c70cba3b20a06f"
       },
@@ -4293,6 +4308,7 @@
       "toolTip": "Leave Management"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5375922c70cba3b20a092"
       },
@@ -4910,6 +4926,7 @@
       "toolTip": "Product Development"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538c822c70cba3b20a4d5"
       },
@@ -5222,6 +5239,7 @@
       "toolTip": "Create Ticket"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538df22c70cba3b20a51f"
       },
@@ -5462,6 +5480,7 @@
       "toolTip": null
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538e622c70cba3b20a529"
       },
@@ -5702,6 +5721,7 @@
       "toolTip": "Escalate Issue"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538f022c70cba3b20a547"
       },
@@ -5930,6 +5950,7 @@
       "toolTip": "Employee Registration"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538f622c70cba3b20a564"
       },
@@ -6158,6 +6179,7 @@
       "toolTip": "Department Assignment"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a538fd22c70cba3b20a575"
       },
@@ -6466,6 +6488,7 @@
       "toolTip": "Manager Approval"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5390422c70cba3b20a587"
       },
@@ -6768,6 +6791,7 @@
       "toolTip": "IT Setup"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64a5390f22c70cba3b20a5a8"
       },
@@ -7072,6 +7096,7 @@
   ],
   "queue": [
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64bfcea90f4949f8dd971ac8"
       },
@@ -7080,6 +7105,7 @@
       "description": "Regular Customers"
     },
     {
+      "schemaVersion": "1.0",
       "_id": {
         "$oid": "64bfceb50f4949f8dd971af4"
       },
