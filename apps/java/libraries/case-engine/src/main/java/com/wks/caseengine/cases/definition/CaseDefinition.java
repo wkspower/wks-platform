@@ -52,4 +52,11 @@ public class CaseDefinition {
 	@Default
 	private JsonObject kanbanConfig = new JsonObject();
 
+	/**
+	 * Version of the WKS Case Configuration Standard this document conforms to.
+	 * Absent/null is treated as the {@code 1.0} baseline (see
+	 * {@link com.wks.caseengine.config.schema.ConfigSchemaVersion#normalize(String)}).
+	 */
+	private String schemaVersion;
+
 }

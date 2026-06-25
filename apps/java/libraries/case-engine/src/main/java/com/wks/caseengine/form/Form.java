@@ -31,4 +31,7 @@ public class Form {
 	private String toolTip;
 	private JsonObject structure;
 
+	/** Version of the WKS Case Configuration Standard this document conforms to (absent/null = 1.0 baseline). */
+	private String schemaVersion;
+
 }
