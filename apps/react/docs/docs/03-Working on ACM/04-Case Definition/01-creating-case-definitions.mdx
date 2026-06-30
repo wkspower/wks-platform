@@ -5,7 +5,7 @@ title: Creating Case Definitions
 
 # Creating Case Definitions
 
-A case definition is a JSON document conforming to the [WKS Case Configuration Standard](./06-configuration-versioning.mdx). You can author one through the **Case Builder** UI or by importing JSON. This guide covers the fields you set and the order that makes sense.
+A case definition is a JSON document conforming to the [WKS Case Configuration Standard](../05-configuration-versioning.mdx). You can author one through the **Case Builder** UI or by importing JSON. This guide covers the fields you set and the order that makes sense.
 
 ---
 
@@ -29,13 +29,13 @@ Provide the core identity fields (see the [field reference](./index.mdx)):
 
 ## 3. Define the stages
 
-Add the ordered [stages](./01-stages.mdx) the case moves through. Each stage needs an `id`, a zero-based `index`, and a `name`. The `name` is what transitions reference.
+Add the ordered [stages](./02-Reference/01-stages.mdx) the case moves through. Each stage needs an `id`, a zero-based `index`, and a `name`. The `name` is what transitions reference.
 
 ---
 
 ## 4. Wire up event listeners
 
-Add [event listeners](./02-events-listeners.mdx) (`caseHooks`) to drive automation — for example, *when task `create-ticket` completes, move to stage `Issue Investigation`*. Remember that stage and queue actions reference targets **by name**.
+Add [event listeners](./02-Reference/02-events-listeners.mdx) (`caseHooks`) to drive automation — for example, *when task `create-ticket` completes, move to stage `Issue Investigation`*. Remember that stage and queue actions reference targets **by name**.
 
 ---
 

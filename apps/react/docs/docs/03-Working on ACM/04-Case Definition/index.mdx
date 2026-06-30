@@ -18,10 +18,10 @@ This page is the field-level reference for that document. Stages, event listener
 | `formKey` | string | ✅ | Key of the [Form](../03-Forms/index.mdx) that renders this case type's data. |
 | `stagesLifecycleProcessKey` | string | | Key of the BPMN process driving the stage lifecycle. Empty/absent when running engine-less (`wks.bpm.engine=none`). |
 | `deployed` | boolean | | Whether the case type is available to end users. |
-| `stages` | array | | Ordered lifecycle [stages](./01-stages.mdx). |
-| `caseHooks` | array | | Event-driven automation: [event listeners](./02-events-listeners.mdx). |
+| `stages` | array | | Ordered lifecycle [stages](./02-Reference/01-stages.mdx). |
+| `caseHooks` | array | | Event-driven automation: [event listeners](./02-Reference/02-events-listeners.mdx). |
 | `kanbanConfig` | object | | Kanban board configuration. Known keys: `title`, `content` (comma-separated). |
-| `schemaVersion` | string | | Version of the WKS Case Configuration Standard this document conforms to. See [Configuration Versioning](./06-configuration-versioning.mdx). |
+| `schemaVersion` | string | | Version of the WKS Case Configuration Standard this document conforms to. See [Configuration Versioning](../05-configuration-versioning.mdx). |
 
 :::caution Legacy / storage fields
 Seed data may also contain `bpmEngineId` (a legacy field that is **silently ignored** by the engine) and `_id` (a storage envelope field, e.g. a MongoDB ObjectId wrapper). Neither is part of the logical configuration contract; do not rely on them.
@@ -64,4 +64,4 @@ A trimmed real case definition (the demo `customer-support` type):
 
 ## Authoring
 
-Case definitions can be created and edited through the **Case Builder** (Management → Case Definitions) or by importing JSON directly. The Case Builder includes a **Schema view** that validates the definition against the Standard as you edit. See [Creating Case Definitions](./04-creating-case-definitions.mdx).
+Case definitions can be created and edited through the **Case Builder** (Management → Case Definitions) or by importing JSON directly. The Case Builder includes a **Schema view** that validates the definition against the Standard as you edit. See [Creating Case Definitions](./01-creating-case-definitions.mdx).
