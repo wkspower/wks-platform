@@ -40,7 +40,8 @@
       "items": { "$ref": "#/$defs/actionHook" }
     },
     "kanbanConfig": {
-      "$ref": "#/$defs/kanbanConfig"
+      "$ref": "#/$defs/kanbanConfig",
+      "deprecated": true
     },
     "bpmEngineId": {
       "type": "string",
@@ -130,7 +131,7 @@
     },
     "kanbanConfig": {
       "type": "object",
-      "description": "Free-form kanban board configuration. Known keys documented; extra keys permitted.",
+      "description": "PRESENTATION CONCERN — NOT part of the core case-definition contract. Configures how a kanban board renders for this case type, which largely duplicates `stages`. Retained on the document for backward compatibility, but slated to be extracted into a separate board-config schema keyed by case definition id (see CHANGELOG). Do not treat it as part of the contract; new consumers should derive the board from `stages`.",
       "properties": {
         "title": { "type": "string", "description": "Comma-separated column titles (split on ',' by the portal)." },
         "content": { "type": "string", "description": "Comma-separated content/field mapping for columns." }

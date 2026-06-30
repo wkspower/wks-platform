@@ -20,11 +20,14 @@ This page is the field-level reference for that document. Stages, event listener
 | `deployed` | boolean | | Whether the case type is available to end users. |
 | `stages` | array | | Ordered lifecycle [stages](./02-Reference/01-stages.mdx). |
 | `caseHooks` | array | | Event-driven automation: [event listeners](./02-Reference/02-events-listeners.mdx). |
-| `kanbanConfig` | object | | Kanban board configuration. Known keys: `title`, `content` (comma-separated). |
 | `schemaVersion` | string | | Version of the WKS Case Configuration Standard this document conforms to. See [Configuration Versioning](../05-configuration-versioning.mdx). |
 
 :::caution Legacy / storage fields
 Seed data may also contain `bpmEngineId` (a legacy field that is **silently ignored** by the engine) and `_id` (a storage envelope field, e.g. a MongoDB ObjectId wrapper). Neither is part of the logical configuration contract; do not rely on them.
+:::
+
+:::note Presentation field — `kanbanConfig` (outside the contract)
+A case definition document may carry a `kanbanConfig` object (`title`/`content`, comma-separated) describing how the kanban board renders. This is a **presentation concern, not part of the core case-definition contract** — the board's columns largely duplicate `stages`. It is retained on the document for backward compatibility but is **deprecated in the Standard** and slated to move into a separate board-config schema (keyed by case definition id). New consumers should derive the board from `stages`.
 :::
 
 ---
