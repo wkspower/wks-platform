@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - "**"
+  # Gate every PR on the build + tests. Without this trigger the checks run only
+  # on branch push and aren't associated with the PR, so branch protection can't
+  # require them. This is what turns the test suite into a real merge gate.
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -41,8 +45,37 @@ jobs:
         with:
           maven-version: 3.8.2
 
-      - name: Build all for backend api
-        run: mvn -B package --file apps/java/pom.xml
+      # `verify` (not `package`) so maven-failsafe-plugin runs the *IT integration
+      # tests and JaCoCo writes coverage reports. The config anti-drift gate
+      # (ConfigSchemaValidationTest) also runs as part of the reactor.
+      - name: Build and test backend api
+        run: mvn -B verify --file apps/java/pom.xml
+
+      - name: Upload JaCoCo coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage
+          path: "apps/java/**/target/site/jacoco/**"
+          if-no-files-found: warn
+
+  # The config Standard's JS validator is the same source of truth the backend
+  # anti-drift test loads. Running its node:test suite in CI keeps the published
+  # @wkspower/case-config-schema package honest.
+  test-config-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install and test case-config-schema
+        run: |
+          npm ci
+          npm test
+        working-directory: packages/case-config-schema
 
   build-react:
     runs-on: ubuntu-latest
@@ -78,7 +111,7 @@ jobs:
   # are pinned via tags (release.yml). maven_revision empty -> jars keep the SNAPSHOT.
   publish-develop:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-java, build-react]
+    needs: [build-java, build-react, test-config-schema]
     uses: ./.github/workflows/publish-images.yml
     permissions:
       contents: read
