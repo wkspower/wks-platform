@@ -14,6 +14,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import { useSession } from 'SessionStoreContext'
+import { useNotification } from 'components/Notification/NotificationContext'
 import MainCard from 'components/MainCard'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -49,6 +50,7 @@ export const CaseList = ({ status, caseDefId }) => {
   const [openNewCaseForm, setOpenNewCaseForm] = useState(false)
   const [view, setView] = React.useState('list')
   const [snackOpen, setSnackOpen] = useState(false)
+  const { notifyError } = useNotification()
   const keycloak = useSession()
   const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
@@ -67,6 +69,10 @@ export const CaseList = ({ status, caseDefId }) => {
   const pageSizeOptions = [5, 10, 25, 50]
 
   useEffect(() => {
+    // Ordering guard: if caseDefId/status changes (or the component unmounts)
+    // before an in-flight fetch resolves, ignore its result so a stale response
+    // can't overwrite the current view.
+    let ignore = false
     fetchCases(
       setFetching,
       keycloak,
@@ -76,13 +82,22 @@ export const CaseList = ({ status, caseDefId }) => {
       filter,
       setCases,
       setFilter,
+      notifyError,
+      () => !ignore,
     )
+    return () => {
+      ignore = true
+    }
   }, [caseDefId, status, openNewCaseForm])
 
   useEffect(() => {
-    CaseService.getCaseDefinitions(keycloak).then((resp) => {
-      setCaseDefs(resp)
-    })
+    CaseService.getCaseDefinitions(keycloak)
+      .then((resp) => {
+        setCaseDefs(resp)
+      })
+      .catch((err) => {
+        notifyError(err?.message || 'Failed to load case definitions')
+      })
   }, [])
 
   const handleRefresh = () => {
@@ -95,6 +110,7 @@ export const CaseList = ({ status, caseDefId }) => {
       filter,
       setCases,
       setFilter,
+      notifyError,
     )
   }
 
@@ -163,6 +179,7 @@ export const CaseList = ({ status, caseDefId }) => {
       filter,
       setCases,
       setFilter,
+      notifyError,
     )
   }
 
@@ -223,7 +240,10 @@ export const CaseList = ({ status, caseDefId }) => {
   )
 
   const handlerNextPage = () => {
-    setFetching(true) / setCases([])
+    // Was `setFetching(true) / setCases([])` — a stray `/` made this a no-op
+    // division expression instead of two statements.
+    setFetching(true)
+    setCases([])
 
     const next = {
       sort: filter.sort,
@@ -242,6 +262,9 @@ export const CaseList = ({ status, caseDefId }) => {
           hasPrevious: paging.hasPrevious,
           hasNext: paging.hasNext,
         })
+      })
+      .catch((err) => {
+        notifyError(err?.message || 'Failed to load the next page')
       })
       .finally(() => {
         setFetching(false)
@@ -270,6 +293,9 @@ export const CaseList = ({ status, caseDefId }) => {
           hasPrevious: paging.hasPrevious,
           hasNext: paging.hasNext,
         })
+      })
+      .catch((err) => {
+        notifyError(err?.message || 'Failed to load the previous page')
       })
       .finally(() => {
         setFetching(false)
@@ -304,6 +330,9 @@ export const CaseList = ({ status, caseDefId }) => {
           hasPrevious: paging.hasPrevious,
           hasNext: paging.hasNext,
         })
+      })
+      .catch((err) => {
+        notifyError(err?.message || 'Failed to change the page size')
       })
       .finally(() => {
         setFetching(false)
@@ -523,6 +552,8 @@ function fetchCases(
   filter,
   setCases,
   setFilter,
+  notifyError = () => {},
+  isActive = () => true,
 ) {
   setFetching(true)
 
@@ -530,11 +561,13 @@ function fetchCases(
 
   CaseService.getCaseDefinitionsById(keycloak, caseDefId)
     .then((resp) => {
+      if (!isActive()) return null
       resp.stages.sort((a, b) => a.index - b.index).map((o) => o.name)
       setStages(resp.stages)
       return CaseService.filterCase(keycloak, caseDefId, status, filter)
     })
     .then((resp) => {
+      if (!isActive() || !resp) return
       const { data, paging } = resp
       setCases(data)
       setFilter({
@@ -544,7 +577,12 @@ function fetchCases(
         hasNext: paging.hasNext,
       })
     })
+    .catch((err) => {
+      // The service layer now rejects on any non-OK status; surface it instead
+      // of leaving the user staring at an empty list.
+      if (isActive()) notifyError(err?.message || 'Failed to load cases')
+    })
     .finally(() => {
-      setFetching(false)
+      if (isActive()) setFetching(false)
     })
 }
