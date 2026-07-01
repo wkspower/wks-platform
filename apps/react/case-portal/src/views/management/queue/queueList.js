@@ -6,12 +6,14 @@ import MainCard from 'components/MainCard'
 import { useEffect, useState } from 'react'
 import { QueueService } from 'services/QueueService'
 import { QueueForm } from './queueForm'
+import { useNotification } from 'components/Notification/NotificationContext'
 
 export const QueueList = () => {
   const [queues, setQueues] = useState([])
   const [openForm, setOpenForm] = useState(false)
   const [queue, setQueue] = useState(null)
   const keycloak = useSession()
+  const { notifyError } = useNotification()
 
   useEffect(() => {
     QueueService.find(keycloak)
@@ -19,7 +21,7 @@ export const QueueList = () => {
         setQueues(data)
       })
       .catch((err) => {
-        console.log(err.message)
+        notifyError(err?.message || 'Failed to load queues')
       })
   }, [openForm])
 

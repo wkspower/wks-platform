@@ -33,12 +33,10 @@ async function saveDocumentsFromFiles(
 }
 
 async function saveDocument(keycloak, businessKey, document) {
+  // addDocuments() now rejects on any non-OK status (see services/request.js),
+  // so a failed upload lands in catch instead of returning a non-ok Response.
   try {
-    const data = await CaseService.addDocuments(keycloak, businessKey, document)
-    if (!data.ok) {
-      return Promise.reject(data)
-    }
-
+    await CaseService.addDocuments(keycloak, businessKey, document)
     return Promise.resolve(document)
   } catch (e) {
     return Promise.reject(e)

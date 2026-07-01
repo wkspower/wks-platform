@@ -6,12 +6,14 @@ import Button from '@mui/material/Button'
 import { RecordTypeForm } from './recordTypeForm'
 import { RecordTypeService } from 'services'
 import { useSession } from 'SessionStoreContext'
+import { useNotification } from 'components/Notification/NotificationContext'
 
 export const RecordTypeList = () => {
   const [recordTypes, setRecordTypes] = useState([])
   const [openForm, setOpenForm] = useState(false)
   const [recordType, setRecordType] = useState(null)
   const keycloak = useSession()
+  const { notifyError } = useNotification()
 
   useEffect(() => {
     RecordTypeService.getAll(keycloak)
@@ -19,7 +21,7 @@ export const RecordTypeList = () => {
         setRecordTypes(data)
       })
       .catch((err) => {
-        console.log(err.message)
+        notifyError(err?.message || 'Failed to load record types')
       })
   }, [openForm])
 
