@@ -153,7 +153,7 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
             <Tab label='Kanban' {...a11yProps(3)} />
             <Tab
               label={
-                schemaErrorCount > 0 ? `Schema (${schemaErrorCount})` : 'Schema'
+                schemaErrorCount > 0 ? `JSON (${schemaErrorCount})` : 'JSON'
               }
               {...a11yProps(4)}
             />

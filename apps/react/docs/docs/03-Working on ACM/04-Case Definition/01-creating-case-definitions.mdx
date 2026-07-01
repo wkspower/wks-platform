@@ -11,7 +11,7 @@ A case definition is a JSON document conforming to the [WKS Case Configuration S
 
 ## 1. Open the Case Builder
 
-Log in to the portal and go to **Management → Case Definitions**, then create a new definition (or edit an existing one). The builder is a tabbed editor; a **Schema** tab shows the live JSON and validates it against the Standard as you work.
+Log in to the portal and go to **Management → Case Definitions**, then create a new definition (or edit an existing one). The builder is a tabbed editor; a **JSON** tab shows the live definition and validates it against the Standard as you work.
 
 ---
 
@@ -47,7 +47,7 @@ Set `kanbanConfig` (`title` / `content`) to control the board columns shown for 
 
 ## 6. Validate and save
 
-Open the **Schema** tab to confirm the definition conforms to the Standard (the tab flags the number of issues if any). Validation does not block saving, but a conforming definition is one that will behave predictably. Save to persist via the configuration API.
+Open the **JSON** tab to confirm the definition conforms to the Standard (the tab flags the number of issues if any). Validation does not block saving, but a conforming definition is one that will behave predictably. Save to persist via the configuration API.
 
 :::tip
 You can also export and re-import definitions as JSON to move a configured case type between environments.

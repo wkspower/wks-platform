@@ -17,7 +17,7 @@ import Typography from '@mui/material/Typography'
 import { SCHEMA_VERSION, validateCaseDefinition } from 'utils/caseConfigSchema'
 
 /**
- * Read-only "Schema view": renders the live case definition against the WKS
+ * Read-only "JSON view": renders the live case definition against the WKS
  * Case Configuration Standard so authors can see and verify the underlying
  * config instead of treating the wizard as a black box. Visible + validated;
  * not an editor and not an enforcement gate.
