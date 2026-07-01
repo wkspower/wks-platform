@@ -1,0 +1,49 @@
+---
+id: recordtype-extension
+title: The recordtype Extension
+---
+
+# The `recordtype` Form Extension
+
+WKS adds one non-standard Form.io component: **`recordtype`**. It lets a form field be populated from a [Record Type](../04-Case%20Definition/index.mdx) — a dropdown whose options come from live record data.
+
+:::note Why it's documented here
+This pseudo-component is **not** known to standard Form.io tooling or to the backend. The portal rewrites it at load time (in `FormService`) into a native Form.io `select`/`selectboxes` whose `data.url` points at `/record/{recordType.id}`. Historically this contract lived only in one JavaScript function; the Standard now documents it in [`ext/form-recordtype.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/ext/form-recordtype.schema.json).
+:::
+
+---
+
+## Shape
+
+A `recordtype` component has `type: "recordtype"` and a `customOptions` object:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `customOptions.inputType` | string | `"selectone"` is rewritten to a `select`; any other value becomes `selectboxes`. |
+| `customOptions.template` | string | Form.io item template used to render each option label. |
+| `customOptions.recordType.id` | string | The `RecordType.id` whose records populate the options. |
+| `customOptions.valueProperty` | string | Property of each record used as the option value. |
+
+---
+
+## Example
+
+:::info Illustrative
+The demo seed data contains no `recordtype` instance, so this example is drawn from the extension schema rather than copied from seed.
+:::
+
+```json
+{
+  "type": "recordtype",
+  "key": "assignedTeam",
+  "label": "Assigned Team",
+  "customOptions": {
+    "inputType": "selectone",
+    "template": "<span>{{ item.name }}</span>",
+    "recordType": { "id": "teams" },
+    "valueProperty": "id"
+  }
+}
+```
+
+At render time the portal turns this into a native `select` backed by `GET /record/teams`.

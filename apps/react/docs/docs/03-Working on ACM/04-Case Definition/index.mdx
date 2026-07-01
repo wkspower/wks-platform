@@ -3,85 +3,68 @@ id: case-definition
 title: Case Definition
 ---
 
-This section provides a comprehensive overview of **case definitions** in the WKS Platform and explains their role in case management.
+A **case definition** is the config-driven template for a type of case. It is a JSON document validated against the **WKS Case Configuration Standard** — the canonical schema published at [`packages/case-config-schema/schemas/case-definition.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/case-definition.schema.json).
+
+This page is the field-level reference for that document. Stages, event listeners (hooks) and queues each have their own page.
 
 ---
 
-## Overview
+## Fields
 
-In the **WKS Platform**, a *case definition* acts as a reusable template for a specific type of case. It defines the **structure**, **behaviour**, and **lifecycle** of a case and governs how similar cases are created, processed, and monitored.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Stable unique identifier for the case type (slug). |
+| `name` | string | ✅ | Human-readable case type name. |
+| `formKey` | string | ✅ | Key of the [Form](../03-Forms/index.mdx) that renders this case type's data. |
+| `stagesLifecycleProcessKey` | string | | Key of the BPMN process driving the stage lifecycle. Empty/absent when running engine-less (`wks.bpm.engine=none`). |
+| `deployed` | boolean | | Whether the case type is available to end users. |
+| `stages` | array | | Ordered lifecycle [stages](./02-Reference/01-stages.mdx). |
+| `caseHooks` | array | | Event-driven automation: [event listeners](./02-Reference/02-events-listeners.mdx). |
+| `schemaVersion` | string | | Version of the WKS Case Configuration Standard this document conforms to. See [Configuration Versioning](../05-configuration-versioning.mdx). |
 
----
+:::caution Legacy / storage fields
+Seed data may also contain `bpmEngineId` (a legacy field that is **silently ignored** by the engine) and `_id` (a storage envelope field, e.g. a MongoDB ObjectId wrapper). Neither is part of the logical configuration contract; do not rely on them.
+:::
 
-## Key Concepts
-
-- **Case**: An individual instance created from a case definition. It represents a real-world scenario or process that needs management.
-- **Case Type**: Categorises cases by domain or function. Each type is linked to a specific case definition.
-- **Case Definition Key**: A unique identifier for each case definition, used to reference and manage cases programmatically.
-
----
-
-## Case Definition Elements
-
-A case definition in WKS comprises several elements that define its functionality and data model:
-
-| Element              | Description                                                                 |
-|----------------------|-----------------------------------------------------------------------------|
-| **Case Name**        | A user-friendly name for identifying the case definition.                  |
-| **Case Description** | A short explanation of the case's purpose and context.                     |
-| **Case Variables**   | Store and manage case-specific data throughout its lifecycle.              |
-| **Case Milestones**  | Represent key events or objectives in the case process.                    |
-| **Case Activities**  | Define the tasks or actions required to complete the case.                 |
-| **Case Forms**       | User interfaces for capturing or displaying case data.                     |
-| **Case Rules**       | Logic that drives decision-making based on conditions and actions.         |
-| **Case Permissions** | Specify who can access, view, or modify the case.                          |
+:::note Presentation field — `kanbanConfig` (outside the contract)
+A case definition document may carry a `kanbanConfig` object (`title`/`content`, comma-separated) describing how the kanban board renders. This is a **presentation concern, not part of the core case-definition contract** — the board's columns largely duplicate `stages`. It is retained on the document for backward compatibility but is **deprecated in the Standard** and slated to move into a separate board-config schema (keyed by case definition id). New consumers should derive the board from `stages`.
+:::
 
 ---
 
-## Case Definition Deployment
+## Example
 
-To make a case definition available for use, it must be **deployed** to the WKS Platform:
+A trimmed real case definition (the demo `customer-support` type):
 
-- Deployment enables case creation and management based on the definition.
-- Only users with the appropriate permissions can deploy definitions.
-
----
-
-## Versioning
-
-Case definitions support **versioning** to manage change over time:
-
-- Multiple versions can coexist for backward compatibility.
-- Versioning allows for:
-  - Smooth transitions between process updates
-  - Change tracking and auditing
-  - Rollbacks if needed
-
----
-
-## Configuration
-
-Case definitions can be created and managed using either:
-
-- A **graphical user interface (GUI)** provided by WKS
-- A **configuration file**, typically in JSON or YAML format
-
-Configuration includes defining elements such as:
-
-- Variables  
-- Milestones  
-- Activities  
-- Forms  
-- Rules  
-- Permissions
+```json
+{
+  "id": "customer-support",
+  "name": "Customer Support Case",
+  "formKey": "customer-support-form",
+  "stagesLifecycleProcessKey": "customer-support",
+  "deployed": true,
+  "schemaVersion": "1.0",
+  "stages": [
+    { "id": "0", "index": 0, "name": "Ticket Creation" },
+    { "id": "1", "index": 1, "name": "Issue Investigation" },
+    { "id": "2", "index": 2, "name": "Resolution" }
+  ],
+  "caseHooks": [
+    {
+      "eventType": "TASK_COMPLETE_EVENT_TYPE",
+      "processDefKey": "customer-support",
+      "taskDefKey": "create-ticket",
+      "actions": [
+        { "actionType": "CASE_STAGE_UPDATE_ACTION", "newStage": "Issue Investigation" }
+      ]
+    }
+  ],
+  "kanbanConfig": {}
+}
+```
 
 ---
 
-## Best Practices
+## Authoring
 
-To design effective and maintainable case definitions:
-
-- Align definitions with organizational processes and objectives.
-- Involve stakeholders and domain experts during design.
-- Review and update definitions regularly to reflect process or policy changes.
-- Maintain clear, versioned documentation for each case definition.
+Case definitions can be created and edited through the **Case Builder** (Management → Case Definitions) or by importing JSON directly. The Case Builder includes a **JSON view** that validates the definition against the Standard as you edit. See [Creating Case Definitions](./01-creating-case-definitions.mdx).

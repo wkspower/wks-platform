@@ -1,0 +1,10 @@
+# Root build context is used only by the case-portal image (docker-compose),
+# which needs both apps/react/case-portal and its internal dependency
+# packages/case-config-schema. Keep the context lean: never ship build output
+# or installed dependencies — they are regenerated inside the image.
+**/node_modules
+**/dist
+**/build
+**/target
+.git
+**/*.log

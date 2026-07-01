@@ -257,7 +257,10 @@ services:
         image: ${WKS_REGISTRY:-ghcr.io/wkspower}/case-portal:${WKS_VERSION:-develop}
         profiles: [portal]
         build:
-            context: apps/react/case-portal
+            # Repo-root context so the portal's internal dependency
+            # @wkspower/case-config-schema (packages/case-config-schema) resolves.
+            context: .
+            dockerfile: apps/react/case-portal/Dockerfile
             args:
                 GENERATE_SOURCEMAP: "false"
         environment:

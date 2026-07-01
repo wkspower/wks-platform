@@ -1,0 +1,33 @@
+---
+id: queues
+title: Queues
+---
+
+A **queue** is a work bucket that cases can be routed to (for example, by a [queue-update action](./02-events-listeners.mdx)). Queues are standalone configuration documents validated against [`queue.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/queue.schema.json).
+
+---
+
+## Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Unique queue identifier. |
+| `name` | string | ✅ | Display name. |
+| `description` | string | | Free-text description. |
+| `schemaVersion` | string | | Standard version (see [Configuration Versioning](../../05-configuration-versioning.mdx)). |
+
+:::caution Referenced by name
+Case actions (`CASE_QUEUE_UPDATE_ACTION`) reference a queue by its **`name`**, not its `id`. Keep queue names stable.
+:::
+
+---
+
+## Example
+
+```json
+{
+  "id": "regular-customer",
+  "name": "Regular Customers",
+  "description": "Regular Customers"
+}
+```

@@ -2478,6 +2478,11 @@
     dmn-js-properties-panel "^0.7.0"
     react-split-pane "^0.1.92"
 
+"@wkspower/case-config-schema@file:../../../packages/case-config-schema":
+  version "1.0.0"
+  dependencies:
+    ajv "^8.17.1"
+
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@xtuc/ieee754/-/ieee754-1.2.0.tgz#eef014a3145ae477a1cbc00cd1e552336dceb790"
@@ -2552,7 +2557,7 @@ ajv@^6.12.4, ajv@^6.12.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.9.0:
+ajv@^8.0.0, ajv@^8.17.1, ajv@^8.9.0:
   version "8.20.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.20.0.tgz#304b3636add88ba7d936760dd50ece006dea95f9"
   integrity sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==

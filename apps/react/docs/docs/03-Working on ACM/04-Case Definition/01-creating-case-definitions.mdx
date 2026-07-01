@@ -1,0 +1,54 @@
+---
+id: creating-case-definitions
+title: Creating Case Definitions
+---
+
+# Creating Case Definitions
+
+A case definition is a JSON document conforming to the [WKS Case Configuration Standard](../05-configuration-versioning.mdx). You can author one through the **Case Builder** UI or by importing JSON. This guide covers the fields you set and the order that makes sense.
+
+---
+
+## 1. Open the Case Builder
+
+Log in to the portal and go to **Management → Case Definitions**, then create a new definition (or edit an existing one). The builder is a tabbed editor; a **JSON** tab shows the live definition and validates it against the Standard as you work.
+
+---
+
+## 2. Set the basics
+
+Provide the core identity fields (see the [field reference](./index.mdx)):
+
+- **`id`** — a stable slug, unique across case types.
+- **`name`** — the human-readable name.
+- **`formKey`** — the key of the [Form](../03-Forms/index.mdx) that captures and displays case data.
+- **`deployed`** — set to `true` to make the type available to end users.
+- **`stagesLifecycleProcessKey`** — the BPMN process key, if you run with a workflow engine; leave empty when running engine-less.
+
+---
+
+## 3. Define the stages
+
+Add the ordered [stages](./02-Reference/01-stages.mdx) the case moves through. Each stage needs an `id`, a zero-based `index`, and a `name`. The `name` is what transitions reference.
+
+---
+
+## 4. Wire up event listeners
+
+Add [event listeners](./02-Reference/02-events-listeners.mdx) (`caseHooks`) to drive automation — for example, *when task `create-ticket` completes, move to stage `Issue Investigation`*. Remember that stage and queue actions reference targets **by name**.
+
+---
+
+## 5. (Optional) Configure the Kanban board
+
+Set `kanbanConfig` (`title` / `content`) to control the board columns shown for this case type.
+
+---
+
+## 6. Validate and save
+
+Open the **JSON** tab to confirm the definition conforms to the Standard (the tab flags the number of issues if any). Validation does not block saving, but a conforming definition is one that will behave predictably. Save to persist via the configuration API.
+
+:::tip
+You can also export and re-import definitions as JSON to move a configured case type between environments.
+:::

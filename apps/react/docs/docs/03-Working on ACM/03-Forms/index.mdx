@@ -61,3 +61,26 @@ Captured data can be used for:
 ---
 
 Forms are a foundational component of the WKS Platform, enabling efficient, secure, and intelligent interaction with automated workflows.
+
+---
+
+## Form document (the Standard)
+
+A form is a configuration document validated against [`form.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/form.schema.json).
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `key` | string | ✅ | Unique form key, referenced by `CaseDefinition.formKey`. |
+| `title` | string \| null | | Display title. |
+| `toolTip` | string \| null | | Optional tooltip. |
+| `structure` | object | ✅ | The [Form.io](https://form.io) schema tree. |
+| `schemaVersion` | string | | Standard version (see [Configuration Versioning](../05-configuration-versioning.mdx)). |
+
+### `structure`
+
+`structure` is a Form.io schema:
+
+- `display` — `"form"` or `"wizard"`.
+- `components` — the component tree (text fields, selects, layout containers, etc.).
+
+The component tree is validated **permissively** — Form.io is an open component model and real trees include typeless container/layout components. On top of the standard component set, WKS adds one non-standard component, `recordtype`, documented in [the recordtype extension](./02-recordtype-extension.mdx).

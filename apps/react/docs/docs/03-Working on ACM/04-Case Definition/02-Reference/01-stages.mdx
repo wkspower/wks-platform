@@ -1,0 +1,45 @@
+---
+id: stages
+title: Stages
+---
+
+**Stages** are the ordered lifecycle steps of a case type. A case definition carries a `stages` array; a case instance is always "in" exactly one stage, identified by the stage **name**.
+
+Transitions between stages are not hard-coded — they are driven by [event listeners](./02-events-listeners.mdx) (`caseHooks`).
+
+---
+
+## Stage fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Stage identifier (typically the ordinal as text, e.g. `"0"`). |
+| `index` | integer | ✅ | Zero-based ordering index. |
+| `name` | string | ✅ | Display name. **This is the value event listeners reference** (see `newStage`). |
+| `processesDefinitions` | array | | BPMN processes bound to this stage (manual or auto-started). |
+
+Each entry of `processesDefinitions`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `autoStart` | boolean | Whether the process starts automatically when the stage is entered. |
+| `definitionKey` | string | BPMN process definition key. |
+| `definitionName` | string | Display name of the process. |
+
+---
+
+## Example
+
+```json
+"stages": [
+  { "id": "0", "index": 0, "name": "Ticket Creation" },
+  { "id": "1", "index": 1, "name": "Issue Investigation" },
+  { "id": "2", "index": 2, "name": "Resolution" }
+]
+```
+
+:::note
+Status (`Work In Progress` / `Closed` / `Archived`) is a separate, fixed dimension and is **not** configurable per case type — only stages are.
+:::
+
+Reference schema: [`case-definition.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/case-definition.schema.json) (`$defs.caseStage`).

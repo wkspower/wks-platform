@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/queue",
+  "title": "WKS Queue",
+  "description": "A work queue cases can be routed to. Part of the WKS Case Configuration Standard.",
+  "type": "object",
+  "required": ["id", "name"],
+  "properties": {
+    "schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+    "id": { "type": "string", "description": "Unique queue identifier." },
+    "name": { "type": "string", "description": "Display name. NOTE: case actions reference queues by this name, not by id." },
+    "description": { "type": "string" },
+    "_id": { "description": "Storage envelope field. Not part of the logical config contract." }
+  },
+  "$defs": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 baseline.",
+      "examples": ["1.0"]
+    }
+  }
+}

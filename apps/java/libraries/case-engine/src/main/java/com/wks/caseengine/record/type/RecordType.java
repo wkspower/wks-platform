@@ -30,4 +30,7 @@ public class RecordType {
 
 	private JsonObject fields;
 
+	/** Version of the WKS Case Configuration Standard this document conforms to (absent/null = 1.0 baseline). */
+	private String schemaVersion;
+
 }

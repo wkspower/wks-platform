@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/ext/form-recordtype",
+  "title": "WKS Form.io `recordtype` extension component",
+  "description": "Normative reference for the WKS-specific Form.io component `type: \"recordtype\"`. This pseudo-component is NOT known to standard Form.io or the backend; the portal (FormService.js requestRemoteDataSourceAndFillRecordTypesIfRequired) rewrites it at load time into a native `select`/`selectboxes` whose data.url points at /record/{recordType.id}. Documented here so the contract is explicit rather than tribal knowledge in one JS function.",
+  "type": "object",
+  "required": ["type", "customOptions"],
+  "properties": {
+    "type": { "const": "recordtype" },
+    "key": { "type": "string" },
+    "label": { "type": "string" },
+    "customOptions": {
+      "type": "object",
+      "required": ["recordType"],
+      "properties": {
+        "inputType": {
+          "type": "string",
+          "description": "'selectone' is rewritten to a Form.io `select`; any other value becomes `selectboxes`."
+        },
+        "template": {
+          "type": "string",
+          "description": "Form.io item template used to render each option label."
+        },
+        "recordType": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "string", "description": "RecordType.id whose records populate the options (live data.url = /record/{id})." }
+          }
+        },
+        "valueProperty": {
+          "type": "string",
+          "description": "Property of each record used as the option value."
+        }
+      }
+    }
+  }
+}
