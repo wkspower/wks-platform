@@ -65,7 +65,7 @@ jobs:
         run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
 
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -129,7 +129,7 @@ jobs:
         run: echo "::set-output name=tag::$(echo ${GITHUB_REF#refs/tags/})"
 
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
