@@ -141,7 +141,7 @@ jobs:
       # Event-driven tags/labels for this image. See header for the full scheme.
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_BASE }}/${{ matrix.name }}
           tags: |
