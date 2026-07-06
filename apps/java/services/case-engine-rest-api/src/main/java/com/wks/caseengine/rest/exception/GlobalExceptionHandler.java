@@ -17,6 +17,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.wks.caseengine.rest.config.validation.ConfigValidationException;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,6 +37,14 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(RestInvalidArgumentException.class)
 	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(RestInvalidArgumentException ex) {
+		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	}
+
+	@ExceptionHandler(ConfigValidationException.class)
+	public ResponseEntity<ErrorResponse> handleConfigValidationException(ConfigValidationException ex) {
+		// Expected client error (config violates the Standard): log at warn, not error.
+		log.warn("Rejected non-conforming config: {}", ex.getMessage());
 		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 	}

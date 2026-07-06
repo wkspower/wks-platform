@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.form.Form;
 import com.wks.caseengine.form.FormNotFoundException;
 import com.wks.caseengine.form.FormService;
+import com.wks.caseengine.rest.config.validation.ConfigDocType;
+import com.wks.caseengine.rest.config.validation.ConfigValidationService;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +40,9 @@ public class FormController {
 
 	@Autowired
 	private FormService formService;
+
+	@Autowired
+	private ConfigValidationService configValidationService;
 
 	@GetMapping
 	public ResponseEntity<List<Form>> find() {
@@ -55,6 +60,7 @@ public class FormController {
 
 	@PostMapping
 	public ResponseEntity<Void> save(@RequestBody final Form form) {
+		configValidationService.validateOnWrite(ConfigDocType.FORM, form, form.getKey());
 		formService.save(form);
 		return ResponseEntity.noContent().build();
 	}
@@ -71,6 +77,7 @@ public class FormController {
 
 	@PatchMapping(value = "/{formKey}")
 	public ResponseEntity<Void> update(@PathVariable final String formKey, @RequestBody final Form form) {
+		configValidationService.validateOnWrite(ConfigDocType.FORM, form, formKey);
 		try {
 			formService.update(formKey, form);
 			

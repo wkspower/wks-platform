@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/record-type",
+  "title": "WKS Record Type",
+  "description": "An auxiliary structured data type referenced by forms (via the recordtype extension). Part of the WKS Case Configuration Standard. `fields` is a Form.io-style schema and is validated permissively.",
+  "type": "object",
+  "required": ["id"],
+  "properties": {
+    "schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+    "id": { "type": "string", "description": "Unique record type identifier." },
+    "fields": {
+      "type": "object",
+      "description": "Field definitions (Form.io-style schema). Open structure."
+    },
+    "_id": { "description": "Storage envelope field. Not part of the logical config contract." }
+  },
+  "$defs": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 baseline.",
+      "examples": ["1.0"]
+    }
+  }
+}
