@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up jdk 18
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up jdk 18
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
