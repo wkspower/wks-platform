@@ -1,4 +1,4 @@
-import { json } from './request'
+import { json, nop } from './request'
 import Config from 'consts/index'
 
 export const ProcessDefService = {
@@ -56,7 +56,11 @@ async function getBPMNXml(keycloak, processDefId) {
 
   try {
     const resp = await fetch(url, { headers })
-    return json(keycloak, resp.text())
+    // This endpoint returns raw BPMN XML, not JSON. Guard the status via nop()
+    // (rejects on non-OK/401) then read the body as text. Previously this passed
+    // resp.text() (a Promise) to json(), which never worked.
+    await nop(keycloak, resp)
+    return resp.text()
   } catch (err) {
     console.log(err)
     return await Promise.reject(err)
