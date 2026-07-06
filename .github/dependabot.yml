@@ -1,0 +1,46 @@
+# Dependabot keeps dependencies patched across the repo's three ecosystems.
+# Weekly to keep noise manageable; grouped minor/patch bumps so routine updates
+# land as a single reviewable PR instead of a flood.
+version: 2
+updates:
+  # Java / Maven — the reactor is rooted at apps/java (parent pom).
+  - package-ecosystem: "maven"
+    directory: "/apps/java"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Portal (React) — yarn workspace.
+  - package-ecosystem: "npm"
+    directory: "/apps/react/case-portal"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # The published config Standard package.
+  - package-ecosystem: "npm"
+    directory: "/packages/case-config-schema"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Keep the GitHub Actions themselves current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

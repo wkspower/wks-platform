@@ -172,6 +172,62 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
+            <!-- Runs the *IT integration tests, which surefire never matched
+                 (it only runs *Test) so they were silently skipped. Bound to the
+                 integration-test/verify phases, so `mvn verify` executes them.
+                 The IT suite is self-contained — H2 in-memory (JPA ITs) and
+                 flapdoodle embedded Mongo (@DataMongoTest ITs) — so CI needs no
+                 external services. Version matches the surefire pins in modules. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <!-- Test against the plain compiled classes, not the artifact
+                         jar. In the service modules spring-boot-maven-plugin:repackage
+                         replaces the main jar with a fat jar (classes under
+                         BOOT-INF/classes); without this, failsafe would load that jar
+                         and fail to resolve @Import'd config (e.g. GsonConfiguration)
+                         at its root path. -->
+                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    <!-- Safety net: a hung integration test fails the build after
+                         5 minutes instead of stalling CI indefinitely. -->
+                    <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Coverage reporting for visibility only — no enforced threshold yet.
+                 prepare-agent injects the coverage agent into the surefire/failsafe
+                 argLine; the report is written per-module under target/site/jacoco
+                 at the verify phase. -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
