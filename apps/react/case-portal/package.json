@@ -14,7 +14,7 @@
     "@mui/x-data-grid": "^7.1.1",
     "@novu/notification-center": "^0.24.2",
     "@reduxjs/toolkit": "^2.12.0",
-    "@syncfusion/ej2-react-kanban": "^20.4.42",
+    "@syncfusion/ej2-react-kanban": "^34.1.29",
     "@tabler/icons-react": "^3.2.0",
     "@wkspower/camunda-web-modeler": "^0.0.5",
     "@wkspower/case-config-schema": "file:../../../packages/case-config-schema",
