@@ -26,24 +26,24 @@
 
         <servlet-api.version>2.5</servlet-api.version>
 
-        <spring.boot.version>4.0.6</spring.boot.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
         <!-- Tomcat security fix: CVE-2026-41293/43512/43515 (critical),
              43513/42498/41284 (high), 43514 (low) in tomcat-embed-core.
              The Spring Boot BOM is imported (not inherited), so overriding
              tomcat.version in <properties> is a no-op; the artifacts are pinned
              explicitly in <dependencyManagement> below, ahead of the BOM import. -->
-        <tomcat.version>11.0.22</tomcat.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <tomcat.version>11.0.23</tomcat.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
         <spring.shell.version>2.0.1.RELEASE</spring.shell.version>
-        <spring.doc.version>2.7.0</spring.doc.version>
+        <spring.doc.version>2.8.17</spring.doc.version>
 
         <camunda7.version>7.24.0</camunda7.version>
         <camunda-bpm-junit5.version>1.1.0</camunda-bpm-junit5.version>
 
         <lombok.version>1.18.22</lombok.version>
         <gson.version>2.10.1</gson.version>
-        <h2.version>2.1.214</h2.version>
-        <mongo.version>4.11.2</mongo.version>
+        <h2.version>2.4.240</h2.version>
+        <mongo.version>4.11.5</mongo.version>
         <minio.version>8.4.5</minio.version>
 
         <findbugs-version>3.0.2</findbugs-version>
@@ -94,7 +94,7 @@
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
-                <version>2.5.5</version>
+                <version>2.9.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -125,7 +125,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
@@ -146,7 +146,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.7.3</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>oss</flattenMode>
@@ -181,7 +181,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.6</version>
                 <configuration>
                     <!-- Test against the plain compiled classes, not the artifact
                          jar. In the service modules spring-boot-maven-plugin:repackage
@@ -211,7 +211,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>jacoco-prepare-agent</id>
@@ -231,7 +231,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.12.0</version>
                 <configuration>
                     <reportOutputDirectory>${project.javadoc.outputDirectory}</reportOutputDirectory>
                     <destDir>.</destDir>
