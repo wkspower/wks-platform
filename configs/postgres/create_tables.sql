@@ -20,8 +20,7 @@ CREATE TABLE case_definition (
     stages_lifecycle_process_key TEXT,
     deployed BOOLEAN NOT NULL DEFAULT FALSE,
     stages text,
-    case_hooks TEXT,
-    kanban_config TEXT
+    case_hooks TEXT
 );
 
 CREATE TABLE record_type (

@@ -52,7 +52,6 @@ export const CaseList = ({ status, caseDefId }) => {
   const [snackOpen, setSnackOpen] = useState(false)
   const { notifyError } = useNotification()
   const keycloak = useSession()
-  const [caseDefs, setCaseDefs] = useState([])
   const [fetching, setFetching] = useState(false)
   const [filter, setFilter] = useState({
     sort: 'desc',
@@ -89,16 +88,6 @@ export const CaseList = ({ status, caseDefId }) => {
       ignore = true
     }
   }, [caseDefId, status, openNewCaseForm])
-
-  useEffect(() => {
-    CaseService.getCaseDefinitions(keycloak)
-      .then((resp) => {
-        setCaseDefs(resp)
-      })
-      .catch((err) => {
-        notifyError(err?.message || 'Failed to load case definitions')
-      })
-  }, [])
 
   const handleRefresh = () => {
     fetchCases(
@@ -198,10 +187,6 @@ export const CaseList = ({ status, caseDefId }) => {
     if (nextView !== null) {
       setView(nextView)
     }
-  }
-
-  const fetchKanbanConfig = () => {
-    return caseDefs.find((o) => o.id === caseDefId).kanbanConfig
   }
 
   const handleCloseSnack = (event, reason) => {
@@ -501,7 +486,6 @@ export const CaseList = ({ status, caseDefId }) => {
                 stages={stages}
                 cases={processedCases}
                 caseDefId={caseDefId}
-                kanbanConfig={fetchKanbanConfig()}
                 setACase={setACase}
                 setOpenCaseForm={setOpenCaseForm}
               />

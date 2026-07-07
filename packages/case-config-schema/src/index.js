@@ -10,8 +10,18 @@
 
 const Ajv2020 = require('ajv/dist/2020');
 
-/** Current version of the WKS Case Configuration Standard. */
-const SCHEMA_VERSION = '1.0';
+/**
+ * Current version of the WKS Case Configuration Standard.
+ * 2.0 — kanbanConfig removed from the case-definition contract; board rendering
+ * derives columns from `stages` and card presentation moves to board-config.
+ */
+const SCHEMA_VERSION = '2.0';
+
+/**
+ * Version assumed for a document that carries no `schemaVersion` — such a document
+ * predates versioning, so it is the 1.0 baseline (NOT the current version).
+ */
+const BASELINE_VERSION = '1.0';
 
 /** type key -> schema filename (relative to schemas/) */
 const SCHEMA_FILES = {
@@ -19,6 +29,7 @@ const SCHEMA_FILES = {
   form: 'form.schema.json',
   'record-type': 'record-type.schema.json',
   queue: 'queue.schema.json',
+  'board-config': 'board-config.schema.json',
 };
 
 /*
@@ -30,6 +41,7 @@ const schemas = {
   form: require('../schemas/form.schema.json'),
   'record-type': require('../schemas/record-type.schema.json'),
   queue: require('../schemas/queue.schema.json'),
+  'board-config': require('../schemas/board-config.schema.json'),
 };
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
@@ -39,7 +51,7 @@ const validators = Object.fromEntries(
 
 /**
  * Validate a config document against its schema.
- * @param {('case-definition'|'form'|'record-type'|'queue')} type
+ * @param {('case-definition'|'form'|'record-type'|'queue'|'board-config')} type
  * @param {object} doc
  * @returns {{ valid: boolean, errors: Array }}
  */
@@ -63,6 +75,7 @@ function getValidator(type) {
 
 module.exports = {
   SCHEMA_VERSION,
+  BASELINE_VERSION,
   SCHEMA_FILES,
   schemas,
   validate,

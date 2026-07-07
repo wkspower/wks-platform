@@ -12,7 +12,6 @@ export const Kanban = ({
   stages,
   cases,
   caseDefId,
-  kanbanConfig,
   setACase,
   setOpenCaseForm,
 }) => {
@@ -38,10 +37,9 @@ export const Kanban = ({
 
   function cardTemplate(props) {
     // card css styling docs: https://ej2.syncfusion.com/angular/documentation/card/style
-
-    let title = kanbanConfig?.title
-    let content = kanbanConfig?.content
-
+    // Columns are derived from the case definition's stages; cards show the
+    // business key and status. Per-card attribute selection (the former
+    // kanbanConfig) is slated to return via the board-config artifact.
     return (
       <div className={'card-template'}>
         <div className='e-card-header'>
@@ -62,25 +60,6 @@ export const Kanban = ({
                 {props.businessKey}
               </Link>
             </div>
-
-            <div className='e-card-header-title'>
-              {title
-                ?.map((attributeName) => {
-                  return props.attributes.find((o) => o.name === attributeName)
-                    ?.value
-                })
-                .join(' ')}
-            </div>
-          </div>
-        </div>
-        <div className='e-card-content'>
-          <div className='e-text'>
-            {content
-              ?.map((attributeName) => {
-                return props.attributes.find((o) => o.name === attributeName)
-                  ?.value
-              })
-              .join(' ')}
           </div>
         </div>
         <div className='e-card-custom-footer'>

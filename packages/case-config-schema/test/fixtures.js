@@ -1,7 +1,7 @@
 /* Minimal fixtures exercising the contract (happy path + each guard). */
 
 const validCaseDefinition = {
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   id: 'demo-type',
   name: 'Demo Type',
   formKey: 'demo-form',
@@ -19,11 +19,10 @@ const validCaseDefinition = {
       actions: [{ actionType: 'CASE_STAGE_UPDATE_ACTION', newStage: 'Resolution' }],
     },
   ],
-  kanbanConfig: {},
 };
 
 const validForm = {
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   key: 'demo-form',
   title: 'Demo Form',
   toolTip: '',
@@ -36,8 +35,17 @@ const validForm = {
   },
 };
 
-const validQueue = { schemaVersion: '1.0', id: 'q1', name: 'Queue One', description: '' };
+const validQueue = { schemaVersion: '2.0', id: 'q1', name: 'Queue One', description: '' };
 
-const validRecordType = { schemaVersion: '1.0', id: 'rt1', fields: { components: [] } };
+const validRecordType = { schemaVersion: '2.0', id: 'rt1', fields: { components: [] } };
 
-module.exports = { validCaseDefinition, validForm, validQueue, validRecordType };
+const validBoardConfig = {
+  schemaVersion: '2.0',
+  caseDefinitionId: 'demo-type',
+  card: {
+    titleFields: ['subject'],
+    contentFields: ['priority'],
+  },
+};
+
+module.exports = { validCaseDefinition, validForm, validQueue, validRecordType, validBoardConfig };
