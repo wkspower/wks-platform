@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.record.type.RecordType;
 import com.wks.caseengine.record.type.RecordTypeNotFoundException;
 import com.wks.caseengine.record.type.RecordTypeService;
-import com.wks.caseengine.rest.config.validation.ConfigDocType;
-import com.wks.caseengine.rest.config.validation.ConfigValidationService;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,9 +38,6 @@ public class RecordTypeController {
 
 	@Autowired
 	private RecordTypeService recordTypeService;
-
-	@Autowired
-	private ConfigValidationService configValidationService;
 
 	@GetMapping
 	public ResponseEntity<List<RecordType>> find() {
@@ -60,7 +55,6 @@ public class RecordTypeController {
 
 	@PostMapping
 	public ResponseEntity<Void> save(@RequestBody final RecordType recordType) {
-		configValidationService.validateOnWrite(ConfigDocType.RECORD_TYPE, recordType, recordType.getId());
 		recordTypeService.save(recordType);
 		return ResponseEntity.noContent().build();
 	}
@@ -77,7 +71,6 @@ public class RecordTypeController {
 
 	@PatchMapping(value = "/{id}")
 	public ResponseEntity<Void> update(@PathVariable final String id, @RequestBody final RecordType recordType) {
-		configValidationService.validateOnWrite(ConfigDocType.RECORD_TYPE, recordType, id);
 		try {
 			recordTypeService.update(id, recordType);
 		} catch (RecordTypeNotFoundException e) {

@@ -9,7 +9,7 @@
  *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.config.validation;
+package com.wks.caseengine.config.validation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

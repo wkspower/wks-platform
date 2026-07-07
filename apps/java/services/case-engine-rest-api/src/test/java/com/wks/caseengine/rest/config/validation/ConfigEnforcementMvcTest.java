@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -29,16 +31,20 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.google.gson.Gson;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
+import com.wks.caseengine.config.validation.ConfigDocType;
+import com.wks.caseengine.config.validation.ConfigValidationException;
 import com.wks.caseengine.json.GsonBuilderFactory;
 import com.wks.caseengine.rest.exception.GlobalExceptionHandler;
 import com.wks.caseengine.rest.server.CaseDefinitionController;
 
 /**
- * Proves the headline deliverable end-to-end through the HTTP layer: a malformed
- * case definition is rejected with 400 (via {@link GlobalExceptionHandler}), while
- * a conforming one is accepted — with enforcement in its default {@code enforce}
- * mode. Standalone MockMvc keeps it deterministic (no Spring context / no reliance
- * on which beans a @WebMvcTest slice would load).
+ * Verifies the REST layer's responsibility now that enforcement lives in the
+ * domain service: when the service rejects a write with a
+ * {@link ConfigValidationException}, the controller + {@link GlobalExceptionHandler}
+ * surface it as HTTP 400; a successful write returns 200. Standalone MockMvc keeps
+ * it deterministic. The validation logic itself is covered in the case-engine
+ * library (ConfigValidationServiceTest); its wiring into the service is covered by
+ * CaseDefinitionServiceEnforcementTest.
  */
 class ConfigEnforcementMvcTest {
 
@@ -49,15 +55,12 @@ class ConfigEnforcementMvcTest {
 	void setup() {
 		caseDefinitionService = mock(CaseDefinitionService.class);
 		Gson gson = new GsonBuilderFactory().getGsonBuilder().create();
-		ConfigValidationService validation = new ConfigValidationService(new ConfigSchemaValidator(),
-				new GsonBuilderFactory().getGsonBuilder(), "enforce");
 
 		CaseDefinitionController controller = new CaseDefinitionController();
 		ReflectionTestUtils.setField(controller, "caseDefinitionService", caseDefinitionService);
-		ReflectionTestUtils.setField(controller, "configValidationService", validation);
 
-		// Use Gson for HTTP conversion, exactly as the service does in production
-		// (its models carry Gson types like JsonObject that Jackson can't serialize).
+		// Gson for HTTP conversion, as in production (models carry Gson types like
+		// JsonObject that Jackson can't serialize).
 		this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
 				.setControllerAdvice(new GlobalExceptionHandler())
 				.setMessageConverters(new GsonHttpMessageConverter(gson))
@@ -65,8 +68,10 @@ class ConfigEnforcementMvcTest {
 	}
 
 	@Test
-	void postMalformedCaseDefinition_isRejectedWith400() throws Exception {
-		// Missing the required formKey.
+	void serviceRejectionSurfacesAs400() throws Exception {
+		when(caseDefinitionService.create(any())).thenThrow(new ConfigValidationException(
+				ConfigDocType.CASE_DEFINITION, "customer-support", List.of("formKey: is missing but it is required")));
+
 		mockMvc.perform(post("/case-definition").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"id\":\"customer-support\",\"name\":\"Customer Support\"}"))
 				.andExpect(status().isBadRequest())
@@ -74,7 +79,7 @@ class ConfigEnforcementMvcTest {
 	}
 
 	@Test
-	void postConformingCaseDefinition_isAccepted() throws Exception {
+	void successfulWriteReturns200() throws Exception {
 		when(caseDefinitionService.create(any())).thenReturn(new CaseDefinition());
 		mockMvc.perform(post("/case-definition").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"id\":\"customer-support\",\"name\":\"Customer Support\",\"formKey\":\"cs-form\"}"))

@@ -36,8 +36,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
-import com.wks.caseengine.rest.config.validation.ConfigValidationService;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 
 @WebMvcTest(controllers = CaseDefinitionController.class)

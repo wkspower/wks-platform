@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.config.validation.ConfigDocType;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 import com.wks.caseengine.record.type.command.CreateRecordTypeCmd;
 import com.wks.caseengine.record.type.command.DeleteRecordTypeCmd;
 import com.wks.caseengine.record.type.command.FindRecordTypeCmd;
@@ -30,9 +32,13 @@ public class RecordTypeServiceImpl implements RecordTypeService {
 	@Autowired
 	private CommandExecutor commandExecutor;
 
+	@Autowired
+	private ConfigValidationService configValidationService;
+
 	@Override
 	@Transactional
 	public void save(RecordType recordType){
+		configValidationService.validateOnWrite(ConfigDocType.RECORD_TYPE, recordType, recordType.getId());
 		commandExecutor.execute(new CreateRecordTypeCmd(recordType));
 	}
 
@@ -55,6 +61,7 @@ public class RecordTypeServiceImpl implements RecordTypeService {
 	@Override
 	@Transactional
 	public void update(final String id, final RecordType recordType) {
+		configValidationService.validateOnWrite(ConfigDocType.RECORD_TYPE, recordType, id);
 		commandExecutor.execute(new UpdateRecordTypeCmd(id, recordType));
 	}
 

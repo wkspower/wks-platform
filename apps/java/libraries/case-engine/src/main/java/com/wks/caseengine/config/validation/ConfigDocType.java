@@ -9,7 +9,7 @@
  *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.config.validation;
+package com.wks.caseengine.config.validation;
 
 /**
  * The four case-configuration document types the WKS Case Configuration Standard

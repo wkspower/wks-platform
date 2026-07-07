@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
-import com.wks.caseengine.rest.config.validation.ConfigDocType;
-import com.wks.caseengine.rest.config.validation.ConfigValidationService;
 import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
@@ -43,9 +41,6 @@ public class CaseDefinitionController {
 
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
-
-	@Autowired
-	private ConfigValidationService configValidationService;
 
 	@GetMapping
 	public ResponseEntity<List<CaseDefinition>> find(@RequestParam(required = false) Boolean deployed) {
@@ -63,8 +58,6 @@ public class CaseDefinitionController {
 
 	@PostMapping
 	public ResponseEntity<CaseDefinition> save(@RequestBody final CaseDefinition caseDefinition) {
-		configValidationService.validateOnWrite(ConfigDocType.CASE_DEFINITION, caseDefinition,
-				caseDefinition.getId());
 		try {
 			return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
 		} catch (IllegalArgumentException e) {
@@ -75,7 +68,6 @@ public class CaseDefinitionController {
 	@PutMapping(value = "/{caseDefId}")
 	public ResponseEntity<CaseDefinition> update(@PathVariable final String caseDefId,
 			@RequestBody final CaseDefinition caseDefinition) {
-		configValidationService.validateOnWrite(ConfigDocType.CASE_DEFINITION, caseDefinition, caseDefId);
 		try {
 			return ResponseEntity.ok(caseDefinitionService.update(caseDefId, caseDefinition));
 		} catch (CaseDefinitionNotFoundException e) {

@@ -17,7 +17,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.wks.caseengine.rest.config.validation.ConfigValidationException;
+import com.wks.caseengine.config.validation.ConfigValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 

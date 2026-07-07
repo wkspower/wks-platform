@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.config.validation.ConfigDocType;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 import com.wks.caseengine.form.command.CreateFormCmd;
 import com.wks.caseengine.form.command.DeleteFormCmd;
 import com.wks.caseengine.form.command.FindFormCmd;
@@ -30,9 +32,13 @@ public class FormServiceImpl implements FormService {
 	@Autowired
 	private CommandExecutor commandExecutor;
 
+	@Autowired
+	private ConfigValidationService configValidationService;
+
 	@Override
 	@Transactional
 	public void save(Form form) {
+		configValidationService.validateOnWrite(ConfigDocType.FORM, form, form.getKey());
 		commandExecutor.execute(new CreateFormCmd(form));
 	}
 
@@ -55,6 +61,7 @@ public class FormServiceImpl implements FormService {
 	@Override
 	@Transactional
 	public void update(final String formKey, final Form form) {
+		configValidationService.validateOnWrite(ConfigDocType.FORM, form, formKey);
 		commandExecutor.execute(new UpdateFormCmd(formKey, form));
 	}
 

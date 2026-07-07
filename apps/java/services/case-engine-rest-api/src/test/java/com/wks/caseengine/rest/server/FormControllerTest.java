@@ -41,11 +41,6 @@ public class FormControllerTest {
 	@MockitoBean
 	private FormService caseInstanceService;
 
-	// Config Standard enforcement is covered in ConfigValidationServiceTest;
-	// stubbed no-op here so these tests cover only controller routing.
-	@MockitoBean
-	private com.wks.caseengine.rest.config.validation.ConfigValidationService configValidationService;
-
 	@BeforeEach
 	public void setup() {
 		SecurityContextHolder.setContext(new MockSecurityContext("wks", "localhost"));

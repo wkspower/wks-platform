@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.queue.Queue;
 import com.wks.caseengine.queue.QueueNotFoundException;
 import com.wks.caseengine.queue.QueueService;
-import com.wks.caseengine.rest.config.validation.ConfigDocType;
-import com.wks.caseengine.rest.config.validation.ConfigValidationService;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,9 +38,6 @@ public class QueueController {
 
 	@Autowired
 	private QueueService queueService;
-
-	@Autowired
-	private ConfigValidationService configValidationService;
 
 	@GetMapping
 	public ResponseEntity<List<Queue>> find() {
@@ -60,14 +55,12 @@ public class QueueController {
 
 	@PostMapping
 	public ResponseEntity<Void> save(@RequestBody final Queue queue) {
-		configValidationService.validateOnWrite(ConfigDocType.QUEUE, queue, queue.getId());
 		queueService.save(queue);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping(value = "/{queueId}")
 	public ResponseEntity<Void> update(@PathVariable final String queueId, @RequestBody final Queue queue) {
-		configValidationService.validateOnWrite(ConfigDocType.QUEUE, queue, queueId);
 		try {
 			queueService.update(queueId, queue);
 		} catch (QueueNotFoundException e) {

@@ -9,7 +9,7 @@
  *
  * For licensing information, see the LICENSE file in the root directory of the project.
  */
-package com.wks.caseengine.rest.config.validation;
+package com.wks.caseengine.config.validation;
 
 import java.io.IOException;
 import java.io.InputStream;
