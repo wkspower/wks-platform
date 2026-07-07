@@ -33,15 +33,15 @@ jobs:
     steps:
       - name: Checkout repository
         id: checkout
-        uses: actions/checkout@v4    
+        uses: actions/checkout@v7    
       - name: Set up jdk 18
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
 
       - name: Set up maven
-        uses: stCarolas/setup-maven@v4.5
+        uses: stCarolas/setup-maven@v5.1
         with:
           maven-version: 3.8.2
 
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload JaCoCo coverage reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-coverage
           path: "apps/java/**/target/site/jacoco/**"
@@ -66,9 +66,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
       - name: Install and test case-config-schema
@@ -86,7 +86,7 @@ jobs:
     steps:
       - name: Checkout repository
         id: checkout
-        uses: actions/checkout@v4    
+        uses: actions/checkout@v7    
 
       - name: Install dependencies for case-portal
         run: yarn --cwd apps/react/case-portal install
