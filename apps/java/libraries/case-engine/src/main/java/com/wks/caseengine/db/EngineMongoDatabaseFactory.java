@@ -35,8 +35,11 @@ public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory
 	@Autowired
 	private TenantResolver tenantResolver;
 
+	private final MongoClient mongoClient;
+
 	public EngineMongoDatabaseFactory(MongoClient mongoClient, String globalDB) {
 		super(mongoClient, globalDB);
+		this.mongoClient = mongoClient;
 	}
 
 	@Override
@@ -49,7 +52,7 @@ public class EngineMongoDatabaseFactory extends SimpleMongoClientDatabaseFactory
 		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
 				provider);
 
-		return getMongoClient().getDatabase(tenantResolver.resolveTenant()).withCodecRegistry(pojoCodecRegistry);
+		return mongoClient.getDatabase(tenantResolver.resolveTenant()).withCodecRegistry(pojoCodecRegistry);
 	}
 
 }
