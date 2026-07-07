@@ -25,12 +25,17 @@ import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.GetCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.UpdateCaseDefinitionCmd;
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.config.validation.ConfigDocType;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 
 @Component
 public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 
 	@Autowired
 	private CommandExecutor commandExecutor;
+
+	@Autowired
+	private ConfigValidationService configValidationService;
 
 	@Override
 	public List<CaseDefinition> find(final Optional<Boolean> deployed) {
@@ -50,11 +55,13 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 			throw new IllegalArgumentException("No Case Definition ID provided");
 		}
 
+		configValidationService.validateOnWrite(ConfigDocType.CASE_DEFINITION, caseDefinition, caseDefinition.getId());
 		return commandExecutor.execute(new CreateCaseDefinitionCmd(caseDefinition));
 	}
 
 	@Override
 	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) {
+		configValidationService.validateOnWrite(ConfigDocType.CASE_DEFINITION, caseDefinition, caseDefId);
 		return commandExecutor.execute(new UpdateCaseDefinitionCmd(caseDefId, caseDefinition));
 	}
 

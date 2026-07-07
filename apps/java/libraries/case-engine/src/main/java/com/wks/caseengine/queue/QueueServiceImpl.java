@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.config.validation.ConfigDocType;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 import com.wks.caseengine.queue.command.CreateQueueCmd;
 import com.wks.caseengine.queue.command.DeleteQueueCmd;
 import com.wks.caseengine.queue.command.FindQueueCmd;
@@ -30,9 +32,13 @@ public class QueueServiceImpl implements QueueService {
 	@Autowired
 	private CommandExecutor commandExecutor;
 
+	@Autowired
+	private ConfigValidationService configValidationService;
+
 	@Override
 	@Transactional
 	public void save(Queue queue){
+		configValidationService.validateOnWrite(ConfigDocType.QUEUE, queue, queue.getId());
 		commandExecutor.execute(new CreateQueueCmd(queue));
 	}
 
@@ -55,6 +61,7 @@ public class QueueServiceImpl implements QueueService {
 	@Override
 	@Transactional
 	public void update(String id, Queue queue){
+		configValidationService.validateOnWrite(ConfigDocType.QUEUE, queue, id);
 		commandExecutor.execute(new UpdateQueueCmd(id, queue));
 	}
 
