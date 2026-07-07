@@ -12,10 +12,22 @@ test('happy-path fixtures validate', () => {
     ['form', fx.validForm],
     ['queue', fx.validQueue],
     ['record-type', fx.validRecordType],
+    ['board-config', fx.validBoardConfig],
   ]) {
     const { valid, errors } = validate(type, doc);
     assert.ok(valid, `${type} should be valid: ${JSON.stringify(errors)}`);
   }
+});
+
+test('board-config requires caseDefinitionId', () => {
+  const bad = { ...fx.validBoardConfig };
+  delete bad.caseDefinitionId;
+  assert.strictEqual(validate('board-config', bad).valid, false);
+});
+
+test('case-definition no longer carries kanbanConfig in fixtures', () => {
+  // kanbanConfig was removed from the contract in 2.0 (board-config.schema.json).
+  assert.strictEqual(fx.validCaseDefinition.kanbanConfig, undefined);
 });
 
 test('case-definition requires formKey', () => {
@@ -72,5 +84,5 @@ test('seed configs conform to the Standard', () => {
 });
 
 test('SCHEMA_VERSION is exported', () => {
-  assert.strictEqual(SCHEMA_VERSION, '1.0');
+  assert.strictEqual(SCHEMA_VERSION, '2.0');
 });

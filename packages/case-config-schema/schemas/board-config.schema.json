@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.wkspower.com/case-config/board-config",
+  "title": "WKS Board Config",
+  "description": "Presentation config for how a case type's kanban board renders. Introduced in the WKS Case Configuration Standard 2.0, extracted out of the (now removed) CaseDefinition.kanbanConfig. Board COLUMNS are always derived from the referenced case definition's `stages`; this document only customizes card presentation. Keyed to a case definition by id. Self-contained (internal $defs only).",
+  "type": "object",
+  "required": ["caseDefinitionId"],
+  "properties": {
+    "schemaVersion": {
+      "$ref": "#/$defs/schemaVersion"
+    },
+    "caseDefinitionId": {
+      "type": "string",
+      "description": "Id of the case definition this board config applies to. Columns are taken from that case definition's stages."
+    },
+    "card": {
+      "type": "object",
+      "description": "Which case attributes appear on each kanban card. When absent/empty, cards show only the business key and status description.",
+      "properties": {
+        "titleFields": {
+          "type": "array",
+          "description": "Attribute names rendered in the card header.",
+          "items": { "type": "string" }
+        },
+        "contentFields": {
+          "type": "array",
+          "description": "Attribute names rendered in the card body.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "_id": {
+      "description": "Storage envelope field (e.g. MongoDB ObjectId wrapper). Not part of the logical config contract."
+    }
+  },
+  "$defs": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline.",
+      "examples": ["2.0"]
+    }
+  }
+}

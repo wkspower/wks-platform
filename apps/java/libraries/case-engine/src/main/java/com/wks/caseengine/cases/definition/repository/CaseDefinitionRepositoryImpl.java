@@ -91,8 +91,6 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
 				Updates.set("deployed", caseDefinition.getDeployed()),
-				Updates.set("kanbanConfig",
-						(new JsonObject(gsonBuilder.create().toJson(caseDefinition.getKanbanConfig())))),
 				Updates.set("caseHooks", caseDefinition.getCaseHooks()));
 
 		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);

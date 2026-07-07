@@ -8,10 +8,11 @@ A case type in WKS is config-driven JSON. This Standard makes that config explic
 
 | Type | Schema | Notes |
 |------|--------|-------|
-| Case Definition | [`schemas/case-definition.schema.json`](schemas/case-definition.schema.json) | Case type: stages, hooks, kanban, form/process links |
+| Case Definition | [`schemas/case-definition.schema.json`](schemas/case-definition.schema.json) | Case type: stages, hooks, form/process links |
 | Form | [`schemas/form.schema.json`](schemas/form.schema.json) | Form.io structure (validated permissively) |
 | Record Type | [`schemas/record-type.schema.json`](schemas/record-type.schema.json) | Auxiliary structured data |
 | Queue | [`schemas/queue.schema.json`](schemas/queue.schema.json) | Work queue |
+| Board Config | [`schemas/board-config.schema.json`](schemas/board-config.schema.json) | Kanban board presentation for a case type (columns derived from stages); introduced in 2.0 |
 
 **Extensions** (non-standard additions, documented as first-class):
 - [`schemas/ext/form-recordtype.schema.json`](schemas/ext/form-recordtype.schema.json) — the WKS `recordtype` Form.io component the portal rewrites at load time.

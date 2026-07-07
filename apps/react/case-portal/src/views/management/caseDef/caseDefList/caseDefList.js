@@ -62,7 +62,6 @@ export const CaseDefList = () => {
       stagesLifecycleProcessKey: '',
       stages: [{ id: 0, index: 0, name: 'Stage 0' }],
       taskCompleteHooks: [],
-      kanbanConfig: {},
     })
     setOpenCaseDefForm(true)
   }

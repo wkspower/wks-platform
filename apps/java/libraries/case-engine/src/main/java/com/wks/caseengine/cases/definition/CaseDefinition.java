@@ -14,7 +14,6 @@ package com.wks.caseengine.cases.definition;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.JsonObject;
 import com.wks.caseengine.event.ActionHook;
 
 import lombok.AllArgsConstructor;
@@ -48,9 +47,6 @@ public class CaseDefinition {
 
 	@Default
 	private List<ActionHook> caseHooks = new ArrayList<>();
-
-	@Default
-	private JsonObject kanbanConfig = new JsonObject();
 
 	/**
 	 * Version of the WKS Case Configuration Standard this document conforms to.

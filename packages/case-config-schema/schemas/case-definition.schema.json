@@ -39,10 +39,6 @@
       "description": "Event-driven automation: on a matching event, apply actions (stage/queue transitions).",
       "items": { "$ref": "#/$defs/actionHook" }
     },
-    "kanbanConfig": {
-      "$ref": "#/$defs/kanbanConfig",
-      "deprecated": true
-    },
     "bpmEngineId": {
       "type": "string",
       "deprecated": true,
@@ -56,8 +52,8 @@
     "schemaVersion": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+$",
-      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline.",
-      "examples": ["1.0"]
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline. Current: 2.0 (kanbanConfig removed — board rendering derives from stages, see board-config.schema.json).",
+      "examples": ["2.0"]
     },
     "caseStage": {
       "type": "object",
@@ -128,14 +124,6 @@
           "then": { "required": ["queueId"] }
         }
       ]
-    },
-    "kanbanConfig": {
-      "type": "object",
-      "description": "PRESENTATION CONCERN — NOT part of the core case-definition contract. Configures how a kanban board renders for this case type, which largely duplicates `stages`. Retained on the document for backward compatibility, but slated to be extracted into a separate board-config schema keyed by case definition id (see CHANGELOG). Do not treat it as part of the contract; new consumers should derive the board from `stages`.",
-      "properties": {
-        "title": { "type": "string", "description": "Comma-separated column titles (split on ',' by the portal)." },
-        "content": { "type": "string", "description": "Comma-separated content/field mapping for columns." }
-      }
     }
   }
 }
