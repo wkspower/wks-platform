@@ -17,7 +17,7 @@
 			<!-- The standalone admin client tracks its own patch line (26.0.x),
 			     decoupled from the server version; compatible across 26.x. -->
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>26.0.9</version>
+			<version>26.0.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -109,7 +109,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.5.6</version>
 			</plugin>
 		</plugins>
 	</build>
