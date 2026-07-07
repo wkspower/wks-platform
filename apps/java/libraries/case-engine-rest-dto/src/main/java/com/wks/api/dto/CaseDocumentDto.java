@@ -36,6 +36,12 @@ public class CaseDocumentDto {
 
 	private String base64;
 
+	/** Storage mode: {@code minio} / {@code filesystem} (storage-api) or {@code inline} (bytes in base64). */
+	private String storage;
+
+	/** Directory/prefix within the tenant storage-api bucket; with {@code name} addresses the object. */
+	private String dir;
+
 	/**
 	 * Optional id of the case-definition {@code requiredDocuments} entry this
 	 * document satisfies. Null for a free-form attachment.

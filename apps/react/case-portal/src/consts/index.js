@@ -14,6 +14,10 @@ const Config = {
     window.AUTH_ISSUER_URL,
   ),
   StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
+  // How case documents are stored:
+  //   'minio' | 'filesystem' — bytes go to storage-api (needs the storage profile);
+  //   'inline'               — bytes travel on the document as base64, no storage-api
+  //                            (the minimal, no-storage-api deployment).
   StorageMode:
     getEnv(process.env.REACT_APP_STORAGE_MODE, window.STORAGE_MODE) || 'minio',
   WebsocketsEnabled: getEnv(

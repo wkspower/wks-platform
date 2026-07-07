@@ -52,6 +52,10 @@ docker compose up -d --build
 
 Then open [http://localhost:3001](http://localhost:3001) — you're logged in automatically.
 
+Document upload works in this mode with no storage-api: set `REACT_APP_STORAGE_MODE=inline` and
+attachment bytes are stored base64 on the case document itself (small docs / demos — use `minio`
+or `filesystem` for production). See the [Document Storage Modes docs](https://docs.wkspower.com/docs/Working%20on%20ACM/Case%20Definition/Reference/document-storage).
+
 ---
 
 For every other configuration — per-concern toggles, filesystem storage, notifications, Traefik,
