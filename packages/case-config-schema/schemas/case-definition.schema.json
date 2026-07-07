@@ -39,6 +39,11 @@
       "description": "Event-driven automation: on a matching event, apply actions (stage/queue transitions).",
       "items": { "$ref": "#/$defs/actionHook" }
     },
+    "requiredDocuments": {
+      "type": "array",
+      "description": "Document requirements for this case type: the documents a case of this type is expected to hold. Drives the case Documents checklist and completeness. Absent/empty means no declared requirements (cases fall back to free-form attachments).",
+      "items": { "$ref": "#/$defs/documentRequirement" }
+    },
     "kanbanConfig": {
       "$ref": "#/$defs/kanbanConfig",
       "deprecated": true
@@ -58,6 +63,40 @@
       "pattern": "^[0-9]+\\.[0-9]+$",
       "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline.",
       "examples": ["1.0"]
+    },
+    "documentRequirement": {
+      "type": "object",
+      "description": "A single declared document requirement for a case type.",
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the requirement (slug). Uploaded documents reference this via CaseDocument.requirementId to mark the requirement satisfied."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable name of the required document (e.g. \"Passport\", \"Proof of Address\")."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional guidance shown to the user about what to provide."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether the document is mandatory for case completeness. Absent is treated as true.",
+          "default": true
+        },
+        "acceptedFileTypes": {
+          "type": "array",
+          "description": "Optional allow-list of file extensions/MIME hints (e.g. [\"pdf\", \"png\"]). Advisory in this slice; absent means any type.",
+          "items": { "type": "string" }
+        },
+        "maxSizeBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional maximum file size in bytes. Advisory in this slice."
+        }
+      }
     },
     "caseStage": {
       "type": "object",

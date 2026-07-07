@@ -3,6 +3,20 @@
 All notable changes to the configuration schemas are documented here. The
 `schemaVersion` on config documents and the npm package version track these.
 
+## 1.1.0 — Document requirements
+
+Additive, backward-compatible extension (minor bump). Documents without a
+`schemaVersion`, or set to `1.0`, remain valid — the new field is optional.
+
+- **Case Definition** gains an optional `requiredDocuments` array: the documents
+  a case of this type is expected to hold (`id`, `label`, optional
+  `description`, `required` (default true), advisory `acceptedFileTypes` /
+  `maxSizeBytes`). Drives the case Documents checklist and completeness.
+- Uploaded documents reference a requirement via `CaseDocument.requirementId`
+  to mark it satisfied. Absent means a free-form attachment (pre-1.1 behavior).
+- No presentation or storage change: this is the config-declared **discipline**
+  layer; storage mode and document lifecycle are tracked as later DMS slices.
+
 ## 1.0.0 — Initial Standard
 
 First published version of the WKS Case Configuration Standard, capturing the

@@ -401,7 +401,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                 </TabPanel>
 
                 <TabPanel value={rightTabIndex} index={2}>
-                  <Documents aCase={aCase} initialValue={documents || []} />
+                  <Documents
+                    aCase={aCase}
+                    initialValue={documents || []}
+                    requiredDocuments={caseDef?.requiredDocuments || []}
+                  />
                 </TabPanel>
 
                 <TabPanel value={rightTabIndex} index={3}>

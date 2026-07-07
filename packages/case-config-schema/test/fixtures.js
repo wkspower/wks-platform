@@ -19,6 +19,10 @@ const validCaseDefinition = {
       actions: [{ actionType: 'CASE_STAGE_UPDATE_ACTION', newStage: 'Resolution' }],
     },
   ],
+  requiredDocuments: [
+    { id: 'id-proof', label: 'ID Proof', required: true, acceptedFileTypes: ['pdf', 'png'] },
+    { id: 'proof-address', label: 'Proof of Address', description: 'Utility bill or bank statement', required: false },
+  ],
   kanbanConfig: {},
 };
 

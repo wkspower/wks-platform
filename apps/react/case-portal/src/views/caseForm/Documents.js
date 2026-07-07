@@ -1,3 +1,4 @@
+import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined'
 import FileExcelOutlined from '@ant-design/icons/FileExcelOutlined'
 import FileImageOutlined from '@ant-design/icons/FileImageOutlined'
 import FileOutlined from '@ant-design/icons/FileOutlined'
@@ -6,6 +7,8 @@ import { Grid } from '@mui/material'
 import MuiAlert from '@mui/material/Alert'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Fade from '@mui/material/Fade'
 import List from '@mui/material/List'
@@ -17,25 +20,29 @@ import Typography from '@mui/material/Typography'
 import { useSession } from 'SessionStoreContext'
 import React, { useState } from 'react'
 import Files from 'react-files'
-import { FileService } from '../../services'
+import { CaseService, FileService } from '../../services'
 import CaseStore from './store'
 
-function Documents({ aCase, initialValue }) {
+function Documents({ aCase, initialValue, requiredDocuments = [] }) {
   const keycloak = useSession()
   const [fetching, setFetching] = useState(false)
   const [percent, setPercent] = useState(0)
   const [messageError, setMessageError] = useState(null)
   const [filesUploaded, setFilesUploaded] = useState(initialValue)
 
-  const handleChange = (files) => {
+  const handleChange = (files, requirementId) => {
     setFetching(true)
 
-    CaseStore.saveDocumentsFromFiles(
-      keycloak,
-      files,
-      aCase.businessKey,
-      setPercent,
-    )
+    const uploadPromise = requirementId
+      ? saveDocumentsForRequirement(files, requirementId)
+      : CaseStore.saveDocumentsFromFiles(
+          keycloak,
+          files,
+          aCase.businessKey,
+          setPercent,
+        )
+
+    uploadPromise
       .then((data) => {
         setFilesUploaded([...filesUploaded, ...data])
       })
@@ -51,6 +58,54 @@ function Documents({ aCase, initialValue }) {
         }, 800)
       })
   }
+
+  // Mirrors CaseStore.saveDocumentsFromFiles but tags each uploaded
+  // document with the requirementId it satisfies so the backend persists
+  // the link (CaseService.addDocuments JSON.stringifies the whole object).
+  const saveDocumentsForRequirement = (files, requirementId) => {
+    return Promise.all(
+      files.map((file) => {
+        const args = {
+          dir: 'cases',
+          file: file,
+          keycloak,
+          progress: (e, percent) => {
+            setPercent(percent)
+          },
+        }
+
+        return FileService.upload(args)
+          .then((uploaded) => {
+            const document = { ...uploaded, requirementId }
+            return CaseService.addDocuments(
+              keycloak,
+              aCase.businessKey,
+              document,
+            ).then((resp) => {
+              if (!resp.ok) {
+                return Promise.reject(resp)
+              }
+              return document
+            })
+          })
+          .catch(() => {
+            return Promise.reject(
+              `Could't upload this file "${file.name}", try again with other file.`,
+            )
+          })
+      }),
+    )
+  }
+
+  const requirements = requiredDocuments || []
+  const isRequirementSatisfied = (requirement) =>
+    (filesUploaded || []).some((doc) => doc.requirementId === requirement.id)
+  const mandatoryRequirements = requirements.filter(
+    (requirement) => requirement.required !== false,
+  )
+  const satisfiedMandatoryCount = mandatoryRequirements.filter(
+    isRequirementSatisfied,
+  ).length
 
   const handleError = (error) => {
     console.log('error code ' + error.code + ': ' + error.message)
@@ -100,6 +155,87 @@ function Documents({ aCase, initialValue }) {
       spacing={2}
       sx={{ display: 'flex', flexDirection: 'column' }}
     >
+      {requirements.length > 0 && (
+        <Box sx={{ pb: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              pb: 1,
+            }}
+          >
+            <Typography variant='h5' color='textSecondary'>
+              Required documents
+            </Typography>
+            <Typography variant='caption' color='textSecondary'>
+              {`${satisfiedMandatoryCount} of ${mandatoryRequirements.length} required documents provided`}
+            </Typography>
+          </Box>
+
+          <List sx={{ border: '1px dashed #d9d9d9' }}>
+            {requirements.map((requirement) => {
+              const satisfied = isRequirementSatisfied(requirement)
+              const isOptional = requirement.required === false
+              return (
+                <ListItem key={requirement.id}>
+                  <ListItemAvatar>
+                    <Avatar
+                      style={{
+                        backgroundColor: satisfied ? 'green' : '#bfbfbf',
+                      }}
+                    >
+                      {satisfied ? <CheckCircleOutlined /> : <FileOutlined />}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        {requirement.label}
+                        <Chip
+                          size='small'
+                          variant='outlined'
+                          color={isOptional ? 'default' : 'primary'}
+                          label={isOptional ? 'Optional' : 'Required'}
+                        />
+                      </Box>
+                    }
+                    secondary={requirement.description}
+                    style={{ maxWidth: '70%' }}
+                  />
+                  {satisfied ? (
+                    <Chip
+                      size='small'
+                      color='success'
+                      label='Provided'
+                      icon={<CheckCircleOutlined />}
+                    />
+                  ) : (
+                    <Files
+                      onChange={(files) => handleChange(files, requirement.id)}
+                      onError={handleError}
+                      accepts={requirement.acceptedFileTypes}
+                      maxFileSize={requirement.maxSizeBytes}
+                      clickable
+                    >
+                      <Button size='small' variant='outlined'>
+                        Upload
+                      </Button>
+                    </Files>
+                  )}
+                </ListItem>
+              )
+            })}
+          </List>
+        </Box>
+      )}
+
       <Box sx={{ padding: 5 }}>
         <Grid
           container

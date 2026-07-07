@@ -33,4 +33,12 @@ public class CaseDocument {
 	private String size;
 
 	private String base64;
+
+	/**
+	 * Optional id of the {@code requiredDocuments} entry on the case definition
+	 * that this document satisfies (see
+	 * {@link com.wks.caseengine.cases.definition.DocumentRequirement}). Null means
+	 * a free-form attachment not tied to a declared requirement.
+	 */
+	private String requirementId;
 }

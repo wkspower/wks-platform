@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.wks.caseengine.cases.definition.CaseStage;
+import com.wks.caseengine.cases.definition.DocumentRequirement;
 import com.wks.caseengine.event.ActionHook;
 import com.wks.caseengine.jpa.entity.converter.ActionHookListConverter;
 import com.wks.caseengine.jpa.entity.converter.CaseStageListConverter;
+import com.wks.caseengine.jpa.entity.converter.DocumentRequirementListConverter;
 import com.wks.caseengine.jpa.entity.converter.JsonConverter;
 
 import jakarta.persistence.Column;
@@ -52,6 +54,10 @@ public class CaseDefinitionEntity {
 	@Column(name="case_hooks", columnDefinition = "TEXT")
 	@Convert(converter = ActionHookListConverter.class)
 	private List<ActionHook> caseHooks;
+
+	@Column(name="required_documents", columnDefinition = "TEXT")
+	@Convert(converter = DocumentRequirementListConverter.class)
+	private List<DocumentRequirement> requiredDocuments;
 
 	@Column(name="kanban_config", columnDefinition = "TEXT")
 	@Convert(converter = JsonConverter.class)

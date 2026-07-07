@@ -11,7 +11,7 @@
 const Ajv2020 = require('ajv/dist/2020');
 
 /** Current version of the WKS Case Configuration Standard. */
-const SCHEMA_VERSION = '1.0';
+const SCHEMA_VERSION = '1.1';
 
 /** type key -> schema filename (relative to schemas/) */
 const SCHEMA_FILES = {

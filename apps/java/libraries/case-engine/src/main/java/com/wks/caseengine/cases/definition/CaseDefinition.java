@@ -49,6 +49,15 @@ public class CaseDefinition {
 	@Default
 	private List<ActionHook> caseHooks = new ArrayList<>();
 
+	/**
+	 * Documents a case of this type is expected to hold (the config-declared
+	 * document requirements). Drives the case Documents checklist and
+	 * completeness. Empty means no declared requirements (free-form attachments).
+	 * Part of the WKS Case Configuration Standard since schema 1.1.
+	 */
+	@Default
+	private List<DocumentRequirement> requiredDocuments = new ArrayList<>();
+
 	@Default
 	private JsonObject kanbanConfig = new JsonObject();
 
