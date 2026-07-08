@@ -37,7 +37,7 @@
              The Spring Boot BOM is imported (not inherited), so overriding
              tomcat.version in <properties> is a no-op; the artifacts are pinned
              explicitly in <dependencyManagement> below, ahead of the BOM import. -->
-        <tomcat.version>11.0.23</tomcat.version>
+        <tomcat.version>11.0.24</tomcat.version>
         <snakeyaml.version>2.6</snakeyaml.version>
         <spring.shell.version>2.0.1.RELEASE</spring.shell.version>
         <spring.doc.version>2.8.17</spring.doc.version>
