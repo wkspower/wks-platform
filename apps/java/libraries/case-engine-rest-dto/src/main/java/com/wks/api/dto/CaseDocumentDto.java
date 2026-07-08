@@ -28,6 +28,9 @@ import lombok.Setter;
 @Builder
 public class CaseDocumentDto {
 
+	/** Server-assigned document id; addresses the document for lifecycle transitions. */
+	private String id;
+
 	private String name;
 
 	private String type;
@@ -47,5 +50,14 @@ public class CaseDocumentDto {
 	 * document satisfies. Null for a free-form attachment.
 	 */
 	private String requirementId;
+
+	/** Lifecycle status: received | verified | rejected (pending is portal-computed). */
+	private String status;
+
+	/** User id that uploaded the document (server-stamped). */
+	private String uploadedBy;
+
+	/** User id that verified/rejected the document (server-stamped). */
+	private String validatedBy;
 
 }

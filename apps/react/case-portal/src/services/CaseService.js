@@ -11,6 +11,7 @@ export const CaseService = {
   createCase,
   patch,
   addDocuments,
+  updateDocumentStatus,
   addComment,
   updateComment,
   deleteComment,
@@ -160,6 +161,26 @@ async function addDocuments(keycloak, businessKey, document) {
         Authorization: `Bearer ${keycloak.token}`,
       },
       body: JSON.stringify(document),
+    })
+    return nop(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function updateDocumentStatus(keycloak, businessKey, documentId, status) {
+  const url = `${Config.CaseEngineUrl}/case/${businessKey}/document/${documentId}/status`
+
+  try {
+    const resp = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${keycloak.token}`,
+      },
+      body: JSON.stringify({ status }),
     })
     return nop(keycloak, resp)
   } catch (e) {
