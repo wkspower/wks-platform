@@ -47,12 +47,15 @@ public class ConfigValidationService {
 	}
 
 	private final ConfigSchemaValidator validator;
+	private final ConfigStructuralValidator structuralValidator;
 	private final Gson gson;
 	private final Mode mode;
 
-	public ConfigValidationService(ConfigSchemaValidator validator, GsonBuilder gsonBuilder,
+	public ConfigValidationService(ConfigSchemaValidator validator,
+			ConfigStructuralValidator structuralValidator, GsonBuilder gsonBuilder,
 			@Value("${wks.config.validation.mode:enforce}") String mode) {
 		this.validator = validator;
+		this.structuralValidator = structuralValidator;
 		this.gson = gsonBuilder.create();
 		this.mode = parseMode(mode);
 		log.info("Config Standard validation mode: {}", this.mode);
@@ -81,7 +84,12 @@ public class ConfigValidationService {
 			return;
 		}
 
+		// Schema conformance first; only run the beyond-schema structural checks when the
+		// document is schema-valid (they assume well-formed input).
 		List<String> violations = validator.validate(type, toJsonNode(type, documentId, document));
+		if (violations.isEmpty()) {
+			violations = structuralValidator.validate(type, document);
+		}
 		if (violations.isEmpty()) {
 			return;
 		}
