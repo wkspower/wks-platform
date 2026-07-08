@@ -14,7 +14,7 @@
              Defaults to the develop dev line; CI overrides it at release time with
              `-Drevision=X.Y.Z` so the same version lands in the jars and the image tag.
              flatten-maven-plugin (below) resolves ${revision} in the installed/published poms. -->
-        <revision>1.5.0-SNAPSHOT</revision>
+        <revision>1.6.0-SNAPSHOT</revision>
 
         <project.javadoc.outputDirectory>website/static/javadoc</project.javadoc.outputDirectory>
 

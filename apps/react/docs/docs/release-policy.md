@@ -59,9 +59,12 @@ positional, so it's easy to reason about without tracking per-version dates:
 
 | Version | Status | Stack | Supported until |
 |---|---|---|---|
+| `1.6.0` | **Next** — in development (Configuration Standard & Document Management) | Spring Boot 4.0.6 · Java 21 · Camunda 7.24 | Not yet released — see the [Roadmap](./roadmap.md) |
 | `1.5.x` | **Current** — the Stabilization release | Spring Boot 4.0.6 · Java 21 · Camunda 7.24 · zero Critical/High vulns | Active |
 | `1.4.x` | **Previous stable** | Java 17 · Spring Boot 3 | `1.6.0` GA + 90-day grace |
 | `< 1.4` | End-of-life | — | Unsupported — please upgrade |
+
+When `1.6.0` reaches GA the window shifts positionally: `1.5.x` becomes the previous stable line and `1.4.x` enters its 90-day migration grace period before EOL.
 
 ---
 
