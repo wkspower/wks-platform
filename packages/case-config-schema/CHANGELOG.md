@@ -3,6 +3,20 @@
 All notable changes to the configuration schemas are documented here. The
 `schemaVersion` on config documents and the npm package version track these.
 
+## 2.1.0 — Document requirements
+
+Additive, backward-compatible extension of the 2.0 contract (minor bump).
+Existing documents remain valid — the new field is optional.
+
+- **Case Definition** gains an optional `requiredDocuments` array: the documents
+  a case of this type is expected to hold (`id`, `label`, optional
+  `description`, `required` (default true), advisory `acceptedFileTypes` /
+  `maxSizeBytes`). Drives the case Documents checklist and completeness.
+- Uploaded documents reference a requirement via `CaseDocument.requirementId`
+  to mark it satisfied. Absent means a free-form attachment.
+- No presentation or storage change: this is the config-declared **discipline**
+  layer; storage mode and document lifecycle are tracked as later DMS slices.
+
 ## 2.0.0 — Board config extracted (BREAKING)
 
 Removes the deprecated presentation field from the core contract and gives board
@@ -22,7 +36,7 @@ rendering its own versioned artifact.
 - Portal: the Case Builder "Kanban" tab is retired (columns derive from stages);
   the board renderer no longer reads `kanbanConfig`.
 - `schemaVersion` semantics unchanged: **absent still means the `1.0` baseline**
-  (a document with no stamp predates versioning); `2.0` is the current version.
+  (a document with no stamp predates versioning).
 
 Note: this release does not yet add a persisted board-config store — there is no
 board data to migrate (all seed `kanbanConfig` was empty). Standing up a

@@ -1,7 +1,7 @@
 /* Minimal fixtures exercising the contract (happy path + each guard). */
 
 const validCaseDefinition = {
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   id: 'demo-type',
   name: 'Demo Type',
   formKey: 'demo-form',
@@ -18,6 +18,10 @@ const validCaseDefinition = {
       taskDefKey: 'do-intake',
       actions: [{ actionType: 'CASE_STAGE_UPDATE_ACTION', newStage: 'Resolution' }],
     },
+  ],
+  requiredDocuments: [
+    { id: 'id-proof', label: 'ID Proof', required: true, acceptedFileTypes: ['pdf', 'png'] },
+    { id: 'proof-address', label: 'Proof of Address', description: 'Utility bill or bank statement', required: false },
   ],
 };
 

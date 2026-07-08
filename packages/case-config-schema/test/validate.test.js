@@ -48,6 +48,12 @@ test('stage-update action must carry newStage', () => {
   assert.strictEqual(validate('case-definition', bad).valid, false);
 });
 
+test('document requirement must carry id and label', () => {
+  const bad = JSON.parse(JSON.stringify(fx.validCaseDefinition));
+  delete bad.requiredDocuments[0].label;
+  assert.strictEqual(validate('case-definition', bad).valid, false);
+});
+
 test('form requires a structure', () => {
   const bad = { ...fx.validForm };
   delete bad.structure;
@@ -84,5 +90,5 @@ test('seed configs conform to the Standard', () => {
 });
 
 test('SCHEMA_VERSION is exported', () => {
-  assert.strictEqual(SCHEMA_VERSION, '2.0');
+  assert.strictEqual(SCHEMA_VERSION, '2.1');
 });

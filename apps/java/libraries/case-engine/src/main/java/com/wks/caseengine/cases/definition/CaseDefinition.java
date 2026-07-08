@@ -49,6 +49,15 @@ public class CaseDefinition {
 	private List<ActionHook> caseHooks = new ArrayList<>();
 
 	/**
+	 * Documents a case of this type is expected to hold (the config-declared
+	 * document requirements). Drives the case Documents checklist and
+	 * completeness. Empty means no declared requirements (free-form attachments).
+	 * Part of the WKS Case Configuration Standard since schema 2.1.
+	 */
+	@Default
+	private List<DocumentRequirement> requiredDocuments = new ArrayList<>();
+
+	/**
 	 * Version of the WKS Case Configuration Standard this document conforms to.
 	 * Absent/null is treated as the {@code 1.0} baseline (see
 	 * {@link com.wks.caseengine.config.schema.ConfigSchemaVersion#normalize(String)}).

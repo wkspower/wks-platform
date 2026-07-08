@@ -22,6 +22,17 @@ Every configuration document carries a `schemaVersion` field recording which ver
 
 ---
 
+## Version history
+
+| Version | Change |
+|---------|--------|
+| `1.0` | Initial Standard — captures the existing config contract as-is (Case Definition, Form, Record Type, Queue; pinned hook vocabulary; documented legacy/storage fields; `kanbanConfig` marked deprecated). |
+| `1.1` | Additive: Case Definition gains an optional [`requiredDocuments`](./04-Case%20Definition/02-Reference/04-required-documents.mdx) array (config-declared document discipline). Backward-compatible — `1.0` documents remain valid. |
+
+The authoritative log lives in the package [`CHANGELOG.md`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/CHANGELOG.md).
+
+---
+
 ## Where the schemas live
 
 | Type | Schema |

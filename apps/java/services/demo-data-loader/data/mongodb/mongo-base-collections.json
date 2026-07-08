@@ -201,7 +201,7 @@
       ]
     },
     {
-      "schemaVersion": "2.0",
+      "schemaVersion": "2.1",
       "_id": {
         "$oid": "64a536cac0c8884b1e83fe08"
       },
@@ -231,6 +231,24 @@
           "id": "3",
           "index": 3,
           "name": "Claim Resolution"
+        }
+      ],
+      "requiredDocuments": [
+        {
+          "id": "identity-proof",
+          "label": "Identity Proof",
+          "description": "Government-issued photo ID of the claimant (passport, national ID or driver's licence).",
+          "required": true,
+          "acceptedFileTypes": ["pdf", "png", "jpg"],
+          "maxSizeBytes": 10485760
+        },
+        {
+          "id": "proof-of-address",
+          "label": "Proof of Address",
+          "description": "A recent utility bill or bank statement (within the last 3 months) showing the claimant's address.",
+          "required": true,
+          "acceptedFileTypes": ["pdf", "png", "jpg"],
+          "maxSizeBytes": 10485760
         }
       ]
     },

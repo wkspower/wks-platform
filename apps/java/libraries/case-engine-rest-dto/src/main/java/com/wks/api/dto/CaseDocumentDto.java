@@ -36,4 +36,10 @@ public class CaseDocumentDto {
 
 	private String base64;
 
+	/**
+	 * Optional id of the case-definition {@code requiredDocuments} entry this
+	 * document satisfies. Null for a free-form attachment.
+	 */
+	private String requirementId;
+
 }

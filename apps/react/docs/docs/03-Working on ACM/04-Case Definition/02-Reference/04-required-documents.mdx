@@ -1,0 +1,63 @@
+---
+id: required-documents
+title: Required Documents
+---
+
+**Required documents** (the `requiredDocuments` array) are the case definition's **document discipline**: the set of documents a case of this type is *expected* to hold. Declaring them in the config turns an otherwise free-form pile of attachments into a checklist the case Documents tab can measure completeness against.
+
+This is a purely **config-declared** layer — it states *what* a case should carry, not *how* documents are stored or how their lifecycle is managed (those are tracked as later DMS slices). Absent or empty, a case falls back to free-form attachments exactly as before.
+
+---
+
+## Requirement fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | ✅ | Stable identifier for the requirement (slug). Uploaded documents reference it via `CaseDocument.requirementId` to mark the requirement satisfied. |
+| `label` | string | ✅ | Human-readable name of the required document (e.g. `"Passport"`, `"Proof of Address"`). |
+| `description` | string | | Optional guidance shown to the user about what to provide. |
+| `required` | boolean | | Whether the document is mandatory for case completeness. **Absent is treated as `true`.** |
+| `acceptedFileTypes` | string[] | | Optional allow-list of file extensions / MIME hints (e.g. `["pdf", "png"]`). |
+| `maxSizeBytes` | integer | | Optional maximum file size in bytes. |
+
+:::caution Advisory fields — declared, not yet enforced
+`acceptedFileTypes` and `maxSizeBytes` are captured in the contract but are **not enforced** in this slice — nothing rejects an oversized or wrong-type upload yet. Treat them as documented intent for authors and future tooling, not a validation guarantee.
+:::
+
+---
+
+## How documents satisfy a requirement
+
+An uploaded document links back to a requirement through `CaseDocument.requirementId`, equal to the requirement's `id`. The case Documents tab uses those links to show which requirements are satisfied and which are still outstanding.
+
+- A document **without** a `requirementId` is a free-form attachment — the pre-1.1 behaviour, still fully supported.
+- A case type **without** `requiredDocuments` declares no discipline: every document is free-form.
+
+---
+
+## Example
+
+```json
+"requiredDocuments": [
+  {
+    "id": "identity-proof",
+    "label": "Identity Proof",
+    "description": "Government-issued photo ID of the claimant.",
+    "required": true,
+    "acceptedFileTypes": ["pdf", "png", "jpg"],
+    "maxSizeBytes": 10485760
+  },
+  {
+    "id": "proof-of-address",
+    "label": "Proof of Address",
+    "description": "A recent utility bill or bank statement (within the last 3 months).",
+    "required": true
+  }
+]
+```
+
+:::note Schema 1.1 — additive
+`requiredDocuments` was introduced in **Standard 1.1** as an additive, backward-compatible extension. Documents declaring `schemaVersion` `"1.0"` (or omitting it) remain valid — the field is optional. See [Configuration Versioning](../../05-configuration-versioning.mdx).
+:::
+
+Reference schema: [`case-definition.schema.json`](https://github.com/wkspower/wks-platform/blob/develop/packages/case-config-schema/schemas/case-definition.schema.json) (`$defs.documentRequirement`).

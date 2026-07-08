@@ -14,8 +14,10 @@ const Ajv2020 = require('ajv/dist/2020');
  * Current version of the WKS Case Configuration Standard.
  * 2.0 — kanbanConfig removed from the case-definition contract; board rendering
  * derives columns from `stages` and card presentation moves to board-config.
+ * 2.1 — adds the optional `requiredDocuments` array to the case definition
+ * (additive, backward-compatible).
  */
-const SCHEMA_VERSION = '2.0';
+const SCHEMA_VERSION = '2.1';
 
 /**
  * Version assumed for a document that carries no `schemaVersion` — such a document

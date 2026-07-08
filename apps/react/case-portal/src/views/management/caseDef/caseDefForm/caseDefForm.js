@@ -16,6 +16,7 @@ import { CaseDefFormEvents } from './listeners/caseDefFormListenerList'
 import { CaseDefFormStages } from './caseDefFormStages'
 import { CaseDefGeneralForm } from './caseDefGeneralForm'
 import { CaseDefFormForm } from './caseDefFormForm'
+import { CaseDefFormDocuments } from './caseDefFormDocuments'
 import { CaseDefSchemaView } from './caseDefSchemaView'
 import { CaseDefService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
@@ -149,11 +150,12 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
             <Tab label='General' {...a11yProps(0)} />
             <Tab label='Stages' {...a11yProps(1)} />
             <Tab label='Event Listeners' {...a11yProps(2)} />
+            <Tab label='Documents' {...a11yProps(3)} />
             <Tab
               label={
                 schemaErrorCount > 0 ? `JSON (${schemaErrorCount})` : 'JSON'
               }
-              {...a11yProps(3)}
+              {...a11yProps(4)}
             />
           </Tabs>
         </Box>
@@ -175,6 +177,10 @@ export const CaseDefForm = ({ open, handleClose, caseDefParam }) => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
+          <CaseDefFormDocuments caseDef={caseDef} setCaseDef={setCaseDef} />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={4}>
           <CaseDefSchemaView caseDef={caseDef} />
         </TabPanel>
       </Dialog>
