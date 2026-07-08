@@ -36,7 +36,12 @@ import com.wks.caseengine.rest.CaseEngineRestAPIApp;
  * it light.
  */
 @SpringBootTest(classes = CaseEngineRestAPIApp.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = {
-		"spring.profiles.active=minimal" })
+		"spring.profiles.active=minimal",
+		// Swagger/OpenAPI is irrelevant to seeding, and springdoc's UI auto-config
+		// currently fails to load under Spring Boot 4 (it references the relocated
+		// WebMvcProperties). Disable it so this test exercises the seeder, not springdoc.
+		"springdoc.api-docs.enabled=false",
+		"springdoc.swagger-ui.enabled=false" })
 public class SeedDataRunnerIT {
 
 	@Autowired
