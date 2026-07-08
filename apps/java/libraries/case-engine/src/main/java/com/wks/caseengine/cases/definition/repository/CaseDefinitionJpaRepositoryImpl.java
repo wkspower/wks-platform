@@ -69,7 +69,6 @@ public class CaseDefinitionJpaRepositoryImpl implements CaseDefinitionRepository
         existingEntity.setDeployed(caseDefinition.getDeployed());
         existingEntity.setStages(caseDefinition.getStages());
         existingEntity.setCaseHooks(caseDefinition.getCaseHooks());
-        existingEntity.setKanbanConfig(caseDefinition.getKanbanConfig());
 
         entityManager.merge(existingEntity);
     }

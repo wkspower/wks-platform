@@ -36,6 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 import com.wks.caseengine.rest.mocks.MockSecurityContext;
 
@@ -49,6 +50,11 @@ public class CaseDefinitionControllerTest {
 
 	@MockitoBean
 	private CaseDefinitionRepository caseDefinitionRepository;
+
+	// Enforcement is exercised in ConfigValidationServiceTest / ConfigSchemaValidatorTest;
+	// here it is stubbed to a no-op so these tests cover only controller routing.
+	@MockitoBean
+	private ConfigValidationService configValidationService;
 
 	@BeforeEach
 	public void setup() {

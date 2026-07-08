@@ -39,9 +39,9 @@ Add [event listeners](./02-Reference/02-events-listeners.mdx) (`caseHooks`) to d
 
 ---
 
-## 5. (Optional) Configure the Kanban board
+## 5. The Kanban board
 
-Set `kanbanConfig` (`title` / `content`) to control the board columns shown for this case type.
+The kanban board for a case type is derived automatically from its **`stages`** — each stage becomes a column, in `index` order. There is nothing to configure here (the old `kanbanConfig` field was removed in Standard 2.0). Per-card presentation is being moved into a separate board-config artifact.
 
 ---
 

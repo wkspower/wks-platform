@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>>42.5.0</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
@@ -90,6 +90,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Draft-2020-12 JSON Schema validator that enforces the WKS Case
+             Configuration Standard in the domain service layer (config.validation).
+             Same library/version as the seed anti-drift gate. Pulls jackson-databind
+             transitively; the only runtime consumer of this module is
+             case-engine-rest-api, which pins HTTP JSON to Gson via
+             spring.mvc.converters.preferred-json-mapper=gson. -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.9</version>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -103,10 +115,14 @@
             <version>${mongo.version}</version> <!--$NO-MVN-MAN-VER$-->
         </dependency>
 
+        <!-- Spring Boot 4 embedded-Mongo test integration. The older spring31x
+             variant did not engage under Spring Boot 4 (its Mongo autoconfig
+             references the pre-4 package layout), so @DataMongoTest booted with no
+             server and the ITs hung. spring4x is the Boot 4 line. -->
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo.spring31x</artifactId>
-            <version>4.9.3</version>
+            <artifactId>de.flapdoodle.embed.mongo.spring4x</artifactId>
+            <version>4.33.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -125,21 +141,14 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <version>4.5.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo.spring31x</artifactId>
-            <version>4.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-        </dependency>        
+        </dependency>
     </dependencies>
 
     <build>
@@ -147,7 +156,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.6</version>
             </plugin>
         </plugins>
     </build>

@@ -14,7 +14,6 @@ package com.wks.caseengine.cases.definition;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.JsonObject;
 import com.wks.caseengine.event.ActionHook;
 
 import lombok.AllArgsConstructor;
@@ -53,13 +52,10 @@ public class CaseDefinition {
 	 * Documents a case of this type is expected to hold (the config-declared
 	 * document requirements). Drives the case Documents checklist and
 	 * completeness. Empty means no declared requirements (free-form attachments).
-	 * Part of the WKS Case Configuration Standard since schema 1.1.
+	 * Part of the WKS Case Configuration Standard since schema 2.1.
 	 */
 	@Default
 	private List<DocumentRequirement> requiredDocuments = new ArrayList<>();
-
-	@Default
-	private JsonObject kanbanConfig = new JsonObject();
 
 	/**
 	 * Version of the WKS Case Configuration Standard this document conforms to.

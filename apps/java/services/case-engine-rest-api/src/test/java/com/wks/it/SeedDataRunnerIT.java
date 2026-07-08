@@ -15,93 +15,34 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 
-import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.caseengine.cases.definition.CaseDefinition;
-import com.wks.caseengine.cases.definition.repository.CaseDefinitionJpaRepositoryImpl;
 import com.wks.caseengine.cases.definition.repository.CaseDefinitionRepository;
-import com.wks.caseengine.db.EngineDatabaseTenantConfig;
-import com.wks.caseengine.form.FormJpaRepositoryImpl;
-import com.wks.caseengine.queue.QueueJpaRepositoryImpl;
-import com.wks.caseengine.rest.config.GsonConfiguration;
-import com.wks.caseengine.rest.config.SeedDataRunner;
+import com.wks.caseengine.rest.CaseEngineRestAPIApp;
 
 /**
- * WP-1.1 acceptance: proves the datastore-agnostic seeder deserializes the bundled
- * demo collections and persists them through the repository interfaces onto embedded
- * H2 (database.type=jpa) — i.e. the minimal core boots with demo case definitions.
+ * WP-1.1 acceptance: the minimal core boots with the demo case definitions seeded.
  *
- * <p>Lives in {@code com.wks.it} (outside every production @ComponentScan) so its
- * nested @SpringBootConfiguration is not picked up by other tests' contexts.
+ * <p>Boots the real application under the {@code minimal} profile group
+ * ({@code db-h2,bpm-none,auth-dev,authz-off,single-tenant,seed}) — the zero-container
+ * mode — so the actual {@code SeedDataRunner} runs through the real
+ * {@code DataImportService -> CommandExecutor -> CommandContext} graph and persists
+ * the bundled demo collections onto embedded H2. A MOCK web environment (no real
+ * servlet container, but a web context so the dev-auth security chain wires) keeps
+ * it light.
  */
-@SpringBootTest(classes = SeedDataRunnerIT.TestApp.class, properties = {
-		"database.type=jpa",
-		"wks.seed.enabled=true",
-		"wks.tenancy.multi-tenant=false",
-		"spring.datasource.jdbcUrl=jdbc:h2:mem:wks_seed_it;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
-		"spring.datasource.driver-class-name=org.h2.Driver",
-		"spring.datasource.username=sa",
-		"spring.datasource.password=",
-		"spring.jpa.hibernate.ddl-auto=create",
-		"spring.autoconfigure.exclude="
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
-				+ "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration" })
+@SpringBootTest(classes = CaseEngineRestAPIApp.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = {
+		"spring.profiles.active=minimal",
+		// Swagger/OpenAPI is irrelevant to seeding, and springdoc's UI auto-config
+		// currently fails to load under Spring Boot 4 (it references the relocated
+		// WebMvcProperties). Disable it so this test exercises the seeder, not springdoc.
+		"springdoc.api-docs.enabled=false",
+		"springdoc.swagger-ui.enabled=false" })
 public class SeedDataRunnerIT {
-
-	@SpringBootConfiguration
-	@EnableAutoConfiguration
-	@Import({ EngineDatabaseTenantConfig.class, CaseDefinitionJpaRepositoryImpl.class, FormJpaRepositoryImpl.class,
-			QueueJpaRepositoryImpl.class, GsonConfiguration.class, SeedDataRunner.class })
-	static class TestApp {
-
-		@Bean
-		static PersistenceAnnotationBeanPostProcessor persistenceAnnotationBeanPostProcessor() {
-			return new PersistenceAnnotationBeanPostProcessor();
-		}
-
-		/** In production the DataSource is TenantRoutingDatasource; the test builds the global one directly. */
-		@Bean
-		javax.sql.DataSource dataSource(com.zaxxer.hikari.HikariConfig hikariConfig) {
-			return new com.zaxxer.hikari.HikariDataSource(hikariConfig);
-		}
-
-		@Bean
-		SecurityContextTenantHolder tenantHolder() {
-			return new SecurityContextTenantHolder() {
-				@Override
-				public Optional<String> getTenantId() {
-					return Optional.empty();
-				}
-
-				@Override
-				public void setTenantId(String tenantId) {
-				}
-
-				@Override
-				public Optional<String> getUserId() {
-					return Optional.empty();
-				}
-
-				@Override
-				public void setUserId(String userId) {
-				}
-
-				@Override
-				public void clear() {
-				}
-			};
-		}
-	}
 
 	@Autowired
 	private CaseDefinitionRepository caseDefinitionRepository;

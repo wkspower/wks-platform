@@ -20,20 +20,28 @@ public final class ConfigSchemaVersion {
 	/**
 	 * The current WKS configuration Standard version.
 	 */
-	public static final String CURRENT = "1.0";
+	public static final String CURRENT = "2.0";
+
+	/**
+	 * Version assumed for a document that carries no {@code schemaVersion}. Such a
+	 * document predates versioning, so it is the {@code 1.0} baseline — NOT the
+	 * current version.
+	 */
+	public static final String BASELINE = "1.0";
 
 	private ConfigSchemaVersion() {
 	}
 
 	/**
-	 * Tolerant read of a document's {@code schemaVersion}: returns {@link #CURRENT}
-	 * when the supplied value is {@code null} or blank, otherwise returns it as-is.
+	 * Tolerant read of a document's {@code schemaVersion}: returns {@link #BASELINE}
+	 * when the supplied value is {@code null} or blank (an unstamped document is
+	 * pre-versioning), otherwise returns it as-is.
 	 *
 	 * @param v the raw schemaVersion read from a document, possibly {@code null}
 	 * @return the normalized schema version, never {@code null}
 	 */
 	public static String normalize(String v) {
-		return (v == null || v.isBlank()) ? CURRENT : v;
+		return (v == null || v.isBlank()) ? BASELINE : v;
 	}
 
 }

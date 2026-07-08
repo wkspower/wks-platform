@@ -1,6 +1,6 @@
 {
   "name": "@wkspower/case-config-schema",
-  "version": "1.1.0",
+  "version": "2.1.0",
   "description": "The WKS Case Configuration Standard — canonical, versioned JSON Schemas for case-type configuration (CaseDefinition, Form, RecordType, Queue) plus a validator. Single source of truth consumed by the backend, the portal, and tooling.",
   "license": "MIT",
   "main": "src/index.js",

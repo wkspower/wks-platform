@@ -27,6 +27,11 @@ wks.bpm.engine: ${WKS_BPM_ENGINE:camunda7}
 wks.tenancy.multi-tenant: ${WKS_TENANCY_MULTI_TENANT:true}
 wks.seed.enabled: ${WKS_SEED_ENABLED:false}
 
+# WKS Case Configuration Standard enforcement on create/update of case-definition,
+# form, queue and record-type. enforce = reject non-conforming config with HTTP 400;
+# warn = log violations but allow the write (transition mode); disabled = skip.
+wks.config.validation.mode: ${WKS_CONFIG_VALIDATION_MODE:enforce}
+
 # api-security defaults (issuer-uri, opa.url, tenant claim, dev-token roles/origins)
 # live in the api-security library's api-security-defaults.properties — overridable
 # here or via env. The auth-dev profile fragment overrides wks.auth.issuer-uri.

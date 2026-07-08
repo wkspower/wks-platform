@@ -35,6 +35,7 @@ import com.wks.caseengine.cases.definition.command.FindCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.GetCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.UpdateCaseDefinitionCmd;
 import com.wks.caseengine.command.CommandExecutor;
+import com.wks.caseengine.config.validation.ConfigValidationService;
 
 /**
  * @author victor.franca
@@ -45,6 +46,11 @@ public class CaseDefinitionServiceImplTest {
 
 	@Mock
 	private CommandExecutor commandExecutor;
+
+	// Enforcement now runs in the service; a mock keeps these tests focused on
+	// command dispatch (validation behaviour is covered by CaseDefinitionServiceEnforcementTest).
+	@Mock
+	private ConfigValidationService configValidationService;
 
 	@InjectMocks
 	private CaseDefinitionServiceImpl service;

@@ -17,7 +17,6 @@ public class CaseDefinitionConverter {
         caseDefinition.setStages(entity.getStages());
         caseDefinition.setCaseHooks(entity.getCaseHooks());
         caseDefinition.setRequiredDocuments(entity.getRequiredDocuments());
-        caseDefinition.setKanbanConfig(entity.getKanbanConfig());
 
         return caseDefinition;
     }
@@ -34,7 +33,6 @@ public class CaseDefinitionConverter {
         entity.setStages(caseDefinition.getStages());
         entity.setCaseHooks(caseDefinition.getCaseHooks());
         entity.setRequiredDocuments(caseDefinition.getRequiredDocuments());
-        entity.setKanbanConfig(caseDefinition.getKanbanConfig());
 
         return entity;
     }

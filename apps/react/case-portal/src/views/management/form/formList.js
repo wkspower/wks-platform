@@ -7,6 +7,7 @@ import { FormDetail } from './formDetail'
 import { FormNew as NewForm } from './formNew'
 import { FormService } from 'services'
 import { useSession } from 'SessionStoreContext'
+import { useNotification } from 'components/Notification/NotificationContext'
 
 export const FormList = () => {
   const [forms, setForms] = useState([])
@@ -14,6 +15,7 @@ export const FormList = () => {
   const [openNewForm, setOpenNewForm] = useState(false)
   const [form, setForm] = useState(null)
   const keycloak = useSession()
+  const { notifyError } = useNotification()
 
   useEffect(() => {
     FormService.getAll(keycloak)
@@ -21,7 +23,7 @@ export const FormList = () => {
         setForms(data)
       })
       .catch((err) => {
-        console.log(err.message)
+        notifyError(err?.message || 'Failed to load forms')
       })
   }, [openForm, openNewForm])
 

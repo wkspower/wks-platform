@@ -1,0 +1,81 @@
+# Dependabot config, tuned for low noise.
+#
+# Policy: keep dependencies patched with as few PRs as possible.
+#  - Minor + patch bumps are grouped into ONE PR per ecosystem per week — safe,
+#    mergeable in a batch.
+#  - Major bumps are ignored here (no per-dependency PR nag). They are breaking
+#    by definition and are handled as deliberate, tested upgrade slices rather
+#    than a pile of standing PRs. Security-critical majors still surface through
+#    Dependabot security updates, which this `ignore` does not suppress.
+#  - Low open-PR limits so the queue can never flood again.
+version: 2
+updates:
+  # Java / Maven — reactor rooted at apps/java.
+  - package-ecosystem: "maven"
+    directory: "/apps/java"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      maven:
+        patterns:
+          - "*"
+        # Keep Spring Boot out of the grouped bump: a framework minor (e.g. 4.0->4.1)
+        # can change transitive versions and behaviour, so it should arrive as its own
+        # reviewable PR rather than folded into routine minor/patch updates.
+        exclude-patterns:
+          - "org.springframework.boot:*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  # Portal (React) — yarn workspace.
+  - package-ecosystem: "npm"
+    directory: "/apps/react/case-portal"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  # The published config Standard package.
+  - package-ecosystem: "npm"
+    directory: "/packages/case-config-schema"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  # Keep the GitHub Actions current — grouped, low volume.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns:
+          - "*"
