@@ -26,7 +26,12 @@
 
         <servlet-api.version>2.5</servlet-api.version>
 
-        <spring.boot.version>4.1.0</spring.boot.version>
+        <!-- Pinned to 4.0.6. The 4.1.0 minor arrived unvetted in a grouped
+             Dependabot bump (#531) and regressed the (then-quarantined) embedded-Mongo
+             integration tests via its transitive Mongo-driver change. Dependabot now
+             holds Spring Boot minors out of the group so the 4.1 upgrade can be done
+             deliberately and verified. -->
+        <spring.boot.version>4.0.6</spring.boot.version>
         <!-- Tomcat security fix: CVE-2026-41293/43512/43515 (critical),
              43513/42498/41284 (high), 43514 (low) in tomcat-embed-core.
              The Spring Boot BOM is imported (not inherited), so overriding

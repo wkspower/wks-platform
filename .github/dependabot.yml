@@ -20,6 +20,11 @@ updates:
       maven:
         patterns:
           - "*"
+        # Keep Spring Boot out of the grouped bump: a framework minor (e.g. 4.0->4.1)
+        # can change transitive versions and behaviour, so it should arrive as its own
+        # reviewable PR rather than folded into routine minor/patch updates.
+        exclude-patterns:
+          - "org.springframework.boot:*"
         update-types:
           - "minor"
           - "patch"
