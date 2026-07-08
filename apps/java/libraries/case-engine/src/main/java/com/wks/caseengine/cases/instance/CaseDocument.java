@@ -91,4 +91,25 @@ public class CaseDocument {
 
 	/** User id (JWT {@code sub}) that verified/rejected the document, stamped server-side. */
 	private String validatedBy;
+
+	/**
+	 * Version number within a requirement's document history (1-based). A re-upload
+	 * for the same {@code requirementId} increments this. Null on legacy documents
+	 * (treated as version 1).
+	 */
+	private Integer version;
+
+	/**
+	 * Whether this is the current version for its requirement. A re-upload marks the
+	 * previous current document {@code false} and the new one {@code true}. Null on
+	 * legacy documents is treated as current for backward compatibility.
+	 */
+	private Boolean current;
+
+	/**
+	 * Id of the document this version superseded (the previous current version for
+	 * the same requirement), forming the history chain. Null for the first version
+	 * and for free-form attachments.
+	 */
+	private String supersedesId;
 }

@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 
 import com.wks.caseengine.cases.instance.CaseDocument;
@@ -49,6 +51,8 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 		document.setStatus(CaseDocument.STATUS_RECEIVED);
 		commandContext.getSecurityContextTenantHolder().getUserId().ifPresent(document::setUploadedBy);
 
+		applyVersioning(caseInstance, document);
+
 		caseInstance.addDocument(document);
 
 		try {
@@ -58,6 +62,35 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 		}
 
 		return document;
+	}
+
+	/**
+	 * Version the incoming document within its requirement's history. A document tied
+	 * to a {@code requirementId} that already has a current document supersedes it:
+	 * the previous current version is marked non-current and the new one takes the
+	 * next version number, linking back via {@code supersedesId}. The first document
+	 * for a requirement (and every free-form attachment) is version 1 and current.
+	 */
+	private void applyVersioning(final CaseInstance caseInstance, final CaseDocument incoming) {
+		incoming.setCurrent(Boolean.TRUE);
+
+		String requirementId = incoming.getRequirementId();
+		List<CaseDocument> existing = caseInstance.getDocuments();
+		CaseDocument previousCurrent = (requirementId == null || existing == null) ? null
+				: existing.stream()
+						.filter(d -> requirementId.equals(d.getRequirementId()))
+						.filter(d -> !Boolean.FALSE.equals(d.getCurrent()))
+						.reduce((first, second) -> second) // the latest current, if any
+						.orElse(null);
+
+		if (previousCurrent == null) {
+			incoming.setVersion(1);
+		} else {
+			previousCurrent.setCurrent(Boolean.FALSE);
+			int previousVersion = previousCurrent.getVersion() == null ? 1 : previousCurrent.getVersion();
+			incoming.setVersion(previousVersion + 1);
+			incoming.setSupersedesId(previousCurrent.getId());
+		}
 	}
 
 }

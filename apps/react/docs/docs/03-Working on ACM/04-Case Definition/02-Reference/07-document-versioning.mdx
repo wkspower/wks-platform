@@ -1,0 +1,126 @@
+---
+id: document-versioning
+title: Document Versioning
+---
+
+Once a case declares its [required documents](./04-required-documents.mdx), stores their bytes in a
+[storage mode](./05-document-storage.mdx), and tracks each one through its
+[lifecycle status](./06-document-lifecycle.mdx), the natural next question is: what happens when a
+document is **uploaded again**? **Document versioning** answers it. Re-uploading a file for a
+requirement that already has one does not create a duplicate — it creates a **new version**, and the
+previous one is kept as history.
+
+Versioning is done by the case-engine **at upload time**, inside the existing create-document
+command. There is **no new endpoint**: the same upload path that has always accepted documents now
+also decides whether the incoming file is a first upload or a replacement.
+
+---
+
+## What triggers a new version
+
+A new version is created when a document is uploaded for a **requirement that already has a current
+document** — that is, when the incoming upload's `requirementId` matches a requirement that a
+`CaseDocument` already satisfies. On that upload the engine:
+
+- Marks the requirement's existing **current** version as no longer current.
+- Stores the new upload as the **current** version, one higher, and links it back to the version it
+  replaced.
+
+| Upload | Grouped by | Result |
+|--------|-----------|--------|
+| First upload for a requirement | `requirementId` | Version `1`, `current` |
+| Re-upload for the **same** requirement | `requirementId` | New version (`n + 1`), becomes `current`; the prior current version is superseded |
+| Free-form attachment (no `requirementId`) | *not grouped* | Always version `1`, `current` — each is independent |
+
+:::note Free-form attachments are never versioned together
+Versioning is keyed on `requirementId`. Documents with **no** `requirementId` — the free-form
+attachments described in [required documents](./04-required-documents.mdx) — are each their own
+version `1` / `current` and are **not** grouped or superseded, even if you upload several. There is
+nothing tying them together to form a chain.
+:::
+
+---
+
+## The versioning fields
+
+Versioning adds three fields to the `CaseDocument`, all managed by the engine:
+
+| Field | Type | Set by | Meaning |
+|-------|------|--------|---------|
+| `version` | integer | Engine, at upload | 1-based version number. The first document for a requirement is `1`; each re-upload increments it. |
+| `current` | boolean | Engine, at upload | Whether this is the **latest** version for its requirement. Exactly one version per requirement is `current` at a time. |
+| `supersedesId` | string | Engine, at upload | The `id` of the version this one replaced. Following `supersedesId` from the current version walks back through the history chain. `null` / absent on version `1`. |
+
+- The **first** upload for a requirement is `version` `1`, `current` `true`, and has **no**
+  `supersedesId` — there is nothing before it.
+- Each re-upload gets the next `version`, becomes the `current` one, and its `supersedesId` points
+  at the version it just replaced. The replaced version keeps its own fields but flips to
+  `current` `false`.
+
+The chain is single-linked from newest to oldest: current → its `supersedesId` → and so on back to
+version `1`.
+
+---
+
+## Current-vs-history in the portal
+
+The Documents tab shows only the **current** version of each requirement's document, so the list
+stays one row per requirement rather than growing with every re-upload:
+
+- When a requirement has more than one version, its current row carries a **`v{n}`** badge (e.g.
+  `v3`) showing how many versions exist.
+- Superseded versions are reached through a per-document **History** expander. Expanding it lists the
+  prior versions, newest first, following the `supersedesId` chain.
+- Every superseded version **remains downloadable** — its bytes are retained in whatever
+  [storage mode](./05-document-storage.mdx) the deployment uses. History is read-only, not archived
+  away.
+
+:::note History is retained — there is no prune or delete
+This slice keeps **all** versions. Superseded documents are not deleted, expired, or pruned; the
+full chain stays queryable and downloadable. There is no retention window and no "delete old
+versions" action here.
+:::
+
+---
+
+## Versioning and the lifecycle status
+
+Each version is a `CaseDocument` in its own right, so each carries its **own**
+[lifecycle status](./06-document-lifecycle.mdx). Versioning and status are independent:
+
+- A **new version starts at `received`** — the same default the engine stamps on any upload. It does
+  **not** inherit the status of the version it replaced.
+- Verifying or rejecting one version does not change any other. A superseded version keeps the
+  status it had when it was replaced (e.g. a `rejected` version stays `rejected` in history), and the
+  new current version is reviewed on its own.
+- Because the status endpoint targets a specific `documentId`, a validator always acts on one exact
+  version — including, if needed, a superseded one still visible in history.
+
+:::caution A re-upload does not "fix" a rejected version
+Rejecting a document and re-uploading a corrected file produces a **new** current version at
+`received`, awaiting its own review — the old `rejected` version stays in the history chain. The
+rejection is not overwritten; it is superseded.
+:::
+
+---
+
+## Versioning and completeness
+
+The completeness checklist from [required documents](./04-required-documents.mdx) is unchanged: a
+requirement counts as satisfied when a document is **present** for it. Because every re-upload keeps
+the requirement's `current` document present, versioning never regresses completeness — replacing a
+document leaves the requirement satisfied throughout. Completeness looks only at the current version;
+history does not affect it.
+
+---
+
+## Relationship to the other document layers
+
+- [Required documents](./04-required-documents.mdx) declare *what* a case should carry and provide
+  the `requirementId` that versions are grouped by. Free-form attachments (no `requirementId`) are
+  never grouped into a version chain.
+- [Storage mode](./05-document-storage.mdx) decides *where* each version's bytes live. Every
+  version — current or superseded — retains its bytes in the active mode, which is why history stays
+  downloadable.
+- [Document lifecycle](./06-document-lifecycle.mdx) tracks *where each version stands* in review.
+  Each version has its own status, and a new version always starts at `received`.
