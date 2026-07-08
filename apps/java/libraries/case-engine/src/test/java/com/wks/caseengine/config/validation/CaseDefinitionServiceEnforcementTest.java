@@ -42,7 +42,7 @@ class CaseDefinitionServiceEnforcementTest {
 	void setup() {
 		commandExecutor = mock(CommandExecutor.class);
 		ConfigValidationService validation = new ConfigValidationService(new ConfigSchemaValidator(),
-				new GsonBuilderFactory().getGsonBuilder(), "enforce");
+				new ConfigStructuralValidator(), new GsonBuilderFactory().getGsonBuilder(), "enforce");
 
 		service = new CaseDefinitionServiceImpl();
 		ReflectionTestUtils.setField(service, "commandExecutor", commandExecutor);

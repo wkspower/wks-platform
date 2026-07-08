@@ -31,7 +31,7 @@ import com.wks.caseengine.record.type.RecordType;
 class ConfigValidationServiceTest {
 
 	private ConfigValidationService service(String mode) {
-		return new ConfigValidationService(new ConfigSchemaValidator(),
+		return new ConfigValidationService(new ConfigSchemaValidator(), new ConfigStructuralValidator(),
 				new GsonBuilderFactory().getGsonBuilder(), mode);
 	}
 
