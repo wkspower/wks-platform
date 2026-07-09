@@ -11,6 +11,8 @@
  */
 package com.wks.caseengine.cases.instance.command;
 
+import org.bson.types.ObjectId;
+
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
@@ -39,6 +41,13 @@ public class CreateCaseInstanceDocumentCmd implements Command<CaseDocument> {
 		} catch (DatabaseRecordNotFoundException e) {
 			throw new CaseInstanceNotFoundException(e.getMessage(), e);
 		}
+
+		// Server-assigned lifecycle metadata: a stable id (so the document can later
+		// be addressed for status transitions), the received status, and the uploader
+		// taken from the security context (never trusted from the client).
+		document.setId(ObjectId.get().toString());
+		document.setStatus(CaseDocument.STATUS_RECEIVED);
+		commandContext.getSecurityContextTenantHolder().getUserId().ifPresent(document::setUploadedBy);
 
 		caseInstance.addDocument(document);
 

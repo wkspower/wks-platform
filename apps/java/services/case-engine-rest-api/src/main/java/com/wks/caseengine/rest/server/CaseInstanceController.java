@@ -11,8 +11,17 @@
  */
 package com.wks.caseengine.rest.server;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.google.gson.GsonBuilder;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
@@ -30,6 +40,7 @@ import com.wks.caseengine.cases.instance.CaseComment;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.CaseInstanceCommentNotFoundException;
+import com.wks.caseengine.cases.instance.CaseInstanceDocumentNotFoundException;
 import com.wks.caseengine.cases.instance.CaseInstanceFilter;
 import com.wks.caseengine.cases.instance.CaseInstanceNotFoundException;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
@@ -50,6 +61,18 @@ public class CaseInstanceController {
 
 	@Autowired
 	private GsonBuilder gsonBuilder;
+
+	/**
+	 * When authorization is enabled, transitioning a document's status requires one
+	 * of these manager realm roles. When authorization is off (dev/minimal mode)
+	 * the check is skipped, so any authenticated caller may transition — the gate is
+	 * a natural no-op, matching the rest of the orthogonal core.
+	 */
+	private static final Set<String> DOCUMENT_VALIDATOR_ROLES =
+			Set.of("mgmt_case_def", "mgmt_form", "mgmt_record_type");
+
+	@Value("${wks.authz.opa.enabled:true}")
+	private boolean authorizationEnabled;
 
 	@GetMapping
 	public ResponseEntity<Object> find(@RequestParam(required = false) String status,
@@ -129,6 +152,40 @@ public class CaseInstanceController {
 			throw new RestResourceNotFoundException(e.getMessage());
 		}
 		return ResponseEntity.noContent().build();
+	}
+
+	/**
+	 * Transition a document's lifecycle status (verify / reject). The engine stamps
+	 * {@code validatedBy} from the security context; the request body carries only
+	 * the target {@code status}.
+	 */
+	@PatchMapping(value = "/{businessKey}/document/{documentId}/status")
+	public ResponseEntity<Void> updateDocumentStatus(@PathVariable final String businessKey,
+			@PathVariable final String documentId, @RequestBody final CaseDocument statusPatch) {
+
+		if (authorizationEnabled && !callerHasValidatorRole()) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Transitioning a document status requires a manager role");
+		}
+
+		try {
+			caseInstanceService.updateDocumentStatus(businessKey, documentId, statusPatch.getStatus());
+		} catch (CaseInstanceNotFoundException | CaseInstanceDocumentNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException(e.getMessage(), e);
+		}
+		return ResponseEntity.noContent().build();
+	}
+
+	private boolean callerHasValidatorRole() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth instanceof JwtAuthenticationToken token
+				&& token.getToken().getClaim("realm_access") instanceof Map<?, ?> realmAccess
+				&& realmAccess.get("roles") instanceof Collection<?> roles) {
+			return roles.stream().map(String::valueOf).anyMatch(DOCUMENT_VALIDATOR_ROLES::contains);
+		}
+		return false;
 	}
 
 	@PostMapping(value = "/{businessKey}/comment")

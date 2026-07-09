@@ -1,0 +1,131 @@
+---
+id: document-lifecycle
+title: Document Lifecycle
+---
+
+Once a case declares its [required documents](./04-required-documents.mdx) and its uploaded bytes
+have a [storage mode](./05-document-storage.mdx) to live in, each document also carries a
+**lifecycle status** — a small, server-controlled state machine that says whether a document has
+merely *arrived* or has been *reviewed*. This lets a case distinguish "we received something" from
+"someone validated it", turning the Documents tab from an attachment list into a review queue.
+
+The status lives on the `CaseDocument` and is managed by the case-engine, not by the config: the
+case definition declares *what* documents a case should carry; the lifecycle tracks *where each one
+stands* in review.
+
+---
+
+## Status values
+
+| Status | Stored? | Set by | Meaning |
+|--------|---------|--------|---------|
+| `received` | ✅ | Engine, at upload | Default. Stamped server-side the moment a file is uploaded. The document exists and is awaiting review. |
+| `verified` | ✅ | Validator, via the status endpoint | A reviewer accepted the document. |
+| `rejected` | ✅ | Validator, via the status endpoint | A reviewer rejected the document (e.g. wrong file, illegible, expired). |
+| `pending` | ❌ | Portal (computed) | **Not a stored status.** A declared [required document](./04-required-documents.mdx) that has *no* upload yet. The portal derives it for display; the engine never persists it. |
+
+:::note `pending` is a view, not a state
+`pending` describes a *gap* — a requirement the case is expected to satisfy but hasn't. Because it
+belongs to a requirement with no document behind it, there is nothing to store it on. The portal
+computes it by comparing the declared `requiredDocuments` against the documents actually present.
+Only `received`, `verified`, and `rejected` ever exist on a stored `CaseDocument`.
+:::
+
+---
+
+## The transition
+
+A stored document moves through a deliberately small state machine:
+
+```
+             ┌──────────► verified
+received ────┤
+             └──────────► rejected
+```
+
+- A document starts at `received` (stamped by the engine at upload — clients cannot set it).
+- A validator transitions it to **either** `verified` **or** `rejected`.
+
+There is no separate "re-open" transition in this slice; the endpoint simply sets the status to one
+of the two review outcomes.
+
+---
+
+## The transition endpoint
+
+```
+PATCH /case/{businessKey}/document/{documentId}/status
+```
+
+```json
+{ "status": "verified" }
+```
+
+| Part | Value |
+|------|-------|
+| Method | `PATCH` |
+| Path | `/case/{businessKey}/document/{documentId}/status` |
+| `documentId` | The server-assigned `id` on the `CaseDocument` (see below). |
+| Body `status` | `"verified"` or `"rejected"`. No other value is accepted. |
+
+The endpoint records the outcome on the document and stamps who made the decision (`validatedBy`,
+below). It does not accept `received` or `pending` — `received` is the engine's job at upload, and
+`pending` is never stored.
+
+---
+
+## Server-stamped identity — `uploadedBy` and `validatedBy`
+
+Two attribution fields are filled in **by the engine from the authenticated user** (the JWT `sub`
+claim), never from the request body:
+
+| Field | Stamped when | Source |
+|-------|--------------|--------|
+| `uploadedBy` | At upload | Authenticated user (JWT `sub`) |
+| `validatedBy` | At verify / reject | Authenticated user (JWT `sub`) |
+
+Documents also gained a server-assigned `id` at upload, which is what `documentId` in the endpoint
+path refers to.
+
+:::caution Integrity — these fields are not client-trusted
+`uploadedBy` and `validatedBy` are set server-side from the token, so a client cannot spoof who
+uploaded or who validated a document by putting a different name in the payload. Any such value in
+the request body is ignored.
+:::
+
+:::caution No audit *trail* — attribution, not history
+The lifecycle records the **current** status and the **latest** actor (`uploadedBy`,
+`validatedBy`) only. It does **not** keep a change history, and **no timestamps are stored** — you
+cannot see prior statuses, when a transition happened, or a sequence of reviewers. A full audit
+trail is out of scope for this slice (it is a separate project). Do not rely on these fields as a
+history log.
+:::
+
+---
+
+## Who can transition — the role gate
+
+Whether a transition requires a privileged role depends on whether authorization is enabled, in
+keeping with the platform's minimal-mode philosophy:
+
+| Authz | Setting | Gate on the status endpoint |
+|-------|---------|-----------------------------|
+| **On** | `wks.authz.opa.enabled=true` (OPA) | Requires a **manager role** — one of `mgmt_case_def`, `mgmt_form`, `mgmt_record_type`. |
+| **Off** | minimal / dev mode | **No-op.** Any authenticated user can transition. |
+
+:::note Same philosophy as the rest of the core
+The gate mirrors the orthogonal-core stance: security is a concern you switch **on** for a real
+deployment and **off** for a minimal/dev stack. With authz off the transition is still restricted
+to *authenticated* users — the no-op removes the *role* check, not authentication.
+:::
+
+---
+
+## Relationship to the other document layers
+
+- [Required documents](./04-required-documents.mdx) declare *what* a case should carry. The
+  lifecycle status describes *where each document stands* in review; a declared requirement with no
+  upload shows as the computed `pending`.
+- [Storage mode](./05-document-storage.mdx) decides *where* a document's bytes live. It is
+  orthogonal to the lifecycle — a document has a status regardless of whether its bytes are in
+  MinIO, on the filesystem, or inline.

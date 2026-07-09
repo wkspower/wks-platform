@@ -14,6 +14,7 @@ import Fade from '@mui/material/Fade'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import ListItemText from '@mui/material/ListItemText'
 import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
@@ -21,6 +22,8 @@ import { useSession } from 'SessionStoreContext'
 import React, { useState } from 'react'
 import Files from 'react-files'
 import { CaseService, FileService } from '../../services'
+import { accountStore } from '../../store'
+import DocumentStatusChip from './DocumentStatusChip'
 import CaseStore from './store'
 
 function Documents({ aCase, initialValue, requiredDocuments = [] }) {
@@ -29,6 +32,28 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
   const [percent, setPercent] = useState(0)
   const [messageError, setMessageError] = useState(null)
   const [filesUploaded, setFilesUploaded] = useState(initialValue)
+
+  const isManager = accountStore.isManagerUser(keycloak)
+
+  const handleUpdateStatus = (documentId, status) => {
+    CaseService.updateDocumentStatus(
+      keycloak,
+      aCase.businessKey,
+      documentId,
+      status,
+    )
+      .then(() => {
+        setFilesUploaded((current) =>
+          current.map((file) =>
+            file.id === documentId ? { ...file, status } : file,
+          ),
+        )
+      })
+      .catch((e) => {
+        console.log(e)
+        setMessageError(e)
+      })
+  }
 
   const handleChange = (files, requirementId) => {
     setFetching(true)
@@ -316,6 +341,37 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
                   secondary={file.size + 'KB'}
                   style={{ maxWidth: '80%' }}
                 />
+                <ListItemSecondaryAction>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <DocumentStatusChip status={file.status || 'received'} />
+                    {isManager && file.id && (
+                      <>
+                        <Button
+                          size='small'
+                          color='success'
+                          variant='outlined'
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            handleUpdateStatus(file.id, 'verified')
+                          }}
+                        >
+                          Verify
+                        </Button>
+                        <Button
+                          size='small'
+                          color='error'
+                          variant='outlined'
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            handleUpdateStatus(file.id, 'rejected')
+                          }}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </Box>
+                </ListItemSecondaryAction>
               </ListItem>
             )
           })}

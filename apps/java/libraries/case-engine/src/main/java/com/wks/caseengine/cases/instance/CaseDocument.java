@@ -26,6 +26,20 @@ import lombok.ToString;
 @NoArgsConstructor
 public class CaseDocument {
 
+	/** Default status stamped when a document is uploaded. */
+	public static final String STATUS_RECEIVED = "received";
+	/** Status set when a validator accepts the document. */
+	public static final String STATUS_VERIFIED = "verified";
+	/** Status set when a validator rejects the document. */
+	public static final String STATUS_REJECTED = "rejected";
+
+	/**
+	 * Server-assigned identifier (assigned on upload). Addresses this document for
+	 * lifecycle transitions (see the document-status endpoint). Null on legacy
+	 * documents predating this field.
+	 */
+	private String id;
+
 	private String name;
 
 	private String type;
@@ -63,4 +77,18 @@ public class CaseDocument {
 	 * a free-form attachment not tied to a declared requirement.
 	 */
 	private String requirementId;
+
+	/**
+	 * Lifecycle status. Stored values: {@code received} (default, stamped on
+	 * upload), {@code verified}, {@code rejected}. ({@code pending} is a
+	 * portal-computed state for a declared-but-unfulfilled requirement — never
+	 * stored here.) Null on legacy documents predating this field.
+	 */
+	private String status;
+
+	/** User id (JWT {@code sub}) that uploaded the document, stamped server-side. */
+	private String uploadedBy;
+
+	/** User id (JWT {@code sub}) that verified/rejected the document, stamped server-side. */
+	private String validatedBy;
 }

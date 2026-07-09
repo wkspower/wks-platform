@@ -29,6 +29,7 @@ import com.wks.caseengine.cases.instance.command.PatchCaseInstanceCmd;
 import com.wks.caseengine.cases.instance.command.SaveCaseInstanceWithValuesCmd;
 import com.wks.caseengine.cases.instance.command.StartCaseInstanceWithValuesCmd;
 import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceCommentCmd;
+import com.wks.caseengine.cases.instance.command.UpdateCaseInstanceDocumentStatusCmd;
 import com.wks.caseengine.command.CommandExecutor;
 import com.wks.caseengine.pagination.PageResult;
 
@@ -76,6 +77,12 @@ public class CaseInstanceServiceImpl implements CaseInstanceService {
 	@Transactional
 	public void saveDocument(final String businessKey, final CaseDocument document) {
 		commandExecutor.execute(new CreateCaseInstanceDocumentCmd(businessKey, document));
+	}
+
+	@Override
+	@Transactional
+	public void updateDocumentStatus(final String businessKey, final String documentId, final String status) {
+		commandExecutor.execute(new UpdateCaseInstanceDocumentStatusCmd(businessKey, documentId, status));
 	}
 
 	@Override

@@ -33,6 +33,8 @@ public interface CaseInstanceService {
 
 	void saveDocument(final String businessKey, final CaseDocument document);
 
+	void updateDocumentStatus(final String businessKey, final String documentId, final String status);
+
 	void saveComment(final String businessKey, final CaseComment comment);
 
 	void updateComment(final String businessKey, final String commentId, final String body);
