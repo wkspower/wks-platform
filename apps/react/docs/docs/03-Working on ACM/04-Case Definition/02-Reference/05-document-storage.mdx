@@ -1,0 +1,65 @@
+---
+id: document-storage
+title: Document Storage Modes
+---
+
+Once a case declares its [required documents](./04-required-documents.mdx), the bytes of an
+uploaded file have to live *somewhere*. The portal picks **where** via a single deployment
+switch — the **storage mode** — and the case-engine records, on each `CaseDocument`, enough
+metadata (`storage` + `dir`) to find those bytes again on download.
+
+The case-engine itself stays a passive metadata bag: it stores *where* a document lives, not
+*how* it got there. Choosing a mode is a **deployment decision**, not a case-definition field.
+
+---
+
+## The three modes
+
+The portal reads the mode from `StorageMode` (env `REACT_APP_STORAGE_MODE`, surfaced to the
+browser as `window.STORAGE_MODE`; default `minio`).
+
+| Mode | Where bytes live | storage-api needed? | Compose profile | Use it for |
+|------|------------------|---------------------|-----------------|------------|
+| `minio` | Object storage via storage-api's MinIO driver (presigned uploads; also works against DigitalOcean Spaces) | ✅ yes | `storage` (storage-api **+** MinIO) | Production / the default full stack |
+| `filesystem` | Local disk via storage-api's filesystem driver (MinIO-free) | ✅ yes | `storage-fs` (storage-api alone) | On-prem / single-host deployments that want files on a mounted volume, no object store |
+| `inline` | Base64 on the `CaseDocument` itself — bytes travel with the document | ❌ no | *(none — omit the storage profile)* | The minimal, no-storage-api deployment; demos and small documents |
+
+Each stored document also carries a `dir` (bucket / path prefix, e.g. `"cases"`) so the mode
+plus the `dir` are enough to locate it at download time.
+
+---
+
+## `inline` — the no-storage-api minimal mode
+
+`inline` is the storage option for the **minimal deployment** (the `app,portal` recipe that
+omits the `storage`/`storage-fs` profile). Instead of shipping bytes to a separate service, the
+file is base64-encoded and persisted **on the case document** — so there is no MinIO, no
+filesystem volume, and no storage-api container to run. Upload still works end to end; the bytes
+just ride along with the document metadata.
+
+:::caution Size caveat — inline is for small documents and demos
+Base64 inflates payloads by ~33% and the encoded bytes are read and written together with the
+case document on every access. That's fine for small attachments and demo data, but it does not
+scale to large files or high volume. For production, or any non-trivial document sizes, use
+`minio` (or `filesystem`), which stream bytes through storage-api instead of embedding them.
+:::
+
+---
+
+## Choosing a mode
+
+- **Full / production stack** → `minio`. It's the default; run the `storage` profile.
+- **On-prem, object-store-free** → `filesystem`. Run the `storage-fs` profile and mount a volume.
+- **Minimal, nothing-but-engine-and-portal** → `inline`. No storage profile, no storage-api;
+  accept the small-document caveat above.
+
+Whichever mode is active, the portal, engine and (where present) storage-api must agree — the
+mode is set once, at the deployment's env layer (`REACT_APP_STORAGE_MODE` →
+`__SERVER_STORAGE_MODE__` → `window.STORAGE_MODE`). See the repo `.env-sample` and the **Minimal
+stack** recipe in the project README for the concrete env values.
+
+:::note Relationship to required documents
+Storage mode is orthogonal to the [required-documents](./04-required-documents.mdx) contract:
+the config declares *what* documents a case should carry; the storage mode decides *where* their
+bytes are kept. Any mode satisfies any requirement.
+:::

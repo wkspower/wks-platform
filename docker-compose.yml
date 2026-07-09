@@ -19,6 +19,9 @@
 #  (camunda + c7-external-tasks), storage (minio + storage-api), storage-fs
 #  (storage-api alone, MinIO-free). App/aux profiles: app (case-engine-rest-api),
 #  portal, notifications, proxy, demo.
+#  Document storage mode (REACT_APP_STORAGE_MODE, default minio): minio needs the
+#  `storage` profile, filesystem needs `storage-fs`. `inline` needs NEITHER — bytes
+#  ride on the case document as base64 (minimal app,portal deploy; small docs/demos).
 #  Concern env knobs (defaults = full/secure): WKS_AUTH_MODE, WKS_AUTHZ_OPA_ENABLED,
 #  WKS_BPM_ENGINE, WKS_TENANCY_MULTI_TENANT, WKS_SEED_ENABLED, DRIVER_STORAGE_FACTORYCLASS;
 #  WKS_SPRING_PROFILES carries the jpa datasource (db-h2 / db-postgres). Any point on
