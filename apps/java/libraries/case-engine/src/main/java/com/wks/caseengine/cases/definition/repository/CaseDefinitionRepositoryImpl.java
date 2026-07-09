@@ -91,7 +91,8 @@ public class CaseDefinitionRepositoryImpl implements CaseDefinitionRepository {
 				Updates.set("formKey", caseDefinition.getFormKey()), Updates.set("name", caseDefinition.getName()),
 				Updates.set("stagesLifecycleProcessKey", caseDefinition.getStagesLifecycleProcessKey()),
 				Updates.set("deployed", caseDefinition.getDeployed()),
-				Updates.set("caseHooks", caseDefinition.getCaseHooks()));
+				Updates.set("caseHooks", caseDefinition.getCaseHooks()),
+				Updates.set("requiredDocuments", caseDefinition.getRequiredDocuments()));
 
 		JsonObject jsonObject = getCollection().findOneAndUpdate(filter, update);
 		if (jsonObject == null) {
