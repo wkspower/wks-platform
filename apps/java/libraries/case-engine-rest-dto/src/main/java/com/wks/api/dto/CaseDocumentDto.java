@@ -60,4 +60,13 @@ public class CaseDocumentDto {
 	/** User id that verified/rejected the document (server-stamped). */
 	private String validatedBy;
 
+	/** Version number within the requirement's document history (1-based). */
+	private Integer version;
+
+	/** Whether this is the current version for its requirement. */
+	private Boolean current;
+
+	/** Id of the document version this one superseded (history chain). */
+	private String supersedesId;
+
 }

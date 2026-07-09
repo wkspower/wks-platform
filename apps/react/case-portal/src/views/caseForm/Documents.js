@@ -10,6 +10,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
+import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -32,8 +33,18 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
   const [percent, setPercent] = useState(0)
   const [messageError, setMessageError] = useState(null)
   const [filesUploaded, setFilesUploaded] = useState(initialValue)
+  const [expandedHistory, setExpandedHistory] = useState({})
 
   const isManager = accountStore.isManagerUser(keycloak)
+
+  // Re-read the authoritative document list from the engine so server-computed
+  // fields (version / current / supersedesId / status / id) are reflected after an
+  // upload or a status change — the client's own object doesn't carry them.
+  const refreshDocuments = () => {
+    return CaseService.getCaseById(keycloak, aCase.businessKey)
+      .then((caseData) => setFilesUploaded(caseData?.documents || []))
+      .catch((e) => console.log(e))
+  }
 
   const handleUpdateStatus = (documentId, status) => {
     CaseService.updateDocumentStatus(
@@ -42,17 +53,18 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
       documentId,
       status,
     )
-      .then(() => {
-        setFilesUploaded((current) =>
-          current.map((file) =>
-            file.id === documentId ? { ...file, status } : file,
-          ),
-        )
-      })
+      .then(() => refreshDocuments())
       .catch((e) => {
         console.log(e)
         setMessageError(e)
       })
+  }
+
+  const toggleHistory = (documentId) => {
+    setExpandedHistory((current) => ({
+      ...current,
+      [documentId]: !current[documentId],
+    }))
   }
 
   const handleChange = (files, requirementId) => {
@@ -68,9 +80,7 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
         )
 
     uploadPromise
-      .then((data) => {
-        setFilesUploaded([...filesUploaded, ...data])
-      })
+      .then(() => refreshDocuments())
       .catch((e) => {
         console.log(e)
         setMessageError(e)
@@ -131,6 +141,54 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
   const satisfiedMandatoryCount = mandatoryRequirements.filter(
     isRequirementSatisfied,
   ).length
+
+  // Versioning: show only the current version of each document at the top level;
+  // superseded versions are reachable via the per-document history chain.
+  const documentsById = Object.fromEntries(
+    (filesUploaded || []).map((doc) => [doc.id, doc]),
+  )
+  const currentDocuments = (filesUploaded || []).filter(
+    (doc) => doc.current !== false,
+  )
+  const historyOf = (doc) => {
+    const chain = []
+    let previousId = doc.supersedesId
+    while (previousId && documentsById[previousId]) {
+      const previous = documentsById[previousId]
+      chain.push(previous)
+      previousId = previous.supersedesId
+    }
+    return chain
+  }
+
+  const documentAvatar = (file) => {
+    if (file.type === 'application/pdf') {
+      return (
+        <Avatar style={{ backgroundColor: 'red' }}>
+          <FilePdfOutlined />
+        </Avatar>
+      )
+    }
+    if (file.type === 'application/xls') {
+      return (
+        <Avatar style={{ backgroundColor: 'green' }}>
+          <FileExcelOutlined />
+        </Avatar>
+      )
+    }
+    if (file.type && file.type.includes('image/')) {
+      return (
+        <Avatar style={{ backgroundColor: 'lightblue' }}>
+          <FileImageOutlined />
+        </Avatar>
+      )
+    }
+    return (
+      <Avatar style={{ backgroundColor: 'grey' }}>
+        <FileOutlined />
+      </Avatar>
+    )
+  }
 
   const handleError = (error) => {
     console.log('error code ' + error.code + ': ' + error.message)
@@ -300,79 +358,102 @@ function Documents({ aCase, initialValue, requiredDocuments = [] }) {
         </Grid>
       </Box>
 
-      {filesUploaded && filesUploaded.length > 0 && (
+      {currentDocuments.length > 0 && (
         <List sx={{ border: '1px dashed #d9d9d9' }}>
-          {filesUploaded.map((file, index) => {
+          {currentDocuments.map((file) => {
+            const history = historyOf(file)
+            const expanded = !!expandedHistory[file.id]
             return (
-              <ListItem
-                key={index}
-                onClick={() => downloadFile(file, keycloak)}
-              >
-                <ListItemAvatar>
-                  {file.type === 'application/pdf' && (
-                    <Avatar style={{ backgroundColor: 'red' }}>
-                      <FilePdfOutlined />
-                    </Avatar>
-                  )}
-
-                  {file.type === 'application/xls' && (
-                    <Avatar style={{ backgroundColor: 'green' }}>
-                      <FileExcelOutlined />
-                    </Avatar>
-                  )}
-
-                  {file.type && file.type.includes('image/') && (
-                    <Avatar style={{ backgroundColor: 'lightblue' }}>
-                      <FileImageOutlined />
-                    </Avatar>
-                  )}
-
-                  {file.type !== 'application/xls' &&
-                    file.type !== 'application/pdf' &&
-                    file.type &&
-                    !file.type.includes('image/') && (
-                      <Avatar style={{ backgroundColor: 'grey' }}>
-                        <FileOutlined />
-                      </Avatar>
-                    )}
-                </ListItemAvatar>
-                <ListItemText
-                  primary={file.name}
-                  secondary={file.size + 'KB'}
-                  style={{ maxWidth: '80%' }}
-                />
-                <ListItemSecondaryAction>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <DocumentStatusChip status={file.status || 'received'} />
-                    {isManager && file.id && (
-                      <>
+              <React.Fragment key={file.id || file.name}>
+                <ListItem onClick={() => downloadFile(file, keycloak)}>
+                  <ListItemAvatar>{documentAvatar(file)}</ListItemAvatar>
+                  <ListItemText
+                    primary={file.name}
+                    secondary={file.size + 'KB'}
+                    style={{ maxWidth: '80%' }}
+                  />
+                  <ListItemSecondaryAction>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {file.version > 1 && (
+                        <Chip
+                          size='small'
+                          variant='outlined'
+                          label={`v${file.version}`}
+                        />
+                      )}
+                      {history.length > 0 && (
                         <Button
                           size='small'
-                          color='success'
-                          variant='outlined'
                           onClick={(event) => {
                             event.stopPropagation()
-                            handleUpdateStatus(file.id, 'verified')
+                            toggleHistory(file.id)
                           }}
                         >
-                          Verify
+                          {expanded
+                            ? 'Hide history'
+                            : `History (${history.length})`}
                         </Button>
-                        <Button
-                          size='small'
-                          color='error'
-                          variant='outlined'
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            handleUpdateStatus(file.id, 'rejected')
-                          }}
+                      )}
+                      <DocumentStatusChip status={file.status || 'received'} />
+                      {isManager && file.id && (
+                        <>
+                          <Button
+                            size='small'
+                            color='success'
+                            variant='outlined'
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              handleUpdateStatus(file.id, 'verified')
+                            }}
+                          >
+                            Verify
+                          </Button>
+                          <Button
+                            size='small'
+                            color='error'
+                            variant='outlined'
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              handleUpdateStatus(file.id, 'rejected')
+                            }}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                    </Box>
+                  </ListItemSecondaryAction>
+                </ListItem>
+                {history.length > 0 && (
+                  <Collapse in={expanded} timeout='auto' unmountOnExit>
+                    <List disablePadding sx={{ pl: 4 }}>
+                      {history.map((old) => (
+                        <ListItem
+                          key={old.id}
+                          onClick={() => downloadFile(old, keycloak)}
+                          sx={{ opacity: 0.7 }}
                         >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </Box>
-                </ListItemSecondaryAction>
-              </ListItem>
+                          <ListItemAvatar>{documentAvatar(old)}</ListItemAvatar>
+                          <ListItemText
+                            primary={old.name}
+                            secondary={`v${old.version || 1}${
+                              old.status ? ' · ' + old.status : ''
+                            }`}
+                            style={{ maxWidth: '80%' }}
+                          />
+                          <ListItemSecondaryAction>
+                            <Chip
+                              size='small'
+                              variant='outlined'
+                              label={`v${old.version || 1}`}
+                            />
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Collapse>
+                )}
+              </React.Fragment>
             )
           })}
         </List>
