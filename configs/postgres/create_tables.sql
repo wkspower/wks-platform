@@ -20,7 +20,8 @@ CREATE TABLE case_definition (
     stages_lifecycle_process_key TEXT,
     deployed BOOLEAN NOT NULL DEFAULT FALSE,
     stages text,
-    case_hooks TEXT
+    case_hooks TEXT,
+    required_documents TEXT
 );
 
 CREATE TABLE record_type (
