@@ -205,10 +205,11 @@ services:
             - WKS_TENANCY_MULTI_TENANT=${WKS_TENANCY_MULTI_TENANT:-true}
             - WKS_SEED_ENABLED=${WKS_SEED_ENABLED:-false}
             # Swagger/OpenAPI toggles. springdoc-openapi is incompatible with Spring
-            # Boot 4 and crashes context startup (issue #541); set these to false to
-            # boot the engine without the API docs until the springdoc fix lands.
-            - SPRINGDOC_API_DOCS_ENABLED=${SPRINGDOC_API_DOCS_ENABLED:-true}
-            - SPRINGDOC_SWAGGER_UI_ENABLED=${SPRINGDOC_SWAGGER_UI_ENABLED:-true}
+            # Boot 4 and CRASHES context startup (issue #541), so the API docs are
+            # disabled by default to keep the engine bootable. Set these to true once
+            # the springdoc/SB4 fix lands to restore Swagger UI.
+            - SPRINGDOC_API_DOCS_ENABLED=${SPRINGDOC_API_DOCS_ENABLED:-false}
+            - SPRINGDOC_SWAGGER_UI_ENABLED=${SPRINGDOC_SWAGGER_UI_ENABLED:-false}
             # Infra connection coordinates (used by whichever concerns are active).
             - CAMUNDA_VERSION=${CAMUNDA_VERSION:-camunda7}
             - CAMUNDA_BASE_URL=${CAMUNDA_BASE_URL}
