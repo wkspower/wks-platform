@@ -20,7 +20,7 @@
     "@wkspower/case-config-schema": "file:../../../packages/case-config-schema",
     "bpmn-js": "^10.0.0",
     "date-fns": "^3.6.0",
-    "dompurify": "^3.4.9",
+    "dompurify": "^3.4.12",
     "formiojs": "^4.21.7",
     "framer-motion": "^11.0.28",
     "i18next": "^23.11.1",
@@ -88,7 +88,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jest-location-mock": "^2.0.0",
-    "prettier": "3.9.4",
+    "prettier": "3.9.5",
     "style-loader": "^4.0.0",
     "webpack": "^5.108.4",
     "webpack-cli": "^5.1.4",
@@ -105,7 +105,7 @@
     "prismjs": "^1.30.0",
     "js-yaml": "^4.2.0",
     "launch-editor": "^2.14.1",
-    "dompurify": "^3.4.9",
+    "dompurify": "^3.4.12",
     "http-proxy-middleware": "^2.0.10"
   }
 }
