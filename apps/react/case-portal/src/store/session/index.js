@@ -7,7 +7,11 @@ function bootstrap() {
   const clientId = 'wks-portal'
   const hostname = window.location.hostname
 
-  if (hostname !== 'localhost') {
+  // Explicit realm wins; the hostname derivation below requires a
+  // fully-qualified DNS name (an IP or dotless hostname yields a bogus realm).
+  if (Config.Realm) {
+    realm = Config.Realm
+  } else if (hostname !== 'localhost') {
     realm = hostname.substring(0, hostname.indexOf('.'))
   } else {
     realm = hostname

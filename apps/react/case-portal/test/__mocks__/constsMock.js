@@ -6,6 +6,14 @@ const Config = {
   CaseEngineUrl: 'http://localhost:8081',
   AuthMode: 'keycloak',
   AuthIssuerUrl: 'http://localhost:8082',
+  // Mirrors the real module's optional Realm override (window.REALM, with the
+  // unresolved-envsubst-placeholder guard) so realm-derivation tests are live.
+  Realm:
+    typeof window !== 'undefined' &&
+    window.REALM &&
+    !/^\$__.*__$/.test(window.REALM)
+      ? window.REALM
+      : undefined,
   StorageUrl: 'http://localhost:8085',
   StorageMode: 'minio',
   WebsocketsEnabled: 'false',
