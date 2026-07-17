@@ -275,6 +275,7 @@ services:
         environment:
             __SERVER_AUTH_MODE__: ${REACT_APP_AUTH_MODE:-keycloak}
             __SERVER_AUTH_ISSUER_URL__: ${REACT_APP_AUTH_ISSUER_URL:-}
+            __SERVER_REALM__: ${REACT_APP_REALM:-}
             __SERVER_API_URL__: ${REACT_APP_API_URL}
             __SERVER_STORAGE_URL__: ${REACT_APP_STORAGE_URL}
             __SERVER_STORAGE_MODE__: ${REACT_APP_STORAGE_MODE:-minio}

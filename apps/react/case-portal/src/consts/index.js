@@ -13,6 +13,10 @@ const Config = {
     process.env.REACT_APP_AUTH_ISSUER_URL,
     window.AUTH_ISSUER_URL,
   ),
+  // Explicit auth realm/tenant. Empty = derive it from the browser hostname's
+  // first DNS label (the historical behavior, which requires an FQDN); set it
+  // to serve the portal from an IP address or a dotless hostname.
+  Realm: optional(getEnv(process.env.REACT_APP_REALM, window.REALM)),
   StorageUrl: getEnv(process.env.REACT_APP_STORAGE_URL, window.STORAGE_URL),
   // How case documents are stored:
   //   'minio' | 'filesystem' — bytes go to storage-api (needs the storage profile);
@@ -78,6 +82,17 @@ function getEnv(key, defaultValue) {
   }
 
   return defaultValue
+}
+
+// For OPTIONAL runtime vars: when index.html hasn't been envsubst'd (yarn
+// start / tests) the window.X value is the raw "$__SERVER_X__" placeholder,
+// which must not be mistaken for a configured value.
+function optional(value) {
+  if (!value || /^\$__.*__$/.test(value)) {
+    return undefined
+  }
+
+  return value
 }
 
 export default Config
