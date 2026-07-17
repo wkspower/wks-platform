@@ -285,7 +285,7 @@ services:
             __SERVER_NOVU_ENABLED__: ${REACT_APP_NOVU_ENABLED}
             __SERVER_NOVU_PUBLISHER_API_URL__: ${REACT_APP_NOVU_PUBLISHER_API_URL}
         ports:
-            - 3001:80
+            - 3001:8080
 
     # ------------------------------------------------------ notifications
     # profile: notifications — Kafka event bus + the consumers that act on it.
