@@ -26,13 +26,19 @@ COPY apps/react/case-portal ./
 RUN yarn build
 
 # Stage 2: Create the production image
-FROM nginx:1.15.8-alpine
+FROM nginxinc/nginx-unprivileged:1.27-alpine
 
-COPY --from=build /app/apps/react/case-portal/dist /usr/share/nginx/html
+# uid 101 (nginx) + gid 0, group-writable: startup.sh rewrites index.html at
+# boot, and OpenShift restricted-v2 runs the container as an arbitrary UID
+# whose only guaranteed membership is gid 0.
+COPY --from=build --chown=101:0 /app/apps/react/case-portal/dist /usr/share/nginx/html
+USER root
+RUN chmod -R g=u /usr/share/nginx/html
+USER 101
 COPY --from=build /app/apps/react/case-portal/startup.sh /startup.sh
 COPY --from=build /app/apps/react/case-portal/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 # Start nginx
-CMD ["/bin/sh", "startup.sh"]
+CMD ["/bin/sh", "/startup.sh"]
