@@ -1,6 +1,7 @@
 import Keycloak from 'keycloak-js'
 import Config from '../../consts'
 import { createDevTokenAdapter } from './devTokenAdapter'
+import { insecureContextInitOptions } from './insecureContext'
 
 function bootstrap() {
   let realm = ''
@@ -24,6 +25,7 @@ function bootstrap() {
       keycloak: kc,
       realm,
       clientId,
+      initOptions: {},
     }
   }
 
@@ -37,6 +39,9 @@ function bootstrap() {
     keycloak: kc,
     realm,
     clientId,
+    // Extra keycloak.init() options — non-empty only in insecure (plain-HTTP)
+    // contexts, where Web Crypto is restricted; see insecureContext.js.
+    initOptions: insecureContextInitOptions(),
   }
 }
 
