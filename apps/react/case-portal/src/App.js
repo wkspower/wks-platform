@@ -23,25 +23,27 @@ const App = () => {
   const [menu, setMenu] = useState({ items: [] })
 
   useEffect(() => {
-    const { keycloak } = sessionStore.bootstrap()
+    const { keycloak, initOptions } = sessionStore.bootstrap()
     // Held across the async init so the effect's cleanup can actually run it.
     // Previously the cleanup was returned from inside the .then() callback — which
     // React ignores — so the menu subscription leaked on unmount/HMR.
     let unsubscribe
 
-    keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-      setKeycloak(keycloak)
-      setAuthenticated(authenticated)
-      buildMenuItems(keycloak)
-      RegisterInjectUserSession(keycloak)
-      RegisteOptions(keycloak)
-      forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
-      registerExtensionModulesFormio()
-
-      unsubscribe = MenuEventService.subscribeToMenuUpdates(() => {
+    keycloak
+      .init({ onLoad: 'login-required', ...initOptions })
+      .then((authenticated) => {
+        setKeycloak(keycloak)
+        setAuthenticated(authenticated)
         buildMenuItems(keycloak)
+        RegisterInjectUserSession(keycloak)
+        RegisteOptions(keycloak)
+        forceLogoutIfUserNoMinimalRoleForSystem(keycloak)
+        registerExtensionModulesFormio()
+
+        unsubscribe = MenuEventService.subscribeToMenuUpdates(() => {
+          buildMenuItems(keycloak)
+        })
       })
-    })
 
     keycloak.onAuthRefreshError = () => {
       window.location.reload()
