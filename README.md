@@ -35,6 +35,11 @@ On first run the `demo-data-loader` bootstraps a Keycloak realm and a `demo` use
 sample cases. Wait for it to finish, then open [http://localhost:3001](http://localhost:3001)
 and log in with `demo` / `demo`.
 
+> **Returning to a stack you brought up before?** Run `docker compose pull` first. The default
+> `WKS_VERSION` is the floating `develop` tag, and `docker compose up` reuses whatever image you
+> already have locally rather than checking for a newer one — so a stack that worked weeks ago
+> can come back up on stale images that predate a fix.
+
 ## Minimal stack (no auth, no authorization)
 
 Runs just the case engine + portal — **no Mongo, Keycloak, OPA, Camunda or MinIO**. It uses an
