@@ -14,9 +14,9 @@ package com.wks.caseengine.queue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
@@ -28,6 +28,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.db.MongoDocuments;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Primary
@@ -60,8 +61,9 @@ public class QueueRepositoryImpl implements QueueRepository {
 
 	@Override
 	public String save(Queue queue) {
-		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(queue))))
-				.getInsertedId()).getValue().toHexString();
+		ObjectId id = new ObjectId();
+		getCollection().insertOne(MongoDocuments.withId(gsonBuilder.create(), queue, id));
+		return id.toHexString();
 	}
 
 	@Override
@@ -89,7 +91,7 @@ public class QueueRepositoryImpl implements QueueRepository {
 
 	}
 
-	private MongoCollection<JsonObject> getCollection() {
+	protected MongoCollection<JsonObject> getCollection() {
 		return connection.getQueueCollection();
 	}
 

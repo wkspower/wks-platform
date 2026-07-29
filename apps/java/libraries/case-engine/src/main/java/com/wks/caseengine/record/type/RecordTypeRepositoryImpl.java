@@ -14,9 +14,9 @@ package com.wks.caseengine.record.type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.BsonObjectId;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
@@ -28,6 +28,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.wks.caseengine.db.EngineMongoDataConnection;
+import com.wks.caseengine.db.MongoDocuments;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
 @Primary
@@ -56,8 +57,9 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 
 	@Override
 	public String save(final RecordType recordType) {
-		return ((BsonObjectId) getCollection().insertOne((new JsonObject(gsonBuilder.create().toJson(recordType))))
-				.getInsertedId()).getValue().toHexString();
+		ObjectId id = new ObjectId();
+		getCollection().insertOne(MongoDocuments.withId(gsonBuilder.create(), recordType, id));
+		return id.toHexString();
 	}
 
 	@Override
@@ -90,7 +92,7 @@ public class RecordTypeRepositoryImpl implements RecordTypeRepository {
 
 	}
 
-	private MongoCollection<JsonObject> getCollection() {
+	protected MongoCollection<JsonObject> getCollection() {
 		return connection.getRecordTypeCollection();
 	}
 
