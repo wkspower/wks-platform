@@ -11,10 +11,12 @@
 /** Error thrown/rejected for any non-OK API response. */
 export class ApiError extends Error {
   constructor(status, body, statusText) {
+    // `errorMessage` is what the case engine's ErrorResponse carries; without it
+    // every server-side explanation collapsed to the bare status text.
     const detail =
-      body && typeof body === 'object' && body.message
-        ? body.message
-        : statusText
+      body && typeof body === 'object'
+        ? body.message || body.errorMessage || statusText
+        : body || statusText
     super(`Request failed with status ${status}${detail ? `: ${detail}` : ''}`)
     this.name = 'ApiError'
     this.status = status

@@ -64,7 +64,17 @@ public class StartCaseInstanceWithValuesCmd implements Command<CaseInstance> {
 
 		// Persistence is delegated to the active CasePersistenceStrategy
 		// (workflow round-trip vs direct save), selected by wks.bpm.engine.
-		return commandContext.getCasePersistenceStrategy().persist(preparedCaseInstance);
+		CaseInstance persistedCaseInstance = commandContext.getCasePersistenceStrategy().persist(preparedCaseInstance);
+
+		// Entering the first stage is a stage entry like any other: run its
+		// autoStart processes. Done after persistence so the processes correlate
+		// to a case that exists.
+		if (firstStage.isPresent()) {
+			commandContext.getCaseStageProcessStarter().startAutoStartProcesses(caseDefinition,
+					firstStage.get().getName(), persistedCaseInstance.getBusinessKey());
+		}
+
+		return persistedCaseInstance;
 	}
 
 	private String generateBusinessKey(CommandContext commandContext) {
