@@ -38,6 +38,12 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	@Qualifier("mongoTemplateShared")
 	private MongoTemplate byShared;
 
+	/**
+	 * Natural keys of the config collections are unique; the index is ensured on
+	 * first use because the tenant set isn't known at startup.
+	 */
+	private final MongoUniqueIndexes uniqueIndexes = new MongoUniqueIndexes();
+
 	@Override
 	public MongoTemplate getOperations() {
 		return byTenant;
@@ -53,6 +59,7 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	public MongoCollection<JsonObject> getCaseDefCollection() {
 		MongoDatabase db = byTenant.getDb();
 		log.debug("using database MongoDataConnection: {}", db.getName());
+		uniqueIndexes.ensure(db, "caseDefinition", "id");
 		return db.getCollection("caseDefinition", JsonObject.class);
 	}
 
@@ -65,12 +72,14 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	@Override
 	public MongoCollection<JsonObject> getFormCollection() {
 		MongoDatabase db = byTenant.getDb();
+		uniqueIndexes.ensure(db, "form", "key");
 		return db.getCollection("form", JsonObject.class);
 	}
 
 	@Override
 	public MongoCollection<JsonObject> getRecordTypeCollection() {
 		MongoDatabase db = byTenant.getDb();
+		uniqueIndexes.ensure(db, "recordType", "id");
 		return db.getCollection("recordType", JsonObject.class);
 	}
 
@@ -89,6 +98,7 @@ public class EngineMongoDataConnectionImpl implements EngineMongoDataConnection 
 	@Override
 	public MongoCollection<JsonObject> getQueueCollection() {
 		MongoDatabase db = byTenant.getDb();
+		uniqueIndexes.ensure(db, "queue", "id");
 		return db.getCollection("queue", JsonObject.class);
 	}
 
