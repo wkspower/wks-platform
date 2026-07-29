@@ -19,6 +19,7 @@ import { FormBuilder } from '@formio/react'
 import { FormService } from 'services'
 import { useSession } from 'SessionStoreContext'
 import { StorageService } from 'plugins/storage'
+import { useFormBuilderSchema } from '../useFormBuilderSchema'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -27,6 +28,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export const FormNew = ({ open, handleClose }) => {
   const [form, setForm] = useState(null)
   const keycloak = useSession()
+  const { onBuilderChange, mergeBuilderSchema } = useFormBuilderSchema(open)
 
   useEffect(() => {
     setForm({
@@ -37,7 +39,11 @@ export const FormNew = ({ open, handleClose }) => {
   }, [open])
 
   const saveNewForm = () => {
-    FormService.create(keycloak, form)
+    // The components live in the builder, not in state — pull them in on save.
+    FormService.create(keycloak, {
+      ...form,
+      structure: mergeBuilderSchema(form.structure),
+    })
       .then(() => handleClose())
       .catch((err) => {
         console.log(err.message)
@@ -135,6 +141,7 @@ export const FormNew = ({ open, handleClose }) => {
           <MainCard>
             <FormBuilder
               form={form.structure}
+              onChange={onBuilderChange}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,

@@ -19,6 +19,7 @@ import MainCard from 'components/MainCard'
 import { FormService } from 'services'
 import { useSession } from 'SessionStoreContext'
 import { StorageService } from 'plugins/storage'
+import { useFormBuilderSchema } from '../useFormBuilderSchema'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -32,9 +33,14 @@ export const FormDetail = ({
   handleSelectDisplay,
 }) => {
   const keycloak = useSession()
+  const { onBuilderChange, mergeBuilderSchema } = useFormBuilderSchema(open)
 
   const saveForm = () => {
-    FormService.update(keycloak, form.key, form)
+    // The components live in the builder, not in state — pull them in on save.
+    FormService.update(keycloak, form.key, {
+      ...form,
+      structure: mergeBuilderSchema(form.structure),
+    })
       .then(() => handleClose())
       .catch((err) => {
         console.log(err.message)
@@ -134,6 +140,7 @@ export const FormDetail = ({
           <MainCard>
             <FormBuilder
               form={form.structure}
+              onChange={onBuilderChange}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,
