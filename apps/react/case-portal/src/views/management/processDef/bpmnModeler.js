@@ -1,6 +1,8 @@
 import CloseIcon from '@mui/icons-material/Close'
+import Alert from '@mui/material/Alert'
 import AppBar from '@mui/material/AppBar'
 import Button from '@mui/material/Button'
+import Snackbar from '@mui/material/Snackbar'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
 import Slide from '@mui/material/Slide'
@@ -26,8 +28,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
   const [bpmnXml, setBpmnXml] = useState()
+  const [deployError, setDeployError] = useState(null)
 
   useEffect(() => {
+    setDeployError(null)
     if (!processDef.id) {
       setBpmnXml(newProcessXml)
     } else {
@@ -56,15 +60,19 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
       return
     }
 
-    // console.log("Saving model...");
-
     const result = await modelerRef.current.save()
-    DeploymentService.deploy(keycloak, result.xml).then(() => {
-      handleClose()
-    })
 
-    // console.log("Saved model!", result.xml, result.svg);
-  }, [])
+    // Only close on a deployment the engine actually accepted. The dialog used
+    // to close on any outcome, so a rejected model (a missing history TTL, an
+    // invalid diagram) looked exactly like a successful save.
+    try {
+      await DeploymentService.deploy(keycloak, result.xml)
+      setDeployError(null)
+      handleClose()
+    } catch (err) {
+      setDeployError(err.message || 'The process could not be deployed.')
+    }
+  }, [keycloak, handleClose])
 
   const onEvent = useCallback(
     async (event) => {
@@ -204,6 +212,20 @@ export const BPMNModeler = ({ open, keycloak, processDef, handleClose }) => {
             </Button>
           </Toolbar>
         </AppBar>
+
+        <Snackbar
+          open={Boolean(deployError)}
+          onClose={() => setDeployError(null)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert
+            severity='error'
+            onClose={() => setDeployError(null)}
+            sx={{ maxWidth: '80vw', whiteSpace: 'pre-wrap' }}
+          >
+            {deployError}
+          </Alert>
+        </Snackbar>
       </Dialog>
     </div>
   )

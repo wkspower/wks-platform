@@ -30,6 +30,7 @@ export const CaseDefStageProcesses = ({
   )
   const [newProcess, setNewProcess] = React.useState({
     definitionKey: '',
+    definitionName: '',
     autoStart: false,
   })
 
@@ -47,9 +48,11 @@ export const CaseDefStageProcesses = ({
   }, [open])
 
   const handleAddProcess = () => {
-    if (newProcess.definitionKey) {
+    // The placeholder option carries the literal string 'null', which is truthy —
+    // picking it and hitting Add used to append a process keyed "null".
+    if (newProcess.definitionKey && newProcess.definitionKey !== 'null') {
       setProcesses([...processes, newProcess])
-      setNewProcess({ definitionKey: '', autoStart: false })
+      setNewProcess({ definitionKey: '', definitionName: '', autoStart: false })
     }
   }
 
@@ -107,6 +110,11 @@ export const CaseDefStageProcesses = ({
                   setNewProcess({
                     ...newProcess,
                     definitionKey: e.target.value,
+                    // Kept alongside the key so the case form's manual-start
+                    // dialog can label the entry with something readable.
+                    definitionName:
+                      processesDefinitions.find((o) => o.key === e.target.value)
+                        ?.name || '',
                   })
                 }
               >

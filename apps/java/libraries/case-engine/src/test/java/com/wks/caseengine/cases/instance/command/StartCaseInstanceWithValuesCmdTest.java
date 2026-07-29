@@ -38,6 +38,7 @@ import com.wks.caseengine.cases.instance.persistence.DirectCasePersistenceStrate
 import com.wks.caseengine.cases.instance.persistence.WorkflowCasePersistenceStrategy;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.command.CommandContext;
+import com.wks.caseengine.process.instance.CaseStageProcessStarter;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.repository.DatabaseRecordNotFoundException;
 
@@ -68,6 +69,33 @@ public class StartCaseInstanceWithValuesCmdTest {
 
 	@Mock
 	private GsonBuilder gsonBuilder;
+
+	@Mock
+	private CaseStageProcessStarter caseStageProcessStarter;
+
+	/**
+	 * Regression: a case lands in its first stage on creation, and that stage's
+	 * autoStart processes have to run — nothing acted on the flag before.
+	 */
+	@Test
+	public void shouldStartTheFirstStageAutoStartProcesses() throws DatabaseRecordNotFoundException {
+
+		CaseInstance caseInstanceToSave = new CaseInstance();
+		caseInstanceToSave.setBusinessKey("BK_AUTO");
+		caseInstanceToSave.setCaseDefinitionId("CD_1");
+		createCaseInstanceCmd.setCaseInstanceParam(caseInstanceToSave);
+
+		CaseDefinition caseDefinition = new CaseDefinition();
+		caseDefinition.setStages(Arrays.<CaseStage>asList(CaseStage.builder().name("Stage 1").index(0).build(),
+				CaseStage.builder().name("Stage 2").index(1).build()));
+
+		commandContext.setCasePersistenceStrategy(new DirectCasePersistenceStrategy(caseInstanceRepository));
+		when(caseDefinitionRepository.get("CD_1")).thenReturn(caseDefinition);
+
+		createCaseInstanceCmd.execute(commandContext);
+
+		verify(caseStageProcessStarter).startAutoStartProcesses(caseDefinition, "Stage 1", "BK_AUTO");
+	}
 
 	@Test
 	public void shouldCreateCaseDefinition() throws DatabaseRecordNotFoundException {

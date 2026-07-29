@@ -25,4 +25,13 @@ public class RestInvalidArgumentException extends RuntimeException {
 		super(String.format(DEFAULT_MESSAGE, argumentName), t);
 	}
 
+	/**
+	 * Carries an already-formed message straight to the client — for rejections
+	 * that come with their own explanation (e.g. a BPM engine's model parse
+	 * errors), where the generic wording would throw that explanation away.
+	 */
+	public RestInvalidArgumentException(final String message) {
+		super(message);
+	}
+
 }

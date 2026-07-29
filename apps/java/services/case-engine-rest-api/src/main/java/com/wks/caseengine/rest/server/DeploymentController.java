@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.bpm.engine.client.facade.BpmEngineClientFacade;
+import com.wks.bpm.engine.exception.BpmEngineDeploymentException;
+import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -27,7 +29,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Deployment")
 public class DeploymentController {
 
-	// TODO replace this hard code
+	/**
+	 * Fallback resource name, used only when the BPMN carries no readable process
+	 * id — the client names the resource after the process id itself.
+	 */
 	private static final String FILE_NAME_BPMN = "fileName.bpmn";
 
 	@Autowired
@@ -35,7 +40,14 @@ public class DeploymentController {
 
 	@PostMapping
 	public ResponseEntity<Void> deploy(@RequestBody String file) {
-		processEngineClient.deploy(FILE_NAME_BPMN, new String(file.getBytes()));
+		try {
+			processEngineClient.deploy(FILE_NAME_BPMN, file);
+		} catch (BpmEngineDeploymentException e) {
+			// A rejected model is a client error, and the caller has to be told:
+			// this used to return 204, so the portal closed the modeler and the
+			// user's process was silently never deployed.
+			throw new RestInvalidArgumentException(e.getMessage());
+		}
 		return ResponseEntity.noContent().build();
 	}
 

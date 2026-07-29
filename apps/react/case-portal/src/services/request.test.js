@@ -86,4 +86,31 @@ describe('request.nop', () => {
       status: 409,
     })
   })
+
+  // The case engine's ErrorResponse names the field `errorMessage`, so reading
+  // only `message` reduced every server explanation to the bare status text —
+  // and a rejected BPMN deployment arrived at the modeler saying nothing useful.
+  it('surfaces the engine ErrorResponse errorMessage in the error message', async () => {
+    const resp = makeResponse({
+      status: 400,
+      ok: false,
+      body: {
+        error: 'Bad Request',
+        errorMessage: 'ENGINE-12018 History Time To Live (TTL) cannot be null',
+      },
+    })
+
+    await expect(nop(makeKeycloak(), resp)).rejects.toThrow(/ENGINE-12018/)
+  })
+
+  it('falls back to a plain-text error body', async () => {
+    const resp = makeResponse({
+      status: 500,
+      ok: false,
+      contentType: 'text/plain',
+      text: 'boom',
+    })
+
+    await expect(nop(makeKeycloak(), resp)).rejects.toThrow(/boom/)
+  })
 })

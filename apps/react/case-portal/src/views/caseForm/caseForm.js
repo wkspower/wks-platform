@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'
 import { Grid } from '@mui/material'
+import Alert from '@mui/material/Alert'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -55,6 +56,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
 
   const [openProcessesDialog, setOpenProcessesDialog] = useState(false)
   const [manualInitProcessDefs, setManualInitProcessDefs] = useState([])
+  const [startProcessError, setStartProcessError] = useState(null)
 
   const [isFollowing, setIsFollowing] = useState(false)
   const handleFollowClick = () => {
@@ -66,15 +68,15 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   }, [open, aCase])
 
   useEffect(() => {
-    if (activeStage) {
+    if (activeStage && caseDef) {
       const stage = caseDef.stages.find((o) => o.name === activeStage)
-      const stageProcesses = stage ? stage.processesDefinitions : []
-      const autoStartProcesses = stageProcesses
-        ? stageProcesses.filter((o) => o.autoStart === false)
-        : undefined
-      setManualInitProcessDefs(autoStartProcesses)
+      const stageProcesses = stage?.processesDefinitions || []
+      // Anything not marked autoStart is manual. Testing `=== false` hid every
+      // process whose config predates the flag — those are startable by hand
+      // only, so they belong here.
+      setManualInitProcessDefs(stageProcesses.filter((o) => !o.autoStart))
     }
-  }, [activeStage])
+  }, [activeStage, caseDef])
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
@@ -162,13 +164,22 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
 
   const handleCloseProcessesDialog = () => {
     setOpenProcessesDialog(false)
+    setStartProcessError(null)
   }
 
   const startProcess = (key) => {
+    // The dialog closed before the request resolved, so a failed start looked
+    // identical to a successful one. Close on success; report the failure.
     ProcessDefService.start(keycloak, key, aCase.businessKey)
-
-    // Close the dialog
-    handleCloseProcessesDialog()
+      .then(() => {
+        setStartProcessError(null)
+        handleCloseProcessesDialog()
+      })
+      .catch((err) => {
+        setStartProcessError(
+          err.message || t('pages.caseform.manualProcesses.startFailed'),
+        )
+      })
   }
 
   return (
@@ -436,6 +447,11 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
             <DialogTitle sx={{ paddingBottom: 2 }}>
               {t('pages.caseform.manualProcesses.title')}
             </DialogTitle>
+            {startProcessError && (
+              <Alert severity='error' sx={{ mx: 2, mb: 1 }}>
+                {startProcessError}
+              </Alert>
+            )}
             <List>
               {!manualInitProcessDefs || manualInitProcessDefs.length === 0 ? (
                 <ListItem>
@@ -455,8 +471,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                         },
                       }}
                     >
+                      {/* definitionName is the field the case definition
+                          actually carries; `name` was always undefined. */}
                       <ListItemText
-                        primary={process.name || process.definitionKey}
+                        primary={
+                          process.definitionName || process.definitionKey
+                        }
                       />
                     </ListItem>
                     {index !== manualInitProcessDefs.length - 1 && <Divider />}

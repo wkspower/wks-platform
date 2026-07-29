@@ -25,6 +25,7 @@ import com.wks.caseengine.cases.instance.email.repository.CaseEmailRepository;
 import com.wks.caseengine.cases.instance.persistence.CasePersistenceStrategy;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.form.FormRepository;
+import com.wks.caseengine.process.instance.CaseStageProcessStarter;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
 import com.wks.caseengine.queue.QueueRepository;
 import com.wks.caseengine.record.RecordRepository;
@@ -76,6 +77,9 @@ public class CommandContext {
 
 	@Autowired
 	private ProcessInstanceService processInstanceService;
+
+	@Autowired
+	private CaseStageProcessStarter caseStageProcessStarter;
 
 	@Autowired
 	private BpmEngineClientFacade bpmEngineClientFacade;
