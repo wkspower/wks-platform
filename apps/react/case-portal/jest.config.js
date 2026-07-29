@@ -32,6 +32,8 @@ module.exports = {
   },
   // Some deps (e.g. keycloak-js) ship ESM-only builds. Jest ignores node_modules
   // for transforms by default, so allow-list the ESM ones through babel.
-  transformIgnorePatterns: ['/node_modules/(?!(keycloak-js)/)'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!(keycloak-js|react-syntax-highlighter)/)',
+  ],
   testMatch: ['<rootDir>/src/**/*.test.js', '<rootDir>/test/**/*.test.js'],
 }

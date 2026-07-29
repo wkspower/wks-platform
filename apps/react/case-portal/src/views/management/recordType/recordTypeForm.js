@@ -15,6 +15,7 @@ import MainCard from 'components/MainCard'
 import { RecordTypeService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
 import { StorageService } from 'plugins/storage'
+import { useFormBuilderSchema } from '../useFormBuilderSchema'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -27,10 +28,17 @@ export const RecordTypeForm = ({
   handleInputChange,
 }) => {
   const keycloak = useSession()
+  const { onBuilderChange, mergeBuilderSchema } = useFormBuilderSchema(open)
 
   const save = () => {
+    // The fields live in the builder, not in state — pull them in on save.
+    const payload = {
+      ...recordType,
+      fields: mergeBuilderSchema(recordType.fields),
+    }
+
     if (recordType.mode && recordType.mode === 'new') {
-      RecordTypeService.create(keycloak, recordType)
+      RecordTypeService.create(keycloak, payload)
         .then(() => {
           MenuEventService.triggerMenuUpdate()
           handleClose()
@@ -39,7 +47,7 @@ export const RecordTypeForm = ({
           console.log(err.message)
         })
     } else {
-      RecordTypeService.update(keycloak, recordType.id, recordType)
+      RecordTypeService.update(keycloak, recordType.id, payload)
         .then(() => {
           MenuEventService.triggerMenuUpdate()
           handleClose()
@@ -113,6 +121,7 @@ export const RecordTypeForm = ({
           <MainCard>
             <FormBuilder
               form={recordType.fields}
+              onChange={onBuilderChange}
               options={{
                 noNewEdit: true,
                 noDefaultSubmitButton: true,
