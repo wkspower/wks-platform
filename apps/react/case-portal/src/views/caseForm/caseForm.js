@@ -27,7 +27,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { CaseStatus } from 'common/caseStatus'
-import { StorageService } from 'plugins/storage'
+import { getFormioOptions } from 'components/@formio/formioOptions'
 import PropTypes from 'prop-types'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -366,10 +366,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     <Form
                       form={form.structure}
                       submission={formData}
-                      options={{
-                        readOnly: true,
-                        fileService: new StorageService(),
-                      }}
+                      options={getFormioOptions({ readOnly: true })}
                     />
                   </Grid>
                 </TabPanel>

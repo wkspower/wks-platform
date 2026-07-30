@@ -18,6 +18,12 @@ const defs = {
     settings: 'Configurações',
     casebuilder: 'Case Builder',
     documentation: 'Documentação',
+    management: 'Gestão',
+    lookAndFeel: 'Aparência',
+
+    profile: 'Perfil',
+    logout: 'Sair',
+    language: 'Idioma',
 
     processes: 'Processos',
     caseDefinitions: 'Definições de Casos',

@@ -14,7 +14,7 @@ import React from 'react'
 import { Form } from '@formio/react'
 import { useSession } from 'SessionStoreContext'
 import { CaseService, FormService } from '../../services'
-import { StorageService } from 'plugins/storage'
+import { getFormioOptions } from 'components/@formio/formioOptions'
 import ValidationErrorAlert from '../../components/FormValidation/ValidationErrorAlert'
 import { validateForm } from '../../utils/formValidation'
 
@@ -178,8 +178,7 @@ export const NewCaseForm = ({
               submission={formData}
               onChange={onChange}
               onInit={onFormInit}
-              options={{
-                fileService: new StorageService(),
+              options={getFormioOptions({
                 validateOnInit: false,
                 validate: true,
                 showErrors: true,
@@ -193,7 +192,7 @@ export const NewCaseForm = ({
                 buttonSettings: {
                   showSubmit: false,
                 },
-              }}
+              })}
             />
           </Grid>
         </Grid>

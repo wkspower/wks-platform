@@ -1,11 +1,17 @@
-import workspace from './workspace'
-import management from './management'
-import externalLinks from './externalLinks'
+import createWorkspace from './workspace'
+import createManagement from './management'
+import createExternalLinks from './externalLinks'
 
-const items = [externalLinks, workspace, management]
+/**
+ * Assemble the static menu definitions in the active language.
+ *
+ * Call this on every rebuild rather than holding the result: the group builders
+ * translate their titles, so a cached tree would keep the language it was first
+ * built in. Each call returns fresh objects, which also keeps buildMenu() free to
+ * treat them as its own.
+ */
+export const getMenuItems = () => ({
+  items: [createExternalLinks(), createWorkspace(), createManagement()],
+})
 
-const menuItems = {
-  items: items,
-}
-
-export default menuItems
+export default getMenuItems

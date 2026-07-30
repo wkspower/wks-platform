@@ -2,7 +2,9 @@ const config = {
   basename: '/',
   defaultPath: '/home',
   fontFamily: "'Public Sans', sans-serif",
-  i18n: 'en',
+  // Deployment default language, used when the user has expressed no preference
+  // and the browser asks for something we don't ship. BCP-47.
+  i18n: 'en-US',
   miniDrawer: false,
   container: true,
   mode: 'light',

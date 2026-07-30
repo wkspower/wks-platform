@@ -13,6 +13,7 @@ import Config from 'consts/index'
 import { format } from 'date-fns'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getDateFnsLocale } from '../../i18n/formatters'
 import { TaskService } from 'services'
 import { useSession } from '../../SessionStoreContext'
 import { AdHocTaskForm } from '../taskForm/adHocTaskForm'
@@ -236,14 +237,25 @@ function fetchTasks(setFetching, keycloak, businessKey, setTasks) {
 
   TaskService.filterTasks(keycloak, businessKey)
     .then((data) => {
+      // Resolved per fetch rather than at module load, so a language switch is
+      // picked up (the routed subtree remounts and refetches — see App.js).
+      const dateLocale = getDateFnsLocale()
+
       setTasks(
         data?.map(
           (o) =>
             (o = {
               ...o,
-              created: o.created && format(new Date(o.created), 'P'),
-              due: o.due && format(new Date(o.due), 'P'),
-              followUp: o.followUp && format(new Date(o.followUp), 'P'),
+              // 'P' is date-fns' localized-date token, but it only honours the
+              // locale when one is passed — otherwise it silently renders en-US.
+              created:
+                o.created &&
+                format(new Date(o.created), 'P', { locale: dateLocale }),
+              due:
+                o.due && format(new Date(o.due), 'P', { locale: dateLocale }),
+              followUp:
+                o.followUp &&
+                format(new Date(o.followUp), 'P', { locale: dateLocale }),
             }),
         ),
       )

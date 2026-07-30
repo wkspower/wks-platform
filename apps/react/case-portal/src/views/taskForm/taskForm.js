@@ -9,7 +9,7 @@ import Slide from '@mui/material/Slide'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import MainCard from 'components/MainCard'
-import { StorageService } from 'plugins/storage'
+import { getFormioOptions } from 'components/@formio/formioOptions'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FormService, TaskService, VariableService } from 'services'
@@ -175,9 +175,7 @@ export const TaskForm = ({ open, handleClose, task }) => {
             <Form
               form={formComponents}
               submission={variableValues}
-              options={{
-                fileService: new StorageService(),
-              }}
+              options={getFormioOptions()}
             />
           </div>
         </div>

@@ -1,9 +1,10 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ThemeRoutes } from './routes'
 import ThemeCustomization from './themes'
 import { SessionStoreProvider } from './SessionStoreContext'
 import { CaseService, RecordService, MenuEventService } from 'services'
-import menuItemsDefs from './menu'
+import { getMenuItems } from './menu'
 import { buildMenu } from './menu/menuBuilder'
 import { RegisterInjectUserSession, RegisteOptions } from './plugins'
 import { accountStore, sessionStore } from './store'
@@ -21,6 +22,9 @@ const App = () => {
   const [recordsTypes, setRecordsTypes] = useState([])
   const [casesDefinitions, setCasesDefinitions] = useState([])
   const [menu, setMenu] = useState({ items: [] })
+  const {
+    i18n: { language },
+  } = useTranslation()
 
   useEffect(() => {
     const { keycloak, initOptions } = sessionStore.bootstrap()
@@ -89,34 +93,39 @@ const App = () => {
     }
   }
 
+  // Fetch the dynamic lists resiliently — a failing call should not blank the
+  // whole navigation. Assembly is deliberately NOT done here: it lives in the
+  // effect below so that switching language re-labels the nav without re-hitting
+  // the backend.
   async function buildMenuItems(keycloak) {
-    // Fetch the dynamic lists resiliently — a failing call should not blank the
-    // whole navigation — then hand the pure assembly off to buildMenu().
-    let recordTypes = []
     try {
-      recordTypes = await RecordService.getAllRecordTypes(keycloak)
-      setRecordsTypes(recordTypes)
+      setRecordsTypes(await RecordService.getAllRecordTypes(keycloak))
     } catch (err) {
       console.error('Failed to load record types for the menu', err)
     }
 
-    let caseDefinitions = []
     try {
-      caseDefinitions = await CaseService.getCaseDefinitions(keycloak)
-      setCasesDefinitions(caseDefinitions)
+      setCasesDefinitions(await CaseService.getCaseDefinitions(keycloak))
     } catch (err) {
       console.error('Failed to load case definitions for the menu', err)
     }
+  }
 
-    return setMenu(
+  // Re-assemble whenever the fetched lists or the active language change. Safe to
+  // run repeatedly: buildMenu() clones before mutating, so it never accumulates
+  // state across builds.
+  useEffect(() => {
+    if (!authenticated) return
+
+    setMenu(
       buildMenu({
-        menuItems: menuItemsDefs.items,
-        recordTypes,
-        caseDefinitions,
+        menuItems: getMenuItems().items,
+        recordTypes: recordsTypes,
+        caseDefinitions: casesDefinitions,
         isManager: accountStore.isManagerUser(keycloak),
       }),
     )
-  }
+  }, [recordsTypes, casesDefinitions, keycloak, authenticated, language])
 
   return (
     keycloak &&
@@ -127,8 +136,20 @@ const App = () => {
             <ScrollTop>
               <SessionStoreProvider value={{ keycloak, menu }}>
                 {/* Per-view boundary: a crash in the routed content shows a
-                    recoverable message while the app shell stays up. */}
-                <ErrorBoundary title='This view failed to render'>
+                    recoverable message while the app shell stays up.
+
+                    Keyed on the active language so a switch remounts the routed
+                    subtree. Several things only read the locale once and would
+                    otherwise stay in the old language: form.io reads
+                    options.language at construction, and views that formatted
+                    dates or mapped status labels while fetching hold already
+                    translated strings in state. Remounting makes them refetch and
+                    re-render. The key sits INSIDE SessionStoreProvider so the
+                    Keycloak instance and session are untouched. */}
+                <ErrorBoundary
+                  key={language}
+                  title='This view failed to render'
+                >
                   <ThemeRoutes
                     keycloak={keycloak}
                     authenticated={authenticated}

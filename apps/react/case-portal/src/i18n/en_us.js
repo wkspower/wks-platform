@@ -18,6 +18,12 @@ const defs = {
     settings: 'Settings',
     casebuilder: 'Case Builder',
     documentation: 'Documentation',
+    management: 'Management',
+    lookAndFeel: 'Look And Feel',
+
+    profile: 'Profile',
+    logout: 'Logout',
+    language: 'Language',
 
     processes: 'Processes',
     caseDefinitions: 'Case Definitions',
@@ -137,7 +143,7 @@ const defs = {
         edit: {
           action: 'Edit',
           update: 'Update',
-          cancel: 'Candel',
+          cancel: 'Cancel',
         },
         delete: 'Delete',
       },

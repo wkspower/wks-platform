@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
@@ -49,6 +50,7 @@ function a11yProps(index) {
 
 const Profile = ({ keycloak }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const iconBackColorOpen = 'grey.300'
   const anchorRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -195,7 +197,7 @@ const Profile = ({ keycloak }) => {
                                   }}
                                 />
                               }
-                              label='Profile'
+                              label={t('menu.profile')}
                               {...a11yProps(0)}
                             />
                           </Tabs>

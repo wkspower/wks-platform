@@ -15,6 +15,7 @@ import { useSession } from 'SessionStoreContext'
 import DOMPurify from 'dompurify'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getIntlLocale } from '../../i18n/formatters'
 import { EmailService } from '../../services'
 import { EmailForm } from './emailForm'
 
@@ -106,7 +107,9 @@ export const CaseEmailsList = ({ caseInstanceBusinessKey }) => {
                     </Typography>
                     <Typography variant='body2' color='text.secondary'>
                       {t('pages.emails.datagrid.receivedDateTime')}:{' '}
-                      {new Date(email.receivedDateTime).toLocaleString()}
+                      {new Date(email.receivedDateTime).toLocaleString(
+                        getIntlLocale(),
+                      )}
                     </Typography>
                     <Typography variant='body2' color='text.secondary'>
                       {t('pages.emails.datagrid.hasAttachments')}:{' '}
