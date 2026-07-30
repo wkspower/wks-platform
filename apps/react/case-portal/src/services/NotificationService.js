@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { CaseService } from './CaseService'
 import { Typography } from '@mui/material'
+import { getMomentLocale } from '../i18n/formatters'
 
 export const NotificationService = {
   getNotifications,
@@ -38,8 +39,16 @@ async function getNotifications(keycloak) {
 
         return {
           ...data,
-          createdAt: moment(it.createdAt, 'DD/MM/YYYY').calendar(),
-          daysAgo: moment(it.createdAt, 'DD/MM/YYYY').startOf('day').fromNow(),
+          // The 'DD/MM/YYYY' argument is the INPUT parse format and must stay as
+          // it is — it describes what the backend sends, not how we display it.
+          // .locale() only affects the rendered output of calendar()/fromNow().
+          createdAt: moment(it.createdAt, 'DD/MM/YYYY')
+            .locale(getMomentLocale())
+            .calendar(),
+          daysAgo: moment(it.createdAt, 'DD/MM/YYYY')
+            .locale(getMomentLocale())
+            .startOf('day')
+            .fromNow(),
           eventType: getEventType(it.stage),
           total: page.total,
           message: (

@@ -1,10 +1,20 @@
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@mui/material/styles'
-import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
+import {
+  Divider,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material'
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined'
+
+import LanguageTab from './LanguageTab'
 
 const ProfileTab = ({ handleLogout }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <List
@@ -17,11 +27,13 @@ const ProfileTab = ({ handleLogout }) => {
         },
       }}
     >
+      <LanguageTab />
+      <Divider />
       <ListItemButton onClick={handleLogout}>
         <ListItemIcon>
           <LogoutOutlined />
         </ListItemIcon>
-        <ListItemText primary='Logout' />
+        <ListItemText primary={t('menu.logout')} />
       </ListItemButton>
     </List>
   )

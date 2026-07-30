@@ -16,10 +16,11 @@ const icons = {
   IconSchema,
 }
 
-const management = {
+/** See createWorkspace: built per call so the titles follow a language switch. */
+const createManagement = () => ({
   id: 'management',
-  title: 'Management',
-  caption: 'Management',
+  title: i18n.t('menu.management'),
+  caption: i18n.t('menu.management'),
   type: 'group',
   children: [
     {
@@ -30,7 +31,7 @@ const management = {
       children: [
         {
           id: 'look-and-feel',
-          title: 'Look And Feel',
+          title: i18n.t('menu.lookAndFeel'),
           type: 'item',
           url: '/system/look-and-feel',
           icon: icons.IconPalette,
@@ -87,6 +88,6 @@ const management = {
       ],
     },
   ],
-}
+})
 
-export default management
+export default createManagement

@@ -23,7 +23,12 @@ const icons = {
   IconLayoutDashboard,
 }
 
-const workspace = {
+/**
+ * Built per call rather than exported as a module-level constant: the titles are
+ * translated here, so a singleton would capture whichever language happened to
+ * be active at import time and never re-translate when the user switches.
+ */
+const createWorkspace = () => ({
   id: 'utilities',
   title: '',
   type: 'group',
@@ -59,6 +64,6 @@ const workspace = {
       children: [],
     },
   ],
-}
+})
 
-export default workspace
+export default createWorkspace

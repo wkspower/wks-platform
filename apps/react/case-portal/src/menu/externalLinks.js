@@ -7,6 +7,8 @@ const icons = {
   IconExternalLink,
 }
 
+// Link titles come from customer-authored configuration, so they are shown as
+// authored and deliberately not routed through the message catalog.
 const links =
   menuItens
     .filter((item) => !!item.url)
@@ -23,13 +25,14 @@ const links =
       }
     }) ?? []
 
-const external = {
+/** See createWorkspace: built per call so the caption follows a language switch. */
+const createExternalLinks = () => ({
   id: 'externallinks',
   title: '',
   caption: i18n.t('menu.externalLinks'),
   type: 'group',
   external: true,
   children: links,
-}
+})
 
-export default external
+export default createExternalLinks

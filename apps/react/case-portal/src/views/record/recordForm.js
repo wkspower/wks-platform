@@ -13,7 +13,7 @@ import MainCard from 'components/MainCard'
 import { useEffect } from 'react'
 import { RecordService } from '../../services'
 import { useSession } from 'SessionStoreContext'
-import { StorageService } from 'plugins/storage'
+import { getFormioOptions } from 'components/@formio/formioOptions'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
@@ -112,9 +112,7 @@ export const RecordForm = ({ open, recordType, record, handleClose, mode }) => {
               <Form
                 form={form}
                 submission={formData}
-                options={{
-                  fileService: new StorageService(),
-                }}
+                options={getFormioOptions()}
               />
             </MainCard>
           </Grid>

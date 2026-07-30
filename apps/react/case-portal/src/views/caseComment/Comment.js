@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import User1 from 'assets/images/users/avatar-3.png'
 import { useTranslation } from 'react-i18next'
+import { getIntlLocale } from '../../i18n/formatters'
 import CommentForm from './CommentForm'
 
 const Comment = ({
@@ -31,9 +32,10 @@ const Comment = ({
   const canReply = true //Boolean(currentUserId);
   const canEdit = true //currentUserId === comment.userId && !timePassed;
   const replyId = parentId ? parentId : comment.id
-  const createdAt = new Date(comment.createdAt).toLocaleDateString()
-
   const { t } = useTranslation()
+  const createdAt = new Date(comment.createdAt).toLocaleDateString(
+    getIntlLocale(),
+  )
 
   return (
     <div key={comment.id} className='comment'>

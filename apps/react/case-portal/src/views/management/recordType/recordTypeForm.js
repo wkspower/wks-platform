@@ -14,7 +14,7 @@ import { TextField } from '@mui/material'
 import MainCard from 'components/MainCard'
 import { RecordTypeService, MenuEventService } from 'services'
 import { useSession } from 'SessionStoreContext'
-import { StorageService } from 'plugins/storage'
+import { getFormioOptions } from 'components/@formio/formioOptions'
 import { useFormBuilderSchema } from '../useFormBuilderSchema'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -122,11 +122,10 @@ export const RecordTypeForm = ({
             <FormBuilder
               form={recordType.fields}
               onChange={onBuilderChange}
-              options={{
+              options={getFormioOptions({
                 noNewEdit: true,
                 noDefaultSubmitButton: true,
-                fileService: new StorageService(),
-              }}
+              })}
             />
           </MainCard>
         </Box>
