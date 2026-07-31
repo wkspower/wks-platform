@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.cases.definition.CaseDefinition;
 import com.wks.caseengine.cases.definition.CaseDefinitionNotFoundException;
 import com.wks.caseengine.cases.definition.service.CaseDefinitionService;
+import com.wks.caseengine.cmmn.CmmnImportResult;
+import com.wks.caseengine.cmmn.CmmnImportService;
+import com.wks.caseengine.cmmn.parse.CmmnParseException;
 import com.wks.caseengine.rest.exception.RestInvalidArgumentException;
 import com.wks.caseengine.rest.exception.RestResourceNotFoundException;
 
@@ -41,6 +44,9 @@ public class CaseDefinitionController {
 
 	@Autowired
 	private CaseDefinitionService caseDefinitionService;
+
+	@Autowired
+	private CmmnImportService cmmnImportService;
 
 	@GetMapping
 	public ResponseEntity<List<CaseDefinition>> find(@RequestParam(required = false) Boolean deployed) {
@@ -62,6 +68,35 @@ public class CaseDefinitionController {
 			return ResponseEntity.ok(caseDefinitionService.create(caseDefinition));
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("caseDefinitionId", e);
+		}
+	}
+
+	/**
+	 * Imports a CMMN 1.1 model as a case definition, generating the forms and the
+	 * BPMN processes that make it runnable.
+	 *
+	 * <p>Deliberately mounted under {@code case-definition} rather than at a path of
+	 * its own: authorization is evaluated on the first URI segment, so this inherits
+	 * the case-definition manager rule and needs no new policy. A new top-level path
+	 * would be denied by default until the policy bundle was updated.
+	 *
+	 * <p>With {@code dryRun=true} nothing is written — the same result is returned so
+	 * the caller can review the warnings, which is how the mapping's assumptions get
+	 * checked before anything is created.
+	 *
+	 * @param cmmnXml the model, as the raw request body
+	 */
+	@PostMapping(value = "/import/cmmn", consumes = { "application/xml", "text/xml", "text/plain",
+			"application/octet-stream" })
+	public ResponseEntity<CmmnImportResult> importCmmn(@RequestBody final String cmmnXml,
+			@RequestParam(required = false, defaultValue = "false") final boolean dryRun) {
+		try {
+			return ResponseEntity.ok(cmmnImportService.importModel(cmmnXml, dryRun));
+		} catch (CmmnParseException e) {
+			// Single-arg on purpose: the parser's message already names what to do
+			// about it (e.g. "that is a rendered diagram, export CMMN 1.1 XML"), and
+			// the generic wording would throw that explanation away.
+			throw new RestInvalidArgumentException(e.getMessage());
 		}
 	}
 

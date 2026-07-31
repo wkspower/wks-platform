@@ -34,4 +34,13 @@ public class CaseStage {
 
 	private List<CaseStageProcessDefinition> processesDefinitions;
 
+	/**
+	 * Milestones achievable while the case sits in this stage. Reaching one is
+	 * recorded on the case instance but does not move the case — see
+	 * {@link CaseMilestone}. Absent/empty means the stage tracks no milestones.
+	 *
+	 * <p>Part of the WKS Case Configuration Standard since schema 2.2.
+	 */
+	private List<CaseMilestone> milestones;
+
 }

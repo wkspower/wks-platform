@@ -30,6 +30,7 @@ import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcesso
 import com.wks.api.security.context.SecurityContextTenantHolder;
 import com.wks.caseengine.cases.definition.CaseStatus;
 import com.wks.caseengine.cases.instance.CaseInstance;
+import com.wks.caseengine.cases.instance.CaseMilestoneState;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceJpaRepositoryImpl;
 import com.wks.caseengine.cases.instance.repository.CaseInstanceRepository;
 import com.wks.caseengine.db.EngineDatabaseTenantConfig;
@@ -136,5 +137,32 @@ public class CaseInstanceJpaRepositoryImplIT {
 		CaseInstance reloaded = repository.get("WP10-0002");
 		assertEquals("Review", reloaded.getStage());
 		assertEquals(CaseStatus.WIP_CASE_STATUS, reloaded.getStatus(), "status must be preserved");
+	}
+
+	/**
+	 * Achieved milestones must survive update() and come back on read.
+	 *
+	 * <p>Both backends update an explicit list of fields rather than replacing the
+	 * document, so a newly added field is silently dropped until it is added to that
+	 * list — the write succeeds, the read returns nothing, and no test built on a
+	 * mocked repository can see it. This pins the round trip.
+	 */
+	@Test
+	public void shouldPersistAchievedMilestonesThroughAnUpdate() throws Exception {
+		repository.save(new CaseInstance("634d1eac797f75ecc4a10077", "WP10-0003", "asyl-verfahren",
+				"Vorverfahren (NPOL/LPOL)", "WIP_CASE_STATUS"));
+
+		CaseInstance patch = CaseInstance.builder().businessKey("WP10-0003")
+				.stage("Vorverfahren (NPOL/LPOL)")
+				.milestones(List.of(CaseMilestoneState.builder().id("person-erfasst").name("Person erfasst")
+						.achievedAt("2026-07-31T10:00:00Z").build()))
+				.build();
+		repository.update("WP10-0003", patch);
+
+		CaseInstance reloaded = repository.get("WP10-0003");
+		assertEquals(1, reloaded.getMilestones().size(), "the achievement must survive the update");
+		assertEquals("person-erfasst", reloaded.getMilestones().get(0).getId());
+		assertEquals("Person erfasst", reloaded.getMilestones().get(0).getName());
+		assertEquals("2026-07-31T10:00:00Z", reloaded.getMilestones().get(0).getAchievedAt());
 	}
 }

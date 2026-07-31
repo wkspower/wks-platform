@@ -56,6 +56,23 @@ public class CaseInstance {
 
 	private String queueId;
 
+	/**
+	 * Milestones this case has reached, in achievement order. Only achieved
+	 * milestones appear — see {@link CaseMilestoneState}.
+	 */
+	private List<CaseMilestoneState> milestones;
+
+	/**
+	 * Write-only patch field: the id of a milestone to mark achieved.
+	 *
+	 * <p>Scalar in, list out. A merge patch carrying a whole {@code milestones}
+	 * list would have to define what happens to entries the caller omitted, and
+	 * every answer is wrong for a monotonic history. Naming a single milestone
+	 * sidesteps that: it is unambiguous, and it makes the operation idempotent
+	 * (see {@code PatchCaseInstanceCmd}). Never populated on read.
+	 */
+	private String achievedMilestone;
+
 	public CaseInstance(String _id, String businessKey, String caseDefinitionId, String stage, String status) {
 		super();
 		this._id = _id;
@@ -79,6 +96,34 @@ public class CaseInstance {
 		}
 
 		this.documents.add(document);
+	}
+
+	/**
+	 * Records a milestone as achieved, ignoring one already recorded so a retried
+	 * signal cannot double-stamp it.
+	 *
+	 * @return true when this call actually recorded it
+	 */
+	public boolean achieveMilestone(final CaseMilestoneState milestone) {
+		if (milestone == null || milestone.getId() == null) {
+			return false;
+		}
+
+		if (milestones == null) {
+			this.milestones = new ArrayList<>();
+		}
+
+		if (hasMilestone(milestone.getId())) {
+			return false;
+		}
+
+		this.milestones.add(milestone);
+		return true;
+	}
+
+	public boolean hasMilestone(final String milestoneId) {
+		return milestones != null
+				&& milestones.stream().anyMatch(achieved -> milestoneId.equals(achieved.getId()));
 	}
 
 	public void addComment(final CaseComment comment) {

@@ -4,9 +4,11 @@ import java.util.UUID;
 
 import com.wks.caseengine.cases.instance.CaseAttribute;
 import com.wks.caseengine.cases.instance.CaseComment;
+import com.wks.caseengine.cases.instance.CaseMilestoneState;
 import com.wks.caseengine.cases.instance.CaseDocument;
 import com.wks.caseengine.cases.instance.CaseOwner;
 import com.wks.caseengine.jpa.entity.converter.CaseCommentListConverter;
+import com.wks.caseengine.jpa.entity.converter.CaseMilestoneStateListConverter;
 import com.wks.caseengine.jpa.entity.converter.CaseDefAttributeConverter;
 import com.wks.caseengine.jpa.entity.converter.CaseDocumentListConverter;
 import com.wks.caseengine.jpa.entity.converter.CaseOwnerConverter;
@@ -54,6 +56,10 @@ public class CaseInstanceEntity {
 	@Column(name="comments", columnDefinition = "TEXT")
 	@Convert(converter = CaseCommentListConverter.class)
     private List<CaseComment> comments;
+
+    @Column(name = "milestones", columnDefinition = "TEXT")
+    @Convert(converter = CaseMilestoneStateListConverter.class)
+    private List<CaseMilestoneState> milestones;
 	
 	@Column(name = "case_definition_id")
 	private String caseDefinitionId;

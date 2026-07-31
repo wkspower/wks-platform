@@ -149,6 +149,19 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
         </dependency>
+
+        <!--
+            Test-only: validates the BPMN produced by the CMMN importer using
+            Camunda's own model parser, so a process that the engine would reject
+            fails the build here instead of at deployment time in front of a user.
+            The model library is a pure parser with no engine or database attached.
+        -->
+        <dependency>
+            <groupId>org.camunda.bpm.model</groupId>
+            <artifactId>camunda-bpmn-model</artifactId>
+            <version>${camunda7.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

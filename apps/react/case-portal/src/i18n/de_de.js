@@ -176,6 +176,27 @@ const defs = {
         },
       },
     },
+    cmmnImport: {
+      action: 'CMMN importieren',
+      title: 'CMMN-Modell importieren',
+      chooseFile: 'Datei auswählen',
+      hint: 'Wählen Sie ein CMMN-1.1-Modell (.cmmn oder .xml). Eine gerenderte Grafik (SVG/PNG) kann nicht importiert werden.',
+      import: 'Importieren',
+      cancel: 'Abbrechen',
+      done: 'Schließen',
+      optional: 'optional',
+      imported: '"{{name}}" wurde importiert.',
+      summary: {
+        stages: '{{count}} Phasen',
+        tasks: '{{count}} Aufgaben',
+        milestones: '{{count}} Meilensteine',
+      },
+      warnings: {
+        title: '{{count}} Punkte konnten nicht exakt übernommen werden',
+        intro:
+          'CMMN kann mehr ausdrücken, als diese Plattform abbildet — bei einem Import bleibt daher immer etwas zurück. Bitte vor dem Importieren prüfen.',
+      },
+    },
     validation: {
       pleaseCorrectErrors:
         'Bitte korrigieren Sie die folgenden Fehler im Formular:',

@@ -11,9 +11,11 @@ import { FileService } from './FileService'
 import { DeploymentService } from './DeploymentService'
 import { VariableService } from './VariableService'
 import { MenuEventService } from './MenuEventService'
+import { CmmnImportService } from './CmmnImportService'
 
 export {
   NotificationService,
+  CmmnImportService,
   CaseService,
   EmailService,
   FormService,

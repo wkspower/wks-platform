@@ -174,6 +174,27 @@ const defs = {
         },
       },
     },
+    cmmnImport: {
+      action: 'Import CMMN',
+      title: 'Import a CMMN model',
+      chooseFile: 'Choose file',
+      hint: 'Select a CMMN 1.1 model (.cmmn or .xml). A rendered diagram (SVG/PNG) cannot be imported.',
+      import: 'Import',
+      cancel: 'Cancel',
+      done: 'Close',
+      optional: 'optional',
+      imported: '"{{name}}" was imported.',
+      summary: {
+        stages: '{{count}} stages',
+        tasks: '{{count}} tasks',
+        milestones: '{{count}} milestones',
+      },
+      warnings: {
+        title: '{{count}} things could not be carried over exactly',
+        intro:
+          'CMMN can express more than this platform models, so an import always leaves something behind. Review these before importing.',
+      },
+    },
     validation: {
       pleaseCorrectErrors: 'Please correct the following errors in the form:',
       requiredFieldsMissing:

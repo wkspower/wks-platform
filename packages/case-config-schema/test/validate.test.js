@@ -90,5 +90,54 @@ test('seed configs conform to the Standard', () => {
 });
 
 test('SCHEMA_VERSION is exported', () => {
-  assert.strictEqual(SCHEMA_VERSION, '2.1');
+  assert.strictEqual(SCHEMA_VERSION, '2.2');
+});
+
+test('a stage accepts milestones (schema 2.2)', () => {
+  const { valid, errors } = validate('case-definition', {
+    schemaVersion: '2.2',
+    id: 'asyl-verfahren',
+    name: 'Asylverfahren',
+    formKey: 'asyl-verfahren-form',
+    stages: [
+      {
+        id: '0',
+        index: 0,
+        name: 'Vorverfahren (NPOL/LPOL)',
+        milestones: [
+          { id: 'person-erfasst', name: 'Person erfasst' },
+          {
+            id: 'antrag-gestellt',
+            name: 'Antrag gestellt',
+            note: 'Sobald beide Tasks erledigt',
+            sourceElementId: 'PlanItem_0fjixce',
+          },
+        ],
+      },
+    ],
+  });
+  assert.ok(valid, `expected valid, got ${JSON.stringify(errors)}`);
+});
+
+test('a milestone requires id and name', () => {
+  const withoutName = validate('case-definition', {
+    id: 'c',
+    name: 'C',
+    formKey: 'f',
+    stages: [{ id: '0', index: 0, name: 'S', milestones: [{ id: 'm' }] }],
+  });
+  assert.ok(!withoutName.valid, 'a milestone with no name should be rejected');
+});
+
+// Milestones are additive: a pre-2.2 definition that declares none stays valid,
+// which is what lets the version bump land without touching existing config.
+test('a stage without milestones is still valid', () => {
+  const { valid, errors } = validate('case-definition', {
+    schemaVersion: '2.1',
+    id: 'c',
+    name: 'C',
+    formKey: 'f',
+    stages: [{ id: '0', index: 0, name: 'S' }],
+  });
+  assert.ok(valid, `expected valid, got ${JSON.stringify(errors)}`);
 });

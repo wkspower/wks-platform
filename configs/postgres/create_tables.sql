@@ -60,6 +60,7 @@ CREATE TABLE case_instance (
     attributes TEXT,
     documents TEXT,
     comments TEXT,
+    milestones TEXT,
     case_definition_id TEXT,
     owner TEXT
 );

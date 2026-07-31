@@ -32,6 +32,9 @@ import com.wks.api.dto.ProcessDefinitionStartDto;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
 import com.wks.bpm.externaltask.worker.WksExternalTaskHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 @ExternalTaskSubscription(topicName = "businessProcessStart", includeExtensionProperties = true)
 public class BusinessProcessStartWorker extends WksExternalTaskHandler {
@@ -52,22 +55,43 @@ public class BusinessProcessStartWorker extends WksExternalTaskHandler {
 
 		JsonObject jsonObject = gsonBuilder.create().fromJson(caseInstanceJson, JsonObject.class);
 
+		String processDefinitionKey = getProcessDefinitionId(jsonObject);
+
+		// A case type need not have a lifecycle process. Cases imported from a model
+		// drive themselves through per-stage processes, and engine-less deployments
+		// have none at all — the config schema documents the field as optional. Raising
+		// an incident for a legitimate configuration would put a permanent failure
+		// against every such case, so this skips instead.
+		if (processDefinitionKey == null || processDefinitionKey.isBlank()) {
+			log.debug("Case definition {} declares no stagesLifecycleProcessKey — nothing to start for case {}",
+					jsonObject.get("caseDefinitionId"), jsonObject.get("businessKey"));
+			return Optional.empty();
+		}
+
 		JsonArray caseAttributesArray = jsonObject.get("attributes").getAsJsonArray();
 		List<ProcessVariable> processVariables = new ArrayList<>();
 		for (JsonElement element : caseAttributesArray) {
 			processVariables.add(gsonBuilder.create().fromJson(element, ProcessVariable.class));
 		}
 
-		processDefinitionApiGateway.start(getProcessDefinitionId(jsonObject), ProcessDefinitionStartDto.builder()
+		processDefinitionApiGateway.start(processDefinitionKey, ProcessDefinitionStartDto.builder()
 				.processVariables(processVariables).businessKey(jsonObject.get("businessKey").getAsString()).build());
 		return Optional.empty();
 	}
 
+	/**
+	 * @return the case type's lifecycle process key, or null when it declares none
+	 */
 	private String getProcessDefinitionId(final JsonObject caseInstanceJson) {
 		String caseDefJsonString = caseDefinitionApiGateway.get(caseInstanceJson.get("caseDefinitionId").getAsString());
 		JsonObject caseDefJson = gsonBuilder.create().fromJson(caseDefJsonString, JsonObject.class);
-		String processDefKey = caseDefJson.get("stagesLifecycleProcessKey").getAsString();
-		return processDefKey;
+
+		JsonElement processDefKey = caseDefJson.get("stagesLifecycleProcessKey");
+		if (processDefKey == null || processDefKey.isJsonNull()) {
+			return null;
+		}
+
+		return processDefKey.getAsString();
 	}
 
 }

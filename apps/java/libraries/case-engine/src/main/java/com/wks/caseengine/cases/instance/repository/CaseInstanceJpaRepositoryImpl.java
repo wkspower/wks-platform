@@ -127,6 +127,7 @@ public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 		entity.setDocuments(caseInstance.getDocuments());
 		entity.setQueueId(caseInstance.getQueueId());
 		entity.setComments(caseInstance.getComments());
+		entity.setMilestones(caseInstance.getMilestones());
 
 		entityManager.merge(entity);
 	}
@@ -184,6 +185,7 @@ public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 		caseInstance.setDocuments(entity.getDocuments());
 		caseInstance.setQueueId(entity.getQueueId());
 		caseInstance.setComments(entity.getComments());
+		caseInstance.setMilestones(entity.getMilestones());
 		caseInstance.setOwner(entity.getOwner());
 		caseInstance.setCaseDefinitionId(entity.getCaseDefinitionId());
 		return caseInstance;
@@ -202,6 +204,7 @@ public class CaseInstanceJpaRepositoryImpl implements CaseInstanceRepository {
 		entity.setDocuments(caseInstance.getDocuments());
 		entity.setQueueId(caseInstance.getQueueId());
 		entity.setComments(caseInstance.getComments());
+		entity.setMilestones(caseInstance.getMilestones());
 		entity.setOwner(caseInstance.getOwner());
 		entity.setCaseDefinitionId(caseInstance.getCaseDefinitionId());
 		
