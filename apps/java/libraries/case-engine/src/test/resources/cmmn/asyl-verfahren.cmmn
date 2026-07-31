@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Asylverfahren — CMMN 1.1 reconstruction of the customer-supplied diagram
+  (see asyl-verfahren.source-diagram.svg, a cmmn-js export).
+
+  WHY THIS FILE IS HAND-AUTHORED, AND WHAT IS AN ASSUMPTION
+  ========================================================
+  The supplied diagram carries NO connections into any of its ten entry criteria:
+  every edge in the SVG is a dashed association to a text annotation. The
+  dependency logic lives entirely in German prose on those annotations
+  ("Sobald beide Tasks erledigt", "Sobald die 3 Tasks erledigt", "Antrag
+  gestellt", "Person erfasst", "Antrag registriert").
+
+  The sentries below are therefore OUR READING of that prose, not something
+  recovered from the model. They are to be reviewed with the customer. Each
+  inferred sentry is marked ASSUMPTION with the annotation it derives from.
+
+  Element ids (CasePlanModel_09iqv6o, PlanItem_*, EntryCriterion_*,
+  TextAnnotation_*) and all DI coordinates are copied verbatim from the supplied
+  SVG, so generated case definitions can point back at the customer's own
+  diagram and so the importer's stage-ordering runs on real geometry.
+-->
+<cmmn:definitions xmlns:cmmn="http://www.omg.org/spec/CMMN/20151109/MODEL"
+                  xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI"
+                  xmlns:dc="http://www.omg.org/spec/CMMN/20151109/DC"
+                  xmlns:di="http://www.omg.org/spec/CMMN/20151109/DI"
+                  id="Definitions_asyl_verfahren"
+                  targetNamespace="http://bpmn.io/schema/cmmn"
+                  exporter="hand-authored from customer diagram"
+                  exporterVersion="1.0">
+  <cmmn:case id="asyl-verfahren" name="Asylverfahren">
+    <cmmn:casePlanModel id="CasePlanModel_09iqv6o" name="Asylverfahren">
+
+      <!-- ============ Task and milestone definitions ============ -->
+      <cmmn:humanTask id="HumanTask_ed_behandlung" name="ED Behandlung"/>
+      <cmmn:humanTask id="HumanTask_screening" name="Screening durchführen/prüfen"/>
+      <cmmn:humanTask id="HumanTask_antragstellung" name="Antragstellung entgegennehmen"/>
+      <cmmn:humanTask id="HumanTask_meldung_registrierungsbehoerde" name="Meldung an Registrierungsbehörde (Fristen..)"/>
+      <cmmn:humanTask id="HumanTask_antragsregistrierung" name="Antragsregistrierung (Fristen..)"/>
+      <cmmn:humanTask id="HumanTask_ladung_erstellt" name="Ladung erstellt"/>
+      <cmmn:humanTask id="HumanTask_einreichungsplanung" name="Einreichungsplanung"/>
+      <cmmn:humanTask id="HumanTask_antragseinreichung" name="Antragseinreichung"/>
+      <cmmn:humanTask id="HumanTask_kat1_pruefen" name="weitere Angabe bei KAT I Treffer prüfen"/>
+      <cmmn:humanTask id="HumanTask_pruefung_weitere_angaben" name="Prüfung der weiteren Angaben"/>
+
+      <cmmn:milestone id="Milestone_person_erfasst" name="Person erfasst"/>
+      <cmmn:milestone id="Milestone_antrag_gestellt" name="Antrag gestellt"/>
+      <cmmn:milestone id="Milestone_antrag_registriert" name="Antrag registriert"/>
+      <cmmn:milestone id="Milestone_antrag_eingereicht" name="Antrag eingereicht"/>
+      <cmmn:milestone id="Milestone_antragsgestattung_erteilt" name="Antragsgestattung erteilt"/>
+      <cmmn:milestone id="Milestone_anhoerung_angesetzt" name="Anhörung angesetzt"/>
+
+      <!-- ============ Stage: Vorverfahren (NPOL/LPOL) ============ -->
+      <cmmn:stage id="Stage_vorverfahren" name="Vorverfahren (NPOL/LPOL)">
+        <cmmn:planItem id="PlanItem_1asz30q" definitionRef="HumanTask_ed_behandlung"/>
+        <cmmn:planItem id="PlanItem_0ihb3fo" definitionRef="HumanTask_screening"/>
+        <cmmn:planItem id="PlanItem_1te867s" definitionRef="Milestone_person_erfasst">
+          <cmmn:entryCriterion id="EntryCriterion_1hlbicy" sentryRef="Sentry_person_erfasst"/>
+        </cmmn:planItem>
+
+        <!-- ASSUMPTION, from TextAnnotation_1g2goyg "Sobald beide Tasks erledigt":
+             both tasks in this stage must complete. -->
+        <cmmn:sentry id="Sentry_person_erfasst">
+          <cmmn:planItemOnPart id="OnPart_pe_1" sourceRef="PlanItem_1asz30q">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+          <cmmn:planItemOnPart id="OnPart_pe_2" sourceRef="PlanItem_0ihb3fo">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+        </cmmn:sentry>
+      </cmmn:stage>
+
+      <!-- ============ Stage: Registrierung ============ -->
+      <cmmn:stage id="Stage_registrierung" name="Registrierung">
+        <cmmn:planItem id="PlanItem_19x2xyj" definitionRef="HumanTask_meldung_registrierungsbehoerde"/>
+        <cmmn:planItem id="PlanItem_17dzvyt" definitionRef="HumanTask_antragsregistrierung"/>
+        <cmmn:planItem id="PlanItem_067mr79" definitionRef="Milestone_antrag_registriert">
+          <cmmn:entryCriterion id="EntryCriterion_0e3qzys" sentryRef="Sentry_antrag_registriert"/>
+        </cmmn:planItem>
+
+        <!-- ASSUMPTION, from TextAnnotation_00m7x3z "Sobald beide Tasks erledigt". -->
+        <cmmn:sentry id="Sentry_antrag_registriert">
+          <cmmn:planItemOnPart id="OnPart_ar_1" sourceRef="PlanItem_19x2xyj">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+          <cmmn:planItemOnPart id="OnPart_ar_2" sourceRef="PlanItem_17dzvyt">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+        </cmmn:sentry>
+      </cmmn:stage>
+
+      <!-- ============ Stage: Einreichung ============
+           Carries a manual-activation marker in the source diagram, and a
+           planning table holding the one discretionary item. -->
+      <cmmn:stage id="Stage_einreichung" name="Einreichung">
+        <cmmn:planItem id="PlanItem_11oy1wh" definitionRef="HumanTask_ladung_erstellt"/>
+        <cmmn:planItem id="PlanItem_0ad1ysa" definitionRef="HumanTask_einreichungsplanung"/>
+        <cmmn:planItem id="PlanItem_0tst5di" definitionRef="HumanTask_antragseinreichung"/>
+        <cmmn:planItem id="PlanItem_1qb2dwp" definitionRef="Milestone_antrag_eingereicht">
+          <cmmn:entryCriterion id="EntryCriterion_16pe5b9" sentryRef="Sentry_antrag_eingereicht"/>
+        </cmmn:planItem>
+
+        <!-- ASSUMPTION, from TextAnnotation_1s45p3q "Sobald die 3 Tasks erledigt". -->
+        <cmmn:sentry id="Sentry_antrag_eingereicht">
+          <cmmn:planItemOnPart id="OnPart_ae_1" sourceRef="PlanItem_11oy1wh">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+          <cmmn:planItemOnPart id="OnPart_ae_2" sourceRef="PlanItem_0ad1ysa">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+          <cmmn:planItemOnPart id="OnPart_ae_3" sourceRef="PlanItem_0tst5di">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+        </cmmn:sentry>
+
+        <cmmn:planningTable id="PlanningTable_einreichung">
+          <cmmn:discretionaryItem id="PlanItem_18axmw4" definitionRef="HumanTask_kat1_pruefen"/>
+        </cmmn:planningTable>
+      </cmmn:stage>
+
+      <!-- ============ Case-plan-level plan items ============ -->
+      <cmmn:planItem id="PlanItem_181t6jt" definitionRef="Stage_vorverfahren"/>
+
+      <cmmn:planItem id="PlanItem_1vnasux" definitionRef="HumanTask_antragstellung"/>
+
+      <cmmn:planItem id="PlanItem_0fjixce" definitionRef="Milestone_antrag_gestellt">
+        <cmmn:entryCriterion id="EntryCriterion_1v7531s" sentryRef="Sentry_antrag_gestellt"/>
+      </cmmn:planItem>
+
+      <!-- The Registrierung stage is fed by TWO separate criteria in the source
+           diagram, annotated "Antrag gestellt" (TextAnnotation_0v3mufb) and
+           "Person erfasst" (TextAnnotation_0ez19g4) — hence two entry criteria
+           rather than one two-part sentry. ASSUMPTION. -->
+      <cmmn:planItem id="PlanItem_08fqej5" definitionRef="Stage_registrierung">
+        <cmmn:entryCriterion id="EntryCriterion_1dzva64" sentryRef="Sentry_reg_antrag_gestellt"/>
+        <cmmn:entryCriterion id="EntryCriterion_11tvsx7" sentryRef="Sentry_reg_person_erfasst"/>
+      </cmmn:planItem>
+
+      <!-- ASSUMPTION, from TextAnnotation_1q8az8a "Antrag registriert". The stage
+           also carries a manual-activation marker in the diagram. -->
+      <cmmn:planItem id="PlanItem_1hsqx8y" definitionRef="Stage_einreichung">
+        <cmmn:entryCriterion id="EntryCriterion_147bq4o" sentryRef="Sentry_einreichung"/>
+        <cmmn:itemControl id="ItemControl_einreichung">
+          <cmmn:manualActivationRule id="ManualActivationRule_einreichung">
+            <cmmn:condition id="Condition_einreichung">true</cmmn:condition>
+          </cmmn:manualActivationRule>
+        </cmmn:itemControl>
+      </cmmn:planItem>
+
+      <cmmn:planItem id="PlanItem_06xryvs" definitionRef="Milestone_antragsgestattung_erteilt">
+        <cmmn:entryCriterion id="EntryCriterion_06by40o" sentryRef="Sentry_antragsgestattung"/>
+      </cmmn:planItem>
+
+      <cmmn:planItem id="PlanItem_0br7vvk" definitionRef="HumanTask_pruefung_weitere_angaben">
+        <cmmn:entryCriterion id="EntryCriterion_1220odh" sentryRef="Sentry_pruefung_weitere_angaben"/>
+      </cmmn:planItem>
+
+      <cmmn:planItem id="PlanItem_0gsqv2s" definitionRef="Milestone_anhoerung_angesetzt">
+        <cmmn:entryCriterion id="EntryCriterion_1s91op2" sentryRef="Sentry_anhoerung"/>
+      </cmmn:planItem>
+
+      <!-- ============ Case-plan-level sentries (all ASSUMPTIONS) ============ -->
+
+      <!-- Antragstellung entgegennehmen completes. -->
+      <cmmn:sentry id="Sentry_antrag_gestellt">
+        <cmmn:planItemOnPart id="OnPart_ag_1" sourceRef="PlanItem_1vnasux">
+          <cmmn:standardEvent>complete</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_reg_antrag_gestellt">
+        <cmmn:planItemOnPart id="OnPart_rag_1" sourceRef="PlanItem_0fjixce">
+          <cmmn:standardEvent>occur</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_reg_person_erfasst">
+        <cmmn:planItemOnPart id="OnPart_rpe_1" sourceRef="PlanItem_1te867s">
+          <cmmn:standardEvent>occur</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_einreichung">
+        <cmmn:planItemOnPart id="OnPart_ein_1" sourceRef="PlanItem_067mr79">
+          <cmmn:standardEvent>occur</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_antragsgestattung">
+        <cmmn:planItemOnPart id="OnPart_age_1" sourceRef="PlanItem_1qb2dwp">
+          <cmmn:standardEvent>occur</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_pruefung_weitere_angaben">
+        <cmmn:planItemOnPart id="OnPart_pwa_1" sourceRef="PlanItem_06xryvs">
+          <cmmn:standardEvent>occur</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+      <cmmn:sentry id="Sentry_anhoerung">
+        <cmmn:planItemOnPart id="OnPart_anh_1" sourceRef="PlanItem_0br7vvk">
+          <cmmn:standardEvent>complete</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+
+    </cmmn:casePlanModel>
+
+    <!-- ============ Text annotations (the source of the assumptions) ============ -->
+    <cmmn:textAnnotation id="TextAnnotation_1g2goyg">
+      <cmmn:text>Sobald beide Tasks erledigt</cmmn:text>
+    </cmmn:textAnnotation>
+    <cmmn:textAnnotation id="TextAnnotation_00m7x3z">
+      <cmmn:text>Sobald beide Tasks erledigt</cmmn:text>
+    </cmmn:textAnnotation>
+    <cmmn:textAnnotation id="TextAnnotation_1s45p3q">
+      <cmmn:text>Sobald die 3 Tasks erledigt</cmmn:text>
+    </cmmn:textAnnotation>
+    <cmmn:textAnnotation id="TextAnnotation_0v3mufb">
+      <cmmn:text>Antrag gestellt</cmmn:text>
+    </cmmn:textAnnotation>
+    <cmmn:textAnnotation id="TextAnnotation_0ez19g4">
+      <cmmn:text>Person erfasst</cmmn:text>
+    </cmmn:textAnnotation>
+    <cmmn:textAnnotation id="TextAnnotation_1q8az8a">
+      <cmmn:text>Antrag registriert</cmmn:text>
+    </cmmn:textAnnotation>
+
+    <cmmn:association id="Association_124lu71" sourceRef="EntryCriterion_1hlbicy" targetRef="TextAnnotation_1g2goyg"/>
+    <cmmn:association id="Association_17ys2lt" sourceRef="EntryCriterion_0e3qzys" targetRef="TextAnnotation_00m7x3z"/>
+    <cmmn:association id="Association_1wd14bl" sourceRef="EntryCriterion_16pe5b9" targetRef="TextAnnotation_1s45p3q"/>
+    <cmmn:association id="Association_1n9buei" sourceRef="EntryCriterion_1dzva64" targetRef="TextAnnotation_0v3mufb"/>
+    <cmmn:association id="Association_1dxljbs" sourceRef="EntryCriterion_11tvsx7" targetRef="TextAnnotation_0ez19g4"/>
+    <cmmn:association id="Association_03rg4bw" sourceRef="EntryCriterion_147bq4o" targetRef="TextAnnotation_1q8az8a"/>
+  </cmmn:case>
+
+  <!-- ============ Diagram interchange ============
+       Coordinates copied verbatim from the supplied SVG. The importer derives
+       stage ordering from these, so they are load-bearing, not decoration. -->
+  <cmmndi:CMMNDI>
+    <cmmndi:CMMNDiagram id="CMMNDiagram_asyl_verfahren">
+      <cmmndi:CMMNShape id="Shape_CasePlanModel_09iqv6o" cmmnElementRef="CasePlanModel_09iqv6o">
+        <dc:Bounds x="-1766" y="-189" width="2019" height="561"/>
+      </cmmndi:CMMNShape>
+
+      <cmmndi:CMMNShape id="Shape_PlanItem_181t6jt" cmmnElementRef="PlanItem_181t6jt">
+        <dc:Bounds x="-1698" y="-53" width="348" height="234"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_1asz30q" cmmnElementRef="PlanItem_1asz30q">
+        <dc:Bounds x="-1674" y="9" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0ihb3fo" cmmnElementRef="PlanItem_0ihb3fo">
+        <dc:Bounds x="-1538" y="9" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_1te867s" cmmnElementRef="PlanItem_1te867s">
+        <dc:Bounds x="-1586" y="117" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_1hlbicy" cmmnElementRef="EntryCriterion_1hlbicy">
+        <dc:Bounds x="-1544" y="103" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_1g2goyg" cmmnElementRef="TextAnnotation_1g2goyg">
+        <dc:Bounds x="-1471" y="94" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+
+      <cmmndi:CMMNShape id="Shape_PlanItem_1vnasux" cmmnElementRef="PlanItem_1vnasux">
+        <dc:Bounds x="-1691" y="-164" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0fjixce" cmmnElementRef="PlanItem_0fjixce">
+        <dc:Bounds x="-1546" y="-144" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_1v7531s" cmmnElementRef="EntryCriterion_1v7531s">
+        <dc:Bounds x="-1556" y="-138" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+
+      <cmmndi:CMMNShape id="Shape_PlanItem_08fqej5" cmmnElementRef="PlanItem_08fqej5">
+        <dc:Bounds x="-1283" y="-55" width="484" height="237"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_19x2xyj" cmmnElementRef="PlanItem_19x2xyj">
+        <dc:Bounds x="-1138" y="-19" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_17dzvyt" cmmnElementRef="PlanItem_17dzvyt">
+        <dc:Bounds x="-993" y="-19" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_067mr79" cmmnElementRef="PlanItem_067mr79">
+        <dc:Bounds x="-1040" y="85" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_0e3qzys" cmmnElementRef="EntryCriterion_0e3qzys">
+        <dc:Bounds x="-996" y="71" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_1dzva64" cmmnElementRef="EntryCriterion_1dzva64">
+        <dc:Bounds x="-1293" y="7" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_11tvsx7" cmmnElementRef="EntryCriterion_11tvsx7">
+        <dc:Bounds x="-1293" y="91" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_00m7x3z" cmmnElementRef="TextAnnotation_00m7x3z">
+        <dc:Bounds x="-919" y="70" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_0v3mufb" cmmnElementRef="TextAnnotation_0v3mufb">
+        <dc:Bounds x="-1261" y="6" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_0ez19g4" cmmnElementRef="TextAnnotation_0ez19g4">
+        <dc:Bounds x="-1253" y="82" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+
+      <cmmndi:CMMNShape id="Shape_PlanItem_1hsqx8y" cmmnElementRef="PlanItem_1hsqx8y">
+        <dc:Bounds x="-709" y="-53" width="457" height="334"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_11oy1wh" cmmnElementRef="PlanItem_11oy1wh">
+        <dc:Bounds x="-689" y="-8" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0ad1ysa" cmmnElementRef="PlanItem_0ad1ysa">
+        <dc:Bounds x="-566" y="-8" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0tst5di" cmmnElementRef="PlanItem_0tst5di">
+        <dc:Bounds x="-459" y="-8" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_1qb2dwp" cmmnElementRef="PlanItem_1qb2dwp">
+        <dc:Bounds x="-555" y="92" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_18axmw4" cmmnElementRef="PlanItem_18axmw4">
+        <dc:Bounds x="-555" y="174" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_16pe5b9" cmmnElementRef="EntryCriterion_16pe5b9">
+        <dc:Bounds x="-515" y="78" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_147bq4o" cmmnElementRef="EntryCriterion_147bq4o">
+        <dc:Bounds x="-719" y="90" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_1s45p3q" cmmnElementRef="TextAnnotation_1s45p3q">
+        <dc:Bounds x="-411" y="97" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_TextAnnotation_1q8az8a" cmmnElementRef="TextAnnotation_1q8az8a">
+        <dc:Bounds x="-678" y="97" width="100" height="30"/>
+      </cmmndi:CMMNShape>
+
+      <cmmndi:CMMNShape id="Shape_PlanItem_06xryvs" cmmnElementRef="PlanItem_06xryvs">
+        <dc:Bounds x="-194" y="-18" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_06by40o" cmmnElementRef="EntryCriterion_06by40o">
+        <dc:Bounds x="-204" y="-9" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0br7vvk" cmmnElementRef="PlanItem_0br7vvk">
+        <dc:Bounds x="-194" y="93" width="100" height="80"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_1220odh" cmmnElementRef="EntryCriterion_1220odh">
+        <dc:Bounds x="-151" y="79" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_PlanItem_0gsqv2s" cmmnElementRef="PlanItem_0gsqv2s">
+        <dc:Bounds x="-44" y="-18" width="100" height="40"/>
+      </cmmndi:CMMNShape>
+      <cmmndi:CMMNShape id="Shape_EntryCriterion_1s91op2" cmmnElementRef="EntryCriterion_1s91op2">
+        <dc:Bounds x="-54" y="-14" width="20" height="28"/>
+      </cmmndi:CMMNShape>
+    </cmmndi:CMMNDiagram>
+  </cmmndi:CMMNDI>
+</cmmn:definitions>

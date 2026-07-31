@@ -38,6 +38,7 @@ import { CaseService, FormService } from '../../services'
 import { tryParseJSONObject } from '../../utils/jsonStringCheck'
 import { TaskList } from '../taskList/taskList'
 import Documents from './Documents'
+import MilestoneChips from './MilestoneChips'
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   const [caseDef, setCaseDef] = useState(null)
@@ -48,7 +49,10 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   const [mainTabIndex, setMainTabIndex] = useState(0)
   const [rightTabIndex, setRightTabIndex] = useState(0)
   const [activeStage, setActiveStage] = React.useState(0)
+  // Whole stage objects, not just names: the Stepper also renders each stage's
+  // milestones, which live on the stage.
   const [stages, setStages] = useState([])
+  const [achievedMilestoneIds, setAchievedMilestoneIds] = useState([])
   const { t } = useTranslation()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -90,9 +94,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
     CaseService.getCaseDefinitionsById(keycloak, aCase.caseDefinitionId)
       .then((data) => {
         setCaseDef(data)
-        setStages(
-          data.stages.sort((a, b) => a.index - b.index).map((o) => o.name),
-        )
+        setStages([...data.stages].sort((a, b) => a.index - b.index))
         return FormService.getByKey(keycloak, data.formKey)
       })
       .then((data) => {
@@ -121,6 +123,7 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           isValid: true,
         })
         setActiveStage(caseData.stage)
+        setAchievedMilestoneIds((caseData?.milestones ?? []).map((m) => m.id))
       })
       .catch((err) => {
         console.log(err.message)
@@ -310,18 +313,20 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
           >
             <Stepper
               activeStep={stages.findIndex((o) => {
-                return o === activeStage
+                return o.name === activeStage
               })}
             >
-              {stages.map((label) => {
-                const stagesProps = {}
-                const labelProps = {}
-                return (
-                  <Step key={label} {...stagesProps}>
-                    <StepLabel {...labelProps}>{label}</StepLabel>
-                  </Step>
-                )
-              })}
+              {stages.map((stage) => (
+                <Step key={stage.name}>
+                  <StepLabel>
+                    {stage.name}
+                    <MilestoneChips
+                      milestones={stage.milestones}
+                      achievedIds={achievedMilestoneIds}
+                    />
+                  </StepLabel>
+                </Step>
+              ))}
             </Stepper>
           </Box>
 

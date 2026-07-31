@@ -57,8 +57,8 @@
     "schemaVersion": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+$",
-      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline. Current: 2.1 (2.0 removed kanbanConfig — board rendering derives from stages, see board-config.schema.json; 2.1 adds requiredDocuments).",
-      "examples": ["2.1"]
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline. Current: 2.2 (2.0 removed kanbanConfig — board rendering derives from stages, see board-config.schema.json; 2.1 adds requiredDocuments; 2.2 adds per-stage milestones).",
+      "examples": ["2.2"]
     },
     "documentRequirement": {
       "type": "object",
@@ -105,6 +105,34 @@
           "type": "array",
           "description": "BPMN processes bound to this stage (manually or auto-started).",
           "items": { "$ref": "#/$defs/caseStageProcessDefinition" }
+        },
+        "milestones": {
+          "type": "array",
+          "description": "Milestones achievable while the case is in this stage: named points of progress that are recorded on the case instance once reached. Independent of stage transitions — a stage may declare several, and reaching one does not move the case. Absent/empty means the stage tracks no milestones. Part of the WKS Case Configuration Standard since schema 2.2.",
+          "items": { "$ref": "#/$defs/caseMilestone" }
+        }
+      }
+    },
+    "caseMilestone": {
+      "type": "object",
+      "description": "A single milestone declared on a stage.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the milestone (slug). Case instances record achievement by this id, and automation signals it by this id, so it must not change once cases exist."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable milestone name, shown on the case. Displayed as authored — not translated."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional free-text note about what achieving this milestone means (e.g. carried over from a source model's annotation)."
+        },
+        "sourceElementId": {
+          "type": "string",
+          "description": "Optional id of the element this milestone was generated from in an imported source model (e.g. a CMMN Milestone's planItem id). Enables highlighting the original diagram; absent for hand-authored milestones."
         }
       }
     },

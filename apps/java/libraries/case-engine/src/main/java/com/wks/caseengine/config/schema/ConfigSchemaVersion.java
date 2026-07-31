@@ -20,7 +20,7 @@ public final class ConfigSchemaVersion {
 	/**
 	 * The current WKS configuration Standard version.
 	 */
-	public static final String CURRENT = "2.0";
+	public static final String CURRENT = "2.2";
 
 	/**
 	 * Version assumed for a document that carries no {@code schemaVersion}. Such a

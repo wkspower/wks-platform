@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
 import { DataGrid } from '@mui/x-data-grid'
 import MainCard from 'components/MainCard'
 import { CaseDefForm } from '../caseDefForm/caseDefForm'
+import CmmnImportDialog from '../cmmnImport/cmmnImportDialog'
 import { CaseDefService } from 'services'
 import { useSession } from 'SessionStoreContext'
 
@@ -11,8 +14,10 @@ export const CaseDefList = () => {
   const [caseDefs, setCaseDefs] = useState([])
   const [aCaseDef, setACaseDef] = useState(null)
   const [openCaseDefForm, setOpenCaseDefForm] = useState(false)
+  const [openCmmnImport, setOpenCmmnImport] = useState(false)
   const [fetching, setFetching] = useState(false)
   const keycloak = useSession()
+  const { t } = useTranslation()
 
   useEffect(() => {
     setFetching(true)
@@ -24,7 +29,8 @@ export const CaseDefList = () => {
       .finally(() => {
         setFetching(false)
       })
-  }, [openCaseDefForm])
+    // Refetch when either dialog closes — an import creates a case definition too.
+  }, [openCaseDefForm, openCmmnImport])
 
   const columns = [
     { field: 'id', headerName: 'Id', width: 300 },
@@ -68,9 +74,18 @@ export const CaseDefList = () => {
 
   return (
     <div style={{ height: 650, width: '100%' }}>
-      <Button id='basic-button' variant='contained' onClick={handleNewCaseDef}>
-        New
-      </Button>
+      <Stack direction='row' spacing={1}>
+        <Button
+          id='basic-button'
+          variant='contained'
+          onClick={handleNewCaseDef}
+        >
+          New
+        </Button>
+        <Button variant='outlined' onClick={() => setOpenCmmnImport(true)}>
+          {t('pages.cmmnImport.action')}
+        </Button>
+      </Stack>
       <MainCard sx={{ mt: 2 }} content={false}>
         <Box>
           <DataGrid
@@ -90,6 +105,10 @@ export const CaseDefList = () => {
           open={openCaseDefForm}
         />
       )}
+      <CmmnImportDialog
+        open={openCmmnImport}
+        handleClose={() => setOpenCmmnImport(false)}
+      />
     </div>
   )
 }

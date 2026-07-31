@@ -176,6 +176,27 @@ const defs = {
         },
       },
     },
+    cmmnImport: {
+      action: 'Importar CMMN',
+      title: 'Importar um modelo CMMN',
+      chooseFile: 'Escolher arquivo',
+      hint: 'Selecione um modelo CMMN 1.1 (.cmmn ou .xml). Um diagrama renderizado (SVG/PNG) não pode ser importado.',
+      import: 'Importar',
+      cancel: 'Cancelar',
+      done: 'Fechar',
+      optional: 'opcional',
+      imported: '"{{name}}" foi importado.',
+      summary: {
+        stages: '{{count}} fases',
+        tasks: '{{count}} tarefas',
+        milestones: '{{count}} marcos',
+      },
+      warnings: {
+        title: '{{count}} pontos não puderam ser reproduzidos exatamente',
+        intro:
+          'O CMMN expressa mais do que esta plataforma modela, então uma importação sempre deixa algo de fora. Revise antes de importar.',
+      },
+    },
     validation: {
       pleaseCorrectErrors:
         'Por favor, corrija os seguintes erros no formulário:',
