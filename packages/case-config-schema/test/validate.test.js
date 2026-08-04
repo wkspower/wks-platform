@@ -90,7 +90,7 @@ test('seed configs conform to the Standard', () => {
 });
 
 test('SCHEMA_VERSION is exported', () => {
-  assert.strictEqual(SCHEMA_VERSION, '2.2');
+  assert.strictEqual(SCHEMA_VERSION, '2.3');
 });
 
 test('a stage accepts milestones (schema 2.2)', () => {

@@ -82,6 +82,12 @@ const defs = {
         comments: 'Comments',
         attachments: 'Attachments',
         emails: 'Emails',
+        diagram: 'Diagram',
+      },
+      diagram: {
+        none: 'This case type has no diagram attached.',
+        currentStage: 'Current stage',
+        achieved: 'Milestone reached',
       },
       manualProcesses: {
         title: 'Choose a process to start',
@@ -178,6 +184,11 @@ const defs = {
       action: 'Import CMMN',
       title: 'Import a CMMN model',
       chooseFile: 'Choose file',
+      chooseDiagram: 'Choose diagram (optional)',
+      diagramHint:
+        'Optionally attach the diagram as SVG, to show the model on each case.',
+      diagramRejected:
+        'The case type was imported, but the diagram was not stored:',
       hint: 'Select a CMMN 1.1 model (.cmmn or .xml). A rendered diagram (SVG/PNG) cannot be imported.',
       import: 'Import',
       cancel: 'Cancel',

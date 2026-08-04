@@ -17,7 +17,7 @@ const Ajv2020 = require('ajv/dist/2020');
  * 2.1 — adds the optional `requiredDocuments` array to the case definition
  * (additive, backward-compatible).
  */
-const SCHEMA_VERSION = '2.2';
+const SCHEMA_VERSION = '2.3';
 
 /**
  * Version assumed for a document that carries no `schemaVersion` — such a document

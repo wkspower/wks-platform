@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.wks.caseengine.cases.definition.CaseDefinition;
+import com.wks.caseengine.cases.definition.SourceDiagramValidator;
 import com.wks.caseengine.cases.definition.CaseDefinitionFilter;
 import com.wks.caseengine.cases.definition.command.CreateCaseDefinitionCmd;
 import com.wks.caseengine.cases.definition.command.DeleteCaseDefinitionCmd;
@@ -63,6 +64,18 @@ public class CaseDefinitionServiceImpl implements CaseDefinitionService {
 	public CaseDefinition update(final String caseDefId, final CaseDefinition caseDefinition) {
 		configValidationService.validateOnWrite(ConfigDocType.CASE_DEFINITION, caseDefinition, caseDefId);
 		return commandExecutor.execute(new UpdateCaseDefinitionCmd(caseDefId, caseDefinition));
+	}
+
+	@Override
+	public void attachSourceDiagram(final String caseDefId, final String svg) {
+		SourceDiagramValidator.validate(svg);
+
+		// Read-modify-write rather than a partial update: it goes through the same
+		// validated update path as any other change, so a diagram cannot be attached
+		// to a definition that would not otherwise pass.
+		CaseDefinition caseDefinition = get(caseDefId);
+		caseDefinition.setSourceDiagram(svg);
+		update(caseDefId, caseDefinition);
 	}
 
 	@Override

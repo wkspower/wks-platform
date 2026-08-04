@@ -53,6 +53,9 @@ public class CaseDefinitionEntity {
 	@Convert(converter = ActionHookListConverter.class)
 	private List<ActionHook> caseHooks;
 
+    @Column(name = "source_diagram", columnDefinition = "TEXT")
+    private String sourceDiagram;
+
 	@Column(name="required_documents", columnDefinition = "TEXT")
 	@Convert(converter = DocumentRequirementListConverter.class)
 	private List<DocumentRequirement> requiredDocuments;

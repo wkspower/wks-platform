@@ -28,4 +28,11 @@ public interface CaseDefinitionService {
 
 	void delete(final String caseDefinitionId);
 
+	/**
+	 * Attaches the diagram this case type was modelled as, for display on its cases.
+	 *
+	 * @param svg rendered diagram as SVG markup; rejected if it carries anything active
+	 */
+	void attachSourceDiagram(final String caseDefId, final String svg);
+
 }

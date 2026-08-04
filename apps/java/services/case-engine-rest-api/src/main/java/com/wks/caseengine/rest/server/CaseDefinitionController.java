@@ -100,6 +100,33 @@ public class CaseDefinitionController {
 		}
 	}
 
+	/**
+	 * Attaches the diagram a case type was modelled as, so cases can show it.
+	 *
+	 * <p>Separate from the import because it is a separate artifact: the importer
+	 * reads a CMMN <em>model</em>, while this is the <em>picture</em> of it, which
+	 * cannot be derived from the model without a rendering library. Keeping it on its
+	 * own endpoint also means a case type modelled elsewhere can be given a diagram
+	 * without being re-imported.
+	 *
+	 * <p>Optional throughout — a case type with no diagram simply does not show one.
+	 *
+	 * @param svg the rendered diagram as SVG markup
+	 */
+	@PutMapping(value = "/{caseDefId}/source-diagram", consumes = { "image/svg+xml", "application/xml", "text/xml",
+			"text/plain" })
+	public ResponseEntity<Void> attachSourceDiagram(@PathVariable final String caseDefId,
+			@RequestBody final String svg) {
+		try {
+			caseDefinitionService.attachSourceDiagram(caseDefId, svg);
+			return ResponseEntity.noContent().build();
+		} catch (CaseDefinitionNotFoundException e) {
+			throw new RestResourceNotFoundException(e.getMessage());
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException(e.getMessage());
+		}
+	}
+
 	@PutMapping(value = "/{caseDefId}")
 	public ResponseEntity<CaseDefinition> update(@PathVariable final String caseDefId,
 			@RequestBody final CaseDefinition caseDefinition) {

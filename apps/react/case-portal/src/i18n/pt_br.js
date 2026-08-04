@@ -82,6 +82,12 @@ const defs = {
         comments: 'Comentários',
         attachments: 'Anexos',
         emails: 'Emails',
+        diagram: 'Diagrama',
+      },
+      diagram: {
+        none: 'Este tipo de caso não possui diagrama anexado.',
+        currentStage: 'Fase atual',
+        achieved: 'Marco atingido',
       },
       manualProcesses: {
         title: 'Selecione o processo para iniciar',
@@ -180,6 +186,11 @@ const defs = {
       action: 'Importar CMMN',
       title: 'Importar um modelo CMMN',
       chooseFile: 'Escolher arquivo',
+      chooseDiagram: 'Escolher diagrama (opcional)',
+      diagramHint:
+        'Opcionalmente anexe o diagrama em SVG, para exibir o modelo em cada caso.',
+      diagramRejected:
+        'O tipo de caso foi importado, mas o diagrama não foi armazenado:',
       hint: 'Selecione um modelo CMMN 1.1 (.cmmn ou .xml). Um diagrama renderizado (SVG/PNG) não pode ser importado.',
       import: 'Importar',
       cancel: 'Cancelar',

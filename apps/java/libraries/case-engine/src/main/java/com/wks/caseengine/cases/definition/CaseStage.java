@@ -35,6 +35,14 @@ public class CaseStage {
 	private List<CaseStageProcessDefinition> processesDefinitions;
 
 	/**
+	 * Optional id of the element this stage was generated from in an imported source
+	 * model. Lets a viewer mark the stage on the original diagram; absent for a
+	 * hand-authored stage, and for one that has no single source shape — a stage
+	 * synthesized from loose items, or several concurrent ones merged into one.
+	 */
+	private String sourceElementId;
+
+	/**
 	 * Milestones achievable while the case sits in this stage. Reaching one is
 	 * recorded on the case instance but does not move the case — see
 	 * {@link CaseMilestone}. Absent/empty means the stage tracks no milestones.

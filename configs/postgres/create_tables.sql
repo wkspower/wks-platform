@@ -21,7 +21,8 @@ CREATE TABLE case_definition (
     deployed BOOLEAN NOT NULL DEFAULT FALSE,
     stages text,
     case_hooks TEXT,
-    required_documents TEXT
+    required_documents TEXT,
+    source_diagram TEXT
 );
 
 CREATE TABLE record_type (

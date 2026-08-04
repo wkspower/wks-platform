@@ -84,7 +84,8 @@ public class CmmnToCaseDefinitionMapper {
 			collectBandWork(diagram, band, stageName, tasks, discretionary, milestones, warnings);
 
 			stages.add(CaseStage.builder().id(String.valueOf(index)).index(index).name(stageName)
-					.milestones(milestones).processesDefinitions(new ArrayList<>()).build());
+					.sourceElementId(sourceElementIdOf(band)).milestones(milestones)
+					.processesDefinitions(new ArrayList<>()).build());
 
 			stageTasks.put(stageName, tasks.stream().map(CmmnElement::getName).toList());
 			stageDiscretionary.put(stageName, discretionary.stream().map(CmmnElement::getName).toList());
@@ -201,6 +202,18 @@ public class CmmnToCaseDefinitionMapper {
 						+ "grouped into a new stage named \"" + synthesized + "\" — rename it if that is not "
 						+ "what this part of the process is called."));
 		return synthesized;
+	}
+
+	/**
+	 * The diagram shape this stage came from, when there is exactly one.
+	 *
+	 * <p>Null when the band merged several concurrent stages or was synthesized from
+	 * loose items: pointing at one of several would mark the wrong shape on the
+	 * diagram, which is worse than marking none.
+	 */
+	private String sourceElementIdOf(final CmmnStageBand band) {
+		List<CmmnElement> stages = band.stages();
+		return stages.size() == 1 ? stages.get(0).getId() : null;
 	}
 
 	private String synthesizedNameFor(final CmmnStageBand band, final int index, final int bandCount) {

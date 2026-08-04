@@ -39,6 +39,7 @@ import { tryParseJSONObject } from '../../utils/jsonStringCheck'
 import { TaskList } from '../taskList/taskList'
 import Documents from './Documents'
 import MilestoneChips from './MilestoneChips'
+import CmmnDiagramPanel from './CmmnDiagramPanel'
 
 export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
   const [caseDef, setCaseDef] = useState(null)
@@ -338,6 +339,12 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     label={t('pages.caseform.tabs.details')}
                     {...a11yProps(0)}
                   />
+                  {caseDef?.sourceDiagram && (
+                    <Tab
+                      label={t('pages.caseform.tabs.diagram')}
+                      {...a11yProps(1)}
+                    />
+                  )}
                 </Tabs>
               </Box>
               <Box
@@ -375,6 +382,16 @@ export const CaseForm = ({ open, handleClose, aCase, keycloak }) => {
                     />
                   </Grid>
                 </TabPanel>
+                {caseDef?.sourceDiagram && (
+                  <TabPanel value={mainTabIndex} index={1}>
+                    <CmmnDiagramPanel
+                      sourceDiagram={caseDef.sourceDiagram}
+                      stages={stages}
+                      activeStage={activeStage}
+                      achievedMilestoneIds={achievedMilestoneIds}
+                    />
+                  </TabPanel>
+                )}
               </Box>
             </Grid>
 
