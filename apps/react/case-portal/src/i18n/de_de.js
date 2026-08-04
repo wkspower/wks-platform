@@ -82,6 +82,12 @@ const defs = {
         comments: 'Kommentare',
         attachments: 'Anhänge',
         emails: 'E-Mails',
+        diagram: 'Diagramm',
+      },
+      diagram: {
+        none: 'Für diesen Falltyp ist kein Diagramm hinterlegt.',
+        currentStage: 'Aktuelle Phase',
+        achieved: 'Meilenstein erreicht',
       },
       manualProcesses: {
         title: 'Zu startenden Prozess auswählen',
@@ -180,6 +186,11 @@ const defs = {
       action: 'CMMN importieren',
       title: 'CMMN-Modell importieren',
       chooseFile: 'Datei auswählen',
+      chooseDiagram: 'Diagramm auswählen (optional)',
+      diagramHint:
+        'Optional das Diagramm als SVG anhängen, um das Modell an jedem Fall anzuzeigen.',
+      diagramRejected:
+        'Der Falltyp wurde importiert, das Diagramm jedoch nicht gespeichert:',
       hint: 'Wählen Sie ein CMMN-1.1-Modell (.cmmn oder .xml). Eine gerenderte Grafik (SVG/PNG) kann nicht importiert werden.',
       import: 'Importieren',
       cancel: 'Abbrechen',

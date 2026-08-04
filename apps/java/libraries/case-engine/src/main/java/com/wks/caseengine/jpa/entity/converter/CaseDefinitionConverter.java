@@ -17,6 +17,7 @@ public class CaseDefinitionConverter {
         caseDefinition.setStages(entity.getStages());
         caseDefinition.setCaseHooks(entity.getCaseHooks());
         caseDefinition.setRequiredDocuments(entity.getRequiredDocuments());
+        caseDefinition.setSourceDiagram(entity.getSourceDiagram());
 
         return caseDefinition;
     }
@@ -33,6 +34,7 @@ public class CaseDefinitionConverter {
         entity.setStages(caseDefinition.getStages());
         entity.setCaseHooks(caseDefinition.getCaseHooks());
         entity.setRequiredDocuments(caseDefinition.getRequiredDocuments());
+        entity.setSourceDiagram(caseDefinition.getSourceDiagram());
 
         return entity;
     }

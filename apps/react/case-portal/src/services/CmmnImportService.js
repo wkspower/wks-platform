@@ -1,5 +1,5 @@
 import Config from 'consts'
-import { json } from './request'
+import { json, nop } from './request'
 
 /**
  * Imports a CMMN 1.1 model as a case definition.
@@ -25,6 +25,29 @@ export const CmmnImportService = {
     )
 
     return json(keycloak, response)
+  },
+
+  /**
+   * Attaches the rendered diagram to an imported case type.
+   *
+   * Separate from the import because a diagram is a separate artifact — the model
+   * says what the case does, the SVG is the picture of it, and one cannot be
+   * derived from the other without a rendering library.
+   */
+  attachDiagram: async (keycloak, caseDefinitionId, svg) => {
+    const response = await fetch(
+      `${Config.CaseEngineUrl}/case-definition/${caseDefinitionId}/source-diagram`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        body: svg,
+      },
+    )
+
+    return nop(keycloak, response)
   },
 }
 

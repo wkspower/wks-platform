@@ -13,6 +13,7 @@ package com.wks.caseengine.cmmn.map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,7 +56,7 @@ class CmmnToCaseDefinitionMapperTest {
 	void shouldMapTheCaseIdentity() {
 		assertEquals("asyl-verfahren", result.getCaseDefinition().getId());
 		assertEquals("Asylverfahren", result.getCaseDefinition().getName());
-		assertEquals("2.2", result.getCaseDefinition().getSchemaVersion());
+		assertEquals("2.3", result.getCaseDefinition().getSchemaVersion());
 		// Not deployed on import: someone reviews the warnings before end users see it.
 		assertFalse(result.getCaseDefinition().getDeployed());
 	}
@@ -128,6 +129,23 @@ class CmmnToCaseDefinitionMapperTest {
 		assertEquals("antrag-gestellt", milestone(0, 1).getId());
 		assertEquals("anhorung-angesetzt", milestone(3, 1).getId());
 		assertEquals("antragsgestattung-erteilt", milestone(3, 0).getId());
+	}
+
+	/**
+	 * A stage points at the shape it came from, so a viewer can mark it on the
+	 * original diagram — but only where that is unambiguous.
+	 */
+	@Test
+	void shouldCarryTheSourceElementIdOntoStagesThatHaveOne() {
+		List<CaseStage> stages = result.getCaseDefinition().getStages();
+
+		assertEquals("PlanItem_181t6jt", stages.get(0).getSourceElementId());
+		assertEquals("PlanItem_08fqej5", stages.get(1).getSourceElementId());
+		assertEquals("PlanItem_1hsqx8y", stages.get(2).getSourceElementId());
+
+		// The synthesized stage has no single source shape; marking one of its items
+		// would highlight the wrong thing.
+		assertNull(stages.get(3).getSourceElementId());
 	}
 
 	/** The plan-item id is kept so a viewer can highlight the customer's own shape. */

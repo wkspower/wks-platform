@@ -36,6 +36,11 @@ export const CmmnImportDialog = ({ open, handleClose }) => {
   // The model text is held so the commit re-sends exactly what was previewed —
   // re-reading the file could pick up an edit made in between.
   const [cmmnXml, setCmmnXml] = useState(null)
+  // Optional: the picture of the model. Attached after the import succeeds, so a
+  // diagram problem can never cost someone the import itself.
+  const [diagramSvg, setDiagramSvg] = useState(null)
+  const [diagramName, setDiagramName] = useState(null)
+  const [diagramWarning, setDiagramWarning] = useState(null)
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -44,6 +49,9 @@ export const CmmnImportDialog = ({ open, handleClose }) => {
   const reset = () => {
     setFileName(null)
     setCmmnXml(null)
+    setDiagramSvg(null)
+    setDiagramName(null)
+    setDiagramWarning(null)
     setPreview(null)
     setError(null)
     setImported(false)
@@ -82,12 +90,40 @@ export const CmmnImportDialog = ({ open, handleClose }) => {
     }
   }
 
+  const handleDiagramSelected = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    setDiagramName(file.name)
+    setDiagramSvg(await file.text())
+    setDiagramWarning(null)
+  }
+
   const handleImport = async () => {
     setBusy(true)
     setError(null)
 
     try {
-      await CmmnImportService.import(keycloak, cmmnXml, { dryRun: false })
+      const result = await CmmnImportService.import(keycloak, cmmnXml, {
+        dryRun: false,
+      })
+
+      // Attached separately, and deliberately not fatal: the case type is already
+      // created and working at this point, so a rejected diagram is worth a note
+      // rather than an error that suggests the import failed.
+      if (diagramSvg) {
+        try {
+          await CmmnImportService.attachDiagram(
+            keycloak,
+            result.caseDefinition.id,
+            diagramSvg,
+          )
+        } catch (diagramError) {
+          setDiagramWarning(diagramError.message)
+        }
+      }
+
       setImported(true)
       MenuEventService.triggerMenuUpdate()
     } catch (err) {
@@ -127,9 +163,42 @@ export const CmmnImportDialog = ({ open, handleClose }) => {
             {t('pages.cmmnImport.hint')}
           </Typography>
 
+          <Box>
+            <Button variant='outlined' component='label' disabled={busy}>
+              {t('pages.cmmnImport.chooseDiagram')}
+              <input
+                type='file'
+                hidden
+                accept='.svg,image/svg+xml'
+                onChange={handleDiagramSelected}
+              />
+            </Button>
+            {diagramName && (
+              <Chip
+                label={diagramName}
+                size='small'
+                sx={{ ml: 1 }}
+                variant='outlined'
+              />
+            )}
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{ display: 'block', mt: 0.5 }}
+            >
+              {t('pages.cmmnImport.diagramHint')}
+            </Typography>
+          </Box>
+
           {busy && <LinearProgress />}
 
           {error && <Alert severity='error'>{error}</Alert>}
+
+          {imported && diagramWarning && (
+            <Alert severity='warning'>
+              {t('pages.cmmnImport.diagramRejected')} {diagramWarning}
+            </Alert>
+          )}
 
           {imported && (
             <Alert severity='success'>

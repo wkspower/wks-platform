@@ -44,6 +44,10 @@
       "description": "Document requirements for this case type: the documents a case of this type is expected to hold. Drives the case Documents checklist and completeness. Absent/empty means no declared requirements (cases fall back to free-form attachments).",
       "items": { "$ref": "#/$defs/documentRequirement" }
     },
+    "sourceDiagram": {
+      "type": "string",
+      "description": "The diagram this case type was modelled as, as SVG markup. Display only: the case shows the model it came from, with the current stage and the milestones reached marked on it (stages and milestones carry the sourceElementId of the element they were generated from). Attached by an importer rather than authored; absent for hand-built case types. Untrusted markup — sanitise before rendering. Part of the WKS Case Configuration Standard since schema 2.3."
+    },
     "bpmEngineId": {
       "type": "string",
       "deprecated": true,
@@ -57,8 +61,8 @@
     "schemaVersion": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+$",
-      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline. Current: 2.2 (2.0 removed kanbanConfig — board rendering derives from stages, see board-config.schema.json; 2.1 adds requiredDocuments; 2.2 adds per-stage milestones).",
-      "examples": ["2.2"]
+      "description": "Version of the WKS Case Configuration Standard this document conforms to. Absent/null is treated as the 1.0 pre-versioning baseline. Current: 2.3 (2.0 removed kanbanConfig — board rendering derives from stages, see board-config.schema.json; 2.1 adds requiredDocuments; 2.2 adds per-stage milestones; 2.3 adds sourceDiagram).",
+      "examples": ["2.3"]
     },
     "documentRequirement": {
       "type": "object",
@@ -101,6 +105,10 @@
         "id": { "type": "string", "description": "Stage identifier (string, typically the ordinal as text)." },
         "index": { "type": "integer", "minimum": 0, "description": "Zero-based ordering index." },
         "name": { "type": "string", "description": "Display name of the stage." },
+        "sourceElementId": {
+          "type": "string",
+          "description": "Optional id of the element this stage was generated from in an imported source model (e.g. a CMMN Stage's planItem id). Enables marking the stage on the original diagram; absent for a hand-authored stage, or one with no single source shape."
+        },
         "processesDefinitions": {
           "type": "array",
           "description": "BPMN processes bound to this stage (manually or auto-started).",
