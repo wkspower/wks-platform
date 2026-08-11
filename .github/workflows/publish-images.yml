@@ -101,7 +101,7 @@ jobs:
       # needs Node.
       - name: Set up Node
         if: matrix.portal
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
 
@@ -126,7 +126,7 @@ jobs:
           yarn --cwd apps/react/case-portal build
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v4.4.0
+        uses: docker/login-action@v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
