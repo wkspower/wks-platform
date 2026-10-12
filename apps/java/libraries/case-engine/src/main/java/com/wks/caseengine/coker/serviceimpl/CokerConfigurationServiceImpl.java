@@ -542,27 +542,27 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
             for (CokerConfigurationFilterDto dto : dtoList) {
                 Row row = sheet.createRow(currentRow++);
 
-                // Col 0 – Particulars (displayName)
+                // Col 0 Â– Particulars (displayName)
                 Cell particularsCell = row.createCell(0);
                 particularsCell.setCellValue(dto.getDisplayName() != null ? dto.getDisplayName() : "");
                 particularsCell.setCellStyle(Utility.createBorderedStyle(workbook));
 
-                // Col 1 – UOM
+                // Col 1 Â– UOM
                 Cell uomCell = row.createCell(1);
                 uomCell.setCellValue(dto.getUOM() != null ? dto.getUOM() : "");
                 uomCell.setCellStyle(Utility.createBorderedStyle(workbook));
 
-                // Col 2 – Value
+                // Col 2 Â– Value
                 Cell valueCell = row.createCell(2);
                 valueCell.setCellValue(dto.getValue() != null ? dto.getValue() : "");
                 valueCell.setCellStyle(Utility.createBorderedStyle(workbook));
 
-                // Col 3 – Remark (wrapped text)
+                // Col 3 Â– Remark (wrapped text)
                 Cell remarkCell = row.createCell(3);
                 remarkCell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
                 remarkCell.setCellStyle(wrapStyle);
 
-                // Col 4 – NormParameterFKId (hidden, required by import)
+                // Col 4 Â– NormParameterFKId (hidden, required by import)
                 Cell idCell = row.createCell(4);
                 idCell.setCellValue(dto.getNormParameterFKId() != null ? dto.getNormParameterFKId() : "");
                 idCell.setCellStyle(Utility.createBorderedStyle(workbook));
@@ -581,7 +581,7 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
                 row.setHeight((short) -1);
             }
 
-            // Dynamic column widths – fixed larger width for Remark(3), auto-size for others
+            // Dynamic column widths Â– fixed larger width for Remark(3), auto-size for others
             int totalCols = isAfterSave ? 7 : 5;
             for (int col = 0; col < totalCols; col++) {
                 if (col == 3) {
@@ -605,7 +605,7 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
         }
     }
 
-    // --- Configuration Filter Import – Excel Reader -------------------------------
+    // --- Configuration Filter Import Â– Excel Reader -------------------------------
 
     private List<CokerConfigurationFilterDto> readConfigurationFilterExcel(InputStream inputStream) {
         List<CokerConfigurationFilterDto> resultList = new ArrayList<>();
@@ -637,35 +637,35 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
                 CokerConfigurationFilterDto dto = new CokerConfigurationFilterDto();
 
                 try {
-                    // Col 0 – Particulars (displayName)
+                    // Col 0 Â– Particulars (displayName)
                     Cell particularsCell = row.getCell(0);
                     if (particularsCell != null) {
                         particularsCell.setCellType(CellType.STRING);
                         dto.setDisplayName(particularsCell.getStringCellValue().trim());
                     }
 
-                    // Col 1 – UOM
+                    // Col 1 Â– UOM
                     Cell uomCell = row.getCell(1);
                     if (uomCell != null) {
                         uomCell.setCellType(CellType.STRING);
                         dto.setUOM(uomCell.getStringCellValue().trim());
                     }
 
-                    // Col 2 – Value
+                    // Col 2 Â– Value
                     Cell valueCell = row.getCell(2);
                     if (valueCell != null) {
                         valueCell.setCellType(CellType.STRING);
                         dto.setValue(valueCell.getStringCellValue().trim());
                     }
 
-                    // Col 3 – Remark
+                    // Col 3 Â– Remark
                     Cell remarkCell = row.getCell(3);
                     if (remarkCell != null) {
                         remarkCell.setCellType(CellType.STRING);
                         dto.setRemarks(remarkCell.getStringCellValue().trim());
                     }
 
-                    // Col 4 – NormParameterFKId (hidden; required for save)
+                    // Col 4 Â– NormParameterFKId (hidden; required for save)
                     Cell idCell = row.getCell(4);
                     if (idCell != null) {
                         idCell.setCellType(CellType.STRING);
@@ -687,7 +687,7 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
         return resultList;
     }
 
-    // --- Configuration Filter Import – API ---------------------------------------
+    // --- Configuration Filter Import Â– API ---------------------------------------
 
     @Override
     @Transactional
