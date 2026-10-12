@@ -24,9 +24,8 @@ function buildPlantIdsParam(plantIds) {
 }
 
 // ===================== || INTERSITE STEAM TRANSFER GET || ===================== //
-async function getIntersiteSteamTransfer(keycloak, plantIds, financialYear) {
-  const queryParams = buildPlantIdsParam(plantIds)
-  const url = `${Config.CaseEngineUrl}/task/jmd/intersite-steam-transfer?plantIds=${queryParams}&financialYear=${financialYear}`
+async function getIntersiteSteamTransfer(keycloak, financialYear) {
+  const url = `${Config.CaseEngineUrl}/task/jmd/intersite-steam-transfer?financialYear=${financialYear}`
   const headers = buildHeaders(keycloak)
   try {
     const resp = await fetch(url, { method: 'GET', headers })

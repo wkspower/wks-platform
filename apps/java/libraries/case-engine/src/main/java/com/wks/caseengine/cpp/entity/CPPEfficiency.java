@@ -36,8 +36,30 @@ public class CPPEfficiency {
     @Column(name = "UOM", length = 50)
     private String uom;
 
-    @Column(name = "Value")
-    private Double value;
+    @Column(name = "Apr")
+    private Double apr;
+    @Column(name = "May")
+    private Double may;
+    @Column(name = "Jun")
+    private Double jun;
+    @Column(name = "Jul")
+    private Double jul;
+    @Column(name = "Aug")
+    private Double aug;
+    @Column(name = "Sep")
+    private Double sep;
+    @Column(name = "Oct")
+    private Double oct;
+    @Column(name = "Nov")
+    private Double nov;
+    @Column(name = "Dec")
+    private Double dec;
+    @Column(name = "Jan")
+    private Double jan;
+    @Column(name = "Feb")
+    private Double feb;
+    @Column(name = "Mar")
+    private Double mar;
 
     @Column(name = "Remarks", length = 500)
     private String remarks;

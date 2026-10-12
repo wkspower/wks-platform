@@ -185,7 +185,7 @@ export const DynamicRowCellEditor = (props) => {
       if (/^[+/-]+\s*\d+(?:\.\d+)?\s*%?$/.test(String(dataItem?.[field] || ''))) {
         return <FormulaTextEditor {...props} />
       }
-      return <TextCellEditorUpdated {...props} />
+      return <NoSpinnerNumericEditor {...props} />
 
     case 'text':
       return <TextCellEditorUpdated {...props} />

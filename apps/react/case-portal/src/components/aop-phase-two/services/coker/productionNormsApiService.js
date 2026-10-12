@@ -31,6 +31,12 @@ export const ProductionNormsApiService = {
   // Generic Import/Export helpers
   saveExcelData,
   exportExcelData,
+
+  // Data Filters
+  getDataFiltersData,
+  saveDataFiltersData,
+  importDataFiltersExcel,
+  exportDataFiltersExcel
 }
 
 // ========================|| Configuration APIs ||=====================================//
@@ -332,12 +338,12 @@ async function importConstantsExcel(
  * @param {string} year - AOP Year
  * @returns {Promise} Export response
  */
-async function exportConstantsExcel(keycloak, plantId, year) {
+async function exportConstantsExcel(keycloak, plantId, year, fileName) {
   return exportExcelData(
     keycloak,
     'vgoht/norms-basis/constant/export',
     { year: year, plantFKId: plantId },
-    `VGOHT_Production_Norms_Constants_${year}.xlsx`,
+    fileName || `Production_Norms_Constants_${year}.xlsx`,
   )
 }
 
@@ -536,4 +542,104 @@ async function calculateHistoricalMonths(keycloak, plantId, aopYear) {
     console.log(e)
     return await Promise.reject(e)
   }
+}
+// ========================|| Data Filters APIs ||=====================================//
+/**
+ * Get Production Norms Data Filters data
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Data Filters data
+ */
+async function getDataFiltersData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-filter?aopYear=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+/**
+ * Save Production Norms Data Filters data
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} year - AOP Year
+ * @param {string} plantId - Plant ID
+ * @param {Array} payload - Data to save
+ * @returns {Promise} Save response
+ */
+async function saveDataFiltersData(
+  keycloak,
+  year,
+  plantId,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-filter?aopYear=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+/**
+ * Import Data Filters Excel file
+ * @param {File} file - Excel file
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Import response
+ */
+async function importDataFiltersExcel(
+  file,
+  keycloak,
+  plantId,
+  year
+) {
+  return saveExcelData(file, keycloak, 'configuration-filter-import', {
+    year: year,
+    plantId: plantId
+  })
+}
+
+/**
+ * Export Data Filters Excel file
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Export response
+ */
+async function exportDataFiltersExcel(keycloak, plantId, year, fileName) {
+  return exportExcelData(
+    keycloak,
+    'configuration-filter-export',
+    { year: year, plantFKId: plantId },
+    fileName || `Production_Norms_DataFilters_${year}.xlsx`,
+  )
 }

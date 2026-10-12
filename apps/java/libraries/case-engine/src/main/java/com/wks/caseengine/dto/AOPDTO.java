@@ -32,6 +32,7 @@ public class AOPDTO {
     private Double oct;
     private Double nov;
     private Double dec;
+    private String uom;
     private String aopYear;
     private String plantFKId;
     private Double avgTPH;

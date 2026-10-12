@@ -20,18 +20,18 @@ const COLUMNS = [
 const FILTER_CONFIG = [
   { id: 1, displayName: 'Sulphur Production', uom: '', targetValue: 'PIMS Sulphur Production (auto fetch from PIMS throughput tab)', range: '+/- 5%', selection: false, remarks: '', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['targetValue'], type: 'formula-text' },
   { id: 2, displayName: 'AGR C003 Inline/Bypass', uom: '', targetValue: 'Bypass', range: '+/-5%', selection: false, remarks: '', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'dropdown', options: ['Inline', 'Bypass'] },
-  { id: 3, displayName: 'AGR C003 Inline (G330PI400340 A/B/C)', uom: 'kg/cm2g', targetValue: '1.2', range: '', selection: false, remarks: 'Less than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text', hideCheckbox: true },
-  { id: 4, displayName: 'AGR C003 Inline ( G330FIC400305)', uom: '%', targetValue: '10', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text', hideCheckbox: true },
-  { id: 5, displayName: 'AGR C003 Bypass (G330PI400340 A/B/C)', uom: 'kg/cm2g', targetValue: '1.6', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text', hideCheckbox: true },
-  { id: 6, displayName: 'AGR C003 Bypass (G330FIC400305)', uom: '%', targetValue: '2', range: '', selection: false, remarks: 'Less than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text', hideCheckbox: true },
+  { id: 3, displayName: 'AGR C003 Inline (G330PI400340 A/B/C)', uom: 'kg/cm2g', targetValue: '1.2', range: '', selection: false, remarks: 'Less than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1', hideCheckbox: true },
+  { id: 4, displayName: 'AGR C003 Inline ( G330FIC400305)', uom: '%', targetValue: '10', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1', hideCheckbox: true },
+  { id: 5, displayName: 'AGR C003 Bypass (G330PI400340 A/B/C)', uom: 'kg/cm2g', targetValue: '1.6', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1', hideCheckbox: true },
+  { id: 6, displayName: 'AGR C003 Bypass (G330FIC400305)', uom: '%', targetValue: '2', range: '', selection: false, remarks: 'Less than target value', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1', hideCheckbox: true },
   { id: 7, displayName: 'J1 Acid Gas Flow', uom: 'Nm3/Hr', targetValue: 'Manual input', range: '+/- 500', selection: false, remarks: '', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: [], type: 'formula-text' },
   { id: 8, displayName: 'Average J3 Acid Gas H2S Concentration', uom: '%', targetValue: 'Manual input', range: '+/- 2%', selection: false, remarks: '', utilities: 'Fuel, HP Stam, LP Steam, Oxygen, Power, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: [], type: 'formula-text' },
-  { id: 9, displayName: 'Incinerator Temperature (G360TIC000157)', uom: 'Deg C', targetValue: '740', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text' },
-  { id: 10, displayName: 'Incinerator Temperature (G361TIC000157)', uom: 'Deg C', targetValue: '740', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'text' },
+  { id: 9, displayName: 'Incinerator Temperature (G360TIC000157)', uom: 'Deg C', targetValue: '740', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1' },
+  { id: 10, displayName: 'Incinerator Temperature (G361TIC000157)', uom: 'Deg C', targetValue: '740', range: '', selection: false, remarks: 'more than target value', utilities: 'Fuel, HP Stam, LP Steam, Return Steam Condensate, BFW', isEditable: true, nonEditableFields: ['range'], type: 'number1' },
   { id: 11, displayName: 'Average O2 Enrichment', uom: '%', targetValue: 'Manual input', range: '+/- 2%', selection: false, remarks: '', utilities: 'Oxygen, Power', isEditable: true, nonEditableFields: [], type: 'formula-text' },
-  { id: 12, displayName: 'SWS-1 Sour Water Processing Rate', uom: 'M3/Hr', targetValue: '200', range: '', selection: false, remarks: 'More than target value', utilities: 'LP Steam & Return Steam Condensate', isEditable: true, nonEditableFields: ['range'], type: 'text' },
-  { id: 13, displayName: 'SRU-1 Sulphur production (GSR1PR001)', uom: 'TPD', targetValue: '50', range: '', selection: false, remarks: 'More than target value', utilities: 'LLP N2, LP N2, Instrument Air, DM Water, Utility Water, Plant Air, caustic, CHEM Ammonia, Chem Maxtreat 3223 SJ', isEditable: true, nonEditableFields: ['range'], type: 'text' },
-  { id: 14, displayName: 'SRU-2 Sulphur production (GSR2PR001)', uom: 'TPD', targetValue: '50', range: '', selection: false, remarks: 'More than target value', utilities: 'LLP N2, LP N2, Instrument Air, DM Water, Utility Water, Plant Air, caustic, CHEM Ammonia, Chem Maxtreat 3223 SJ', isEditable: true, nonEditableFields: ['range'], type: 'text' }
+  { id: 12, displayName: 'SWS-1 Sour Water Processing Rate', uom: 'M3/Hr', targetValue: '200', range: '', selection: false, remarks: 'More than target value', utilities: 'LP Steam & Return Steam Condensate', isEditable: true, nonEditableFields: ['range'], type: 'number1' },
+  { id: 13, displayName: 'SRU-1 Sulphur production (GSR1PR001)', uom: 'TPD', targetValue: '50', range: '', selection: false, remarks: 'More than target value', utilities: 'LLP N2, LP N2, Instrument Air, DM Water, Utility Water, Plant Air, caustic, CHEM Ammonia, Chem Maxtreat 3223 SJ', isEditable: true, nonEditableFields: ['range'], type: 'number1' },
+  { id: 14, displayName: 'SRU-2 Sulphur production (GSR2PR001)', uom: 'TPD', targetValue: '50', range: '', selection: false, remarks: 'More than target value', utilities: 'LLP N2, LP N2, Instrument Air, DM Water, Utility Water, Plant Air, caustic, CHEM Ammonia, Chem Maxtreat 3223 SJ', isEditable: true, nonEditableFields: ['range'], type: 'number1' }
 ]
 
 const PERMISSIONS = {
@@ -94,7 +94,8 @@ const Configuration = ({ startDate, endDate, refreshData }) => {
           ...configItem, ...apiItem,
           isEditable: apiItem.isEditable ?? configItem.isEditable ?? true,
           nonEditableFields: configItem.nonEditableFields || [],
-          type: configItem.type || 'text',
+          type: configItem.type || 'number1',
+          dataType: configItem.type || 'number1',
           options: configItem.options || []
         }
       }) : FILTER_CONFIG
@@ -110,7 +111,7 @@ const Configuration = ({ startDate, endDate, refreshData }) => {
       let formattedData = res.map((item, index) => {
         const config = parseConfig(item.config)
         const mappingKeys = config?.valueMapping ? Object.keys(config.valueMapping) : []
-        const type = item.type || (mappingKeys.length ? 'dropdown' : undefined)
+        const type = item.dataType || (mappingKeys.length ? 'dropdown' : undefined)
         
         return {
           ...item,
@@ -119,7 +120,7 @@ const Configuration = ({ startDate, endDate, refreshData }) => {
           remarks: item.remarks || '',
           id: item.id || index + 1,
           attributeValue: ['date', 'datetime'].includes(type) ? formatDate(item.attributeValue) : item.attributeValue,
-          allowNegative: item.allowNegative || item.name === 'Additional TSRF',
+          allowNegative: item.allowNegative,
           selection: item.selection?.toLowerCase() === 'true' ? true : false
         }
       })

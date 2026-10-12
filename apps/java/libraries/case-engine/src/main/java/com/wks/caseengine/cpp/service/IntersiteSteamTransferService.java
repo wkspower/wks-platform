@@ -9,9 +9,7 @@ import java.util.UUID;
 
 public interface IntersiteSteamTransferService {
 
-    AOPMessageVM getIntersiteSteamTransfer(
-            List<UUID> plantIds,
-            String financialYear);
+    AOPMessageVM getIntersiteSteamTransfer(String financialYear);
 
     AOPMessageVM saveIntersiteSteamTransfer(
             List<UUID> plantIds,

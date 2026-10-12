@@ -140,6 +140,8 @@ public class AOPServiceImpl implements AOPService {
 		    boolean pvc= vertical.getName().equalsIgnoreCase("PVC") && (site.getName().equalsIgnoreCase("VMD") || site.getName().equalsIgnoreCase("DMD"));
 			boolean staple= vertical.getName().equalsIgnoreCase("Staple");
 			boolean filament= vertical.getName().equalsIgnoreCase("Filament");
+			boolean aromaticsDtaPlatformer = vertical.getName().equalsIgnoreCase("AROMATICS") && site.getName().equalsIgnoreCase("DTA") && plant.getName().equalsIgnoreCase("PLAT");
+
 			if(vertical.getName().equalsIgnoreCase("AROMATICS")) {
 				String procedureName=vertical.getName()+"_"+site.getName()+"_"+"GetAOP";
 				obj = getData(year,plant.getId(),site.getId(),vertical.getId(),procedureName);
@@ -180,6 +182,10 @@ public class AOPServiceImpl implements AOPService {
 				aopDTO.setDisplayOrder(row[20] != null ? Integer.valueOf(row[20].toString()) : null);
 				aopDTO.setIsEditable(row[21] != null ? Boolean.valueOf(row[21].toString()) : null);
 				aopDTO.setIsVisible(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
+
+				if(aromaticsDtaPlatformer) { 
+					aopDTO.setUom(row[25] != null ? row[25].toString() : null);
+				}
 
 				aOPDTOList.add(aopDTO);
 			}

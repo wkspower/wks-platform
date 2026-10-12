@@ -5,6 +5,10 @@ import { useSession } from 'SessionStoreContext'
 import { EfficiencyAndFuelRatioAPIService } from 'components/aop-phase-two/services/cpp/jmd/efficiencyAndFuelRatioApiService'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import { downloadBase64Excel } from 'components/aop-phase-two/common/utilities/downloadBase64Excel'
+import { generateExcelName } from 'components/aop-phase-two/common/utilities/excelNameUtil'
+import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import { useDebounce } from 'hooks/useDebounce'
 
 const Efficiency = () => {
@@ -27,6 +31,8 @@ const Efficiency = () => {
     [plantObject, jmdSelectedPlants, siteObject],
   )
 
+  const EXCEL_NAME = generateExcelName(dataGridStore, 'Efficiency')
+
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -38,8 +44,27 @@ const Efficiency = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
 
-  const columns = [
+  const headerMap = useMemo(() => generateHeaderNames(AOP_YEAR), [AOP_YEAR])
+
+  // Fiscal-year month order: Apr → Mar
+  const MONTH_TO_INDEX = {
+    apr: 4,
+    may: 5,
+    jun: 6,
+    jul: 7,
+    aug: 8,
+    sep: 9,
+    oct: 10,
+    nov: 11,
+    dec: 12,
+    jan: 1,
+    feb: 2,
+    mar: 3,
+  }
+
+  const baseColumns = [
     {
       field: 'assetName',
       title: 'Asset Name',
@@ -62,22 +87,49 @@ const Efficiency = () => {
       editable: false,
       minWidth: 120,
     },
-    {
-      field: 'value',
-      title: 'Value',
-      type: 'number1',
-      editable: true,
-      minWidth: 120,
-    },
-    {
-      field: 'remarks',
-      title: 'Remark',
-      widthT: 250,
-      type: 'textarea',
-      editable: true,
-      minWidth: 250,
-    },
   ]
+
+  // Month columns (Apr → Mar) — field names match the DTO month fields
+  const monthColumns = useMemo(
+    () =>
+      [
+        'apr',
+        'may',
+        'jun',
+        'jul',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'mar',
+      ].map((mon) => ({
+        field: mon,
+        title: headerMap[MONTH_TO_INDEX[mon]],
+        type: 'number1',
+        editable: true,
+        minWidth: 120,
+      })),
+    [headerMap],
+  )
+
+  const columns = useMemo(
+    () => [
+      ...baseColumns,
+      ...monthColumns,
+      {
+        field: 'remarks',
+        title: 'Remark',
+        widthT: 250,
+        type: 'textarea',
+        editable: true,
+        minWidth: 250,
+      },
+    ],
+    [monthColumns],
+  )
 
   const fetchData = useCallback(async () => {
     if (!PLANT_ID_LIST.length || !AOP_YEAR) return
@@ -103,6 +155,7 @@ const Efficiency = () => {
         remarks: row.remarks || '',
       }))
       setRows(rowsWithId)
+      setOriginalRows(rowsWithId)
     } catch (error) {
       console.error('Error fetching efficiency data:', error)
       setRows([])
@@ -136,6 +189,9 @@ const Efficiency = () => {
     allAction: true,
     showTitle: true,
     titleName: 'Efficiency',
+    showImport: true,
+    showExport: true,
+    ExcelName: EXCEL_NAME,
   }
 
   const saveChanges = async () => {
@@ -157,6 +213,39 @@ const Efficiency = () => {
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Validation: if any month value is updated, remarks must be filled
+    // and different from the original remarks
+    const fieldsToCheck = [
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'assetName',
+    )
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return
@@ -204,6 +293,97 @@ const Efficiency = () => {
     setRemarkDialogOpen(true)
   }
 
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await EfficiencyAndFuelRatioAPIService.importEfficiency(
+        file,
+        keycloak,
+        PLANT_ID_LIST,
+        AOP_YEAR,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        await fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        // Handle error response with Excel file download (partial save)
+        try {
+          downloadBase64Excel(
+            response.data,
+            `Efficiency_Errors_${new Date().getTime()}.xlsx`,
+          )
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message || 'Partial data saved. Error file downloaded.',
+            severity: 'warning',
+          })
+          await fetchData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to import Excel file.',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+    setLoading(true)
+
+    try {
+      await EfficiencyAndFuelRatioAPIService.exportEfficiency(
+        keycloak,
+        PLANT_ID_LIST,
+        AOP_YEAR,
+        EXCEL_NAME,
+      )
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting efficiency data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <Box>
       <LoaderBackdrop open={!!loading} />
@@ -223,6 +403,8 @@ const Efficiency = () => {
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         groupBy={'type'}
         snackbarOpen={snackbarOpen}

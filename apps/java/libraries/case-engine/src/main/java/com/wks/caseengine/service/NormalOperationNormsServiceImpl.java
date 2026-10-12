@@ -3424,10 +3424,19 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	public AOPMessageVM importExcelSAP(String year, UUID plantFKId, String gradeId, MultipartFile file, String mode) {
 		// TODO Auto-generated method stub
 		try {
+
+			Plants plant = plantsRepository.findById(plantFKId).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+
+			boolean merox = vertical.getName().equalsIgnoreCase("MEROX");
 			
 			List<MCUNormsValueDTO> data = null;
-			
-			data = readConfigurationsSAP(file.getInputStream(), plantFKId, year);
+
+				if (merox) {
+				      data = readConfigurationsSAPMerox(file.getInputStream(), plantFKId, year);
+					} else {
+							data = readConfigurationsSAP(file.getInputStream(), plantFKId, year);
+					}
 			List<MCUNormsValueDTO> failedRecords = saveNormalOperationNormsData(data, plantFKId, year, gradeId, true);
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -4060,6 +4069,60 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						dto.setSaveStatus("Failed");
 					}
 
+				configList.add(dto);
+			}
+		}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+		return configList;
+	}
+
+
+	public List<MCUNormsValueDTO> readConfigurationsSAPMerox(InputStream inputStream, UUID plantFKId, String year) {
+		List<MCUNormsValueDTO> configList = new ArrayList<>();
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
+				Sheet sheet = workbook.getSheetAt(sheetIndex);
+				Iterator<Row> rowIterator = sheet.iterator();
+
+				if (rowIterator.hasNext())
+					rowIterator.next(); // skip header row
+
+				while (rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					MCUNormsValueDTO dto = new MCUNormsValueDTO();
+
+					try {
+						dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+						dto.setSapCode(getStringCellValue(row.getCell(1), dto));
+						dto.setProductName(getStringCellValue(row.getCell(2), dto));
+						dto.setUOM(getStringCellValue(row.getCell(3), dto));
+						// Col 4 is Last FY — read-only reference data, intentionally skipped
+						dto.setApril(getNumericCellValue(row.getCell(5), dto));
+						dto.setMay(getNumericCellValue(row.getCell(6), dto));
+						dto.setJune(getNumericCellValue(row.getCell(7), dto));
+						dto.setJuly(getNumericCellValue(row.getCell(8), dto));
+						dto.setAugust(getNumericCellValue(row.getCell(9), dto));
+						dto.setSeptember(getNumericCellValue(row.getCell(10), dto));
+						dto.setOctober(getNumericCellValue(row.getCell(11), dto));
+						dto.setNovember(getNumericCellValue(row.getCell(12), dto));
+						dto.setDecember(getNumericCellValue(row.getCell(13), dto));
+						dto.setJanuary(getNumericCellValue(row.getCell(14), dto));
+						dto.setFebruary(getNumericCellValue(row.getCell(15), dto));
+						dto.setMarch(getNumericCellValue(row.getCell(16), dto));
+						dto.setFinancialYear(year);
+						dto.setRemarks(getStringCellValue(row.getCell(17), dto));
+						dto.setId(getStringCellValue(row.getCell(18), dto));
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						dto.setErrDescription(e.getMessage());
+						dto.setSaveStatus("Failed");
+					}
+
 					configList.add(dto);
 				}
 			}
@@ -4067,8 +4130,21 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
+
 		return configList;
+	}
+
+
+	private String getPreviousFinancialYear(String year) {
+		try {
+			String[] parts = year.split("-");
+			int startYear = Integer.parseInt(parts[0]);
+			int prevStartYear = startYear - 1;
+			String prevEndYearStr = String.format("%02d", startYear % 100);
+			return prevStartYear + "-" + prevEndYearStr;
+		} catch (Exception e) {
+			return year; // fallback to current year if parsing fails
+		}
 	}
 
 	public List<MCUNormsValueDTO> readSteadyStateChemical(InputStream inputStream, UUID plantFKId, String year) {
@@ -4795,6 +4871,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			boolean polyester = vertical.getName().equalsIgnoreCase("Filament") || vertical.getName().equalsIgnoreCase("Staple");
+			boolean merox = vertical.getName().equalsIgnoreCase("MEROX");
 			if (!isAfterSave) {
 				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
 				dtoList = (List<MCUNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
@@ -4844,6 +4921,16 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		remarksUnlockedStyle.setBorderLeft(BorderStyle.THIN);
 		remarksUnlockedStyle.setBorderRight(BorderStyle.THIN);
 		remarksUnlockedStyle.setWrapText(true);
+
+		CellStyle lastFyLockedStyle = workbook.createCellStyle();
+		lastFyLockedStyle.setLocked(true);
+		lastFyLockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+		lastFyLockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		lastFyLockedStyle.setBorderTop(BorderStyle.THIN);
+		lastFyLockedStyle.setBorderBottom(BorderStyle.THIN);
+		lastFyLockedStyle.setBorderLeft(BorderStyle.THIN);
+		lastFyLockedStyle.setBorderRight(BorderStyle.THIN);
+
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
 				// if (isAfterSave) {
@@ -4852,6 +4939,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				list.add(dto.getSapCode());
 				list.add(dto.getProductName());
 				list.add(dto.getUOM());
+				if (merox) {
+					list.add(dto.getLastFy());
+				}
 				list.add(dto.getApril());
 				list.add(dto.getMay());
 				list.add(dto.getJune());
@@ -4883,6 +4973,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			} else {
 				innerHeaders.add("UOM");
 			}
+			if (merox) {
+				innerHeaders.add("Last FY " + getPreviousFinancialYear(year));
+			}
 			List<String> monthsList = getAcademicYearMonths(year);
 			innerHeaders.addAll(monthsList);
 			
@@ -4895,6 +4988,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 			int remarksColIndex = innerHeaders.indexOf("Remarks");
 			int idColIndex = innerHeaders.indexOf("Id");
+			int lastFyColIndex = merox ? innerHeaders.indexOf("Last FY " + getPreviousFinancialYear(year)) : -1;
 
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
@@ -4929,6 +5023,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					}
 					if (col == remarksColIndex) {
 						cell.setCellStyle(isRowEditable ? remarksUnlockedStyle : remarksLockedStyle);
+					} else if (lastFyColIndex >= 0 && col == lastFyColIndex) {
+						cell.setCellStyle(lastFyLockedStyle);
 					} else if (isRowEditable) {
 						cell.setCellStyle(unlockedStyle);
 					} else {
@@ -4938,7 +5034,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				}
 			}
 			
-				sheet.setColumnHidden(17, true);
+				sheet.setColumnHidden(idColIndex, true);
 
 			int totalCols = innerHeaders.size();
 			for (int col = 0; col < totalCols; col++) {

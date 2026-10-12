@@ -83,6 +83,70 @@ public interface IntersiteSteamTransferRepository
             @Param("plantIds") String plantIds,
             @Param("financialYear") String financialYear);
 
+    // ── GET (by financial year only — common for all plants) ───────────
+    @Query(value =
+        "SELECT " +
+        "    cist.Id AS id, " +
+        "    p.Name AS cppPlantName, " +
+        "    p.PlantCode AS cppPlantCode, " +
+        "    np.Name AS normParameterName, " +
+        "    np.SAPMaterialCode AS sapMaterialCode, " +
+        "    np.UOM AS uom, " +
+        "    sp.Name AS senderPlantName, " +
+        "    sp.PlantCode AS senderPlantCode, " +
+        "    sccm.CostCenterName AS senderCostCenterName, " +
+        "    sccm.CostCenterCode AS senderCostCenterCode, " +
+        "    rp.Name AS receiverPlantName, " +
+        "    rp.PlantCode AS receiverPlantCode, " +
+        "    rccm.CostCenterName AS receiverCostCenterName, " +
+        "    rccm.CostCenterCode AS receiverCostCenterCode, " +
+        "    cist.AOP_Year AS aopYear, " +
+        "    cist.Min_Apr AS minApr, " +
+        "    cist.Max_Apr AS maxApr, " +
+        "    cist.Min_May AS minMay, " +
+        "    cist.Max_May AS maxMay, " +
+        "    cist.Min_Jun AS minJun, " +
+        "    cist.Max_Jun AS maxJun, " +
+        "    cist.Min_Jul AS minJul, " +
+        "    cist.Max_Jul AS maxJul, " +
+        "    cist.Min_Aug AS minAug, " +
+        "    cist.Max_Aug AS maxAug, " +
+        "    cist.Min_Sep AS minSep, " +
+        "    cist.Max_Sep AS maxSep, " +
+        "    cist.Min_Oct AS minOct, " +
+        "    cist.Max_Oct AS maxOct, " +
+        "    cist.Min_Nov AS minNov, " +
+        "    cist.Max_Nov AS maxNov, " +
+        "    cist.Min_Dec AS minDec, " +
+        "    cist.Max_Dec AS maxDec, " +
+        "    cist.Min_Jan AS minJan, " +
+        "    cist.Max_Jan AS maxJan, " +
+        "    cist.Min_Feb AS minFeb, " +
+        "    cist.Max_Feb AS maxFeb, " +
+        "    cist.Min_Mar AS minMar, " +
+        "    cist.Max_Mar AS maxMar, " +
+        "    cist.Remarks AS remarks, " +
+        "    cist.CPPPlant_FK_Id AS cppPlantFkId, " +
+        "    cist.NormParameter_FK_Id AS normParameterFkId, " +
+        "    cist.SenderPlant_FK_Id AS senderPlantFkId, " +
+        "    cist.SenderCostCenter_FK_Id AS senderCostCenterFkId, " +
+        "    cist.ReceiverPlant_FK_Id AS receiverPlantFkId, " +
+        "    cist.ReceiverCostCenter_FK_Id AS receiverCostCenterFkId " +
+        "FROM dbo.CPP_IntersiteSteamTransfer AS cist " +
+        "LEFT JOIN dbo.Plants AS p ON p.Id = cist.CPPPlant_FK_Id " +
+        "LEFT JOIN dbo.NormParameters AS np ON np.Id = cist.NormParameter_FK_Id " +
+        "LEFT JOIN dbo.Plants AS sp ON sp.Id = cist.SenderPlant_FK_Id " +
+        "LEFT JOIN dbo.CPPCostCentersMaster AS sccm ON sccm.CostCenterId = cist.SenderCostCenter_FK_Id " +
+        "LEFT JOIN dbo.Plants AS rp ON rp.Id = cist.ReceiverPlant_FK_Id " +
+        "LEFT JOIN dbo.CPPCostCentersMaster AS rccm ON rccm.CostCenterId = cist.ReceiverCostCenter_FK_Id " +
+        "WHERE cist.AOP_Year = :financialYear",
+        nativeQuery = true)
+    List<IntersiteSteamTransferProjection> getIntersiteSteamTransferByYear(
+            @Param("financialYear") String financialYear);
+
+    // ── Carry-forward: find raw entities for a given AOP year ───────────
+    List<CPPIntersiteSteamTransfer> findByAopYear(String aopYear);
+
     // ── SAVE (update min/max month columns + remarks by Id) ─────────────
     @Modifying
     @Transactional

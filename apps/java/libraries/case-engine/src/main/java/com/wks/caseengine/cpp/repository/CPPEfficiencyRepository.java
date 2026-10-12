@@ -26,7 +26,9 @@ public interface CPPEfficiencyRepository extends JpaRepository<CPPEfficiency, UU
         "  Asset_FK_Id = :assetFkId, " +
         "  AssetName   = :assetName, " +
         "  UOM         = :uom, " +
-        "  [Value]     = :value, " +
+        "  Apr = :apr, May = :may, Jun = :jun, Jul = :jul, " +
+        "  Aug = :aug, Sep = :sep, Oct = :oct, Nov = :nov, " +
+        "  Dec = :dec, Jan = :jan, Feb = :feb, Mar = :mar, " +
         "  Remarks     = :remarks, " +
         "  UpdatedDate = GETDATE() " +
         "WHERE Id = :id",
@@ -36,6 +38,17 @@ public interface CPPEfficiencyRepository extends JpaRepository<CPPEfficiency, UU
             @Param("assetFkId") UUID assetFkId,
             @Param("assetName") String assetName,
             @Param("uom")       String uom,
-            @Param("value")     Double value,
+            @Param("apr")       Double apr,
+            @Param("may")       Double may,
+            @Param("jun")       Double jun,
+            @Param("jul")       Double jul,
+            @Param("aug")       Double aug,
+            @Param("sep")       Double sep,
+            @Param("oct")       Double oct,
+            @Param("nov")       Double nov,
+            @Param("dec")       Double dec,
+            @Param("jan")       Double jan,
+            @Param("feb")       Double feb,
+            @Param("mar")       Double mar,
             @Param("remarks")   String remarks);
 }

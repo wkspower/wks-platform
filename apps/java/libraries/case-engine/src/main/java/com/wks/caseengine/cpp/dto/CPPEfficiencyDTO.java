@@ -29,12 +29,37 @@ public class CPPEfficiencyDTO {
     @JsonProperty("uom")
     private String uom;
 
-    @JsonProperty("value")
-    private Double value;
+    @JsonProperty("apr")
+    private Double apr;
+    @JsonProperty("may")
+    private Double may;
+    @JsonProperty("jun")
+    private Double jun;
+    @JsonProperty("jul")
+    private Double jul;
+    @JsonProperty("aug")
+    private Double aug;
+    @JsonProperty("sep")
+    private Double sep;
+    @JsonProperty("oct")
+    private Double oct;
+    @JsonProperty("nov")
+    private Double nov;
+    @JsonProperty("dec")
+    private Double dec;
+    @JsonProperty("jan")
+    private Double jan;
+    @JsonProperty("feb")
+    private Double feb;
+    @JsonProperty("mar")
+    private Double mar;
 
     @JsonProperty("remarks")
     private String remarks;
 
     @JsonProperty("aopYear")
     private String aopYear;
+
+    @JsonProperty("rowHash")
+    private String rowHash;
 }

@@ -15,6 +15,7 @@ import Notification from 'components/aop-phase-two/common/utilities/Notification
 import ManualEntry from './ManualEntry'
 import HistoricalMonths from './HistoricalMonths'
 import JWAvgNorms from 'components/aop-phase-two/crude/production-norms-basis/JWAvgNorms'
+import DataFilters from './DataFilters'
 
 const ProductionNormsBasisCoker = () => {
   const keycloak = useSession()
@@ -223,6 +224,14 @@ const ProductionNormsBasisCoker = () => {
       case 'Historical Months':
         return (
           <HistoricalMonths
+            startDate={startDate}
+            endDate={endDate}
+            refreshData={refreshData}
+          />
+        )
+      case 'Data Filters':
+        return (
+          <DataFilters
             startDate={startDate}
             endDate={endDate}
             refreshData={refreshData}

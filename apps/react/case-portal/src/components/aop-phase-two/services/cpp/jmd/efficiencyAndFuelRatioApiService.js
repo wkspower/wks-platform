@@ -4,6 +4,8 @@ import { json } from 'services/request'
 export const EfficiencyAndFuelRatioAPIService = {
   getEfficiency,
   saveEfficiency,
+  exportEfficiency,
+  importEfficiency,
   getFuelRatio,
   saveFuelRatio,
 }
@@ -62,6 +64,67 @@ async function saveEfficiency(keycloak, plantIds, aopYear, payload) {
   } catch (e) {
     console.error('Error saving efficiency data:', e)
     return await Promise.reject(e)
+  }
+}
+
+// ===================== || EFFICIENCY EXPORT || ===================== //
+// GET /task/jmd/efficiency/export?plantIds=...&aopYear=...
+async function exportEfficiency(keycloak, plantIds, aopYear, fileName) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/efficiency/export?plantIds=${queryParams}&aopYear=${aopYear}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    const blob = await resp.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName || `Efficiency_${aopYear}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(downloadUrl)
+  } catch (e) {
+    console.error('Error exporting efficiency data:', e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || EFFICIENCY IMPORT || ===================== //
+// POST /task/jmd/efficiency/import?plantIds=...&aopYear=...
+async function importEfficiency(file, keycloak, plantIds, aopYear) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/efficiency/import?plantIds=${queryParams}&aopYear=${aopYear}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error importing efficiency Excel data:', e)
+    return Promise.reject(e)
   }
 }
 

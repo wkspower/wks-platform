@@ -43,34 +43,86 @@ public class IntersiteSteamTransferServiceImpl implements IntersiteSteamTransfer
     private IntersiteSteamTransferRepository repository;
 
     // ──────────────────────────────────────────────────────────────────────
-    //  GET
+    //  GET (by financial year only — common for all plants)
+    //  Includes carry-forward: if no data for the requested year, clone the
+    //  previous financial year's records into the requested year.
     // ──────────────────────────────────────────────────────────────────────
     @Override
-    public AOPMessageVM getIntersiteSteamTransfer(List<UUID> plantIds, String financialYear) {
-        logger.info("[GET] Fetching intersite steam transfer for plantIds: {}, financialYear: {}",
-                plantIds, financialYear);
+    public AOPMessageVM getIntersiteSteamTransfer(String financialYear) {
+        logger.info("[GET] Fetching intersite steam transfer for financialYear: {}", financialYear);
         AOPMessageVM vm = new AOPMessageVM();
 
         try {
-            if (plantIds == null || plantIds.isEmpty()) {
-                vm.setCode(400);
-                vm.setMessage("Plant IDs are required");
-                vm.setData(null);
-                return vm;
-            }
-
-            String plantIdsCsv = plantIds.stream()
-                    .map(UUID::toString)
-                    .collect(Collectors.joining(","));
-
             List<IntersiteSteamTransferProjection> projections =
-                    repository.getIntersiteSteamTransfer(plantIdsCsv, financialYear);
+                    repository.getIntersiteSteamTransferByYear(financialYear);
+            logger.info("[GET] Returning {} records for {}", projections.size(), financialYear);
+
+            // ── CARRY-FORWARD: clone from previous FY if requested FY is empty ──
+            if (projections.isEmpty()) {
+                logger.info("[GET] No records found for {}. Attempting carry-forward from previous financial year.", financialYear);
+                String previousYear = derivePreviousFinancialYear(financialYear);
+
+                if (previousYear != null) {
+                    List<CPPIntersiteSteamTransfer> prevRecords = repository.findByAopYear(previousYear);
+                    if (!prevRecords.isEmpty()) {
+                        logger.info("[GET] Carrying forward {} records from {} to {}", prevRecords.size(), previousYear, financialYear);
+                        List<CPPIntersiteSteamTransfer> clones = new ArrayList<>();
+                        for (CPPIntersiteSteamTransfer src : prevRecords) {
+                            CPPIntersiteSteamTransfer clone = new CPPIntersiteSteamTransfer();
+                            clone.setId(UUID.randomUUID());
+                            clone.setCppPlantFkId(src.getCppPlantFkId());
+                            clone.setNormParameterFkId(src.getNormParameterFkId());
+                            clone.setSenderPlantFkId(src.getSenderPlantFkId());
+                            clone.setSenderCostCenterFkId(src.getSenderCostCenterFkId());
+                            clone.setReceiverPlantFkId(src.getReceiverPlantFkId());
+                            clone.setReceiverCostCenterFkId(src.getReceiverCostCenterFkId());
+                            clone.setAopYear(financialYear);
+                            clone.setMinApr(src.getMinApr());
+                            clone.setMaxApr(src.getMaxApr());
+                            clone.setMinMay(src.getMinMay());
+                            clone.setMaxMay(src.getMaxMay());
+                            clone.setMinJun(src.getMinJun());
+                            clone.setMaxJun(src.getMaxJun());
+                            clone.setMinJul(src.getMinJul());
+                            clone.setMaxJul(src.getMaxJul());
+                            clone.setMinAug(src.getMinAug());
+                            clone.setMaxAug(src.getMaxAug());
+                            clone.setMinSep(src.getMinSep());
+                            clone.setMaxSep(src.getMaxSep());
+                            clone.setMinOct(src.getMinOct());
+                            clone.setMaxOct(src.getMaxOct());
+                            clone.setMinNov(src.getMinNov());
+                            clone.setMaxNov(src.getMaxNov());
+                            clone.setMinDec(src.getMinDec());
+                            clone.setMaxDec(src.getMaxDec());
+                            clone.setMinJan(src.getMinJan());
+                            clone.setMaxJan(src.getMaxJan());
+                            clone.setMinFeb(src.getMinFeb());
+                            clone.setMaxFeb(src.getMaxFeb());
+                            clone.setMinMar(src.getMinMar());
+                            clone.setMaxMar(src.getMaxMar());
+                            clone.setRemarks(src.getRemarks());
+                            clone.setCreatedDate(java.time.LocalDateTime.now());
+                            clone.setUpdatedDate(java.time.LocalDateTime.now());
+                            clones.add(clone);
+                        }
+                        repository.saveAll(clones);
+                        logger.info("[GET] Saved {} carry-forward records for {}", clones.size(), financialYear);
+
+                        // Re-query after carry-forward
+                        projections = repository.getIntersiteSteamTransferByYear(financialYear);
+                        logger.info("[GET] After carry-forward, re-query returned {} records for {}", projections.size(), financialYear);
+                    } else {
+                        logger.info("[GET] No records found in previous year {} either. Returning empty list.", previousYear);
+                    }
+                } else {
+                    logger.warn("[GET] Could not derive previous financial year from '{}'. Skipping carry-forward.", financialYear);
+                }
+            }
 
             List<IntersiteSteamTransferDto> dtoList = projections.stream()
                     .map(this::mapToDto)
                     .collect(Collectors.toList());
-
-            logger.info("[GET] Returning {} records", dtoList.size());
 
             // Wrap in a map with "list" key to match the frontend's res.data.list access pattern
             java.util.Map<String, Object> dataMap = new java.util.HashMap<>();
@@ -86,6 +138,26 @@ public class IntersiteSteamTransferServiceImpl implements IntersiteSteamTransfer
             vm.setData(null);
         }
         return vm;
+    }
+
+    /**
+     * Derives the previous financial year string.
+     * Expected format: "YYYY-YY" (e.g. "2026-27" → "2025-26", "2025-26" → "2024-25").
+     * Returns null if the format is unrecognised.
+     */
+    private String derivePreviousFinancialYear(String financialYear) {
+        try {
+            String[] parts = financialYear.split("-");
+            if (parts.length != 2) return null;
+            int startYear = Integer.parseInt(parts[0]);
+            int prevStart = startYear - 1;
+            int prevEnd = prevStart + 1;
+            String prevEndSuffix = String.format("%02d", prevEnd % 100);
+            return prevStart + "-" + prevEndSuffix;
+        } catch (Exception e) {
+            logger.warn("[GET] Could not parse financial year '{}': {}", financialYear, e.getMessage());
+            return null;
+        }
     }
 
     private IntersiteSteamTransferDto mapToDto(IntersiteSteamTransferProjection p) {
@@ -218,7 +290,7 @@ public class IntersiteSteamTransferServiceImpl implements IntersiteSteamTransfer
     public byte[] exportIntersiteSteamTransfer(List<UUID> plantIds, String financialYear) {
         logger.info("[Export] plantIds: {}, financialYear: {}", plantIds, financialYear);
         try {
-            AOPMessageVM response = getIntersiteSteamTransfer(plantIds, financialYear);
+            AOPMessageVM response = getIntersiteSteamTransfer(financialYear);
             @SuppressWarnings("unchecked")
             java.util.Map<String, Object> dataMap = (java.util.Map<String, Object>) response.getData();
             @SuppressWarnings("unchecked")

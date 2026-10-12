@@ -2,8 +2,11 @@ package com.wks.caseengine.coker.serviceimpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.LinkedHashMap;
@@ -11,9 +14,12 @@ import java.util.LinkedHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.coker.dto.CokerConfigurationDto;
+import com.wks.caseengine.coker.dto.CokerConfigurationFilterDto;
 import com.wks.caseengine.coker.service.CokerConfigurationService;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -22,7 +28,9 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.service.ConfigurationService;
+import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -48,6 +56,9 @@ public class CokerConfigurationServiceImpl implements CokerConfigurationService 
 
     @Autowired
     private ConfigurationService configurationService;
+
+    @Autowired
+    private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
     public AOPMessageVM getConfigurationData(String year, UUID plantFKId, String type, String version) {
         try {
@@ -368,4 +379,110 @@ public class CokerConfigurationServiceImpl implements CokerConfigurationService 
 			throw new RuntimeException("Failed to execute stored procedure", e);
 		}
 	}
+
+    @Override
+    public AOPMessageVM getConfigurationFilterData(String plantId, String aopYear) {
+        try {
+            Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+            Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+
+            String procedureName = vertical.getName() +  "_GetConfigurationData";
+
+            String sql = "EXEC [" + procedureName + "] ?, ?";
+
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, plantId, aopYear);
+
+            List<CokerConfigurationFilterDto> result = new ArrayList<>();
+            for (Map<String, Object> row : rows) {
+                CokerConfigurationFilterDto dto = new CokerConfigurationFilterDto();
+                dto.setNormParameterFKId(row.get("NormParameter_FK_Id") != null ? row.get("NormParameter_FK_Id").toString() : null);
+                dto.setDisplayName(row.get("DisplayName") != null ? row.get("DisplayName").toString() : "");
+                dto.setValue(row.get("value") != null ? row.get("value").toString() : "");
+                dto.setRemarks(row.get("remarks") != null ? row.get("remarks").toString() : "");
+                dto.setUOM(row.get("UOM") != null ? row.get("UOM").toString() : "");
+                dto.setNormParameterTypeDisplayName(row.get("NormParameterTypeDisplayName") != null ? row.get("NormParameterTypeDisplayName").toString() : "");
+                dto.setType(row.get("Type") != null ? row.get("Type").toString() : "");
+                result.add(dto);
+            }
+
+            AOPMessageVM response = new AOPMessageVM();
+            response.setCode(200);
+            response.setMessage("Data fetched successfully");
+            response.setData(result);
+            return response;
+
+        } catch (IllegalArgumentException e) {
+            throw new RestInvalidArgumentException("Invalid argument for configuration filter data", e);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Failed to fetch configuration filter data", ex);
+        }
+    }
+
+    @Override
+    @Transactional 
+    public List<CokerConfigurationFilterDto> saveConfigurationFilterData(String plantId, String aopYear, List<CokerConfigurationFilterDto> dtos) {
+
+        List<CokerConfigurationFilterDto> failedList = new ArrayList<>();
+
+        for(CokerConfigurationFilterDto dto : dtos) {
+		UUID normParameterFKId = UUID.fromString(dto.getNormParameterFKId());
+		String attributeValue = dto.getValue();
+		String remark = dto.getRemarks();
+
+	Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+			.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, 4, aopYear);
+
+	NormAttributeTransactions normAttributeTransactions;
+
+	if (existingRecord.isPresent()) {
+		normAttributeTransactions = existingRecord.get();
+		normAttributeTransactions.setModifiedOn(new Date());
+		String existingValue = normAttributeTransactions.getAttributeValue();
+		boolean isRemarkValidationPassed = isRemarkValidationPassed(attributeValue, existingValue, remark, normAttributeTransactions.getRemarks());
+		if(!isRemarkValidationPassed) { 
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please update remark");
+			failedList.add(dto);
+			continue;
+		}
+	} else {
+
+		normAttributeTransactions = new NormAttributeTransactions();
+		normAttributeTransactions.setCreatedOn(new Date());
+		normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+		normAttributeTransactions.setAopMonth(4);
+		normAttributeTransactions.setAuditYear(aopYear);
+	}
+
+	normAttributeTransactions
+			.setAttributeValue(attributeValue != null ? attributeValue : "0.0");
+	normAttributeTransactions.setRemarks(remark);
+	normAttributeTransactions.setUserName(Utility.getUserName());
+	normAttributeTransactionsRepository.save(normAttributeTransactions);
+
+}
+ 
+ return failedList;
+}
+
+private boolean isRemarkValidationPassed(String newValue, String existingValue, String newRemark, String existingRemark) {
+  
+	if(existingValue == null || newValue == null) {
+		return true;
+	}
+	// Check if the value has changed (null-safe)
+    boolean valueChanged = !Objects.equals(newValue, existingValue);
+    
+    if (valueChanged) {
+        // If the value changed, the remark must be updated (must not be null/empty and must differ from the existing remark)
+        boolean isRemarkUpdated = newRemark != null 
+                && !newRemark.trim().isEmpty() 
+                && !Objects.equals(newRemark, existingRemark);
+        return isRemarkUpdated;
+    }
+    
+   // return true if values not changed
+    return true;
+}
 }

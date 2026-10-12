@@ -1,15 +1,27 @@
 package com.wks.caseengine.cpp.serviceimpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.dto.CPPEfficiencyDTO;
 import com.wks.caseengine.cpp.dto.CPPFuelRatioDTO;
@@ -22,6 +34,11 @@ import com.wks.caseengine.cpp.repository.CPPFuelRatioRepository;
 import com.wks.caseengine.cpp.repository.CppSteamGenerationAssetRepository;
 import com.wks.caseengine.cpp.repository.PowerGenerationAssetRepository;
 import com.wks.caseengine.cpp.service.JMDEfficiencyAndFuelRatioService;
+import com.wks.caseengine.cpp.utility.ExcelCells;
+import com.wks.caseengine.cpp.utility.ExcelColumns;
+import com.wks.caseengine.cpp.utility.ExcelRows;
+import com.wks.caseengine.cpp.utility.ExcelStyles;
+import com.wks.caseengine.cpp.utility.FiscalYearMonths;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @Service
@@ -87,7 +104,18 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                 dto.setType(entity.getType());
                 dto.setIsActive(entity.getIsActive());
                 dto.setUom(entity.getUom());
-                dto.setValue(entity.getValue());
+                dto.setApr(entity.getApr());
+                dto.setMay(entity.getMay());
+                dto.setJun(entity.getJun());
+                dto.setJul(entity.getJul());
+                dto.setAug(entity.getAug());
+                dto.setSep(entity.getSep());
+                dto.setOct(entity.getOct());
+                dto.setNov(entity.getNov());
+                dto.setDec(entity.getDec());
+                dto.setJan(entity.getJan());
+                dto.setFeb(entity.getFeb());
+                dto.setMar(entity.getMar());
                 dto.setRemarks(entity.getRemarks());
                 dto.setAopYear(entity.getAopYear());
                 result.add(dto);
@@ -145,7 +173,18 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                         entity.setType(dto.getType());
                         entity.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
                         entity.setUom(dto.getUom());
-                        entity.setValue(dto.getValue());
+                        entity.setApr(dto.getApr());
+                        entity.setMay(dto.getMay());
+                        entity.setJun(dto.getJun());
+                        entity.setJul(dto.getJul());
+                        entity.setAug(dto.getAug());
+                        entity.setSep(dto.getSep());
+                        entity.setOct(dto.getOct());
+                        entity.setNov(dto.getNov());
+                        entity.setDec(dto.getDec());
+                        entity.setJan(dto.getJan());
+                        entity.setFeb(dto.getFeb());
+                        entity.setMar(dto.getMar());
                         entity.setRemarks(dto.getRemarks());
                         entity.setAopYear(dto.getAopYear() != null ? dto.getAopYear() : aopYear);
                         LocalDateTime now = LocalDateTime.now();
@@ -160,7 +199,18 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                                 dto.getAssetFkId(),
                                 dto.getAssetName(),
                                 dto.getUom(),
-                                dto.getValue(),
+                                dto.getApr(),
+                                dto.getMay(),
+                                dto.getJun(),
+                                dto.getJul(),
+                                dto.getAug(),
+                                dto.getSep(),
+                                dto.getOct(),
+                                dto.getNov(),
+                                dto.getDec(),
+                                dto.getJan(),
+                                dto.getFeb(),
+                                dto.getMar(),
                                 dto.getRemarks());
                         successCount++;
                     }
@@ -196,6 +246,402 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
         return vm;
     }
 
+    // ── Efficiency Export ──────────────────────────────────────────────────────
+
+    @Override
+    public byte[] exportEfficiency(List<UUID> plantIds, String aopYear) {
+        logger.info("[Efficiency] Export - plantIds: {}, aopYear: {}", plantIds, aopYear);
+        try {
+            AOPMessageVM response = getEfficiency(plantIds, aopYear);
+            @SuppressWarnings("unchecked")
+            List<CPPEfficiencyDTO> dtoList = (List<CPPEfficiencyDTO>) response.getData();
+            if (dtoList == null) {
+                dtoList = new ArrayList<>();
+            }
+
+            // Preserve order: assetName → type
+            dtoList.sort(Comparator
+                    .comparing((CPPEfficiencyDTO d) -> d.getAssetName() != null ? d.getAssetName() : "")
+                    .thenComparing(d -> d.getType() != null ? d.getType() : ""));
+
+            return buildEfficiencyExcel(dtoList, aopYear);
+        } catch (Exception e) {
+            logger.error("[Efficiency] Export error: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private byte[] buildEfficiencyExcel(List<CPPEfficiencyDTO> dtoList, String aopYear) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Efficiency");
+
+        CellStyle headerStyle = ExcelStyles.createHeaderStyle(workbook);
+        CellStyle dataStyle = ExcelStyles.createDataStyle(workbook);
+        CellStyle remarksStyle = ExcelStyles.createRemarksStyle(workbook);
+
+        String[] monthHeaders = FiscalYearMonths.getMonthHeaders(aopYear);
+
+        // Header row
+        List<String> headers = new ArrayList<>();
+        headers.add("Asset Name");
+        headers.add("Type");
+        headers.add("UOM");
+        for (String mh : monthHeaders) {
+            headers.add(mh);
+        }
+        headers.add("Remarks");
+        // Hidden columns
+        headers.add("id");
+        headers.add("_hash");
+
+        Row headerRow = sheet.createRow(0);
+        for (int c = 0; c < headers.size(); c++) {
+            ExcelCells.setString(headerRow.createCell(c), headers.get(c), headerStyle);
+        }
+
+        // Data rows
+        int rowNum = 1;
+        for (CPPEfficiencyDTO dto : dtoList) {
+            Row row = sheet.createRow(rowNum++);
+            int col = 0;
+
+            ExcelCells.setString(row.createCell(col++), dto.getAssetName(), dataStyle);
+            ExcelCells.setString(row.createCell(col++), dto.getType(), dataStyle);
+            ExcelCells.setString(row.createCell(col++), dto.getUom(), dataStyle);
+
+            // 12 months (Apr → Mar)
+            ExcelCells.setDouble(row.createCell(col++), dto.getApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getMar(), dataStyle);
+
+            ExcelCells.setString(row.createCell(col++), dto.getRemarks(), remarksStyle);
+
+            // Hidden: id
+            ExcelCells.setString(row.createCell(col++),
+                    dto.getId() != null ? dto.getId().toString() : "", dataStyle);
+            // Hidden: row hash
+            ExcelCells.setString(row.createCell(col++), computeEfficiencyRowHash(dto), dataStyle);
+        }
+
+        // Hide id and hash columns
+        int idColIndex = headers.size() - 2;
+        int hashColIndex = headers.size() - 1;
+        ExcelColumns.hideColumns(sheet, idColIndex, hashColIndex);
+
+        // Auto-size + remarks width
+        int remarksColIndex = headers.size() - 3;
+        ExcelColumns.autoSize(sheet, headers.size(), remarksColIndex);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        workbook.close();
+        return baos.toByteArray();
+    }
+
+    // ── Efficiency Import ─────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public AOPMessageVM importEfficiency(List<UUID> plantIds, String aopYear, MultipartFile file) {
+        logger.info("[Efficiency] Import - plantIds: {}, aopYear: {}, fileName: {}",
+                plantIds, aopYear, file != null ? file.getOriginalFilename() : "null");
+        AOPMessageVM vm = new AOPMessageVM();
+
+        try {
+            List<CPPEfficiencyDTO> excelData = readEfficiencyExcel(file.getInputStream());
+            logger.info("[Efficiency] Import - read {} records from Excel", excelData.size());
+
+            List<CPPEfficiencyDTO> validRecords = new ArrayList<>();
+            List<CPPEfficiencyDTO> failedRecords = new ArrayList<>();
+            List<String> failureReasons = new ArrayList<>();
+            int skippedCount = 0;
+
+            for (CPPEfficiencyDTO dto : excelData) {
+                // 1. Validate id present + exists
+                String validationError = validateEfficiencyRow(dto);
+                if (validationError != null) {
+                    failedRecords.add(dto);
+                    failureReasons.add(validationError);
+                    logger.warn("[Efficiency] Import - invalid record (id={}): {}", dto.getId(), validationError);
+                    continue;
+                }
+
+                // 2. Hash-based change detection
+                String uploadedHash = computeEfficiencyRowHash(dto);
+                String embeddedHash = dto.getRowHash();
+                boolean rowChanged = embeddedHash == null || !embeddedHash.equals(uploadedHash);
+                if (!rowChanged) {
+                    skippedCount++;
+                    logger.debug("[Efficiency] Import - skipping unchanged record id={}", dto.getId());
+                    continue;
+                }
+
+                // 3. Remarks must be updated when values change
+                String remarkError = validateEfficiencyRemarksUpdated(dto);
+                if (remarkError != null) {
+                    failedRecords.add(dto);
+                    failureReasons.add(remarkError);
+                    logger.warn("[Efficiency] Import - remarks not updated for id={}: {}", dto.getId(), remarkError);
+                    continue;
+                }
+
+                validRecords.add(dto);
+            }
+
+            logger.info("[Efficiency] Import - {} unchanged (skipped), {} to update, {} failed",
+                    skippedCount, validRecords.size(), failedRecords.size());
+
+            // 4. Persist
+            int updated = 0;
+            for (CPPEfficiencyDTO dto : validRecords) {
+                try {
+                    int rows = efficiencyRepository.updateEfficiency(
+                            dto.getId(),
+                            dto.getAssetFkId(),
+                            dto.getAssetName(),
+                            dto.getUom(),
+                            dto.getApr(),
+                            dto.getMay(),
+                            dto.getJun(),
+                            dto.getJul(),
+                            dto.getAug(),
+                            dto.getSep(),
+                            dto.getOct(),
+                            dto.getNov(),
+                            dto.getDec(),
+                            dto.getJan(),
+                            dto.getFeb(),
+                            dto.getMar(),
+                            dto.getRemarks());
+                    if (rows > 0) {
+                        updated++;
+                    } else {
+                        failedRecords.add(dto);
+                        failureReasons.add("Record with this ID does not exist in database");
+                    }
+                } catch (Exception e) {
+                    failedRecords.add(dto);
+                    failureReasons.add("Save failed: " + e.getMessage());
+                    logger.error("[Efficiency] Import - error saving id={}: {}", dto.getId(), e.getMessage(), e);
+                }
+            }
+
+            // 5. Build response
+            if (failedRecords.isEmpty()) {
+                vm.setCode(200);
+                if (updated == 0 && skippedCount > 0) {
+                    vm.setMessage("No changes detected. All " + skippedCount + " records are unchanged.");
+                } else {
+                    vm.setMessage("Imported successfully. Updated: " + updated
+                            + ", Unchanged: " + skippedCount + ".");
+                }
+                vm.setData(null);
+            } else {
+                byte[] errorFile = buildEfficiencyErrorExcel(failedRecords, failureReasons, aopYear);
+                String base64File = java.util.Base64.getEncoder().encodeToString(errorFile);
+                vm.setCode(400);
+                vm.setMessage("Partial import: " + updated + " updated, " + skippedCount
+                        + " unchanged, " + failedRecords.size() + " failed. Download error file for details.");
+                vm.setData(base64File);
+                logger.info("[Efficiency] Import - exported {} failed records to error Excel", failedRecords.size());
+            }
+
+            logger.info("[Efficiency] Import - completed. Updated: {}, Unchanged: {}, Failed: {}",
+                    updated, skippedCount, failedRecords.size());
+
+        } catch (Exception e) {
+            logger.error("[Efficiency] Import error: {}", e.getMessage(), e);
+            vm.setCode(500);
+            vm.setMessage("Failed to import: " + e.getMessage());
+            vm.setData(null);
+        }
+        return vm;
+    }
+
+    /**
+     * Reads the exported Excel and maps each data row to a DTO.
+     * Column order must match {@link #buildEfficiencyExcel}.
+     */
+    private List<CPPEfficiencyDTO> readEfficiencyExcel(InputStream inputStream) throws Exception {
+        List<CPPEfficiencyDTO> records = new ArrayList<>();
+        try (XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            for (Row row : ExcelRows.getDataRows(sheet, 1)) {
+                CPPEfficiencyDTO dto = new CPPEfficiencyDTO();
+                int col = 0;
+
+                // Static columns (0-2)
+                dto.setAssetName(ExcelCells.toStringValue(row.getCell(col++)));
+                dto.setType(ExcelCells.toStringValue(row.getCell(col++)));
+                dto.setUom(ExcelCells.toStringValue(row.getCell(col++)));
+
+                // 12 months (3-14)
+                dto.setApr(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setMay(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setJun(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setJul(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setAug(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setSep(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setOct(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setNov(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setDec(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setJan(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setFeb(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setMar(ExcelCells.toDouble(row.getCell(col++)));
+
+                // Remarks (15)
+                dto.setRemarks(ExcelCells.toStringValue(row.getCell(col++)));
+
+                // Hidden: id (16)
+                String idStr = ExcelCells.toStringValue(row.getCell(col++));
+                if (idStr != null && !idStr.trim().isEmpty()) {
+                    try {
+                        dto.setId(UUID.fromString(idStr.trim()));
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("[Efficiency] Import - invalid UUID: {}", idStr);
+                    }
+                }
+
+                // Hidden: row hash (17)
+                dto.setRowHash(ExcelCells.toStringValue(row.getCell(col++)));
+
+                records.add(dto);
+            }
+        }
+        return records;
+    }
+
+    private String validateEfficiencyRow(CPPEfficiencyDTO dto) {
+        if (dto.getId() == null) {
+            return "Record ID is missing – the hidden 'id' column must not be modified.";
+        }
+        try {
+            Optional<CPPEfficiency> optEntity = efficiencyRepository.findById(dto.getId());
+            if (optEntity.isEmpty()) {
+                return "Record with this ID does not exist in the database.";
+            }
+        } catch (Exception e) {
+            logger.error("[Efficiency] Import validation - error checking id={}: {}", dto.getId(), e.getMessage());
+        }
+        return null;
+    }
+
+    private String validateEfficiencyRemarksUpdated(CPPEfficiencyDTO dto) {
+        if (dto.getRemarks() == null || dto.getRemarks().trim().isEmpty()) {
+            return "Remarks are required when changing values. Please add a remark explaining the change.";
+        }
+        try {
+            Optional<CPPEfficiency> optEntity = efficiencyRepository.findById(dto.getId());
+            if (optEntity.isPresent()) {
+                String dbRemarks = optEntity.get().getRemarks() != null ? optEntity.get().getRemarks().trim() : "";
+                String importRemarks = dto.getRemarks().trim();
+                if (dbRemarks.equals(importRemarks)) {
+                    return "Remarks must be updated when changing values.";
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[Efficiency] Import remarks validation - error for id={}: {}", dto.getId(), e.getMessage());
+        }
+        return null;
+    }
+
+    private String computeEfficiencyRowHash(CPPEfficiencyDTO dto) {
+        String raw = String.join("|",
+                fmt(dto.getApr()), fmt(dto.getMay()), fmt(dto.getJun()),
+                fmt(dto.getJul()), fmt(dto.getAug()), fmt(dto.getSep()),
+                fmt(dto.getOct()), fmt(dto.getNov()), fmt(dto.getDec()),
+                fmt(dto.getJan()), fmt(dto.getFeb()), fmt(dto.getMar()),
+                dto.getRemarks() != null ? dto.getRemarks().trim() : "");
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hash = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(hash.length * 2);
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            logger.warn("[Efficiency] computeRowHash - MD5 unavailable, using raw string as fallback");
+            return raw;
+        }
+    }
+
+    private String fmt(Double val) {
+        return val != null ? val.toString() : "null";
+    }
+
+    private byte[] buildEfficiencyErrorExcel(List<CPPEfficiencyDTO> failedRecords,
+                                              List<String> failureReasons, String aopYear) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Failed Records");
+
+        CellStyle headerStyle = ExcelStyles.createHeaderStyle(workbook);
+        CellStyle dataStyle = ExcelStyles.createDataStyle(workbook);
+        CellStyle remarksStyle = ExcelStyles.createRemarksStyle(workbook);
+        CellStyle errorStyle = ExcelStyles.createErrorStyle(workbook);
+
+        String[] monthHeaders = FiscalYearMonths.getMonthHeaders(aopYear);
+
+        List<String> headers = new ArrayList<>();
+        headers.add("Asset Name");
+        headers.add("Type");
+        headers.add("UOM");
+        for (String mh : monthHeaders) {
+            headers.add(mh);
+        }
+        headers.add("Remarks");
+        headers.add("Status");
+        headers.add("Comment");
+
+        Row headerRow = sheet.createRow(0);
+        for (int c = 0; c < headers.size(); c++) {
+            ExcelCells.setString(headerRow.createCell(c), headers.get(c), headerStyle);
+        }
+
+        for (int i = 0; i < failedRecords.size(); i++) {
+            CPPEfficiencyDTO dto = failedRecords.get(i);
+            Row row = sheet.createRow(i + 1);
+            int col = 0;
+
+            ExcelCells.setString(row.createCell(col++), dto.getAssetName(), dataStyle);
+            ExcelCells.setString(row.createCell(col++), dto.getType(), dataStyle);
+            ExcelCells.setString(row.createCell(col++), dto.getUom(), dataStyle);
+
+            ExcelCells.setDouble(row.createCell(col++), dto.getApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getMar(), dataStyle);
+
+            ExcelCells.setString(row.createCell(col++), dto.getRemarks(), remarksStyle);
+            ExcelCells.setString(row.createCell(col++), "Failed", errorStyle);
+            ExcelCells.setString(row.createCell(col++), failureReasons.get(i), errorStyle);
+        }
+
+        ExcelColumns.autoSize(sheet, headers.size(), -1);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        workbook.close();
+        return baos.toByteArray();
+    }
+
     // ── Fuel Ratio ────────────────────────────────────────────────────────────
 
     @Override
@@ -221,6 +667,48 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
 
             List<CPPFuelRatio> entities =
                     fuelRatioRepository.findByCppPlantFkIdInAndAopYearOrderByFuelName(plantIds, aopYear);
+
+            // ── CARRY-FORWARD: clone from previous FY if requested FY is empty ──
+            if (entities.isEmpty()) {
+                logger.info("[FuelRatio] GET - no records for {}. Attempting carry-forward from previous financial year.", aopYear);
+                String previousYear = derivePreviousFinancialYear(aopYear);
+
+                if (previousYear != null) {
+                    List<CPPFuelRatio> prevRecords =
+                            fuelRatioRepository.findByCppPlantFkIdInAndAopYearOrderByFuelName(plantIds, previousYear);
+                    if (!prevRecords.isEmpty()) {
+                        logger.info("[FuelRatio] GET - carrying forward {} records from {} to {}",
+                                prevRecords.size(), previousYear, aopYear);
+                        List<CPPFuelRatio> clones = new ArrayList<>();
+                        for (CPPFuelRatio src : prevRecords) {
+                            CPPFuelRatio clone = new CPPFuelRatio();
+                            clone.setId(UUID.randomUUID());
+                            clone.setCppPlantFkId(src.getCppPlantFkId());
+                            clone.setFuelFkId(src.getFuelFkId());
+                            clone.setFuelName(src.getFuelName());
+                            clone.setGcv(src.getGcv());
+                            clone.setPercentageByWt(src.getPercentageByWt());
+                            clone.setRemarks(src.getRemarks());
+                            clone.setAopYear(aopYear);
+                            LocalDateTime now = LocalDateTime.now();
+                            clone.setCreatedDate(now);
+                            clone.setUpdatedDate(now);
+                            clones.add(clone);
+                        }
+                        fuelRatioRepository.saveAll(clones);
+                        logger.info("[FuelRatio] GET - saved {} carry-forward records for {}", clones.size(), aopYear);
+
+                        // Re-query after carry-forward
+                        entities = fuelRatioRepository.findByCppPlantFkIdInAndAopYearOrderByFuelName(plantIds, aopYear);
+                        logger.info("[FuelRatio] GET - after carry-forward, re-query returned {} records for {}",
+                                entities.size(), aopYear);
+                    } else {
+                        logger.info("[FuelRatio] GET - no records found in previous year {} either. Returning empty list.", previousYear);
+                    }
+                } else {
+                    logger.warn("[FuelRatio] GET - could not derive previous financial year from '{}'. Skipping carry-forward.", aopYear);
+                }
+            }
 
             List<CPPFuelRatioDTO> result = new ArrayList<>();
             for (CPPFuelRatio entity : entities) {
@@ -338,6 +826,26 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
     }
 
     /**
+     * Derives the previous financial year string.
+     * Expected format: "YYYY-YY" (e.g. "2026-27" → "2025-26", "2025-26" → "2024-25").
+     * Returns null if the format is unrecognised.
+     */
+    private String derivePreviousFinancialYear(String financialYear) {
+        try {
+            String[] parts = financialYear.split("-");
+            if (parts.length != 2) return null;
+            int startYear = Integer.parseInt(parts[0]);
+            int prevStart = startYear - 1;
+            int prevEnd = prevStart + 1;
+            String prevEndSuffix = String.format("%02d", prevEnd % 100);
+            return prevStart + "-" + prevEndSuffix;
+        } catch (Exception e) {
+            logger.warn("Could not parse financial year '{}': {}", financialYear, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Seeds one CPP_Efficiency row per asset for the given plants + AOP year,
      * pulled from the two asset master tables:
      *   PowerGenerationAssets      -> Type = 'Power' (IsActive only when AssetType = 'STG')
@@ -378,7 +886,18 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
         seed.setType(type);
         seed.setIsActive(isActive);
         seed.setUom("%");
-        seed.setValue(0.0);
+        seed.setApr(0.0);
+        seed.setMay(0.0);
+        seed.setJun(0.0);
+        seed.setJul(0.0);
+        seed.setAug(0.0);
+        seed.setSep(0.0);
+        seed.setOct(0.0);
+        seed.setNov(0.0);
+        seed.setDec(0.0);
+        seed.setJan(0.0);
+        seed.setFeb(0.0);
+        seed.setMar(0.0);
         seed.setAopYear(aopYear);
         LocalDateTime now = LocalDateTime.now();
         seed.setCreatedDate(now);

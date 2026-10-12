@@ -120,44 +120,16 @@ const IntersiteSteamTransfer = () => {
   const baseColumns = useMemo(
     () => [
       // CPP Plant Name
-      {
-        field: 'cppPlantName',
-        title: 'CPP Plant Name',
-        widthT: 180,
-        type: 'text',
-        editable: false,
-        locked: true,
-        minWidth: 180,
-      },
-      // Material
-      {
-        field: 'normParameterName',
-        title: 'Material',
-        widthT: 180,
-        type: 'text',
-        editable: false,
-        locked: true,
-        minWidth: 180,
-      },
-      // SAP Code
-      {
-        field: 'sapMaterialCode',
-        title: 'SAP Code',
-        widthT: 160,
-        type: 'text',
-        editable: false,
-        locked: true,
-        minWidth: 160,
-      },
-      // UOM
-      {
-        field: 'uom',
-        title: 'UOM',
-        widthT: 100,
-        type: 'text',
-        editable: false,
-        minWidth: 100,
-      },
+      // {
+      //   field: 'cppPlantName',
+      //   title: 'CPP Plant Name',
+      //   widthT: 180,
+      //   type: 'text',
+      //   editable: false,
+      //   locked: true,
+      //   minWidth: 180,
+      // },
+
       // Sender Plant Name
       {
         field: 'senderPlantName',
@@ -177,23 +149,23 @@ const IntersiteSteamTransfer = () => {
         minWidth: 160,
       },
       // Sender Cost Center Name
-      {
-        field: 'senderCostCenterName',
-        title: 'Sender Cost Center Name',
-        widthT: 200,
-        type: 'text',
-        editable: false,
-        minWidth: 200,
-      },
-      // Sender Cost Center Code
-      {
-        field: 'senderCostCenterCode',
-        title: 'Sender Cost Center Code',
-        widthT: 180,
-        type: 'text',
-        editable: false,
-        minWidth: 180,
-      },
+      // {
+      //   field: 'senderCostCenterName',
+      //   title: 'Sender Cost Center Name',
+      //   widthT: 200,
+      //   type: 'text',
+      //   editable: false,
+      //   minWidth: 200,
+      // },
+      // // Sender Cost Center Code
+      // {
+      //   field: 'senderCostCenterCode',
+      //   title: 'Sender Cost Center Code',
+      //   widthT: 180,
+      //   type: 'text',
+      //   editable: false,
+      //   minWidth: 180,
+      // },
       // Receiver Plant Name
       {
         field: 'receiverPlantName',
@@ -213,22 +185,51 @@ const IntersiteSteamTransfer = () => {
         minWidth: 160,
       },
       // Receiver Cost Center Name
+      // {
+      //   field: 'receiverCostCenterName',
+      //   title: 'Receiver Cost Center Name',
+      //   widthT: 200,
+      //   type: 'text',
+      //   editable: false,
+      //   minWidth: 200,
+      // },
+      // // Receiver Cost Center Code
+      // {
+      //   field: 'receiverCostCenterCode',
+      //   title: 'Receiver Cost Center Code',
+      //   widthT: 180,
+      //   type: 'text',
+      //   editable: false,
+      //   minWidth: 180,
+      // },
+      // Material
       {
-        field: 'receiverCostCenterName',
-        title: 'Receiver Cost Center Name',
-        widthT: 200,
-        type: 'text',
-        editable: false,
-        minWidth: 200,
-      },
-      // Receiver Cost Center Code
-      {
-        field: 'receiverCostCenterCode',
-        title: 'Receiver Cost Center Code',
+        field: 'normParameterName',
+        title: 'Material',
         widthT: 180,
         type: 'text',
         editable: false,
+        locked: false,
         minWidth: 180,
+      },
+      // SAP Code
+      {
+        field: 'sapMaterialCode',
+        title: 'SAP Code',
+        widthT: 160,
+        type: 'text',
+        editable: false,
+        locked: false,
+        minWidth: 160,
+      },
+      // UOM
+      {
+        field: 'uom',
+        title: 'UOM',
+        widthT: 100,
+        type: 'text',
+        editable: false,
+        minWidth: 100,
       },
     ],
     [],
@@ -261,7 +262,6 @@ const IntersiteSteamTransfer = () => {
       const res =
         await IntersiteSteamTransferApiService.getIntersiteSteamTransfer(
           keycloak,
-          PLANT_ID_LIST,
           AOP_YEAR,
         )
 
@@ -290,17 +290,17 @@ const IntersiteSteamTransfer = () => {
     } finally {
       setLoading(false)
     }
-  }, [keycloak, PLANT_ID_LIST, AOP_YEAR])
+  }, [keycloak, AOP_YEAR])
 
   useDebounce(
     () => {
-      if (PLANT_ID_LIST?.length && AOP_YEAR) {
+      if (AOP_YEAR) {
         fetchIntersiteSteamTransferData()
         setModifiedCells({})
       }
     },
     1000,
-    [PLANT_ID_LIST, AOP_YEAR, fetchIntersiteSteamTransferData],
+    [AOP_YEAR, fetchIntersiteSteamTransferData],
   )
 
   // Save handler with API call

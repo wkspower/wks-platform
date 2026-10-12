@@ -70,9 +70,7 @@ const RowBasedKendoTable = (props) => {
             const minutes = String(value.getMinutes()).padStart(2, '0')
             displayValue = `${year}-${month}-${day} ${hours}:${minutes}`
           } else if (!isNaN(value) && value !== null && value !== '') {
-            const decimals = isFilamentOrStaple
-              ? getDecimalPlacesFromFormat(enhanced.format)
-              : dataItem.isEditable ? 2 : 2
+            const decimals = getDecimalPlacesFromFormat(enhanced.format)
             displayValue = Number(value).toFixed(decimals)
           }
 

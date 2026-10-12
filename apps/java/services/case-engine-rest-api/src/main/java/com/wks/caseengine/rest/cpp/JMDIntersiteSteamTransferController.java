@@ -38,14 +38,12 @@ public class JMDIntersiteSteamTransferController {
 
     @GetMapping("/jmd/intersite-steam-transfer")
     public AOPMessageVM getIntersiteSteamTransfer(
-            @RequestParam List<UUID> plantIds,
             @RequestParam String financialYear) {
 
-        logger.info("[GET /jmd/intersite-steam-transfer] plantIds: {}, financialYear: {}",
-                plantIds, financialYear);
+        logger.info("[GET /jmd/intersite-steam-transfer] financialYear: {}", financialYear);
 
         AOPMessageVM response = intersiteSteamTransferService
-                .getIntersiteSteamTransfer(plantIds, financialYear);
+                .getIntersiteSteamTransfer(financialYear);
 
         logger.info("[GET /jmd/intersite-steam-transfer] code: {}, message: {}",
                 response.getCode(), response.getMessage());
