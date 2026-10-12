@@ -6,7 +6,7 @@ import PackagingConsumables from './packaging-consumables'
 
 const QualityPackagingNorms = () => {
   const [tabIndex, setTabIndex] = useState(0)
-  const defaultTabs = ['Quality', 'Other Cost'] //, 'Packaging & Consumables'
+  const defaultTabs = ['Quality', 'Packaging & Consumables'] //, 'Other Cost'
 
   return (
     <Box>

@@ -14,9 +14,9 @@ const PackagingConsumables = () => {
           triggerRefresh={triggerRefresh}
         />
       </div>
-      {/* <div style={{ marginTop: '24px' }}>
+      <div style={{ marginTop: '24px' }}>
         <OtherCost refreshTrigger={refreshTrigger} />
-      </div> */}
+      </div>
     </div>
   )
 }
