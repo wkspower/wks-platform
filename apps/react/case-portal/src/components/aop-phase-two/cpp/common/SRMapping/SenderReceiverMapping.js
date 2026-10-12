@@ -395,8 +395,18 @@ const SenderReceiverMapping = () => {
     [normParameters],
   )
 
-  const getFilteredCostCenters = useCallback(
+  const getFilteredSenderCostCenters = useCallback(
     (dataItem) => {
+      // Sender Cost Center: show all fetched for the selected CPP plants
+      // (no per-row cppPlantId filter)
+      return costCentersDropdown
+    },
+    [costCentersDropdown],
+  )
+
+  const getFilteredReceiverCostCenters = useCallback(
+    (dataItem) => {
+      // Receiver Cost Center: filter by cppPlantFkId matching the row's cppPlantId
       const selectedCppPlantId = dataItem?.cppPlantId
       if (!selectedCppPlantId) return []
 
@@ -404,7 +414,6 @@ const SenderReceiverMapping = () => {
         (cc) =>
           cc.cppPlantFkId?.toLowerCase() === selectedCppPlantId?.toLowerCase(),
       )
-
       return filtered
     },
     [costCentersDropdown],
@@ -412,14 +421,9 @@ const SenderReceiverMapping = () => {
 
   const getFilteredPlants = useCallback(
     (dataItem) => {
-      const selectedCppPlantId = dataItem?.cppPlantId
-      if (!selectedCppPlantId) return []
-
-      const filtered = plantsDropdown.filter(
-        (p) =>
-          p.sourceName?.toLowerCase() === selectedCppPlantId?.toLowerCase(),
-      )
-      return filtered
+      // Sender Plant: show all plants fetched for the selected CPP plants
+      // (no per-row cppPlantId filter — sender can be any plant in the list)
+      return plantsDropdown
     },
     [plantsDropdown],
   )
@@ -544,21 +548,33 @@ const SenderReceiverMapping = () => {
             item.plantFkId?.toLowerCase() === selectedPlantId?.toLowerCase(),
         )
       } else if (config.group === 'Plant') {
-        // Plants: filter by sourceName matching the row's cppPlantId.
-        const selectedCppPlantId = currentRow.cppPlantId
-        source = dropdownSource.filter(
-          (item) =>
-            item.sourceName?.toLowerCase() ===
-            selectedCppPlantId?.toLowerCase(),
-        )
+        if (config.prefix === 'sender') {
+          // Sender Plant: search across all fetched plants (no cppPlantId filter)
+          source = dropdownSource
+        } else {
+          // Receiver Plant: filter by sourceName matching the row's cppPlantId
+          // and vertical === 'cpp'
+          const selectedCppPlantId = currentRow.cppPlantId
+          source = dropdownSource.filter(
+            (item) =>
+              item.sourceName?.toLowerCase() ===
+                selectedCppPlantId?.toLowerCase() &&
+              item.verticalName?.toLowerCase() === 'cpp',
+          )
+        }
       } else if (config.group === 'CostCenter') {
-        // Cost centers: filter by cppPlantFkId matching the row's cppPlantId.
-        const selectedCppPlantId = currentRow.cppPlantId
-        source = dropdownSource.filter(
-          (item) =>
-            item.cppPlantFkId?.toLowerCase() ===
-            selectedCppPlantId?.toLowerCase(),
-        )
+        if (config.prefix === 'sender') {
+          // Sender Cost Center: search across all fetched cost centers
+          source = dropdownSource
+        } else {
+          // Receiver Cost Center: filter by cppPlantFkId matching the row's cppPlantId
+          const selectedCppPlantId = currentRow.cppPlantId
+          source = dropdownSource.filter(
+            (item) =>
+              item.cppPlantFkId?.toLowerCase() ===
+              selectedCppPlantId?.toLowerCase(),
+          )
+        }
       }
 
       // Find the selected item within the context-filtered source.
@@ -648,7 +664,7 @@ const SenderReceiverMapping = () => {
         type: 'select',
         dynamicOptions: true,
         displayMode: 'label',
-        getOptions: getFilteredCostCenters,
+        getOptions: getFilteredSenderCostCenters,
         editable: isSRMappingRole || isSRMappingEditRole,
       },
       {
@@ -716,7 +732,7 @@ const SenderReceiverMapping = () => {
         type: 'select',
         dynamicOptions: true,
         displayMode: 'label',
-        getOptions: getFilteredCostCenters,
+        getOptions: getFilteredReceiverCostCenters,
       },
       {
         field: 'receiverCostCenterCode',
@@ -800,7 +816,8 @@ const SenderReceiverMapping = () => {
       isSRMappingRole,
       isSRMappingEditRole,
       cppPlantList,
-      getFilteredCostCenters,
+      getFilteredSenderCostCenters,
+      getFilteredReceiverCostCenters,
       getFilteredPlants,
       getFilteredReceiverPlants,
       getFilteredSenderUtilities,

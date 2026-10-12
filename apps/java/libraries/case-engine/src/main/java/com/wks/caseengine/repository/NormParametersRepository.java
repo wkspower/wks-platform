@@ -77,7 +77,7 @@ public interface NormParametersRepository extends JpaRepository<NormParameters, 
             UUID plantFkId
         );
     
-        @Modifying 
-    @Query("UPDATE NormParameters n SET n.isVisible = false WHERE n.id = :id")
-    int updateIsVisibleToFalse(@Param("id") UUID id);
+    @Modifying 
+    @Query("UPDATE NormParameterType npt SET npt.isActive = false WHERE npt.id = :id")
+    int updateIsActiveToFalse(@Param("id") UUID id);
 }
