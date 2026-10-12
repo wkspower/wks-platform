@@ -825,7 +825,7 @@ const ConfigurationAccordian = ({
 
   return (
     <>
-      <LoaderBackdrop open={!!loading} />
+      <LoaderBackdrop open={!!loading || !!normCalculationLoading} />
       {accordian}
 
       {/* Confirmation Dialog */}
