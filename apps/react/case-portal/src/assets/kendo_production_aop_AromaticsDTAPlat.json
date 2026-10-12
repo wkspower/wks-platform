@@ -1,0 +1,235 @@
+[
+  {
+    "field": "idFromApi",
+    "title": "ID",
+    "hidden": true,
+    "minWidth": 100,
+    "isVisible": false
+  },
+  {
+    "field": "aopCaseId",
+    "title": "Case ID",
+    "hidden": true,
+    "editable": false,
+    "isVisible": false,
+    "minWidth": 100
+  },
+  {
+    "field": "aopType",
+    "title": "Type",
+    "width": 80,
+    "hidden": true,
+    "minWidth": 100,
+    "isVisible": false
+  },
+  {
+    "field": "aopYear",
+    "title": "Year",
+    "width": 80,
+    "hidden": true,
+    "minWidth": 100,
+    "isVisible": false
+  },
+  {
+    "field": "plantFkId",
+    "title": "Plant ID",
+    "width": 80,
+    "hidden": true,
+    "minWidth": 100,
+    "isVisible": false
+  },
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "width": 100,
+    "groupable": true,
+    "headerClass": "bold-header",
+    "filterable": "false",
+    "editable": false,
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  },
+  {
+    "field": "normParameterId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 150,
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  },
+  {
+    "field": "materialFKId",
+    "editable": false,
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  },
+  {
+    "field": "normParameterDisplayName",
+    "editable": false,
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  },
+  {
+    "field": "displayName",
+    "title": "Products",
+    "editable": false,
+    "width": 125,
+    "minWidth": 120
+  },
+  {
+    "field": "uomField",
+    "title": "UOM",
+    "editable": false,
+    "width": 60,
+    "minWidth": 120
+  },
+  {
+    "field": "april",
+    "title": "4",
+    "align": "left",
+    "editable": false,
+    "type": "number",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "may",
+    "title": "5",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "june",
+    "title": "6",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "july",
+    "title": "7",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "aug",
+    "title": "8",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "sep",
+    "title": "9",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "oct",
+    "title": "10",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "nov",
+    "title": "11",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "dec",
+    "title": "12",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "jan",
+    "title": "1",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "feb",
+    "title": "2",
+
+    "editable": false,
+
+    "align": "left",
+    "type": "number",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "march",
+    "title": "3",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+  {
+    "field": "averageTPH",
+    "title": "Total",
+    "type": "number",
+    "editable": false,
+    "format": "{0:#.##}",
+    "minWidth": 100
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  },
+
+  {
+    "field": "aopStatus",
+    "title": "aopStatus",
+    "editable": false,
+    "hidden": true,
+    "isVisible": false,
+    "minWidth": 100
+  }
+]
