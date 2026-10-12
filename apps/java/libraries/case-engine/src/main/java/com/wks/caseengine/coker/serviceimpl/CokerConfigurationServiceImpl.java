@@ -1,8 +1,13 @@
 package com.wks.caseengine.coker.serviceimpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,10 +16,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.LinkedHashMap;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.coker.dto.CokerConfigurationDto;
 import com.wks.caseengine.coker.dto.CokerConfigurationFilterDto;
@@ -485,4 +499,239 @@ private boolean isRemarkValidationPassed(String newValue, String existingValue, 
    // return true if values not changed
     return true;
 }
+
+    // --- Configuration Filter Export ---------------------------------------------
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public byte[] createConfigurationFilterExcel(String plantId, String aopYear, boolean isAfterSave,
+            List<CokerConfigurationFilterDto> dtoList) {
+        try {
+            if (!isAfterSave) {
+                AOPMessageVM result = getConfigurationFilterData(plantId, aopYear);
+                dtoList = (List<CokerConfigurationFilterDto>) result.getData();
+            }
+
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("ConfigurationFilter");
+            int currentRow = 0;
+
+            // Columns: Particulars(0), UOM(1), Value(2), Remark(3), NormParameterFKId(4-hidden)
+            List<String> headerNames = new ArrayList<>(
+                    Arrays.asList("Particulars", "UOM", "Value", "Remark", "NormParameterFKId"));
+            if (isAfterSave) {
+                headerNames.add("Status");
+                headerNames.add("Error Description");
+            }
+
+            Row headerRow = sheet.createRow(currentRow++);
+            for (int col = 0; col < headerNames.size(); col++) {
+                Cell cell = headerRow.createCell(col);
+                cell.setCellValue(headerNames.get(col));
+                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+            }
+
+            // Wrap style for Remark column
+            CellStyle wrapStyle = workbook.createCellStyle();
+            wrapStyle.setWrapText(true);
+            wrapStyle.setBorderBottom(BorderStyle.THIN);
+            wrapStyle.setBorderTop(BorderStyle.THIN);
+            wrapStyle.setBorderLeft(BorderStyle.THIN);
+            wrapStyle.setBorderRight(BorderStyle.THIN);
+
+            for (CokerConfigurationFilterDto dto : dtoList) {
+                Row row = sheet.createRow(currentRow++);
+
+                // Col 0 – Particulars (displayName)
+                Cell particularsCell = row.createCell(0);
+                particularsCell.setCellValue(dto.getDisplayName() != null ? dto.getDisplayName() : "");
+                particularsCell.setCellStyle(Utility.createBorderedStyle(workbook));
+
+                // Col 1 – UOM
+                Cell uomCell = row.createCell(1);
+                uomCell.setCellValue(dto.getUOM() != null ? dto.getUOM() : "");
+                uomCell.setCellStyle(Utility.createBorderedStyle(workbook));
+
+                // Col 2 – Value
+                Cell valueCell = row.createCell(2);
+                valueCell.setCellValue(dto.getValue() != null ? dto.getValue() : "");
+                valueCell.setCellStyle(Utility.createBorderedStyle(workbook));
+
+                // Col 3 – Remark (wrapped text)
+                Cell remarkCell = row.createCell(3);
+                remarkCell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                remarkCell.setCellStyle(wrapStyle);
+
+                // Col 4 – NormParameterFKId (hidden, required by import)
+                Cell idCell = row.createCell(4);
+                idCell.setCellValue(dto.getNormParameterFKId() != null ? dto.getNormParameterFKId() : "");
+                idCell.setCellStyle(Utility.createBorderedStyle(workbook));
+
+                if (isAfterSave) {
+                    Cell statusCell = row.createCell(5);
+                    statusCell.setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    statusCell.setCellStyle(Utility.createBorderedStyle(workbook));
+
+                    Cell errCell = row.createCell(6);
+                    errCell.setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    errCell.setCellStyle(Utility.createBorderedStyle(workbook));
+                }
+
+                // Let POI calculate row height automatically for wrapped remark
+                row.setHeight((short) -1);
+            }
+
+            // Dynamic column widths – fixed larger width for Remark(3), auto-size for others
+            int totalCols = isAfterSave ? 7 : 5;
+            for (int col = 0; col < totalCols; col++) {
+                if (col == 3) {
+                    sheet.setColumnWidth(col, 15000); // ~60 characters wide for Remark
+                } else {
+                    sheet.autoSizeColumn(col);
+                }
+            }
+
+            // Hide the NormParameterFKId column from end-users
+            sheet.setColumnHidden(4, true);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // --- Configuration Filter Import – Excel Reader -------------------------------
+
+    private List<CokerConfigurationFilterDto> readConfigurationFilterExcel(InputStream inputStream) {
+        List<CokerConfigurationFilterDto> resultList = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            if (rowIterator.hasNext())
+                rowIterator.next(); // Skip header row
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+
+                // Skip completely empty rows
+                boolean isEmpty = true;
+                for (int col = 0; col <= 4; col++) {
+                    Cell cell = row.getCell(col);
+                    if (cell != null) {
+                        cell.setCellType(CellType.STRING);
+                        if (!cell.getStringCellValue().trim().isEmpty()) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                }
+                if (isEmpty) continue;
+
+                CokerConfigurationFilterDto dto = new CokerConfigurationFilterDto();
+
+                try {
+                    // Col 0 – Particulars (displayName)
+                    Cell particularsCell = row.getCell(0);
+                    if (particularsCell != null) {
+                        particularsCell.setCellType(CellType.STRING);
+                        dto.setDisplayName(particularsCell.getStringCellValue().trim());
+                    }
+
+                    // Col 1 – UOM
+                    Cell uomCell = row.getCell(1);
+                    if (uomCell != null) {
+                        uomCell.setCellType(CellType.STRING);
+                        dto.setUOM(uomCell.getStringCellValue().trim());
+                    }
+
+                    // Col 2 – Value
+                    Cell valueCell = row.getCell(2);
+                    if (valueCell != null) {
+                        valueCell.setCellType(CellType.STRING);
+                        dto.setValue(valueCell.getStringCellValue().trim());
+                    }
+
+                    // Col 3 – Remark
+                    Cell remarkCell = row.getCell(3);
+                    if (remarkCell != null) {
+                        remarkCell.setCellType(CellType.STRING);
+                        dto.setRemarks(remarkCell.getStringCellValue().trim());
+                    }
+
+                    // Col 4 – NormParameterFKId (hidden; required for save)
+                    Cell idCell = row.getCell(4);
+                    if (idCell != null) {
+                        idCell.setCellType(CellType.STRING);
+                        String idVal = idCell.getStringCellValue().trim();
+                        dto.setNormParameterFKId(idVal.isEmpty() ? null : idVal);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    dto.setSaveStatus("Failed");
+                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "Failed to read row");
+                }
+
+                resultList.add(dto);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read Configuration Filter Excel", e);
+        }
+        return resultList;
+    }
+
+    // --- Configuration Filter Import – API ---------------------------------------
+
+    @Override
+    @Transactional
+    public AOPMessageVM importConfigurationFilterExcel(String plantId, String aopYear, MultipartFile file) {
+        if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+            throw new IllegalArgumentException("Invalid or empty Excel file.");
+        }
+        try {
+            List<CokerConfigurationFilterDto> data = readConfigurationFilterExcel(file.getInputStream());
+
+            List<CokerConfigurationFilterDto> failedRecords = new ArrayList<>();
+
+            // Collect parse-failed rows first
+            for (CokerConfigurationFilterDto dto : data) {
+                if ("Failed".equals(dto.getSaveStatus())) {
+                    failedRecords.add(dto);
+                }
+            }
+
+            // Remove pre-failed rows before saving
+            List<CokerConfigurationFilterDto> toSave = new ArrayList<>(data);
+            toSave.removeAll(failedRecords);
+
+            // Persist and collect save-failed rows
+            List<CokerConfigurationFilterDto> saveFailed = saveConfigurationFilterData(plantId, aopYear, toSave);
+            failedRecords.addAll(saveFailed);
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = createConfigurationFilterExcel(plantId, aopYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+            return aopMessageVM;
+
+        } catch (IllegalArgumentException e) {
+            throw new RestInvalidArgumentException("Invalid argument", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to import Configuration Filter data", ex);
+        }
+    }
 }
