@@ -4,6 +4,7 @@ import productionColDefsPE from '../../../assets/kendo_production_aop_pe.json'
 import productionColDefsCracker from '../../../assets/kendo_production_aop_cracker.json'
 import productionColDefsvcmpta from '../../../assets/kendo_production_aop_vcmpta.json'
 import productionColDefsElastomerJmd from '../../../assets/kendo_production_aop_Elastomer.json'
+import productionColDefsAromaticDTAPlat from '../../../assets/kendo_production_aop_AromaticsDTAPlat.json'
 import { shouldLockColumn } from 'utils/columnLockUtils'
 const monthFields = [
   'april',
@@ -28,10 +29,13 @@ const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
   const lowerSiteName = siteObject?.name.toLowerCase()
   const lowerPlantName = plantObject?.name.toLowerCase()
   const IS_PTA_PMD_PIA =
-  lowerVertName === 'pta' &&
-  lowerSiteName === 'pmd' &&
-  lowerPlantName === 'pia'  
-
+    lowerVertName === 'pta' &&
+    lowerSiteName === 'pmd' &&
+    lowerPlantName === 'pia'
+  const IS_AROMATIC_DTA_PLATFORMER =
+    lowerVertName === 'aromatics' &&
+    lowerSiteName === 'dta' &&
+    (lowerPlantName === 'platformer' || lowerPlantName === 'plat')
   let cols
 
   if (lowerVertName == 'pe' || lowerVertName == 'pp') {
@@ -45,6 +49,8 @@ const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
     IS_PTA_PMD_PIA
   ) {
     cols = productionColDefsElastomerJmd
+  } else if (IS_AROMATIC_DTA_PLATFORMER) {
+    cols = productionColDefsAromaticDTAPlat
   } else if (lowerVertName === 'pta' || lowerVertName === 'vcm') {
     cols = productionColDefsvcmpta
   } else if (lowerVertName === 'elastomer' && lowerSiteName === 'jmd') {
