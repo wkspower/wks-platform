@@ -255,8 +255,18 @@ public class VgohtNormBasisController {
 
         Plants plant = plantsRepository.findById((plantFKId)).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+
+        boolean vgoht = vertical.getName().equalsIgnoreCase("VGOHT");
+        boolean dht1 = plant.getName().equalsIgnoreCase("DHT1");
+        boolean dht2 = plant.getName().equalsIgnoreCase("DHT2");
+        boolean VGOHT1 = plant.getName().equalsIgnoreCase("VGOHT1");
+        boolean VGOHT2 = plant.getName().equalsIgnoreCase("VGOHT2");
+        boolean VGOHT3 = plant.getName().equalsIgnoreCase("VGOHT3");
+        boolean VGOHT4 = plant.getName().equalsIgnoreCase("VGOHT4");
+
+        boolean isVgohtWithThreeValues = vgoht && (dht1 || dht2 || VGOHT1 || VGOHT2 || VGOHT3 || VGOHT4);
        
-        if(plant.getName().equalsIgnoreCase("DHT1")) {
+        if(isVgohtWithThreeValues) {
         	return vgohtNormBasisServiceImpl.getConfigurationDataWithThreeValues(year, plantFKId);
         }else {
         	return vgohtNormBasisServiceImpl.getConfigurationDataWithTwoValues(year, plantFKId);
@@ -279,10 +289,20 @@ public class VgohtNormBasisController {
         Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID associated with the plant"));
 
+        boolean vgoht = vertical.getName().equalsIgnoreCase("VGOHT");
+        boolean dht1 = plant.getName().equalsIgnoreCase("DHT1");
+        boolean dht2 = plant.getName().equalsIgnoreCase("DHT2");
+        boolean VGOHT1 = plant.getName().equalsIgnoreCase("VGOHT1");
+        boolean VGOHT2 = plant.getName().equalsIgnoreCase("VGOHT2");
+        boolean VGOHT3 = plant.getName().equalsIgnoreCase("VGOHT3");
+        boolean VGOHT4 = plant.getName().equalsIgnoreCase("VGOHT4");
+
+        boolean isVgohtWithThreeValues = vgoht && (dht1 || dht2 || VGOHT1 || VGOHT2 || VGOHT3 || VGOHT4);
+
         // Declare variable outside the if/else block so it is accessible in the return check
         List<VgohtNormConfigurationDTO> failedRecords;
 
-        if(plant.getName().equalsIgnoreCase("DHT1")) {
+        if(isVgohtWithThreeValues) {
             failedRecords = vgohtNormBasisServiceImpl.saveConfigurationDataWithThreeValues(year, plantFKId, configurationDataList);
         } else {
             failedRecords = vgohtNormBasisServiceImpl.saveConfigurationDataWithTwoValues(year, plantFKId, configurationDataList);
@@ -310,8 +330,20 @@ public class VgohtNormBasisController {
 
              Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
                      .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID associated with the plant"));
+
+                     
+        boolean vgoht = vertical.getName().equalsIgnoreCase("VGOHT");
+        boolean dht1 = plant.getName().equalsIgnoreCase("DHT1");
+        boolean dht2 = plant.getName().equalsIgnoreCase("DHT2");
+        boolean VGOHT1 = plant.getName().equalsIgnoreCase("VGOHT1");
+        boolean VGOHT2 = plant.getName().equalsIgnoreCase("VGOHT2");
+        boolean VGOHT3 = plant.getName().equalsIgnoreCase("VGOHT3");
+        boolean VGOHT4 = plant.getName().equalsIgnoreCase("VGOHT4");
+
+        boolean isVgohtWithThreeValues = vgoht && (dht1 || dht2 || VGOHT1 || VGOHT2 || VGOHT3 || VGOHT4);
+
              byte[] excelBytes;
-             if(plant.getName().equalsIgnoreCase("DHT1")) {
+             if(isVgohtWithThreeValues) {
             	  excelBytes = vgohtNormBasisServiceImpl
                          .exportConfigurationDataWithThreeValues(year, plantFKId, false, null);
              }else {
@@ -349,8 +381,19 @@ public class VgohtNormBasisController {
 
         Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID associated with the plant"));
+
                 
-                if(plant.getName().equalsIgnoreCase("DHT1")) {
+        boolean vgoht = vertical.getName().equalsIgnoreCase("VGOHT");
+        boolean dht1 = plant.getName().equalsIgnoreCase("DHT1");
+        boolean dht2 = plant.getName().equalsIgnoreCase("DHT2");
+        boolean VGOHT1 = plant.getName().equalsIgnoreCase("VGOHT1");
+        boolean VGOHT2 = plant.getName().equalsIgnoreCase("VGOHT2");
+        boolean VGOHT3 = plant.getName().equalsIgnoreCase("VGOHT3");
+        boolean VGOHT4 = plant.getName().equalsIgnoreCase("VGOHT4");
+
+        boolean isVgohtWithThreeValues = vgoht && (dht1 || dht2 || VGOHT1 || VGOHT2 || VGOHT3 || VGOHT4);
+                
+                if(isVgohtWithThreeValues) {
         	 return vgohtNormBasisServiceImpl.importConfigurationDataWithThreeValues(year, plantFKId, file);
         }else {
         	 return vgohtNormBasisServiceImpl.importConfigurationDataWithTwoValues(year, plantFKId, file);
