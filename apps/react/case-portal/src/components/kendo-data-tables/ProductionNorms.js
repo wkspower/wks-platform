@@ -118,7 +118,7 @@ const ProductionNorms = ({ permissions }) => {
     lowerVertName === 'chemical' &&
     SITE_NAME_LOWERCASE === 'vmd' &&
     plantName === 'acrylonitrile'
-  const IS_PTA_PMD_PIA=
+  const IS_PTA_PMD_PIA =
     lowerVertName === 'pta' &&
     SITE_NAME_LOWERCASE === 'pmd' &&
     plantName === 'pia'
@@ -588,9 +588,11 @@ const ProductionNorms = ({ permissions }) => {
           normParametersFKId: product.materialFKId,
           originalRemark: product.remark,
           remark: product.remark,
+          uomField:product.uom,
           isEditable:
             IS_ELASTOMER_JMD_IIR ||
-            IS_CHEMICAL_VMD_ACRYLONITRILE || IS_PTA_PMD_PIA ||
+            IS_CHEMICAL_VMD_ACRYLONITRILE ||
+            IS_PTA_PMD_PIA ||
             IS_CHEMICAL_NMD
               ? true
               : false,
@@ -644,6 +646,7 @@ const ProductionNorms = ({ permissions }) => {
           const transformedItem = {
             ...item,
             idFromApi: item.id,
+            uomField:item.uom,
             uom: selectedUnit ? selectedUnit : 'MT',
             normParametersFKId: item?.normParametersFKId?.toLowerCase(),
             id: index,
@@ -1300,18 +1303,19 @@ const ProductionNorms = ({ permissions }) => {
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
           editButton: permissions?.editButton ?? false,
-          showUnit:
-            lowerVertName === 'vcm' ||
-            lowerVertName === 'pta' ||
-            lowerVertName === 'cracker' ||
-            lowerVertName === 'chemical'
+          showUnit: IS_AROMATIC_DTA_PLATFORMER
+            ? false
+            : lowerVertName === 'vcm' ||
+                lowerVertName === 'pta' ||
+                lowerVertName === 'cracker' ||
+                lowerVertName === 'chemical'
               ? true
-              : (permissions?.showUnit ?? true),
+              : permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
 
           showCalculate: IS_ELASTOMER_JMD
             ? false
-            : (permissions?.showCalculate ?? true),
+            : permissions?.showCalculate ?? true,
 
           allAction: permissions?.allAction ?? true,
           showNote: true,
@@ -1323,7 +1327,7 @@ const ProductionNorms = ({ permissions }) => {
 
           showCalculateVisibility:
             calculationObject && Object.keys(calculationObject).length > 0
-              ? (permissions?.showCalculate ?? true)
+              ? permissions?.showCalculate ?? true
               : false,
           saveBtn:
             IS_ELASTOMER_JMD_IIR ||
@@ -1331,7 +1335,7 @@ const ProductionNorms = ({ permissions }) => {
             IS_CHEMICAL_NMD ||
             IS_PTA_PMD_PIA
               ? true
-              : (permissions?.saveBtn ?? false),
+              : permissions?.saveBtn ?? false,
           units:
             lowerVertName === 'cracker'
               ? ['MT/Month', 'TPH']
@@ -1423,7 +1427,7 @@ const ProductionNorms = ({ permissions }) => {
       allAction: permissions?.allAction ?? true,
       showCalculateVisibility:
         calculationObject && Object.keys(calculationObject).length > 0
-          ? (permissions?.showCalculate ?? true)
+          ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
       units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
