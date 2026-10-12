@@ -328,13 +328,13 @@ const LastFinacialYearGrid = () => {
     saveBtn: false,
     showCalculate: false,
     allAction: true,
-    showDropdown: true,
-    downloadExcelBtnFromUI: selectedUnit === 'TPM',
+    showDropdown: false,
+    downloadExcelBtnFromUI: true,
     showImport: false,
     showTitleNameBusiness: true,
     ExcelName: EXCEL_NAME,
     showTitle: true,
-    titleName: `Last Financial ${previousFYFormatted}`,
+    titleName: `Last Financial ${previousFYFormatted} (TPM)`,
     isTotalFooterActive: true,
   }
 
@@ -345,7 +345,7 @@ const LastFinacialYearGrid = () => {
         columns={columns}
         rows={rows}
         setRows={setRows}
-        title={`Last Financial ${previousFYFormatted}`}
+        title={`Last Financial ${previousFYFormatted} (TPM)`}
         loading={loading}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
