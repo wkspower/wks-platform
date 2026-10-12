@@ -416,6 +416,15 @@ public class CokerConfigurationServiceImpl implements CokerConfigurationService 
                 dto.setUOM(row.get("UOM") != null ? row.get("UOM").toString() : "");
                 dto.setNormParameterTypeDisplayName(row.get("NormParameterTypeDisplayName") != null ? row.get("NormParameterTypeDisplayName").toString() : "");
                 dto.setType(row.get("Type") != null ? row.get("Type").toString() : "");
+                Boolean isEditable = null;
+				if (row.get("IsEditable") != null) {
+					if (row.get("IsEditable") instanceof Boolean) {
+						isEditable = (Boolean) row.get("IsEditable");
+					} else if (row.get("IsEditable") instanceof Number) {
+						isEditable = ((Number) row.get("IsEditable")).intValue() == 1;
+					}
+				}
+				dto.setIsEditable(isEditable);
                 result.add(dto);
             }
 

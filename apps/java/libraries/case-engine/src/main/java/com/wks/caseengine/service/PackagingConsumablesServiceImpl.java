@@ -912,7 +912,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	public List<List<Map<String, Object>>> getAllColumnMetadataForPEE(
 	    String plantId, String aopYear, String periodFrom, String periodTo, String type, String storedProcedure) {
 
-	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+	    String storedProcedureCall = "{ call " +   "[" + storedProcedure + "]" + "(?, ?, ?, ?) }";
 
 	    Session session = entityManager.unwrap(Session.class);
 
@@ -994,7 +994,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	@Transactional(readOnly = true) 
 	public List<List<Object[]>> getReportDataForPEE(String plantId, String aopYear, String periodFrom, String periodTo,String type,String storedProcedure) {
    
-	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+	    String storedProcedureCall = "{ call " +   "[" + storedProcedure + "]" + "(?, ?, ?, ?) }";
 	   
 	    Session session = entityManager.unwrap(Session.class);
   
