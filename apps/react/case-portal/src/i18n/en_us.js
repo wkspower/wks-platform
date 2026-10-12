@@ -47,7 +47,7 @@ const defs = {
     slowdownNorms: 'Slowdown Consumption (Norm/Quantity)',
     normalOpNorms: 'Steady State Consumption (Norm/Quantity)',
     normalOpNormsGradeWise:
-      'Grade Wise Steady State Consumption (Norm/Quantity)',
+      'Grade Wise Steady State Consumption (Norm)',
     slowdownPlan: 'Slowdown Activities',
     taPlan: 'Turnaround Activities',
     feedStock: 'Feed Stock Availability',
@@ -308,7 +308,7 @@ const defs = {
         shutdownConsumptionNorms: 'Shutdown Consumption Norms',
         normalOpNorms: 'Steady State Consumption (Norm/Quantity)',
         normalOpNormsGradeWise:
-          'Grade Wise Steady State Consumption (Norm/Quantity)',
+          'Grade Wise Steady State Consumption (Norm)',
         slowdownPlan: 'Slowdown Activities',
         taPlan: 'Turnaround Activities',
         productionNormsOutput: 'Production Norms (Output)',

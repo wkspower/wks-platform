@@ -95,6 +95,21 @@ const Constants = ({ startDate, endDate }) => {
         return (Math.trunc(num * 10) / 10).toFixed(1)
       }
 
+      const isPcgAsuPlant =
+        (siteName === 'DTA' || siteName === 'SEZ') && plantName === 'PCG ASU'
+
+      const isCompressedAirFixedRatio =
+        cleanName === 'compressed air fixed ratio' ||
+        cleanDisplayName === 'compressed air fixed ratio' ||
+        cleanName.includes('compressed air fixed ratio') ||
+        cleanDisplayName.includes('compressed air fixed ratio')
+
+      // 3 decimal conditions:
+      // SEZ and DTA sites with PCG ASU plant for Compressed air fixed ratio
+      if (isPcgAsuPlant && isCompressedAirFixedRatio) {
+        return (Math.trunc(num * 1000) / 1000).toFixed(3)
+      }
+
       if (isSpecialPlant) {
         if (cleanUom === '%' || cleanUom === 'm3/hr') {
           return Math.trunc(num).toString()

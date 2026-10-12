@@ -605,7 +605,7 @@ const GradeWiseSteadyStateConsumption = () => {
     ExcelName: EXCEL_NAME,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Grade Wise Steady State Consumption (Norm/Quantity)',
+    titleName: 'Grade Wise Steady State Consumption (Norm)',
     // Grade dropdown (showG → showDropdown: true for PE)
     showDropdown: false,
     remarksEditable: true,

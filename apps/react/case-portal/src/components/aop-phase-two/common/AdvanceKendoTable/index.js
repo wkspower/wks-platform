@@ -662,8 +662,8 @@ const AdvanceKendoTable = ({
       return
     }
 
-    setRows(
-      rows.map((r) => ({
+    setRows((prev) =>
+      (prev || []).map((r) => ({
         ...r,
         inEdit: r.id === e.dataItem.id,
       })),
