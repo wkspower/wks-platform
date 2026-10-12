@@ -623,7 +623,7 @@ async function importDataFiltersExcel(
   year
 ) {
   return saveExcelData(file, keycloak, 'configuration-filter-import', {
-    year: year,
+    aopYear: year,
     plantId: plantId
   })
 }
@@ -639,7 +639,7 @@ async function exportDataFiltersExcel(keycloak, plantId, year, fileName) {
   return exportExcelData(
     keycloak,
     'configuration-filter-export',
-    { year: year, plantFKId: plantId },
+    { aopYear: year, plantId: plantId },
     fileName || `Production_Norms_DataFilters_${year}.xlsx`,
   )
 }
