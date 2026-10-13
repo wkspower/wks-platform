@@ -1,8 +1,6 @@
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 import {
-  filterBy,
-  FilterDescriptor,
-  CompositeFilterDescriptor,
+  filterBy
 } from '@progress/kendo-data-query'
 import { useState, useEffect, useRef } from 'react'
 

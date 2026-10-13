@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { ShutdownPlanApiService } from '../../services/polyester/shutdownPlanApiService'
-import { DataService } from 'services/DataService'
 import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import { generateExcelName } from '../../common/utilities/excelNameUtil'
 import { downloadBase64Excel } from '../../common/utilities/downloadBase64Excel'
@@ -201,6 +200,34 @@ const ShutdownPlan = () => {
 
   const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}`
   const EXCEL_NAME = generateExcelName(dataGridStore, 'Shutdown_Plan')
+
+  const rateTitle = useMemo(() => {
+    const siteName = (siteObject?.name || '').toLowerCase()
+    const plantName = (plantObject?.name || '').toLowerCase()
+
+    if (siteName === 'c2' && ['c2 asu', 'c2_asu'].includes(plantName)) {
+      return 'Quantity (hourly)'
+    }
+    if (
+      ['dta', 'sez'].includes(siteName) &&
+      ['air & asu'].includes(plantName)
+    ) {
+      return 'Quantity (MWh)'
+    }
+    return 'Quantity (TPH)'
+  }, [siteObject?.name, plantObject?.name])
+
+  const columns = useMemo(() => {
+    return ShutDownColumns.map((col) => {
+      if (col.field === 'rate') {
+        return {
+          ...col,
+          title: rateTitle,
+        }
+      }
+      return col
+    })
+  }, [rateTitle])
 
   // ─── State ──────────────────────────────────────────────────────────────────
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
@@ -477,7 +504,7 @@ const ShutdownPlan = () => {
         record.isError = true
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Quantity (TPH) is required for all records.',
+          message: `${rateTitle} is required for all records.`,
           severity: 'error',
         })
         return
@@ -537,7 +564,7 @@ const ShutdownPlan = () => {
     } finally {
       setLoading(false)
     }
-  }, [modifiedCells, rows, AOP_YEAR, PLANT_ID, keycloak, fetchData])
+  }, [modifiedCells, rows, AOP_YEAR, PLANT_ID, keycloak, fetchData, rateTitle])
 
   // ─── Delete ───────────────────────────────────────────────────────────────────
 
@@ -732,7 +759,7 @@ const ShutdownPlan = () => {
       <LoaderBackdrop open={!!loading} />
 
       <AdvanceKendoTable
-        columns={ShutDownColumns}
+        columns={columns}
         rows={rows}
         allDescriptionDrpdwn={allDescriptionDrpdwn}
         setRows={setRows}

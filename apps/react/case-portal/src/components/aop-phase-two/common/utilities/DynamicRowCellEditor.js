@@ -8,23 +8,114 @@ import DateTimePickerEditor from './DatePickeronSelectedYr'
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 import { Checkbox } from '@mui/material'
 
-const FormulaTextEditor = ({ dataItem, field, onChange }) => {
-  const [localValue, setLocalValue] = React.useState('');
-  const [prefix, setPrefix] = React.useState('');
-  const [suffix, setSuffix] = React.useState('');
-  const inputRef = React.useRef(null);
+const parseFormulaText = (value, dataItem, field) => {
+  const str = String(value ?? '').trim();
+  const match = str.match(/^([+/-]+\s*)(\d+(?:\.\d+)?)(\s*%?)?$/);
+  if (match) {
+    return {
+      prefix: match[1] || '',
+      num: match[2] || '',
+      suffix: match[3] || '',
+    };
+  }
+  if (field === 'range') {
+    const hasPercent = dataItem?.uom === '%' || str.includes('%');
+    return {
+      prefix: '+/- ',
+      num: str.replace(/[^\d.]/g, ''),
+      suffix: hasPercent ? '%' : '',
+    };
+  }
+  return {
+    prefix: '',
+    num: str,
+    suffix: '',
+  };
+};
 
+const formatFormulaText = (num, prefix, suffix) => {
+  if (num === '' || num === null || num === undefined) {
+    return '';
+  }
+  return `${prefix || ''}${num}${suffix || ''}`;
+};
+
+const FormulaTextEditor = (props) => {
+  const { dataItem, field, onChange, tdProps } = props;
+  const initialRawValue = dataItem?.[field] ?? '';
+
+  // Synchronous initialization - parsed once on mount
+  const parsed = React.useMemo(
+    () => parseFormulaText(initialRawValue, dataItem, field),
+    []
+  );
+
+  const [localValue, setLocalValue] = React.useState(parsed.num);
+  const prefix = parsed.prefix;
+  const suffix = parsed.suffix;
+
+  const isFirstRender = React.useRef(true);
+  const inputRef = React.useRef(null);
+  const lastSyncedValueRef = React.useRef(String(initialRawValue ?? ''));
+
+  const getFullValue = React.useCallback(
+    (val) => {
+      if (val === '' || val === null || val === undefined) {
+        return '';
+      }
+      return formatFormulaText(val, prefix, suffix);
+    },
+    [prefix, suffix]
+  );
+
+  const syncChange = React.useCallback(
+    (val) => {
+      const fullValue = getFullValue(val);
+      if (fullValue !== lastSyncedValueRef.current) {
+        lastSyncedValueRef.current = fullValue;
+        onChange({ dataItem, field, value: fullValue });
+      }
+    },
+    [dataItem, field, onChange, getFullValue]
+  );
+
+  const localValueRef = React.useRef(localValue);
+  localValueRef.current = localValue;
+  const onChangeRef = React.useRef(onChange);
+  onChangeRef.current = onChange;
+  const dataItemRef = React.useRef(dataItem);
+  dataItemRef.current = dataItem;
+  const fieldRef = React.useRef(field);
+  fieldRef.current = field;
+
+  // Unmount cleanup: sync if value hasn't been synced yet
   React.useEffect(() => {
-    const value = String(dataItem?.[field] || '');
-    const match = value.match(/^([+/-]+\s*)(\d+(?:\.\d+)?)(\s*%?)?$/);
-    if (match) {
-      setPrefix(match[1] || '');
-      setLocalValue(match[2] || '');
-      setSuffix(match[3] || '');
-    } else {
-      setLocalValue(value);
+    return () => {
+      const fullValue = getFullValue(localValueRef.current);
+      if (fullValue !== lastSyncedValueRef.current) {
+        lastSyncedValueRef.current = fullValue;
+        onChangeRef.current({
+          dataItem: dataItemRef.current,
+          field: fieldRef.current,
+          value: fullValue,
+        });
+      }
+    };
+  }, [getFullValue]);
+
+  // Debounced sync to grid (300ms) - matching NoSpinnerNumericEditor pattern
+  React.useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [dataItem, field]);
+
+    const handler = setTimeout(() => {
+      syncChange(localValue);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [localValue, syncChange]);
 
   const handleChange = (e) => {
     const val = e.target.value;
@@ -33,43 +124,13 @@ const FormulaTextEditor = ({ dataItem, field, onChange }) => {
     }
   };
 
-  const valueRef = React.useRef(localValue)
-  valueRef.current = localValue
-  const prefixRef = React.useRef(prefix)
-  prefixRef.current = prefix
-  const suffixRef = React.useRef(suffix)
-  suffixRef.current = suffix
-  const onChangeRef = React.useRef(onChange)
-  onChangeRef.current = onChange
-  const dataItemRef = React.useRef(dataItem)
-  dataItemRef.current = dataItem
-  const fieldRef = React.useRef(field)
-  fieldRef.current = field
-
-  React.useEffect(() => {
-    return () => {
-      let finalValue = valueRef.current;
-      if (prefixRef.current || suffixRef.current) {
-        finalValue = valueRef.current !== '' ? `${prefixRef.current}${valueRef.current}${suffixRef.current}` : '';
-      }
-      if (finalValue !== String(dataItemRef.current?.[fieldRef.current] || '')) {
-        onChangeRef.current({ dataItem: dataItemRef.current, field: fieldRef.current, value: finalValue });
-      }
-    }
-  }, [])
-
   const handleBlur = () => {
-    let finalValue = localValue;
-    if (prefix || suffix) {
-      finalValue = localValue !== '' ? `${prefix}${localValue}${suffix}` : ''; 
-    }
-    if (finalValue !== String(dataItem?.[field] || '')) {
-      onChange({ dataItem, field, value: finalValue });
-    }
+    syncChange(localValue);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
+      syncChange(localValue);
       inputRef.current?.blur();
     }
   };
@@ -81,12 +142,27 @@ const FormulaTextEditor = ({ dataItem, field, onChange }) => {
   }, []);
 
   return (
-    <td style={{ padding: '0px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', width: '100%', height: '100%', padding: '0 8px', backgroundColor: '#fff', border: '1px solid #ccc' }}>
-        {prefix && <span style={{ color: '#666', marginRight: '2px', whiteSpace: 'nowrap' }}>{prefix}</span>}
+    <td {...tdProps} style={{ padding: '0px', ...tdProps?.style }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          height: '100%',
+          padding: '0 8px',
+          backgroundColor: '#fff',
+          border: '1px solid #ccc',
+        }}
+      >
+        {prefix && (
+          <span style={{ color: '#666', marginRight: '2px', whiteSpace: 'nowrap' }}>
+            {prefix}
+          </span>
+        )}
         <input
           ref={inputRef}
           type="number"
+          step="any"
           value={localValue}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -105,7 +181,11 @@ const FormulaTextEditor = ({ dataItem, field, onChange }) => {
             textAlign: 'left',
           }}
         />
-        {suffix && <span style={{ color: '#666', marginLeft: '2px', whiteSpace: 'nowrap' }}>{suffix}</span>}
+        {suffix && (
+          <span style={{ color: '#666', marginLeft: '2px', whiteSpace: 'nowrap' }}>
+            {suffix}
+          </span>
+        )}
       </div>
     </td>
   );

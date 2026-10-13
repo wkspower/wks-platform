@@ -19,6 +19,7 @@ public class CokerConfigurationFilterDto {
     private String normParameterTypeDisplayName;
     private String type;
     private String auditYear;
+    private Boolean isEditable;
     private String saveStatus;
     private String errDescription;
 }

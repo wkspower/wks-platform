@@ -5029,10 +5029,17 @@ public byte[] shutdownNonProductLineExport(String year, String plantId, String m
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+			boolean refineryUtility = vertical.getName().equalsIgnoreCase("RefineryUtility");
+			boolean isPlantWise = refineryUtility;
+
 			List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
 			String viewName = null;
 			if(vertical.getName().equalsIgnoreCase("Chemical")) { 
   				viewName = "vwScrnShutdown" + vertical.getName();
+			}
+			else if(isPlantWise) { 
+            viewName =  vertical.getName() + site.getName() + "vwScrnShutdownPlantWise";
 			}
 			else {
 		viewName = vertical.getName() + site.getName() + "vwScrnShutdown"; 
@@ -5040,6 +5047,9 @@ public byte[] shutdownNonProductLineExport(String year, String plantId, String m
 	List<Object[]> results = null;
       if(vertical.getName().equalsIgnoreCase("Chemical")) { 
 		  
+		results = getDescriptionDropdownDataByPlant( UUID.fromString(plantId), viewName);
+	  }
+	  else if(isPlantWise) { 
 		results = getDescriptionDropdownDataByPlant( UUID.fromString(plantId), viewName);
 	  }
 			else { results = getDescriptionDropdownDataBySite(site.getId(), viewName);  

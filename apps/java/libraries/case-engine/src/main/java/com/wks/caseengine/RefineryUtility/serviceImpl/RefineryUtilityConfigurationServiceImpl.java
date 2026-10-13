@@ -33,6 +33,8 @@ import com.wks.caseengine.RefineryUtility.dto.ConsumerDemandDTO;
 import com.wks.caseengine.RefineryUtility.dto.MonthWiseConstantsDTO;
 import com.wks.caseengine.RefineryUtility.dto.PlantOwnerDTO;
 import com.wks.caseengine.RefineryUtility.dto.SelectedPlantOwnerDTO;
+import com.wks.caseengine.RefineryUtility.dto.TreatmentVendorConsumptionDTO;
+import com.wks.caseengine.RefineryUtility.dto.CommodityChemicalsConsumptionDTO;
 import com.wks.caseengine.RefineryUtility.dto.TreatmentVendorDTO;
 import com.wks.caseengine.RefineryUtility.service.RefineryUtilityConfigurationService;
 import com.wks.caseengine.entity.NormAttributeTransactions;
@@ -1260,5 +1262,166 @@ public Double getAttributeValueForConsumerDemand(ConsumerDemandDTO consumerDeman
 	}
 	return consumerDemandDTO.getJan();
 }
+
+@Override
+public AOPMessageVM getTreatmentVendorConsumption(String year, String plantFKId) {
+	try {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantFKId)).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+		String procedureName = vertical.getName() + "_" + site.getName() + "_" + "GetTreatmentVendorConsumption";
+
+		String sql = "EXEC " + "[" + procedureName + "]" + " @plantId = :plantId, @aopYear = :aopYear";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("plantId", plantFKId);
+		query.setParameter("aopYear", year);
+
+		List<Object[]> resultList = query.getResultList();
+		List<TreatmentVendorConsumptionDTO> dtoList = new ArrayList<>();
+
+		for (Object[] row : resultList) {
+			TreatmentVendorConsumptionDTO dto = new TreatmentVendorConsumptionDTO();
+			dto.setNormParameterFKId(row[0] != null ? row[0].toString() : null);
+			dto.setName(row[1] != null ? row[1].toString() : null);
+			dto.setDisplayName(row[2] != null ? row[2].toString() : null);
+			dto.setUom(row[3] != null ? row[3].toString() : null);
+			dto.setNormTypeName(row[4] != null ? row[4].toString() : null);
+			dto.setApril(row[5] != null ? parseDouble(row[5]) : null);
+			dto.setAuditYear(row[6] != null ? row[6].toString() : null);
+			dto.setRemarks(row[7] != null ? row[7].toString() : null);
+			dto.setDisplayOrder(row[8] != null ? Integer.parseInt(row[8].toString()) : null);
+
+			Boolean isEditable = null;
+			if (row[9] != null) {
+				if (row[9] instanceof Boolean) {
+					isEditable = (Boolean) row[9];
+				} else if (row[9] instanceof Number) {
+					isEditable = ((Number) row[9]).intValue() == 1;
+				}
+			}
+			dto.setIsEditable(isEditable);
+			dtoList.add(dto);
+		}
+
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(dtoList);
+		return aopMessageVM;
+	} catch (IllegalArgumentException e) {
+		throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	} catch (Exception ex) {
+		throw new RuntimeException("Failed to fetch treatment vendor consumption data", ex);
+	}
+}
+
+@Override
+public AOPMessageVM getCommodityChemicalsConsumption(String year, String plantFKId) {
+	try {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantFKId)).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+
+		String procedureName = vertical.getName() + "_" + site.getName() + "_" + "GetCommodityChemicalsConsumption";
+
+		String sql = "EXEC " + "[" + procedureName + "]" + " @plantId = :plantId, @aopYear = :aopYear";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("plantId", plantFKId);
+		query.setParameter("aopYear", year);
+
+		List<Object[]> resultList = query.getResultList();
+		List<CommodityChemicalsConsumptionDTO> dtoList = new ArrayList<>();
+
+		for (Object[] row : resultList) {
+			CommodityChemicalsConsumptionDTO dto = new CommodityChemicalsConsumptionDTO();
+			dto.setNormParameterFKId(row[0] != null ? row[0].toString() : null);
+			dto.setName(row[1] != null ? row[1].toString() : null);
+			dto.setDisplayName(row[2] != null ? row[2].toString() : null);
+			dto.setUom(row[3] != null ? row[3].toString() : null);
+			dto.setNormTypeName(row[4] != null ? row[4].toString() : null);
+			dto.setApril(row[5] != null ? parseDouble(row[5]) : null);
+			dto.setAuditYear(row[6] != null ? row[6].toString() : null);
+			dto.setRemarks(row[7] != null ? row[7].toString() : null);
+			dto.setDisplayOrder(row[8] != null ? Integer.parseInt(row[8].toString()) : null);
+
+			Boolean isEditable = null;
+			if (row[9] != null) {
+				if (row[9] instanceof Boolean) {
+					isEditable = (Boolean) row[9];
+				} else if (row[9] instanceof Number) {
+					isEditable = ((Number) row[9]).intValue() == 1;
+				}
+			}
+			dto.setIsEditable(isEditable);
+			dtoList.add(dto);
+		}
+
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(dtoList);
+		return aopMessageVM;
+	} catch (IllegalArgumentException e) {
+		throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	} catch (Exception ex) {
+		throw new RuntimeException("Failed to fetch commodity chemicals consumption data", ex);
+	}
+}
+
+@Transactional 
+@Override
+	public List<TreatmentVendorConsumptionDTO> saveRefinaryConsumptionTransaction(String year, String plantFKId,
+			List<TreatmentVendorConsumptionDTO> treatmentVendorConsumptionDTOList) {
+		try {
+			List<TreatmentVendorConsumptionDTO> failedList = new ArrayList<>();
+	
+			for (TreatmentVendorConsumptionDTO treatmentVendorConsumptionDTO : treatmentVendorConsumptionDTOList) {
+				
+				if (treatmentVendorConsumptionDTO.getSaveStatus() != null
+						&& treatmentVendorConsumptionDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(treatmentVendorConsumptionDTO);
+					continue;
+				}
+
+				UUID normParameterFKId = UUID.fromString(treatmentVendorConsumptionDTO.getNormParameterFKId());
+				String remark = treatmentVendorConsumptionDTO.getRemarks();
+		
+			Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+					.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, 4, year);
+		
+			NormAttributeTransactions normAttributeTransactions;
+		
+			if (existingRecord.isPresent()) {
+				normAttributeTransactions = existingRecord.get();
+				normAttributeTransactions.setModifiedOn(new Date());
+		
+			} else {
+		
+				normAttributeTransactions = new NormAttributeTransactions();
+				normAttributeTransactions.setCreatedOn(new Date());
+				normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+				normAttributeTransactions.setAopMonth(4);
+				normAttributeTransactions.setAuditYear(year);
+			}
+		
+			normAttributeTransactions
+					.setAttributeValue(treatmentVendorConsumptionDTO.getApril() != null ? treatmentVendorConsumptionDTO.getApril().toString() : "0.0");
+			normAttributeTransactions.setRemarks(remark);
+			normAttributeTransactions.setUserName(Utility.getUserName());
+			normAttributeTransactionsRepository.save(normAttributeTransactions);
+				
+			
+		}
+
+
+		return failedList;
+			
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save month wise constants", ex);
+		}
+	}
+
+
 
 }
