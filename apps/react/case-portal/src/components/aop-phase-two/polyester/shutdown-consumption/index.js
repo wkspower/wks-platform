@@ -456,6 +456,8 @@ const ShutdownConsumption = () => {
     showImport: true,
     showTitleNameBusiness: true,
     showTitle: true,
+    showNote: true,
+    note: '(in Additional consumption during Shutdown above Steady State Consumption)',
     titleName: 'Shutdown Consumption Norms',
   }
 
