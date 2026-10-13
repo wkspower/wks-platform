@@ -1,5 +1,4 @@
 import { DatePicker } from '@progress/kendo-react-dateinputs'
-import { formatDate } from '@progress/kendo-date-math'; 
 import { useRef, useEffect } from 'react'
 
 const DateOnlyPicker = ({ dataItem, field, onChange }) => {

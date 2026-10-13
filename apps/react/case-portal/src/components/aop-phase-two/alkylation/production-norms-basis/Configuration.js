@@ -4,8 +4,7 @@ import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/g
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import {
-  ValueFormatterPhaseTwo,
-  customValueFormatterPhaseTwo,
+  customValueFormatterPhaseTwo
 } from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import RowBasedKendoTable from '../../common/RowBasedKendoTable/index'
