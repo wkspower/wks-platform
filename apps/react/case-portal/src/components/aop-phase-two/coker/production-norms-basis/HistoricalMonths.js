@@ -268,7 +268,8 @@ const HistoricalMonths = ({ refreshData }) => {
 
   useEffect(() => {
     if (refreshData) {
-      handleCalculate()
+      fetchData()
+      // handleCalculate()
     }
   }, [refreshData])
 
