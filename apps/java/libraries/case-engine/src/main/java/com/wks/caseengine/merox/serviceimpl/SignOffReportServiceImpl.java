@@ -29,8 +29,8 @@ import jakarta.persistence.PersistenceContext;
 public class SignOffReportServiceImpl implements SignOffReportService {
 
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @PersistenceContext(unitName = "db2")
+    private EntityManager entityManagerdb2;
 
     @Autowired 
 	private PlantsRepository plantsRepository;
@@ -54,6 +54,8 @@ public class SignOffReportServiceImpl implements SignOffReportService {
        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 
        String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSignOffReport";
+
+       storedProcedure = "[RIL.AOP.Refinery].[dbo].[" + storedProcedure + "]";
 
             // 1. Fetch ALL column metadata
             List<List<Map<String, Object>>> allColMetadata =
@@ -130,7 +132,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
 
         String storedProcedureCall = "{ call [" + storedProcedure + "](?, ?, ?, ?) }";
 
-        Session session = entityManager.unwrap(Session.class);
+        Session session = entityManagerdb2.unwrap(Session.class);
 
         return session.doReturningWork(connection -> {
             List<List<Map<String, Object>>> allMetadataGrids = new ArrayList<>();
@@ -183,7 +185,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
 
         String storedProcedureCall = "{ call [" + storedProcedure + "](?, ?, ?, ?) }";
 
-        Session session = entityManager.unwrap(Session.class);
+        Session session = entityManagerdb2.unwrap(Session.class);
 
         return session.doReturningWork(connection -> {
             List<List<Object[]>> allGrids = new ArrayList<>();
