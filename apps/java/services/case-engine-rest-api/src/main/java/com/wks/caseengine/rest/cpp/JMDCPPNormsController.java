@@ -124,7 +124,7 @@ public class JMDCPPNormsController {
         }
     }
 
-    @PostMapping(value = "/jmd/cpp-norms/import")
+    @PostMapping("/jmd/cpp-norms/import")
     public ResponseEntity<AOPMessageVM> importCPPNorms(
             @RequestParam List<UUID> plantIds,
             @RequestParam String financialYear,
@@ -145,6 +145,37 @@ public class JMDCPPNormsController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("[POST /jmd/cpp-norms/import] Error importing CPP norms", e);
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(500);
+            errorResponse.setMessage("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/jmd/cpp-norms/calculate")
+    public ResponseEntity<?> calculateCPPNorms(
+            @RequestParam List<UUID> plantIds,
+            @RequestParam String financialYear,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate
+    ) {
+        try {
+            log.info("=== POST JMD CPP Norms Calculate Request ===");
+            log.info("PlantIds: {}, FinancialYear: {}, StartDate: {}, EndDate: {}", plantIds, financialYear, startDate, endDate);
+
+            AOPMessageVM result = jmdCppNormsService.calculateCPPNorms(plantIds, financialYear, startDate, endDate);
+
+            log.info("=== POST JMD CPP Norms Calculate Response ===");
+            log.info("Response Code: {}", result.getCode());
+
+            if (result.getCode() == 200) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(result.getCode()).body(result);
+            }
+        } catch (Exception e) {
+            log.error("=== ERROR in calculateCPPNorms (JMD) ===", e);
+
             AOPMessageVM errorResponse = new AOPMessageVM();
             errorResponse.setCode(500);
             errorResponse.setMessage("Error: " + e.getMessage());

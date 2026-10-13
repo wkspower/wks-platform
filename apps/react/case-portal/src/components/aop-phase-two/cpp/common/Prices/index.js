@@ -217,7 +217,6 @@ const Prices = () => {
       widthT: 150,
       type: 'text',
       editable: false,
-      hidden: true,
       minWidth: 150,
     },
     {

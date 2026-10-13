@@ -12,6 +12,7 @@ import Summary from './Summary'
 import AverageAssetLoading from './average-asset-loading'
 import UtilityRate from './utility-rate'
 import MonthlyCalculatedNorms from './monthly-calculated-norms'
+import SpinningMarginReport from './spinning-margin-report'
 
 const Outputs = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -47,6 +48,8 @@ const Outputs = () => {
         return <UtilityRate />
       case 'Monthly Calculated Norms':
         return <MonthlyCalculatedNorms />
+      case 'Spinning Margin Maintained':
+        return <SpinningMarginReport />
 
       default:
         return null

@@ -33,7 +33,9 @@ import com.wks.caseengine.cpp.utility.ExcelColumns;
 import com.wks.caseengine.cpp.utility.ExcelRows;
 import com.wks.caseengine.cpp.utility.ExcelStyles;
 import com.wks.caseengine.cpp.utility.FiscalYearMonths;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
@@ -50,6 +52,9 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
 
     @Autowired
     private CPPNormsRepository cppNormsRepository;
+
+    @Autowired
+    private AopCalculationRepository aopCalculationRepository;
 
     @Override
     public AOPMessageVM getCPPNormsForPlants(List<UUID> plantIds, String financialYear, String fromDate, String toDate) {
@@ -80,28 +85,12 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
 
             List<CPPNormsResponseDTO> allResults = new ArrayList<>();
 
-            // -- Step A: Pre-calculate Fixed-type norms (NormType=6) --------------------
-            // When date range is provided, run CPP_GetFixedCalculatedUtilityNorms
-            // which deletes stale rows in CPP_utilitiesCalculatednorms for these
-            // plants and recalculates fresh values from consumption/production data.
-            // CPP_JMD_GetCPPNorms (Step B) will then LEFT JOIN that table to
-            // populate calculatedNorms for NormType=6 rows.
-            if (fromDate != null && !fromDate.isEmpty() && toDate != null && !toDate.isEmpty()) {
-                log.info("Date range provided pre-calculating fixed utility norms for JMD plants: {}", plantIdsStr);
-                try {
-                    callFixedUtilityCalculation(plantIdsStr, financialYear, fromDate, toDate);
-                    log.info("Fixed utility norm pre-calculation completed for financialYear={}", financialYear);
-                } catch (Exception calcEx) {
-                    log.warn("Fixed utility norm pre-calculation failed: {}. Continuing with existing CPP_utilitiesCalculatednorms values.",
-                            calcEx.getMessage());
-                }
-            } else {
-                log.info("Date range not provided using existing values from CPP_utilitiesCalculatednorms for Fixed-type norms");
-            }
-
-            // -- Step B: Fetch CPP norms via main SP ------------------------------------
-            // CPP_JMD_GetCPPNorms handles Formula-type (NormType=9) calculation
-            // internally and LEFT JOINs CPP_utilitiesCalculatednorms for Fixed-type.
+            // -- Fetch CPP norms via main SP ------------------------------------
+            // CPP_JMD_GetCPPNorms now only reads pre-calculated values:
+            //   - Formula-type (NormType=9): from CPPNorms.CalculatedNorms (set by CPP_JMD_CalculateCPPNorms)
+            //   - Fixed-type (NormType=6): from CPP_utilitiesCalculatednorms (set by CPP_GetFixedCalculatedUtilityNorms)
+            // The GET SP internally calls CPP_GetFixedCalculatedUtilityNorms if date range is provided.
+            // Formula calculation is done separately via the Calculate API (POST /jmd/cpp-norms/calculate).
             try {
                 StoredProcedureQuery sp = entityManager
                         .createStoredProcedureQuery("dbo.CPP_JMD_GetCPPNorms")
@@ -133,9 +122,25 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
 
             log.info("Total aggregated CPP norms records: {}", allResults.size());
 
+            // Fetch AopCalculation dirty-flag records for each plant (calculationScreen = "input-norms")
+            List<Map<String, Object>> aopCalculationResultList = new ArrayList<>();
+            for (UUID plantId : plantIds) {
+                List<AopCalculation> aopCalculation = aopCalculationRepository
+                        .findByPlantIdAndAopYearAndCalculationScreen(plantId, financialYear, "input-norms");
+
+                Map<String, Object> singlePlantMap = new HashMap<>();
+                singlePlantMap.put("plantId", plantId);
+                singlePlantMap.put("aopCalculation", aopCalculation);
+                aopCalculationResultList.add(singlePlantMap);
+            }
+
+            Map<String, Object> finalDataMap = new HashMap<>();
+            finalDataMap.put("aopCalculationList", aopCalculationResultList);
+            finalDataMap.put("list", allResults);
+
             vm.setCode(200);
             vm.setMessage("Success");
-            vm.setData(allResults);
+            vm.setData(finalDataMap);
 
         } catch (Exception e) {
             log.error("=== ERROR in getCPPNormsForPlants ===", e);
@@ -262,10 +267,15 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
             AOPMessageVM result = getCPPNormsForPlants(plantIds, financialYear, startDate, endDate);
 
             List<CPPNormsResponseDTO> dtoList = new ArrayList<>();
-            if (result.getData() instanceof List) {
+            if (result.getData() instanceof Map) {
                 @SuppressWarnings("unchecked")
-                List<CPPNormsResponseDTO> data = (List<CPPNormsResponseDTO>) result.getData();
-                dtoList = data;
+                Map<String, Object> dataMap = (Map<String, Object>) result.getData();
+                Object listObj = dataMap.get("list");
+                if (listObj instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<CPPNormsResponseDTO> data = (List<CPPNormsResponseDTO>) listObj;
+                    dtoList = data;
+                }
             }
 
             if (dtoList == null || dtoList.isEmpty()) {
@@ -977,5 +987,75 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
         dto.setCalculationFormula(row[idx++] != null ? row[idx - 1].toString() : null);
 
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public AOPMessageVM calculateCPPNorms(List<UUID> plantIds, String financialYear, String fromDate, String toDate) {
+        log.info("=== Starting calculateCPPNorms (JMD) ===");
+        log.info("PlantIds: {}, FinancialYear: {}, FromDate: {}, ToDate: {}", plantIds, financialYear, fromDate, toDate);
+
+        AOPMessageVM vm = new AOPMessageVM();
+
+        try {
+            if (plantIds == null || plantIds.isEmpty()) {
+                vm.setCode(400);
+                vm.setMessage("plantIds cannot be null or empty");
+                return vm;
+            }
+
+            String plantIdsStr = plantIds.stream()
+                    .map(UUID::toString)
+                    .collect(Collectors.joining(","));
+
+            // Step 1: Pre-calculate Fixed-type norms (NormType=6) if date range is provided
+            if (fromDate != null && !fromDate.isEmpty() && toDate != null && !toDate.isEmpty()) {
+                log.info("Pre-calculating fixed utility norms for plantIds: {}", plantIdsStr);
+                try {
+                    callFixedUtilityCalculation(plantIdsStr, financialYear, fromDate, toDate);
+                    log.info("Fixed utility norm pre-calculation completed for financialYear={}", financialYear);
+                } catch (Exception calcEx) {
+                    log.warn("Fixed utility norm pre-calculation failed: {}", calcEx.getMessage());
+                }
+            }
+
+            // Step 2: Calculate Formula-type norms (NormType=9) via CPP_JMD_CalculateCPPNorms
+            log.info("Executing stored procedure dbo.CPP_JMD_CalculateCPPNorms for plantIds: {}, financialYear: {}, fromDate: {}, toDate: {}",
+                    plantIdsStr, financialYear, fromDate, toDate);
+            try {
+                StoredProcedureQuery sp = entityManager
+                        .createStoredProcedureQuery("dbo.CPP_JMD_CalculateCPPNorms")
+                        .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
+                        .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
+                        .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
+                        .registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+
+                sp.setParameter(1, plantIdsStr);
+                sp.setParameter(2, financialYear);
+                sp.setParameter(3, fromDate);
+                sp.setParameter(4, toDate);
+                sp.execute();
+                log.info("CPP_JMD_CalculateCPPNorms completed successfully");
+            } catch (Exception e) {
+                log.error("Error executing CPP_JMD_CalculateCPPNorms: {}", e.getMessage(), e);
+            }
+
+            // Step 3: Clear the AopCalculation dirty-flag for all plants (calculationScreen = "input-norms")
+            for (UUID plantId : plantIds) {
+                aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(
+                        plantId, financialYear, "input-norms");
+            }
+
+            vm.setCode(200);
+            vm.setMessage("Calculation completed successfully");
+            vm.setData(null);
+
+        } catch (Exception e) {
+            log.error("=== ERROR in calculateCPPNorms ===", e);
+            vm.setCode(500);
+            vm.setMessage("Error: " + e.getMessage());
+        }
+
+        return vm;
     }
 }

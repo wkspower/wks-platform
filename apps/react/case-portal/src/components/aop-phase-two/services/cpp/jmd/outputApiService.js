@@ -21,6 +21,10 @@ export const OutputApiService = {
   // Used in: Outputs/utility-rate/UtilityRateGrid.js (Utility Rate output grid)
   getUtilityRateData,
   exportUtilityRateExcel,
+
+  // Used in: Outputs/spinning-margin-report/SpinningMarginReportGrid.js (Spinning Margin report grid)
+  getSpinningMarginReport,
+  exportSpinningMarginReportExcel,
 }
 
 // ===================== GENERIC HELPERS ===================== //
@@ -409,6 +413,82 @@ async function exportUtilityRateExcel(keycloak, plantIds, aopYear, EXCEL_NAME) {
     return { success: true, message: 'Excel exported successfully' }
   } catch (e) {
     console.error('Error exporting utility rate Excel:', e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || SPINNING MARGIN REPORT APIs || ===================== //
+// GET /task/jmd/spinning-margin-report?plantIds=...&aopYear=...
+// Returns Spinning Margin Maintained rows from dbo.CPPMonthlySpinningMarginMaintained
+// for the given plant(s) and AOP year. POWER rows (Plant_FK_Id IS NULL) apply to
+// all plants; STEAM rows are filtered by Plant_FK_Id.
+// Each row contains: id, aopYear, marginType, plantFkId, plantName,
+// 12 monthly margin fields (apr → mar).
+async function getSpinningMarginReport(keycloak, plantIds, aopYear) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report?plantIds=${queryParams}&aopYear=${aopYear}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error fetching Spinning Margin report data:', e)
+    return await Promise.reject(e)
+  }
+}
+
+// GET /task/jmd/spinning-margin-report/export?plantIds=...&aopYear=...
+async function exportSpinningMarginReportExcel(
+  keycloak,
+  plantIds,
+  aopYear,
+  EXCEL_NAME,
+) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report/export?plantIds=${queryParams}&aopYear=${aopYear}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+
+    // Extract filename from Content-Disposition header if available
+    const contentDisposition = resp.headers.get('content-disposition')
+    let downloadFileName = EXCEL_NAME
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/i)
+      if (filenameMatch && filenameMatch[1]) {
+        downloadFileName = filenameMatch[1]
+      }
+    }
+
+    a.download = downloadFileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+
+    return { success: true, message: 'Excel exported successfully' }
+  } catch (e) {
+    console.error('Error exporting Spinning Margin report Excel:', e)
     return Promise.reject(e)
   }
 }
