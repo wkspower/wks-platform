@@ -14,11 +14,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +52,13 @@ import jakarta.persistence.Query;
 
 @Service
 public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionService{
+
+	private static final String EXPORT_SHEET_PROTECTION_PASSWORD = "wks_other_costs_export";
+
+	private static final int MAX_EXPORT_COLUMN_WIDTH = 60 * 256;
+
+	// Extra width so the auto-filter dropdown arrow does not cover the header text
+	private static final int FILTER_ARROW_PADDING = 4 * 256;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -243,8 +253,8 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 		        }
 	        }
 
-	        Workbook workbook = new XSSFWorkbook();
-	        Sheet sheet = workbook.createSheet("Sheet1");
+	        XSSFWorkbook workbook = new XSSFWorkbook();
+	        XSSFSheet sheet = workbook.createSheet("Sheet1");
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
@@ -266,6 +276,10 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	            cell.setCellValue(innerHeaders.get(col));
 	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 	        }
+
+	        // Unlocked so data cells stay editable under sheet protection
+	        CellStyle unlockedDataStyle = workbook.createCellStyle();
+	        unlockedDataStyle.setLocked(false);
 
 	        int dataRowCount = dtoList.size();
 	        for (int i = 0; i < dataRowCount; i++) {
@@ -297,9 +311,41 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                } else {
 	                    cell.setCellValue("");
 	                }  
+	                cell.setCellStyle(unlockedDataStyle);
 	            }
 	        }
+
+	        // Users cannot resize columns once the sheet is protected, so all visible columns are sized up front
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            if (col == 7) {
+	                continue;
+	            }
+	            sheet.autoSizeColumn(col);
+	            sheet.setColumnWidth(col, Math.min(sheet.getColumnWidth(col) + FILTER_ARROW_PADDING, MAX_EXPORT_COLUMN_WIDTH));
+	        }
+
+	        CellStyle unlockedDefaultStyle = workbook.createCellStyle();
+	        unlockedDefaultStyle.setLocked(false);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            sheet.setDefaultColumnStyle(col, unlockedDefaultStyle);
+	        }
+
 	        sheet.setColumnHidden(7, true);
+
+	        int lastDataRowIndex = currentRow - 1;
+	        sheet.setAutoFilter(new CellRangeAddress(0, Math.max(lastDataRowIndex, 0), 0, innerHeaders.size() - 1));
+
+	        // Keeping "Format columns" locked stops Excel from unhiding the Material Id column
+	        // when the neighbouring Remarks column is resized.
+	        sheet.protectSheet(EXPORT_SHEET_PROTECTION_PASSWORD);
+	        sheet.lockFormatColumns(true);
+	        sheet.lockAutoFilter(false);
+	        sheet.lockSort(false);
+	        sheet.lockSelectLockedCells(false);
+	        sheet.lockSelectUnlockedCells(false);
+	        sheet.lockInsertRows(false);
+	        sheet.lockDeleteRows(false);
+
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
