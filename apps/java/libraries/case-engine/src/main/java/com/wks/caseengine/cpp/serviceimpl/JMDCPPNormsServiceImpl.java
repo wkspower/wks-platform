@@ -1019,26 +1019,26 @@ public class JMDCPPNormsServiceImpl implements JMDCPPNormsService {
                 }
             }
 
-            // Step 2: Calculate Formula-type norms (NormType=9) via CPP_JMD_CalculateCPPNorms
-            log.info("Executing stored procedure dbo.CPP_JMD_CalculateCPPNorms for plantIds: {}, financialYear: {}, fromDate: {}, toDate: {}",
-                    plantIdsStr, financialYear, fromDate, toDate);
-            try {
-                StoredProcedureQuery sp = entityManager
-                        .createStoredProcedureQuery("dbo.CPP_JMD_CalculateCPPNorms")
-                        .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
-                        .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
-                        .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
-                        .registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+            // // Step 2: Calculate Formula-type norms (NormType=9) via CPP_JMD_CalculateCPPNorms
+            // log.info("Executing stored procedure dbo.CPP_JMD_CalculateCPPNorms for plantIds: {}, financialYear: {}, fromDate: {}, toDate: {}",
+            //         plantIdsStr, financialYear, fromDate, toDate);
+            // try {
+            //     StoredProcedureQuery sp = entityManager
+            //             .createStoredProcedureQuery("dbo.CPP_JMD_CalculateCPPNorms")
+            //             .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
+            //             .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
+            //             .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
+            //             .registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
 
-                sp.setParameter(1, plantIdsStr);
-                sp.setParameter(2, financialYear);
-                sp.setParameter(3, fromDate);
-                sp.setParameter(4, toDate);
-                sp.execute();
-                log.info("CPP_JMD_CalculateCPPNorms completed successfully");
-            } catch (Exception e) {
-                log.error("Error executing CPP_JMD_CalculateCPPNorms: {}", e.getMessage(), e);
-            }
+            //     sp.setParameter(1, plantIdsStr);
+            //     sp.setParameter(2, financialYear);
+            //     sp.setParameter(3, fromDate);
+            //     sp.setParameter(4, toDate);
+            //     sp.execute();
+            //     log.info("CPP_JMD_CalculateCPPNorms completed successfully");
+            // } catch (Exception e) {
+            //     log.error("Error executing CPP_JMD_CalculateCPPNorms: {}", e.getMessage(), e);
+            // }
 
             // Step 3: Clear the AopCalculation dirty-flag for all plants (calculationScreen = "input-norms")
             for (UUID plantId : plantIds) {
