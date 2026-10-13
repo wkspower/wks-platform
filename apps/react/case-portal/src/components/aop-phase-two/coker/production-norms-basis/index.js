@@ -16,6 +16,7 @@ import ManualEntry from './ManualEntry'
 import HistoricalMonths from './HistoricalMonths'
 import JWAvgNorms from 'components/aop-phase-two/crude/production-norms-basis/JWAvgNorms'
 import DataFilters from './DataFilters'
+import { formatDateForAPI } from 'components/aop-phase-two/common/utilities/helper'
 
 const ProductionNormsBasisCoker = () => {
   const keycloak = useSession()
@@ -107,22 +108,79 @@ const ProductionNormsBasisCoker = () => {
     setEndDate(end)
   }
 
-  // Helper function to format date for API
-  const formatDateForAPI = (date) => {
-    if (!date) return null
-    const d = new Date(date)
-    const year = d.getFullYear()
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
   // Handler for Load Norm Calculation button
   const handleLoadNormCalculation = async () => {
-    setRefreshData(true)
-    setTimeout(() => {
-      setRefreshData(false)
-    }, 500)
+    setRefreshData(false)
+    if (!startDate || !endDate) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Please select both start date and end date',
+        severity: 'warning',
+        autoHide: true,
+      })
+      return
+    }
+
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Missing required parameters',
+        severity: 'error',
+        autoHide: true,
+      })
+      return
+    }
+
+    setNormCalculationLoading(true)
+    try {
+      const periodFrom = formatDateForAPI(startDate)
+      const periodTo = formatDateForAPI(endDate)
+
+      const response =
+        await ProductionNormsApiService.loadButtonNormCalculation(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+          periodFrom,
+          periodTo,
+        )
+
+      if (response?.code === 422) {
+        // Then show validation error after a delay
+        setTimeout(() => {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: response.message || 'Validation error occurred.',
+            severity: 'error',
+            autoHide: false,
+          })
+          setRefreshData(true)
+        }, 500)
+      } else {
+        // Code 200 - show only success notification
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message:
+            response?.message || 'Norm calculation completed successfully!',
+          severity: 'success',
+          autoHide: true,
+        })
+        setTimeout(() => {
+          setRefreshData(true)
+        }, 500)
+      }
+    } catch (error) {
+      console.error('Error in norm calculation:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to calculate norms. Please try again.',
+        severity: 'error',
+        autoHide: true,
+      })
+    } finally {
+      setNormCalculationLoading(false)
+    }
   }
 
   const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]

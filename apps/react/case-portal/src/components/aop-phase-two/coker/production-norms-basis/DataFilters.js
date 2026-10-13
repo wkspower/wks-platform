@@ -70,13 +70,7 @@ const DataFilters = ({ startDate, endDate, refreshData }) => {
       minWidth: 300,
     },
   ]
-
-  useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
-      fetchData()
-    }
-  }, [PLANT_ID, AOP_YEAR, refreshData])
-
+  
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -109,6 +103,18 @@ const DataFilters = ({ startDate, endDate, refreshData }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (PLANT_ID && AOP_YEAR) {
+      fetchData()
+    }
+  }, [PLANT_ID, AOP_YEAR])
+
+  useEffect(() => {
+    if (refreshData) {
+      fetchData()
+    }
+  }, [refreshData])
 
   const permissions = {
     showAction: true,

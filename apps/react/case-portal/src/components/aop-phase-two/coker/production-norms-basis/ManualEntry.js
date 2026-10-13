@@ -111,7 +111,7 @@ const ManualEntry = ({ refreshData }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR, refreshData])
+  }, [PLANT_ID, AOP_YEAR])
 
   const fetchData = async () => {
     setLoading(true)
@@ -148,6 +148,12 @@ const ManualEntry = ({ refreshData }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (refreshData) {
+      fetchData()
+    }
+  }, [refreshData])
 
   const saveChanges = async () => {
     setLoading(true)
