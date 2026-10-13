@@ -57,6 +57,15 @@ export const ProductionNormsApiService = {
   getPlantOwnerDropdown,
   getSelectedPlantOwner,
   saveSelectedPlantOwner,
+  
+  // vendor consumption APIs
+  getVendorConsumptionData,
+  saveVendorConsumptionData,
+
+  // commodity consumption APIs
+  getCommodityConsumptionData,
+  saveCommodityConsumptionData,
+
 }
 
 // ========================|| Configuration APIs ||=====================================//
@@ -927,6 +936,100 @@ async function getSelectedPlantOwner(keycloak, plantId) {
 
 async function saveSelectedPlantOwner(keycloak, plantId, payload) {
   const url = `${Config.CaseEngineUrl}/task/selected-plant-owner?plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getVendorConsumptionData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/treatment-vendor-consumption?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveVendorConsumptionData(
+  keycloak,
+  PlantId,
+  AOP_YEAR,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/refinary-consumption-transactions?year=${AOP_YEAR}&plantFKId=${PlantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getCommodityConsumptionData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/commodity-chemicals-consumption?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveCommodityConsumptionData(
+  keycloak,
+  PlantId,
+  AOP_YEAR,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/refinary-consumption-transactions?year=${AOP_YEAR}&plantFKId=${PlantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
