@@ -25,6 +25,7 @@ import com.wks.caseengine.RefineryUtility.dto.CommoditySelectionDTO;
 import com.wks.caseengine.RefineryUtility.dto.ConsumerDemandDTO;
 import com.wks.caseengine.RefineryUtility.dto.MonthWiseConstantsDTO;
 import com.wks.caseengine.RefineryUtility.dto.SelectedPlantOwnerDTO;
+import com.wks.caseengine.RefineryUtility.dto.TreatmentVendorConsumptionDTO;
 import com.wks.caseengine.RefineryUtility.dto.TreatmentVendorDTO;
 import com.wks.caseengine.RefineryUtility.service.RefineryUtilityConfigurationService;
 
@@ -161,5 +162,26 @@ public class RefineryUtilityConfigurationController {
 			return ResponseEntity.ok(new AOPMessageVM(400, "Partial Data Updated", failedList));
 		}
 	}
+
+	@GetMapping("/treatment-vendor-consumption")
+	public ResponseEntity<AOPMessageVM> getTreatmentVendorConsumption(@RequestParam String year, @RequestParam String plantFKId) {
+		return ResponseEntity.ok(refineryUtilityConfigurationService.getTreatmentVendorConsumption(year, plantFKId));
+	}
+
+	@GetMapping("/commodity-chemicals-consumption")
+	public ResponseEntity<AOPMessageVM> getCommodityChemicalsConsumption(@RequestParam String year, @RequestParam String plantFKId) {
+		return ResponseEntity.ok(refineryUtilityConfigurationService.getCommodityChemicalsConsumption(year, plantFKId));
+	}
+
+	// Comman API to save treatment-vendor-consumption and commodity-chemicals-consumption tabs
+	@PostMapping("/refinary-consumption-transactions")
+    public ResponseEntity<AOPMessageVM> saveRefinaryConsumptionTransactions(@RequestBody List<TreatmentVendorConsumptionDTO> treatmentVendorConsumptionDTOList, @RequestParam String year, @RequestParam String plantFKId) {
+        List<TreatmentVendorConsumptionDTO> failedList = refineryUtilityConfigurationService.saveRefinaryConsumptionTransaction(year, plantFKId, treatmentVendorConsumptionDTOList);
+        if(failedList.isEmpty()) {
+            return ResponseEntity.ok(new AOPMessageVM(200, "Data saved successfully", null));
+        } else {
+            return ResponseEntity.ok(new AOPMessageVM(400, "Partial Data Updated", failedList));
+        }
+    }
 
 }
