@@ -3015,7 +3015,22 @@ const AdvanceKendoTable = ({
 
                   {/* TITLE */}
                   {title || permissions?.titleName}
-
+                  {permissions?.showNote && (
+                    <Box sx={{ pl: 0.1 }}>
+                      <Typography
+                        component='div'
+                        sx={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          fontFamily: "'Honeywell Cond Web', 'Inter', sans-serif",
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {permissions?.note}
+                      </Typography>
+                    </Box>
+                  )}
                   {permissions?.showDropdown && (
                     <GenericDropdown
                       options={dropdownConfig?.options}
@@ -3077,6 +3092,7 @@ const AdvanceKendoTable = ({
                   />
                 </Box>
               )}
+              
             </Box>
 
             {/* Right side - Unit dropdown + action buttons */}

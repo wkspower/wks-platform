@@ -24,7 +24,7 @@ const GradeWiseSteadyStateConsumption = () => {
   const AOP_YEAR = year?.selectedYear
   const EXCEL_NAME = generateExcelName(
     dataGridStore,
-    'Grade_Wise_Steady_State_Consumption',
+    'Grade Wise Overall Steady State Consumption (Norm)',
   )
   const isFilament = verticalObject?.name?.toLowerCase() === 'filament (pfy)'
 
@@ -605,11 +605,13 @@ const GradeWiseSteadyStateConsumption = () => {
     ExcelName: EXCEL_NAME,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Grade Wise Steady State Consumption (Norm)',
+    titleName: 'Grade Wise Overall Steady State Consumption (Norm)',
     // Grade dropdown (showG → showDropdown: true for PE)
     showDropdown: false,
     remarksEditable: true,
     marginBottom: true,
+    showNote: true,
+    note: `(UOM is applicable from Raw Materials onwards)`,
   }
 
   // Grade dropdown config (same as NormalOpNorms dropdownLabel: 'Grade' for isPEPP)
