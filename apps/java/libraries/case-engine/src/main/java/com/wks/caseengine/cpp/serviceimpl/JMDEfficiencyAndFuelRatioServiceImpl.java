@@ -686,8 +686,30 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                             clone.setCppPlantFkId(src.getCppPlantFkId());
                             clone.setFuelFkId(src.getFuelFkId());
                             clone.setFuelName(src.getFuelName());
-                            clone.setGcv(src.getGcv());
-                            clone.setPercentageByWt(src.getPercentageByWt());
+                            clone.setGcvApr(src.getGcvApr());
+                            clone.setGcvMay(src.getGcvMay());
+                            clone.setGcvJun(src.getGcvJun());
+                            clone.setGcvJul(src.getGcvJul());
+                            clone.setGcvAug(src.getGcvAug());
+                            clone.setGcvSep(src.getGcvSep());
+                            clone.setGcvOct(src.getGcvOct());
+                            clone.setGcvNov(src.getGcvNov());
+                            clone.setGcvDec(src.getGcvDec());
+                            clone.setGcvJan(src.getGcvJan());
+                            clone.setGcvFeb(src.getGcvFeb());
+                            clone.setGcvMar(src.getGcvMar());
+                            clone.setPercentageByWtApr(src.getPercentageByWtApr());
+                            clone.setPercentageByWtMay(src.getPercentageByWtMay());
+                            clone.setPercentageByWtJun(src.getPercentageByWtJun());
+                            clone.setPercentageByWtJul(src.getPercentageByWtJul());
+                            clone.setPercentageByWtAug(src.getPercentageByWtAug());
+                            clone.setPercentageByWtSep(src.getPercentageByWtSep());
+                            clone.setPercentageByWtOct(src.getPercentageByWtOct());
+                            clone.setPercentageByWtNov(src.getPercentageByWtNov());
+                            clone.setPercentageByWtDec(src.getPercentageByWtDec());
+                            clone.setPercentageByWtJan(src.getPercentageByWtJan());
+                            clone.setPercentageByWtFeb(src.getPercentageByWtFeb());
+                            clone.setPercentageByWtMar(src.getPercentageByWtMar());
                             clone.setRemarks(src.getRemarks());
                             clone.setAopYear(aopYear);
                             LocalDateTime now = LocalDateTime.now();
@@ -717,8 +739,30 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                 dto.setCppPlantFkId(entity.getCppPlantFkId());
                 dto.setFuelFkId(entity.getFuelFkId());
                 dto.setFuelName(entity.getFuelName());
-                dto.setGcv(entity.getGcv());
-                dto.setPercentageByWt(entity.getPercentageByWt());
+                dto.setGcvApr(entity.getGcvApr());
+                dto.setGcvMay(entity.getGcvMay());
+                dto.setGcvJun(entity.getGcvJun());
+                dto.setGcvJul(entity.getGcvJul());
+                dto.setGcvAug(entity.getGcvAug());
+                dto.setGcvSep(entity.getGcvSep());
+                dto.setGcvOct(entity.getGcvOct());
+                dto.setGcvNov(entity.getGcvNov());
+                dto.setGcvDec(entity.getGcvDec());
+                dto.setGcvJan(entity.getGcvJan());
+                dto.setGcvFeb(entity.getGcvFeb());
+                dto.setGcvMar(entity.getGcvMar());
+                dto.setPercentageByWtApr(entity.getPercentageByWtApr());
+                dto.setPercentageByWtMay(entity.getPercentageByWtMay());
+                dto.setPercentageByWtJun(entity.getPercentageByWtJun());
+                dto.setPercentageByWtJul(entity.getPercentageByWtJul());
+                dto.setPercentageByWtAug(entity.getPercentageByWtAug());
+                dto.setPercentageByWtSep(entity.getPercentageByWtSep());
+                dto.setPercentageByWtOct(entity.getPercentageByWtOct());
+                dto.setPercentageByWtNov(entity.getPercentageByWtNov());
+                dto.setPercentageByWtDec(entity.getPercentageByWtDec());
+                dto.setPercentageByWtJan(entity.getPercentageByWtJan());
+                dto.setPercentageByWtFeb(entity.getPercentageByWtFeb());
+                dto.setPercentageByWtMar(entity.getPercentageByWtMar());
                 dto.setRemarks(entity.getRemarks());
                 dto.setAopYear(entity.getAopYear());
                 result.add(dto);
@@ -773,8 +817,30 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                         entity.setCppPlantFkId(dto.getCppPlantFkId());
                         entity.setFuelFkId(dto.getFuelFkId());
                         entity.setFuelName(dto.getFuelName());
-                        entity.setGcv(dto.getGcv());
-                        entity.setPercentageByWt(dto.getPercentageByWt());
+                        entity.setGcvApr(dto.getGcvApr());
+                        entity.setGcvMay(dto.getGcvMay());
+                        entity.setGcvJun(dto.getGcvJun());
+                        entity.setGcvJul(dto.getGcvJul());
+                        entity.setGcvAug(dto.getGcvAug());
+                        entity.setGcvSep(dto.getGcvSep());
+                        entity.setGcvOct(dto.getGcvOct());
+                        entity.setGcvNov(dto.getGcvNov());
+                        entity.setGcvDec(dto.getGcvDec());
+                        entity.setGcvJan(dto.getGcvJan());
+                        entity.setGcvFeb(dto.getGcvFeb());
+                        entity.setGcvMar(dto.getGcvMar());
+                        entity.setPercentageByWtApr(dto.getPercentageByWtApr());
+                        entity.setPercentageByWtMay(dto.getPercentageByWtMay());
+                        entity.setPercentageByWtJun(dto.getPercentageByWtJun());
+                        entity.setPercentageByWtJul(dto.getPercentageByWtJul());
+                        entity.setPercentageByWtAug(dto.getPercentageByWtAug());
+                        entity.setPercentageByWtSep(dto.getPercentageByWtSep());
+                        entity.setPercentageByWtOct(dto.getPercentageByWtOct());
+                        entity.setPercentageByWtNov(dto.getPercentageByWtNov());
+                        entity.setPercentageByWtDec(dto.getPercentageByWtDec());
+                        entity.setPercentageByWtJan(dto.getPercentageByWtJan());
+                        entity.setPercentageByWtFeb(dto.getPercentageByWtFeb());
+                        entity.setPercentageByWtMar(dto.getPercentageByWtMar());
                         entity.setRemarks(dto.getRemarks());
                         entity.setAopYear(dto.getAopYear() != null ? dto.getAopYear() : aopYear);
                         LocalDateTime now = LocalDateTime.now();
@@ -788,8 +854,30 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
                                 dto.getId(),
                                 dto.getFuelFkId(),
                                 dto.getFuelName(),
-                                dto.getGcv(),
-                                dto.getPercentageByWt(),
+                                dto.getGcvApr(),
+                                dto.getGcvMay(),
+                                dto.getGcvJun(),
+                                dto.getGcvJul(),
+                                dto.getGcvAug(),
+                                dto.getGcvSep(),
+                                dto.getGcvOct(),
+                                dto.getGcvNov(),
+                                dto.getGcvDec(),
+                                dto.getGcvJan(),
+                                dto.getGcvFeb(),
+                                dto.getGcvMar(),
+                                dto.getPercentageByWtApr(),
+                                dto.getPercentageByWtMay(),
+                                dto.getPercentageByWtJun(),
+                                dto.getPercentageByWtJul(),
+                                dto.getPercentageByWtAug(),
+                                dto.getPercentageByWtSep(),
+                                dto.getPercentageByWtOct(),
+                                dto.getPercentageByWtNov(),
+                                dto.getPercentageByWtDec(),
+                                dto.getPercentageByWtJan(),
+                                dto.getPercentageByWtFeb(),
+                                dto.getPercentageByWtMar(),
                                 dto.getRemarks());
                         successCount++;
                     }
@@ -823,6 +911,439 @@ public class JMDEfficiencyAndFuelRatioServiceImpl implements JMDEfficiencyAndFue
         }
 
         return vm;
+    }
+
+    // ── Fuel Ratio Export ─────────────────────────────────────────────────────
+
+    @Override
+    public byte[] exportFuelRatio(List<UUID> plantIds, String aopYear) {
+        logger.info("[FuelRatio] Export - plantIds: {}, aopYear: {}", plantIds, aopYear);
+        try {
+            AOPMessageVM response = getFuelRatio(plantIds, aopYear);
+            @SuppressWarnings("unchecked")
+            List<CPPFuelRatioDTO> dtoList = (List<CPPFuelRatioDTO>) response.getData();
+            if (dtoList == null) {
+                dtoList = new ArrayList<>();
+            }
+
+            dtoList.sort(Comparator
+                    .comparing((CPPFuelRatioDTO d) -> d.getFuelName() != null ? d.getFuelName() : ""));
+
+            return buildFuelRatioExcel(dtoList, aopYear);
+        } catch (Exception e) {
+            logger.error("[FuelRatio] Export error: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private byte[] buildFuelRatioExcel(List<CPPFuelRatioDTO> dtoList, String aopYear) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Fuel Ratio");
+
+        CellStyle headerStyle = ExcelStyles.createHeaderStyle(workbook);
+        CellStyle dataStyle = ExcelStyles.createDataStyle(workbook);
+        CellStyle remarksStyle = ExcelStyles.createRemarksStyle(workbook);
+
+        String[] monthHeaders = FiscalYearMonths.getMonthHeaders(aopYear);
+
+        // Header row
+        List<String> headers = new ArrayList<>();
+        headers.add("Fuel");
+        for (String mh : monthHeaders) {
+            headers.add("GCV " + mh);
+            headers.add("PercentageByWt " + mh);
+        }
+        headers.add("Remarks");
+        // Hidden columns
+        headers.add("id");
+        headers.add("_hash");
+
+        Row headerRow = sheet.createRow(0);
+        for (int c = 0; c < headers.size(); c++) {
+            ExcelCells.setString(headerRow.createCell(c), headers.get(c), headerStyle);
+        }
+
+        // Data rows
+        int rowNum = 1;
+        for (CPPFuelRatioDTO dto : dtoList) {
+            Row row = sheet.createRow(rowNum++);
+            int col = 0;
+
+            ExcelCells.setString(row.createCell(col++), dto.getFuelName(), dataStyle);
+
+            // GCV + PercentageByWt for each month (Apr → Mar)
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvMar(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtMar(), dataStyle);
+
+            ExcelCells.setString(row.createCell(col++), dto.getRemarks(), remarksStyle);
+
+            // Hidden: id
+            ExcelCells.setString(row.createCell(col++),
+                    dto.getId() != null ? dto.getId().toString() : "", dataStyle);
+            // Hidden: row hash
+            ExcelCells.setString(row.createCell(col++), computeFuelRatioRowHash(dto), dataStyle);
+        }
+
+        // Hide id and hash columns
+        int idColIndex = headers.size() - 2;
+        int hashColIndex = headers.size() - 1;
+        ExcelColumns.hideColumns(sheet, idColIndex, hashColIndex);
+
+        // Auto-size + remarks width
+        int remarksColIndex = headers.size() - 3;
+        ExcelColumns.autoSize(sheet, headers.size(), remarksColIndex);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        workbook.close();
+        return baos.toByteArray();
+    }
+
+    // ── Fuel Ratio Import ─────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public AOPMessageVM importFuelRatio(List<UUID> plantIds, String aopYear, MultipartFile file) {
+        logger.info("[FuelRatio] Import - plantIds: {}, aopYear: {}, fileName: {}",
+                plantIds, aopYear, file != null ? file.getOriginalFilename() : "null");
+        AOPMessageVM vm = new AOPMessageVM();
+
+        try {
+            List<CPPFuelRatioDTO> excelData = readFuelRatioExcel(file.getInputStream());
+            logger.info("[FuelRatio] Import - read {} records from Excel", excelData.size());
+
+            List<CPPFuelRatioDTO> validRecords = new ArrayList<>();
+            List<CPPFuelRatioDTO> failedRecords = new ArrayList<>();
+            List<String> failureReasons = new ArrayList<>();
+            int skippedCount = 0;
+
+            for (CPPFuelRatioDTO dto : excelData) {
+                // 1. Validate id present + exists
+                String validationError = validateFuelRatioRow(dto);
+                if (validationError != null) {
+                    failedRecords.add(dto);
+                    failureReasons.add(validationError);
+                    logger.warn("[FuelRatio] Import - invalid record (id={}): {}", dto.getId(), validationError);
+                    continue;
+                }
+
+                // 2. Hash-based change detection
+                String uploadedHash = computeFuelRatioRowHash(dto);
+                String embeddedHash = dto.getRowHash();
+                boolean rowChanged = embeddedHash == null || !embeddedHash.equals(uploadedHash);
+                if (!rowChanged) {
+                    skippedCount++;
+                    logger.debug("[FuelRatio] Import - skipping unchanged record id={}", dto.getId());
+                    continue;
+                }
+
+                // 3. Remarks must be updated when values change
+                String remarkError = validateFuelRatioRemarksUpdated(dto);
+                if (remarkError != null) {
+                    failedRecords.add(dto);
+                    failureReasons.add(remarkError);
+                    logger.warn("[FuelRatio] Import - remarks not updated for id={}: {}", dto.getId(), remarkError);
+                    continue;
+                }
+
+                validRecords.add(dto);
+            }
+
+            logger.info("[FuelRatio] Import - {} unchanged (skipped), {} to update, {} failed",
+                    skippedCount, validRecords.size(), failedRecords.size());
+
+            // 4. Persist
+            int updated = 0;
+            for (CPPFuelRatioDTO dto : validRecords) {
+                try {
+                    int rows = fuelRatioRepository.updateFuelRatio(
+                            dto.getId(),
+                            dto.getFuelFkId(),
+                            dto.getFuelName(),
+                            dto.getGcvApr(),
+                            dto.getGcvMay(),
+                            dto.getGcvJun(),
+                            dto.getGcvJul(),
+                            dto.getGcvAug(),
+                            dto.getGcvSep(),
+                            dto.getGcvOct(),
+                            dto.getGcvNov(),
+                            dto.getGcvDec(),
+                            dto.getGcvJan(),
+                            dto.getGcvFeb(),
+                            dto.getGcvMar(),
+                            dto.getPercentageByWtApr(),
+                            dto.getPercentageByWtMay(),
+                            dto.getPercentageByWtJun(),
+                            dto.getPercentageByWtJul(),
+                            dto.getPercentageByWtAug(),
+                            dto.getPercentageByWtSep(),
+                            dto.getPercentageByWtOct(),
+                            dto.getPercentageByWtNov(),
+                            dto.getPercentageByWtDec(),
+                            dto.getPercentageByWtJan(),
+                            dto.getPercentageByWtFeb(),
+                            dto.getPercentageByWtMar(),
+                            dto.getRemarks());
+                    if (rows > 0) {
+                        updated++;
+                    } else {
+                        failedRecords.add(dto);
+                        failureReasons.add("Record with this ID does not exist in database");
+                    }
+                } catch (Exception e) {
+                    failedRecords.add(dto);
+                    failureReasons.add("Save failed: " + e.getMessage());
+                    logger.error("[FuelRatio] Import - error saving id={}: {}", dto.getId(), e.getMessage(), e);
+                }
+            }
+
+            // 5. Build response
+            if (failedRecords.isEmpty()) {
+                vm.setCode(200);
+                if (updated == 0 && skippedCount > 0) {
+                    vm.setMessage("No changes detected. All " + skippedCount + " records are unchanged.");
+                } else {
+                    vm.setMessage("Imported successfully. Updated: " + updated
+                            + ", Unchanged: " + skippedCount + ".");
+                }
+                vm.setData(null);
+            } else {
+                byte[] errorFile = buildFuelRatioErrorExcel(failedRecords, failureReasons, aopYear);
+                String base64File = java.util.Base64.getEncoder().encodeToString(errorFile);
+                vm.setCode(400);
+                vm.setMessage("Partial import: " + updated + " updated, " + skippedCount
+                        + " unchanged, " + failedRecords.size() + " failed. Download error file for details.");
+                vm.setData(base64File);
+                logger.info("[FuelRatio] Import - exported {} failed records to error Excel", failedRecords.size());
+            }
+
+            logger.info("[FuelRatio] Import - completed. Updated: {}, Unchanged: {}, Failed: {}",
+                    updated, skippedCount, failedRecords.size());
+
+        } catch (Exception e) {
+            logger.error("[FuelRatio] Import error: {}", e.getMessage(), e);
+            vm.setCode(500);
+            vm.setMessage("Failed to import: " + e.getMessage());
+            vm.setData(null);
+        }
+        return vm;
+    }
+
+    private List<CPPFuelRatioDTO> readFuelRatioExcel(InputStream inputStream) throws Exception {
+        List<CPPFuelRatioDTO> records = new ArrayList<>();
+        try (XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            for (Row row : ExcelRows.getDataRows(sheet, 1)) {
+                CPPFuelRatioDTO dto = new CPPFuelRatioDTO();
+                int col = 0;
+
+                // Static column (0)
+                dto.setFuelName(ExcelCells.toStringValue(row.getCell(col++)));
+
+                // GCV + PercentageByWt for each month (1-24)
+                dto.setGcvApr(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtApr(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvMay(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtMay(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvJun(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtJun(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvJul(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtJul(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvAug(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtAug(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvSep(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtSep(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvOct(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtOct(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvNov(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtNov(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvDec(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtDec(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvJan(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtJan(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvFeb(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtFeb(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setGcvMar(ExcelCells.toDouble(row.getCell(col++)));
+                dto.setPercentageByWtMar(ExcelCells.toDouble(row.getCell(col++)));
+
+                // Remarks (25)
+                dto.setRemarks(ExcelCells.toStringValue(row.getCell(col++)));
+
+                // Hidden: id (26)
+                String idStr = ExcelCells.toStringValue(row.getCell(col++));
+                if (idStr != null && !idStr.trim().isEmpty()) {
+                    try {
+                        dto.setId(UUID.fromString(idStr.trim()));
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("[FuelRatio] Import - invalid UUID: {}", idStr);
+                    }
+                }
+
+                // Hidden: row hash (27)
+                dto.setRowHash(ExcelCells.toStringValue(row.getCell(col++)));
+
+                records.add(dto);
+            }
+        }
+        return records;
+    }
+
+    private String validateFuelRatioRow(CPPFuelRatioDTO dto) {
+        if (dto.getId() == null) {
+            return "Record ID is missing – the hidden 'id' column must not be modified.";
+        }
+        try {
+            Optional<CPPFuelRatio> optEntity = fuelRatioRepository.findById(dto.getId());
+            if (optEntity.isEmpty()) {
+                return "Record with this ID does not exist in the database.";
+            }
+        } catch (Exception e) {
+            logger.error("[FuelRatio] Import validation - error checking id={}: {}", dto.getId(), e.getMessage());
+        }
+        return null;
+    }
+
+    private String validateFuelRatioRemarksUpdated(CPPFuelRatioDTO dto) {
+        if (dto.getRemarks() == null || dto.getRemarks().trim().isEmpty()) {
+            return "Remarks are required when changing values. Please add a remark explaining the change.";
+        }
+        try {
+            Optional<CPPFuelRatio> optEntity = fuelRatioRepository.findById(dto.getId());
+            if (optEntity.isPresent()) {
+                String dbRemarks = optEntity.get().getRemarks() != null ? optEntity.get().getRemarks().trim() : "";
+                String importRemarks = dto.getRemarks().trim();
+                if (dbRemarks.equals(importRemarks)) {
+                    return "Remarks must be updated when changing values.";
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[FuelRatio] Import remarks validation - error for id={}: {}", dto.getId(), e.getMessage());
+        }
+        return null;
+    }
+
+    private String computeFuelRatioRowHash(CPPFuelRatioDTO dto) {
+        String raw = String.join("|",
+                fmt(dto.getGcvApr()), fmt(dto.getPercentageByWtApr()),
+                fmt(dto.getGcvMay()), fmt(dto.getPercentageByWtMay()),
+                fmt(dto.getGcvJun()), fmt(dto.getPercentageByWtJun()),
+                fmt(dto.getGcvJul()), fmt(dto.getPercentageByWtJul()),
+                fmt(dto.getGcvAug()), fmt(dto.getPercentageByWtAug()),
+                fmt(dto.getGcvSep()), fmt(dto.getPercentageByWtSep()),
+                fmt(dto.getGcvOct()), fmt(dto.getPercentageByWtOct()),
+                fmt(dto.getGcvNov()), fmt(dto.getPercentageByWtNov()),
+                fmt(dto.getGcvDec()), fmt(dto.getPercentageByWtDec()),
+                fmt(dto.getGcvJan()), fmt(dto.getPercentageByWtJan()),
+                fmt(dto.getGcvFeb()), fmt(dto.getPercentageByWtFeb()),
+                fmt(dto.getGcvMar()), fmt(dto.getPercentageByWtMar()),
+                dto.getRemarks() != null ? dto.getRemarks().trim() : "");
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hash = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(hash.length * 2);
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            logger.warn("[FuelRatio] computeRowHash - MD5 unavailable, using raw string as fallback");
+            return raw;
+        }
+    }
+
+    private byte[] buildFuelRatioErrorExcel(List<CPPFuelRatioDTO> failedRecords,
+                                             List<String> failureReasons, String aopYear) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Failed Records");
+
+        CellStyle headerStyle = ExcelStyles.createHeaderStyle(workbook);
+        CellStyle dataStyle = ExcelStyles.createDataStyle(workbook);
+        CellStyle remarksStyle = ExcelStyles.createRemarksStyle(workbook);
+        CellStyle errorStyle = ExcelStyles.createErrorStyle(workbook);
+
+        String[] monthHeaders = FiscalYearMonths.getMonthHeaders(aopYear);
+
+        List<String> headers = new ArrayList<>();
+        headers.add("Fuel");
+        for (String mh : monthHeaders) {
+            headers.add("GCV " + mh);
+            headers.add("PercentageByWt " + mh);
+        }
+        headers.add("Remarks");
+        headers.add("Status");
+        headers.add("Comment");
+
+        Row headerRow = sheet.createRow(0);
+        for (int c = 0; c < headers.size(); c++) {
+            ExcelCells.setString(headerRow.createCell(c), headers.get(c), headerStyle);
+        }
+
+        for (int i = 0; i < failedRecords.size(); i++) {
+            CPPFuelRatioDTO dto = failedRecords.get(i);
+            Row row = sheet.createRow(i + 1);
+            int col = 0;
+
+            ExcelCells.setString(row.createCell(col++), dto.getFuelName(), dataStyle);
+
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtApr(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtMay(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJun(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJul(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtAug(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtSep(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtOct(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtNov(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtDec(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtJan(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtFeb(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getGcvMar(), dataStyle);
+            ExcelCells.setDouble(row.createCell(col++), dto.getPercentageByWtMar(), dataStyle);
+
+            ExcelCells.setString(row.createCell(col++), dto.getRemarks(), remarksStyle);
+            ExcelCells.setString(row.createCell(col++), "Failed", errorStyle);
+            ExcelCells.setString(row.createCell(col++), failureReasons.get(i), errorStyle);
+        }
+
+        ExcelColumns.autoSize(sheet, headers.size(), -1);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        workbook.close();
+        return baos.toByteArray();
     }
 
     /**

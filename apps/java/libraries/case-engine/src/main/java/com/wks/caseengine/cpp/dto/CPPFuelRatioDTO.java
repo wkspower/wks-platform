@@ -20,15 +20,62 @@ public class CPPFuelRatioDTO {
     @JsonProperty("fuelName")
     private String fuelName;
 
-    @JsonProperty("gcv")
-    private Double gcv;
+    @JsonProperty("gcvApr")
+    private Double gcvApr;
+    @JsonProperty("gcvMay")
+    private Double gcvMay;
+    @JsonProperty("gcvJun")
+    private Double gcvJun;
+    @JsonProperty("gcvJul")
+    private Double gcvJul;
+    @JsonProperty("gcvAug")
+    private Double gcvAug;
+    @JsonProperty("gcvSep")
+    private Double gcvSep;
+    @JsonProperty("gcvOct")
+    private Double gcvOct;
+    @JsonProperty("gcvNov")
+    private Double gcvNov;
+    @JsonProperty("gcvDec")
+    private Double gcvDec;
+    @JsonProperty("gcvJan")
+    private Double gcvJan;
+    @JsonProperty("gcvFeb")
+    private Double gcvFeb;
+    @JsonProperty("gcvMar")
+    private Double gcvMar;
 
-    @JsonProperty("percentageByWt")
-    private Double percentageByWt;
+    @JsonProperty("percentageByWtApr")
+    private Double percentageByWtApr;
+    @JsonProperty("percentageByWtMay")
+    private Double percentageByWtMay;
+    @JsonProperty("percentageByWtJun")
+    private Double percentageByWtJun;
+    @JsonProperty("percentageByWtJul")
+    private Double percentageByWtJul;
+    @JsonProperty("percentageByWtAug")
+    private Double percentageByWtAug;
+    @JsonProperty("percentageByWtSep")
+    private Double percentageByWtSep;
+    @JsonProperty("percentageByWtOct")
+    private Double percentageByWtOct;
+    @JsonProperty("percentageByWtNov")
+    private Double percentageByWtNov;
+    @JsonProperty("percentageByWtDec")
+    private Double percentageByWtDec;
+    @JsonProperty("percentageByWtJan")
+    private Double percentageByWtJan;
+    @JsonProperty("percentageByWtFeb")
+    private Double percentageByWtFeb;
+    @JsonProperty("percentageByWtMar")
+    private Double percentageByWtMar;
 
     @JsonProperty("remarks")
     private String remarks;
 
     @JsonProperty("aopYear")
     private String aopYear;
+
+    @JsonProperty("rowHash")
+    private String rowHash;
 }
