@@ -920,11 +920,8 @@ const DecokingConfigNMD = () => {
       showAccordian: true,
       showCalculate: true,
       showCalculateNextYear: false,
-      // showCalculateVisibility:
-      //   Object.keys(calculationObject || {}).length > 0 ? true : false,
-
-      //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
-      showCalculateVisibility: false,
+      showCalculateVisibility:
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       byDefCollaps: false,
