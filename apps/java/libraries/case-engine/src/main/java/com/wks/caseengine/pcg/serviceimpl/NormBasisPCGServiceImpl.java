@@ -215,12 +215,22 @@ public class NormBasisPCGServiceImpl implements NormBasisPCGService {
 
 		String sql = "EXEC " + "[" + procedureName + "]" + " @plantId = ?, @aopYear = ?";
 
-		return jdbcTemplate.query(sql, (rs, rowNum) -> GasifierDropdownAopBasisDTO.builder()
-				.name(rs.getString("name"))
-				.displayName(rs.getString("displayName"))
-				.configuration(rs.getString("configuration"))
-				.build(),
-				plantId.toString(), aopYear);
+		return jdbcTemplate.query(sql, (rs, rowNum) -> {
+			String id = null;
+			try {
+				id = rs.getString("id");
+			} catch (Exception e1) {
+				try {
+					id = rs.getString("Id");
+				} catch (Exception ignored) {}
+			}
+			return GasifierDropdownAopBasisDTO.builder()
+					.id(id)
+					.name(rs.getString("name"))
+					.displayName(rs.getString("displayName"))
+					.configuration(rs.getString("configuration"))
+					.build();
+		}, plantId.toString(), aopYear);
 	}
 
 	@Override
