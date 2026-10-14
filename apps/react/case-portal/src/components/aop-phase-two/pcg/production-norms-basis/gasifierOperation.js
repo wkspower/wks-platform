@@ -72,31 +72,72 @@ const GasifierOperation = () => {
     setRemarkDialogOpen(true)
   }
 
+  // Dynamic G-Operation dropdown options from API with fallback
+  const gOperationOptions = useMemo(() => {
+    if (dropdownList.length > 0) {
+      const nameCount = {}
+      dropdownList.forEach((d) => {
+        const k = (d.displayName || d.name || '').trim()
+        nameCount[k] = (nameCount[k] || 0) + 1
+      })
+
+      return dropdownList.map((item, idx) => {
+        const baseName = (item.displayName || item.name || '').trim()
+        const isDuplicate = nameCount[baseName] > 1
+
+        const label = baseName
+        const gId = item.id || item.gId || item.gid || item.GId || null
+
+        // Ensure unique value (using gId) so Kendo DropDownList (dataItemKey="value") can distinguish each item
+        const value =
+          gId ||
+          (isDuplicate && item.configuration
+            ? `${baseName}__${item.configuration}`
+            : isDuplicate
+              ? `${baseName}__${idx}`
+              : baseName)
+
+        return {
+          label,
+          value,
+          id: gId,
+          gId: gId,
+          name: item.name || baseName,
+          displayName: item.displayName || baseName,
+          configuration: item.configuration || '',
+        }
+      })
+    }
+    return G_OPERATION_OPTIONS
+  }, [dropdownList])
+
   // Get config string for a selected G-Operation
   const getConfigForOperation = useCallback(
     (gOp) => {
       if (!gOp) return ''
+      const opStr = String(gOp).trim().toLowerCase()
+      const matchedOption = gOperationOptions.find(
+        (opt) =>
+          (opt.value && String(opt.value).trim().toLowerCase() === opStr) ||
+          (opt.id && String(opt.id).trim().toLowerCase() === opStr) ||
+          (opt.gId && String(opt.gId).trim().toLowerCase() === opStr) ||
+          (opt.name && opt.name.trim().toLowerCase() === opStr) ||
+          (opt.displayName && opt.displayName.trim().toLowerCase() === opStr),
+      )
+      if (matchedOption?.configuration) return matchedOption.configuration
+
       const found = dropdownList.find(
         (d) =>
-          (d.name || d.displayName)?.trim().toLowerCase() ===
-          String(gOp).trim().toLowerCase(),
+          (d.id && String(d.id).trim().toLowerCase() === opStr) ||
+          (d.gId && String(d.gId).trim().toLowerCase() === opStr) ||
+          (d.name && d.name.trim().toLowerCase() === opStr) ||
+          (d.displayName && d.displayName.trim().toLowerCase() === opStr),
       )
       if (found?.configuration) return found.configuration
       return getGConfigurationString(gOp)
     },
-    [dropdownList],
+    [gOperationOptions, dropdownList],
   )
-
-  // Dynamic G-Operation dropdown options from API with fallback
-  const gOperationOptions = useMemo(() => {
-    if (dropdownList.length > 0) {
-      return dropdownList.map((item) => ({
-        label: item.displayName || item.name,
-        value: item.name || item.displayName,
-      }))
-    }
-    return G_OPERATION_OPTIONS
-  }, [dropdownList])
 
   // Column definitions for AdvanceKendoTable
   const columns = useMemo(
@@ -221,26 +262,35 @@ const GasifierOperation = () => {
         )
       const list = Array.isArray(response) ? response : response?.data || []
 
+      const activeDropdowns =
+        currentDropdowns.length > 0 ? currentDropdowns : dropdownList
+
       if (Array.isArray(list) && list.length > 0) {
         const formattedRows = list.map((item, index) => {
-          const opName = item?.gOperation || ''
-          const matchingDd = (currentDropdowns.length > 0
-            ? currentDropdowns
-            : dropdownList
-          ).find(
+          const rawOp = String(item?.gOperation || '').trim()
+          const rawOpLower = rawOp.toLowerCase()
+
+          // Match by id, gId, or name/displayName case-insensitively
+          const matchedDd = activeDropdowns.find(
             (d) =>
-              (d.name || d.displayName)?.trim().toLowerCase() ===
-              opName.trim().toLowerCase(),
+              (d.id && String(d.id).trim().toLowerCase() === rawOpLower) ||
+              (d.gId && String(d.gId).trim().toLowerCase() === rawOpLower) ||
+              (d.name && d.name.trim().toLowerCase() === rawOpLower) ||
+              (d.displayName &&
+                d.displayName.trim().toLowerCase() === rawOpLower),
           )
+
           const configStr =
-            matchingDd?.configuration || getGConfigurationString(opName)
+            matchedDd?.configuration ||
+            getGConfigurationString(matchedDd?.name || rawOp)
+          const gIdValue = matchedDd?.id || matchedDd?.gId || rawOp
 
           return {
             ...item,
             id: item?.id || index + 1,
             idFromApi: item?.id || null,
             particulars: 'Gasifier Operation',
-            gOperation: opName,
+            gOperation: gIdValue,
             gConfiguration: configStr,
             plantId: item?.plantId || PLANT_ID,
             aopYear: item?.aopYear || AOP_YEAR,
@@ -251,16 +301,21 @@ const GasifierOperation = () => {
         })
         setRows(formattedRows)
       } else {
-        const defaultOp = currentDropdowns[0]?.name || '4G Operation'
+        const defaultItem = currentDropdowns[0]
+        const defaultGId =
+          defaultItem?.id ||
+          defaultItem?.gId ||
+          defaultItem?.name ||
+          '4G Operation'
         const defaultConf =
-          currentDropdowns[0]?.configuration ||
-          getGConfigurationString(defaultOp)
+          defaultItem?.configuration ||
+          getGConfigurationString(defaultItem?.name || '4G Operation')
         setRows([
           {
             id: 1,
             idFromApi: null,
             particulars: 'Gasifier Operation',
-            gOperation: defaultOp,
+            gOperation: defaultGId,
             gConfiguration: defaultConf,
             plantId: PLANT_ID,
             aopYear: AOP_YEAR,
@@ -276,11 +331,39 @@ const GasifierOperation = () => {
     } finally {
       setLoading(false)
     }
-  }, [PLANT_ID, AOP_YEAR, keycloak, dropdownList, READ_ONLY])
+  }, [
+    PLANT_ID,
+    AOP_YEAR,
+    keycloak,
+    dropdownList,
+    gOperationOptions,
+    getConfigForOperation,
+    READ_ONLY,
+  ])
 
   useEffect(() => {
     fetchData()
   }, [PLANT_ID, AOP_YEAR])
+
+  // Ensure G-Configuration is synced whenever dropdownList or rows load
+  useEffect(() => {
+    if (rows.length > 0 && dropdownList.length > 0) {
+      setRows((prev) => {
+        let changed = false
+        const nextRows = prev.map((r) => {
+          if (!r.gConfiguration && r.gOperation) {
+            const resolvedConfig = getConfigForOperation(r.gOperation)
+            if (resolvedConfig) {
+              changed = true
+              return { ...r, gConfiguration: resolvedConfig }
+            }
+          }
+          return r
+        })
+        return changed ? nextRows : prev
+      })
+    }
+  }, [dropdownList, getConfigForOperation])
 
   // Handler for save button
   const saveChanges = useCallback(async () => {
@@ -299,9 +382,26 @@ const GasifierOperation = () => {
 
     setLoading(true)
     try {
+      const targetOp = String(targetRow.gOperation || '').trim().toLowerCase()
+      const selectedOpt = gOperationOptions.find(
+        (opt) =>
+          (opt.value && String(opt.value).trim().toLowerCase() === targetOp) ||
+          (opt.id && String(opt.id).trim().toLowerCase() === targetOp) ||
+          (opt.gId && String(opt.gId).trim().toLowerCase() === targetOp) ||
+          (opt.name && opt.name.trim().toLowerCase() === targetOp) ||
+          (opt.displayName && opt.displayName.trim().toLowerCase() === targetOp),
+      )
+
+      // Ensure we send gId in gOperation
+      const gIdToSave =
+        selectedOpt?.id ||
+        selectedOpt?.gId ||
+        targetRow.gOperation ||
+        ''
+
       const payload = {
         id: targetRow.idFromApi || null,
-        gOperation: targetRow.gOperation || '',
+        gOperation: gIdToSave,
         plantId: targetRow.plantId || PLANT_ID,
         aopYear: AOP_YEAR,
         normParameterId: targetRow.normParameterId || null,
@@ -342,7 +442,7 @@ const GasifierOperation = () => {
     } finally {
       setLoading(false)
     }
-  }, [modifiedCells, rows, PLANT_ID, AOP_YEAR, keycloak, fetchData])
+  }, [modifiedCells, rows, PLANT_ID, AOP_YEAR, keycloak, fetchData, gOperationOptions])
 
   const handleExport = useCallback(() => {
     setSnackbarOpen(true)
