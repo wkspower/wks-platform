@@ -123,6 +123,105 @@ export const getConfigurationExecutionDetails = async (
 }
 
 /**
+ * Build payload for configuration execution test
+ */
+export const buildConfigurationPayloadTest = (
+  startDate,
+  endDate,
+  configurationExecutionDetails,
+  PLANT_ID,
+  AOP_YEAR,
+  sorStartDate,
+  sorEndDate,
+  eorStartDate,
+  eorEndDate,
+) => {
+  const startDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'StartDate',
+  )
+  const endDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'EndDate',
+  )
+  const sorStartDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'SORStartDate',
+  )
+  const sorEndDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'SOREndDate',
+  )
+  const eorStartDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'SlowDownStartDate',
+  )
+  const eorEndDateObj = configurationExecutionDetails.find(
+    (item) => item.Name === 'SlowDownEndDate',
+  )
+
+  if (!startDateObj?.NormParameter_FK_Id || !endDateObj?.NormParameter_FK_Id) {
+    return null
+  }
+
+  let buildPayload = [
+    {
+      apr: formatDate(startDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: startDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: startDateObj?.Id || null,
+      plantId: PLANT_ID,
+    },
+    {
+      apr: formatDate(endDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: endDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: endDateObj?.Id || null,
+      plantId: PLANT_ID,
+    },
+  ]
+  if (sorStartDateObj?.NormParameter_FK_Id && sorEndDateObj?.NormParameter_FK_Id) {
+    buildPayload.push({
+      apr: formatDate(sorStartDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: sorStartDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: sorStartDateObj?.Id || null,
+      plantId: PLANT_ID,
+    })
+    buildPayload.push({
+      apr: formatDate(sorEndDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: sorEndDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: sorEndDateObj?.Id || null,
+      plantId: PLANT_ID,
+    })
+  }
+  if (eorStartDateObj?.NormParameter_FK_Id && eorEndDateObj?.NormParameter_FK_Id) {
+    buildPayload.push({
+      apr: formatDate(eorStartDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: eorStartDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: eorStartDateObj?.Id || null,
+      plantId: PLANT_ID,
+    })
+    buildPayload.push({
+      apr: formatDate(eorEndDate),
+      UOM: '',
+      auditYear: AOP_YEAR,
+      normParameterFKId: eorEndDateObj?.NormParameter_FK_Id,
+      remarks: 'Initiated',
+      id: eorEndDateObj?.Id || null,
+      plantId: PLANT_ID,
+    })
+  }
+  return buildPayload
+}
+/**
  * Build payload for configuration execution
  */
 export const buildConfigurationPayload = (
