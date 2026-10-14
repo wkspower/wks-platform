@@ -25,4 +25,9 @@ public interface JMDEfficiencyAndFuelRatioService {
 
     AOPMessageVM saveFuelRatio(List<UUID> plantIds, String aopYear,
                                List<CPPFuelRatioDTO> dtoList);
+
+    byte[] exportFuelRatio(List<UUID> plantIds, String aopYear);
+
+    AOPMessageVM importFuelRatio(List<UUID> plantIds, String aopYear,
+                                 MultipartFile file);
 }

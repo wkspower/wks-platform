@@ -206,4 +206,65 @@ public class JMDEfficiencyAndFuelRatioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    // GET /task/jmd/fuel-ratio/export?plantIds=...&aopYear=...
+    @GetMapping("/jmd/fuel-ratio/export")
+    public ResponseEntity<byte[]> exportFuelRatio(
+            @RequestParam List<UUID> plantIds,
+            @RequestParam String aopYear
+    ) {
+        log.info("=== GET JMD FuelRatio Export === plantIds: {}, aopYear: {}", plantIds, aopYear);
+        try {
+            byte[] excelData = efficiencyAndFuelRatioService.exportFuelRatio(plantIds, aopYear);
+
+            if (excelData == null || excelData.length == 0) {
+                log.error("=== GET JMD FuelRatio Export === Failed to generate Excel");
+                return ResponseEntity.status(500).body(null);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment",
+                    "FuelRatio_" + aopYear + ".xlsx");
+
+            log.info("=== GET JMD FuelRatio Export === Excel generated, {} bytes", excelData.length);
+            return ResponseEntity.ok().headers(headers).body(excelData);
+        } catch (Exception e) {
+            log.error("=== GET JMD FuelRatio Export === Error: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    // POST /task/jmd/fuel-ratio/import?plantIds=...&aopYear=...
+    @PostMapping(value = "/jmd/fuel-ratio/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AOPMessageVM> importFuelRatio(
+            @RequestParam List<UUID> plantIds,
+            @RequestParam String aopYear,
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("=== POST JMD FuelRatio Import === plantIds: {}, aopYear: {}, file: {}",
+                plantIds, aopYear, file != null ? file.getOriginalFilename() : "null");
+
+        if (file == null || file.isEmpty()) {
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(400);
+            errorResponse.setMessage("File is required");
+            errorResponse.setData(null);
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        try {
+            AOPMessageVM response = efficiencyAndFuelRatioService.importFuelRatio(plantIds, aopYear, file);
+            log.info("=== POST JMD FuelRatio Import === code: {}, message: {}",
+                    response.getCode(), response.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("=== POST JMD FuelRatio Import === Error: {}", e.getMessage(), e);
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(500);
+            errorResponse.setMessage("Failed to import data: " + e.getMessage());
+            errorResponse.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
