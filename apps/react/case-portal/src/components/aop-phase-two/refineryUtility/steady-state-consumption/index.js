@@ -32,7 +32,7 @@ const MONTH_FIELDS = [
 ]
 
 const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
-const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3']
+const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3', 'kg/km3']
 
 const SteadyStateConsumption = () => {
   const keycloak = useSession()
