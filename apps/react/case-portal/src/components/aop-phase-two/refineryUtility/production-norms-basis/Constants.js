@@ -48,6 +48,11 @@ const Constants = ({ startDate, endDate }) => {
         (siteName === 'SEZ' && plantName === 'AIR & ASU') ||
         (siteName === 'C2' && plantName === 'ASU') ||
         (siteName === 'C2' && plantName === 'AIR')
+      
+      const isDtapcgCtPlant =
+    siteName.toLowerCase() === 'dta_pcg' &&
+    (plantName.toLowerCase() === 'ct1 (g731)' ||
+      plantName.toLowerCase() === 'ct3 (g733)')
 
       const isDtaCtPlant =
         siteName === 'DTA' &&
@@ -91,7 +96,7 @@ const Constants = ({ startDate, endDate }) => {
       // 1 decimal conditions:
       // 1) COC for DTA site and CT4 / CT6 plants
       // 2) Name like 'Cooling Water Design' for DMD site
-      if ((isCoc && isDtaCtPlant) || (isDmdSite && isCoolingWaterDesign)) {
+      if ((isCoc && isDtaCtPlant) || (isDmdSite && isCoolingWaterDesign) ||(isCoc && isDtapcgCtPlant)) {
         return (Math.trunc(num * 10) / 10).toFixed(1)
       }
 

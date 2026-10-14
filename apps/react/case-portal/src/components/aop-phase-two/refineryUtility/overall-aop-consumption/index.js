@@ -10,6 +10,7 @@ import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import { generateExcelName } from 'components/aop-phase-two/common/utilities/excelNameUtil'
 
 const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
+const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3']
 
 const OverallAopConsumption = () => {
   const keycloak = useSession()
@@ -24,6 +25,10 @@ const OverallAopConsumption = () => {
   const isDtaCtPlant =
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
+  const isDtapcgCtPlant =
+    siteName.toLowerCase() === 'dta_pcg' &&
+    (plantName.toLowerCase() === 'ct1 (g731)' ||
+      plantName.toLowerCase() === 'ct3 (g733)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -62,6 +67,18 @@ const OverallAopConsumption = () => {
         }
         return Math.trunc(num).toString()
       }
+      if (isDtapcgCtPlant) {
+        const cleanUom = String(uom ?? '')
+          .trim()
+          .toLowerCase()
+        const isThreeDecimal = decimalUOM.some(
+          (u) => u.trim().toLowerCase() === cleanUom,
+        )
+        if (isThreeDecimal) {
+          return (Math.trunc(num * 1000) / 1000).toFixed(3)
+        }
+        return Math.trunc(num).toString()
+      }
 
       if (isAsuPlant || isFCCTame) {
         return (Math.trunc(num * 100000) / 100000).toFixed(5)
@@ -69,7 +86,7 @@ const OverallAopConsumption = () => {
 
       return Math.trunc(num).toString()
     },
-    [isDtaCtPlant, isAsuPlant, isFCCTame],
+    [isDtaCtPlant, isAsuPlant, isFCCTame,isDtapcgCtPlant],
   )
 
   const columns = useMemo(() => {
@@ -223,13 +240,13 @@ const OverallAopConsumption = () => {
         format: valueFormat,
       },
     ]
-  }, [AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame])
+  }, [AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant])
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame])
+  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant])
 
   const fetchData = async () => {
     setLoading(true)
