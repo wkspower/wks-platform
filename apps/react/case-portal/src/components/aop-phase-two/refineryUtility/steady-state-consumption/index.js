@@ -32,6 +32,7 @@ const MONTH_FIELDS = [
 ]
 
 const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
+const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3', 'kg/km3']
 
 const SteadyStateConsumption = () => {
   const keycloak = useSession()
@@ -50,6 +51,10 @@ const SteadyStateConsumption = () => {
   const isDtaCtPlant =
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
+  const isDtapcgCtPlant =
+    siteName.toLowerCase() === 'dta_pcg' &&
+    (plantName.toLowerCase() === 'ct1 (g731)' ||
+      plantName.toLowerCase() === 'ct3 (g733)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -61,6 +66,8 @@ const SteadyStateConsumption = () => {
     (siteName === 'C2' &&
       (plantName.toLowerCase() === 'air' ||
         plantName.toLowerCase() === 'c2_asu'))
+
+  
 
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -94,13 +101,26 @@ const SteadyStateConsumption = () => {
         return Math.trunc(num).toString()
       }
 
+      if (isDtapcgCtPlant) {
+        const cleanUom = String(uom ?? '')
+          .trim()
+          .toLowerCase()
+        const isThreeDecimal = decimalUOM.some(
+          (u) => u.trim().toLowerCase() === cleanUom,
+        )
+        if (isThreeDecimal) {
+          return (Math.trunc(num * 1000) / 1000).toFixed(3)
+        }
+        return Math.trunc(num).toString()
+      }
+
       if (isAsuPlant || isFCCTame) {
         return (Math.trunc(num * 100000) / 100000).toFixed(5)
       }
 
       return Math.trunc(num).toString()
     },
-    [isDtaCtPlant, isAsuPlant, isFCCTame],
+    [isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame],
   )
 
   const columns = useMemo(() => {
@@ -272,7 +292,7 @@ const SteadyStateConsumption = () => {
         editable: true,
       },
     ]
-  }, [isDtaCtPlant, isAsuPlant, isFCCTame, AOP_YEAR])
+  }, [isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame, AOP_YEAR])
 
   const dummyRows = []
 
@@ -280,7 +300,7 @@ const SteadyStateConsumption = () => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame])
+  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame])
 
   const fetchData = async () => {
     setLoading(true)
@@ -300,14 +320,14 @@ const SteadyStateConsumption = () => {
           isEditable: true,
         }
         const uom = item?.UOM || item?.uom || ''
-        if (isDtaCtPlant) {
+        if (isDtaCtPlant || isDtapcgCtPlant) {
           MONTH_FIELDS.forEach((m) => {
             if (row[m] !== undefined && row[m] !== null && row[m] !== '') {
               row[m] = formatValueByUom(row[m], uom)
             }
           })
         } else {
-          // Apart from isDtaCtPlant: show by default 2 decimals
+          // Apart from isDtaCtPlant / isDtapcgCtPlant: show by default 2 decimals
           MONTH_FIELDS.forEach((m) => {
             if (row[m] !== undefined && row[m] !== null && row[m] !== '') {
               row[m] = formatValueByUom(row[m], uom)
@@ -346,7 +366,7 @@ const SteadyStateConsumption = () => {
       .map((row) => {
         const uom = row?.UOM || row?.uom || ''
         const updatedRow = { ...row }
-        if (isDtaCtPlant) {
+        if (isDtaCtPlant || isDtapcgCtPlant) {
           MONTH_FIELDS.forEach((m) => {
             if (
               updatedRow[m] !== undefined &&
@@ -357,7 +377,7 @@ const SteadyStateConsumption = () => {
             }
           })
         } else {
-          // Apart from isDtaCtPlant: show by default 2 decimals
+          // Apart from isDtaCtPlant / isDtapcgCtPlant: show by default 2 decimals
           MONTH_FIELDS.forEach((m) => {
             if (
               updatedRow[m] !== undefined &&

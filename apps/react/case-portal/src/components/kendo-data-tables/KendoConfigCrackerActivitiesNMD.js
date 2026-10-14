@@ -1160,7 +1160,7 @@ const DecokingConfigNMD = () => {
             />
           </Box>
 
-          {otherFurnanceDetailsList.map((item, idx) => (
+          {/* {otherFurnanceDetailsList.map((item, idx) => (
             <Box
               key={item.id || item.name || idx}
               sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
@@ -1224,7 +1224,7 @@ const DecokingConfigNMD = () => {
                 }}
               />
             </Box>
-          ))}
+          ))} */}
         </Box>
       </LocalizationProvider>
 
