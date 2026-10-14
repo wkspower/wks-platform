@@ -366,7 +366,7 @@ async function loadButtonNormCalculation(
   periodFrom,
   periodTo,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/vgoht/load-button-norm-calculation?plantId=${plantId}&aopYear=${aopYear}&siteId=${siteId}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+  const url = `${Config.CaseEngineUrl}/task/load-button-norm-calculation?plantId=${plantId}&aopYear=${aopYear}&siteId=${siteId}&periodFrom=${periodFrom}&periodTo=${periodTo}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
