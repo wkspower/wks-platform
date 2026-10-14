@@ -70,7 +70,7 @@ const Efficiency = () => {
       title: 'Asset Name',
       type: 'text',
       editable: false,
-      locked: false,
+      locked: true,
       minWidth: 200,
     },
     {
@@ -78,12 +78,14 @@ const Efficiency = () => {
       title: 'Type',
       type: 'text',
       editable: false,
+      locked: true,
       minWidth: 100,
     },
     {
       field: 'uom',
       title: 'UOM',
       type: 'text',
+      locked: true,
       editable: false,
       minWidth: 120,
     },

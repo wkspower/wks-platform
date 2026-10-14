@@ -8,6 +8,8 @@ export const EfficiencyAndFuelRatioAPIService = {
   importEfficiency,
   getFuelRatio,
   saveFuelRatio,
+  exportFuelRatio,
+  importFuelRatio,
 }
 
 // ===================== GENERIC HELPERS ===================== //
@@ -167,5 +169,66 @@ async function saveFuelRatio(keycloak, plantIds, aopYear, payload) {
   } catch (e) {
     console.error('Error saving fuel ratio data:', e)
     return await Promise.reject(e)
+  }
+}
+
+// ===================== || FUEL RATIO EXPORT || ===================== //
+// GET /task/jmd/fuel-ratio/export?plantIds=...&aopYear=...
+async function exportFuelRatio(keycloak, plantIds, aopYear, fileName) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/fuel-ratio/export?plantIds=${queryParams}&aopYear=${aopYear}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    const blob = await resp.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName || `FuelRatio_${aopYear}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(downloadUrl)
+  } catch (e) {
+    console.error('Error exporting fuel ratio data:', e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || FUEL RATIO IMPORT || ===================== //
+// POST /task/jmd/fuel-ratio/import?plantIds=...&aopYear=...
+async function importFuelRatio(file, keycloak, plantIds, aopYear) {
+  const queryParams = buildPlantIdsParam(plantIds)
+  const url = `${Config.CaseEngineUrl}/task/jmd/fuel-ratio/import?plantIds=${queryParams}&aopYear=${aopYear}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error importing fuel ratio Excel data:', e)
+    return Promise.reject(e)
   }
 }
