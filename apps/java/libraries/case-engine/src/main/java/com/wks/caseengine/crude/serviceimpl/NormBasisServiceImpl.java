@@ -262,14 +262,16 @@ public class NormBasisServiceImpl implements NormBasisService {
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
        boolean crude = vertical.getName().equalsIgnoreCase("CRUDE");
+       boolean coker = vertical.getName().equalsIgnoreCase("COKER");
 
        String procedureName = null;
 
-       if(crude) { 
+       if(crude || coker) { 
         procedureName = vertical.getName()+"_"+site.getName() +"_LoadConfiguration";
        }
      else {
-         procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation"; }
+         procedureName = vertical.getName()+"_"+site.getName()+"_"+  plant.getName() +"_"+"NormCalculation";
+         }
 
      String errorMessage = executeNormCalculationProcedure(plantId, aopYear, siteId, periodFrom, periodTo, procedureName );
 

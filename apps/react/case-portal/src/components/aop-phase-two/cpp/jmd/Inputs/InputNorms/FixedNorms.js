@@ -310,7 +310,11 @@ const FixedNorms = () => {
 
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
+  const [fetchLoading, setFetchLoading] = useState(false)
   const [calculationLoading, setCaculationLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
+  const [calculateBtnEnabled, setCalculateBtnEnabled] = useState(false)
+  const [aopCalaculation, setAopCalaculation] = useState([])
 
   const formatDate = (date) => {
     if (!date) return ''
@@ -333,7 +337,7 @@ const FixedNorms = () => {
 
   const fetchNormsData = useCallback(
     async (startDate, endDate) => {
-      setLoading(true)
+      setFetchLoading(true)
       try {
         const res = await InputNormsApiService.getNormsData(
           keycloak,
@@ -343,13 +347,26 @@ const FixedNorms = () => {
           endDate,
         )
 
-        if (res?.data?.length === 0) {
+        const normsList = res?.data?.list || []
+        const aopCalcList = res?.data?.aopCalculationList || []
+
+        if (normsList.length === 0) {
           setRows([])
+          setCalculateBtnEnabled(false)
+          setAopCalaculation([])
           setSnackbarOpen(true)
           setSnackbarData({ message: 'No data found', severity: 'info' })
           return
         }
-        let tempRes = res?.data
+
+        // Enable calculate button if any plant has aopCalculation dirty-flag records
+        const hasAopCalculation = aopCalcList.some(
+          (item) => item?.aopCalculation?.length > 0,
+        )
+        setCalculateBtnEnabled(hasAopCalculation)
+        setAopCalaculation(aopCalcList)
+
+        let tempRes = normsList
           ?.filter((item) => item.issuingUom !== 'MMBTU')
           ?.map((item, index) => {
             const actualNormValue =
@@ -404,7 +421,7 @@ const FixedNorms = () => {
         setSnackbarOpen(true)
         setSnackbarData({ message: 'Error fetching data', severity: 'error' })
       } finally {
-        setLoading(false)
+        setFetchLoading(false)
       }
     },
     [keycloak, PLANT_ID_LIST, AOP_YEAR],
@@ -436,7 +453,49 @@ const FixedNorms = () => {
     showImport: true,
     showTitle: true,
     showExport: true,
+    showCalculate: true,
+    enableCalculate: calculateBtnEnabled,
     ExcelName: `Norms - ${AOP_YEAR}`,
+    note: aopCalaculation?.some((item) => item?.aopCalculation?.length > 0)
+      ? ' Please calculate again there are some inputs updated.'
+      : '',
+  }
+
+  // Calculate Norms data via API
+  const handleCalculate = async () => {
+    setCaculationLoading(true)
+    try {
+      const formattedStartDate = formatDate(startDate)
+      const formattedEndDate = formatDate(endDate)
+      const res = await InputNormsApiService.calculateNormsData(
+        keycloak,
+        PLANT_ID_LIST,
+        AOP_YEAR,
+        formattedStartDate,
+        formattedEndDate,
+      )
+
+      if (res) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Calculation completed successfully!',
+          severity: 'success',
+        })
+        // Refresh the data after calculation
+        const formattedStartDate = formatDate(startDate)
+        const formattedEndDate = formatDate(endDate)
+        await fetchNormsData(formattedStartDate, formattedEndDate)
+      }
+    } catch (error) {
+      console.error('Error calculating norms data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error during calculation. Please try again.',
+        severity: 'error',
+      })
+    } finally {
+      setCaculationLoading(false)
+    }
   }
 
   // Save handler with API call
@@ -622,6 +681,7 @@ const FixedNorms = () => {
   }
 
   const handleExport = async () => {
+    setExportLoading(true)
     setSnackbarOpen(true)
     setSnackbarData({
       message: 'Excel download started!',
@@ -649,6 +709,8 @@ const FixedNorms = () => {
         message: 'Excel download failed. Please try again.',
         severity: 'error',
       })
+    } finally {
+      setExportLoading(false)
     }
   }
 
@@ -763,7 +825,11 @@ const FixedNorms = () => {
 
   return (
     <Box>
-      <LoaderBackdrop open={!!loading} />
+      <LoaderBackdrop
+        open={fetchLoading || calculationLoading || exportLoading || !!loading}
+        showMessage={calculationLoading}
+        message='Your data is being processed. This may take a few moments—thank you for your patience.'
+      />
 
       <NestedKendoTable
         columns={nestedColumns}
@@ -773,6 +839,7 @@ const FixedNorms = () => {
         setModifiedCells={setModifiedCells}
         title='Norms'
         permissions={permissions}
+        handleCalculate={handleCalculate}
         handleRemarkCellClick={handleRemarkCellClick}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}

@@ -21,11 +21,14 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,9 @@ import jakarta.persistence.Query;
 
 @Service
 public class PackagingConsumablesServiceImpl implements PackagingConsumablesService{
+
+	// Extra width so the auto-filter dropdown arrow does not cover the header text
+	private static final int FILTER_ARROW_PADDING = 4 * 256;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -585,9 +591,12 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 		        }
 	        }
 
-	        Workbook workbook = new XSSFWorkbook();
-	        Sheet sheet = workbook.createSheet("Sheet1");
+	        XSSFWorkbook workbook = new XSSFWorkbook();
+	        XSSFSheet sheet = workbook.createSheet("Sheet1");
 	        int currentRow = 0;
+
+	        CellStyle unlockedStyle = workbook.createCellStyle();
+	        unlockedStyle.setLocked(false);
 
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("SAP Material Code");
@@ -603,11 +612,14 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
 	        }
+	        int columnCount = innerHeaders.size();
+	        int[] maxColumnChars = new int[columnCount];
 	        Row headerRow = sheet.createRow(currentRow++);
-	        for (int col = 0; col < innerHeaders.size(); col++) {
+	        for (int col = 0; col < columnCount; col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
 	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+	            maxColumnChars[col] = innerHeaders.get(col).length();
 	        }
 
 	        int dataRowCount = dtoList.size();
@@ -631,6 +643,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
+	                cell.setCellStyle(unlockedStyle);
 	                Object value = rowData.get(col);
 	                if (value instanceof Number) {
 	                    cell.setCellValue(((Number) value).doubleValue());
@@ -640,10 +653,33 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                    cell.setCellValue(value.toString());
 	                } else {
 	                    cell.setCellValue("");
-	                }  
+	                }
+	                if (value != null) {
+	                    maxColumnChars[col] = Math.max(maxColumnChars[col], value.toString().length());
+	                }
 	            }
 	        }
+
+	        // Users cannot resize columns once the sheet is protected, so widths are sized up front.
+	        for (int col = 0; col < columnCount; col++) {
+	            int widthChars = Math.min(Math.max(maxColumnChars[col] + 2, 12), 60);
+	            sheet.setColumnWidth(col, Math.min(widthChars * 256 + FILTER_ARROW_PADDING, 60 * 256));
+	            sheet.setDefaultColumnStyle(col, unlockedStyle);
+	        }
 	        sheet.setColumnHidden(8, true);
+
+	        sheet.setAutoFilter(new CellRangeAddress(0, Math.max(currentRow - 1, 0), 0, columnCount - 1));
+
+	        // Protection keeps "Format columns" locked, which is what stops Excel from
+	        // unhiding the Material Id column when the neighbouring column is resized.
+	        sheet.protectSheet("password");
+	        sheet.lockFormatColumns(true);
+	        sheet.lockAutoFilter(false);
+	        sheet.lockSort(false);
+	        sheet.lockInsertRows(false);
+	        sheet.lockDeleteRows(false);
+	        sheet.lockSelectLockedCells(false);
+	        sheet.lockSelectUnlockedCells(false);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();

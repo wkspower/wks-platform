@@ -19,4 +19,6 @@ public interface JMDCPPNormsService {
 
     AOPMessageVM importCPPNorms(List<UUID> plantIds, String financialYear, MultipartFile file, String modifiedBy) throws IOException;
 
+    AOPMessageVM calculateCPPNorms(List<UUID> plantIds, String financialYear, String fromDate, String toDate);
+
 }

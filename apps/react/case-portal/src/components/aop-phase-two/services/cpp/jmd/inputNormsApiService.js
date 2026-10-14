@@ -6,6 +6,7 @@ export const InputNormsApiService = {
   saveNormsData,
   exportNormsData,
   importNormsData,
+  calculateNormsData,
 }
 
 async function getNormsData(
@@ -110,6 +111,36 @@ async function importNormsData(keycloak, file, plantIds, financialYear) {
   formData.append('file', file)
   try {
     const resp = await fetch(url, { method: 'POST', headers, body: formData })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function calculateNormsData(
+  keycloak,
+  plantIds,
+  financialYear,
+  startDate,
+  endDate,
+) {
+  const plantIdArray = Array.isArray(plantIds) ? plantIds : [plantIds]
+  const queryParams = plantIdArray.map((id) => id).join(',')
+  let url = `${Config.CaseEngineUrl}/task/jmd/cpp-norms/calculate?plantIds=${queryParams}&financialYear=${financialYear}`
+  if (startDate && endDate) {
+    url += `&startDate=${startDate}&endDate=${endDate}`
+  }
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'POST', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

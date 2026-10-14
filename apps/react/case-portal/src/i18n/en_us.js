@@ -161,6 +161,7 @@ const defs = {
     productionScheduling: 'Production Scheduling',
     configurationOtherCost: 'Other Cost',
     consumerDemand: 'Consumer Demand',
+    signOffReport: 'Sign Off Report',
   },
   pages: {
     dashboard: {
@@ -390,6 +391,7 @@ const defs = {
         vcmAvailability: 'VCM Availability',
         otherDocumentUpload: 'Other Document Upload',
         consumerDemand: 'Consumer Demand',
+        signOffReport: 'Sign Off Report',
       },
     },
   },

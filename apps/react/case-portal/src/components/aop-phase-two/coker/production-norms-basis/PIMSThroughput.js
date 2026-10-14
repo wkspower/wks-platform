@@ -77,7 +77,7 @@ const PIMSThroughput = ({ refreshData }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConfigurationData()
     }
-  }, [PLANT_ID, AOP_YEAR, revisionUpdated, refreshData])
+  }, [PLANT_ID, AOP_YEAR, revisionUpdated])
 
   const fetchConfigurationData = async () => {
     setLoading(true)
@@ -112,6 +112,12 @@ const PIMSThroughput = ({ refreshData }) => {
       setRevisionUpdated(false)
     }
   }
+
+  useEffect(() => {
+    if (refreshData) {
+      fetchConfigurationData()
+    }
+  }, [refreshData])
 
   const permissions = {
     showAction: true,

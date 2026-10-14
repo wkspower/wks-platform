@@ -212,6 +212,9 @@ import ConsumerDemand from 'components/aop-phase-two/refineryUtility/Consumer_De
 
 // Naphthasplitter Ended
 
+// SignOffReport
+import SignOffReport from 'components/aop-phase-two/SignOffReport/index'
+
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -1741,6 +1744,14 @@ export const MainRoutes = (
         element: (
           <PrivateRoute routeId='plant-team'>
             <PlantTeam />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'sign-off-report',
+        element: (
+          <PrivateRoute routeId='sign-off-report'>
+            <SignOffReport />
           </PrivateRoute>
         ),
       },

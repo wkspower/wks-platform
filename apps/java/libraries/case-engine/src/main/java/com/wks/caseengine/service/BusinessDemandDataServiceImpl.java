@@ -31,6 +31,8 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,6 +72,13 @@ import jakarta.persistence.Query;
 
 @Service
 public class BusinessDemandDataServiceImpl implements BusinessDemandDataService {
+
+	private static final String EXPORT_SHEET_PROTECTION_PASSWORD = "wks_business_demand_export";
+
+	private static final int MAX_EXPORT_COLUMN_WIDTH = 60 * 256;
+
+	// Extra width so the auto-filter dropdown arrow does not cover the header text
+	private static final int FILTER_ARROW_PADDING = 4 * 256;
 
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
@@ -1391,9 +1400,9 @@ public byte[] exportBusinessDemandWithTotal(String year, String plantId, boolean
 			dtoList = (List<BusinessDemandDataDTO>) map.get("businessDemandDataDTOList");
 		}
 
-		Workbook workbook = new XSSFWorkbook();
+		XSSFWorkbook workbook = new XSSFWorkbook();
 
-		Sheet sheet = workbook.createSheet("Sheet1");
+		XSSFSheet sheet = workbook.createSheet("Sheet1");
 		int currentRow = 0;
 
 		if(showProductionTarget) {
@@ -1520,6 +1529,7 @@ public byte[] exportBusinessDemandWithTotal(String year, String plantId, boolean
 	List<List<String>> headers = new ArrayList<>();
 	headers.add(innerHeaders);
 
+	int bdHeaderRowIndex = currentRow;
 	for (List<String> headerRowData : headers) {
 		Row headerRow = sheet.createRow(currentRow++);
 		for (int col = 0; col < headerRowData.size(); col++) {
@@ -1542,8 +1552,9 @@ lockedBorderedStyle.setBorderBottom(BorderStyle.THIN);
 lockedBorderedStyle.setBorderTop(BorderStyle.THIN);
 lockedBorderedStyle.setBorderLeft(BorderStyle.THIN);
 lockedBorderedStyle.setBorderRight(BorderStyle.THIN);
-// Plain bordered style for non-showProductionTarget case
+// Plain bordered style for non-showProductionTarget case; unlocked so cells stay editable under sheet protection
 CellStyle borderedDataStyle = Utility.createBorderedStyle(workbook);
+borderedDataStyle.setLocked(false);
 CellStyle totalRowStyle = Utility.createBoldBorderedStyle(workbook);
 
 for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
@@ -1579,19 +1590,43 @@ for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
 	}
 }
 
-	// Protect the sheet so that locked PT cells become non-editable
-	if (showProductionTarget) {
-		sheet.protectSheet("");
+// Users cannot resize columns once the sheet is protected, so all visible columns are sized up front
+for (int col = 0; col < innerHeaders.size(); col++) {
+	if (col == 17 || col == 18) {
+		continue;
 	}
-
-// Auto-size all visible columns (0–16)
-for (int col = 0; col <= 16; col++) {
 	sheet.autoSizeColumn(col);
+	sheet.setColumnWidth(col, Math.min(sheet.getColumnWidth(col) + FILTER_ARROW_PADDING, MAX_EXPORT_COLUMN_WIDTH));
+}
+
+if (!showProductionTarget) {
+	CellStyle unlockedDefaultStyle = workbook.createCellStyle();
+	unlockedDefaultStyle.setLocked(false);
+	for (int col = 0; col < innerHeaders.size(); col++) {
+		sheet.setDefaultColumnStyle(col, unlockedDefaultStyle);
+	}
 }
 
 sheet.setColumnHidden(17, true);
 sheet.setColumnHidden(18, true);
 //sheet.setColumnHidden(18, true);
+
+// The Total summary row is kept out of the filter range so it stays at the bottom and is never sorted
+int bdLastDataRowIndex = rows.isEmpty() ? bdHeaderRowIndex : currentRow - 2;
+sheet.setAutoFilter(new CellRangeAddress(bdHeaderRowIndex, Math.max(bdLastDataRowIndex, bdHeaderRowIndex), 0, innerHeaders.size() - 1));
+
+// Protection keeps locked PT cells non-editable, and keeping "Format columns" locked stops Excel
+// from unhiding the Id / NormParameterId columns when the neighbouring Remark column is resized.
+sheet.protectSheet(EXPORT_SHEET_PROTECTION_PASSWORD);
+sheet.lockFormatColumns(true);
+sheet.lockAutoFilter(false);
+sheet.lockSort(false);
+sheet.lockSelectLockedCells(false);
+sheet.lockSelectUnlockedCells(false);
+if (!showProductionTarget) {
+	sheet.lockInsertRows(false);
+	sheet.lockDeleteRows(false);
+}
 try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

@@ -245,6 +245,12 @@ const Configuration = () => {
     }
   }
 
+  useEffect(() => {
+    if (refreshData) {
+      fetchConfigurationData()
+    }
+  }, [refreshData])
+
   const permissions = {
     showAction: true,
     addButton: false,

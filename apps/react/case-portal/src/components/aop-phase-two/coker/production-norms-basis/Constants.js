@@ -74,7 +74,8 @@ const Constants = ({ startDate, endDate, refreshData }) => {
     if (PLANT_ID && AOP_YEAR) {
       fetchConstantsData()
     }
-  }, [PLANT_ID, AOP_YEAR, refreshData])
+  }, [PLANT_ID, AOP_YEAR])
+  
 
   const fetchConstantsData = async () => {
     setLoading(true)
@@ -108,6 +109,12 @@ const Constants = ({ startDate, endDate, refreshData }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (refreshData) {
+      fetchConstantsData()
+    }
+  }, [refreshData])
 
   const permissions = {
     showAction: true,
