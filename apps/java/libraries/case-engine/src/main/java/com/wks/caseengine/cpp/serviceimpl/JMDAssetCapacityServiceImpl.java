@@ -12,6 +12,8 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,10 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
 
     @Autowired
     private CPPSteamAssetCapacityRepository steamRepository;
+
+    @Autowired
+    @Qualifier("db1JdbcTemplate")
+    private JdbcTemplate db1JdbcTemplate;
 
     @Override
     public AOPMessageVM getAssetCapacitiesForPlants(List<UUID> plantIds, String aopYear) {
@@ -400,40 +406,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 if (!Objects.equals(dto.getFixedMax(), db.getFixedMax())) return true;
                 if (!Objects.equals(dto.getAprMin(), db.getAprMin())) return true;
                 if (!Objects.equals(dto.getAprMax(), db.getAprMax())) return true;
-                if (!Objects.equals(dto.getAprManLoad(), db.getAprManLoad())) return true;
+                if (dto.getAprManLoad() != null && !Objects.equals(dto.getAprManLoad(), db.getAprManLoad())) return true;
                 if (!Objects.equals(dto.getMayMin(), db.getMayMin())) return true;
                 if (!Objects.equals(dto.getMayMax(), db.getMayMax())) return true;
-                if (!Objects.equals(dto.getMayManLoad(), db.getMayManLoad())) return true;
+                if (dto.getMayManLoad() != null && !Objects.equals(dto.getMayManLoad(), db.getMayManLoad())) return true;
                 if (!Objects.equals(dto.getJunMin(), db.getJunMin())) return true;
                 if (!Objects.equals(dto.getJunMax(), db.getJunMax())) return true;
-                if (!Objects.equals(dto.getJunManLoad(), db.getJunManLoad())) return true;
+                if (dto.getJunManLoad() != null && !Objects.equals(dto.getJunManLoad(), db.getJunManLoad())) return true;
                 if (!Objects.equals(dto.getJulMin(), db.getJulMin())) return true;
                 if (!Objects.equals(dto.getJulMax(), db.getJulMax())) return true;
-                if (!Objects.equals(dto.getJulManLoad(), db.getJulManLoad())) return true;
+                if (dto.getJulManLoad() != null && !Objects.equals(dto.getJulManLoad(), db.getJulManLoad())) return true;
                 if (!Objects.equals(dto.getAugMin(), db.getAugMin())) return true;
                 if (!Objects.equals(dto.getAugMax(), db.getAugMax())) return true;
-                if (!Objects.equals(dto.getAugManLoad(), db.getAugManLoad())) return true;
+                if (dto.getAugManLoad() != null && !Objects.equals(dto.getAugManLoad(), db.getAugManLoad())) return true;
                 if (!Objects.equals(dto.getSepMin(), db.getSepMin())) return true;
                 if (!Objects.equals(dto.getSepMax(), db.getSepMax())) return true;
-                if (!Objects.equals(dto.getSepManLoad(), db.getSepManLoad())) return true;
+                if (dto.getSepManLoad() != null && !Objects.equals(dto.getSepManLoad(), db.getSepManLoad())) return true;
                 if (!Objects.equals(dto.getOctMin(), db.getOctMin())) return true;
                 if (!Objects.equals(dto.getOctMax(), db.getOctMax())) return true;
-                if (!Objects.equals(dto.getOctManLoad(), db.getOctManLoad())) return true;
+                if (dto.getOctManLoad() != null && !Objects.equals(dto.getOctManLoad(), db.getOctManLoad())) return true;
                 if (!Objects.equals(dto.getNovMin(), db.getNovMin())) return true;
                 if (!Objects.equals(dto.getNovMax(), db.getNovMax())) return true;
-                if (!Objects.equals(dto.getNovManLoad(), db.getNovManLoad())) return true;
+                if (dto.getNovManLoad() != null && !Objects.equals(dto.getNovManLoad(), db.getNovManLoad())) return true;
                 if (!Objects.equals(dto.getDecMin(), db.getDecMin())) return true;
                 if (!Objects.equals(dto.getDecMax(), db.getDecMax())) return true;
-                if (!Objects.equals(dto.getDecManLoad(), db.getDecManLoad())) return true;
+                if (dto.getDecManLoad() != null && !Objects.equals(dto.getDecManLoad(), db.getDecManLoad())) return true;
                 if (!Objects.equals(dto.getJanMin(), db.getJanMin())) return true;
                 if (!Objects.equals(dto.getJanMax(), db.getJanMax())) return true;
-                if (!Objects.equals(dto.getJanManLoad(), db.getJanManLoad())) return true;
+                if (dto.getJanManLoad() != null && !Objects.equals(dto.getJanManLoad(), db.getJanManLoad())) return true;
                 if (!Objects.equals(dto.getFebMin(), db.getFebMin())) return true;
                 if (!Objects.equals(dto.getFebMax(), db.getFebMax())) return true;
-                if (!Objects.equals(dto.getFebManLoad(), db.getFebManLoad())) return true;
+                if (dto.getFebManLoad() != null && !Objects.equals(dto.getFebManLoad(), db.getFebManLoad())) return true;
                 if (!Objects.equals(dto.getMarMin(), db.getMarMin())) return true;
                 if (!Objects.equals(dto.getMarMax(), db.getMarMax())) return true;
-                if (!Objects.equals(dto.getMarManLoad(), db.getMarManLoad())) return true;
+                if (dto.getMarManLoad() != null && !Objects.equals(dto.getMarManLoad(), db.getMarManLoad())) return true;
                 if (!Objects.equals(dto.getUom(), db.getUom())) return true;
                 if (!Objects.equals(dto.getRemarks(), db.getRemarks())) return true;
                 return false;
@@ -443,40 +449,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 if (!Objects.equals(dto.getFixedMax(), db.getFixedMax())) return true;
                 if (!Objects.equals(dto.getAprMin(), db.getAprMin())) return true;
                 if (!Objects.equals(dto.getAprMax(), db.getAprMax())) return true;
-                if (!Objects.equals(dto.getAprManLoad(), db.getAprManLoad())) return true;
+                if (dto.getAprManLoad() != null && !Objects.equals(dto.getAprManLoad(), db.getAprManLoad())) return true;
                 if (!Objects.equals(dto.getMayMin(), db.getMayMin())) return true;
                 if (!Objects.equals(dto.getMayMax(), db.getMayMax())) return true;
-                if (!Objects.equals(dto.getMayManLoad(), db.getMayManLoad())) return true;
+                if (dto.getMayManLoad() != null && !Objects.equals(dto.getMayManLoad(), db.getMayManLoad())) return true;
                 if (!Objects.equals(dto.getJunMin(), db.getJunMin())) return true;
                 if (!Objects.equals(dto.getJunMax(), db.getJunMax())) return true;
-                if (!Objects.equals(dto.getJunManLoad(), db.getJunManLoad())) return true;
+                if (dto.getJunManLoad() != null && !Objects.equals(dto.getJunManLoad(), db.getJunManLoad())) return true;
                 if (!Objects.equals(dto.getJulMin(), db.getJulMin())) return true;
                 if (!Objects.equals(dto.getJulMax(), db.getJulMax())) return true;
-                if (!Objects.equals(dto.getJulManLoad(), db.getJulManLoad())) return true;
+                if (dto.getJulManLoad() != null && !Objects.equals(dto.getJulManLoad(), db.getJulManLoad())) return true;
                 if (!Objects.equals(dto.getAugMin(), db.getAugMin())) return true;
                 if (!Objects.equals(dto.getAugMax(), db.getAugMax())) return true;
-                if (!Objects.equals(dto.getAugManLoad(), db.getAugManLoad())) return true;
+                if (dto.getAugManLoad() != null && !Objects.equals(dto.getAugManLoad(), db.getAugManLoad())) return true;
                 if (!Objects.equals(dto.getSepMin(), db.getSepMin())) return true;
                 if (!Objects.equals(dto.getSepMax(), db.getSepMax())) return true;
-                if (!Objects.equals(dto.getSepManLoad(), db.getSepManLoad())) return true;
+                if (dto.getSepManLoad() != null && !Objects.equals(dto.getSepManLoad(), db.getSepManLoad())) return true;
                 if (!Objects.equals(dto.getOctMin(), db.getOctMin())) return true;
                 if (!Objects.equals(dto.getOctMax(), db.getOctMax())) return true;
-                if (!Objects.equals(dto.getOctManLoad(), db.getOctManLoad())) return true;
+                if (dto.getOctManLoad() != null && !Objects.equals(dto.getOctManLoad(), db.getOctManLoad())) return true;
                 if (!Objects.equals(dto.getNovMin(), db.getNovMin())) return true;
                 if (!Objects.equals(dto.getNovMax(), db.getNovMax())) return true;
-                if (!Objects.equals(dto.getNovManLoad(), db.getNovManLoad())) return true;
+                if (dto.getNovManLoad() != null && !Objects.equals(dto.getNovManLoad(), db.getNovManLoad())) return true;
                 if (!Objects.equals(dto.getDecMin(), db.getDecMin())) return true;
                 if (!Objects.equals(dto.getDecMax(), db.getDecMax())) return true;
-                if (!Objects.equals(dto.getDecManLoad(), db.getDecManLoad())) return true;
+                if (dto.getDecManLoad() != null && !Objects.equals(dto.getDecManLoad(), db.getDecManLoad())) return true;
                 if (!Objects.equals(dto.getJanMin(), db.getJanMin())) return true;
                 if (!Objects.equals(dto.getJanMax(), db.getJanMax())) return true;
-                if (!Objects.equals(dto.getJanManLoad(), db.getJanManLoad())) return true;
+                if (dto.getJanManLoad() != null && !Objects.equals(dto.getJanManLoad(), db.getJanManLoad())) return true;
                 if (!Objects.equals(dto.getFebMin(), db.getFebMin())) return true;
                 if (!Objects.equals(dto.getFebMax(), db.getFebMax())) return true;
-                if (!Objects.equals(dto.getFebManLoad(), db.getFebManLoad())) return true;
+                if (dto.getFebManLoad() != null && !Objects.equals(dto.getFebManLoad(), db.getFebManLoad())) return true;
                 if (!Objects.equals(dto.getMarMin(), db.getMarMin())) return true;
                 if (!Objects.equals(dto.getMarMax(), db.getMarMax())) return true;
-                if (!Objects.equals(dto.getMarManLoad(), db.getMarManLoad())) return true;
+                if (dto.getMarManLoad() != null && !Objects.equals(dto.getMarManLoad(), db.getMarManLoad())) return true;
                 if (!Objects.equals(dto.getUom(), db.getUom())) return true;
                 if (!Objects.equals(dto.getRemarks(), db.getRemarks())) return true;
                 return false;
@@ -649,41 +655,41 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
         entity.setFixedMax(dto.getFixedMax());
         entity.setAprMin(dto.getAprMin());
         entity.setAprMax(dto.getAprMax());
-        entity.setAprManLoad(dto.getAprManLoad());
+        if (dto.getAprManLoad() != null) entity.setAprManLoad(dto.getAprManLoad());
         entity.setMayMin(dto.getMayMin());
         entity.setMayMax(dto.getMayMax());
-        entity.setMayManLoad(dto.getMayManLoad());
+        if (dto.getMayManLoad() != null) entity.setMayManLoad(dto.getMayManLoad());
         entity.setJunMin(dto.getJunMin());
         entity.setJunMax(dto.getJunMax());
-        entity.setJunManLoad(dto.getJunManLoad());
+        if (dto.getJunManLoad() != null) entity.setJunManLoad(dto.getJunManLoad());
         entity.setJulMin(dto.getJulMin());
         entity.setJulMax(dto.getJulMax());
-        entity.setJulManLoad(dto.getJulManLoad());
+        if (dto.getJulManLoad() != null) entity.setJulManLoad(dto.getJulManLoad());
         entity.setAugMin(dto.getAugMin());
         entity.setAugMax(dto.getAugMax());
-        entity.setAugManLoad(dto.getAugManLoad());
+        if (dto.getAugManLoad() != null) entity.setAugManLoad(dto.getAugManLoad());
         entity.setSepMin(dto.getSepMin());
         entity.setSepMax(dto.getSepMax());
-        entity.setSepManLoad(dto.getSepManLoad());
+        if (dto.getSepManLoad() != null) entity.setSepManLoad(dto.getSepManLoad());
         entity.setOctMin(dto.getOctMin());
         entity.setOctMax(dto.getOctMax());
-        entity.setOctManLoad(dto.getOctManLoad());
+        if (dto.getOctManLoad() != null) entity.setOctManLoad(dto.getOctManLoad());
         entity.setNovMin(dto.getNovMin());
         entity.setNovMax(dto.getNovMax());
-        entity.setNovManLoad(dto.getNovManLoad());
+        if (dto.getNovManLoad() != null) entity.setNovManLoad(dto.getNovManLoad());
         entity.setDecMin(dto.getDecMin());
         entity.setDecMax(dto.getDecMax());
-        entity.setDecManLoad(dto.getDecManLoad());
+        if (dto.getDecManLoad() != null) entity.setDecManLoad(dto.getDecManLoad());
         entity.setJanMin(dto.getJanMin());
         entity.setJanMax(dto.getJanMax());
-        entity.setJanManLoad(dto.getJanManLoad());
+        if (dto.getJanManLoad() != null) entity.setJanManLoad(dto.getJanManLoad());
         entity.setFebMin(dto.getFebMin());
         entity.setFebMax(dto.getFebMax());
-        entity.setFebManLoad(dto.getFebManLoad());
+        if (dto.getFebManLoad() != null) entity.setFebManLoad(dto.getFebManLoad());
         entity.setMarMin(dto.getMarMin());
         entity.setMarMax(dto.getMarMax());
 
-        entity.setMarManLoad(dto.getMarManLoad());
+        if (dto.getMarManLoad() != null) entity.setMarManLoad(dto.getMarManLoad());
         entity.setUom(dto.getUom());
         entity.setRemarks(dto.getRemarks());
 
@@ -706,40 +712,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
         entity.setFixedMax(dto.getFixedMax());
         entity.setAprMin(dto.getAprMin());
         entity.setAprMax(dto.getAprMax());
-        entity.setAprManLoad(dto.getAprManLoad());
+        if (dto.getAprManLoad() != null) entity.setAprManLoad(dto.getAprManLoad());
         entity.setMayMin(dto.getMayMin());
         entity.setMayMax(dto.getMayMax());
-        entity.setMayManLoad(dto.getMayManLoad());
+        if (dto.getMayManLoad() != null) entity.setMayManLoad(dto.getMayManLoad());
         entity.setJunMin(dto.getJunMin());
         entity.setJunMax(dto.getJunMax());
-        entity.setJunManLoad(dto.getJunManLoad());
+        if (dto.getJunManLoad() != null) entity.setJunManLoad(dto.getJunManLoad());
         entity.setJulMin(dto.getJulMin());
         entity.setJulMax(dto.getJulMax());
-        entity.setJulManLoad(dto.getJulManLoad());
+        if (dto.getJulManLoad() != null) entity.setJulManLoad(dto.getJulManLoad());
         entity.setAugMin(dto.getAugMin());
         entity.setAugMax(dto.getAugMax());
-        entity.setAugManLoad(dto.getAugManLoad());
+        if (dto.getAugManLoad() != null) entity.setAugManLoad(dto.getAugManLoad());
         entity.setSepMin(dto.getSepMin());
         entity.setSepMax(dto.getSepMax());
-        entity.setSepManLoad(dto.getSepManLoad());
+        if (dto.getSepManLoad() != null) entity.setSepManLoad(dto.getSepManLoad());
         entity.setOctMin(dto.getOctMin());
         entity.setOctMax(dto.getOctMax());
-        entity.setOctManLoad(dto.getOctManLoad());
+        if (dto.getOctManLoad() != null) entity.setOctManLoad(dto.getOctManLoad());
         entity.setNovMin(dto.getNovMin());
         entity.setNovMax(dto.getNovMax());
-        entity.setNovManLoad(dto.getNovManLoad());
+        if (dto.getNovManLoad() != null) entity.setNovManLoad(dto.getNovManLoad());
         entity.setDecMin(dto.getDecMin());
         entity.setDecMax(dto.getDecMax());
-        entity.setDecManLoad(dto.getDecManLoad());
+        if (dto.getDecManLoad() != null) entity.setDecManLoad(dto.getDecManLoad());
         entity.setJanMin(dto.getJanMin());
         entity.setJanMax(dto.getJanMax());
-        entity.setJanManLoad(dto.getJanManLoad());
+        if (dto.getJanManLoad() != null) entity.setJanManLoad(dto.getJanManLoad());
         entity.setFebMin(dto.getFebMin());
         entity.setFebMax(dto.getFebMax());
-        entity.setFebManLoad(dto.getFebManLoad());
+        if (dto.getFebManLoad() != null) entity.setFebManLoad(dto.getFebManLoad());
         entity.setMarMin(dto.getMarMin());
         entity.setMarMax(dto.getMarMax());
-        entity.setMarManLoad(dto.getMarManLoad());
+        if (dto.getMarManLoad() != null) entity.setMarManLoad(dto.getMarManLoad());
 
         entity.setUom(dto.getUom());
         entity.setRemarks(dto.getRemarks());
@@ -762,7 +768,7 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
             if (powerCapacities == null) powerCapacities = new ArrayList<>();
             powerCapacities.sort(Comparator.comparing(CPPAssetCapacityResponseDto::getPlantName)
                     .thenComparing(CPPAssetCapacityResponseDto::getAssetName));
-            return generateAssetCapacityExcel(powerCapacities, "Power Asset Capacity", aopYear);
+            return generateAssetCapacityExcel(powerCapacities, "Power Asset Capacity", aopYear, !isDmdSite(plantIds));
         } catch (Exception e) {
             logger.error("[Export Power Capacity] Error: {}", e.getMessage(), e);
             return null;
@@ -782,15 +788,15 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
             if (steamCapacities == null) steamCapacities = new ArrayList<>();
             steamCapacities.sort(Comparator.comparing(CPPAssetCapacityResponseDto::getPlantName)
                     .thenComparing(CPPAssetCapacityResponseDto::getAssetName));
-            return generateAssetCapacityExcel(steamCapacities, "Steam Asset Capacity", aopYear);
+            return generateAssetCapacityExcel(steamCapacities, "Steam Asset Capacity", aopYear, !isDmdSite(plantIds));
         } catch (Exception e) {
             logger.error("[Export Steam Capacity] Error: {}", e.getMessage(), e);
             return null;
         }
     }
 
-    private byte[] generateAssetCapacityExcel(List<CPPAssetCapacityResponseDto> dataList, String sheetName, String aopYear) throws Exception {
-        logger.info("[Excel Generation] Creating {} with {} records", sheetName, dataList != null ? dataList.size() : 0);
+    private byte[] generateAssetCapacityExcel(List<CPPAssetCapacityResponseDto> dataList, String sheetName, String aopYear, boolean includeManLoad) throws Exception {
+        logger.info("[Excel Generation] Creating {} with {} records, includeManLoad: {}", sheetName, dataList != null ? dataList.size() : 0, includeManLoad);
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
         CellStyle headerStyle = createHeaderStyle(workbook);
@@ -816,7 +822,9 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
         for (String month : months) {
             createCell(headerRow, col++, month + " Min", headerStyle);
             createCell(headerRow, col++, month + " Max", headerStyle);
-            createCell(headerRow, col++, month + " Man Load", headerStyle);
+            if (includeManLoad) {
+                createCell(headerRow, col++, month + " Man Load", headerStyle);
+            }
         }
 
         int remarksCol = col;
@@ -842,40 +850,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
 
             setNumericCell(row, col++, dto.getAprMin(), dataStyle);
                 setNumericCell(row, col++, dto.getAprMax(), dataStyle);
-            setNumericCell(row, col++, dto.getAprManLoad() != null ? dto.getAprManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getAprManLoad() != null ? dto.getAprManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getMayMin(), dataStyle);
             setNumericCell(row, col++, dto.getMayMax(), dataStyle);
-            setNumericCell(row, col++, dto.getMayManLoad() != null ? dto.getMayManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getMayManLoad() != null ? dto.getMayManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getJunMin(), dataStyle);
             setNumericCell(row, col++, dto.getJunMax(), dataStyle);
-            setNumericCell(row, col++, dto.getJunManLoad() != null ? dto.getJunManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getJunManLoad() != null ? dto.getJunManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getJulMin(), dataStyle);
             setNumericCell(row, col++, dto.getJulMax(), dataStyle);
-            setNumericCell(row, col++, dto.getJulManLoad() != null ? dto.getJulManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getJulManLoad() != null ? dto.getJulManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getAugMin(), dataStyle);
             setNumericCell(row, col++, dto.getAugMax(), dataStyle);
-            setNumericCell(row, col++, dto.getAugManLoad() != null ? dto.getAugManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getAugManLoad() != null ? dto.getAugManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getSepMin(), dataStyle);
             setNumericCell(row, col++, dto.getSepMax(), dataStyle);
-            setNumericCell(row, col++, dto.getSepManLoad() != null ? dto.getSepManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getSepManLoad() != null ? dto.getSepManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getOctMin(), dataStyle);
             setNumericCell(row, col++, dto.getOctMax(), dataStyle);
-            setNumericCell(row, col++, dto.getOctManLoad() != null ? dto.getOctManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getOctManLoad() != null ? dto.getOctManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getNovMin(), dataStyle);
             setNumericCell(row, col++, dto.getNovMax(), dataStyle);
-            setNumericCell(row, col++, dto.getNovManLoad() != null ? dto.getNovManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getNovManLoad() != null ? dto.getNovManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getDecMin(), dataStyle);
             setNumericCell(row, col++, dto.getDecMax(), dataStyle);
-            setNumericCell(row, col++, dto.getDecManLoad() != null ? dto.getDecManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getDecManLoad() != null ? dto.getDecManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getJanMin(), dataStyle);
             setNumericCell(row, col++, dto.getJanMax(), dataStyle);
-            setNumericCell(row, col++, dto.getJanManLoad() != null ? dto.getJanManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getJanManLoad() != null ? dto.getJanManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getFebMin(), dataStyle);
             setNumericCell(row, col++, dto.getFebMax(), dataStyle);
-            setNumericCell(row, col++, dto.getFebManLoad() != null ? dto.getFebManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getFebManLoad() != null ? dto.getFebManLoad().doubleValue() : 0.0, dataStyle);
             setNumericCell(row, col++, dto.getMarMin(), dataStyle);
             setNumericCell(row, col++, dto.getMarMax(), dataStyle);
-            setNumericCell(row, col++, dto.getMarManLoad() != null ? dto.getMarManLoad().doubleValue() : 0.0, dataStyle);
+            if (includeManLoad) setNumericCell(row, col++, dto.getMarManLoad() != null ? dto.getMarManLoad().doubleValue() : 0.0, dataStyle);
 
             createCell(row, col++, dto.getRemarks(), dataStyle);
             createCell(row, col++, dto.getId() != null ? dto.getId().toString() : "", dataStyle);
@@ -943,7 +951,7 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 sheetLabel = "Asset Capacity";
             }
 
-            return generateAssetCapacityExcel(combined, sheetLabel, aopYear);
+            return generateAssetCapacityExcel(combined, sheetLabel, aopYear, !isDmdSite(plantIds));
         } catch (Exception e) {
             logger.error("[Export Unified Capacity] Error: {}", e.getMessage(), e);
             return null;
@@ -1014,7 +1022,7 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 }
             } else {
                 byte[] failedRecordsFile = generateAssetCapacityErrorExcel(allFailedRecords, allFailureReasons,
-                        "Asset Capacity", aopYear);
+                        "Asset Capacity", aopYear, !isDmdSite(plantIds));
                 String base64File = java.util.Base64.getEncoder().encodeToString(failedRecordsFile);
                 response.setCode(400);
                 response.setMessage("Partial import: " + totalSaved + " saved, " + totalFailed
@@ -1184,7 +1192,7 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 }
             } else {
                 byte[] failedRecordsFile = generateAssetCapacityErrorExcel(failedRecords, failureReasons,
-                        (isPower ? "Power" : "Steam") + " Asset Capacity", aopYear);
+                        (isPower ? "Power" : "Steam") + " Asset Capacity", aopYear, !isDmdSite(plantIds));
                 String base64File = java.util.Base64.getEncoder().encodeToString(failedRecordsFile);
                 response.setCode(400);
                 response.setMessage("Partial import: " + validRecords.size() + " saved, " + failedRecords.size()
@@ -1274,6 +1282,22 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
         List<CPPAssetCapacityResponseDto> records = new ArrayList<>();
         try (XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
+
+            // Detect whether the sheet contains "Man Load" columns (absent for DMD exports)
+            boolean hasManLoad = false;
+            Row headerRow = sheet.getRow(0);
+            if (headerRow != null) {
+                for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                    String headerVal = getCellValue(headerRow, i);
+                    if (headerVal != null
+                            && headerVal.toLowerCase().replace(".", "").contains("man load")) {
+                        hasManLoad = true;
+                        break;
+                    }
+                }
+            }
+            logger.info("[IMPORT] Man Load columns present in file: {}", hasManLoad);
+
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
@@ -1299,40 +1323,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
 
                 dto.setAprMin(getCellDoubleValue(row, col++));
                 dto.setAprMax(getCellDoubleValue(row, col++));
-                dto.setAprManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setAprManLoad(getCellIntValue(row, col++));
                 dto.setMayMin(getCellDoubleValue(row, col++));
                 dto.setMayMax(getCellDoubleValue(row, col++));
-                dto.setMayManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setMayManLoad(getCellIntValue(row, col++));
                 dto.setJunMin(getCellDoubleValue(row, col++));
                 dto.setJunMax(getCellDoubleValue(row, col++));
-                dto.setJunManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setJunManLoad(getCellIntValue(row, col++));
                 dto.setJulMin(getCellDoubleValue(row, col++));
                 dto.setJulMax(getCellDoubleValue(row, col++));
-                dto.setJulManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setJulManLoad(getCellIntValue(row, col++));
                 dto.setAugMin(getCellDoubleValue(row, col++));
                 dto.setAugMax(getCellDoubleValue(row, col++));
-                dto.setAugManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setAugManLoad(getCellIntValue(row, col++));
                 dto.setSepMin(getCellDoubleValue(row, col++));
                 dto.setSepMax(getCellDoubleValue(row, col++));
-                dto.setSepManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setSepManLoad(getCellIntValue(row, col++));
                 dto.setOctMin(getCellDoubleValue(row, col++));
                 dto.setOctMax(getCellDoubleValue(row, col++));
-                dto.setOctManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setOctManLoad(getCellIntValue(row, col++));
                 dto.setNovMin(getCellDoubleValue(row, col++));
                 dto.setNovMax(getCellDoubleValue(row, col++));
-                dto.setNovManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setNovManLoad(getCellIntValue(row, col++));
                 dto.setDecMin(getCellDoubleValue(row, col++));
                 dto.setDecMax(getCellDoubleValue(row, col++));
-                dto.setDecManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setDecManLoad(getCellIntValue(row, col++));
                 dto.setJanMin(getCellDoubleValue(row, col++));
                 dto.setJanMax(getCellDoubleValue(row, col++));
-                dto.setJanManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setJanManLoad(getCellIntValue(row, col++));
                 dto.setFebMin(getCellDoubleValue(row, col++));
                 dto.setFebMax(getCellDoubleValue(row, col++));
-                dto.setFebManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setFebManLoad(getCellIntValue(row, col++));
                 dto.setMarMin(getCellDoubleValue(row, col++));
                 dto.setMarMax(getCellDoubleValue(row, col++));
-                dto.setMarManLoad(getCellIntValue(row, col++));
+                if (hasManLoad) dto.setMarManLoad(getCellIntValue(row, col++));
 
                 dto.setRemarks(getCellValue(row, col++));
 
@@ -1362,7 +1386,7 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
     }
 
     private byte[] generateAssetCapacityErrorExcel(List<CPPAssetCapacityResponseDto> failedRecords,
-            List<String> failureReasons, String sheetName, String aopYear) throws Exception {
+            List<String> failureReasons, String sheetName, String aopYear, boolean includeManLoad) throws Exception {
         try (XSSFWorkbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
@@ -1395,9 +1419,11 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
                 cell = headerRow.createCell(col++);
                 cell.setCellValue(month + " Max");
                 cell.setCellStyle(headerStyle);
-                cell = headerRow.createCell(col++);
-                cell.setCellValue(month + " Man. Load");
-                cell.setCellStyle(headerStyle);
+                if (includeManLoad) {
+                    cell = headerRow.createCell(col++);
+                    cell.setCellValue(month + " Man. Load");
+                    cell.setCellStyle(headerStyle);
+                }
             }
 
             Cell cell = headerRow.createCell(col++);
@@ -1432,40 +1458,40 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
 
                 setNumericCell(row, col++, dto.getAprMin(), dataStyle);
                 setNumericCell(row, col++, dto.getAprMax(), dataStyle);
-                setNumericCell(row, col++, dto.getAprManLoad() != null ? dto.getAprManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getAprManLoad() != null ? dto.getAprManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getMayMin(), dataStyle);
                 setNumericCell(row, col++, dto.getMayMax(), dataStyle);
-                setNumericCell(row, col++, dto.getMayManLoad() != null ? dto.getMayManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getMayManLoad() != null ? dto.getMayManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getJunMin(), dataStyle);
                 setNumericCell(row, col++, dto.getJunMax(), dataStyle);
-                setNumericCell(row, col++, dto.getJunManLoad() != null ? dto.getJunManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getJunManLoad() != null ? dto.getJunManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getJulMin(), dataStyle);
                 setNumericCell(row, col++, dto.getJulMax(), dataStyle);
-                setNumericCell(row, col++, dto.getJulManLoad() != null ? dto.getJulManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getJulManLoad() != null ? dto.getJulManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getAugMin(), dataStyle);
                 setNumericCell(row, col++, dto.getAugMax(), dataStyle);
-                setNumericCell(row, col++, dto.getAugManLoad() != null ? dto.getAugManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getAugManLoad() != null ? dto.getAugManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getSepMin(), dataStyle);
                 setNumericCell(row, col++, dto.getSepMax(), dataStyle);
-                setNumericCell(row, col++, dto.getSepManLoad() != null ? dto.getSepManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getSepManLoad() != null ? dto.getSepManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getOctMin(), dataStyle);
                 setNumericCell(row, col++, dto.getOctMax(), dataStyle);
-                setNumericCell(row, col++, dto.getOctManLoad() != null ? dto.getOctManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getOctManLoad() != null ? dto.getOctManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getNovMin(), dataStyle);
                 setNumericCell(row, col++, dto.getNovMax(), dataStyle);
-                setNumericCell(row, col++, dto.getNovManLoad() != null ? dto.getNovManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getNovManLoad() != null ? dto.getNovManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getDecMin(), dataStyle);
                 setNumericCell(row, col++, dto.getDecMax(), dataStyle);
-                setNumericCell(row, col++, dto.getDecManLoad() != null ? dto.getDecManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getDecManLoad() != null ? dto.getDecManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getJanMin(), dataStyle);
                 setNumericCell(row, col++, dto.getJanMax(), dataStyle);
-                setNumericCell(row, col++, dto.getJanManLoad() != null ? dto.getJanManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getJanManLoad() != null ? dto.getJanManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getFebMin(), dataStyle);
                 setNumericCell(row, col++, dto.getFebMax(), dataStyle);
-                setNumericCell(row, col++, dto.getFebManLoad() != null ? dto.getFebManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getFebManLoad() != null ? dto.getFebManLoad().doubleValue() : null, dataStyle);
                 setNumericCell(row, col++, dto.getMarMin(), dataStyle);
                 setNumericCell(row, col++, dto.getMarMax(), dataStyle);
-                setNumericCell(row, col++, dto.getMarManLoad() != null ? dto.getMarManLoad().doubleValue() : null, dataStyle);
+                if (includeManLoad) setNumericCell(row, col++, dto.getMarManLoad() != null ? dto.getMarManLoad().doubleValue() : null, dataStyle);
 
                 createCell(row, col++, dto.getRemarks(), dataStyle);
                 createCell(row, col++, dto.getId() != null ? dto.getId().toString() : "", dataStyle);
@@ -1595,6 +1621,27 @@ public class JMDAssetCapacityServiceImpl implements JMDAssetCapacityService {
         style.setFont(font);
         style.setWrapText(true);
         return style;
+    }
+
+    private boolean isDmdSite(List<UUID> plantIds) {
+        if (plantIds == null || plantIds.isEmpty()) {
+            return false;
+        }
+        try {
+            String inClause = plantIds.stream().map(id -> "?").collect(Collectors.joining(","));
+            String sql = "SELECT DISTINCT s.Name FROM Plants p " +
+                    "LEFT JOIN Sites s ON s.Id = p.Site_FK_Id " +
+                    "WHERE p.Id IN (" + inClause + ")";
+            List<String> siteNames = db1JdbcTemplate.queryForList(sql, String.class,
+                    plantIds.stream().map(UUID::toString).toArray());
+            boolean isDmd = siteNames.stream()
+                    .anyMatch(n -> n != null && "dmd".equalsIgnoreCase(n.trim()));
+            logger.info("[isDmdSite] plantIds: {} resolved siteNames: {} -> isDmd: {}", plantIds, siteNames, isDmd);
+            return isDmd;
+        } catch (Exception e) {
+            logger.error("[isDmdSite] Error resolving site for plantIds {}: {}", plantIds, e.getMessage(), e);
+            return false;
+        }
     }
 
     private String derivePreviousFinancialYear(String financialYear) {
