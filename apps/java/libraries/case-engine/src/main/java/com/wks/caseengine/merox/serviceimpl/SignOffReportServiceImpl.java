@@ -130,7 +130,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
     private List<List<Map<String, Object>>> getAllColumnMetadata(
             String plantId, String aopYear, String periodFrom, String periodTo, String storedProcedure) {
 
-        String storedProcedureCall = "{ call [" + storedProcedure + "](?, ?, ?, ?) }";
+        String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
 
         Session session = entityManagerdb2.unwrap(Session.class);
 
@@ -183,7 +183,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
     private List<List<Object[]>> getAllGridData(
             String plantId, String aopYear, String periodFrom, String periodTo, String storedProcedure) {
 
-        String storedProcedureCall = "{ call [" + storedProcedure + "](?, ?, ?, ?) }";
+        String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
 
         Session session = entityManagerdb2.unwrap(Session.class);
 

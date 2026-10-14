@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class GasifierDropdownAopBasisDTO {
 
+    private String id;
     private String name;
     private String displayName;
     private String configuration;
