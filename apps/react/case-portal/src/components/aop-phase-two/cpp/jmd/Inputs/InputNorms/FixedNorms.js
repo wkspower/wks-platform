@@ -156,13 +156,13 @@ const FixedNorms = () => {
     },
     {
       field: 'actualNorm',
-      title: 'Actual Norm',
-      widthT: 150,
+      title: 'Proposed Norm',
+      widthT: 200,
       type: 'numberWithCheckbox',
       editable: true,
       isNumberEditable: false,
       format: customFormatFive,
-      minWidth: 150,
+      minWidth: 200,
       alwaysEditable: true,
     },
     // Apr

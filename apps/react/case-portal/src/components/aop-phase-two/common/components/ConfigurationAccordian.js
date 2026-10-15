@@ -27,6 +27,7 @@ import Notification from 'components/aop-phase-two/common/utilities/Notification
 import {
   validateDateRange,
   buildConfigurationPayload,
+  buildConfigurationPayloadTest,
 } from '../../crude/production-norms-basis/utils/utility'
 import ConfigurationDialog from './ConfigurationDialog'
 import { HistoricPeriodBasisApiService } from 'components/aop-phase-two/services/common/historicPeriodBasisApiService'
@@ -178,7 +179,7 @@ const ConfigurationAccordian = ({
         const startDateObj = details.find((item) => item.Name === 'StartDate')
         const endDateObj = details.find((item) => item.Name === 'EndDate')
         hasExecutedRef.current = true
-        await onLoadTest(startDateObj, endDateObj)
+        await onLoadTest(details, startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
         // Capture who last modified the data
@@ -220,11 +221,11 @@ const ConfigurationAccordian = ({
   )
 
   // Initial load with configurable year period
-  const onLoadTest = async (startDateObj, endDateObj) => {
+  const onLoadTest = async (configurationDetails, startDateObj, endDateObj) => {
     const { startDate: aopStartDate, endDate: aopEndDate } =
       getDatesFromAopYear(AOP_YEAR, yearGap)
-    let effectiveStartDate = startDate
-    let effectiveEndDate = endDate
+    let effectiveStartDate = aopStartDate
+    let effectiveEndDate = aopEndDate
     if (isHideLoadButton) {
       effectiveStartDate = aopStartDate
       effectiveEndDate = aopEndDate
@@ -240,10 +241,23 @@ const ConfigurationAccordian = ({
       plantId: PLANT_ID,
     })
 
-    const payload = [
-      createPayloadItem(startDateObj, formatDate(effectiveStartDate)),
-      createPayloadItem(endDateObj, formatDate(effectiveEndDate)),
-    ]
+    // const payload = [
+    //   createPayloadItem(startDateObj, formatDate(effectiveStartDate)),
+    //   createPayloadItem(endDateObj, formatDate(effectiveEndDate)),
+    // ]
+
+    // Build payload
+      const payload = buildConfigurationPayloadTest(
+        effectiveStartDate,
+        effectiveEndDate,
+        configurationDetails,
+        PLANT_ID,
+        AOP_YEAR,
+        effectiveStartDate,
+        effectiveEndDate,
+        effectiveStartDate,
+        effectiveEndDate
+      )
 
     try {
       setLoading(true)

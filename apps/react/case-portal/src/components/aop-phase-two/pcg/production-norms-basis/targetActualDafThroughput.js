@@ -64,7 +64,7 @@ const TargetActualDafThroughput = () => {
       },
       {
         field: 'range',
-        title: 'Range',
+        title: 'Range (+/-)',
         type: 'number',
         format: '{0:0.00}',
         editable: !READ_ONLY,
@@ -230,14 +230,14 @@ const TargetActualDafThroughput = () => {
             'DAF Throughput',
           targetValue:
             modifiedRow.targetValue !== '' &&
-            modifiedRow.targetValue !== null &&
-            modifiedRow.targetValue !== undefined
+              modifiedRow.targetValue !== null &&
+              modifiedRow.targetValue !== undefined
               ? Number(modifiedRow.targetValue)
               : 0,
           range:
             modifiedRow.range !== '' &&
-            modifiedRow.range !== null &&
-            modifiedRow.range !== undefined
+              modifiedRow.range !== null &&
+              modifiedRow.range !== undefined
               ? Number(modifiedRow.range)
               : 0,
           remarks: modifiedRow.remarks || modifiedRow.remark || '',

@@ -10,6 +10,9 @@ import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable
 import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import { generateExcelName } from 'components/aop-phase-two/common/utilities/excelNameUtil'
 
+// Only users with this role can edit the Fixed Min / Fixed Max columns.
+const CPP_MASTER_ROLE = 'cpp-master'
+
 const PowerAssetCapacity = ({
   initialRows = [],
   onRefresh,
@@ -33,7 +36,14 @@ const PowerAssetCapacity = ({
     jmdSelectedPlants,
   } = dataGridStore
   const AOP_YEAR = year?.selectedYear
-  const EXCEL_NAME = generateExcelName(dataGridStore, 'Power_Asset_Capacity')
+  const EXCEL_NAME = generateExcelName(dataGridStore, 'Asset_Capacity')
+  const IS_DMD = siteObject?.name?.toLowerCase() === 'dmd'
+
+  // Only cpp-master users may edit Fixed Min / Fixed Max.
+  const isCppMasterRole = useMemo(
+    () => keycloak?.realmAccess?.roles?.includes(CPP_MASTER_ROLE) || false,
+    [keycloak?.realmAccess?.roles],
+  )
 
   // Multi-plant list — same pattern as PowerAssetAvailability
   const PLANT_ID_LIST = plantObject?.id
@@ -107,6 +117,7 @@ const PowerAssetCapacity = ({
         minWidth: 140,
         editable: true,
         type: 'select',
+        hidden: IS_DMD,
         options: [
           { label: 1, value: 1 },
           { label: 0, value: 0 },
@@ -188,7 +199,7 @@ const PowerAssetCapacity = ({
       title: 'Fixed Min',
       widthT: 130,
       minWidth: 130,
-      editable: false,
+      editable: isCppMasterRole,
       type: 'number1',
       format: valueFormat,
     },
@@ -197,7 +208,7 @@ const PowerAssetCapacity = ({
       title: 'Fixed Max',
       widthT: 130,
       minWidth: 130,
-      editable: false,
+      editable: isCppMasterRole,
       type: 'number1',
       format: valueFormat,
     },
