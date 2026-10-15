@@ -213,14 +213,14 @@ const FuelAvailability = ({
       locked: true,
       minWidth: 100,
     },
-    {
-      field: 'fuelDescription',
-      title: 'Description',
-      type: 'text',
-      editable: false,
-      locked: false,
-      minWidth: 200,
-    },
+    // {
+    //   field: 'fuelDescription',
+    //   title: 'Description',
+    //   type: 'text',
+    //   editable: false,
+    //   locked: false,
+    //   minWidth: 200,
+    // },
     ...MONTH_COLUMNS,
     {
       field: 'remarks',

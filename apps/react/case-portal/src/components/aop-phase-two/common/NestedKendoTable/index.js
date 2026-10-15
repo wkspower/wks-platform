@@ -1700,6 +1700,7 @@ const NestedKendoTable = ({
                 onRowClick={handleRowClick}
                 onCellClick={handleCellClick}
                 onKeyDown={onTabKeyPressed}
+                lockGroups={true}
               >
                 {renderColumns(
                   columns.filter((col) => !hiddenFields.includes(col.field)),

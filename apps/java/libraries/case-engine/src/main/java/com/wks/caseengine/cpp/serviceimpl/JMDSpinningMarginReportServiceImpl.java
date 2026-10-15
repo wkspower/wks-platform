@@ -28,11 +28,13 @@ import lombok.extern.slf4j.Slf4j;
  * Read-only Spinning Margin Maintained report service implementation.
  *
  * <p>Reads directly from {@code dbo.CPPMonthlySpinningMarginMaintained}
- * for the selected plant(s) and AOP year, and exports the same data to Excel.</p>
+ * for the given AOP year, and exports the same data to Excel.</p>
  */
 @Service
 @Slf4j
 public class JMDSpinningMarginReportServiceImpl implements JMDSpinningMarginReportService {
+
+    private static final String COMBINED_PLANT_NAME = "Combined/All Plant";
 
     @Autowired
     private CPPMonthlySpinningMarginMaintainedRepository repository;
@@ -46,13 +48,6 @@ public class JMDSpinningMarginReportServiceImpl implements JMDSpinningMarginRepo
         log.info("[SpinningMarginReport] GET - plantIds: {}, aopYear: {}", plantIds, aopYear);
         AOPMessageVM vm = new AOPMessageVM();
 
-        if (plantIds == null || plantIds.isEmpty()) {
-            vm.setCode(400);
-            vm.setMessage("plantIds cannot be null or empty");
-            vm.setData(new ArrayList<>());
-            return vm;
-        }
-
         if (aopYear == null || aopYear.isEmpty()) {
             vm.setCode(400);
             vm.setMessage("aopYear cannot be null or empty");
@@ -61,7 +56,10 @@ public class JMDSpinningMarginReportServiceImpl implements JMDSpinningMarginRepo
         }
 
         try {
-            List<Object[]> rawRows = repository.findByPlantIdsAndAopYear(plantIds, aopYear);
+            // plantIds optional: when absent, return all rows for the year
+            List<Object[]> rawRows = (plantIds == null || plantIds.isEmpty())
+                    ? repository.findByAopYear(aopYear)
+                    : repository.findByPlantIdsAndAopYear(plantIds, aopYear);
             log.info("[SpinningMarginReport] GET - found {} records", rawRows.size());
 
             List<SpinningMarginReportDTO> dtoList = new ArrayList<>();
@@ -123,7 +121,7 @@ public class JMDSpinningMarginReportServiceImpl implements JMDSpinningMarginRepo
      * Map a native query result row to the report DTO.
      *
      * Expected column order (see
-     * {@link CPPMonthlySpinningMarginMaintainedRepository#findByPlantIdsAndAopYear}):
+     * {@link CPPMonthlySpinningMarginMaintainedRepository#findByAopYear}):
      *   0: Id, 1: AOPYear, 2: MarginType, 3: Plant_FK_Id,
      *   4: PlantName, 5..16: Apr .. Mar
      */
@@ -133,7 +131,9 @@ public class JMDSpinningMarginReportServiceImpl implements JMDSpinningMarginRepo
         dto.setAopYear(row[1] != null ? row[1].toString() : null);
         dto.setMarginType(row[2] != null ? row[2].toString() : null);
         dto.setPlantFkId(row[3] != null ? UUID.fromString(row[3].toString()) : null);
-        dto.setPlantName(row[4] != null ? row[4].toString() : null);
+        // Rows with no Plant_FK_Id are common to all plants
+        dto.setPlantName(row[3] == null ? COMBINED_PLANT_NAME
+                : (row[4] != null ? row[4].toString() : null));
         dto.setApr(toDoubleObj(row[5]));
         dto.setMay(toDoubleObj(row[6]));
         dto.setJun(toDoubleObj(row[7]));
