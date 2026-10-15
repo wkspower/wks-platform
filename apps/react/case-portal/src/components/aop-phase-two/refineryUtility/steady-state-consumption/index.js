@@ -32,7 +32,21 @@ const MONTH_FIELDS = [
 ]
 
 const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
-const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3', 'kg/km3']
+
+// Lowercase + strip all whitespace so "Power Consumption" === "PowerConsumption"
+const normalizeKey = (s) =>
+  String(s ?? '')
+    .replace(/\s+/g, '')
+    .toLowerCase()
+
+// Norm parameter types that show 3 decimals for DTA_PCG CT plants
+const THREE_DECIMAL_NORM_TYPES = [
+  'Specific Other Utilities consumption',
+  'Specific Makeup Consumption',
+  'Power Consumption',
+  'Chemical Consumption',
+  'Other Utilities consumption',
+].map(normalizeKey)
 
 const SteadyStateConsumption = () => {
   const keycloak = useSession()
@@ -52,7 +66,7 @@ const SteadyStateConsumption = () => {
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
   const isDtapcgCtPlant =
-    siteName.toLowerCase() === 'dta_pcg' &&
+    (siteName.toLowerCase() === 'dta_pcg' || siteName.toLowerCase() === 'sez_pcg') &&
     (plantName.toLowerCase() === 'ct1 (g731)' ||
       plantName.toLowerCase() === 'ct3 (g733)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
@@ -66,8 +80,6 @@ const SteadyStateConsumption = () => {
     (siteName === 'C2' &&
       (plantName.toLowerCase() === 'air' ||
         plantName.toLowerCase() === 'c2_asu'))
-
-  
 
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -83,7 +95,7 @@ const SteadyStateConsumption = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const formatValueByUom = useCallback(
-    (val, uom) => {
+    (val, uom, row = {}) => {
       if (val === null || val === undefined || val === '') return ''
       const num = parseFloat(val)
       if (isNaN(num)) return val
@@ -102,11 +114,13 @@ const SteadyStateConsumption = () => {
       }
 
       if (isDtapcgCtPlant) {
-        const cleanUom = String(uom ?? '')
-          .trim()
-          .toLowerCase()
-        const isThreeDecimal = decimalUOM.some(
-          (u) => u.trim().toLowerCase() === cleanUom,
+        // Decide by normParameterTypeName (or display name), not by UOM
+        const typeKeys = [
+          normalizeKey(row?.normParameterTypeName),
+          normalizeKey(row?.normParameterTypeDisplayName),
+        ]
+        const isThreeDecimal = typeKeys.some((k) =>
+          THREE_DECIMAL_NORM_TYPES.includes(k),
         )
         if (isThreeDecimal) {
           return (Math.trunc(num * 1000) / 1000).toFixed(3)
@@ -320,17 +334,17 @@ const SteadyStateConsumption = () => {
           isEditable: true,
         }
         const uom = item?.UOM || item?.uom || ''
-        if (isDtaCtPlant || isDtapcgCtPlant) {
+        if (isDtaCtPlant) {
           MONTH_FIELDS.forEach((m) => {
             if (row[m] !== undefined && row[m] !== null && row[m] !== '') {
-              row[m] = formatValueByUom(row[m], uom)
+              row[m] = formatValueByUom(row[m], uom, row)
             }
           })
         } else {
-          // Apart from isDtaCtPlant / isDtapcgCtPlant: show by default 2 decimals
+          // Apart from isDtaCtPlant: default formatting
           MONTH_FIELDS.forEach((m) => {
             if (row[m] !== undefined && row[m] !== null && row[m] !== '') {
-              row[m] = formatValueByUom(row[m], uom)
+              row[m] = formatValueByUom(row[m], uom, row)
             }
           })
         }
@@ -366,25 +380,25 @@ const SteadyStateConsumption = () => {
       .map((row) => {
         const uom = row?.UOM || row?.uom || ''
         const updatedRow = { ...row }
-        if (isDtaCtPlant || isDtapcgCtPlant) {
+        if (isDtaCtPlant) {
           MONTH_FIELDS.forEach((m) => {
             if (
               updatedRow[m] !== undefined &&
               updatedRow[m] !== null &&
               updatedRow[m] !== ''
             ) {
-              updatedRow[m] = formatValueByUom(updatedRow[m], uom)
+              updatedRow[m] = formatValueByUom(updatedRow[m], uom, updatedRow)
             }
           })
         } else {
-          // Apart from isDtaCtPlant / isDtapcgCtPlant: show by default 2 decimals
+          // Apart from isDtaCtPlant: default formatting
           MONTH_FIELDS.forEach((m) => {
             if (
               updatedRow[m] !== undefined &&
               updatedRow[m] !== null &&
               updatedRow[m] !== ''
             ) {
-              updatedRow[m] = formatValueByUom(updatedRow[m], uom)
+              updatedRow[m] = formatValueByUom(updatedRow[m], uom, updatedRow)
             }
           })
         }
@@ -400,24 +414,10 @@ const SteadyStateConsumption = () => {
       return
     }
 
-    const fieldsToCheck = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'august',
-      'september',
-      'october',
-      'november',
-      'december',
-      'january',
-      'february',
-      'march',
-    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
-      fieldsToCheck,
+      MONTH_FIELDS,
       'productName',
     )
 

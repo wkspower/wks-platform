@@ -10,7 +10,21 @@ import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import { generateExcelName } from 'components/aop-phase-two/common/utilities/excelNameUtil'
 
 const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
-const decimalUOM = ['kwh', 'kwh/m3', 'kg/m3']
+
+// Lowercase + strip all whitespace so "Power Consumption" === "PowerConsumption"
+const normalizeKey = (s) =>
+  String(s ?? '')
+    .replace(/\s+/g, '')
+    .toLowerCase()
+
+// Norm parameter types that show 3 decimals for DTA_PCG CT plants
+const THREE_DECIMAL_NORM_TYPES = [
+  'Specific Other Utilities consumption',
+  'Specific Makeup Consumption',
+  'Power Consumption',
+  'Chemical Consumption',
+  'Other Utilities consumption',
+].map(normalizeKey)
 
 const OverallAopConsumption = () => {
   const keycloak = useSession()
@@ -26,7 +40,7 @@ const OverallAopConsumption = () => {
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
   const isDtapcgCtPlant =
-    siteName.toLowerCase() === 'dta_pcg' &&
+    (siteName.toLowerCase() === 'dta_pcg' || siteName.toLowerCase() === 'sez_pcg') &&
     (plantName.toLowerCase() === 'ct1 (g731)' ||
       plantName.toLowerCase() === 'ct3 (g733)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
@@ -50,7 +64,7 @@ const OverallAopConsumption = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const formatValueByUom = useCallback(
-    (val, uom) => {
+    (val, uom, row = {}) => {
       if (val === null || val === undefined || val === '') return ''
       const num = parseFloat(val)
       if (isNaN(num)) return val
@@ -67,12 +81,15 @@ const OverallAopConsumption = () => {
         }
         return Math.trunc(num).toString()
       }
+
       if (isDtapcgCtPlant) {
-        const cleanUom = String(uom ?? '')
-          .trim()
-          .toLowerCase()
-        const isThreeDecimal = decimalUOM.some(
-          (u) => u.trim().toLowerCase() === cleanUom,
+        // Decide by normParameterTypeName (or display name), not by UOM
+        const typeKeys = [
+          normalizeKey(row?.normParameterTypeName),
+          normalizeKey(row?.normParameterTypeDisplayName),
+        ]
+        const isThreeDecimal = typeKeys.some((k) =>
+          THREE_DECIMAL_NORM_TYPES.includes(k),
         )
         if (isThreeDecimal) {
           return (Math.trunc(num * 1000) / 1000).toFixed(3)
@@ -86,7 +103,7 @@ const OverallAopConsumption = () => {
 
       return Math.trunc(num).toString()
     },
-    [isDtaCtPlant, isAsuPlant, isFCCTame,isDtapcgCtPlant],
+    [isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant],
   )
 
   const columns = useMemo(() => {
@@ -297,7 +314,11 @@ const OverallAopConsumption = () => {
               formattedItem[field] !== null &&
               formattedItem[field] !== ''
             ) {
-              formattedItem[field] = formatValueByUom(formattedItem[field], uom)
+              formattedItem[field] = formatValueByUom(
+                formattedItem[field],
+                uom,
+                formattedItem,
+              )
             }
           })
 
