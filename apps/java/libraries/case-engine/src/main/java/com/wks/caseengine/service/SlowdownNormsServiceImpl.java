@@ -137,7 +137,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			Boolean elastomer = vertical.getName().equalsIgnoreCase("ELASTOMER")  && site.getName().equalsIgnoreCase("JMD") && plant.getName().equalsIgnoreCase("HIIR");
+			Boolean elastomerJmdHiiR = vertical.getName().equalsIgnoreCase("ELASTOMER")  && site.getName().equalsIgnoreCase("JMD") && plant.getName().equalsIgnoreCase("HIIR");
 			boolean ptapmdpia = vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("pmd") && plant.getName().equalsIgnoreCase("pia");
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
 				String storedProcedure = vertical.getName() + "_" + site.getName() + "_SlowdownNormCalculation";
@@ -154,13 +154,10 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				String storedProcedure = "vwScrn" + vertical.getName() + "SlowdownNorms";
 
 				objList = getSlowdownNorms(year, plant.getId(), storedProcedure);
-			}else if(elastomer) {
-				String viewName = "vwScrn" + vertical.getName()+site.getName() + "SlowdownNorms";
-				
-				if(gradeId!=null) {
-					 grade=UUID.fromString(gradeId);
-				}
-				objList = getSlowdownNormsWithGrades(year, plant.getId(), viewName,grade);
+			}else if(elastomerJmdHiiR) {
+				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowdownnorms";
+				objList = getSlowdownConsumptionDataForGrades(plant.getId().toString(),year, gradeId, storedProcedure);
+
 			} else if (vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("ELASTOMER")
 					|| vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("Chemical")) {
 				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowdownnorms";
@@ -241,6 +238,26 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getSlowdownConsumptionDataForGrades(String plantId, String aopYear,String gradeId,String storedProcedure) {
+		try {
+			
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @FinYear = :aopYear, @GradeId = :gradeId";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("gradeId", gradeId);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
