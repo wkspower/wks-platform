@@ -16,6 +16,7 @@ public interface NormalOperationNormsService {
 	byte[] exportSteadyStateNormsDynamic(String year, String plantId, boolean isAfterSave, List<Map<String, Object>> dynamicData);
 	AOPMessageVM importSteadyStateNorms(String year, String plantId, MultipartFile file);
 	public AOPMessageVM updateSteadyStateNorms( String plantId,  String year, List<Map<String, Object>> payloadList);
+	public AOPMessageVM updateAOPConsumptionNormGrade( String plantId,  String year, List<Map<String, Object>> payloadList);
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData( List<MCUNormsValueDTO> mCUNormsValueDTOList, UUID plantFKId, String year,String gradeId, boolean isFromExcel);
 	public AOPMessageVM calculateExpressionConsumptionNorms(String year,String plantId);
 	public AOPMessageVM loadGradeWiseConsumptionNorms(String year,String plantId);

@@ -24,6 +24,7 @@ import com.wks.caseengine.dto.ModeWiseNormsDTO;
 import com.wks.caseengine.dto.NormConfigurationDTO;
 import com.wks.caseengine.dto.SteadyStateNormDTO;
 import com.wks.caseengine.dto.ValidationErrorDTO;
+import com.wks.caseengine.entity.AOPConsumptionNormGrade;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.MCUNormsValueGrade;
@@ -36,6 +37,7 @@ import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AOPConsumptionNormGradeRepository;
 import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueGradeRepository;
@@ -97,6 +99,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@Autowired
 	private MCUNormsValueGradeRepository mcuNormsValueGradeRepository;
+
+	@Autowired
+	private AOPConsumptionNormGradeRepository aopConsumptionNormGradeRepository;
 
 	private DataSource dataSource;
 
@@ -1497,9 +1502,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	       Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
 	       Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 
-		   boolean filament = vertical.getName().equalsIgnoreCase("Filament");
-		   boolean staple = vertical.getName().equalsIgnoreCase("STAPLE");
-
 	       List<MCUNormsValueGrade> mcuNormsValueGrades = new ArrayList<>();
 	       List<SteadyStateNormDTO> failedList = new ArrayList<>();
 
@@ -1625,6 +1627,156 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	       aopMessageVM.setMessage(failedList.isEmpty() ? "Data updated successfully" : "Processed with some validation errors");
 	       return aopMessageVM;
 	   }	
+
+	   @Transactional
+	   @Override
+	   public AOPMessageVM updateAOPConsumptionNormGrade(String plantId, String year, List<Map<String, Object>> payloadList) {
+
+	       List<SteadyStateNormDTO> dtos = processPayload(payloadList);
+
+	       Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	       Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
+	       Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+
+	       List<AOPConsumptionNormGrade> aopConsumptionNormGrades = new ArrayList<>();
+	       List<SteadyStateNormDTO> failedList = new ArrayList<>();
+
+	       for (SteadyStateNormDTO steadyStateNormDTO : dtos) {
+
+	           if (steadyStateNormDTO.getSaveStatus() != null && steadyStateNormDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+	               failedList.add(steadyStateNormDTO);
+	               continue;
+	           }
+
+	           UUID materialId = UUID.fromString(steadyStateNormDTO.getMaterialFkId());
+	           UUID gradeId = UUID.fromString(steadyStateNormDTO.getGradeId());
+
+	           Optional<AOPConsumptionNormGrade> opt = aopConsumptionNormGradeRepository.findByMaterialGradeAndAOPYear(
+	                   materialId, gradeId, year, UUID.fromString(plantId)
+	           );
+
+	           String newRemark = steadyStateNormDTO.getRemarks() != null ? steadyStateNormDTO.getRemarks().trim() : "";
+
+	           if (opt.isPresent()) {
+	               AOPConsumptionNormGrade existing = opt.get();
+	               String existingRemark = existing.getAopRemarks() != null ? existing.getAopRemarks().trim() : "";
+
+	               boolean isValueChanged = isAnyMonthValueChanged(existing, steadyStateNormDTO);
+	               boolean isRemarkChanged = !existingRemark.equalsIgnoreCase(newRemark);
+
+	               if (isValueChanged && !isRemarkChanged) {
+	                   steadyStateNormDTO.setSaveStatus("Failed");
+	                   steadyStateNormDTO.setErrDescription("Value has changed; please provide an updated remark.");
+	                   failedList.add(steadyStateNormDTO);
+	                   continue;
+	               }
+
+	               if (isValueChanged || isRemarkChanged) {
+	                   setMonthlyValues(existing, steadyStateNormDTO);
+	                   existing.setAopRemarks(newRemark);
+	                   aopConsumptionNormGrades.add(existing);
+	               }
+	           } else {
+	               boolean areAllMonthsNull = steadyStateNormDTO.getApril() == null &&
+	                       steadyStateNormDTO.getMay() == null &&
+	                       steadyStateNormDTO.getJune() == null &&
+	                       steadyStateNormDTO.getJuly() == null &&
+	                       steadyStateNormDTO.getAugust() == null &&
+	                       steadyStateNormDTO.getSeptember() == null &&
+	                       steadyStateNormDTO.getOctober() == null &&
+	                       steadyStateNormDTO.getNovember() == null &&
+	                       steadyStateNormDTO.getDecember() == null &&
+	                       steadyStateNormDTO.getJanuary() == null &&
+	                       steadyStateNormDTO.getFebruary() == null &&
+	                       steadyStateNormDTO.getMarch() == null;
+
+	               if (areAllMonthsNull) {
+	                   continue;
+	               }
+
+	               if (newRemark.isEmpty()) {
+	                   steadyStateNormDTO.setSaveStatus("Failed");
+	                   steadyStateNormDTO.setErrDescription("Remark is mandatory for creating a new record.");
+	                   failedList.add(steadyStateNormDTO);
+	                   continue;
+	               }
+
+	               AOPConsumptionNormGrade newEntity = new AOPConsumptionNormGrade();
+	               setMonthlyValues(newEntity, steadyStateNormDTO);
+
+	               newEntity.setAopRemarks(newRemark);
+	               newEntity.setAopYear(year);
+	               newEntity.setGradeFkId(gradeId);
+	               newEntity.setMaterialFkId(materialId);
+	               newEntity.setNormParameterTypeFkId(UUID.fromString(steadyStateNormDTO.getNormParameterTypeFkId()));
+	               newEntity.setPlantFkId(UUID.fromString(plantId));
+	               newEntity.setSiteFkId(site.getId());
+	               newEntity.setVerticalFkId(vertical.getId());
+
+	               aopConsumptionNormGrades.add(newEntity);
+	           }
+	       }
+
+	       if (!aopConsumptionNormGrades.isEmpty()) {
+	           aopConsumptionNormGradeRepository.saveAll(aopConsumptionNormGrades);
+
+	           String procedureName = vertical.getName() + "_" + site.getName() + "_CalculateTotalNorms";
+
+	           Integer result = executeCalculateSP(String.valueOf(plantId), year, procedureName);
+
+	           List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
+	           for (ScreenMapping screenMapping : screenMappingList) {
+	               AopCalculation aopCalculation = new AopCalculation();
+	               aopCalculation.setAopYear(year);
+	               aopCalculation.setIsChanged(true);
+	               aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	               aopCalculation.setPlantId(plant.getId());
+	               aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	               aopCalculationRepository.save(aopCalculation);
+	           }
+	       }
+
+	       AOPMessageVM aopMessageVM = new AOPMessageVM();
+	       aopMessageVM.setCode(failedList.isEmpty() ? 200 : 207);
+
+	       Map<String, Object> responseData = new HashMap<>();
+	       responseData.put("updatedList", aopConsumptionNormGrades);
+	       responseData.put("failedList", failedList);
+
+	       aopMessageVM.setData(responseData);
+	       aopMessageVM.setMessage(failedList.isEmpty() ? "Data updated successfully" : "Processed with some validation errors");
+	       return aopMessageVM;
+	   }
+
+	   private void setMonthlyValues(AOPConsumptionNormGrade entity, SteadyStateNormDTO dto) {
+	       entity.setApril(dto.getApril());
+	       entity.setMay(dto.getMay());
+	       entity.setJune(dto.getJune());
+	       entity.setJuly(dto.getJuly());
+	       entity.setAug(dto.getAugust());
+	       entity.setSep(dto.getSeptember());
+	       entity.setOct(dto.getOctober());
+	       entity.setNov(dto.getNovember());
+	       entity.setDec(dto.getDecember());
+	       entity.setJan(dto.getJanuary());
+	       entity.setFeb(dto.getFebruary());
+	       entity.setMarch(dto.getMarch());
+	   }
+
+	   private boolean isAnyMonthValueChanged(AOPConsumptionNormGrade existing, SteadyStateNormDTO dto) {
+	       return isDoubleChanged(existing.getApril(), dto.getApril()) ||
+	              isDoubleChanged(existing.getMay(), dto.getMay()) ||
+	              isDoubleChanged(existing.getJune(), dto.getJune()) ||
+	              isDoubleChanged(existing.getJuly(), dto.getJuly()) ||
+	              isDoubleChanged(existing.getAug(), dto.getAugust()) ||
+	              isDoubleChanged(existing.getSep(), dto.getSeptember()) ||
+	              isDoubleChanged(existing.getOct(), dto.getOctober()) ||
+	              isDoubleChanged(existing.getNov(), dto.getNovember()) ||
+	              isDoubleChanged(existing.getDec(), dto.getDecember()) ||
+	              isDoubleChanged(existing.getJan(), dto.getJanuary()) ||
+	              isDoubleChanged(existing.getFeb(), dto.getFebruary()) ||
+	              isDoubleChanged(existing.getMarch(), dto.getMarch());
+	   }
 	   
 	   public Integer executeCalculateSP( String plantId, String aopYear, String procedureName) {
 		try {
