@@ -29,6 +29,13 @@ public interface CPPImportPowerRepository extends JpaRepository<CPPImportPower, 
      *     This precisely scopes the result to the right CPP → ImportPlant relationship.
      *
      *  3. Filter by AOPYear and exclude soft-deleted NormParameters (isVisible = 0).
+     *
+     *  Two NormParameters joins:
+     *   - np  → material norm (NormParameter_FK_Id): SAPMaterialCode = Material Code,
+     *           Name = Material Name, DisplayName = Material Display Name
+     *   - unp → utility norm (Utility_NormParameter_FK_Id): SAPMaterialCode = Utility Code,
+     *           Name = Utility Name (e.g. Power_dis receiver norm)
+     *   - utility/material legacy aliases kept for process-unit allocation consumers
      */
     @Query(value = """
         WITH ImportPlants AS (
@@ -43,7 +50,11 @@ public interface CPPImportPowerRepository extends JpaRepository<CPPImportPower, 
             ip.Id                                           AS id,
             importPlant.DisplayName                         AS procurementPlant,
             cppPlant.DisplayName                            AS plantName,
-            np.SAPMaterialCode                              AS utility,
+            unp.SAPMaterialCode                             AS utilityCode,
+            unp.Name                                        AS utilityName,
+            np.SAPMaterialCode                              AS materialCode,
+            np.Name                                         AS materialName,
+            unp.Name                                        AS utility,
             np.Name                                         AS material,
             np.DisplayName                                  AS materialDisplayName,
             np.UOM                                          AS uom,
@@ -67,7 +78,8 @@ public interface CPPImportPowerRepository extends JpaRepository<CPPImportPower, 
             CONVERT(VARCHAR(19), ip.UpdatedDate, 120)       AS updatedDate,
             ip.ImportPlantFK_ID                             AS importPlantFkId,
             ip.CPPPlant_FK_ID                               AS cppPlantFkId,
-            ip.NormParameter_FK_Id                          AS normParameterFkId
+            ip.NormParameter_FK_Id                          AS normParameterFkId,
+            ip.Utility_NormParameter_FK_Id                  AS utilityNormParameterFkId
         FROM [dbo].[CPPImportPower] ip WITH(NOLOCK)
         INNER JOIN ImportPlants imp
             ON ip.ImportPlantFK_ID = imp.importPlantId
@@ -78,6 +90,8 @@ public interface CPPImportPowerRepository extends JpaRepository<CPPImportPower, 
             ON cppPlant.Id = ip.CPPPlant_FK_ID
         LEFT JOIN [dbo].[NormParameters] np WITH(NOLOCK)
             ON np.Id = ip.NormParameter_FK_Id
+        LEFT JOIN [dbo].[NormParameters] unp WITH(NOLOCK)
+            ON unp.Id = ip.Utility_NormParameter_FK_Id
         WHERE ip.AOPYear = :aopYear
           AND ISNULL(np.isVisible, 1) = 1
         ORDER BY importPlant.DisplayName, np.SAPMaterialCode
