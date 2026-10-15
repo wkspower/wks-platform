@@ -30,6 +30,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
 
 
    // @PersistenceContext(unitName = "db2")
+    @PersistenceContext
     private EntityManager entityManagerdb2;
 
     @Autowired 
