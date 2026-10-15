@@ -12,22 +12,10 @@ import { generateExcelName } from 'components/aop-phase-two/common/utilities/exc
 const SpinningMarginReport = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { siteObject, plantObject, year, screenTitle, jmdSelectedPlants } =
-    dataGridStore
+  const { year, screenTitle } = dataGridStore
 
-  const PLANT_ID = plantObject?.id
-  const lowerSiteName = siteObject?.name?.toLowerCase()
   const AOP_YEAR = year?.selectedYear
   const EXCEL_NAME = generateExcelName(dataGridStore, 'Spinning_Margin_Report')
-
-  // Build plant ID list: JMD uses all selected plants, otherwise single plant
-  const PLANT_ID_LIST = useMemo(
-    () =>
-      lowerSiteName === 'jmd'
-        ? jmdSelectedPlants?.map((plant) => plant.id) || []
-        : [PLANT_ID],
-    [jmdSelectedPlants, lowerSiteName, PLANT_ID],
-  )
 
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -117,19 +105,23 @@ const SpinningMarginReport = () => {
   )
 
   const fetchData = useCallback(async () => {
-    if (!PLANT_ID_LIST?.length || !AOP_YEAR) return
+    if (!AOP_YEAR) return
     setLoading(true)
     try {
+      // plantIds passed as null → fetch all rows for the year; pass a plant
+      // id list here to enable plant-wise filtering in future
       const response = await OutputApiService.getSpinningMarginReport(
         keycloak,
-        PLANT_ID_LIST,
+        null,
         AOP_YEAR,
       )
       const data = response?.data || []
       const rowsWithId = data?.map((row, index) => ({
         ...row,
         id: row.id || `row_${index}`,
-        plantName: row.plantName || '',
+        // Rows with no plant id are common to all plants
+        plantName:
+          row.plantFkId == null ? 'Combined/All Plant' : row.plantName || '',
       }))
       setRows(rowsWithId)
       if (!rowsWithId.length) {
@@ -144,16 +136,16 @@ const SpinningMarginReport = () => {
     } finally {
       setLoading(false)
     }
-  }, [keycloak, PLANT_ID_LIST, AOP_YEAR])
+  }, [keycloak, AOP_YEAR])
 
   useDebounce(
     () => {
-      if (PLANT_ID_LIST?.length && AOP_YEAR) {
+      if (AOP_YEAR) {
         fetchData()
       }
     },
     1000,
-    [PLANT_ID_LIST, AOP_YEAR, fetchData],
+    [AOP_YEAR, fetchData],
   )
 
   const permissions = {
@@ -180,7 +172,7 @@ const SpinningMarginReport = () => {
     try {
       await OutputApiService.exportSpinningMarginReportExcel(
         keycloak,
-        PLANT_ID_LIST,
+        null,
         AOP_YEAR,
         EXCEL_NAME,
       )

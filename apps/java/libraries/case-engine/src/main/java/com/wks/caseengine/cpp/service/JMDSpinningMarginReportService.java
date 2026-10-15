@@ -10,13 +10,16 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
  * Read-only Spinning Margin Maintained report service.
  *
  * <p>Provides GET and Excel export for the
- * {@code dbo.CPPMonthlySpinningMarginMaintained} table, filtered by selected
- * plant(s) and AOP year.</p>
+ * {@code dbo.CPPMonthlySpinningMarginMaintained} table, filtered by AOP year
+ * and optionally by plant(s).</p>
  */
 public interface JMDSpinningMarginReportService {
 
     /**
-     * Fetch Spinning Margin Maintained rows for the given plant(s) and AOP year.
+     * Fetch Spinning Margin Maintained rows for the given AOP year.
+     *
+     * @param plantIds optional; when null or empty, all rows for the year are
+     *                 returned (including rows common to all plants)
      */
     AOPMessageVM getSpinningMarginReport(List<UUID> plantIds, String aopYear);
 

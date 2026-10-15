@@ -22,7 +22,7 @@ export const OutputApiService = {
   getUtilityRateData,
   exportUtilityRateExcel,
 
-  // Used in: Outputs/spinning-margin-report/SpinningMarginReportGrid.js (Spinning Margin report grid)
+  // Used in: Outputs/spinning-margin-report/index.js (Spinning Margin report grid)
   getSpinningMarginReport,
   exportSpinningMarginReportExcel,
 }
@@ -418,15 +418,17 @@ async function exportUtilityRateExcel(keycloak, plantIds, aopYear, EXCEL_NAME) {
 }
 
 // ===================== || SPINNING MARGIN REPORT APIs || ===================== //
-// GET /task/jmd/spinning-margin-report?plantIds=...&aopYear=...
+// GET /task/jmd/spinning-margin-report?aopYear=...[&plantIds=...]
 // Returns Spinning Margin Maintained rows from dbo.CPPMonthlySpinningMarginMaintained
-// for the given plant(s) and AOP year. POWER rows (Plant_FK_Id IS NULL) apply to
-// all plants; STEAM rows are filtered by Plant_FK_Id.
+// for the given AOP year. plantIds is optional — when omitted, all rows for the
+// year are returned; rows where Plant_FK_Id IS NULL are common to all plants.
 // Each row contains: id, aopYear, marginType, plantFkId, plantName,
 // 12 monthly margin fields (apr → mar).
 async function getSpinningMarginReport(keycloak, plantIds, aopYear) {
-  const queryParams = buildPlantIdsParam(plantIds)
-  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report?plantIds=${queryParams}&aopYear=${aopYear}`
+  const plantParams = plantIds?.length
+    ? `&plantIds=${buildPlantIdsParam(plantIds)}`
+    : ''
+  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report?aopYear=${aopYear}${plantParams}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -444,15 +446,17 @@ async function getSpinningMarginReport(keycloak, plantIds, aopYear) {
   }
 }
 
-// GET /task/jmd/spinning-margin-report/export?plantIds=...&aopYear=...
+// GET /task/jmd/spinning-margin-report/export?aopYear=...[&plantIds=...]
 async function exportSpinningMarginReportExcel(
   keycloak,
   plantIds,
   aopYear,
   EXCEL_NAME,
 ) {
-  const queryParams = buildPlantIdsParam(plantIds)
-  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report/export?plantIds=${queryParams}&aopYear=${aopYear}`
+  const plantParams = plantIds?.length
+    ? `&plantIds=${buildPlantIdsParam(plantIds)}`
+    : ''
+  const url = `${Config.CaseEngineUrl}/task/jmd/spinning-margin-report/export?aopYear=${aopYear}${plantParams}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

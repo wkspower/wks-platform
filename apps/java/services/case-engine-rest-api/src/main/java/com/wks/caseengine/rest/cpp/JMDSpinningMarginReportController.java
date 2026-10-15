@@ -20,12 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Read-only Spinning Margin Maintained report endpoints.
  *
- *   GET /task/jmd/spinning-margin-report?plantIds=...&aopYear=...
- *   GET /task/jmd/spinning-margin-report/export?plantIds=...&aopYear=...
+ *   GET /task/jmd/spinning-margin-report?aopYear=...[&plantIds=...]
+ *   GET /task/jmd/spinning-margin-report/export?aopYear=...[&plantIds=...]
  *
  * Reads from {@code dbo.CPPMonthlySpinningMarginMaintained} filtered by the
- * selected plant(s) and AOP year. POWER rows (Plant_FK_Id IS NULL) apply to
- * all plants; STEAM rows are filtered by Plant_FK_Id.
+ * AOP year. plantIds is optional; when omitted, all rows for the year are
+ * returned. Rows where Plant_FK_Id IS NULL are common to all plants.
  */
 @RestController
 @RequestMapping("task")
@@ -37,7 +37,7 @@ public class JMDSpinningMarginReportController {
 
     @GetMapping("/jmd/spinning-margin-report")
     public ResponseEntity<?> getSpinningMarginReport(
-            @RequestParam List<UUID> plantIds,
+            @RequestParam(required = false) List<UUID> plantIds,
             @RequestParam String aopYear) {
         try {
             log.info("=== GET Spinning Margin Report Request ===");
@@ -62,7 +62,7 @@ public class JMDSpinningMarginReportController {
 
     @GetMapping(value = "/jmd/spinning-margin-report/export")
     public ResponseEntity<byte[]> exportSpinningMarginReport(
-            @RequestParam List<UUID> plantIds,
+            @RequestParam(required = false) List<UUID> plantIds,
             @RequestParam String aopYear) {
 
         log.info("[GET /jmd/spinning-margin-report/export] Request received - plantIds: {}, aopYear: {}",
