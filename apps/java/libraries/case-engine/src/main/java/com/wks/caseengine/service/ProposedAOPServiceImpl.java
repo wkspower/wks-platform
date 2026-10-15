@@ -803,15 +803,6 @@ public class ProposedAOPServiceImpl implements ProposedAOPService {
 
 			}
 
-			// sp call logic 
-
-			Plants plants = plantsRepository.findById(plantId).orElseThrow(() -> new RuntimeException("Plant not found"));
-			String verticalName = verticalRepository.findById(plants.getVerticalFKId()).orElseThrow(() -> new RuntimeException("Vertical not found")).getName();
-			String siteName = siteRepository.findById(plants.getSiteFkId()).orElseThrow(() -> new RuntimeException("Site not found")).getName();
-	
-			String procedureName = verticalName + "_" + siteName + "_CalculateTotalNorms";
-
-			Integer result = executeCalculateSP(String.valueOf(plantId), year, procedureName);
 
 			if (plantId != null && year != null) {
 				List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("proposed-aop");

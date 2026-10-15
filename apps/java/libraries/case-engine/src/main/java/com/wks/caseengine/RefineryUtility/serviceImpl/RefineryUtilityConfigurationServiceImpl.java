@@ -1130,7 +1130,7 @@ public List<Object[]> getCommodityChemicalsDataFromSP(String aopYear, String pla
 					}
 				}
 				dto.setIsEditable(isEditable);
-				
+				dto.setType(row[22] != null ? row[22].toString() : null);
 				dtoList.add(dto);
 			}
 			aopMessageVM.setCode(200);

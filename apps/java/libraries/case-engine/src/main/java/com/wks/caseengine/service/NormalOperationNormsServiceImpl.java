@@ -64,6 +64,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
 import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Service
@@ -74,6 +76,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
 	@Autowired
 	PlantsRepository plantsRepository;
 	@Autowired
@@ -1491,6 +1497,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	       Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
 	       Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 
+		   boolean filament = vertical.getName().equalsIgnoreCase("Filament");
+		   boolean staple = vertical.getName().equalsIgnoreCase("STAPLE");
+
 	       List<MCUNormsValueGrade> mcuNormsValueGrades = new ArrayList<>();
 	       List<SteadyStateNormDTO> failedList = new ArrayList<>();
 
@@ -1588,6 +1597,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	       if (!mcuNormsValueGrades.isEmpty()) {
 	           mcuNormsValueGradeRepository.saveAll(mcuNormsValueGrades);
 
+			   // sp call logic 
+			String procedureName = vertical.getName() + "_" + site.getName() + "_CalculateTotalNorms";
+
+			Integer result = executeCalculateSP(String.valueOf(plantId), year, procedureName);
+
 	           List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
 	           for (ScreenMapping screenMapping : screenMappingList) {
 	               AopCalculation aopCalculation = new AopCalculation();
@@ -1610,7 +1624,20 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	       aopMessageVM.setData(responseData);
 	       aopMessageVM.setMessage(failedList.isEmpty() ? "Data updated successfully" : "Processed with some validation errors");
 	       return aopMessageVM;
-	   }	   
+	   }	
+	   
+	   public Integer executeCalculateSP( String plantId, String aopYear, String procedureName) {
+		try {
+
+			String callSql = "{call " + "[" + procedureName + "]" + "(?, ?)}";
+
+
+			return jdbcTemplate.update(callSql, plantId, aopYear);
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to execute stored procedure", e);
+		}
+	}
 
 	   private void setMonthlyValues(MCUNormsValueGrade entity, SteadyStateNormDTO dto) {
 	       entity.setApril(dto.getApril());
