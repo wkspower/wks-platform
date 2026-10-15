@@ -8,6 +8,7 @@ import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import TargetActualDafThroughput from './targetActualDafThroughput'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/pcg/productionNormsApiService'
+import SelectCellEditorDropdown from './SelectCellEditorDropdown'
 
 // Fallback G-Operation dropdown options
 export const G_OPERATION_OPTIONS = [
@@ -75,27 +76,17 @@ const GasifierOperation = () => {
   // Dynamic G-Operation dropdown options from API with fallback
   const gOperationOptions = useMemo(() => {
     if (dropdownList.length > 0) {
-      const nameCount = {}
-      dropdownList.forEach((d) => {
-        const k = (d.displayName || d.name || '').trim()
-        nameCount[k] = (nameCount[k] || 0) + 1
-      })
-
       return dropdownList.map((item, idx) => {
         const baseName = (item.displayName || item.name || '').trim()
-        const isDuplicate = nameCount[baseName] > 1
-
         const label = baseName
         const gId = item.id || item.gId || item.gid || item.GId || null
 
         // Ensure unique value (using gId) so Kendo DropDownList (dataItemKey="value") can distinguish each item
         const value =
           gId ||
-          (isDuplicate && item.configuration
+          (item.configuration
             ? `${baseName}__${item.configuration}`
-            : isDuplicate
-              ? `${baseName}__${idx}`
-              : baseName)
+            : `${baseName}__${idx}`)
 
         return {
           label,
@@ -116,24 +107,31 @@ const GasifierOperation = () => {
     (gOp) => {
       if (!gOp) return ''
       const opStr = String(gOp).trim().toLowerCase()
+
+      // 1. Primary match: match by ID / unique value
       const matchedOption = gOperationOptions.find(
         (opt) =>
           (opt.value && String(opt.value).trim().toLowerCase() === opStr) ||
           (opt.id && String(opt.id).trim().toLowerCase() === opStr) ||
-          (opt.gId && String(opt.gId).trim().toLowerCase() === opStr) ||
-          (opt.name && opt.name.trim().toLowerCase() === opStr) ||
-          (opt.displayName && opt.displayName.trim().toLowerCase() === opStr),
+          (opt.gId && String(opt.gId).trim().toLowerCase() === opStr),
       )
       if (matchedOption?.configuration) return matchedOption.configuration
 
       const found = dropdownList.find(
         (d) =>
           (d.id && String(d.id).trim().toLowerCase() === opStr) ||
-          (d.gId && String(d.gId).trim().toLowerCase() === opStr) ||
-          (d.name && d.name.trim().toLowerCase() === opStr) ||
-          (d.displayName && d.displayName.trim().toLowerCase() === opStr),
+          (d.gId && String(d.gId).trim().toLowerCase() === opStr),
       )
       if (found?.configuration) return found.configuration
+
+      // 2. Fallback: match by name/displayName only if not matched by ID
+      const fallbackOption = gOperationOptions.find(
+        (opt) =>
+          (opt.name && opt.name.trim().toLowerCase() === opStr) ||
+          (opt.displayName && opt.displayName.trim().toLowerCase() === opStr),
+      )
+      if (fallbackOption?.configuration) return fallbackOption.configuration
+
       return getGConfigurationString(gOp)
     },
     [gOperationOptions, dropdownList],
@@ -153,9 +151,10 @@ const GasifierOperation = () => {
       {
         field: 'gOperation',
         title: 'G-Operation',
-        widthT: 200,
+        widthT: 220,
         minWidth: 180,
-        type: 'select',
+        type: 'customSelect',
+        cellEditor: SelectCellEditorDropdown,
         editable: !READ_ONLY,
         options: gOperationOptions,
         displayMode: 'label',

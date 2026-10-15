@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import Constants from './Constants'
+import Configuration from './Configuration'
 import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
 import PIMSThroughput from './PIMSThroughput'
 import PIMSMontlyThroughput from 'components/aop-phase-two/crude/production-norms-basis/PIMSMontlyThroughput'
@@ -207,10 +208,6 @@ const ProductionNormsBasis = () => {
 
       const name = tabInfo.displayName
 
-      if (name === 'Configuration') {
-        return null
-      }
-
       return {
         id: tabId,
         name,
@@ -230,14 +227,22 @@ const ProductionNormsBasis = () => {
     const currentTabName = typeof tabData === 'object' ? tabData.name : tabData
 
     switch (currentTabName) {
+      case 'Configuration':
+        return (
+          <Configuration
+            startDate={startDate}
+            endDate={endDate}
+            refreshData={refreshData}
+          />
+        )
       case 'Constants':
-        return <Constants startDate={startDate} endDate={endDate} />
+        return <Constants startDate={startDate} endDate={endDate} refreshData={refreshData} />
       case 'PIMS Throughput':
-        return <PIMSThroughput startDate={startDate} endDate={endDate} />
+        return <PIMSThroughput startDate={startDate} endDate={endDate} refreshData={refreshData} />
       case 'PIMS Monthly Throughput':
       case 'pims-monthly-throughput':
       case 'pims-monthly-throughtput':
-        return <PIMSMontlyThroughput startDate={startDate} endDate={endDate} />
+        return <PIMSMontlyThroughput startDate={startDate} endDate={endDate} refreshData={refreshData} />
       default:
         return null
     }
