@@ -1712,6 +1712,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	               newEntity.setPlantFkId(UUID.fromString(plantId));
 	               newEntity.setSiteFkId(site.getId());
 	               newEntity.setVerticalFkId(vertical.getId());
+				   newEntity.setAopCaseId(year + "Proposed Norms");
+				   newEntity.setAopStatus("Saved");
 
 	               aopConsumptionNormGrades.add(newEntity);
 	           }
