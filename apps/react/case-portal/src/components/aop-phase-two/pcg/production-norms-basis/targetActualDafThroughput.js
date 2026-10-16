@@ -64,7 +64,7 @@ const TargetActualDafThroughput = () => {
       },
       {
         field: 'range',
-        title: 'Range (+/-)',
+        title: 'Range (+/-) %',
         type: 'number',
         format: '{0:0.00}',
         editable: !READ_ONLY,
