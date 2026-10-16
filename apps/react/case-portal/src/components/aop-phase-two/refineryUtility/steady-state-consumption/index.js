@@ -46,6 +46,7 @@ const THREE_DECIMAL_NORM_TYPES = [
   'Power Consumption',
   'Chemical Consumption',
   'Other Utilities consumption',
+  'UtilityConsumption',
 ].map(normalizeKey)
 
 const SteadyStateConsumption = () => {

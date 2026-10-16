@@ -1,10 +1,12 @@
 package com.wks.caseengine.merox.serviceimpl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,14 +15,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.wks.caseengine.entity.NormAttributeTransactionsReport;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
+import com.wks.caseengine.merox.dto.SignOffReportDTO;
 import com.wks.caseengine.merox.service.SignOffReportService;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
+import com.wks.caseengine.repository.NormAttributeTransactionsReportRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -41,6 +47,9 @@ public class SignOffReportServiceImpl implements SignOffReportService {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+
+    @Autowired
+	private NormAttributeTransactionsReportRepository normAttributeTransactionsReportRepository;
 
     @Override
     public AOPMessageVM getSignOffReport(String plantId, String aopYear, String periodFrom, String periodTo) {
@@ -259,4 +268,61 @@ public class SignOffReportServiceImpl implements SignOffReportService {
                 return "string";
         }
     }
+
+    @Transactional 
+    @Override
+	public AOPMessageVM saveSignOffReportRemarks(String year,
+			List<SignOffReportDTO> signOffReportDTOList) {
+		try {
+		
+	
+			for (SignOffReportDTO signOffReportDTO : signOffReportDTOList) {
+				
+				
+			//	saveTreatmentVendorInDB(treatmentVendorDTO, 4, year, treatmentVendorDTO.getIsChecked());
+
+            UUID normParameterFKId = UUID.fromString(signOffReportDTO.getId());
+            String remark = signOffReportDTO.getRemarks();
+    
+        Optional<NormAttributeTransactionsReport> existingRecord = normAttributeTransactionsReportRepository
+                .findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, 4, year);
+    
+        NormAttributeTransactionsReport normAttributeTransactionsReport;
+    
+        if (existingRecord.isPresent()) {
+            normAttributeTransactionsReport = existingRecord.get();
+            normAttributeTransactionsReport.setModifiedOn(new Date());
+    
+        } else {
+    
+            normAttributeTransactionsReport = new NormAttributeTransactionsReport();
+            normAttributeTransactionsReport.setCreatedOn(new Date());
+            normAttributeTransactionsReport.setUserName(Utility.getUserName());
+            normAttributeTransactionsReport.setNormParameterFKId(normParameterFKId);
+            normAttributeTransactionsReport.setAopMonth(4);
+            normAttributeTransactionsReport.setAuditYear(year);
+        }
+    
+        normAttributeTransactionsReport
+                .setAttributeValue("0");
+        normAttributeTransactionsReport.setRemarks(remark);
+        normAttributeTransactionsReport.setUserName(Utility.getUserName());
+        normAttributeTransactionsReportRepository.save(normAttributeTransactionsReport);
+				
+			
+			
+			
+		}
+
+     AOPMessageVM aopMessageVM = new AOPMessageVM();
+     aopMessageVM.setCode(200);
+     aopMessageVM.setMessage("Sign off report remarks saved successfully");
+     return aopMessageVM;
+			
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save month wise constants", ex);
+		}
+	}
+
+
 }

@@ -1,0 +1,63 @@
+package com.wks.caseengine.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.Date;
+import java.util.UUID;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+
+
+@Entity
+@Table(name = "NormAttributeTransactionsReport")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NormAttributeTransactionsReport {
+    
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "Id", nullable = false, updatable = false)
+    private UUID id;
+
+    @Column(name = "AttributeValue", length = 250)
+    private String attributeValue;
+
+    @Column(name = "AOPMonth")
+    private Integer aopMonth;
+
+    @Column(name = "AuditYear")
+    private String auditYear;
+
+    @Column(name = "Remarks", length = 500)
+    private String remarks;
+
+    @Column(name = "CreatedOn")
+    private Date createdOn;
+
+    @Column(name = "ModifiedOn")
+    private Date modifiedOn;
+
+    @Column(name = "AttributeValueVersion", length = 10)
+    private String attributeValueVersion;
+
+    @Column(name = "[User]")
+    private String userName;
+
+    @Column(name = "NormParameter_FK_Id")
+    private UUID normParameterFKId;
+    
+    @Column(name="PlantMaintenanceTransaction_FK_Id")
+    private UUID maintenanceId;
+    
+    @Column(name="ShutdownType_FK_Id")
+    private UUID shutdownTypeId;
+}
