@@ -3,6 +3,7 @@ import { json } from 'services/request'
 
 export const SignOffReportApiService = {
   getSignOffReport,
+  saveSignOffReportRemarks,
 }
 
 // ========================|| Sign Off Report APIs ||=====================================//
@@ -48,3 +49,41 @@ async function getSignOffReport(keycloak, plantId, year, periodFrom, periodTo) {
     return await Promise.reject(error)
   }
 }
+
+/**
+ * Save Sign Off Report Remarks
+ * @param {Object} keycloak - Keycloak session object
+ * @param {string} year - AOP Year (e.g. '2026-27')
+ * @param {Array<{id: string, remarks: string}>} signOffReportDTOList - List of SignOffReportDTO
+ * @returns {Promise} Response object with AOPMessageVM structure
+ */
+async function saveSignOffReportRemarks(keycloak, year, signOffReportDTOList) {
+  const queryParams = new URLSearchParams()
+  if (year) {
+    queryParams.append('year', year)
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/sign-off-report-remarks?${queryParams.toString()}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(signOffReportDTOList),
+    })
+    return json(keycloak, resp)
+  } catch (error) {
+    console.error(
+      'Error in SignOffReportApiService.saveSignOffReportRemarks:',
+      error,
+    )
+    return await Promise.reject(error)
+  }
+}
+
