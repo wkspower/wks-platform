@@ -25,6 +25,9 @@ public class CPPImportPower {
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFkId;
 
+    @Column(name = "Utility_NormParameter_FK_Id")
+    private UUID utilityNormParameterFkId;
+
     @Column(name = "Apr")
     private BigDecimal apr;
 

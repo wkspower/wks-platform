@@ -74,16 +74,32 @@ const ImportPowerGrid = ({ setImportData }) => {
       editable: false,
     },
     {
-      field: 'utility',
-      title: 'Utility',
+      field: 'utilityName',
+      title: 'Utility Name',
       width: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
     },
     {
-      field: 'material',
-      title: 'Material',
+      field: 'utilityCode',
+      title: 'Utility Code',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'materialName',
+      title: 'Material Name',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'materialCode',
+      title: 'Material Code',
       width: 120,
       minWidth: 120,
       type: 'text',
@@ -325,8 +341,10 @@ const ImportPowerGrid = ({ setImportData }) => {
       id: 'TOTAL_ROW',
       plantName: lastRow.plantName || '', // keep same group bucket as data rows
       procurementPlant: 'Total',
-      utility: '',
-      material: '',
+      utilityName: '',
+      utilityCode: '',
+      materialName: '',
+      materialCode: '',
       uom: lastRow.uom || '',
       aopYear: lastRow.aopYear || '',
       ...totals,
@@ -437,7 +455,7 @@ const ImportPowerGrid = ({ setImportData }) => {
       data,
       originalRows,
       monthFields,
-      'utility',
+      'materialName',
     )
     if (validationError) {
       setSnackbarOpen(true)

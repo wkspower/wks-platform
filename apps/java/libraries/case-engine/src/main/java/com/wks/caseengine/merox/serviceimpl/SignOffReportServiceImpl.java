@@ -29,7 +29,8 @@ import jakarta.persistence.PersistenceContext;
 public class SignOffReportServiceImpl implements SignOffReportService {
 
 
-    @PersistenceContext(unitName = "db2")
+   // @PersistenceContext(unitName = "db2")
+    @PersistenceContext
     private EntityManager entityManagerdb2;
 
     @Autowired 
@@ -55,7 +56,7 @@ public class SignOffReportServiceImpl implements SignOffReportService {
 
        String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSignOffReport";
 
-       storedProcedure = "[RIL.AOP.Refinery].[dbo].[" + storedProcedure + "]";
+       storedProcedure = "[RIL.AOP.Report].[dbo].[" + storedProcedure + "]";
 
             // 1. Fetch ALL column metadata
             List<List<Map<String, Object>>> allColMetadata =

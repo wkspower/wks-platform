@@ -33,6 +33,7 @@ public class ConsumerDemandDTO {
     private String remarks;
     private Integer displayOrder;
     private Boolean isEditable;
+    private String type;
     private String saveStatus;
     private String errDescription;
 }
