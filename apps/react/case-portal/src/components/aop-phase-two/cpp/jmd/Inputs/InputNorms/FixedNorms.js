@@ -158,7 +158,7 @@ const FixedNorms = () => {
       field: 'actualNorm',
       title: 'Proposed Norm',
       widthT: 200,
-      type: 'numberWithCheckbox',
+      type: 'proposedNorm',
       editable: true,
       isNumberEditable: false,
       format: customFormatFive,
@@ -375,6 +375,8 @@ const FixedNorms = () => {
                 : 0
             const applyToAll = item.applyActualNormToAll || false
 
+            const isModelCalculated = item.normTypeName === 'Model Calculated'
+
             // If applyActualNormToAll is true, populate all 12 months with actualNorm value
             if (
               applyToAll &&
@@ -388,6 +390,7 @@ const FixedNorms = () => {
                 actualNorm: actualNormValue,
                 applyActualNormToAll: applyToAll,
                 isEditable: false, // Row not editable when checkbox is checked
+                isModelCalculated, // Flag to completely lock row for 'Model Calculated'
                 aprNorms: actualNormValue,
                 mayNorms: actualNormValue,
                 junNorms: actualNormValue,
@@ -410,7 +413,8 @@ const FixedNorms = () => {
               remarks: item.remarks || '',
               actualNorm: actualNormValue,
               applyActualNormToAll: applyToAll,
-              isEditable: true, // Row editable when checkbox unchecked
+              isEditable: !isModelCalculated, // Row not editable when norm type is 'Model Calculated'
+              isModelCalculated, // Flag to completely lock row for 'Model Calculated'
             }
           })
 
@@ -716,6 +720,7 @@ const FixedNorms = () => {
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
+    if (row.isModelCalculated) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -725,6 +730,14 @@ const FixedNorms = () => {
   const handleCustomItemChange = (e, setRows) => {
     const { dataItem, field, value } = e
     const itemId = dataItem.id
+
+    // Block all edits to Proposed Norm for 'Model Calculated' norm type
+    if (
+      dataItem.isModelCalculated &&
+      (field === 'applyActualNormToAll' || field === 'actualNorm')
+    ) {
+      return false
+    }
 
     // When checkbox is toggled
     if (field === 'applyActualNormToAll') {
@@ -764,11 +777,12 @@ const FixedNorms = () => {
       } else {
         // Checkbox is unchecked - restore entire original row
         const originalRow = originalRows.find((r) => r.id === itemId)
+        const isModelCalculated = originalRow?.isModelCalculated || false
 
         const updatedRow = {
           ...originalRow,
           applyActualNormToAll: value,
-          isEditable: true, // Enable row when checkbox is unchecked
+          isEditable: !isModelCalculated, // Don't enable row if norm type is 'Model Calculated'
         }
 
         setRows((prev) => prev.map((r) => (r.id === itemId ? updatedRow : r)))
