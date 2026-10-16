@@ -40,9 +40,12 @@ const OverallAopConsumption = () => {
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
   const isDtapcgCtPlant =
-    (siteName.toLowerCase() === 'dta_pcg' || siteName.toLowerCase() === 'sez_pcg') &&
+    siteName.toLowerCase() === 'dta_pcg'&&
     (plantName.toLowerCase() === 'ct1 (g731)' ||
       plantName.toLowerCase() === 'ct3 (g733)')
+
+  const isSezpcgCtPlant=siteName.toLowerCase() === 'sez_pcg' && (plantName.toLowerCase() === 'ct1 (h731)' ||
+      plantName.toLowerCase() === 'ct3 (h733)' || plantName.toLowerCase() === 'ct2 (h732)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -82,7 +85,7 @@ const OverallAopConsumption = () => {
         return Math.trunc(num).toString()
       }
 
-      if (isDtapcgCtPlant) {
+      if (isDtapcgCtPlant || isSezpcgCtPlant) {
         // Decide by normParameterTypeName (or display name), not by UOM
         const typeKeys = [
           normalizeKey(row?.normParameterTypeName),
@@ -103,7 +106,7 @@ const OverallAopConsumption = () => {
 
       return Math.trunc(num).toString()
     },
-    [isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant],
+    [isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant, isSezpcgCtPlant],
   )
 
   const columns = useMemo(() => {
@@ -257,13 +260,13 @@ const OverallAopConsumption = () => {
         format: valueFormat,
       },
     ]
-  }, [AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant])
+  }, [AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant, isSezpcgCtPlant])
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant])
+  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant, isSezpcgCtPlant])
 
   const fetchData = async () => {
     setLoading(true)
