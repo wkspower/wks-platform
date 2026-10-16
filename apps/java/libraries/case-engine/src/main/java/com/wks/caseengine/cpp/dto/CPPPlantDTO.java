@@ -45,4 +45,7 @@ public class CPPPlantDTO {
 
     /** Maps to Verticals.DisplayName */
     private String verticalDisplayName;
+
+    /** Source of this plant entry: "sourceName" (from Plants.SourceName) or "processMapping" (from CPPProcessPlantsMapping). */
+    private String plantSource;
 }

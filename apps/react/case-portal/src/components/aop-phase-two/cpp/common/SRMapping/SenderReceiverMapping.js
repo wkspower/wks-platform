@@ -265,6 +265,7 @@ const SenderReceiverMapping = () => {
         verticalId: plant.verticalId || '',
         verticalName: plant.verticalName || '',
         verticalDisplayName: plant.verticalDisplayName || '',
+        plantSource: plant.plantSource || 'sourceName',
       }))
       setPlantsDropdown(plantsOptions)
 
@@ -421,8 +422,7 @@ const SenderReceiverMapping = () => {
 
   const getFilteredPlants = useCallback(
     (dataItem) => {
-      // Sender Plant: show all plants fetched for the selected CPP plants
-      // (no per-row cppPlantId filter — sender can be any plant in the list)
+      // Sender Plant: show all plants (both SourceName-based and CPPProcessPlantsMapping-based)
       return plantsDropdown
     },
     [plantsDropdown],
@@ -434,8 +434,8 @@ const SenderReceiverMapping = () => {
 
       const filtered = plantsDropdown.filter(
         (p) =>
-          p.sourceName?.toLowerCase() === selectedCppPlantId?.toLowerCase() &&
-          p.verticalName?.toLowerCase() === 'cpp',
+          p.plantSource === 'sourceName' &&
+          p.sourceName?.toLowerCase() === selectedCppPlantId?.toLowerCase(),
       )
       return filtered
     },
@@ -549,17 +549,16 @@ const SenderReceiverMapping = () => {
         )
       } else if (config.group === 'Plant') {
         if (config.prefix === 'sender') {
-          // Sender Plant: search across all fetched plants (no cppPlantId filter)
+          // Sender Plant: search across all fetched plants (both SourceName and CPPProcessPlantsMapping)
           source = dropdownSource
         } else {
-          // Receiver Plant: filter by sourceName matching the row's cppPlantId
-          // and vertical === 'cpp'
+          // Receiver Plant: only SourceName-based plants scoped to the row's cppPlantId
           const selectedCppPlantId = currentRow.cppPlantId
           source = dropdownSource.filter(
             (item) =>
+              item.plantSource === 'sourceName' &&
               item.sourceName?.toLowerCase() ===
-                selectedCppPlantId?.toLowerCase() &&
-              item.verticalName?.toLowerCase() === 'cpp',
+                selectedCppPlantId?.toLowerCase(),
           )
         }
       } else if (config.group === 'CostCenter') {
