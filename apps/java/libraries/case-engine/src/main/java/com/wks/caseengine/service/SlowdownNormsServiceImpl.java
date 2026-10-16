@@ -297,9 +297,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 				slowdownNormsValueDTOList.add(slowdownNormsValueDTO);
 			}
-			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			Map<String, Object> map = new HashMap<>();
+           AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), aopYear, "slowdown-norms");
+			map.put("slowdownNormsValueDTO", slowdownNormsValueDTOList);
+			map.put("aopCalculation", aopCalculation);
 			aopMessageVM.setCode(200);
-			aopMessageVM.setData(slowdownNormsValueDTOList);
+			aopMessageVM.setData(map);
 			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
