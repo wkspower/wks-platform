@@ -19,11 +19,19 @@ const normalizeKey = (s) =>
 
 // Norm parameter types that show 3 decimals for DTA_PCG CT plants
 const THREE_DECIMAL_NORM_TYPES = [
-  'Specific Other Utilities consumption',
-  'Specific Makeup Consumption',
-  'Power Consumption',
-  'Chemical Consumption',
-  'Other Utilities consumption',
+'Makeup Consumption',
+'Power Consumption',
+'Commodity Chemicals',
+'Vender Chemicals',
+'Chembond Ltd',
+'Veolia Chemicals Ltd',
+'Ion Exchange Ltd',
+'Wex Technologies Ltd',
+'Dorf Ketal Ltd',
+'Specific Makeup Consumption',
+'Other Utilities consumption',
+'Specific Other Utilities consumption',
+ 'Chemical Consumption',
 ].map(normalizeKey)
 
 const OverallAopConsumption = () => {
@@ -36,16 +44,13 @@ const OverallAopConsumption = () => {
 
   const siteName = (siteObject?.name || '').trim().toUpperCase()
   const plantName = (plantObject?.name || '').trim()
-  const isDtaCtPlant =
-    siteName === 'DTA' &&
-    (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
   const isDtapcgCtPlant =
     siteName.toLowerCase() === 'dta_pcg'&&
     (plantName.toLowerCase() === 'ct1 (g731)' ||
       plantName.toLowerCase() === 'ct3 (g733)')
 
   const isSezpcgCtPlant=siteName.toLowerCase() === 'sez_pcg' && (plantName.toLowerCase() === 'ct1 (h731)' ||
-      plantName.toLowerCase() === 'ct3 (h733)' || plantName.toLowerCase() === 'ct2 (h732)')
+      plantName.toLowerCase() === 'ct3 (h733)' || plantName.toLowerCase() === 'ct2 (h732)' || plantName.toLowerCase() === 'ct4 (h734)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -57,6 +62,20 @@ const OverallAopConsumption = () => {
     (siteName === 'C2' &&
       (plantName.toLowerCase() === 'air' ||
         plantName.toLowerCase() === 'c2_asu'))
+
+  const isDtaCtPlant=siteName === 'DTA' &&
+      (
+  plantName.toLowerCase() === 'ct1 (731)' ||
+  plantName.toLowerCase() === 'ct2 (732)' ||
+  plantName.toLowerCase() === 'ct3 (733)' ||
+  plantName.toLowerCase() === 'ct4 (734)' ||
+  plantName.toLowerCase() === 'ct5 (735)' ||
+  plantName.toLowerCase() === 'ct6 (736)' ||
+  plantName.toLowerCase() === 'ct7 (737)' ||
+  plantName.toLowerCase() === 'ct8 (738)' ||
+  plantName.toLowerCase() === 'ct9 (739)' ||
+  plantName.toLowerCase() === 'ct10 (740)' 
+)
 
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -85,7 +104,7 @@ const OverallAopConsumption = () => {
         return Math.trunc(num).toString()
       }
 
-      if (isDtapcgCtPlant || isSezpcgCtPlant) {
+      if (isDtapcgCtPlant || isSezpcgCtPlant || isDtaCtPlant) {
         // Decide by normParameterTypeName (or display name), not by UOM
         const typeKeys = [
           normalizeKey(row?.normParameterTypeName),
