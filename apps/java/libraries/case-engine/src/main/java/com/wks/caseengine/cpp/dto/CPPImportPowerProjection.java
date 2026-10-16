@@ -8,6 +8,10 @@ public interface CPPImportPowerProjection {
     UUID getId();
     String getProcurementPlant();
     String getPlantName();
+    String getUtilityCode();
+    String getUtilityName();
+    String getMaterialCode();
+    String getMaterialName();
     String getUtility();
     String getMaterial();
     String getMaterialDisplayName();
@@ -35,4 +39,5 @@ public interface CPPImportPowerProjection {
     UUID getImportPlantFkId();
     UUID getCppPlantFkId();
     UUID getNormParameterFkId();
+    UUID getUtilityNormParameterFkId();
 }

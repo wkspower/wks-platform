@@ -57,6 +57,32 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
     @Autowired
     private PlantsRepository plantsRepository;
 
+    /** Utility norm name (NormType=1) under the CPP plant. */
+    private static final String IMPORT_POWER_UTILITY_NAME = "Power_dis";
+
+    /**
+     * Resolves the 'Power_dis' utility norm (NormType=1) attached directly to
+     * the CPP plant (NormParameters.Plant_FK_Id = cppPlantId).
+     * Returns null if the norm cannot be found.
+     */
+    private UUID resolveUtilityNormParameterId(UUID cppPlantId) {
+        try {
+            Optional<NormParameters> powerDisNormOpt = normParametersRepository
+                    .findFirstByNameAndPlantFkIdAndNormTypeFkId(
+                            IMPORT_POWER_UTILITY_NAME, cppPlantId, 1);
+            if (powerDisNormOpt.isEmpty()) {
+                logger.warn("[Utility Norm] '{}' norm not found at cppPlant={}",
+                        IMPORT_POWER_UTILITY_NAME, cppPlantId);
+                return null;
+            }
+            return powerDisNormOpt.get().getId();
+        } catch (Exception e) {
+            logger.error("[Utility Norm] Error resolving utility norm for cppPlant={}: {}",
+                    cppPlantId, e.getMessage(), e);
+            return null;
+        }
+    }
+
     @Override
     public AOPMessageVM getImportedPowerPlans(List<UUID> plantIds, String aopYear) {
         logger.info("[GET Service] Fetching imported power plans for plantIds: {}, aopYear: {}", plantIds, aopYear);
@@ -93,6 +119,10 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
         dto.setId(projection.getId());
         dto.setProcurementPlant(projection.getProcurementPlant());
         dto.setPlantName(projection.getPlantName());
+        dto.setUtilityCode(projection.getUtilityCode());
+        dto.setUtilityName(projection.getUtilityName());
+        dto.setMaterialCode(projection.getMaterialCode());
+        dto.setMaterialName(projection.getMaterialName());
         dto.setUtility(projection.getUtility());
         dto.setMaterial(projection.getMaterial());
         dto.setMaterialDisplayName(projection.getMaterialDisplayName());
@@ -120,6 +150,7 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
         dto.setImportPlantFkId(projection.getImportPlantFkId());
         dto.setCppPlantFkId(projection.getCppPlantFkId());
         dto.setNormParameterFkId(projection.getNormParameterFkId());
+        dto.setUtilityNormParameterFkId(projection.getUtilityNormParameterFkId());
 
         return dto;
     }
@@ -146,7 +177,7 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
 
                         Map<String, String> missingRecord = new HashMap<>();
                         missingRecord.put("procurementPlant", dto.getProcurementPlant() != null ? dto.getProcurementPlant() : "Unknown");
-                        missingRecord.put("utility", dto.getUtility() != null ? dto.getUtility() : "Unknown");
+                        missingRecord.put("materialCode", dto.getMaterialCode() != null ? dto.getMaterialCode() : "Unknown");
                         missingRecord.put("reason", "ID is null - cannot update non-existent record");
                         missingIdRecords.add(missingRecord);
                         continue;
@@ -168,7 +199,7 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
                         Map<String, String> missingRecord = new HashMap<>();
                         missingRecord.put("id", dto.getId().toString());
                         missingRecord.put("procurementPlant", dto.getProcurementPlant() != null ? dto.getProcurementPlant() : "Unknown");
-                        missingRecord.put("utility", dto.getUtility() != null ? dto.getUtility() : "Unknown");
+                        missingRecord.put("materialCode", dto.getMaterialCode() != null ? dto.getMaterialCode() : "Unknown");
                         missingRecord.put("reason", "Record with this ID does not exist in database");
                         missingIdRecords.add(missingRecord);
                     }
@@ -522,8 +553,8 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
 
             createCell(row, col++, dto.getProcurementPlant(), dataStyle);
             createCell(row, col++, dto.getPlantName(), dataStyle);
-            createCell(row, col++, dto.getUtility(), dataStyle);
-            createCell(row, col++, dto.getMaterial(), dataStyle);
+            createCell(row, col++, formatCodeName(dto.getUtilityCode(), dto.getUtilityName()), dataStyle);
+            createCell(row, col++, formatCodeName(dto.getMaterialCode(), dto.getMaterialName()), dataStyle);
             createCell(row, col++, dto.getUom(), dataStyle);
 
             setNumericCell(row, col++, dto.getApr() != null ? dto.getApr().doubleValue() : null, dataStyle);
@@ -624,8 +655,8 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
 
                 dto.setProcurementPlant(getCellValue(row, 0));
                 dto.setPlantName(getCellValue(row, 1));
-                dto.setUtility(getCellValue(row, 2));
-                dto.setMaterial(getCellValue(row, 3));
+                dto.setUtilityName(getCellValue(row, 2));
+                dto.setMaterialName(getCellValue(row, 3));
                 dto.setUom(getCellValue(row, 4));
 
                 dto.setApr(getCellBigDecimalValue(row, 5));
@@ -784,8 +815,8 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
 
                 createCell(row, 0, dto.getProcurementPlant(), dataStyle);
                 createCell(row, 1, dto.getPlantName(), dataStyle);
-                createCell(row, 2, dto.getUtility(), dataStyle);
-                createCell(row, 3, dto.getMaterial(), dataStyle);
+                createCell(row, 2, formatCodeName(dto.getUtilityCode(), dto.getUtilityName()), dataStyle);
+                createCell(row, 3, formatCodeName(dto.getMaterialCode(), dto.getMaterialName()), dataStyle);
                 createCell(row, 4, dto.getUom(), dataStyle);
 
                 setNumericCell(row, 5, dto.getApr() != null ? dto.getApr().doubleValue() : null, dataStyle);
@@ -884,6 +915,16 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
         style.setFont(font);
         style.setWrapText(true);
         return style;
+    }
+
+    /** Formats a code + name pair as "code - name" for the exported Excel template. */
+    private String formatCodeName(String code, String name) {
+        boolean hasCode = code != null && !code.isBlank();
+        boolean hasName = name != null && !name.isBlank();
+        if (hasCode && hasName && !code.equals(name)) {
+            return code + " - " + name;
+        }
+        return hasName ? name : (hasCode ? code : "");
     }
 
     private String getCellValue(Row row, int cellIndex) {
@@ -989,6 +1030,7 @@ public class CPPImportPowerServiceImpl implements CPPImportPowerService {
             // --- Step 3: Create CPPImportPower entry ---
             CPPImportPower importPower = new CPPImportPower();
             importPower.setNormParameterFkId(savedNorm.getId());
+            importPower.setUtilityNormParameterFkId(resolveUtilityNormParameterId(request.getCppPlant()));
             importPower.setImportPlantFkId(request.getProcurementPlant());
             importPower.setCppPlantFkId(request.getCppPlant());
             importPower.setSiteFkId(siteFkId);

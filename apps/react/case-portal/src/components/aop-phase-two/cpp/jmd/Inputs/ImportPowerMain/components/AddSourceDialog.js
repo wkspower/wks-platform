@@ -131,9 +131,9 @@ const AddSourceDialog = ({ open, onClose, onSuccess, editRowData = null }) => {
         setFormData({
           cppPlant: editRowData.cppPlantFkId || '',
           procurementPlant: editRowData.importPlantFkId || '',
-          name: editRowData.material || '',
+          name: editRowData.materialName || '',
           displayName: editRowData.materialDisplayName || '',
-          sapCode: editRowData.utility || '',
+          sapCode: editRowData.materialCode || '',
           uom: editRowData.uom || '',
         })
       } else {
