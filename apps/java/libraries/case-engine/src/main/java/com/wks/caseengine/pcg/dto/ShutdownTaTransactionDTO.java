@@ -29,4 +29,6 @@ public class ShutdownTaTransactionDTO {
     private String plantMaintenanceFKId;
     private String normParameterFKId;
     private String plantFKId;
+    private String saveStatus;
+    private String errDescription;
 }

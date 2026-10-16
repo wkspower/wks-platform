@@ -88,7 +88,7 @@ public class CPPNormsServiceImpl implements CPPNormsService {
             if (fromDate != null && !fromDate.isEmpty() && toDate != null && !toDate.isEmpty()) {
                 log.info("FromDate and ToDate provided, calculating utility norms first...");
                 try {
-                    AOPMessageVM calcResult = calculateUtilityNorms(financialYear, fromDate, toDate);
+                    AOPMessageVM calcResult = calculateUtilityNorms(cppPlantId.toString(), financialYear, fromDate, toDate);
                     
                     if (calcResult.getCode() != 200) {
                         log.warn("Failed to calculate utility norms: {}. Continuing with existing calculated norms.", calcResult.getMessage());
@@ -992,13 +992,21 @@ public class CPPNormsServiceImpl implements CPPNormsService {
         return vm;
     }
 
-    private AOPMessageVM calculateUtilityNorms(String financialYear, String fromDate, String toDate) {
+    private AOPMessageVM calculateUtilityNorms(String plantIds, String financialYear, String fromDate, String toDate) {
         log.info("=== Starting calculateUtilityNorms ===");
-        log.info("FinancialYear: {}, FromDate: {}, ToDate: {}", financialYear, fromDate, toDate);
+        log.info("PlantIds: {}, FinancialYear: {}, FromDate: {}, ToDate: {}", plantIds, financialYear, fromDate, toDate);
 
         AOPMessageVM vm = new AOPMessageVM();
 
         try {
+            if (plantIds == null || plantIds.isEmpty()) {
+                log.error("PlantIds is null or empty");
+                vm.setCode(400);
+                vm.setMessage("PlantIds cannot be null or empty");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
             if (financialYear == null || financialYear.isEmpty()) {
                 log.error("FinancialYear is null or empty");
                 vm.setCode(400);
@@ -1027,11 +1035,13 @@ public class CPPNormsServiceImpl implements CPPNormsService {
                     .createStoredProcedureQuery("dbo.CPP_FixedUtilityCalculatedNorms")
                     .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
-                    .registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+                    .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
 
             sp.setParameter(1, financialYear);
             sp.setParameter(2, fromDate);
             sp.setParameter(3, toDate);
+            sp.setParameter(4, plantIds);
 
             log.info("Executing stored procedure dbo.CPP_FixedUtilityCalculatedNorms ...");
             sp.execute();

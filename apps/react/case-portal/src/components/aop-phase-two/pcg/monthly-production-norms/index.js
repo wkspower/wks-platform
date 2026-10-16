@@ -319,14 +319,6 @@ const MonthlyProductionNormsPCG = () => {
         editable: false,
         format: valueFormat,
       },
-      {
-        field: 'aopRemarks',
-        title: 'Remarks',
-        widthT: 180,
-        minWidth: 150,
-        type: 'textarea',
-        editable: false,
-      },
     ],
     [headerMap, valueFormat, selectedUnit],
   )
@@ -341,8 +333,7 @@ const MonthlyProductionNormsPCG = () => {
       saveBtn: false,
       saveWithRemark: false,
       showCalculate: true,
-      calculateDisabled:
-        !calculationObject || Object.keys(calculationObject).length === 0,
+      calculateDisabled: false,
       allAction: true,
       showNote: true,
       showTitleNameBusiness: true,
@@ -353,7 +344,7 @@ const MonthlyProductionNormsPCG = () => {
       downloadExcelBtnFromUI: true,
       ExcelName: EXCEL_NAME,
     }),
-    [calculationObject, EXCEL_NAME],
+    [EXCEL_NAME],
   )
 
   const dropdownConfig = useMemo(

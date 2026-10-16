@@ -47,6 +47,10 @@ import {
   NumberWithCheckboxCellEditor,
   NumberWithCheckboxDisplayCell,
 } from '../utilities/NumberWithCheckboxCellEditor'
+import {
+  ProposedNormCellEditor,
+  ProposedNormDisplayCell,
+} from '../utilities/ProposedNormCell'
 import Notification from 'components/Utilities/Notification'
 
 import AddIcon from '@mui/icons-material/Add'
@@ -163,6 +167,7 @@ const NestedKendoTable = ({
   const gridRef = useRef(null)
   const _export = useRef(null)
   const activeCellRef = useRef({ rowId: null, field: null })
+  const alwaysEditableCellClickedRef = useRef(false)
   const [gridExpanded, setGridExpanded] = useState(true)
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -449,7 +454,12 @@ const NestedKendoTable = ({
 
   const handleRowClick = (e) => {
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
-      setEdit({})
+      // Don't clear edit if an alwaysEditable cell (e.g. Proposed Norm checkbox)
+      // was just clicked on a non-locked row — handleCellClick already set it
+      if (!alwaysEditableCellClickedRef.current) {
+        setEdit({})
+      }
+      alwaysEditableCellClickedRef.current = false
       return
     }
 
@@ -466,10 +476,20 @@ const NestedKendoTable = ({
     // Guard against group header rows (they have an 'items' array, not a data id)
     if (e.dataItem?.items !== undefined) return
 
-    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) return
+    alwaysEditableCellClickedRef.current = false
 
     const allColumns = extractAllColumns(columns)
     const clickedColumn = allColumns.find((col) => col.field === e.field)
+
+    // Allow alwaysEditable columns (e.g. Proposed Norm checkbox) to bypass
+    // row-level isEditable, but NOT for fully locked rows (isModelCalculated)
+    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
+      if (!clickedColumn?.alwaysEditable || e.dataItem?.isModelCalculated) {
+        return
+      }
+      alwaysEditableCellClickedRef.current = true
+    }
+
     if (clickedColumn?.editable) {
       const rowId = e.dataItem?.id
       setEdit({ [rowId]: [e.field] })
@@ -956,10 +976,12 @@ const NestedKendoTable = ({
     const rowId = dataItem.id
 
     // Check if row is editable (standard check) OR if column has alwaysEditable flag
+    // Fully locked rows (isModelCalculated) are never editable
     const isRowEditable =
-      alwaysEditable ||
-      (!(!dataItem.isEditable && dataItem?.isEditable !== undefined) &&
-        typeof onRemarkClick === 'function')
+      !dataItem?.isModelCalculated &&
+      (alwaysEditable ||
+        (!(!dataItem.isEditable && dataItem?.isEditable !== undefined) &&
+          typeof onRemarkClick === 'function'))
 
     // Check if this remark field was edited
     const isEdited = Object.prototype.hasOwnProperty.call(
@@ -1140,6 +1162,63 @@ const NestedKendoTable = ({
                   {...props}
                   customModifiedCells={customModifiedCells}
                   format={col.format}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT || col?.width)}
+          />
+        )
+      }
+
+      if (col.type === 'proposedNorm') {
+        // Per-row edit gating is handled in handleCellClick:
+        // alwaysEditable columns bypass isEditable, except when isModelCalculated.
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            locked={col?.locked || false}
+            editable={!READ_ONLY}
+            className={`${READ_ONLY ? 'non-editable-cell' : 'k-number-right'}`}
+            headerClassName={isActive ? 'active-column' : ''}
+            cells={{
+              edit: {
+                text: (cellProps) => {
+                  // Fully locked rows render display cell instead of editor
+                  if (cellProps?.dataItem?.isModelCalculated) {
+                    return (
+                      <ProposedNormDisplayCell
+                        {...cellProps}
+                        customModifiedCells={customModifiedCells}
+                        format={col.format}
+                        isModelCalculated={true}
+                        alwaysEditable={col.alwaysEditable && !READ_ONLY}
+                      />
+                    )
+                  }
+                  return (
+                    <ProposedNormCellEditor
+                      {...cellProps}
+                      isNumberEditable={col.isNumberEditable}
+                      isModelCalculated={false}
+                      alwaysEditable={col.alwaysEditable && !READ_ONLY}
+                    />
+                  )
+                },
+              },
+              data: (props) => (
+                <ProposedNormDisplayCell
+                  {...props}
+                  customModifiedCells={customModifiedCells}
+                  format={col.format}
+                  isModelCalculated={props?.dataItem?.isModelCalculated}
+                  alwaysEditable={col.alwaysEditable && !READ_ONLY}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,
