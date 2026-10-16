@@ -3459,7 +3459,7 @@ public byte[] shutdownNonProductLineExport(String year, String plantId, String m
 			}
 			if (("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))
 					|| ("PTA".equalsIgnoreCase(verticalName)) || ("Chemical".equalsIgnoreCase(verticalName))) {
-				int month = plantMaintenanceTransaction.getMaintForMonth();
+				int month = plantMaintenanceTransaction.getMaintForMonth() != null ? plantMaintenanceTransaction.getMaintForMonth() : 0;
 				Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId, month, "Slowdown",
 						year);
 				if (count == 1) {

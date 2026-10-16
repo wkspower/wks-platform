@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Box } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
@@ -13,6 +13,55 @@ import {
   downloadBase64Excel,
   downloadBlobExcel,
 } from 'components/aop-phase-two/common/utilities/downloadBase64Excel'
+
+/**
+ * Format type string into a readable title (e.g. "Vendor" -> "Vendor", "Utility Consumption" -> "Utility Consumption")
+ */
+export const formatTypeTitle = (type) => {
+  if (!type || typeof type !== 'string') return 'Consumer Demand'
+  const trimmed = type.trim()
+  if (!trimmed) return 'Consumer Demand'
+
+  const acronyms = new Set([
+    'DM',
+    'RO',
+    'LP',
+    'HP',
+    'MP',
+    'HHP',
+    'UOM',
+    'AOP',
+    'FY',
+    'LPG',
+    'LNG',
+    'CNG',
+    'N2',
+    'O2',
+    'H2',
+  ])
+
+  return trimmed
+    .split(/[\s_-]+/)
+    .map((word) => {
+      const upper = word.toUpperCase()
+      if (acronyms.has(upper)) return upper
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    })
+    .join(' ')
+}
+
+const TYPE_PRIORITY = [
+  'utility consumption',
+  'utility',
+  'vendor',
+  'vendor consumption',
+]
+
+const getTypeSortIndex = (key) => {
+  const lower = key.toLowerCase().trim()
+  const idx = TYPE_PRIORITY.indexOf(lower)
+  return idx !== -1 ? idx : 999
+}
 
 const ConsumerDemand = () => {
   const keycloak = useSession()
@@ -30,181 +79,200 @@ const ConsumerDemand = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [activeRemarkType, setActiveRemarkType] = useState(null)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
+  const modifiedCellsRef = useRef({})
+  useEffect(() => {
+    modifiedCellsRef.current = modifiedCells
+  }, [modifiedCells])
+
   const valueFormat = customValueFormatterPhaseTwo(2)
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  const columns = [
-    {
-      field: 'id',
-      title: 'Id',
-      widthT: 80,
-      minWidth: 60,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
-    },
-    {
-      field: 'consumerUnit',
-      title: 'Consumers Unit',
-      widthT: 260,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-    },
-    {
-      field: 'actualConsumption',
-      title: 'Yearly Actual Consumption',
-      widthT: 260,
-      minWidth: 230,
-      type: 'number1',
-      locked: true,
-      editable: false,
-      format: valueFormat,
-    },
-    {
-      field: 'consumerType',
-      title: 'Consumer Category',
-      widthT: 200,
-      minWidth: 150,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
-    },
-    {
-      field: 'UOM',
-      title: 'UOM',
-      widthT: 100,
-      minWidth: 80,
-      type: 'text',
-      editable: false,
-      locked: true,
-    },
-    {
-      field: 'apr',
-      title: headerMap[4] || 'Apr',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'may',
-      title: headerMap[5] || 'May',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'jun',
-      title: headerMap[6] || 'Jun',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'jul',
-      title: headerMap[7] || 'Jul',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'aug',
-      title: headerMap[8] || 'Aug',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'sep',
-      title: headerMap[9] || 'Sep',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'oct',
-      title: headerMap[10] || 'Oct',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'nov',
-      title: headerMap[11] || 'Nov',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'dec',
-      title: headerMap[12] || 'Dec',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'jan',
-      title: headerMap[1] || 'Jan',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'feb',
-      title: headerMap[2] || 'Feb',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'mar',
-      title: headerMap[3] || 'Mar',
-      widthT: 120,
-      minWidth: 110,
-      type: 'number1',
-      editable: true,
-      format: valueFormat,
-    },
-    {
-      field: 'remarks',
-      title: 'Remarks',
-      widthT: 180,
-      minWidth: 140,
-      type: 'textarea',
-      editable: true,
-    },
-  ]
+  const columns = useMemo(
+    () => [
+      {
+        field: 'id',
+        title: 'Id',
+        widthT: 80,
+        minWidth: 60,
+        type: 'text',
+        editable: false,
+        locked: true,
+        hidden: true,
+      },
+      {
+        field: 'consumerUnit',
+        title: 'Consumers Unit',
+        widthT: 260,
+        minWidth: 200,
+        type: 'text',
+        editable: false,
+        locked: true,
+      },
+      {
+        field: 'actualConsumption',
+        title: 'Yearly Actual Consumption',
+        widthT: 260,
+        minWidth: 230,
+        type: 'number1',
+        locked: true,
+        editable: false,
+        format: valueFormat,
+      },
+      {
+        field: 'consumerType',
+        title: 'Consumer Category',
+        widthT: 200,
+        minWidth: 150,
+        type: 'text',
+        editable: false,
+        locked: true,
+        hidden: true,
+      },
+      {
+        field: 'type',
+        title: 'Type',
+        widthT: 150,
+        minWidth: 100,
+        type: 'text',
+        editable: false,
+        locked: true,
+        hidden: true,
+      },
+      {
+        field: 'UOM',
+        title: 'UOM',
+        widthT: 100,
+        minWidth: 80,
+        type: 'text',
+        editable: false,
+        locked: true,
+      },
+      {
+        field: 'apr',
+        title: headerMap[4] || 'Apr',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'may',
+        title: headerMap[5] || 'May',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'jun',
+        title: headerMap[6] || 'Jun',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'jul',
+        title: headerMap[7] || 'Jul',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'aug',
+        title: headerMap[8] || 'Aug',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'sep',
+        title: headerMap[9] || 'Sep',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'oct',
+        title: headerMap[10] || 'Oct',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'nov',
+        title: headerMap[11] || 'Nov',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'dec',
+        title: headerMap[12] || 'Dec',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'jan',
+        title: headerMap[1] || 'Jan',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'feb',
+        title: headerMap[2] || 'Feb',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'mar',
+        title: headerMap[3] || 'Mar',
+        widthT: 120,
+        minWidth: 110,
+        type: 'number1',
+        editable: true,
+        format: valueFormat,
+      },
+      {
+        field: 'remarks',
+        title: 'Remarks',
+        widthT: 180,
+        minWidth: 140,
+        type: 'textarea',
+        editable: true,
+      },
+    ],
+    [headerMap, valueFormat],
+  )
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
@@ -303,9 +371,16 @@ const ConsumerDemand = () => {
             ? item.mar
             : item?.march ?? 0
 
+        const itemType =
+          item?.type !== undefined && item?.type !== null && String(item.type).trim() !== ''
+            ? String(item.type).trim()
+            : 'Consumer Demand'
+
+        const rowId = item?.id || item?.normParameterFKId || index + 1
+
         return {
           ...item,
-          id: item?.id || index + 1,
+          id: rowId,
           srNo:
             item?.srNo !== undefined && item?.srNo !== null
               ? item.srNo
@@ -350,10 +425,19 @@ const ConsumerDemand = () => {
           auditYear: item?.auditYear || AOP_YEAR,
           displayOrder: item?.displayOrder ?? index + 1,
           isEditable: item?.isEditable !== undefined ? item.isEditable : true,
+          type: itemType,
         }
       })
 
-      setRows(formattedData)
+      // Retain any pending edits for unsaved grids
+      const mergedData = formattedData.map((row) => {
+        if (modifiedCellsRef.current && modifiedCellsRef.current[row.id]) {
+          return { ...row, ...modifiedCellsRef.current[row.id] }
+        }
+        return row
+      })
+
+      setRows(mergedData)
       setOriginalRows(formattedData)
     } catch (error) {
       console.error('Error fetching consumer demand data:', error)
@@ -364,11 +448,97 @@ const ConsumerDemand = () => {
     }
   }
 
-  const saveChanges = async () => {
+  // Dynamically group rows by the 'type' field and order them
+  const { distinctTypes, groupedRows } = useMemo(() => {
+    const groups = {}
+    const typesOrder = []
+
+    rows.forEach((row, index) => {
+      const rawType =
+        row.type !== undefined && row.type !== null && String(row.type).trim() !== ''
+          ? String(row.type).trim()
+          : 'Consumer Demand'
+
+      const key = rawType.toLowerCase()
+      if (!groups[key]) {
+        groups[key] = {
+          key,
+          rawType,
+          title: formatTypeTitle(rawType),
+          items: [],
+          firstIndex: index,
+        }
+        typesOrder.push(groups[key])
+      }
+      groups[key].items.push(row)
+    })
+
+    // Sort types: Utility Consumption first, Vendor second, followed by any others
+    typesOrder.sort((a, b) => {
+      const prioA = getTypeSortIndex(a.key)
+      const prioB = getTypeSortIndex(b.key)
+      if (prioA !== prioB) return prioA - prioB
+      return a.firstIndex - b.firstIndex
+    })
+
+    return {
+      distinctTypes: typesOrder,
+      groupedRows: groups,
+    }
+  }, [rows])
+
+  // Get modified cells filtered for a specific type key
+  const getModifiedCellsForType = useCallback(
+    (typeKey) => {
+      const filtered = {}
+      Object.entries(modifiedCells).forEach(([id, row]) => {
+        if ((row?.type || '').trim().toLowerCase() === typeKey) {
+          filtered[id] = row
+        }
+      })
+      return filtered
+    },
+    [modifiedCells],
+  )
+
+  // Safe rows updater handling both functional and array updates
+  const handleSetRows = useCallback((updater) => {
+    setRows((prev) => {
+      if (typeof updater === 'function') {
+        return updater(prev)
+      } else if (Array.isArray(updater)) {
+        const updaterMap = new Map(updater.map((r) => [r.id, r]))
+        return prev.map((r) => updaterMap.get(r.id) || r)
+      }
+      return prev
+    })
+  }, [])
+
+  // Safe modified cells updater
+  const handleSetModifiedCells = useCallback((updater) => {
+    setModifiedCells((prev) => {
+      if (typeof updater === 'function') {
+        return updater(prev)
+      } else if (updater && typeof updater === 'object') {
+        return { ...prev, ...updater }
+      }
+      return prev
+    })
+  }, [])
+
+  const saveChanges = async (targetType) => {
     setLoading(true)
 
     const modifiedData = Object.values(modifiedCells)
-    if (modifiedData.length === 0) {
+    const dataForType = targetType
+      ? modifiedData.filter(
+          (row) =>
+            (row?.type || '').trim().toLowerCase() ===
+            targetType.trim().toLowerCase(),
+        )
+      : modifiedData
+
+    if (dataForType.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
@@ -378,7 +548,7 @@ const ConsumerDemand = () => {
       return
     }
 
-    const data = modifiedData.filter((row) => row.inEdit !== false)
+    const data = dataForType.filter((row) => row.inEdit !== false)
     if (data.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -461,6 +631,7 @@ const ConsumerDemand = () => {
       remarks: row.remarks || '',
       displayOrder: row.displayOrder ?? row.srNo ?? null,
       isEditable: row.isEditable ?? true,
+      type: row.type || '',
     }))
 
     try {
@@ -477,7 +648,20 @@ const ConsumerDemand = () => {
           message: response?.message || 'Data saved successfully!',
           severity: 'success',
         })
-        setModifiedCells({})
+        // Clear saved items of this type from modifiedCells
+        setModifiedCells((prev) => {
+          if (!targetType) return {}
+          const next = { ...prev }
+          Object.keys(next).forEach((key) => {
+            if (
+              (next[key]?.type || '').trim().toLowerCase() ===
+              targetType.trim().toLowerCase()
+            ) {
+              delete next[key]
+            }
+          })
+          return next
+        })
         await fetchData()
       } else if (response?.code === 400 && response?.data) {
         const failedNames = Array.isArray(response.data)
@@ -593,10 +777,11 @@ const ConsumerDemand = () => {
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
+    setActiveRemarkType((row.type || '').trim().toLowerCase())
     setRemarkDialogOpen(true)
   }
 
-  const permissions = {
+  const basePermissions = {
     showAction: true,
     addButton: false,
     deleteButton: false,
@@ -606,49 +791,95 @@ const ConsumerDemand = () => {
     showExport: false,
     showImport: false,
     showCalculate: false,
-    ExcelName: `Consumer_Demand_${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Consumer Demand',
     showDropdown: false,
     remarksEditable: true,
   }
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <LoaderBackdrop open={!!loading} />
 
-      <AdvanceKendoTable
-        columns={columns}
-        rows={rows}
-        setRows={setRows}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        title={permissions.showTitle ? permissions.titleName : ''}
-        permissions={permissions}
-        handleRemarkCellClick={handleRemarkCellClick}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={saveChanges}
-        handleExport={handleExport}
-        handleExcelUpload={handleImport}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        groupBy={['consumerType']}
-        customHeight={70}
-        paginationConfig={{
-          threshold: 100,
-          buttonCount: 5,
-          pageSizes: [10, 20, 50, 100],
-          defaultPageSize: 100,
-        }}
-      />
+      {distinctTypes.length === 0 ? (
+        <AdvanceKendoTable
+          columns={columns}
+          rows={[]}
+          setRows={handleSetRows}
+          modifiedCells={{}}
+          setModifiedCells={handleSetModifiedCells}
+          title='Consumer Demand'
+          permissions={{
+            ...basePermissions,
+            titleName: 'Consumer Demand',
+            ExcelName: `Consumer_Demand_${AOP_YEAR}`,
+          }}
+          handleRemarkCellClick={handleRemarkCellClick}
+          remarkDialogOpen={false}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark=''
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={null}
+          setCurrentRowId={setCurrentRowId}
+          saveChanges={() => saveChanges()}
+          handleExport={handleExport}
+          handleExcelUpload={handleImport}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          paginationConfig={{
+            threshold: 100,
+            buttonCount: 5,
+            pageSizes: [10, 20, 50, 100],
+            defaultPageSize: 100,
+          }}
+        />
+      ) : (
+        distinctTypes.map((group, index) => {
+          const typeModifiedCells = getModifiedCellsForType(group.key)
+          const gridPermissions = {
+            ...basePermissions,
+            titleName: group.title,
+            ExcelName: `${group.title.replace(/\s+/g, '_')}_${AOP_YEAR}`,
+          }
+
+          return (
+            <AdvanceKendoTable
+              key={group.key}
+              columns={columns}
+              rows={group.items}
+              setRows={handleSetRows}
+              modifiedCells={typeModifiedCells}
+              setModifiedCells={handleSetModifiedCells}
+              title={gridPermissions.showTitle ? gridPermissions.titleName : ''}
+              permissions={gridPermissions}
+              handleRemarkCellClick={handleRemarkCellClick}
+              remarkDialogOpen={
+                remarkDialogOpen && activeRemarkType === group.key
+              }
+              setRemarkDialogOpen={setRemarkDialogOpen}
+              currentRemark={currentRemark}
+              setCurrentRemark={setCurrentRemark}
+              currentRowId={currentRowId}
+              setCurrentRowId={setCurrentRowId}
+              saveChanges={() => saveChanges(group.rawType)}
+              handleExport={handleExport}
+              handleExcelUpload={handleImport}
+              snackbarData={snackbarData}
+              snackbarOpen={index === 0 ? snackbarOpen : false}
+              setSnackbarOpen={setSnackbarOpen}
+              setSnackbarData={setSnackbarData}
+              paginationConfig={{
+                threshold: 100,
+                buttonCount: 5,
+                pageSizes: [10, 20, 50, 100],
+                defaultPageSize: 100,
+              }}
+            />
+          )
+        })
+      )}
     </Box>
   )
 }
