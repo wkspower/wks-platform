@@ -66,9 +66,12 @@ const SteadyStateConsumption = () => {
     siteName === 'DTA' &&
     (plantName === 'CT4 (734)' || plantName === 'CT6 (736)')
   const isDtapcgCtPlant =
-    (siteName.toLowerCase() === 'dta_pcg' || siteName.toLowerCase() === 'sez_pcg') &&
+    siteName.toLowerCase() === 'dta_pcg'  &&
     (plantName.toLowerCase() === 'ct1 (g731)' ||
       plantName.toLowerCase() === 'ct3 (g733)')
+
+  const isSezpcgCtPlant=siteName.toLowerCase() === 'sez_pcg' && (plantName.toLowerCase() === 'ct1 (h731)' ||
+      plantName.toLowerCase() === 'ct3 (h733)' || plantName.toLowerCase() === 'ct2 (h732)')
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -113,7 +116,7 @@ const SteadyStateConsumption = () => {
         return Math.trunc(num).toString()
       }
 
-      if (isDtapcgCtPlant) {
+      if (isDtapcgCtPlant || isSezpcgCtPlant) {
         // Decide by normParameterTypeName (or display name), not by UOM
         const typeKeys = [
           normalizeKey(row?.normParameterTypeName),
@@ -134,7 +137,7 @@ const SteadyStateConsumption = () => {
 
       return Math.trunc(num).toString()
     },
-    [isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame],
+    [isDtaCtPlant, isDtapcgCtPlant, isSezpcgCtPlant, isAsuPlant, isFCCTame],
   )
 
   const columns = useMemo(() => {
@@ -306,7 +309,7 @@ const SteadyStateConsumption = () => {
         editable: true,
       },
     ]
-  }, [isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame, AOP_YEAR])
+  }, [isDtaCtPlant, isDtapcgCtPlant,isSezpcgCtPlant, isAsuPlant, isFCCTame, AOP_YEAR])
 
   const dummyRows = []
 
@@ -314,7 +317,7 @@ const SteadyStateConsumption = () => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isDtapcgCtPlant, isAsuPlant, isFCCTame])
+  }, [PLANT_ID, AOP_YEAR, isDtaCtPlant, isDtapcgCtPlant,isSezpcgCtPlant, isAsuPlant, isFCCTame])
 
   const fetchData = async () => {
     setLoading(true)
