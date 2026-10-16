@@ -12,6 +12,7 @@ import PIMSThroughput from './PIMSThroughput'
 import PIMSMontlyThroughput from 'components/aop-phase-two/crude/production-norms-basis/PIMSMontlyThroughput'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/naphthasplitter/productionNormsApiService'
 import Notification from 'components/aop-phase-two/common/utilities/Notification'
+import ManualEntry from './ManualEntry'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -115,6 +116,7 @@ const ProductionNormsBasis = () => {
 
   // Handler for Load Norm Calculation button
   const handleLoadNormCalculation = async () => {
+    setRefreshData(false)
     if (!startDate || !endDate) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -170,7 +172,9 @@ const ProductionNormsBasis = () => {
           severity: 'success',
           autoHide: true,
         })
-        setRefreshData(true)
+        setTimeout(() => {
+          setRefreshData(true)
+        }, 500)
       }
     } catch (error) {
       console.error('Error in norm calculation:', error)
@@ -243,12 +247,13 @@ const ProductionNormsBasis = () => {
       case 'pims-monthly-throughput':
       case 'pims-monthly-throughtput':
         return <PIMSMontlyThroughput startDate={startDate} endDate={endDate} refreshData={refreshData} />
+      case 'Manual Entry':
+        return <ManualEntry startDate={startDate} endDate={endDate} refreshData={refreshData} />
       default:
         return null
     }
   }
 
-  console.log('filteredTabs', filteredTabs)
   return (
     <div>
       <Stack sx={{ mt: 1, mb: 1 }}>
@@ -258,7 +263,7 @@ const ProductionNormsBasis = () => {
           isOldYear={isOldYear}
           isSummaryRequired={false}
           onDatesChange={handleDatesChange}
-          // onLoadNormCalculation={handleLoadNormCalculation}
+          onLoadNormCalculation={handleLoadNormCalculation}
           normCalculationLoading={normCalculationLoading}
         />
       </Stack>

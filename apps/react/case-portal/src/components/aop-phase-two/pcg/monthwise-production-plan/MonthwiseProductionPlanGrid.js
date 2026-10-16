@@ -282,8 +282,7 @@ const MonthwiseProductionPlanGrid = () => {
     ExcelName: EXCEL_NAME,
     showImport: false,
     showCalculate: true,
-    calculateDisabled:
-      !calculationObject || Object.keys(calculationObject).length === 0,
+    calculateDisabled: false,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: 'Month wise Production Plan',

@@ -587,7 +587,11 @@ public class CPPSRMappingServiceImpl implements CPPSRMappingService {
         logger.info("getPlants: sourceNames={}", sourceNames);
         AOPMessageVM response = new AOPMessageVM();
         try {
-            StringBuilder sql = new StringBuilder(
+            List<Object> params = new ArrayList<>();
+            boolean hasFilter = (sourceNames != null && !sourceNames.isBlank());
+
+            // ── Query 1: Plants via SourceName (for receiver dropdown) ──
+            StringBuilder sql1 = new StringBuilder(
                     "SELECT p.Id AS plantId, p.DisplayName AS plantName, p.PlantCode AS plantCode, " +
                     "p.SourceName AS sourceName, " +
                     "p.Site_FK_Id AS siteId, s.Name AS siteName, s.DisplayName AS siteDisplayName, " +
@@ -597,11 +601,7 @@ public class CPPSRMappingServiceImpl implements CPPSRMappingService {
                     "LEFT JOIN Verticals v ON v.Id = p.Vertical_FK_Id " +
                     "WHERE p.IsActive = 1 ");
 
-            List<Object> params = new ArrayList<>();
-
-            boolean hasFilter = (sourceNames != null && !sourceNames.isBlank());
             if (hasFilter) {
-                // Split comma-separated SourceName values and build IN (...)
                 String[] parts = sourceNames.split(",");
                 StringBuilder inClause = new StringBuilder();
                 for (int i = 0; i < parts.length; i++) {
@@ -609,12 +609,11 @@ public class CPPSRMappingServiceImpl implements CPPSRMappingService {
                     inClause.append("?");
                     params.add(parts[i].trim());
                 }
-                sql.append("AND p.SourceName IN (").append(inClause).append(") ");
+                sql1.append("AND p.SourceName IN (").append(inClause).append(") ");
             }
+            sql1.append("ORDER BY p.DisplayName");
 
-            sql.append("ORDER BY p.DisplayName");
-
-            List<CPPPlantDTO> data = db1JdbcTemplate.query(sql.toString(), (rs, rowNum) -> {
+            List<CPPPlantDTO> data = db1JdbcTemplate.query(sql1.toString(), (rs, rowNum) -> {
                 CPPPlantDTO dto = new CPPPlantDTO();
                 dto.setPlantId(toUuidStr(rs.getString("plantId")));
                 dto.setPlantName(rs.getString("plantName"));
@@ -626,10 +625,55 @@ public class CPPSRMappingServiceImpl implements CPPSRMappingService {
                 dto.setVerticalId(toUuidStr(rs.getString("verticalId")));
                 dto.setVerticalName(rs.getString("verticalName"));
                 dto.setVerticalDisplayName(rs.getString("verticalDisplayName"));
+                dto.setPlantSource("sourceName");
                 return dto;
             }, params.toArray());
 
-            logger.info("getPlants: {} records returned", data.size());
+            // ── Query 2: Process plants via CPPProcessPlantsMapping (for sender dropdown) ──
+            if (hasFilter) {
+                StringBuilder sql2 = new StringBuilder(
+                        "SELECT PP.Id AS plantId, PP.DisplayName AS plantName, PP.PlantCode AS plantCode, " +
+                        "PP.SourceName AS sourceName, " +
+                        "PP.Site_FK_Id AS siteId, s.Name AS siteName, s.DisplayName AS siteDisplayName, " +
+                        "PP.Vertical_FK_Id AS verticalId, v.Name AS verticalName, v.DisplayName AS verticalDisplayName " +
+                        "FROM CPPProcessPlantsMapping M " +
+                        "INNER JOIN Plants PP ON PP.Id = M.ProcessPlant_FK_Id " +
+                        "LEFT JOIN Sites s ON s.Id = PP.Site_FK_Id " +
+                        "LEFT JOIN Verticals v ON v.Id = PP.Vertical_FK_Id " +
+                        "WHERE M.IsActive = 1 AND PP.IsActive = 1 AND M.CPPPlant_FK_Id IN (");
+
+                List<Object> params2 = new ArrayList<>();
+                String[] parts = sourceNames.split(",");
+                for (int i = 0; i < parts.length; i++) {
+                    if (i > 0) sql2.append(",");
+                    sql2.append("?");
+                    params2.add(parts[i].trim());
+                }
+                sql2.append(") ORDER BY PP.DisplayName");
+
+                List<CPPPlantDTO> processPlants = db1JdbcTemplate.query(sql2.toString(), (rs, rowNum) -> {
+                    CPPPlantDTO dto = new CPPPlantDTO();
+                    dto.setPlantId(toUuidStr(rs.getString("plantId")));
+                    dto.setPlantName(rs.getString("plantName"));
+                    dto.setPlantCode(rs.getString("plantCode"));
+                    dto.setSourceName(rs.getString("sourceName"));
+                    dto.setSiteId(toUuidStr(rs.getString("siteId")));
+                    dto.setSiteName(rs.getString("siteName"));
+                    dto.setSiteDisplayName(rs.getString("siteDisplayName"));
+                    dto.setVerticalId(toUuidStr(rs.getString("verticalId")));
+                    dto.setVerticalName(rs.getString("verticalName"));
+                    dto.setVerticalDisplayName(rs.getString("verticalDisplayName"));
+                    dto.setPlantSource("processMapping");
+                    return dto;
+                }, params2.toArray());
+
+                data.addAll(processPlants);
+            }
+
+            logger.info("getPlants: {} records returned ({} from SourceName, {} from CPPProcessPlantsMapping)",
+                    data.size(),
+                    data.stream().filter(d -> "sourceName".equals(d.getPlantSource())).count(),
+                    data.stream().filter(d -> "processMapping".equals(d.getPlantSource())).count());
             response.setCode(200);
             response.setMessage(data.size() + " record(s) found.");
             response.setData(data);
@@ -1562,22 +1606,28 @@ public class CPPSRMappingServiceImpl implements CPPSRMappingService {
         logger.info("getNormParametersBySourcePlant: plantId={}, normTypeId={}", plantId, normTypeId);
         AOPMessageVM response = new AOPMessageVM();
         try {
+            String normTypeFilter = UTILITY_NORM_PARAMETER_TYPES.stream()
+                    .map(t -> "?")
+                    .collect(java.util.stream.Collectors.joining(","));
+
+            // Plants linked to the CPP plant via two paths:
+            //   1. Plants.SourceName = cppPlantId (internal/regular plants)
+            //   2. CPPProcessPlantsMapping.CPPPlant_FK_Id = cppPlantId (outside/process plants)
+            // NormParameters are fetched for all such plants.
             StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT np.*, nt.NormName AS NormTypeName " +
-                "FROM Plants p " +
-                "INNER JOIN NormParameters np ON np.Plant_FK_Id = p.Id " +
+                "FROM NormParameters np " +
                 "INNER JOIN NormTypes nt ON nt.Id = np.NormType_FK_Id " +
                 "INNER JOIN NormParameterType npt ON npt.Id = np.NormParameterType_FK_Id " +
-                "WHERE p.SourceName = CAST(? AS VARCHAR(36)) " +
-                "AND npt.IsActive = 1 AND npt.Name IN (" +
-                UTILITY_NORM_PARAMETER_TYPES.stream()
-                        .map(t -> "?")
-                        .collect(java.util.stream.Collectors.joining(",")) +
-                ")"
+                "INNER JOIN Plants p ON p.Id = np.Plant_FK_Id " +
+                "LEFT JOIN CPPProcessPlantsMapping m ON m.ProcessPlant_FK_Id = p.Id AND m.IsActive = 1 " +
+                "WHERE npt.IsActive = 1 AND npt.Name IN (" + normTypeFilter + ") " +
+                "AND (p.SourceName = CAST(? AS VARCHAR(36)) OR m.CPPPlant_FK_Id = CAST(? AS VARCHAR(36)))"
             );
             List<Object> params = new ArrayList<>();
-            params.add(plantId);
             params.addAll(UTILITY_NORM_PARAMETER_TYPES);
+            params.add(plantId);  // SourceName match
+            params.add(plantId);  // CPPProcessPlantsMapping match
 
             if (normTypeId != null) {
                 sql.append(" AND np.NormType_FK_Id = ?");

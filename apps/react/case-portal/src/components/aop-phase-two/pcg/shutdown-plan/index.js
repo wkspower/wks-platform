@@ -133,7 +133,7 @@ const columns = [
 
 // Initial field values for new rows added via the "Add Item" button
 const initialFieldValues = {
-  gasifier: 'G1',
+  gasifier: '',
   discription: '',
   maintenanceId: null,
   maintStartDateTime: null,
@@ -269,8 +269,8 @@ const ShutdownPlanPCG = () => {
           ...item,
           idFromApi: item?.id,
           id: index,
-          gasifier: item?.name || item?.gasifier || item?.productName || 'G1',
-          name: item?.name || item?.gasifier || item?.productName || 'G1',
+          gasifier: item?.name || item?.gasifier || item?.productName || '',
+          name: item?.name || item?.gasifier || item?.productName || '',
           discription: item?.description || item?.discription || '',
           description: item?.description || item?.discription || '',
           maintStartDateTime: startDate,
@@ -348,6 +348,39 @@ const ShutdownPlanPCG = () => {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'SD To date & time is required for all records.',
+          severity: 'error',
+        })
+        return
+      }
+
+      const start = new Date(record.maintStartDateTime)
+      const end = new Date(record.maintEndDateTime)
+
+      if (start > end) {
+        record.isError = true
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'SD To date must be greater than or equal to SD From date.',
+          severity: 'error',
+        })
+        return
+      }
+
+      const isSameMonth =
+        start.getMonth() === end.getMonth() &&
+        start.getFullYear() === end.getFullYear()
+
+      if (!isSameMonth) {
+        record.isError = true
+        const formatDate = (date) =>
+          date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `SD From and SD To must be in the same month. Record '${record.gasifier || record.discription || 'Row'}' spans multiple months (${formatDate(start)} to ${formatDate(end)}). Please split it into separate entries for each month.`,
           severity: 'error',
         })
         return

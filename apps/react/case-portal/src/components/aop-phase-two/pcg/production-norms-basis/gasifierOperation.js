@@ -10,14 +10,6 @@ import TargetActualDafThroughput from './targetActualDafThroughput'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/pcg/productionNormsApiService'
 import SelectCellEditorDropdown from './SelectCellEditorDropdown'
 
-// Fallback G-Operation dropdown options
-export const G_OPERATION_OPTIONS = [
-  { label: '3G Operation', value: '3G Operation' },
-  { label: '4G Operation', value: '4G Operation' },
-  { label: '5G Operation', value: '5G Operation' },
-  { label: '6G Operation', value: '6G Operation' },
-]
-
 // Fallback G-Configuration mapping based on (M3+M4+M5) combinations all in one line separated by /
 export const G_CONFIGURATION_MAPPING = {
   '6G Operation': '(2+2+2)',
@@ -25,6 +17,40 @@ export const G_CONFIGURATION_MAPPING = {
   '4G Operation': '(1+1+1)/(1+2+1)/(1+1+2)/(2+1+1)/(0+2+2)/(2+0+2)/(2+2+0)',
   '3G Operation': '(1+1+1)/(2+1+0)/(1+2+0)/(0+1+2)/(2+0+1)/(1+0+2)/(0+2+1)',
 }
+
+// Helper to format G-Operation label with configuration in braces
+export const formatGOperationLabel = (name, config) => {
+  const baseName = (name || '').trim()
+  const conf = (config || '').trim()
+  if (!conf) return baseName
+  if (baseName.includes('(')) return baseName
+  if (conf.startsWith('(') && conf.endsWith(')')) {
+    return `${baseName} ${conf}`
+  }
+  return `${baseName} (${conf})`
+}
+
+// Fallback G-Operation dropdown options
+export const G_OPERATION_OPTIONS = [
+  {
+    label:
+      '3G Operation (1+1+1)/(2+1+0)/(1+2+0)/(0+1+2)/(2+0+1)/(1+0+2)/(0+2+1)',
+    value: '3G Operation',
+  },
+  {
+    label:
+      '4G Operation (1+1+1)/(1+2+1)/(1+1+2)/(2+1+1)/(0+2+2)/(2+0+2)/(2+2+0)',
+    value: '4G Operation',
+  },
+  {
+    label: '5G Operation (2+2+1)/(1+2+2)/(2+1+2)',
+    value: '5G Operation',
+  },
+  {
+    label: '6G Operation (2+2+2)',
+    value: '6G Operation',
+  },
+]
 
 // Helper to get configuration string dynamically for a given G-Operation
 export const getGConfigurationString = (gOperation) => {
@@ -78,8 +104,11 @@ const GasifierOperation = () => {
     if (dropdownList.length > 0) {
       return dropdownList.map((item, idx) => {
         const baseName = (item.displayName || item.name || '').trim()
-        const label = baseName
         const gId = item.id || item.gId || item.gid || item.GId || null
+        const configStr =
+          (item.configuration || '').trim() ||
+          getGConfigurationString(baseName)
+        const label = formatGOperationLabel(baseName, configStr)
 
         // Ensure unique value (using gId) so Kendo DropDownList (dataItemKey="value") can distinguish each item
         const value =
@@ -95,7 +124,7 @@ const GasifierOperation = () => {
           gId: gId,
           name: item.name || baseName,
           displayName: item.displayName || baseName,
-          configuration: item.configuration || '',
+          configuration: configStr,
         }
       })
     }
@@ -124,11 +153,12 @@ const GasifierOperation = () => {
       )
       if (found?.configuration) return found.configuration
 
-      // 2. Fallback: match by name/displayName only if not matched by ID
+      // 2. Fallback: match by name/displayName/label only if not matched by ID
       const fallbackOption = gOperationOptions.find(
         (opt) =>
           (opt.name && opt.name.trim().toLowerCase() === opStr) ||
-          (opt.displayName && opt.displayName.trim().toLowerCase() === opStr),
+          (opt.displayName && opt.displayName.trim().toLowerCase() === opStr) ||
+          (opt.label && opt.label.trim().toLowerCase() === opStr),
       )
       if (fallbackOption?.configuration) return fallbackOption.configuration
 
@@ -151,21 +181,13 @@ const GasifierOperation = () => {
       {
         field: 'gOperation',
         title: 'G-Operation',
-        widthT: 220,
-        minWidth: 180,
+        widthT: 650,
+        minWidth: 450,
         type: 'customSelect',
         cellEditor: SelectCellEditorDropdown,
         editable: !READ_ONLY,
         options: gOperationOptions,
         displayMode: 'label',
-      },
-      {
-        field: 'gConfiguration',
-        title: 'G-Configuration',
-        widthT: 480,
-        minWidth: 380,
-        type: 'text',
-        editable: false,
       },
     ],
     [gOperationOptions, READ_ONLY],
@@ -388,7 +410,9 @@ const GasifierOperation = () => {
           (opt.id && String(opt.id).trim().toLowerCase() === targetOp) ||
           (opt.gId && String(opt.gId).trim().toLowerCase() === targetOp) ||
           (opt.name && opt.name.trim().toLowerCase() === targetOp) ||
-          (opt.displayName && opt.displayName.trim().toLowerCase() === targetOp),
+          (opt.displayName &&
+            opt.displayName.trim().toLowerCase() === targetOp) ||
+          (opt.label && opt.label.trim().toLowerCase() === targetOp),
       )
 
       // Ensure we send gId in gOperation
