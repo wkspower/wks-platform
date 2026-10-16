@@ -20,8 +20,10 @@ export const ProductionNormsApiService = {
   loadButtonNormCalculation,
 
   //Manual entry
-  getManualEntry,
-  saveManualEntry,
+  getManualEntryData,
+  saveManualEntryData,
+  importManualEntryExcel,
+  exportManualEntryExcel,
 
   // Generic Import/Export helpers
   saveExcelData,
@@ -553,5 +555,95 @@ async function exportPIMSThroughputExcel(keycloak, plantId, year) {
     queryParams: {},
     fileName: `Production_Norms_PIMS_Throughput_${year}.xlsx`,
     method: 'GET',
+  })
+}
+// ========================|| Manual Entry APIs ||=====================================//
+/**
+ * Get Production Norms Manual Entry data
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Manual Entry data
+ */
+async function getManualEntryData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/production-norms?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+/**
+ * Save Production Norms Manual Entry data
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} year - AOP Year
+ * @param {string} plantId - Plant ID
+ * @param {Array} payload - Data to save
+ * @returns {Promise} Save response
+ */
+async function saveManualEntryData(keycloak, year, plantId, payload) {
+  const url = `${Config.CaseEngineUrl}/task/production-norms?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+/**
+ * Import Manual Entry Excel file
+ * @param {File} file - Excel file
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Import response
+ */
+async function importManualEntryExcel(file, keycloak, plantId, year) {
+  return saveExcelData(file, keycloak, 'manual-entry-import', {
+    year: year,
+    plantId: plantId,
+  })
+}
+
+/**
+ * Export Manual Entry Excel file
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} plantId - Plant ID
+ * @param {string} year - AOP Year
+ * @returns {Promise} Export response
+ */
+async function exportManualEntryExcel(keycloak, plantId, year, fileName) {
+  return ImportExportApiService.exportExcelData(keycloak, {
+    endpoint: 'manual-entry-export',
+    queryParams: { year: year, plantId: plantId },
+    fileName: fileName || `Naphthasplitter_Production_Norms_Manual_Entry_${year}.xlsx`,
+    method: 'POST',
   })
 }
