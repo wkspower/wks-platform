@@ -288,7 +288,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 			String aopYear) {
 		try {
 			
-			String callSql = "{call " + procedureName + "(?, ?)}";
+			String callSql = "{call " + "[" + procedureName + "]" + "(?, ?)}";
 
 	        try (Connection connection = dataSource.getConnection();
 	             CallableStatement stmt = connection.prepareCall(callSql)) {
