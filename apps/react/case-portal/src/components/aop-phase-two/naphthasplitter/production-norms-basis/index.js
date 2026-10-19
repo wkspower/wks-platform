@@ -13,6 +13,9 @@ import PIMSMontlyThroughput from 'components/aop-phase-two/crude/production-norm
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/naphthasplitter/productionNormsApiService'
 import Notification from 'components/aop-phase-two/common/utilities/Notification'
 import ManualEntry from './ManualEntry'
+import DataFilters from 'components/aop-phase-two/naphthasplitter/production-norms-basis/DataFilter'
+import EnergyFactor from './EnergyFactor'
+import NormsRationalizationFactor from './NormsRationalizationFactor'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
@@ -249,6 +252,12 @@ const ProductionNormsBasis = () => {
         return <PIMSMontlyThroughput startDate={startDate} endDate={endDate} refreshData={refreshData} />
       case 'Manual Entry':
         return <ManualEntry startDate={startDate} endDate={endDate} refreshData={refreshData} />
+      case 'Data Filters':
+        return <DataFilters />
+      case 'Energy Factor':
+        return <EnergyFactor />
+      case 'Norms Rationalization Factor':
+        return <NormsRationalizationFactor/>
       default:
         return null
     }
