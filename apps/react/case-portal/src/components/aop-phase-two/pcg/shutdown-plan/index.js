@@ -501,7 +501,7 @@ const ShutdownPlanPCG = () => {
       if (!file) return
       setLoading(true)
       try {
-        const response = await ShutdownPlanApiService.importShutdownPlan(
+        const response = await PCGShutdownTaApiService.importShutdownPlan(
           file,
           keycloak,
           PLANT_ID,
@@ -585,7 +585,7 @@ const ShutdownPlanPCG = () => {
     setSnackbarOpen(true)
     setSnackbarData({ message: 'Excel download started!', severity: 'info' })
     try {
-      await ShutdownPlanApiService.exportShutdownPlan(
+      await PCGShutdownTaApiService.exportShutdownPlan(
         keycloak,
         PLANT_ID,
         AOP_YEAR,

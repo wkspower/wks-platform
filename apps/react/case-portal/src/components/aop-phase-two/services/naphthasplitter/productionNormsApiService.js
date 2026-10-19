@@ -34,6 +34,18 @@ export const ProductionNormsApiService = {
   getPIMSThroughputData,
   importPIMSThroughputExcel,
   exportPIMSThroughputExcel,
+
+    //Energy Factor
+  getEnergyFactorData,
+  saveEnergyFactorData,
+ 
+  //Rationalization Factor
+  getRationalizationFactorData,
+  saveRationalizationFactorData,
+  
+  // Data Filter
+  getDataFilterData,
+  saveDataFilterData,
 }
 
 // ========================|| Configuration APIs ||=====================================//
@@ -646,4 +658,160 @@ async function exportManualEntryExcel(keycloak, plantId, year, fileName) {
     fileName: fileName || `Naphthasplitter_Production_Norms_Manual_Entry_${year}.xlsx`,
     method: 'POST',
   })
+}
+
+async function getEnergyFactorData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/energy-factor?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+/**
+ * Save Production Norms Constants data
+ * @param {Object} keycloak - Keycloak session
+ * @param {string} year - AOP Year
+ * @param {string} plantId - Plant ID
+ * @param {string} siteId - Site ID
+ * @param {string} periodFrom - Period start date
+ * @param {string} periodTo - Period end date
+ * @param {Array} payload - Data to save
+ * @returns {Promise} Save response
+ */
+async function saveEnergyFactorData(
+  keycloak,
+  year,
+  plantId,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/energy-factor?aopYear=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+//getRationalizationFactorData
+async function getRationalizationFactorData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/norms-rationalization-factor?year=${year}&plantFKId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveRationalizationFactorData(
+  keycloak,
+  year,
+  plantId,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/norms-rationalization-factor?aopYear=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getDataFilterData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/data-filter?aopYear=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveDataFilterData(
+  keycloak,
+  year,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/data-filter?year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
 }

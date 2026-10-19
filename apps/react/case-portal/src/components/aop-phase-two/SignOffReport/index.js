@@ -116,6 +116,7 @@ const SignOffReport = () => {
           const isNumber = col.type === 'number'
           const isDate = col.type === 'date'
           const isFirstCol = index === 0
+          const isFrozenCol = index === 0 || index === 1
           const formattedTitle = col.title || col.field.replace(/_/g, ' ')
           const isRemarks =
             col.field?.toLowerCase().includes('remarks') ||
@@ -126,7 +127,7 @@ const SignOffReport = () => {
             title: formattedTitle,
             editable: isRemarks ? true : Boolean(col.editable),
             hidden: col.hidden || false,
-            locked: isFirstCol && backendCols.length > 6,
+            locked: isFrozenCol && backendCols.length > 2,
           }
 
           if (isRemarks) {

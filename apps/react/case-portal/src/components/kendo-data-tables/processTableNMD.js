@@ -228,13 +228,14 @@ const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
   const fetchData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) {
       setRows([])
+      setCalculationObject([])
       return
     }
     setLoading(true)
     try {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data?.data
-      setCalculationObject(resp?.data?.aopCalculation)
+      setCalculationObject(resp?.data?.aopCalculation || [])
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,
         idFromApi: item.id,
@@ -253,10 +254,11 @@ const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
     } catch (err) {
       console.error('Error fetching data:', err)
       setRows([])
+      setCalculationObject([])
     } finally {
       setLoading(false)
     }
-  }, [PLANT_ID, keycloak, AOP_YEAR])
+  }, [PLANT_ID, keycloak, AOP_YEAR, dataConfig, viewOnly])
 
   const handleCalculate = useCallback(async () => {
     try {
@@ -280,7 +282,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
       setSnackbarData({ message: err.message || 'Error!', severity: 'error' })
       setSnackbarOpen(true)
     }
-  }, [keycloak, fetchData])
+  }, [keycloak, fetchData, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     fetchData()
@@ -463,16 +465,14 @@ const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
           uploadExcelBtn: viewOnly ? false : true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
-          // showCalculateVisibility: true,
-
-          //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
-          showCalculateVisibility: false,
-
+          showCalculateVisibility:
+            Object.keys(calculationObject || {}).length > 0 ? true : false,
+          showCalulcationPromt: lowerVertName === 'cracker',
           showNote: true,
         },
         isOldYear,
       ),
-    [isOldYear],
+    [isOldYear, calculationObject, viewOnly, permissions, lowerVertName],
   )
 
   return (
