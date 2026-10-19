@@ -9,29 +9,21 @@ import { OverallAopConsumptionApiService } from 'components/aop-phase-two/servic
 import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 import { generateExcelName } from 'components/aop-phase-two/common/utilities/excelNameUtil'
 
-const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
+const CoolingTowerUom=['Kg/Km3', 'kWh/km3', 'm3/km3', 'Nm3/Km3']
 
-// Lowercase + strip all whitespace so "Power Consumption" === "PowerConsumption"
 const normalizeKey = (s) =>
   String(s ?? '')
-    .replace(/\s+/g, '')
+    .replace(/\s+/g, '') 
     .toLowerCase()
 
 // Norm parameter types that show 3 decimals for DTA_PCG CT plants
 const THREE_DECIMAL_NORM_TYPES = [
-'Makeup Consumption',
-'Power Consumption',
-'Commodity Chemicals',
-'Vender Chemicals',
-'Chembond Ltd',
-'Veolia Chemicals Ltd',
-'Ion Exchange Ltd',
-'Wex Technologies Ltd',
-'Dorf Ketal Ltd',
-'Specific Makeup Consumption',
-'Other Utilities consumption',
-'Specific Other Utilities consumption',
- 'Chemical Consumption',
+'Power Norms',
+'Norms proposed for Next FY-Total Power',
+].map(normalizeKey)
+const SIX_DECIMAL_NORM_TYPES=[
+'Norms proposed for Next FY-Cooling Water',
+'Cooling Water Norms',
 ].map(normalizeKey)
 
 const OverallAopConsumption = () => {
@@ -86,47 +78,51 @@ const OverallAopConsumption = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const formatValueByUom = useCallback(
-    (val, uom, row = {}) => {
-      if (val === null || val === undefined || val === '') return ''
-      const num = parseFloat(val)
-      if (isNaN(num)) return val
-
-      if (isDtaCtPlant) {
-        const cleanUom = String(uom ?? '')
-          .trim()
-          .toLowerCase()
-        const isThreeDecimal = THREE_DECIMAL_UOMS.some(
-          (u) => u.trim().toLowerCase() === cleanUom,
-        )
-        if (isThreeDecimal) {
-          return (Math.trunc(num * 1000) / 1000).toFixed(3)
+      (val, uom, row = {}) => {
+        if (val === null || val === undefined || val === '') return ''
+        const num = parseFloat(val)
+        if (isNaN(num)) return val
+  
+        if (isDtapcgCtPlant || isSezpcgCtPlant || isDtaCtPlant) {
+          // Decide by normParameterTypeName (or display name), not by UOM
+          const cleanUom = String(uom ?? '')
+            .trim()
+            .toLowerCase()
+          const isThreeDecimal = CoolingTowerUom.some(
+            (u) => u.trim().toLowerCase() === cleanUom,
+          )
+          if (isThreeDecimal) {
+            return (Math.trunc(num * 1000) / 1000).toFixed(3)
+          }
+          return Math.trunc(num).toString()
         }
-        return Math.trunc(num).toString()
-      }
-
-      if (isDtapcgCtPlant || isSezpcgCtPlant || isDtaCtPlant) {
-        // Decide by normParameterTypeName (or display name), not by UOM
-        const typeKeys = [
-          normalizeKey(row?.normParameterTypeName),
-          normalizeKey(row?.normParameterTypeDisplayName),
-        ]
-        const isThreeDecimal = typeKeys.some((k) =>
-          THREE_DECIMAL_NORM_TYPES.includes(k),
-        )
-        if (isThreeDecimal) {
-          return (Math.trunc(num * 1000) / 1000).toFixed(3)
+        if (isFCCTame) {
+          return (Math.trunc(num * 100000) / 100000).toFixed(5)
         }
+        if (isAsuPlant) {
+          const typeKeys = [
+            normalizeKey(row?.normParameterTypeName),
+            normalizeKey(row?.normParameterTypeDisplayName),
+          ]
+          const isThreeDecimal = typeKeys.some((k) =>
+            THREE_DECIMAL_NORM_TYPES.includes(k),
+          )
+          if (isThreeDecimal) {
+            return (Math.trunc(num * 1000) / 1000).toFixed(3)
+          }
+          const isSixDecimal = typeKeys.some((k) =>
+            SIX_DECIMAL_NORM_TYPES.includes(k),
+          )
+          if (isSixDecimal) {
+            return (Math.trunc(num * 1000000) / 1000000).toFixed(6)
+          }
+          return (Math.trunc(num * 100000) / 100000).toFixed(5)
+        }
+  
         return Math.trunc(num).toString()
-      }
-
-      if (isAsuPlant || isFCCTame) {
-        return (Math.trunc(num * 100000) / 100000).toFixed(5)
-      }
-
-      return Math.trunc(num).toString()
-    },
-    [isDtaCtPlant, isAsuPlant, isFCCTame, isDtapcgCtPlant, isSezpcgCtPlant],
-  )
+      },
+      [isDtaCtPlant, isDtapcgCtPlant, isSezpcgCtPlant, isAsuPlant, isFCCTame],
+    )
 
   const columns = useMemo(() => {
     const valueFormat = undefined

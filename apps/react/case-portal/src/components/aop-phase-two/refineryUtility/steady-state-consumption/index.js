@@ -31,9 +31,8 @@ const MONTH_FIELDS = [
   'march',
 ]
 
-const THREE_DECIMAL_UOMS = ['kw', 'kw/m3', 'kg/km3']
+const CoolingTowerUom=['Kg/Km3', 'kWh/km3', 'm3/km3', 'Nm3/Km3']
 
-// Lowercase + strip all whitespace so "Power Consumption" === "PowerConsumption"
 const normalizeKey = (s) =>
   String(s ?? '')
     .replace(/\s+/g, '')
@@ -41,20 +40,14 @@ const normalizeKey = (s) =>
 
 // Norm parameter types that show 3 decimals for DTA_PCG CT plants
 const THREE_DECIMAL_NORM_TYPES = [
- 'Makeup Consumption',
-'Power Consumption',
-'Commodity Chemicals',
-'Vender Chemicals',
-'Chembond Ltd',
-'Veolia Chemicals Ltd',
-'Ion Exchange Ltd',
-'Wex Technologies Ltd',
-'Dorf Ketal Ltd',
-'Specific Makeup Consumption',
-'Other Utilities consumption',
-'Specific Other Utilities consumption',
- 'Chemical Consumption',
+'Power Norms',
+'Norms proposed for Next FY-Total Power',
 ].map(normalizeKey)
+const SIX_DECIMAL_NORM_TYPES=[
+'Norms proposed for Next FY-Cooling Water',
+'Cooling Water Norms',
+].map(normalizeKey)
+
 
 const SteadyStateConsumption = () => {
   const keycloak = useSession()
@@ -78,7 +71,6 @@ const SteadyStateConsumption = () => {
 
   const isSezpcgCtPlant=siteName.toLowerCase() === 'sez_pcg' && (plantName.toLowerCase() === 'ct1 (h731)' ||
       plantName.toLowerCase() === 'ct3 (h733)' || plantName.toLowerCase() === 'ct2 (h732)' ||plantName.toLowerCase() === 'ct4 (h734)')
-
   const isFCCTame = siteName === 'DTA' && plantName === 'FCC-2_SHP-TAME'
   const isAsuPlant =
     (siteName === 'DTA' &&
@@ -124,11 +116,12 @@ const SteadyStateConsumption = () => {
       const num = parseFloat(val)
       if (isNaN(num)) return val
 
-      if (isDtaCtPlant) {
+      if (isDtapcgCtPlant || isSezpcgCtPlant || isDtaCtPlant) {
+        // Decide by normParameterTypeName (or display name), not by UOM
         const cleanUom = String(uom ?? '')
           .trim()
           .toLowerCase()
-        const isThreeDecimal = THREE_DECIMAL_UOMS.some(
+        const isThreeDecimal = CoolingTowerUom.some(
           (u) => u.trim().toLowerCase() === cleanUom,
         )
         if (isThreeDecimal) {
@@ -136,9 +129,10 @@ const SteadyStateConsumption = () => {
         }
         return Math.trunc(num).toString()
       }
-
-      if (isDtapcgCtPlant || isSezpcgCtPlant || isDtaCtPlant) {
-        // Decide by normParameterTypeName (or display name), not by UOM
+      if (isFCCTame) {
+        return (Math.trunc(num * 100000) / 100000).toFixed(5)
+      }
+      if (isAsuPlant) {
         const typeKeys = [
           normalizeKey(row?.normParameterTypeName),
           normalizeKey(row?.normParameterTypeDisplayName),
@@ -149,10 +143,12 @@ const SteadyStateConsumption = () => {
         if (isThreeDecimal) {
           return (Math.trunc(num * 1000) / 1000).toFixed(3)
         }
-        return Math.trunc(num).toString()
-      }
-
-      if (isAsuPlant || isFCCTame) {
+        const isSixDecimal = typeKeys.some((k) =>
+          SIX_DECIMAL_NORM_TYPES.includes(k),
+        )
+        if (isSixDecimal) {
+          return (Math.trunc(num * 1000000) / 1000000).toFixed(6)
+        }
         return (Math.trunc(num * 100000) / 100000).toFixed(5)
       }
 
@@ -331,8 +327,6 @@ const SteadyStateConsumption = () => {
       },
     ]
   }, [isDtaCtPlant, isDtapcgCtPlant,isSezpcgCtPlant, isAsuPlant, isFCCTame, AOP_YEAR])
-
-  const dummyRows = []
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
