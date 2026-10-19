@@ -12,7 +12,11 @@ import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
 import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
-const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
+const MaintenanceProcessTableNMD = ({
+  viewOnly,
+  permissions,
+  refreshTrigger,
+}) => {
   const keycloak = useSession()
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -286,7 +290,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly, permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR])
+  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR, refreshTrigger])
 
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)

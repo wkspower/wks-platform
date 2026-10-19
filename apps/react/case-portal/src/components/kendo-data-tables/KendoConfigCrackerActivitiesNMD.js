@@ -80,6 +80,7 @@ const DecokingConfigNMD = () => {
   const [currentRemarkRunLength, setCurrentRemarkRunLength] = useState('')
   const [currentRowIdRunLength, setCurrentRowId3] = useState(null)
   const [calculationObject, setCalculationObject] = useState([])
+  const [refreshThirdGrid, setRefreshThirdGrid] = useState(0)
   const [dateError, setDateError] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
 
@@ -732,6 +733,7 @@ const DecokingConfigNMD = () => {
         })
         setModifiedCellsSdTa({})
         setSummaryEdited(false)
+        setRefreshThirdGrid((prev) => prev + 1)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -808,6 +810,7 @@ const DecokingConfigNMD = () => {
         })
         setModifiedCellsSdTa({})
         setSummaryEdited(false)
+        setRefreshThirdGrid((prev) => prev + 1)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -1276,7 +1279,10 @@ const DecokingConfigNMD = () => {
         handleCalculate={handleCalculate}
       />
 
-      <MaintenanceProcessTableNMD permissions={MaintenanceProcessPermission} />
+      <MaintenanceProcessTableNMD
+        permissions={MaintenanceProcessPermission}
+        refreshTrigger={refreshThirdGrid}
+      />
     </Box>
   )
 }
