@@ -63,9 +63,13 @@ public class ShutdownActivitiesController {
     }
 
     @PostMapping ("/shutdown-transactions")
-    public ResponseEntity<AOPMessageVM> saveShutdownTaTransactions( @RequestParam String plantId, @RequestBody List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
+    public ResponseEntity<AOPMessageVM> saveShutdownTaTransactions( @RequestParam String plantId, @RequestParam String aopYear, @RequestBody List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
 
-        List<ShutdownTaTransactionDTO> result = shutdownActivitiesService.saveShutdownTaTransactions(UUID.fromString(plantId), shutdownTaTransactionDTOList);
+        if (plantId == null || plantId.isEmpty() || aopYear == null || aopYear.isEmpty()) {
+            throw new IllegalArgumentException("Plant ID and AOP Year are required");
+        }
+
+        List<ShutdownTaTransactionDTO> result = shutdownActivitiesService.saveShutdownTaTransactions(UUID.fromString(plantId), aopYear, shutdownTaTransactionDTOList);
         AOPMessageVM aopMessageVM = new AOPMessageVM();
         aopMessageVM.setMessage("Success");
         aopMessageVM.setData(result);
@@ -99,6 +103,10 @@ public class ShutdownActivitiesController {
             @RequestParam("aopYear") String aopYear,
             @RequestParam("file") MultipartFile file) {
         try {
+            if (plantId == null || plantId.isEmpty() || aopYear == null || aopYear.isEmpty()) {
+                throw new IllegalArgumentException("Plant ID and AOP Year are required");
+            }
+
             return shutdownActivitiesService.importShutdownTaTransactions(UUID.fromString(plantId), aopYear, file);
         } catch (Exception e) {
             AOPMessageVM aopMessageVM = new AOPMessageVM();

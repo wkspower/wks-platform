@@ -162,19 +162,12 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
     }
 
 	@Override
-	public List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
+	public List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, String aopYear, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
 	
         List<ShutdownTaTransactionDTO> failedList = new ArrayList<>();
 
 			// Fetch valid gasifier displayNames once before the loop for name validation
-			String aopYear = shutdownTaTransactionDTOList.stream()
-					.map(ShutdownTaTransactionDTO::getAuditYear)
-					.filter(y -> y != null && !y.isEmpty())
-					.findFirst()
-					.orElse(null);
-			List<GasifierDropdownDTO> validGasifiers = (aopYear != null)
-					? getGasifierDropdown(plantId, aopYear)
-					: null;
+			List<GasifierDropdownDTO> validGasifiers = getGasifierDropdown(plantId, aopYear);
 
 			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
 			if (plantMaintenanceId == null) {
@@ -410,7 +403,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
         AOPMessageVM aopMessageVM = new AOPMessageVM();
         try {
             List<ShutdownTaTransactionDTO> data = readShutdownTaTransactions(file.getInputStream(), aopYear);
-            List<ShutdownTaTransactionDTO> failedList = saveShutdownTaTransactions(plantId, data);
+            List<ShutdownTaTransactionDTO> failedList = saveShutdownTaTransactions(plantId, aopYear, data);
             if (failedList != null && !failedList.isEmpty()) {
                 byte[] fileByteArray = exportShutdownTaTransactions(plantId, aopYear, true, failedList);
                 aopMessageVM.setData(Base64.getEncoder().encodeToString(fileByteArray));

@@ -16,7 +16,7 @@ public interface ShutdownActivitiesService {
 
     List<ShutdownTaTransactionDTO> getShutdownTaTransactions(UUID plantId, String aopYear);
 
-    List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList);
+    List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, String aopYear, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList);
 
     List<AopProductionNormsDTO> getAopProductionNorms(UUID plantId, String aopYear);
 
