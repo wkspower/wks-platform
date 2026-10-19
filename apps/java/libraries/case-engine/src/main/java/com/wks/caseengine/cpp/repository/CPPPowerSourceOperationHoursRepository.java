@@ -20,29 +20,10 @@ public interface CPPPowerSourceOperationHoursRepository extends JpaRepository<CP
             psoh.Id AS id,
             psoh.PowerSource_FK_Id AS assetFkId,
 
-            CASE
-                WHEN CHARINDEX('-', np.SAPMaterialCode) > 0
-                THEN LTRIM(SUBSTRING(np.SAPMaterialCode, CHARINDEX('-', np.SAPMaterialCode) + 1, LEN(np.SAPMaterialCode)))
-                ELSE np.SAPMaterialCode
-            END AS utilityDistributed,
-
-            CASE
-                WHEN CHARINDEX('-', np.SAPMaterialCode) > 0
-                THEN LEFT(np.SAPMaterialCode, CHARINDEX('-', np.SAPMaterialCode) - 1)
-                ELSE np.SAPMaterialCode
-            END AS distributedSapCode,
-
-            CASE
-                WHEN CHARINDEX('-', np.Name) > 0
-                THEN LTRIM(SUBSTRING(np.Name, CHARINDEX('-', np.Name) + 1, LEN(np.Name)))
-                ELSE np.Name
-            END AS utilityGenerated,
-
-            CASE
-                WHEN CHARINDEX('-', np.Name) > 0
-                THEN LEFT(np.Name, CHARINDEX('-', np.Name) - 1)
-                ELSE np.Name
-            END AS generatedUtilityCode,
+            np.Name AS utilityGenerated,
+            np.SAPMaterialCode AS generatedUtilityCode,
+            unp.Name AS utilityDistributed,
+            unp.SAPMaterialCode AS distributedSapCode,
 
             psoh.Apr AS apr,
             psoh.May AS may,
@@ -85,6 +66,9 @@ public interface CPPPowerSourceOperationHoursRepository extends JpaRepository<CP
         INNER JOIN dbo.NormParameters np WITH (NOLOCK)
             ON np.Id = ip.NormParameter_FK_Id
 
+        LEFT JOIN dbo.NormParameters unp WITH (NOLOCK)
+            ON unp.Id = ip.Utility_NormParameter_FK_Id
+
         LEFT JOIN dbo.Plants importPlant WITH (NOLOCK)
             ON importPlant.Id = ip.ImportPlantFK_ID
 
@@ -109,29 +93,10 @@ public interface CPPPowerSourceOperationHoursRepository extends JpaRepository<CP
             CAST(NULL AS UNIQUEIDENTIFIER) AS id,
             ip.Id                         AS assetFkId,
 
-            CASE
-                WHEN CHARINDEX('-', np3.SAPMaterialCode) > 0
-                THEN LTRIM(SUBSTRING(np3.SAPMaterialCode, CHARINDEX('-', np3.SAPMaterialCode) + 1, LEN(np3.SAPMaterialCode)))
-                ELSE np3.SAPMaterialCode
-            END AS utilityDistributed,
-
-            CASE
-                WHEN CHARINDEX('-', np3.SAPMaterialCode) > 0
-                THEN LEFT(np3.SAPMaterialCode, CHARINDEX('-', np3.SAPMaterialCode) - 1)
-                ELSE np3.SAPMaterialCode
-            END AS distributedSapCode,
-
-            CASE
-                WHEN CHARINDEX('-', np3.Name) > 0
-                THEN LTRIM(SUBSTRING(np3.Name, CHARINDEX('-', np3.Name) + 1, LEN(np3.Name)))
-                ELSE np3.Name
-            END AS utilityGenerated,
-
-            CASE
-                WHEN CHARINDEX('-', np3.Name) > 0
-                THEN LEFT(np3.Name, CHARINDEX('-', np3.Name) - 1)
-                ELSE np3.Name
-            END AS generatedUtilityCode,
+            np3.Name                       AS utilityGenerated,
+            np3.SAPMaterialCode            AS generatedUtilityCode,
+            unp3.Name                      AS utilityDistributed,
+            unp3.SAPMaterialCode           AS distributedSapCode,
 
             CAST(NULL AS FLOAT)           AS apr,
             CAST(NULL AS FLOAT)           AS may,
@@ -164,6 +129,7 @@ public interface CPPPowerSourceOperationHoursRepository extends JpaRepository<CP
         LEFT JOIN Plants pl3 WITH(NOLOCK) ON pl3.Id = ip.CPPPlant_FK_ID
         LEFT JOIN Plants importPlant WITH(NOLOCK) ON importPlant.Id = ip.ImportPlantFK_ID
         LEFT JOIN NormParameters np3 WITH(NOLOCK) ON np3.Id = ip.NormParameter_FK_Id
+        LEFT JOIN NormParameters unp3 WITH(NOLOCK) ON unp3.Id = ip.Utility_NormParameter_FK_Id
         WHERE ip.CPPPlant_FK_ID IN :plantIds
 
         ORDER BY plantName, namePrefix, nameNumber, sortDisplayName;
