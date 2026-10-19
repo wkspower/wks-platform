@@ -435,6 +435,7 @@ const ShutdownPlanPCG = () => {
         keycloak,
         PLANT_ID,
         shutdownDetails,
+        AOP_YEAR
       )
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })

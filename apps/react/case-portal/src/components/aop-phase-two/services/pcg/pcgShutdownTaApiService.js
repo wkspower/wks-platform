@@ -44,7 +44,7 @@ async function getShutdownTaTransactions(keycloak, plantId, aopYear) {
   const params = []
   if (plantId) params.push(`plantId=${encodeURIComponent(plantId)}`)
   if (aopYear) params.push(`aopYear=${encodeURIComponent(aopYear)}`)
-  if (params.length > 0) url += `?${params.join('&')}`
+  if (params?.length > 0) url += `?${params?.join('&')}`
 
   const headers = {
     Accept: 'application/json',
@@ -65,9 +65,12 @@ async function getShutdownTaTransactions(keycloak, plantId, aopYear) {
  * POST /shutdown-transactions?plantId=
  * Body: List<ShutdownTaTransactionDTO>
  */
-async function saveShutdownTaTransactions(keycloak, plantId, payload) {
+async function saveShutdownTaTransactions(keycloak, plantId, payload, aopYear) {
   let url = `${Config.CaseEngineUrl}/task/shutdown-transactions`
-  if (plantId) url += `?plantId=${encodeURIComponent(plantId)}`
+  const params = []
+  if (plantId) params.push(`plantId=${encodeURIComponent(plantId)}`)
+  if (aopYear) params.push(`aopYear=${encodeURIComponent(aopYear)}`)
+  if (params?.length > 0) url += `?${params?.join('&')}`
 
   const headers = {
     Accept: 'application/json',

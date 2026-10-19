@@ -162,19 +162,12 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
     }
 
 	@Override
-	public List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
+	public List<ShutdownTaTransactionDTO> saveShutdownTaTransactions(UUID plantId, String aopYear, List<ShutdownTaTransactionDTO> shutdownTaTransactionDTOList) {
 	
         List<ShutdownTaTransactionDTO> failedList = new ArrayList<>();
 
 			// Fetch valid gasifier displayNames once before the loop for name validation
-			String aopYear = shutdownTaTransactionDTOList.stream()
-					.map(ShutdownTaTransactionDTO::getAuditYear)
-					.filter(y -> y != null && !y.isEmpty())
-					.findFirst()
-					.orElse(null);
-			List<GasifierDropdownDTO> validGasifiers = (aopYear != null)
-					? getGasifierDropdown(plantId, aopYear)
-					: null;
+			List<GasifierDropdownDTO> validGasifiers = getGasifierDropdown(plantId, aopYear);
 
 			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
 			if (plantMaintenanceId == null) {
@@ -410,7 +403,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
         AOPMessageVM aopMessageVM = new AOPMessageVM();
         try {
             List<ShutdownTaTransactionDTO> data = readShutdownTaTransactions(file.getInputStream(), aopYear);
-            List<ShutdownTaTransactionDTO> failedList = saveShutdownTaTransactions(plantId, data);
+            List<ShutdownTaTransactionDTO> failedList = saveShutdownTaTransactions(plantId, aopYear, data);
             if (failedList != null && !failedList.isEmpty()) {
                 byte[] fileByteArray = exportShutdownTaTransactions(plantId, aopYear, true, failedList);
                 aopMessageVM.setData(Base64.getEncoder().encodeToString(fileByteArray));
@@ -431,8 +424,15 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
     private boolean isRemarkUpdatedIfFieldsChanged(ShutdownTaTransactionDTO dto,
             PlantMaintenanceTransaction existing) {
 
-        boolean nameChanged        = !Objects.equals(dto.getName(),                 existing.getName());
-        boolean descriptionChanged = !Objects.equals(dto.getDescription(),          existing.getDiscription());
+                String existingName = existing.getName() != null ? existing.getName().trim() : null;
+                String newName = dto.getName() != null ? dto.getName().trim() : null;
+                String existingDescription = existing.getDiscription() != null ? existing.getDiscription().trim() : null;
+                String newDescription = dto.getDescription() != null ? dto.getDescription().trim() : null;
+                String existingRemarks = existing.getRemarks() != null ? existing.getRemarks().trim() : null;
+                String newRemarks = dto.getRemarks() != null ? dto.getRemarks().trim() : null;
+
+        boolean nameChanged        = !Objects.equals(newName,                 existingName);
+        boolean descriptionChanged = !Objects.equals(newDescription,          existingDescription);
         boolean startChanged       = !Objects.equals(dto.getMaintStartDateTime(),   existing.getMaintStartDateTime());
         boolean endChanged         = !Objects.equals(dto.getMaintEndDateTime(),     existing.getMaintEndDateTime());
 
@@ -443,7 +443,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
         }
 
         // At least one field changed: the remark must be different from the stored one
-        return !Objects.equals(dto.getRemarks(), existing.getRemarks());
+        return !Objects.equals(newRemarks, existingRemarks);
     }
 
   
@@ -513,9 +513,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
                 } else if (dto.getMaintStartDateTime() != null && dto.getMaintEndDateTime() != null
                         && dto.getMaintEndDateTime().before(dto.getMaintStartDateTime())) {
                     markFailed(dto, "SD - To cannot be before SD - From.");
-                } else if (durationText != null && !durationText.isEmpty() && durationHrs == null) {
-                    markFailed(dto, "Invalid Duration (Hrs) format. Expected HH:MM.");
-                }
+                } 
 
                 if (durationHrs == null && dto.getMaintStartDateTime() != null && dto.getMaintEndDateTime() != null) {
                     long totalMinutes = Duration.between(dto.getMaintStartDateTime().toInstant(),
