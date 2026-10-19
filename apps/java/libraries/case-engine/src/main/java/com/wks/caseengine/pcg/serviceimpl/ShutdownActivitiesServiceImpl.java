@@ -513,7 +513,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
                 } else if (dto.getMaintStartDateTime() != null && dto.getMaintEndDateTime() != null
                         && dto.getMaintEndDateTime().before(dto.getMaintStartDateTime())) {
                     markFailed(dto, "SD - To cannot be before SD - From.");
-                } else if (durationText != null && !durationText.isEmpty() && durationHrs == null) {
+                } else if (durationText != null && !durationText.isEmpty()) {
                     markFailed(dto, "Invalid Duration (Hrs) format. Expected HH:MM.");
                 }
 
