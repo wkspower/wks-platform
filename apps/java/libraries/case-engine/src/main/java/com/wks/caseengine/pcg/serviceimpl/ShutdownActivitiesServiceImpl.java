@@ -424,8 +424,15 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
     private boolean isRemarkUpdatedIfFieldsChanged(ShutdownTaTransactionDTO dto,
             PlantMaintenanceTransaction existing) {
 
-        boolean nameChanged        = !Objects.equals(dto.getName(),                 existing.getName());
-        boolean descriptionChanged = !Objects.equals(dto.getDescription(),          existing.getDiscription());
+                String existingName = existing.getName() != null ? existing.getName().trim() : null;
+                String newName = dto.getName() != null ? dto.getName().trim() : null;
+                String existingDescription = existing.getDiscription() != null ? existing.getDiscription().trim() : null;
+                String newDescription = dto.getDescription() != null ? dto.getDescription().trim() : null;
+                String existingRemarks = existing.getRemarks() != null ? existing.getRemarks().trim() : null;
+                String newRemarks = dto.getRemarks() != null ? dto.getRemarks().trim() : null;
+
+        boolean nameChanged        = !Objects.equals(newName,                 existingName);
+        boolean descriptionChanged = !Objects.equals(newDescription,          existingDescription);
         boolean startChanged       = !Objects.equals(dto.getMaintStartDateTime(),   existing.getMaintStartDateTime());
         boolean endChanged         = !Objects.equals(dto.getMaintEndDateTime(),     existing.getMaintEndDateTime());
 
@@ -436,7 +443,7 @@ public class ShutdownActivitiesServiceImpl implements ShutdownActivitiesService 
         }
 
         // At least one field changed: the remark must be different from the stored one
-        return !Objects.equals(dto.getRemarks(), existing.getRemarks());
+        return !Objects.equals(newRemarks, existingRemarks);
     }
 
   
