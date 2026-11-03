@@ -101,6 +101,13 @@ public class Camunda7DataImportCommandRunner implements CommandLineRunner {
 				MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 				multipartBodyBuilder.part("upload", new FileSystemResource(file));
 				multipartBodyBuilder.part("tenant-id", tenantId);
+				// The loader runs on every start (docker compose up -d), so a re-run must
+				// not mint a new version of an unchanged model. Camunda skips a deployment
+				// whose resources match the last deployment of the same name and tenant,
+				// so the name must be stable per file — without one nothing ever matches.
+				multipartBodyBuilder.part("deployment-name", file.getName());
+				multipartBodyBuilder.part("enable-duplicate-filtering", "true");
+				multipartBodyBuilder.part("deploy-changed-only", "true");
 
 				MultiValueMap<String, HttpEntity<?>> multipartBody = multipartBodyBuilder.build();
 

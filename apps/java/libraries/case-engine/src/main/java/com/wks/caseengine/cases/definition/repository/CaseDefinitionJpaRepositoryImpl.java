@@ -70,6 +70,7 @@ public class CaseDefinitionJpaRepositoryImpl implements CaseDefinitionRepository
         existingEntity.setStages(caseDefinition.getStages());
         existingEntity.setCaseHooks(caseDefinition.getCaseHooks());
         existingEntity.setRequiredDocuments(caseDefinition.getRequiredDocuments());
+        existingEntity.setSourceDiagram(caseDefinition.getSourceDiagram());
 
         entityManager.merge(existingEntity);
     }
