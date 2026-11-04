@@ -169,7 +169,7 @@ services:
             - storage-fs:/data/storage
 
     camunda:
-        image: ${CAMUNDA_DOCKER_IMAGE}:${CAMUNDA7_VERSION}
+        image: ${CAMUNDA_DOCKER_IMAGE:-ghcr.io/wkspower/camunda-bpm-platform}:${CAMUNDA7_VERSION:-run-7.24.0}
         profiles: [camunda]
         command: ./camunda.sh --rest --webapps
         ports:
